@@ -51,13 +51,14 @@
                         "title": "Value Type",
                         "type": "string"
                     },
+                    "other": {
+                        "title": "Other Type",
+                        "description": "Description of other type",
+                        "type": "string"
+                    },
                     "value": {
                         "title": "Value",
                         "type": "number"
-                    },
-                    "other": {
-                        "title": "Other description",
-                        "type": "string"
                     }
                 }
             }
@@ -79,7 +80,7 @@
         "demographicInfoMatched": {
             "title": "Demographic Info Matched",
             "description": "Whether case and control cohorts are mateched by demogtaphic information?",
-            "type": "boolean"
+            "type": "string"
         },
         "typeDemographicInfoMatched": {
             "title": "Type of Demographic Info Matched",
@@ -93,7 +94,7 @@
         "geneticAncestryMatched": {
             "title": "Genetic Ancestry Matched",
             "description": "Whether case and control cohorts are matched for genetic ancestry?",
-            "type": "boolean"
+            "type": "string"
         },
         "typeGeneticAncestryMatched": {
             "title": "Type of Genetic Ancestry Matched",
@@ -117,7 +118,7 @@
         "differInVariables": {
             "title": "Differ In Other Variables",
             "description": "Whether case and control cohorts differ in any other variables?",
-            "type": "boolean"
+            "type": "string"
         },
         "explanationForDifference": {
             "title": "Explanation",
@@ -128,14 +129,10 @@
             "title": "Comments",
             "type": "string"
         },
-        "modifiedScore": {
-            "title": "Modified Score",
-            "description": "Score modified by user",
+        "score": {
+            "title": "Score",
+            "description": "Score range from 0 to 6, user selected",
             "type": "number"
-        },
-        "reasonModified": {
-            "title": "Reason for Midification",
-            "type": "string"
         }
     },
     "columns": {

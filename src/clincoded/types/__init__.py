@@ -522,7 +522,7 @@ class Annotation(Item):
     unique_key='caseControl:uuid',
     properties={
         'title': 'Case Control',
-        'description': 'List of case-control objects in all gdm pairs',
+        'description': 'List of case-control objects in all GDM(s)',
     })
 class CaseControl(Item):
     item_type = 'caseControl'
@@ -535,7 +535,9 @@ class CaseControl(Item):
         'controlCohort',
         'controlCohort.submitted_by',
         'associatedAnnotation',
-        'associatedAnnotation.article'
+        'associatedAnnotation.article',
+        'associatedAnnotation.groups',
+        'associatedAnnotation.associatedGdm'
     ]
     rev = {
         'associatedAnnotation': ('annotation', 'caseControlStudies')
@@ -558,7 +560,7 @@ class CaseControl(Item):
     unique_key='caseCohort:uuid',
     properties={
         'title': 'Case Cohort',
-        'description': 'List of case cohort',
+        'description': 'List of case cohort in all GDM(s)',
     })
 class CaseCohort(Item):
     item_type = 'caseCohort'
@@ -571,9 +573,11 @@ class CaseCohort(Item):
         'otherGenes',
         'associatedCaseControl',
         'associatedCaseControl.submitted_by',
+        'associatedCaseControl.controlCohort',
         'associatedCaseControl.associatedAnnotation',
         'associatedCaseControl.associatedAnnotation.article',
         'associatedCaseControl.associatedAnnotation.submitted_by',
+        'associatedCaseControl.associatedAnnotation.groups',
         'associatedCaseControl.associatedAnnotation.associatedGdm'
     ]
     rev = {
@@ -593,11 +597,11 @@ class CaseCohort(Item):
 
 
 @collection(
-    name='contolcohort',
+    name='controlcohort',
     unique_key='controlCohort:uuid',
     properties={
         'title': 'Control Cohort',
-        'description': 'List of control cohort',
+        'description': 'List of control cohort in all GDM(s)',
     })
 class ControlCohort(Item):
     item_type = 'controlCohort'
@@ -609,6 +613,7 @@ class ControlCohort(Item):
         'otherGenes',
         'associatedCaseControl',
         'associatedCaseControl.submitted_by',
+        'associatedCaseControl.caseCohort',
         'associatedCaseControl.associatedAnnotation',
         'associatedCaseControl.associatedAnnotation.article',
         'associatedCaseControl.associatedAnnotation.submitted_by',
