@@ -15,9 +15,11 @@ var Input = form.Input;
 module.exports = {
 
     // Render a method panel. 'family' is boolean true if this is a method for family.
-    render: function(method, family) {
+    // 'caseControl' is boolean value if this is a method for case-control.
+    render: function(method, family, caseControl) {
         return (
-            <div className="row">
+            <div className={(caseControl) ? 'row section section-method' : 'row'}>
+                {(caseControl) ? <h3>Methods</h3> : null}
                 <Input type="select" ref="prevtesting" label="Previous Testing:" defaultValue="none" value={curator.booleanToDropdown(method.previousTesting)}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
