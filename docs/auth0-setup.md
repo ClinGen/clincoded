@@ -14,7 +14,7 @@ The ClinGen curation interface currently supports Google and the user-password d
 3. Specify a client name and select **Single Page Application** as the client type
 
 4. Navigate to the **Settings** tab for the client and specify a comma-delimited list of **Allowed Callback URLs** for the client, including test URLs. For example:
-> http://localhost:6543/callback, https://localhost:6543/callback, http://\*.clinicalgenome.org/callback, https://\*.clinicalgenome.org/callback, http://curation.clinicalgenome.org/callback, https://curation.clinicalgenome.org/callback, http://\*.production.clinicalgenome.org/callback, https://\*.production.clinicalgenome.org/callback, http://curation-test.clinicalgenome.org/callback, https://curation-test.clinicalgenome.org/callback, http://\*.demo.clinicalgenome.org/callback, https://\*.demo.clinicalgenome.org/callback, http://\*.instance.clinicalgenome.org/callback, https://\*.instance.clinicalgenome.org/callback
+> http://localhost:6543/callback, http://\*.instance.clinicalgenome.org/callback, https://\*.demo.clinicalgenome.org/callback, http://\*.production.clinicalgenome.org/callback, https://curation-test.clinicalgenome.org/callback, https://curation.clinicalgenome.org/callback
 
 5. Navigate to the **Addons** and **Connections** tabs and enable the signup methods you want to allow. Even if you do not allow users to use the Username-Password-Authentication Database option, you should enable it to add the account for automated tests later.
 
