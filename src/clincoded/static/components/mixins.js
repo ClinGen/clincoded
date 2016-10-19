@@ -161,6 +161,40 @@ module.exports.Auth0 = {
         this.lock.show();
     },
 
+    triggerAutoLogin: function(e, retrying) {
+        // pressing the Demo Login button automatically logs in the user to the test curator
+        // account. Only enabled on non-production/curation instances
+        var $script = require('scriptjs');
+        if (this.state.session && !this.state.session._csrft_) {
+            this.fetch('/session');
+        }
+
+        this.fetch('https://mrmin.auth0.com/oauth/ro', {
+            xcsrf_disable: true,
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "client_id":   "L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo", // Clingen-Test
+                "username":    "clingen.test.curator@genome.stanford.edu",
+                "password":    "curateme",
+                "id_token":    "",
+                "connection":  "Username-Password-Authentication",
+                "grant_type":  "password",
+                "scope":       "openid",
+                "device":      ""
+            })
+        })
+        .then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        }).then(session => {
+            this.handleAuth0Login(session);
+        });
+    },
+
     triggerLoginFail: function() {
         // Login failed (not sure when this ever happens)
         let login_failure = {};
@@ -171,7 +205,7 @@ module.exports.Auth0 = {
     handleAuth0Login: function (authResult, retrying) {
         // method that handles what happens after Auth0 Lock modal interaction.
         // most of this logic was in triggerLogin previously
-        var accessToken = authResult.accessToken;
+        var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
         if (!accessToken) return;
         this.sessionPropertiesRequest = true;
         this.fetch('/login', {

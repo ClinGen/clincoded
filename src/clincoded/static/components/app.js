@@ -27,6 +27,7 @@ var portal = {
         {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
         {id: 'space', title: 'space'}, // white space between
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
+        {id: 'demo', title: 'Demo Login'},
         {id: 'loginout', title: 'Login'}
         //{id: 'account', title: 'Account', url: '/account/'},
     ]
@@ -238,6 +239,11 @@ var NavbarMain = React.createClass({
 var NavbarUser = React.createClass({
     render: function() {
         var session = this.props.session;
+        var demoLoginEnabled = true;
+        if (/curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname) || /production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production or curation URL. Disable demo login if true
+            demoLoginEnabled = false;
+        }
 
         return (
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
@@ -256,13 +262,21 @@ var NavbarUser = React.createClass({
 
                         // Item with trigger; e.g. login/logout
                         if (!(session && session['auth.userid'])) {
-                            // Logged out; render signin trigger
-                            attrs['data-trigger'] = 'login';
-                            return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            if (menu.id === 'loginout') {
+                                // Logged out; render signin triggers
+                                attrs['data-trigger'] = 'login';
+                                return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            } else if (menu.id === 'demo' && demoLoginEnabled) {
+                                // Logged out; render signin triggers
+                                attrs['data-trigger'] = 'demo';
+                                return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            }
                         } else {
-                            var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
-                            attrs['data-trigger'] = 'logout';
-                            return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            if (menu.id === 'loginout') {
+                                var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
+                                attrs['data-trigger'] = 'logout';
+                                return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            }
                         }
                     }
                 })}
