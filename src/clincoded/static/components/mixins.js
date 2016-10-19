@@ -314,7 +314,7 @@ module.exports.Auth0 = {
         if (!(http_method === 'GET' || http_method === 'HEAD')) {
             var headers = options.headers = _.extend({}, options.headers);
             var session = this.state.session;
-            if (session._csrft_) {
+            if (session._csrft_ && !options.xcsrf_disable) {
                 headers['X-CSRF-Token'] = session._csrft_;
             }
         }
