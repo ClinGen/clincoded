@@ -56,6 +56,8 @@ The ClinGen curation interface currently supports Google and the user-password d
 
 ## Slack notification setup
 
+Note: do to the nature of the way the rule is built, a slack notification will be sent whenever a user with a login count of 0 or 1 logs in (this happens automatically on registration). This means that accounts that were manually added via the Auth0 Management Dashboard will still trigger a Slack notification on their first sign-in due to their login count being 0.
+
 1. Navigate to the Slack [App Directory](https://clingenstanford.slack.com/apps/) then search for and/or select '**Incoming WebHooks**'
 
 2. Press **Add Configuration**, select the channel you'd like the notifications to go to, then press the **Add Incoming WebHooks integration**
@@ -96,6 +98,8 @@ function(user, context, callback) {
 
 ## Codebase setup
 
-1. In `/src/clincoded/static/components/mixins.js`, configure all lines commented with the `// AUTH0:` prefix (Client ID, Login Domain, Test Curator Credentials)
-2. In `/src/clincoded/auth0.py`, configure all lines commented with the `# AUTH0:` prefix (Client ID)
-3. In `/src/clincoded/tests/test_auth0.py`, configure all lines commented with the `# AUTH0:` prefix (Client ID, Login Domain, Automated Test Account Credentials)
+* In `/src/clincoded/auth0.py`, configure all lines commented with the `# AUTH0:` prefix (Client ID)
+
+* In `/src/clincoded/static/components/mixins.js`, configure all lines commented with the `// AUTH0:` prefix (Client ID, Login Domain, Test Curator Credentials)
+
+* In `/src/clincoded/tests/test_auth0.py`, configure all lines commented with the `# AUTH0:` prefix (Client ID, Login Domain, Automated Test Account Credentials)
