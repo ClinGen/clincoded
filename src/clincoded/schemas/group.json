@@ -4,10 +4,7 @@
     "description": "Schema for storing group data",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [
-        "label",
-        "totalNumberIndividuals"
-    ],
+    "required": ["label"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -335,6 +332,10 @@
         "numberWithVariant": {
             "title": "Number of Case or Control with Variant",
             "description": "For case cohort or control cohort only",
+            "type": "number"
+        },
+        "numberAllGenotypedSequenced": {
+            "title": "Number of All Case or Control Genotyped or Sequenced",
             "type": "number"
         },
         "alleleFrequency": {

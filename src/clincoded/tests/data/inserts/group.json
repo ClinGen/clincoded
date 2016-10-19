@@ -131,7 +131,7 @@
         "numberOfMale": 28,
         "numberOfFemale": 17,
         "numberWithVariant": 20,
-        "totalNumberIndividuals": 35,
+        "numberAllGenotypedSequenced": 35,
         "alleleFrequency": 0.331,
         "method": {
             "previousTesting": true,
@@ -171,7 +171,7 @@
         "numberOfMale": 21,
         "numberOfFemale": 17,
         "numberWithVariant": 24,
-        "totalNumberIndividuals": 35,
+        "numberAllGenotypedSequenced": 35,
         "alleleFrequency": 1.033,
         "method": {
             "previousTesting": true,
