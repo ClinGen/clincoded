@@ -4,7 +4,10 @@
     "description": "Schema for storing group data",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["label"],
+    "required": [
+        "label",
+        "totalNumberIndividuals"
+    ],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -321,16 +324,16 @@
         },
         "groupType": {
             "title": "Group Type",
-            "description": "Case level, Case cohort or Control cohort",
-            "type": "string"
+            "description": "List of types the group used in case level or case control",
+            "type": "array",
+            "items": {
+                "title": "Type",
+                "type": "string",
+                "default": "Case level"
+            }
         },
         "numberWithVariant": {
             "title": "Number of Case or Control with Variant",
-            "description": "For case cohort or control cohort only",
-            "type": "number"
-        },
-        "numberOfAll": {
-            "title": "Number of All",
             "description": "For case cohort or control cohort only",
             "type": "number"
         },
