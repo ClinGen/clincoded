@@ -567,14 +567,12 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
-        // FIXME: Add to the array of case-control renders
-        if (annotation && annotation.groups) {
-            let caseControlGroups = annotation.groups.map(group => {
-                if (group.caseControlType && group.caseControlType !== 'undefined') {
-                    return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch)}</div>;
-                }
+        // Add to the array of case-control renders
+        if (annotation && annotation.caseControlStudies) {
+            let caseControlObj = annotation.caseControlStudies.map(caseControl => {
+                return <div key={caseControl.uuid}>{renderGroup(caseControl, gdm, annotation, curatorMatch)}</div>;
             });
-            caseControlRenders = caseControlRenders.concat(caseControlGroups);
+            caseControlRenders = caseControlRenders.concat(caseControlObj);
         }
 
         // Add to the array of experiment renders.
