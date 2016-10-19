@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var globals = require('./globals');
+var url = require('url');
 
 var SignIn = module.exports.SignIn = React.createClass({
     render: function() {
@@ -18,6 +19,22 @@ var SignIn = module.exports.SignIn = React.createClass({
 });
 
 var Home = module.exports.Home = React.createClass({
+    getInitialState: function() {
+        var demoWarning = false;
+        var productionWarning = false;
+        if (/production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production URL. Enable productionWarning if it is.
+            productionWarning = true;
+        } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // if neither production nor curation URL, enable demoWarning.
+            demoWarning = true;
+        }
+        return {
+            demoWarning: demoWarning,
+            productionWarning: productionWarning
+        };
+    },
+
     render: function() {
         if (this.props.session['auth.userid'] !== undefined) {
             window.location.href = '/dashboard/';
@@ -34,6 +51,14 @@ var Home = module.exports.Home = React.createClass({
                                 <p className="lead">ClinGen is a National Institutes of Health (NIH)-funded resource dedicated to building an authoritative central resource that defines the clinical relevance of genes and variants for use in precision medicine and research. One of the key goals of ClinGen is to implement an evidence-based consensus for curating genes and variants. For more information on the ClinGen resource, please visit the ClinGen portal at <a href="https://www.clinicalgenome.org" target="_blank">clinicalgenome.org <i className="icon icon-external-link"></i></a>.</p>
                             </div>
                         </div>
+                    </div>
+                    <div className="row demo-access-note">
+                        {this.state.demoWarning ?
+                            <div>If you are interested in exploring this test/demo version of the ClinGen interfaces, please visit us again in a few weeks for more information on how to access it (posted 10/19/2016).</div>
+                        : null}
+                        {this.state.productionWarning ?
+                            <div>If you are interested in exploring a test/demo version of the ClinGen interfaces, please visit us again in a few weeks for more information (posted 10/19/2016).</div>
+                        : null}
                     </div>
                     <div className="row">
                         <div className="col-sm-6">
