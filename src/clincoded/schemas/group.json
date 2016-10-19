@@ -363,10 +363,6 @@
             "title": "Creation Date",
             "type": "string"
         },
-        "totalNumberIndividuals": {
-            "title": "Total Number Individuals",
-            "type": "integer"
-        },
         "submitted_by.title": {
             "title": "Submitted by",
             "type": "string"
