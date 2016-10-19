@@ -323,7 +323,11 @@ class Gdm(Item):
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
-        'annotations.experimentalData.assessments.submitted_by'
+        'annotations.experimentalData.assessments.submitted_by',
+        'annotations.caseControlStudies',
+        'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.caseCohort',
+        'annotations.caseControlStudies.controlCohort'
     ]
 
     @calculated_property(schema={
@@ -422,7 +426,6 @@ class Annotation(Item):
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
-        # 'groups.control',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
@@ -457,7 +460,11 @@ class Annotation(Item):
         'experimentalData.proteinInteractions.interactingGenes',
         'associatedGdm',
         'experimentalData.assessments',
-        'experimentalData.assessments.submitted_by'
+        'experimentalData.assessments.submitted_by',
+        'caseControlStudies',
+        'caseControlStudies.submitted_by',
+        'caseControlStudies.caseCohort',
+        'caseControlStudies.controlCohort',
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -509,6 +516,42 @@ class Annotation(Item):
         if len(experimentalData) > 0:
             return len(experimentalData)
         return ""
+
+
+@collection(
+    name='casecontrol',
+    unique_key='caseControl:uuid',
+    properties={
+        'title': 'Case Control',
+        'description': 'List of case-control objects in all GDM(s)',
+    })
+class CaseControl(Item):
+    item_type = 'caseControl'
+    schema = load_schema('clincoded:schemas/caseControl.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseCohort',
+        'controlCohort',
+        'associatedAnnotation',
+        'associatedAnnotation.article',
+        'associatedAnnotation.groups',
+        'associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'associatedAnnotation': ('annotation', 'caseControlStudies')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.caseControlStudies"
+        }
+    })
+    def associatedAnnotation(self, request, associatedAnnotation):
+        return paths_filtered_by_status(request, associatedAnnotation)
 
 
 @collection(

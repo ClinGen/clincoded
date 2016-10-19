@@ -4,10 +4,7 @@
     "description": "Schema for storing group data",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [
-        "label",
-        "totalNumberIndividuals"
-    ],
+    "required": ["label"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -298,12 +295,6 @@
                 "linkTo": "article"
             }
         },
-        "statistic": {
-            "title": "Statistical Study",
-            "description": "Statistical study associated to the group",
-            "type": "string",
-            "linkTo": "statistic"
-        },
         "familyIncluded": {
             "title": "Family Included",
             "description": "List of families included in the group",
@@ -328,11 +319,30 @@
                 "linkTo": "individual"
             }
         },
-        "control": {
-            "title": "Control Group",
-            "description": "ID of control group associated to the group",
-            "type": "string",
-            "linkTo": "controlGroup"
+        "groupType": {
+            "title": "Group Type",
+            "description": "Case level, Case cohort or Control cohort",
+            "type": "string"
+        },
+        "numberWithVariant": {
+            "title": "Number of Case or Control with Variant",
+            "description": "For case cohort or control cohort only",
+            "type": "number"
+        },
+        "numberOfAll": {
+            "title": "Number of All",
+            "description": "For case cohort or control cohort only",
+            "type": "number"
+        },
+        "alleleFrequency": {
+            "title": "Allele Frequency",
+            "description": "For case cohort or control cohort only",
+            "type": "number"
+        },
+        "controlType": {
+            "title": "Control Type",
+            "description": "For control cohort only",
+            "type": "string"
         },
         "active": {
             "description": "boolean switch to set if the group avaliable for curation.",
