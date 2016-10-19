@@ -174,7 +174,7 @@ const CaseControlCuration = React.createClass({
                                                 {GroupCommonDiseases.call(this, 'case-cohort')}
                                                 {GroupDemographics.call(this)}
                                                 {methods.render.call(this, method, false, true)}
-                                                {GroupProbandInfo.call(this)}
+                                                {GroupPower.call(this, 'case-cohort')}
                                                 {GroupAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -186,7 +186,7 @@ const CaseControlCuration = React.createClass({
                                                 {GroupCommonDiseases.call(this, 'control-cohort')}
                                                 {GroupDemographics.call(this)}
                                                 {methods.render.call(this, method, false, true)}
-                                                {GroupProbandInfo.call(this)}
+                                                {GroupPower.call(this, 'control-cohort')}
                                                 {GroupAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -255,7 +255,8 @@ function GroupCommonDiseases(groupType) {
 
     return (
         <div className="row section section-disease">
-            <h3>Common Disease(s) & Phenotype(s)</h3>
+            <h3 data-toggle="collapse" data-target="#collapsible" aria-expanded="true" aria-controls="collapsible">Common Disease(s) & Phenotype(s)</h3>
+            <div id="collapsible" className="collapse in" aria-expanded="true">
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">Please enter an Orphanet ID(s) and/or HPO ID(s) and/or Phenotype free text (required).</p>
             </div>
@@ -274,6 +275,7 @@ function GroupCommonDiseases(groupType) {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={group && group.termsInElimination} inputDisabled={inputDisabled}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            </div>
         </div>
     );
 }
@@ -393,20 +395,27 @@ function GroupDemographics() {
 
 // Group information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-function GroupProbandInfo() {
+function GroupPower(groupType) {
     var group = this.state.group;
+    let type;
+    if (groupType === 'case-cohort') {
+        type = 'Case';
+    }
+    if (groupType === 'control-cohort') {
+        type = 'Control';
+    }
 
     return(
         <div className="row section section-power">
             <h3>Power</h3>
-            <Input type="number" ref="indvariantgenecount" label="Enter numeric value of Cases with variant(s):" value={group && group.numberOfIndividualsWithVariantInCuratedGene}
+            <Input type="number" ref="indvariantgenecount" label={'Numeric value of ' + type + 's with variant(s):'} value={group && group.numberOfIndividualsWithVariantInCuratedGene}
                 error={this.getFormError('indvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'indvariantgenecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="notindvariantgenecount" label="Enter numeric value of all Cases genotyped/sequenced:" value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
+            <Input type="number" ref="notindvariantgenecount" label={'Numeric value of all ' + type + 's genotyped/sequenced:'} value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
                 error={this.getFormError('notindvariantgenecount')} clearError={this.clrFormErrors.bind(null, 'notindvariantgenecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="caseallelefreq" label="Case Allele Frequency:" value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
-                error={this.getFormError('calcallelefreq')} clearError={this.clrFormErrors.bind(null, 'calcallelefreq')}
+            <Input type="number" ref="caseallelefreq" label={type + ' Allele Frequency:'} value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
+                error={this.getFormError('calcallelefreq')} clearError={this.clrFormErrors.bind(null, 'calcallelefreq')} inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
