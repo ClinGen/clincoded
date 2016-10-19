@@ -62,9 +62,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             return None
 
         try:
-            # CHANGEME
             user_url = "https://{domain}/userinfo?access_token={access_token}" \
-                .format(domain='mrmin.auth0.com', access_token=access_token)
+                .format(domain='clingen.auth0.com', access_token=access_token)  # AUTH0: LOGIN DOMAIN
 
             user_info = requests.get(user_url).json()
         except Exception as e:

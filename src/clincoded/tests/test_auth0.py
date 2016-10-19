@@ -7,12 +7,12 @@ def auth0_access_token():
     creds = {
         'connection': 'Username-Password-Authentication',
         'scope': 'openid',
-        'client_id': 'L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo',
+        'client_id': 'fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs',  # AUTH0: CLIENT ID
         'grant_type': 'password',
-        'username': 'clingen.test.automated@genome.stanford.edu',
+        'username': 'clingen.test.automated@genome.stanford.edu',  # AUTH0: AUTOMATED TEST CREDENTIALS
         'password': 'curateme'
     }
-    url = 'https://mrmin.auth0.com/oauth/ro'
+    url = 'https://clingen.auth0.com/oauth/ro'  # AUTH0: LOGIN DOMAIN
     try:
         res = requests.post(url, data=creds)
         res.raise_for_status()
@@ -32,7 +32,7 @@ def auth0_encode_user_token(auth0_access_token):
 @pytest.fixture(scope='session')
 def auth0_encode_user_profile(auth0_access_token):
     user_url = "https://{domain}/userinfo?access_token={access_token}" \
-        .format(domain='mrmin.auth0.com', access_token=auth0_access_token)
+        .format(domain='clingen.auth0.com', access_token=auth0_access_token)  # AUTH0: LOGIN DOMAIN
     user_info = requests.get(user_url).json()
     return user_info
 

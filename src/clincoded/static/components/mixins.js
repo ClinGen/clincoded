@@ -101,26 +101,30 @@ module.exports.Auth0 = {
         this.setState({loadingComplete: true});
         if (window.Auth0Lock !== undefined) {
             // CHANGEME
-            this.lock = new window.Auth0Lock('L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo', 'mrmin.auth0.com', {
-                additionalSignUpFields: [
-                    {
-                        name: "name",
-                        placeholder: "Your full name"
+            this.lock = new window.Auth0Lock(
+                'fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs', // AUTH0: CLIENT ID
+                'clingen.auth0.com', // AUTH0: LOGIN DOMAIN
+                {
+                    additionalSignUpFields: [
+                        {
+                            name: "name",
+                            placeholder: "Your full name"
+                        }
+                    ],
+                    auth: {
+                        redirect: false
+                    },
+                    avatar: null,
+                    socialButtonStyle: 'big',
+                    theme: {
+                        logo: '/static/img/clingen-logo-only.svg',
+                        primaryColor: '#294297'
+                    },
+                    languageDictionary: {
+                        title: "ClinGen Curator Interface"
                     }
-                ],
-                auth: {
-                    redirect: false
-                },
-                avatar: null,
-                socialButtonStyle: 'big',
-                theme: {
-                    logo: '/static/img/clingen-logo-only.svg',
-                    primaryColor: '#294297'
-                },
-                languageDictionary: {
-                    title: "ClinGen Curator Interface"
                 }
-            });
+            );
             this.lock.on('authenticated', this.handleAuth0Login);
         } else {
             // Auth0Lock is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
@@ -169,25 +173,27 @@ module.exports.Auth0 = {
             this.fetch('/session');
         }
 
-        this.fetch('https://mrmin.auth0.com/oauth/ro', {
-            xcsrf_disable: true,
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "client_id":   "L1PeoMCK5d2ToCsrQ8gYJ7imZ87shmZo", // Clingen-Test
-                "username":    "clingen.test.curator@genome.stanford.edu",
-                "password":    "curateme",
-                "id_token":    "",
-                "connection":  "Username-Password-Authentication",
-                "grant_type":  "password",
-                "scope":       "openid",
-                "device":      ""
-            })
-        })
-        .then(response => {
+        this.fetch(
+            'https://clingen.auth0.com/oauth/ro', // AUTH0: LOGIN DOMAIN
+            {
+                xcsrf_disable: true,
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "client_id":   "fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs", // AUTH0: CLIENT ID
+                    "username":    "clingen.test.curator@genome.stanford.edu", // AUTH0: TEST CURATOR CREDENTIALS
+                    "password":    "curateme",
+                    "id_token":    "",
+                    "connection":  "Username-Password-Authentication",
+                    "grant_type":  "password",
+                    "scope":       "openid",
+                    "device":      ""
+                })
+            }
+        ).then(response => {
             if (!response.ok) throw response;
             return response.json();
         }).then(session => {

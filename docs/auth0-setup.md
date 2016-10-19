@@ -20,7 +20,9 @@ The ClinGen curation interface currently supports Google and the user-password d
 
 6. Add any **Rules** you'd like (see the [Slack notification section](#slack-notification-section))
 
-7. Modify the **Email Templates** -- it is recommended that the logo be replaced in the templates, along with the line saying `please contact us by replying to this mail` as replying to the automated emails results in a failed mail delivery
+7. Modify the **Email Templates** -- it is recommended that the logo be replaced in the templates, along with the lines saying `please contact us by replying to this mail` as replying to the automated emails results in a failed mail delivery
+
+8. Add test user accounts. ClinGen uses `clingen.test.curator` (for test curator and auto-logins) and `clingen.test.automated` (for automated tests)
 
 
 ## Google Auth setup
@@ -90,3 +92,10 @@ function(user, context, callback) {
 	callback(null, user, context);
 }
 ```
+
+
+## Codebase setup
+
+1. In `/src/clincoded/static/components/mixins.js`, configure all lines commented with the `// AUTH0:` prefix (Client ID, Login Domain, Test Curator Credentials)
+2. In `/src/clincoded/auth0.py`, configure all lines commented with the `# AUTH0:` prefix (Client ID)
+3. In `/src/clincoded/tests/test_auth0.py`, configure all lines commented with the `# AUTH0:` prefix (Client ID, Login Domain, Automated Test Account Credentials)
