@@ -4,7 +4,7 @@
     "description": "Schema for storing and using assessments",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["value"],
+    "required": [],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [

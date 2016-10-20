@@ -1,0 +1,31 @@
+{
+    "title": "Evidence Score",
+    "id": "/profiles/evidenceScore.json",
+    "description": "Schema for storing score to evidence in GCI",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/standard_status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "score": {
+            "title": "Score",
+            "description": "Score to evidence",
+            "type": "number"
+        },
+        "evidenceType": {
+            "title": "Evidence Type",
+            "description": "Type (Case control, Segregation, Individual, Experimental) of evidence scored",
+            "type": "string"
+        }
+    }
+}

@@ -24,7 +24,10 @@
         "diseaseHistoryEvaluated": "Yes to both presence/absence of phenotype and family history",
         "explanationForDiseaseHistoryEvaluation": "some reason here",
         "differInVariables": "No",
-        "score": 3,
-        "comments": "comment here"
+        "scores": ["185fa1ba-4509-4c36-93ef-8036c7a56f8b"],
+        "comments": "comment here",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "last_modified": "2016-10-19T08:35:18.000000+00:00",
+        "date_created": "2016-10-18T22:47:10.000000+00:00"
     }
 ]

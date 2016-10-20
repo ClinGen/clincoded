@@ -533,6 +533,7 @@ class CaseControl(Item):
         'submitted_by',
         'caseCohort',
         'controlCohort',
+        'scores',
         'associatedAnnotation',
         'associatedAnnotation.article',
         'associatedAnnotation.groups',
@@ -922,6 +923,39 @@ class Assessment(Item):
     })
     def experimental_assessed(self, request, experimental_assessed):
         return paths_filtered_by_status(request, experimental_assessed)
+
+
+@collection(
+    name='evidencescore',
+    unique_key='evidenceScore:uuid',
+    properties={
+        'title': 'Evidence Score',
+        'description': 'List of score assigned to evidence',
+    })
+class EvidenceScore(Item):
+    item_type = 'evidenceScore'
+    schema = load_schema('clincoded:schemas/evidenceScore.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseControl_scored',
+        'caseControl_scored.associatedAnnotation',
+        'caseControl_scored.associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'caseControl_scored': ('caseControl', 'scores')
+    }
+
+    @calculated_property(schema={
+        "title": "Case Control Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "caseControl.scores"
+        }
+    })
+    def caseControl_scored(self, request, caseControl_scored):
+        return paths_filtered_by_status(request, caseControl_scored)
 
 
 @collection(

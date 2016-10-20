@@ -22,6 +22,7 @@ ORDER = [
     #'disease',
     'article',
     'assessment',
+    'evidenceScore',
     'variant',
     'protein',
     'transcript',

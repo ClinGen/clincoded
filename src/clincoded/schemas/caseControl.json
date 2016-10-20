@@ -129,10 +129,15 @@
             "title": "Comments",
             "type": "string"
         },
-        "score": {
-            "title": "Score",
-            "description": "Score range from 0 to 6, user selected",
-            "type": "number"
+        "scores": {
+            "title": "Scores",
+            "description": "List of score assigned to case control study. Limited to one per user.",
+            "type": "array",
+            "items": {
+                "title": "Score",
+                "type": "string",
+                "linkTo": "evidenceScore"
+            }
         }
     },
     "columns": {
