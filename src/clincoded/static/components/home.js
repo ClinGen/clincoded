@@ -54,11 +54,10 @@ var Home = module.exports.Home = React.createClass({
                     </div>
                     <div className="row demo-access-note">
                         {this.state.demoWarning ?
-                            <div>If you are interested in exploring this test/demo version of the ClinGen interfaces, please visit us again in a few weeks for more information on how to access it (posted 10/19/2016).</div>
-                        : null}
-                        {this.state.productionWarning ?
-                            <div>If you are interested in exploring a test/demo version of the ClinGen interfaces, please visit us again in a few weeks for more information (posted 10/19/2016).</div>
-                        : null}
+                            <div>We are happy to announce you will be able to explore this text/demo version of the ClinGen interfaces within a few weeks. Please visit us again then for for more information (posted 10/19/2016).</div>
+                            :
+                            <div>We are happy to announce you will be able to explore a test/demo version of the ClinGen interfaces within a few weeks. Please visit us again then for more information (posted 10/19/2016).</div>
+                        }
                     </div>
                     <div className="row">
                         <div className="col-sm-6">
