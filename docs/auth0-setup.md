@@ -18,7 +18,7 @@ The ClinGen curation interface currently supports Google and the user-password d
 
 5. Navigate to the **Addons** and **Connections** tabs and enable the signup methods you want to allow. Even if you do not allow users to use the Username-Password-Authentication Database option, you should enable it to add the account for automated tests later.
 
-6. Add any **Rules** you'd like (see the [Slack notification section](#slack-notification-section))
+6. Add any **Rules** you'd like (see the [Slack notification setup](#slack-notification-setup) section)
 
 7. Modify the **Email Templates** -- it is recommended that the logo be replaced in the templates, along with the lines saying `please contact us by replying to this mail` as replying to the automated emails results in a failed mail delivery
 
