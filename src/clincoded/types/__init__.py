@@ -327,7 +327,9 @@ class Gdm(Item):
         'annotations.caseControlStudies',
         'annotations.caseControlStudies.submitted_by',
         'annotations.caseControlStudies.caseCohort',
-        'annotations.caseControlStudies.controlCohort'
+        'annotations.caseControlStudies.controlCohort',
+        'annotations.caseControlStudies.scores',
+        'annotations.caseControlStudies.scores.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -465,6 +467,8 @@ class Annotation(Item):
         'caseControlStudies.submitted_by',
         'caseControlStudies.caseCohort',
         'caseControlStudies.controlCohort',
+        'caseControlStudies.scores',
+        'caseControlStudies.scores.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -534,6 +538,7 @@ class CaseControl(Item):
         'caseCohort',
         'controlCohort',
         'scores',
+        'scores.submitted_by',
         'associatedAnnotation',
         'associatedAnnotation.article',
         'associatedAnnotation.groups',
