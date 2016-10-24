@@ -163,12 +163,6 @@ def main(global_config, **local_config):
     settings['contentbase.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['contentbase.jsonld.terms_prefix'] = 'encode'
     settings['contentbase.elasticsearch.index'] = 'clincoded'
-    hostname_command = settings.get('hostname_command', '').strip()
-    if hostname_command:
-        hostname = subprocess.check_output(hostname_command, shell=True).strip()
-        settings.setdefault('persona.audiences', '')
-        settings['persona.audiences'] += '\nhttp://%s' % hostname
-        settings['persona.audiences'] += '\nhttp://%s:6543' % hostname
 
     config = Configurator(settings=settings)
     config.registry['app_factory'] = main  # used by mp_indexer
@@ -178,7 +172,7 @@ def main(global_config, **local_config):
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
-    config.include('.persona')
+    config.include('.auth0')
 
     configure_engine(settings)
     config.include('contentbase')
