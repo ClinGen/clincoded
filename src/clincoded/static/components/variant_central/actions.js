@@ -457,7 +457,7 @@ var AssociateInheritance = React.createClass({
         this.setState({submitResourceBusy: true});
 
         let inheritance = this.getFormValue('inheritance');
-        let interpretationDisease, currInterpretation;
+        let currInterpretation;
 
         this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
             currInterpretation = interpretation;
@@ -483,6 +483,9 @@ var AssociateInheritance = React.createClass({
                         mode: 'edit-inheritance'
                     }
                 };
+                if (currInterpretation.disease) {
+                    meta.interpretation.disease = currInterpretation.disease['@id'];
+                }
                 return this.recordHistory('modify', currInterpretation, meta).then(result => {
                     this.setState({submitResourceBusy: false});
                     // Need 'submitResourceBusy' state to proceed closing modal

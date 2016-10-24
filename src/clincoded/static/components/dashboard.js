@@ -40,9 +40,9 @@ var Dashboard = React.createClass({
         return gene + "–" + disease;
     },
 
-    cleanGdmModelName: function(model) {
+    cleanHpoName: function(term) {
         // remove (HP:#######) from model name
-        return model.indexOf('(') > -1 ? model.substring(0, model.indexOf('(') - 1) : model;
+        return term.indexOf('(') > -1 ? term.substring(0, term.indexOf('(') - 1) : term;
     },
 
     setUserData: function(props) {
@@ -72,7 +72,7 @@ var Dashboard = React.createClass({
                         gdmList.push({
                             uuid: gdmResult.uuid,
                             gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
-                            gdmModel: this.cleanGdmModelName(gdmResult.modeInheritance),
+                            gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
                             status: gdmResult.gdm_status,
                             date_created: gdmResult.date_created
                         });
@@ -94,7 +94,7 @@ var Dashboard = React.createClass({
                             hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
                             hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
                             diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
-                            modeInheritance: vciInterpResult.modeInheritance ? vciInterpResult.modeInheritance : null,
+                            modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
                             status: vciInterpResult.interpretation_status,
                             date_created: vciInterpResult.date_created
                         });
