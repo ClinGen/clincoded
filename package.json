@@ -39,7 +39,7 @@
     "babelify": "^7.2.0",
     "brace": "^0.7.0",
     "brfs": "^1.4.0",
-    "browserify": "^10.2.4",
+    "browserify": "^13.1.0",
     "cookie-monster": "0.1.0",
     "domready": "^0.3.0",
     "envify": "^3.0.0",
