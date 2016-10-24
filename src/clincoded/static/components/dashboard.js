@@ -94,6 +94,7 @@ var Dashboard = React.createClass({
                             hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
                             hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
                             diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
+                            modeInheritance: vciInterpResult.modeInheritance ? vciInterpResult.modeInheritance : null,
                             status: vciInterpResult.interpretation_status,
                             date_created: vciInterpResult.date_created
                         });
@@ -186,7 +187,8 @@ var Dashboard = React.createClass({
                                             }
                                             </strong></span></div>
                                             <span className="block-link-no-color title-ellipsis">
-                                                {item.diseaseTerm ? item.diseaseTerm : "No disease associated"}
+                                                <strong>Disease</strong>: {item.diseaseTerm ? item.diseaseTerm : "None added"}
+                                                <br /><strong>Mode of Inheritance</strong>: {item.modeInheritance ? item.modeInheritance : "None added"}
                                                 <br /><span className="block-link-no-color"><strong>Status</strong>: {item.status}
                                                 <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
                                             </span>
