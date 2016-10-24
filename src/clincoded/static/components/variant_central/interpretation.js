@@ -264,7 +264,7 @@ var InterpretationModifyHistory = React.createClass({
         const interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease,
-            modeInheritance = history.meta && history.meta.interpretation && history.meta.interpretation.modeInheritance;
+            modeInheritance = history.meta && history.meta.interpretation && history.meta.interpretation.modeInheritance && history.meta.interpretation.modeInheritance.indexOf('(') > -1 ? history.meta.interpretation.modeInheritance.substring(0, history.meta.interpretation.modeInheritance.indexOf('(') - 1) : history.meta.interpretation.modeInheritance;
         const interpretationName = <span><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}{disease ? `–${disease.term}` : null}</strong>{modeInheritance ? <span><strong>–</strong><i>{modeInheritance}</i></span> : null}</span>;
         return (
             <div>
@@ -275,7 +275,7 @@ var InterpretationModifyHistory = React.createClass({
                 : null}
                 {history.meta.interpretation.mode == 'edit-inheritance' ?
                     modeInheritance ?
-                        <span>Mode of inheritance <i>{modeInheritance.indexOf('(') > -1 ? modeInheritance.substring(0, modeInheritance.indexOf('(') - 1) : modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
+                        <span>Mode of inheritance <i>{modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                         : <span>Mode of inheritance association removed from Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                 : null}
                 {history.meta.interpretation.mode == 'update-eval' ?

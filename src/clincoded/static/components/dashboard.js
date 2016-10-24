@@ -188,7 +188,7 @@ var Dashboard = React.createClass({
                                             </strong></span></div>
                                             <span className="block-link-no-color title-ellipsis">
                                                 <strong>Disease</strong>: {item.diseaseTerm ? item.diseaseTerm : "None added"}
-                                                <br /><strong>Mode of Inheritance</strong>: {item.modeInheritance ? item.modeInheritance : "None added"}
+                                                <br /><strong>Mode of Inheritance</strong>: {item.modeInheritance ? <i>{item.modeInheritance}</i> : "None added"}
                                                 <br /><span className="block-link-no-color"><strong>Status</strong>: {item.status}
                                                 <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
                                             </span>
