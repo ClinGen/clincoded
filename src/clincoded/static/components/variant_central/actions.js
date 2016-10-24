@@ -89,7 +89,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                     variant: variantObj['@id']
                 }
             };
-            this.recordHistory('add-hide', interpretation['@graph'][0], meta).then(result => {
+            this.recordHistory('add', interpretation['@graph'][0], meta).then(result => {
                 window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
             });
         }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
@@ -98,7 +98,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     render: function() {
         let hasExistingInterpretation = this.props.interpretation ? true : false;
         if (!hasExistingInterpretation) {
-            let variant = this.props.variantData
+            let variant = this.props.variantData;
             if (variant && variant.associatedInterpretations && variant.associatedInterpretations.length) {
                 for (let interpretation of variant.associatedInterpretations) {
                     if (interpretation.submitted_by.uuid === this.props.session.user_properties.uuid) {
@@ -457,7 +457,7 @@ var AssociateInheritance = React.createClass({
         this.setState({submitResourceBusy: true});
 
         let inheritance = this.getFormValue('inheritance');
-        let interpretationDisease, currInterpretation;
+        let currInterpretation;
 
         this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
             currInterpretation = interpretation;
@@ -483,6 +483,9 @@ var AssociateInheritance = React.createClass({
                         mode: 'edit-inheritance'
                     }
                 };
+                if (currInterpretation.disease) {
+                    meta.interpretation.disease = currInterpretation.disease['@id'];
+                }
                 return this.recordHistory('modify', currInterpretation, meta).then(result => {
                     this.setState({submitResourceBusy: false});
                     // Need 'submitResourceBusy' state to proceed closing modal

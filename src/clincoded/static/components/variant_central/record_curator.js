@@ -94,7 +94,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                 <div className="current-user-interpretations">
                                     <div><strong>Disease:</strong>&nbsp;
                                         {myInterpretation.disease ?
-                                            <span>{myInterpretation.disease.term}, <a href={external_url_map['OrphaNet'] + myInterpretation.disease.orphaNumber} target="_blank">{'ORPHA' + myInterpretation.disease.orphaNumber}</a></span>
+                                            <span>{myInterpretation.disease.term} (<a href={external_url_map['OrphaNet'] + myInterpretation.disease.orphaNumber} target="_blank">{'ORPHA' + myInterpretation.disease.orphaNumber}</a>)</span>
                                             :
                                             <span>Not associated</span>
                                         }

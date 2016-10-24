@@ -242,8 +242,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 // Display a history item for adding an interpretation
 var InterpretationAddHistory = React.createClass({
     render: function() {
-        var history = this.props.history;
-        var interpretation = history.primary,
+        const history = this.props.history;
+        const interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
         return (
@@ -260,24 +260,25 @@ globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add'
 // Display a history item for adding an individual
 var InterpretationModifyHistory = React.createClass({
     render: function() {
-        var history = this.props.history;
-        var interpretation = history.primary,
+        const history = this.props.history;
+        const interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
+        const interpretationName = <span><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></span>;
         return (
             <div>
                 {history.meta.interpretation.mode == 'edit-disease' ?
                     disease ?
-                        <span>Disease <strong>{disease.term}</strong> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
-                        : <span>Disease association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
+                        <span>Disease <strong>{disease.term}</strong> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
+                        : <span>Disease association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                 : null}
                 {history.meta.interpretation.mode == 'edit-inheritance' ?
                     interpretation.modeInheritance ?
-                        <span>Mode of inheritance <i>{interpretation.modeInheritance}</i> associated with Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
-                        : <span>Mode of inheritance association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></a> interpretation</span>
+                        <span>Mode of inheritance <i>{interpretation.modeInheritance.indexOf('(') > -1 ? interpretation.modeInheritance.substring(0, interpretation.modeInheritance.indexOf('(') - 1) : interpretation.modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
+                        : <span>Mode of inheritance association removed from Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                 : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
-                    <span>Evaluation(s) updated for Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong> {disease ? <span>({disease.term})</span> : null}</a></span>
+                    <span>Evaluation(s) updated for Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                 : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
