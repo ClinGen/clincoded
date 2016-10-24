@@ -544,12 +544,7 @@ function clinvarQueryResource() {
         var data;
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then(xml => {
-            console.log('clinvarQuestResource getRestDataXml');
-            console.log(xml);
-            console.log(xml.length);
             data = parseClinvar(xml);
-            console.log('clinvarQuestResource after parseClinvar');
-            console.log(data);
             if (data.clinvarVariantId) {
                 // found the result we want
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});

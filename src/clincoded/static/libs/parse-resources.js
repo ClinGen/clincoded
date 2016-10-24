@@ -122,6 +122,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
                 // protein change
                 if (HGVSnodes[j].getAttribute('Type') === 'HGVS, protein, RefSeq') {
                     variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+                }
             }
         }
     }
