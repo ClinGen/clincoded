@@ -653,9 +653,6 @@ function carTxt(field, extra) {
                     <p className="alert alert-info">
                         <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323 <i className="icon icon-external-link"></i></a>).</span>
                     </p>
-                    <p className="alert alert-warning">
-                        <span>Note: Please register your allele with the ClinGen Allele Registry using a <strong>GRCh37</strong> HGVS representation in order to return all possible associated evidence.</span>
-                    </p>
                 </span>;
             break;
         case 'resourceResponse':
