@@ -272,7 +272,7 @@ var AssociateDisease = React.createClass({
             this.setState({submitResourceBusy: true});
             // Get the free-text values for the Orphanet ID to check against the DB
             var orphaId = this.getFormValue('orphanetid');
-            var interpretationDisease, currInterpretation;
+            var interpretationDisease, currInterpretation, flatInterpretation;
 
             if (orphaId !== '') {
                 orphaId = orphaId.match(/^ORPHA([0-9]{1,6})$/i)[1];
@@ -287,7 +287,7 @@ var AssociateDisease = React.createClass({
                     this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
                         currInterpretation = interpretation;
                         // get up-to-date copy of interpretation object and flatten it
-                        var flatInterpretation = curator.flatten(currInterpretation);
+                        flatInterpretation = curator.flatten(currInterpretation);
                         // if the interpretation object does not have a disease object, create it
                         if (!('disease' in flatInterpretation)) {
                             flatInterpretation.disease = '';
@@ -307,6 +307,7 @@ var AssociateDisease = React.createClass({
                                     interpretation: {
                                         variant: this.props.data['@id'],
                                         disease: interpretationDisease,
+                                        modeInheritance: flatInterpretation.modeInheritance ? flatInterpretation.modeInheritance : null,
                                         mode: 'edit-disease'
                                     }
                                 };
@@ -480,6 +481,8 @@ var AssociateInheritance = React.createClass({
                 var meta = {
                     interpretation: {
                         variant: this.props.data['@id'],
+                        disease: flatInterpretation.disease ? flatInterpretation.disease : null,
+                        modeInheritance: inheritance,
                         mode: 'edit-inheritance'
                     }
                 };

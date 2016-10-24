@@ -412,6 +412,11 @@
                             "type": "string",
                             "linkTo": "orphaPhenotype"
                         },
+                        "modeInheritance": {
+                            "title": "Mode of Inheritance",
+                            "description": "Mode of inheritance associated with the interpretation",
+                            "type": "string"
+                        },
                         "mode": {
                             "title": "Specific mode of change",
                             "description": "Specific mode of change",
