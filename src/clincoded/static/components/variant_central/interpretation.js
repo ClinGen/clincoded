@@ -263,8 +263,9 @@ var InterpretationModifyHistory = React.createClass({
         const history = this.props.history;
         const interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
-            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
-        const interpretationName = <span><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</strong></span>;
+            disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease,
+            modeInheritance = history.meta && history.meta.interpretation && history.meta.interpretation.modeInheritance;
+        const interpretationName = <span><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}{disease ? `–${disease.term}` : null}</strong>{modeInheritance ? <span><strong>–</strong><i>{modeInheritance}</i></span> : null}</span>;
         return (
             <div>
                 {history.meta.interpretation.mode == 'edit-disease' ?
@@ -273,8 +274,8 @@ var InterpretationModifyHistory = React.createClass({
                         : <span>Disease association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                 : null}
                 {history.meta.interpretation.mode == 'edit-inheritance' ?
-                    interpretation.modeInheritance ?
-                        <span>Mode of inheritance <i>{interpretation.modeInheritance.indexOf('(') > -1 ? interpretation.modeInheritance.substring(0, interpretation.modeInheritance.indexOf('(') - 1) : interpretation.modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
+                    modeInheritance ?
+                        <span>Mode of inheritance <i>{modeInheritance.indexOf('(') > -1 ? modeInheritance.substring(0, modeInheritance.indexOf('(') - 1) : modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                         : <span>Mode of inheritance association removed from Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                 : null}
                 {history.meta.interpretation.mode == 'update-eval' ?

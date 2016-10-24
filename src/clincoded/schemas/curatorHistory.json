@@ -528,6 +528,10 @@
             "title": "Orpha ID",
             "type": "string"
         },
+        "meta.interpretation.modeInheritance": {
+            "title": "Mode of Inheritance",
+            "type": "string"
+        },
         "meta.interpretation.mode": {
             "title": "Mode of change",
             "type": "string"

@@ -307,10 +307,12 @@ var AssociateDisease = React.createClass({
                                     interpretation: {
                                         variant: this.props.data['@id'],
                                         disease: interpretationDisease,
-                                        modeInheritance: flatInterpretation.modeInheritance ? flatInterpretation.modeInheritance : null,
                                         mode: 'edit-disease'
                                     }
                                 };
+                                if (flatInterpretation.modeInheritance) {
+                                    meta.interpretation.modeInheritance = flatInterpretation.modeInheritance;
+                                }
                                 return this.recordHistory('modify', currInterpretation, meta).then(result => {
                                     this.setState({submitResourceBusy: false});
                                     // Need 'submitResourceBusy' state to proceed closing modal
@@ -457,7 +459,7 @@ var AssociateInheritance = React.createClass({
         // Invoke button progress indicator
         this.setState({submitResourceBusy: true});
 
-        let inheritance = this.getFormValue('inheritance');
+        let modeInheritance = this.getFormValue('inheritance');
         let currInterpretation;
 
         this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
@@ -465,27 +467,28 @@ var AssociateInheritance = React.createClass({
             // get up-to-date copy of interpretation object and flatten it
             var flatInterpretation = curator.flatten(currInterpretation);
 
-            // if inheritance is set to none, either delete the key in interpretation object, or if
+            // if modeInheritance is set to none, either delete the key in interpretation object, or if
             // the key is already blank, return null and close modal
-            if (inheritance === 'no-moi') {
+            if (modeInheritance === 'no-moi') {
                 if ('modeInheritance' in flatInterpretation) {
                     delete flatInterpretation['modeInheritance'];
                 } else {
                     return null;
                 }
             } else {
-                flatInterpretation.modeInheritance = inheritance;
+                flatInterpretation.modeInheritance = modeInheritance;
             }
 
             return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
                 var meta = {
                     interpretation: {
                         variant: this.props.data['@id'],
-                        disease: flatInterpretation.disease ? flatInterpretation.disease : null,
-                        modeInheritance: inheritance,
                         mode: 'edit-inheritance'
                     }
                 };
+                if (modeInheritance !== 'no-moi') {
+                    meta.interpretation.modeInheritance = modeInheritance;
+                }
                 if (currInterpretation.disease) {
                     meta.interpretation.disease = currInterpretation.disease['@id'];
                 }
