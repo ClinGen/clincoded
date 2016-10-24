@@ -6,20 +6,12 @@ var _ = require('underscore');
 // https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
 module.exports.parseClinvar = parseClinvar;
 function parseClinvar(xml, extended){
-    console.log('parseClinvar xml raw');
-    console.log(xml);
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
-
-    console.log('parseClinvar xml doc');
-    console.log(doc);
-
     var $ClinVarResult = doc.getElementsByTagName('ClinVarResult-Set')[0];
     if ($ClinVarResult) {
-        console.log('parseClinvar clinvarresult passed');
         var $VariationReport = $ClinVarResult.getElementsByTagName('VariationReport')[0];
         if ($VariationReport) {
-            console.log('parseClinvar variationreport passed');
             // Get the ID (just in case) and Preferred Title
             variant.clinvarVariantId = $VariationReport.getAttribute('VariationID');
             variant.clinvarVariantTitle = $VariationReport.getAttribute('VariationName');
@@ -27,11 +19,9 @@ function parseClinvar(xml, extended){
             // e.g. http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=7901
             var $Allele = $VariationReport.getElementsByTagName('Allele')[0];
             if ($Allele) {
-                console.log('parseClinvar allele passed');
                 // Parse <VariantType> node under <Allele>
                 let $variationType = $Allele.getElementsByTagName('VariantType')[0];
                 if ($variationType) {
-                    console.log('parseClinvar variationtype passed');
                     variant.variationType = $variationType.textContent;
                 }
                 // Parse <MolecularConsequence> node under <MolecularConsequenceList>
@@ -39,11 +29,8 @@ function parseClinvar(xml, extended){
                 let $MolecularConsequenceNodes = [];
                 variant.molecularConsequenceList = [];
                 if ($MolecularConsequenceListNode) {
-                    console.log('parseClinvar molconlist passed');
                     $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
-                    console.log($MolecularConsequenceNodes);
                     for (var i = 0; i < $MolecularConsequenceNodes.length; i++) {
-                        console.log('parseClinvar molcon loop');
                         let molecularItem = {
                             "hgvsName": $MolecularConsequenceNodes[i].getAttribute('HGVS'),
                             "term": $MolecularConsequenceNodes[i].getAttribute('Function'),
@@ -51,18 +38,14 @@ function parseClinvar(xml, extended){
                         };
                         variant.molecularConsequenceList.push(molecularItem);
                     }
-
-                    console.log('parseClinvar molconlist post-loop');
                 }
                 var $HGVSlist_raw = $Allele.getElementsByTagName('HGVSlist')[0];
                 if ($HGVSlist_raw) {
-                    console.log('parseClinvar hvgs passed');
                     variant.hgvsNames = {};
                     variant.hgvsNames.others = [];
                     // get the HGVS entries
                     var $HGVSlist = $HGVSlist_raw.getElementsByTagName('HGVS');
                     _.map($HGVSlist, $HGVS => {
-                        console.log('parseClinvar hgvslist loop');
                         let temp_hgvs = $HGVS.textContent;
                         let assembly = $HGVS.getAttribute('Assembly');
                         if (assembly) {
@@ -76,21 +59,17 @@ function parseClinvar(xml, extended){
                 var $XRefList = $Allele.getElementsByTagName('XRefList')[0];
                 var $XRef = $XRefList.getElementsByTagName('XRef');
                 for(var j = 0; j < $XRef.length; j++) {
-                    console.log('parseClinvar xref loop');
                     if ($XRef[j].getAttribute('DB') === 'dbSNP') {
                         variant.dbSNPIds.push($XRef[j].getAttribute('ID'));
                     }
                 }
                 // Call to extract more ClinVar data from XML response
                 if (extended) {
-                    console.log('parseClinvar extended passed');
                     parseClinvarExtended(variant, $Allele, $HGVSlist_raw, $VariationReport, $MolecularConsequenceNodes);
                 }
             }
         }
     }
-    console.log('parseClinvar pre-return variant');
-    console.log(variant);
     return variant;
 }
 
@@ -110,9 +89,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     variant.clinvarVariationType = dataset.getAttribute('VariationType');
     // Parse <MolecularConsequence> nodes
     if (molecularConsequenceNodes) {
-        console.log('extended molcon passed');
         for (var i = 0; i < molecularConsequenceNodes.length; i++) {
-            console.log('extended molcon loop');
             // Used for transcript tables on "Basic Information" tab in VCI
             // HGVS property for mapping to transcripts with matching HGVS names
             // SOid and Function properties for UI display
@@ -125,37 +102,34 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
         }
     }
     // Parse <HGVS> nodes
-    var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
-    if (HGVSnodes) {
-        console.log('extended hgvs passed');
-        for (var j = 0; j < HGVSnodes.length; j++) {
-            console.log('extended hgvs loop');
-            // Used for transcript tables on "Basic Information" tab in VCI
-            // Type property for identifying the nucleotide change transcripts
-            // and protein change transcripts
-            var hgvsObj = {
-                "HGVS": HGVSnodes[j].textContent,
-                "Change": HGVSnodes[j].getAttribute('Change'),
-                "AccessionVersion": HGVSnodes[j].getAttribute('AccessionVersion'),
-                "Type": HGVSnodes[j].getAttribute('Type')
-            };
-            // nucleotide change
-            if (HGVSnodes[j].getAttribute('Type') === 'HGVS, coding, RefSeq') {
-                variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
-            }
-            // protein change
-            if (HGVSnodes[j].getAttribute('Type') === 'HGVS, protein, RefSeq') {
-                variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
+    if (hgvs_list) {
+        var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
+        if (HGVSnodes) {
+            for (var j = 0; j < HGVSnodes.length; j++) {
+                // Used for transcript tables on "Basic Information" tab in VCI
+                // Type property for identifying the nucleotide change transcripts
+                // and protein change transcripts
+                var hgvsObj = {
+                    "HGVS": HGVSnodes[j].textContent,
+                    "Change": HGVSnodes[j].getAttribute('Change'),
+                    "AccessionVersion": HGVSnodes[j].getAttribute('AccessionVersion'),
+                    "Type": HGVSnodes[j].getAttribute('Type')
+                };
+                // nucleotide change
+                if (HGVSnodes[j].getAttribute('Type') === 'HGVS, coding, RefSeq') {
+                    variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
+                }
+                // protein change
+                if (HGVSnodes[j].getAttribute('Type') === 'HGVS, protein, RefSeq') {
+                    variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
             }
         }
     }
     // Parse <gene> node
     var geneList = dataset.getElementsByTagName('GeneList')[0];
     if (geneList) {
-        console.log('extended gene passed');
         var geneNode = geneList.getElementsByTagName('Gene')[0];
         if (geneNode) {
-            console.log('extended genenode passed');
             variant.gene.id = geneNode.getAttribute('GeneID');
             variant.gene.symbol = geneNode.getAttribute('Symbol');
             variant.gene.full_name = geneNode.getAttribute('FullName');
@@ -169,7 +143,6 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     const protein_change = allele.getElementsByTagName('ProteinChange')[0];
     let alt_protein_change;
     if (variant.RefSeqTranscripts.ProteinChangeList.length > 0) {
-        console.log('extended refseq passed');
         const changeAttr = variant.RefSeqTranscripts.ProteinChangeList[0].Change;
         if (changeAttr.length) {
             // Remove 'p.' from string value
@@ -194,9 +167,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
     // Parse <SequenceLocation> nodes
     var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
     if (SequenceLocationNodes) {
-        console.log('extended seqloc passed');
         for(var k = 0; k < SequenceLocationNodes.length; k++) {
-            console.log('extended seqloc loop');
             // Properties in SequenceLocationObj are used to construct LinkOut URLs
             // Used primarily for LinkOut links on "Basic Information" tab in VCI
             // referenceAllele and alternateAllele properties are added for Population tab
