@@ -47,4 +47,3 @@ window.onload = function () {
 
 var $script = require('scriptjs');
 $script.path('/static/build/');
-$script('https://login.persona.org/include.js', 'persona');
