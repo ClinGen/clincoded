@@ -240,14 +240,18 @@
             border: none;
 
             > .panel-heading {
-                h4 {
-                    font-size: 1.20em;
+                background-color: #f0f0f0;
+                border-bottom: solid 1px #c0c0c0;
+                padding-bottom: 4px;
 
-                    .panel-title-std {
+                h4 {
+                    font-size: 1.25em;
+
+                    span {
                         background-color: #f0f0f0;
-                        color: #2697d1;
-                        font-style: italic;
-                        padding: 5px 0 5px 0;
+                        color: #000;
+                        font-weight: 500;
+                        padding: 5px 0 0 0;
                     }
                 }
             }
@@ -256,7 +260,13 @@
                 padding: 0;
 
                 .group-separator {
-                    margin: 2px 0 10px 0;
+                    margin: 2px 0 5px 1px;
+
+                    .subhead {
+                        color: #777;
+                        font-size: 0.9em;
+                        font-weight: bold;
+                    }
                 }
 
                 .group-separator:first-child {
@@ -269,14 +279,18 @@
             border: none;
 
             > .panel-heading {
-                h4 {
-                    font-size: 1.20em;
+                background-color: #f0f0f0;
+                border-bottom: solid 1px #c0c0c0;
+                padding-bottom: 4px;
 
-                    .panel-title-std {
+                h4 {
+                    font-size: 1.25em;
+
+                    span {
                         background-color: #f0f0f0;
-                        color: #2697d1;
-                        font-style: italic;
-                        padding: 0 0 5px 0;
+                        color: #000;
+                        font-weight: 500;
+                        padding: 0 0 0 0;
                     }
                 }
             }
@@ -2392,20 +2406,18 @@ table.login-users-interpretations {
 /* case-cohort, control-cohort panels */
 .panel.case-cohort,
 .panel.control-cohort,
-.panel.case-control-eval-score {
+.panel.case-control-eval-score,
+.panel.case-control-label-panel {
     .panel-std {
         padding: 30px 45px 20px 45px;
     }
 
     .section {
-        border-top: solid 1px #ddd;
-        
         h3 {
-            border-bottom: solid 1px #ddd;
-            color: #2697d1;
+            border-bottom: solid 1px lighten(#486e82, 35%);
+            color: #486e82;
             font-size: 1.45em;
-            font-style: italic;
-            font-weight: normal;
+            font-weight: 500;
             margin: 0 0 30px 0;
             padding: 5px 0;
         }
@@ -2416,6 +2428,10 @@ table.login-users-interpretations {
 
         label {
             padding-right: 0;
+        }
+
+        .invisible-placeholder {
+            visibility: hidden;
         }
     }
 
@@ -2445,5 +2461,22 @@ table.login-users-interpretations {
             margin-left: 0;
         }
     }
+
+    .statistic-other-type.expanded {
+        display: block;
+    }
+
+    .statistic-other-type.collapsed {
+        display: none;
+    }
 }
 
+.panel.case-control-label-panel {
+    .panel-std {
+        padding-bottom: 10px;
+
+        .form-group {
+            margin-bottom: 0;
+        }
+    }
+}
