@@ -6,55 +6,56 @@ import moment from 'moment';
 
 import * as curator from '../curator';
 
-import { Form, FormMixin, Input, InputMixin } from '../../libs/bootstrap/form';
+import { Form, Input } from '../../libs/bootstrap/form';
 
-// Renders Case-Control Evaluation & Score panel
-const CaseControlEvalScore = module.exports.CaseControlEvalScore = React.createClass({
-    propTypes: {
-        caseControlObj: React.PropTypes.object,
-        updateCaseControlObj: React.PropTypes.func
-    },
-
-    mixins: [
-        FormMixin, InputMixin
-    ],
-
-    getInitialState() {
-        return {
-            caseControlObj: this.props.caseControlObj,
-            evaluationScore: {
-                studyType: null,
-                detectionMethod: null,
-                statistics: {
-                    statisticalValue: {type: null, other_type: null, value: null},
-                    confidenceInterval: {pValue: null, rangeFrom: null, rangeTo: null}
-                },
-                biasCategory: {
-                    eval1: {question: null, influence: null, explanation: null},
-                    eval2: {question: null, influence: null, explanation: null},
-                    eval3: {question: null, explanation: null},
-                    eval4: {question: null, explanation: null}
-                },
-                comments: null,
-                score: null
-            }
-        };
-    },
+// Utility function to display the Case-Control Evaluation & Score panel,
+// and convert its values to an object.
+// This object assumes it has a React component's 'this', so these need to be called
+module.exports = {
     
-    render() {
-        let evaluationScore = this.state.evaluationScore;
+    // Renders Case-Control Evaluation & Score panel
+    render(case_control, scores) {
+        let statisticOtherType = this.state.statisticOtherType; // 'collapsed' or 'expanded'
+        let caseControl = {
+            studyType: null,
+            detectionMethod: null,
+            statisticalValues: [{valueType: null, otherType: null, value: null}],
+            pValue: null,
+            confidenceIntervalFrom: null,
+            confidenceIntervalTo: null,
+            demographicInfoMatched: null,
+            factorOfDemographicInfoMatched: null,
+            explanationForDemographicMatched: null,
+            geneticAncestryMatched: null,
+            factorOfGeneticAncestryNotMatched: null,
+            explanationForGeneticAncestryNotMatched: null,
+            diseaseHistoryEvaluated: null,
+            explanationForDiseaseHistoryEvaluation: null,
+            differInVariables: null,
+            explanationForDifference: null,
+            comments: null
+        };
+        if (case_control && case_control.studyType !== 'undefined') {
+            caseControl = case_control;
+        }
+        let evidenceScores = [{score: null, evidenceType: null, uuid: null}];
+        if (scores && scores.length) {
+            evidenceScores = scores;
+        }
 
         return (
             <div>
                 <div className="row section section-study-type-detection-method">
-                    <Input type="select" ref="studytype" label="Study type:" defaultValue="none" value={evaluationScore.studyType}
-                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                    <Input type="select" ref="studyType" label="Study type:" defaultValue="none"
+                        value={caseControl.studyType ? caseControl.studyType: 'none'}
+                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group studyType">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
                         <option value="Single variant analysis">Single variant analysis</option>
                         <option value="Aggregate variant analysis">Aggregate variant analysis</option>
                     </Input>
-                    <Input type="select" ref="detectionmethod" label="Detection method:" defaultValue="none" value={evaluationScore.detectionMethod}
+                    <Input type="select" ref="detectionMethod" label="Detection method:" defaultValue="none"
+                        value={caseControl.detectionMethod ? caseControl.detectionMethod : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -65,48 +66,59 @@ const CaseControlEvalScore = module.exports.CaseControlEvalScore = React.createC
                     </Input>
                 </div>
                 <div className="row section section-statistics">
-                <h3>Statistics</h3>
+                <h3><i className="icon icon-chevron-right"></i> Statistics</h3>
                     <h4 className="col-sm-7 col-sm-offset-5">Statistical Value</h4>
-                    <Input type="select" ref="statisticvauletype" label="Value type:" defaultValue="none" value={evaluationScore.statistics.statisticalValue.type}
-                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                        <option value="none">No Selection</option>
-                        <option disabled="disabled"></option>
-                        <option value="Yes">Odds Ratio</option>
-                        <option value="No">Fischer's exact test</option>
-                        <option value="Yes">Beta</option>
-                        <option value="No">Hazard Radio</option>
-                        <option value="Yes">Relative Risk</option>
-                        <option value="No">Other (describe in text box)</option>
-                    </Input>
-                    <Input type="number" ref="statisticvaule" label="Value:" value={evaluationScore.statistics.statisticalValue.value}
-                        error={this.getFormError('statisticvauletype')} clearError={this.clrFormErrors.bind(null, 'statisticvauletype')}
-                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                    {caseControl.statisticalValues.map(entry => {
+                        return (
+                            <div key={entry.valueType ? entry.valueType : 'none'} ref="caseControlStatistics">
+                                <Input type="select" ref="statisticVauleType" label="Value type:" defaultValue="none"
+                                    value={entry.valueType ? entry.valueType : 'none'} handleChange={this.handleChange}
+                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                                    <option value="none">No Selection</option>
+                                    <option disabled="disabled"></option>
+                                    <option value="Odds Ratio">Odds Ratio</option>
+                                    <option value="Fischer's exact test">Fischer's exact test</option>
+                                    <option value="Beta">Beta</option>
+                                    <option value="Hazard Radio">Hazard Radio</option>
+                                    <option value="Relative Risk">Relative Risk</option>
+                                    <option value="Other">Other</option>
+                                </Input>
+                                <Input type="number" ref="statisticOtherType" label="Other value type:" value={entry.otherType ? entry.otherType : null}
+                                    error={this.getFormError('statisticOtherType')} clearError={this.clrFormErrors.bind(null, 'statisticOtherType')}
+                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
+                                    groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
+                                <Input type="number" ref="statisticVaule" label="Value:" value={entry.value ? entry.value : null}
+                                    error={this.getFormError('statisticVaule')} clearError={this.clrFormErrors.bind(null, 'statisticVaule')}
+                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                            </div>
+                        );
+                    })}
                     <h4 className="col-sm-7 col-sm-offset-5">Confidence/Significance</h4>
-                    <Input type="number" ref="confidencepvaule" label="p-value (%):" value={evaluationScore.statistics.confidenceInterval.pValue}
-                        error={this.getFormError('confidencepvaule')} clearError={this.clrFormErrors.bind(null, 'confidencepvaule')}
+                    <Input type="number" ref="pVaule" label="p-value (%):" value={caseControl.pValue ? caseControl.pValue : null}
+                        error={this.getFormError('pVaule')} clearError={this.clrFormErrors.bind(null, 'pVaule')}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                     <Input type="text-range" labelClassName="col-sm-6 control-label" label="Confidence interval (%):" wrapperClassName="col-sm-6">
-                        <Input type="number" ref="confidenceintervalfrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
-                            error={this.getFormError('confidenceintervalfrom')} clearError={this.clrFormErrors.bind(null, 'confidenceintervalfrom')}
-                            value={evaluationScore.statistics.confidenceInterval.rangeFrom} />
+                        <Input type="number" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                            error={this.getFormError('confidenceIntervalFrom')} clearError={this.clrFormErrors.bind(null, 'confidenceIntervalFrom')}
+                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} />
                         <span className="group-age-inter">to</span>
-                        <Input type="number" ref="confidenceintervalto" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
-                            error={this.getFormError('confidenceintervalto')} clearError={this.clrFormErrors.bind(null, 'confidenceintervalto')}
-                            value={evaluationScore.statistics.confidenceInterval.rangeTo} />
+                        <Input type="number" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                            error={this.getFormError('confidenceIntervalTo')} clearError={this.clrFormErrors.bind(null, 'confidenceIntervalTo')}
+                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} />
                     </Input>
                 </div>
                 <div className="row section section-bias-category">
-                    <h3>Bias Category</h3>
-                    <Input type="select" ref="biasquestion1" label="1. Are case and control cohorts matched by demographic information?"
-                        defaultValue="none" value={evaluationScore.biasCategory.eval1.question}
+                    <h3><i className="icon icon-chevron-right"></i> Bias Category</h3>
+                    <Input type="select" ref="demographicInfoMatched" label="1. Are case and control cohorts matched by demographic information?"
+                        defaultValue="none" value={caseControl.demographicInfoMatched ? caseControl.demographicInfoMatched : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
                     </Input>
-                    <Input type="select" ref="biasquestion1factor" label="If yes, select one of the following:"
-                        defaultValue="none" value={evaluationScore.biasCategory.eval1.influence}
+                    <Input type="select" ref="factorOfDemographicInfoMatched" label="If yes, select one of the following:"
+                        defaultValue="none" value={caseControl.factorOfDemographicInfoMatched ? caseControl.factorOfDemographicInfoMatched : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -115,28 +127,30 @@ const CaseControlEvalScore = module.exports.CaseControlEvalScore = React.createC
                         <option value="Ethnicity">Ethnicity</option>
                         <option value="Location of recruitment">Location of recruitment</option>
                     </Input>
-                    <Input type="textarea" ref="biasquestion1desc" label="Explanation:" rows="5" value={evaluationScore.biasCategory.eval1.explanation}
+                    <Input type="textarea" ref="explanationForDemographicMatched" label="Explanation:" rows="5"
+                        value={caseControl.explanationForDemographicMatched ? caseControl.explanationForDemographicMatched : null}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
-                    <Input type="select" ref="biasquestion2" label="2. Are case and control cohorts matched for genetic ancestry?"
-                        defaultValue="none" value={evaluationScore.biasCategory.eval2.question}
+                    <Input type="select" ref="geneticAncestryMatched" label="2. Are case and control cohorts matched for genetic ancestry?"
+                        defaultValue="none" value={caseControl.geneticAncestryMatched ? caseControl.geneticAncestryMatched : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
                     </Input>
-                    <Input type="select" ref="biasquestion2factor" label="If no, select one of the following:"
-                        defaultValue="none" value={evaluationScore.biasCategory.eval2.influence}
+                    <Input type="select" ref="factorOfGeneticAncestryNotMatched" label="If no, select one of the following:"
+                        defaultValue="none" value={caseControl.factorOfGeneticAncestryNotMatched ? caseControl.factorOfGeneticAncestryNotMatched : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
                         <option value="No, but investigators accounted for genetic ancestry in analysis">No, but investigators accounted for genetic ancestry in analysis</option>
                         <option value="No, investigators did NOT account for genetic ancestry in analysis">No, investigators did NOT account for genetic ancestry in analysis</option>
                     </Input>
-                    <Input type="textarea" ref="biasquestion2desc" label="Explanation:" rows="5" value={evaluationScore.biasCategory.eval2.explanation}
+                    <Input type="textarea" ref="explanationForGeneticAncestryNotMatched" label="Explanation:" rows="5"
+                        value={caseControl.explanationForGeneticAncestryNotMatched ? caseControl.explanationForGeneticAncestryNotMatched : null}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
-                    <Input type="select" ref="biasquestion3" label="3. Are case and control cohorts equivalently evaluated for primary disease outcome and/or family history of disease?"
-                        defaultValue="none" value={evaluationScore.biasCategory.eval3.question}
+                    <Input type="select" ref="diseaseHistoryEvaluated" label="3. Are case and control cohorts equivalently evaluated for primary disease outcome and/or family history of disease?"
+                        defaultValue="none" value={caseControl.diseaseHistoryEvaluated ? caseControl.diseaseHistoryEvaluated : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -145,40 +159,109 @@ const CaseControlEvalScore = module.exports.CaseControlEvalScore = React.createC
                         <option value="No to presence/absence of phenotype. Yes to family history evaluation.">No to presence/absence of phenotype. Yes to family history evaluation.</option>
                         <option value="No to both presence/absence of phenotype and family history">No to both presence/absence of phenotype and family history</option>
                     </Input>
-                    <Input type="textarea" ref="biasquestion3desc" label="Explanation:" rows="5" value={evaluationScore.biasCategory.eval3.explanation}
+                    <Input type="textarea" ref="explanationForDiseaseHistoryEvaluation" label="Explanation:" rows="5"
+                        value={caseControl.explanationForDiseaseHistoryEvaluation ? caseControl.explanationForDiseaseHistoryEvaluation : null}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
-                    <Input type="select" ref="biasquestion4" label="4. Do case and control cohorts differ in any other variables?"
-                        defaultValue="none" value={evaluationScore.biasCategory.eval4.question}
+                    <Input type="select" ref="differInVariables" label="4. Do case and control cohorts differ in any other variables?"
+                        defaultValue="none" value={caseControl.differInVariables ? caseControl.differInVariables : 'none'}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
                     </Input>
-                    <Input type="textarea" ref="biasquestion4desc" label="If yes, explain:" rows="5" value={evaluationScore.biasCategory.eval4.explanation}
+                    <Input type="textarea" ref="explanationForDifference" label="If yes, explain:" rows="5"
+                        value={caseControl.explanationForDifference ? caseControl.explanationForDifference : null}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                 </div>
                 <div className="row section section-comments">
-                    <h3>Comments</h3>
-                    <Input type="textarea" ref="biascomments" label="Please provide any comments regarding case-control evaluation:" rows="5" value={evaluationScore.comments}
+                    <h3><i className="icon icon-chevron-right"></i> Comments</h3>
+                    <Input type="textarea" ref="comments" label="Please provide any comments regarding case-control evaluation:" rows="5"
+                        value={caseControl.comments ? caseControl.comments : null}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                 </div>
                 <div className="row section section-score">
-                    <h3>Score Case-Control Study</h3>
-                    <Input type="select" ref="studyscore" label="Score:" defaultValue="none" value={evaluationScore.score}
-                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                        <option value="none">No Selection</option>
-                        <option disabled="disabled"></option>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                    </Input>
+                    <h3><i className="icon icon-chevron-right"></i> Score Case-Control Study</h3>
+                    {evidenceScores.map(item => {
+                        return (
+                            <div key={item.score ? item.score : 'none'} ref="evidenceScores">
+                                <Input type="select" ref="evidenceScore" label="Score:" defaultValue="none" value={item.score ? item.score : 'none'}
+                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                                    <option value="none">No Selection</option>
+                                    <option disabled="disabled"></option>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </Input>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         );
+    },
+
+    // Create new Case-Control object based on the form values
+    handleCaseControlObj() {
+        let newCaseControlObj = {};
+        newCaseControlObj.statisticalValues = [];
+
+        // Iterate statistical values array
+        let statisticsObjects = this.refs['caseControlStatistics'],
+            newObj = {}, newArray = [];
+        statisticsObjects.forEach(obj => {
+            newObj = {
+                valueType: obj.getFormValue('statisticVauleType'),
+                otherType: obj.getFormValue('statisticOtherType'),
+                value: obj.getFormValue('statisticVaule')
+            };
+            newArray.push(newObj);
+        });
+
+        // Put together a new 'caseControl' object
+        newCaseControlObj = {
+            studyType: this.getFormValue('studyType'),
+            detectionMethod: this.getFormValue('detectionMethod'),
+            statisticalValues: newArray,
+            pValue: this.getFormValue('pVaule'),
+            confidenceIntervalFrom: this.getFormValue('confidenceIntervalFrom'),
+            confidenceIntervalTo: this.getFormValue('confidenceIntervalTo'),
+            demographicInfoMatched: this.getFormValue('demographicInfoMatched'),
+            factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched'),
+            explanationForDemographicMatched: this.getFormValue('explanationForDemographicMatched'),
+            geneticAncestryMatched: this.getFormValue('geneticAncestryMatched'),
+            factorOfGeneticAncestryNotMatched: this.getFormValue('factorOfGeneticAncestryNotMatched'),
+            explanationForGeneticAncestryNotMatched: this.getFormValue('explanationForGeneticAncestryNotMatched'),
+            diseaseHistoryEvaluated: this.getFormValue('diseaseHistoryEvaluated'),
+            explanationForDiseaseHistoryEvaluation: this.getFormValue('explanationForDiseaseHistoryEvaluation'),
+            differInVariables: this.getFormValue('differInVariables'),
+            explanationForDifference: this.getFormValue('explanationForDifference'),
+            comments: this.getFormValue('comments')
+        };
+
+        return Object.keys(newCaseControlObj).length ? newCaseControlObj : null;
+    },
+
+    // Create new Evaluation-Score object based on the form values
+    handleScoreObj() {
+        let newScoreObj = [];
+
+        // Iterate scores array
+        let scoreObjects = this.refs['evidenceScores'],
+            newScore = {};
+        scoreObjects.forEach(obj => {
+            newScore = {
+                score: obj.getFormValue('evidenceScore'),
+                evidenceType: 'Case control'
+            };
+            // Put together a new 'evidenceScores' object
+            newScoreObj.push(newScore);
+        });
+
+        return Object.keys(newScoreObj).length ? newScoreObj : null;
     }
-});
+};
