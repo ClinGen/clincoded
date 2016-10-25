@@ -69,9 +69,9 @@ module.exports = function(grunt) {
             browser: {
                 dest: './src/clincoded/static/build/bundle.js',
                 src: [
+                    'babel-polyfill',
                     'es5-shims',
                     'es5-shim/es5-sham',
-                    'babel-polyfill',
                     'html5shiv/dist/html5shiv',
                     './src/clincoded/static/libs/compat.js', // The shims should execute first
                     './src/clincoded/static/libs/sticky_header.js',
