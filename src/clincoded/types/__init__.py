@@ -323,7 +323,13 @@ class Gdm(Item):
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
-        'annotations.experimentalData.assessments.submitted_by'
+        'annotations.experimentalData.assessments.submitted_by',
+        'annotations.caseControlStudies',
+        'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.caseCohort',
+        'annotations.caseControlStudies.controlCohort',
+        'annotations.caseControlStudies.scores',
+        'annotations.caseControlStudies.scores.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -422,7 +428,6 @@ class Annotation(Item):
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
-        # 'groups.control',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
@@ -457,7 +462,13 @@ class Annotation(Item):
         'experimentalData.proteinInteractions.interactingGenes',
         'associatedGdm',
         'experimentalData.assessments',
-        'experimentalData.assessments.submitted_by'
+        'experimentalData.assessments.submitted_by',
+        'caseControlStudies',
+        'caseControlStudies.submitted_by',
+        'caseControlStudies.caseCohort',
+        'caseControlStudies.controlCohort',
+        'caseControlStudies.scores',
+        'caseControlStudies.scores.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -509,6 +520,44 @@ class Annotation(Item):
         if len(experimentalData) > 0:
             return len(experimentalData)
         return ""
+
+
+@collection(
+    name='casecontrol',
+    unique_key='caseControl:uuid',
+    properties={
+        'title': 'Case Control',
+        'description': 'List of case-control objects in all GDM(s)',
+    })
+class CaseControl(Item):
+    item_type = 'caseControl'
+    schema = load_schema('clincoded:schemas/caseControl.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseCohort',
+        'controlCohort',
+        'scores',
+        'scores.submitted_by',
+        'associatedAnnotation',
+        'associatedAnnotation.article',
+        'associatedAnnotation.groups',
+        'associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'associatedAnnotation': ('annotation', 'caseControlStudies')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.caseControlStudies"
+        }
+    })
+    def associatedAnnotation(self, request, associatedAnnotation):
+        return paths_filtered_by_status(request, associatedAnnotation)
 
 
 @collection(
@@ -879,6 +928,39 @@ class Assessment(Item):
     })
     def experimental_assessed(self, request, experimental_assessed):
         return paths_filtered_by_status(request, experimental_assessed)
+
+
+@collection(
+    name='evidencescore',
+    unique_key='evidenceScore:uuid',
+    properties={
+        'title': 'Evidence Score',
+        'description': 'List of score assigned to evidence',
+    })
+class EvidenceScore(Item):
+    item_type = 'evidenceScore'
+    schema = load_schema('clincoded:schemas/evidenceScore.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseControl_scored',
+        'caseControl_scored.associatedAnnotation',
+        'caseControl_scored.associatedAnnotation.associatedGdm'
+    ]
+    rev = {
+        'caseControl_scored': ('caseControl', 'scores')
+    }
+
+    @calculated_property(schema={
+        "title": "Case Control Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "caseControl.scores"
+        }
+    })
+    def caseControl_scored(self, request, caseControl_scored):
+        return paths_filtered_by_status(request, caseControl_scored)
 
 
 @collection(
