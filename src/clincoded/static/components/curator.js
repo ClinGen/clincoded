@@ -596,8 +596,8 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             <div>
                 {annotation ?
                     <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + annotation.article.pmid}>
-                        <Panel panelClassName="genetic-evidence-group" title="Genetic Evidence">
-                            <div className="group-separator"><span className="label label-default">Case Level</span></div>
+                        <Panel panelClassName="genetic-evidence-group" title={<h4><i className="icon icon-user"></i> Genetic Evidence</h4>}>
+                            <div className="group-separator"><span className="subhead"><i className="icon icon-chevron-right"></i> Case Level</span></div>
                             <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
                                 {groupRenders}
                             </Panel>
@@ -607,12 +607,12 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                             <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
                                 {individualRenders}
                             </Panel>
-                            <div className="group-separator"><span className="label label-default">Case-Control</span></div>
+                            <div className="group-separator"><span className="subhead"><i className="icon icon-chevron-right"></i> Case-Control</span></div>
                             <Panel title={<CurationPaletteTitles title="Case-Control" url={caseControlUrl} />} panelClassName="panel-evidence">
                                 {caseControlRenders}
                             </Panel>
                         </Panel>
-                        <Panel panelClassName="experimental-group" title="Experimental">
+                        <Panel panelClassName="experimental-group" title={<h4><i className="icon icon-user"></i> Experimental Evidence</h4>}>
                             <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
                                 {experimentalRenders}
                             </Panel>
