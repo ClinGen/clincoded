@@ -147,7 +147,7 @@
     },
     "columns": {
         "label": {
-            "title": "Lable",
+            "title": "Label",
             "type": "string"
         },
         "caseCohort.label": {
