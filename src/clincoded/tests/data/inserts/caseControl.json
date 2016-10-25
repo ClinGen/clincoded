@@ -2,6 +2,7 @@
 [
     {
         "uuid": "2fa791d5-f1e4-4ede-8397-1c48a2e834e2",
+        "label": "Case Control ABC",
         "caseCohort": "64df7938-33bc-4789-8e5c-52f45da24006",
         "controlCohort": "342cccda-b3ed-4228-8956-9825b58cd36b",
         "studyType": "Single variant analysis",
