@@ -5,6 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [
+        "label",
         "caseCohort",
         "controlCohort"
     ],
@@ -19,6 +20,10 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "label": {
+            "title": "Label",
+            "type": "string"
         },
         "caseCohort": {
             "title": "Case Cohort",
@@ -141,8 +146,8 @@
         }
     },
     "columns": {
-        "uuid": {
-            "title": "ID",
+        "label": {
+            "title": "Label",
             "type": "string"
         },
         "caseCohort.label": {
