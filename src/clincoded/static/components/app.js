@@ -27,6 +27,7 @@ var portal = {
         {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
         {id: 'space', title: 'space'}, // white space between
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
+        {id: 'demo', title: 'Demo Login'},
         {id: 'loginout', title: 'Login'}
         //{id: 'account', title: 'Account', url: '/account/'},
     ]
@@ -35,9 +36,10 @@ var portal = {
 
 // Renders HTML common to all pages.
 var App = module.exports = React.createClass({
-    mixins: [mixins.Persona, mixins.HistoryAndTriggers],
+    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
 
     triggers: {
+        demo: 'triggerAutoLogin',
         login: 'triggerLogin',
         logout: 'triggerLogout'
     },
@@ -126,16 +128,17 @@ var App = module.exports = React.createClass({
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
+                    <script src="https://cdn.auth0.com/js/lock/10.4/lock.min.js"></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
-                    <script src="@@bundleJsFile" async defer></script>
+                    <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
-                        <Header session={this.state.session} />
+                        <Header session={this.state.session} href={this.props.href} />
                         {this.state.demoWarning ?
                         <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
                         : null}
@@ -176,7 +179,7 @@ var Header = React.createClass({
     render: function() {
         return (
             <header className="site-header">
-                <NavbarMain portal={portal} session={this.props.session} />
+                <NavbarMain portal={portal} session={this.props.session} href={this.props.href} />
             </header>
         );
     }
@@ -216,16 +219,17 @@ var NavbarMain = React.createClass({
     mixins: [NavbarMixin],
 
     propTypes: {
-        portal: React.PropTypes.object.isRequired
+        portal: React.PropTypes.object.isRequired,
+        href: React.PropTypes.string.isRequired
     },
 
     render: function() {
         var headerUrl = '/';
-        if (this.props.session['auth.userid'] !== undefined) headerUrl = '/dashboard/';
+        if (this.props.session && this.props.session['auth.userid'] !== undefined) headerUrl = '/dashboard/';
         return (
             <div>
                 <div className="container">
-                    <NavbarUser portal={this.props.portal} session={this.props.session} />
+                    <NavbarUser portal={this.props.portal} session={this.props.session} href={this.props.href} />
                     <a href={headerUrl} className='navbar-brand'>ClinGen Dashboard</a>
                 </div>
             </div>
@@ -237,10 +241,15 @@ var NavbarMain = React.createClass({
 var NavbarUser = React.createClass({
     render: function() {
         var session = this.props.session;
+        var demoLoginEnabled = true;
+        if (/curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname) || /production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production or curation URL. Disable demo login if true
+            demoLoginEnabled = false;
+        }
 
         return (
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
-                {this.props.portal.navUser.map(function(menu) {
+                {this.props.portal.navUser.map(menu => {
                     if (menu.url || menu.title === 'space') {
                         if (menu.id === 'help') {
                             return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;
@@ -255,13 +264,21 @@ var NavbarUser = React.createClass({
 
                         // Item with trigger; e.g. login/logout
                         if (!(session && session['auth.userid'])) {
-                            // Logged out; render signin trigger
-                            attrs['data-trigger'] = 'login';
-                            return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            if (menu.id === 'loginout') {
+                                // Logged out; render signin triggers
+                                attrs['data-trigger'] = 'login';
+                                return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            } else if (menu.id === 'demo' && demoLoginEnabled) {
+                                // Logged out; render signin triggers
+                                attrs['data-trigger'] = 'demo';
+                                return <NavItem {...attrs} key={menu.id}>{menu.title}</NavItem>;
+                            }
                         } else {
-                            var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
-                            attrs['data-trigger'] = 'logout';
-                            return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            if (menu.id === 'loginout') {
+                                var fullname = (session.user_properties && session.user_properties.title) || 'unknown';
+                                attrs['data-trigger'] = 'logout';
+                                return <NavItem {...attrs} key={menu.id}>{'Logout ' + fullname}</NavItem>;
+                            }
                         }
                     }
                 })}

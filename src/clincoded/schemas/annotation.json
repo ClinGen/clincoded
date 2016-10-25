@@ -71,6 +71,16 @@
                 "linkTo": "experimental"
             }
         },
+        "caseControlStudies": {
+            "title": "Case Control Study",
+            "description": "List of case-control study",
+            "type": "array",
+            "items": {
+                "title": "Case Control",
+                "type": "string",
+                "linkTo": "caseControl"
+            }
+        },
         "active": {
             "title": "Active",
             "description": "Boolean switch for using the annotation",

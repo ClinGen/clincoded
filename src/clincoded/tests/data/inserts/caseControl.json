@@ -1,0 +1,33 @@
+
+[
+    {
+        "uuid": "2fa791d5-f1e4-4ede-8397-1c48a2e834e2",
+        "caseCohort": "64df7938-33bc-4789-8e5c-52f45da24006",
+        "controlCohort": "342cccda-b3ed-4228-8956-9825b58cd36b",
+        "studyType": "Single variant analysis",
+        "detectionMethod": "Cases and controls genotyped for variant(s)",
+        "statisticalValues": [
+            {
+                "valueType": "Odds Ratio",
+                "value": 12.345
+            }
+        ],
+        "pValue": 3.15,
+        "confidenceIntervalFrom": 6.7,
+        "confidenceIntervalTo": 8.9,
+        "demographicInfoMatched": "Yes",
+        "factorOfDemographicInfoMatched": "Age",
+        "explanationForDemographicMatched": "Just like it",
+        "geneticAncestryMatched": "No",
+        "factorOfGeneticAncestryNotMatched": "No, but investigators accounted for genetic ancestry in analysis",
+        "explanationForGeneticAncestryNotMatched": "Like it too",
+        "diseaseHistoryEvaluated": "Yes to both presence/absence of phenotype and family history",
+        "explanationForDiseaseHistoryEvaluation": "some reason here",
+        "differInVariables": "No",
+        "scores": ["185fa1ba-4509-4c36-93ef-8036c7a56f8b"],
+        "comments": "comment here",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "last_modified": "2016-10-19T08:35:18.000000+00:00",
+        "date_created": "2016-10-18T22:47:10.000000+00:00"
+    }
+]
