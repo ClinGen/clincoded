@@ -199,6 +199,14 @@
             "numberOfUnaffectedIndividuals": 10,
             "probandAssociatedWithBoth": true,
             "additionalInformation": "11 of the 15 family members were sequenced",
+            "numberOfAffectedWithGenotype": 7,
+            "numberOfSegregationsForThisFamily": 3,
+            "inconsistentSegregationAmongstTestedIndividuals": "No",
+            "familyConsanguineous": "Yes",
+            "pedigreeLocation": "Page 12-13",
+            "lodPublished": true,
+            "pubishedLodScore": 1,
+            "includeLodScoreInAggregateCalculation": true,
             "variants": [
                 "e496545c-2685-11e5-a4b3-60f81dc5b05a"
             ],
