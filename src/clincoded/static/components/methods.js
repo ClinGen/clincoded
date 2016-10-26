@@ -17,9 +17,17 @@ module.exports = {
     // Render a method panel. 'family' is boolean true if this is a method for family.
     // 'caseControl' is boolean value if this is a method for case-control.
     render: function(method, family, caseControl, prefix) {
+        let headerLabel;
+        if (prefix === 'caseCohort_') {
+            headerLabel = 'CASE';
+        }
+        if (prefix === 'controlCohort_') {
+            headerLabel = 'CONTROL';
+        }
+
         return (
             <div className={(caseControl) ? 'row section section-method' : 'row'}>
-                {(caseControl) ? <h3><i className="icon icon-chevron-right"></i> Methods</h3> : null}
+                {(caseControl) ? <h3><i className="icon icon-chevron-right"></i> Methods <span className="label label-group">{headerLabel}</span></h3> : null}
                 <Input type="select" ref={prefix ? prefix + 'prevtesting' : 'prevtesting'} label="Previous Testing:" defaultValue="none"
                     value={curator.booleanToDropdown(method.previousTesting)} labelClassName="col-sm-5 control-label"
                     wrapperClassName="col-sm-7" groupClassName="form-group">
