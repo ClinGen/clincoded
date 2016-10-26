@@ -183,12 +183,12 @@ const CaseControlCuration = React.createClass({
             var formError = false;
 
             // Parse comma-separated list fields
-            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
+            var orphaIds = curator.capture.orphas(this.getFormValue('caseCohort_orphanetId'));
             var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
-            var hpotext = curator.capture.hpoids(this.getFormValue('phenoterms'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            var hpoids = curator.capture.hpoids(this.getFormValue('caseCohort_hpoId'));
+            var hpotext = curator.capture.hpoids(this.getFormValue('caseCohort_phenoTerms'));
+            var nothpoids = curator.capture.hpoids(this.getFormValue('caseCohort_nothpoId'));
 
             var valid_orphaId = false;
             var valid_phoId = false;
@@ -796,7 +796,7 @@ var LabelPhenoTerms = React.createClass({
 // as the calling component.
 function GroupDemographics(groupType) {
     const group = this.state.group;
-    let maleCount, femaleCount, country, ethnicity, race, ageRangeType, ageFrom, ageTo, ageUnit;
+    let maleCount, femaleCount, country, ethnicity, race, ageRangeType, ageFrom, ageTo, ageUnit, headerLabel;
     if (groupType === 'case-cohort') {
         maleCount = 'caseCohort_maleCount';
         femaleCount = 'caseCohort_femaleCount';
@@ -807,6 +807,7 @@ function GroupDemographics(groupType) {
         ageFrom = 'caseCohort_ageFrom';
         ageTo = 'caseCohort_ageTo';
         ageUnit = 'caseCohort_ageUnit';
+        headerLabel = 'CASE';
     }
     if (groupType === 'control-cohort') {
         maleCount = 'controlCohort_maleCount';
@@ -818,11 +819,12 @@ function GroupDemographics(groupType) {
         ageFrom = 'controlCohort_ageFrom';
         ageTo = 'controlCohort_ageTo';
         ageUnit = 'controlCohort_ageUnit';
+        headerLabel = 'CONTROL';
     }
 
     return (
         <div className="row section section-demographics">
-            <h3><i className="icon icon-chevron-right"></i> Demographics</h3>
+            <h3><i className="icon icon-chevron-right"></i> Demographics <span className="label label-group">{headerLabel}</span></h3>
             <Input type="number" ref={maleCount} label="# males:" value={group && group.numberOfMale}
                 error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -893,12 +895,13 @@ function GroupDemographics(groupType) {
 // as the calling component.
 function GroupPower(groupType) {
     const group = this.state.group;
-    let type, controlGroupType, numGroupVariant, numGroupGenotyped, calcAlleleFreq;
+    let type, controlGroupType, numGroupVariant, numGroupGenotyped, calcAlleleFreq, headerLabel;
     if (groupType === 'case-cohort') {
         type = 'Case';
         numGroupVariant = 'caseCohort_numGroupVariant';
         numGroupGenotyped = 'caseCohort_numGroupGenotyped';
         calcAlleleFreq = 'caseCohort_calcAlleleFreq';
+        headerLabel = 'CASE';
     }
     if (groupType === 'control-cohort') {
         type = 'Control';
@@ -906,11 +909,12 @@ function GroupPower(groupType) {
         numGroupVariant = 'controlCohort_numGroupVariant';
         numGroupGenotyped = 'controlCohort_numGroupGenotyped';
         calcAlleleFreq = 'controlCohort_calcAlleleFreq';
+        headerLabel = 'CONTROL';
     }
 
     return(
         <div className="row section section-power">
-            <h3><i className="icon icon-chevron-right"></i> Power</h3>
+            <h3><i className="icon icon-chevron-right"></i> Power <span className="label label-group">{headerLabel}</span></h3>
             {/**** Not ready to be made available to current release
             {(groupType === 'control-cohort') ?
                 <Input type="select" ref={controlGroupType} label="Select Control Group Type:" defaultValue="none" value={group && group.numberOfIndividualsWithVariantInCuratedGene}
@@ -957,13 +961,14 @@ function GroupAdditional(groupType) {
     if (group) {
         otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
-    let indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids;
+    let indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel;
     if (groupType === 'case-cohort') {
         indFamilyCount = 'caseCohort_indFamilyCount';
         indVariantOtherCount = 'caseCohort_indVariantOtherCount';
         otherGeneVariants = 'caseCohort_otherGeneVariants';
         additionalInfoGroup = 'caseCohort_additionalInfoGroup';
         otherPmids = 'caseCohort_otherPmids';
+        headerLabel = 'CASE';
     }
     if (groupType === 'control-cohort') {
         indFamilyCount = 'controlCohort_indFamilyCount';
@@ -971,11 +976,12 @@ function GroupAdditional(groupType) {
         otherGeneVariants = 'controlCohort_otherGeneVariants';
         additionalInfoGroup = 'controlCohort_additionalInfoGroup';
         otherPmids = 'controlCohort_otherPmids';
+        headerLabel = 'CONTROL';
     }
 
     return (
         <div className="row section section-additional-info">
-            <h3><i className="icon icon-chevron-right"></i> Additional Information</h3>
+            <h3><i className="icon icon-chevron-right"></i> Additional Information <span className="label label-group">{headerLabel}</span></h3>
             <Input type="number" ref={indFamilyCount} label="# individuals with family information:" value={group && group.numberOfIndividualsWithFamilyInformation}
                 error={this.getFormError(indFamilyCount)} clearError={this.clrFormErrors.bind(null, indFamilyCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
