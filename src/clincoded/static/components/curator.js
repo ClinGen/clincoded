@@ -612,7 +612,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
                                 {caseControlRenders}
                             </Panel>
                         </Panel>
-                        <Panel panelClassName="experimental-group" title={<h4><i className="icon icon-user"></i> Experimental Evidence</h4>}>
+                        <Panel panelClassName="experimental-group" title={<h4><i className="icon icon-flask"></i> Experimental Evidence</h4>}>
                             <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
                                 {experimentalRenders}
                             </Panel>
