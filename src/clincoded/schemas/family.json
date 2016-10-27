@@ -330,7 +330,7 @@
                     "title": "Number of AFFECTED Individuals with Genotype",
                     "type": "number"
                 },
-                "numberOfUnaffectedWithoutBialleticGenotype": {
+                "numberOfUnaffectedWithoutBiallelicGenotype": {
                     "title": "Number of UNAFFECTED Individuals without the Bialletic Genotype",
                     "description": "Required for recessive only",
                     "type": "number"
@@ -377,11 +377,6 @@
                 },
                 "recessiveZygosity": {
                     "title": "Recessive Variant Zygosity",
-                    "type": "string"
-                },
-                "variantsInTrans": {
-                    "title": "Two Variants in Trans?",
-                    "description": "For recessive heterozygous only",
                     "type": "string"
                 },
                 "variants": {
