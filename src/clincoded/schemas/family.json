@@ -378,6 +378,7 @@
                 },
                 "recessiveZygosity": {
                     "title": "Recessive Variant Zygosity",
+                    "description": "For recessive only",
                     "type": "string"
                 },
                 "variants": {
