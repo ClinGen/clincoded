@@ -328,6 +328,7 @@
                 },
                 "numberOfAffectedWithGenotype": {
                     "title": "Number of AFFECTED Individuals with Genotype",
+                    "description": "For dominant and recessive",
                     "type": "number"
                 },
                 "numberOfUnaffectedWithoutBiallelicGenotype": {
@@ -361,7 +362,7 @@
                     "description": "Is there a LOD score published?",
                     "type": "boolean"
                 },
-                "pubishedLodScore": {
+                "publishedLodScore": {
                     "title": "Value of Published LOD Score",
                     "description": "Entered by user.",
                     "type": "number"
