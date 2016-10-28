@@ -28,6 +28,7 @@ require('./family_submit');
 require('./individual_curation');
 require('./individual_submit');
 require('./case_control_curation');
+require('./case_control_submit');
 require('./experimental_curation');
 require('./experimental_submit');
 require('./variant_curation');
