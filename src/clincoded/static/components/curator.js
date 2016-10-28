@@ -570,7 +570,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of case-control renders
         if (annotation && annotation.caseControlStudies) {
             let caseControlObj = annotation.caseControlStudies.map(caseControl => {
-                return <div key={caseControl.uuid}>{renderGroup(caseControl, gdm, annotation, curatorMatch)}</div>;
+                return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch)}</div>;
             });
             caseControlRenders = caseControlRenders.concat(caseControlObj);
         }
@@ -774,6 +774,30 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             : null}
             <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+        </div>
+    );
+};
+
+// Render a case-control in the curator palette.
+var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
+    return (
+        <div className="panel-evidence-group">
+            <h5><span className="title-ellipsis dotted" title={caseControl.label}>{caseControl.label}</span></h5>
+            <div className="evidence-curation-info">
+                {caseControl.submitted_by ?
+                    <p className="evidence-curation-info">{caseControl.submitted_by.title}</p>
+                : null}
+                <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            {/* <a href={'/case-control/' + caseControl.uuid} title="View group in a new tab">View</a> */}
+            {curatorMatch ? <span><a href={
+                '/case-control-curation/?editsc&gdm=' + gdm.uuid +
+                '&evidence=' + annotation.uuid +
+                '&casecontrol=' + caseControl.uuid +
+                '&evidencescore=' + caseControl.scores[0].uuid +
+                '&casecohort=' + caseControl.caseCohort.uuid +
+                '&controlcohort=' + caseControl.controlCohort.uuid
+            } title="Edit this case-control">Edit</a></span> : null}
         </div>
     );
 };
@@ -1466,6 +1490,14 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenProvisionalVariant(obj);
                 break;
 
+            case 'evidenceScore':
+                flat = flattenEvidenceScore(obj);
+                break;
+
+            case 'caseControl':
+                flat = flattenCaseControl(obj);
+                break;
+
             case 'interpretation':
                 flat = flattenInterpretation(obj);
                 break;
@@ -1537,6 +1569,13 @@ function flattenAnnotation(annotation) {
         });
     }
 
+    // Flatten caseControlStudies
+    if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
+        flat.caseControlStudies = annotation.caseControlStudies.map(function(data) {
+            return data['@id'];
+        });
+    }
+
     return flat;
 }
 
@@ -1544,7 +1583,8 @@ function flattenAnnotation(annotation) {
 var groupSimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
     "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "totalNumberIndividuals", "numberOfIndividualsWithFamilyInformation",
     "numberOfIndividualsWithoutFamilyInformation", "numberOfIndividualsWithVariantInCuratedGene", "numberOfIndividualsWithoutVariantInCuratedGene",
-    "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created"
+    "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created", "numberWithVariant", "numberAllGenotypedSequenced",
+    "alleleFrequency"
 ];
 
 function flattenGroup(group) {
@@ -1819,6 +1859,45 @@ var provisionalVariantSimpleProps = [
 
 function flattenProvisionalVariant(provisional_variant) {
     var flat = cloneSimpleProps(provisional_variant, provisionalVariantSimpleProps);
+
+    return flat;
+}
+
+
+var evidenceScoreSimpleProps = [
+    "score", "evidenceType"
+];
+
+function flattenEvidenceScore(evidencescore) {
+    var flat = cloneSimpleProps(evidencescore, evidenceScoreSimpleProps);
+
+    return flat;
+}
+
+
+var caseControlSimpleProps = [
+    "label", "studyType", "detectionMethod", "statisticalValues", "pValue", "confidenceIntervalFrom", "confidenceIntervalTo",
+    "diseaseHistoryEvaluated", "demographicInfoMatched", "geneticAncestryMatched", "factorOfGeneticAncestryNotMatched",
+    "factorOfDemographicInfoMatched", "differInVariables", "explanationForDemographicMatched", "explanationForDiseaseHistoryEvaluation",
+    "explanationForGeneticAncestryNotMatched", "comments", "date_created"
+];
+
+function flattenCaseControl(casecontrol) {
+    var flat = cloneSimpleProps(casecontrol, caseControlSimpleProps);
+
+    if (casecontrol.caseCohort) {
+        flat.caseCohort = casecontrol.caseCohort['@id'];
+    }
+
+    if (casecontrol.controlCohort) {
+        flat.controlCohort = casecontrol.controlCohort['@id'];
+    }
+
+    if (casecontrol.scores && casecontrol.scores.length) {
+        flat.scores = casecontrol.scores.map(function(score) {
+            return score['@id'];
+        });
+    }
 
     return flat;
 }
