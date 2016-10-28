@@ -320,6 +320,10 @@ const CaseControlCuration = React.createClass({
                     this.setFormErrors('caseCohort_orphanetId', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
+                    /*****************************************************/
+                    /* Case Group 'Additional Information' form field    */
+                    /* Handle gene(s) input values                       */
+                    /*****************************************************/
                     if (caseCohort_geneSymbols && caseCohort_geneSymbols.length) {
                         // At least one gene symbol entered; search the DB for them.
                         searchStr = '/search/?type=gene&' + caseCohort_geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
@@ -339,8 +343,36 @@ const CaseControlCuration = React.createClass({
                         // No genes entered; just pass null to the next then
                         return Promise.resolve(null);
                     }
-                }).then(data => {
-                    // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
+                }).then(case_genes => {
+                    /*****************************************************/
+                    /* Control Group 'Additional Information' form field */
+                    /* Handle gene(s) input values                       */
+                    /*****************************************************/
+                    if (controlCohort_geneSymbols && controlCohort_geneSymbols.length) {
+                        // At least one gene symbol entered; search the DB for them.
+                        searchStr = '/search/?type=gene&' + controlCohort_geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+                        return this.getRestData(searchStr).then(genes => {
+                            if (genes['@graph'].length === controlCohort_geneSymbols.length) {
+                                // Successfully retrieved all genes
+                                controlCohort_groupGenes = genes;
+                                return Promise.resolve(genes);
+                            } else {
+                                this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                var missingGenes = _.difference(controlCohort_geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
+                                this.setFormErrors('controlCohort_otherGeneVariants', missingGenes.join(', ') + ' not found');
+                                throw genes;
+                            }
+                        });
+                    } else {
+                        // No genes entered; just pass null to the next then
+                        return Promise.resolve(null);
+                    }
+                }).then(control_genes => {
+                    /*****************************************************/
+                    /* Case Group 'Additional Information' form field    */
+                    /* Handle 'Add any other PMID(s) that have evidence  */
+                    /* about this same Group' list of PMIDs              */
+                    /*****************************************************/
                     if (caseCohort_pmids && caseCohort_pmids.length) {
                         // User entered at least one PMID
                         searchStr = '/search/?type=article&' + caseCohort_pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
@@ -386,6 +418,68 @@ const CaseControlCuration = React.createClass({
                                                 articles['@graph'].push(data[dataIndex]['@graph'][0]);
                                             }
                                             caseCohort_groupArticles = articles;
+                                            return Promise.resolve(data);
+                                        });
+                                    }
+                                    return Promise(articles);
+                                });
+                            }
+                        });
+                    } else {
+                        // No PMIDs entered; just pass null to the next then
+                        return Promise.resolve(null);
+                    }
+                }).then(case_pmids => {
+                    /*****************************************************/
+                    /* Control Group 'Additional Information' form field */
+                    /* Handle 'Add any other PMID(s) that have evidence  */
+                    /* about this same Group' list of PMIDs              */
+                    /*****************************************************/
+                    if (controlCohort_pmids && controlCohort_pmids.length) {
+                        // User entered at least one PMID
+                        searchStr = '/search/?type=article&' + controlCohort_pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
+                        return this.getRestData(searchStr).then(articles => {
+                            if (articles['@graph'].length === controlCohort_pmids.length) {
+                                // Successfully retrieved all PMIDs, so just set groupArticles and return
+                                controlCohort_groupArticles = articles;
+                                return Promise.resolve(articles);
+                            } else {
+                                // some PMIDs were not in our db already
+                                // generate list of PMIDs and pubmed URLs for those PMIDs
+                                var missingPmids = _.difference(controlCohort_pmids, articles['@graph'].map(function(article) { return article.pmid; }));
+                                var missingPmidsUrls = [];
+                                for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
+                                    missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
+                                }
+                                // get the XML for the missing PMIDs
+                                return this.getRestDatasXml(missingPmidsUrls).then(xml => {
+                                    var newArticles = [];
+                                    var invalidPmids = [];
+                                    var tempArticle;
+                                    // loop through the resulting XMLs and parsePubmed them
+                                    for (var xmlIndex = 0; xmlIndex < xml.length; xmlIndex++) {
+                                        tempArticle = parsePubmed(xml[xmlIndex]);
+                                        // check to see if Pubmed actually had an entry for the PMID
+                                        if ('pmid' in tempArticle) {
+                                            newArticles.push(tempArticle);
+                                        } else {
+                                            // PMID was not found at Pubmed
+                                            invalidPmids.push(missingPmids[xmlIndex]);
+                                        }
+                                    }
+                                    // if there were invalid PMIDs, throw an error with a list of them
+                                    if (invalidPmids.length > 0) {
+                                        this.setState({submitBusy: false}); // submit error; re-enable submit button
+                                        this.setFormErrors('controlCohort_otherPmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        throw invalidPmids;
+                                    }
+                                    // otherwise, post the valid PMIDs
+                                    if (newArticles.length > 0) {
+                                        return this.postRestDatas('/articles', newArticles).then(data => {
+                                            for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+                                                articles['@graph'].push(data[dataIndex]['@graph'][0]);
+                                            }
+                                            controlCohort_groupArticles = articles;
                                             return Promise.resolve(data);
                                         });
                                     }
