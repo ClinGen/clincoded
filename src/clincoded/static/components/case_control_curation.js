@@ -11,7 +11,7 @@ import * as CaseControlEvalScore from './case_control/evaluation_score';
 import * as CuratorHistory from './curator_history';
 
 import { RestMixin } from './rest';
-import { queryKeyValue, country_codes, external_url_map, curator_page } from './globals';
+import { queryKeyValue, country_codes, external_url_map, curator_page, history_views } from './globals';
 import { Form, FormMixin, Input, InputMixin } from '../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { parsePubmed } from '../libs/parse-pubmed';
@@ -1057,6 +1057,29 @@ const CaseControlCuration = React.createClass({
 });
 
 curator_page.register(CaseControlCuration, 'curator_page', 'case-control-curation');
+
+// Display a history item for adding a group
+var CaseControlAddHistory = React.createClass({
+    render: function() {
+        var history = this.props.history;
+        var caseControl = history.primary;
+        var gdm = history.meta.caseControl.gdm;
+        var article = history.meta.caseControl.article;
+
+        return (
+            <div>
+                Group <a href={caseControl['@id']}>{caseControl.label}</a>
+                <span> added to </span>
+                <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+                <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+                <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
+                <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+            </div>
+        );
+    }
+});
+
+history_views.register(CaseControlAddHistory, 'caseControl', 'add');
 
 // Case-Control Name above other group curation panels.
 // Call with .call(this) to run in the same context as the calling component.
