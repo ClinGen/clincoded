@@ -100,5 +100,11 @@
         "title": "Case-Control Curation",
         "status": "released",
         "uuid": "e5e7bda0-98fb-46ad-9b29-42be70076f9b"
+    },
+    {
+        "name": "case-control-submit",
+        "title": "Case Control Submit Results",
+        "status": "released",
+        "uuid": "7827b383-efdd-458e-953b-6e59f50fb778"
     }
 ]
