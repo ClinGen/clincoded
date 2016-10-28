@@ -41,9 +41,13 @@ const CaseControlCuration = React.createClass({
             gdm: null, // GDM object given in UUID
             annotation: null, // Annotation object given in UUID
             caseControl: null,
+            caseControlUuid: null,
             evidenceScore: null,
+            evidenceScoreUuid: null,
             caseGroup: null,
+            caseGroupUuid: null,
             controlGroup: null,
+            controlGroupUuid: null,
             caseControlName: null,
             caseGroupName: null,
             controlGroupName: null,
@@ -67,12 +71,13 @@ const CaseControlCuration = React.createClass({
     // Load objects from query string into the state variables. Must have already parsed the query string
     // and set the queryValues property of this React class.
     loadData() {
+
+        let caseControlUuid = this.queryValues.caseControlUuid ? this.queryValues.caseControlUuid : queryKeyValue('casecontrol', this.props.href);
+        let evidenceScoreUuid = this.queryValues.evidenceScoreUuid ? this.queryValues.evidenceScoreUuid : queryKeyValue('evidencescore', this.props.href);
+        let caseGroupUuid = this.queryValues.caseGroupUuid ? this.queryValues.caseGroupUuid : queryKeyValue('casecohort', this.props.href);
+        let controlGroupUuid = this.queryValues.controlGroupUuid ? this.queryValues.controlGroupUuid : queryKeyValue('controlcohort', this.props.href);
         let gdmUuid = this.queryValues.gdmUuid;
         let annotationUuid = this.queryValues.annotationUuid;
-        let caseControlUuid = this.queryValues.caseControlUuid;
-        let caseGroupUuid = this.queryValues.caseGroupUuid;
-        let controlGroupUuid = this.queryValues.controlGroupUuid;
-        let evidenceScoreUuid = this.queryValues.evidenceScoreUuid;
 
 
         // Make an array of URIs to query the database. Don't include any that didn't include a query string.
@@ -98,10 +103,10 @@ const CaseControlCuration = React.createClass({
                         break;
 
                     case 'group':
-                        if (data['groupType'] === 'Case cohort') {
+                        if (data['groupType'][0] === 'Case cohort') {
                             stateObj.caseGroup = data;
                         }
-                        if (data['groupType'] === 'Control cohort') {
+                        if (data['groupType'][0] === 'Control cohort') {
                             stateObj.controlGroup = data;
                         }
                         break;
@@ -136,6 +141,9 @@ const CaseControlCuration = React.createClass({
             if (stateObj.controlGroup) {
                 stateObj.controlCohort_genotyping2Disabled = !(stateObj.controlGroup.method && stateObj.controlGroup.method.genotypingMethods && stateObj.controlGroup.method.genotypingMethods.length);
                 this.setState({controlGroupName: stateObj.controlGroup.label});
+            }
+            if (stateObj.caseControl) {
+                this.setState({caseControlName: stateObj.caseControl.label});
             }
 
             // Set all the state variables we've collected
@@ -178,27 +186,37 @@ const CaseControlCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            var groupDiseases, groupGenes, groupArticles;
-            var savedGroup;
-            var formError = false;
+            let groupDiseases, caseCohort_groupGenes, caseCohort_groupArticles;
+            let controlCohort_groupGenes, controlCohort_groupArticles;
+            let savedCaseControl;
+            let formError = false;
+
+            /***********************************************************************/
+            /* Prepare data objects, either from pre-existing data or from scratch */
+            /***********************************************************************/
+            let newCaseControl = this.state.caseControl ? curator.flatten(this.state.caseControl) : {};
+            let newCaseGroup = this.state.caseGroup ? curator.flatten(this.state.caseGroup) : {};
+            let newControlGroup = this.state.controlGroup ? curator.flatten(this.state.controlGroup) : {};
+            let newEvidenceScore = this.state.evidenceScore ? curator.flatten(this.state.evidenceScore) : {};
 
             // Parse comma-separated list fields
-            var orphaIds = curator.capture.orphas(this.getFormValue('caseCohort_orphanetId'));
-            var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
-            var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('caseCohort_hpoId'));
-            var hpotext = curator.capture.hpoids(this.getFormValue('caseCohort_phenoTerms'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('caseCohort_nothpoId'));
+            /**********************************/
+            /* Only applicable to Case Cohort */
+            /**********************************/
+            let orphaIds = curator.capture.orphas(this.getFormValue('caseCohort_orphanetId'));
+            let hpoids = curator.capture.hpoids(this.getFormValue('caseCohort_hpoId'));
+            let hpotext = curator.capture.hpoids(this.getFormValue('caseCohort_phenoTerms'));
+            let nothpoids = curator.capture.hpoids(this.getFormValue('caseCohort_nothpoId'));
 
-            var valid_orphaId = false;
-            var valid_phoId = false;
+            let valid_orphaId = false,
+                valid_phoId = false;
+
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
                 formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
-            }
-            else if (orphaIds && orphaIds.length && !_(orphaIds).any(function(id) { return id === null; })) {
+                this.setFormErrors('caseCohort_orphanetId', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+            } else if (orphaIds && orphaIds.length && !_(orphaIds).any(function(id) { return id === null; })) {
                 valid_orphaId = true;
             }
 
@@ -206,9 +224,8 @@ const CaseControlCuration = React.createClass({
             if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
                 // HPOID list is bad
                 formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-            else if (hpoids && hpoids.length && !_(hpoids).any(function(id) { return id === null; })) {
+                this.setFormErrors('caseCohort_hpoId', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            } else if (hpoids && hpoids.length && !_(hpoids).any(function(id) { return id === null; })) {
                 valid_phoId = true;
             }
 
@@ -216,32 +233,57 @@ const CaseControlCuration = React.createClass({
             if (!formError && !valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
-                this.setFormErrors('orphanetid', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
-                this.setFormErrors('hpoid', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
-                this.setFormErrors('phenoterms', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
+                this.setFormErrors('caseCohort_orphanetId', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
+                this.setFormErrors('caseCohort_hpoId', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
+                this.setFormErrors('caseCohort_phenoTerms', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
             }
 
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (geneSymbols && geneSymbols.length && _(geneSymbols).any(function(id) { return id === null; })) {
-                // Gene symbol list is bad
-                formError = true;
-                this.setFormErrors('othergenevariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
-                // PMID list is bad
-                formError = true;
-                this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
+            // Check 'NOT Phenotype(s)' HPO ID format
             if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
                 // NOT HPOID list is bad
                 formError = true;
-                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+                this.setFormErrors('caseCohort_nothpoId', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
 
+            /*****************************************************/
+            /* Applicable to both Case Cohort and Control Cohort */
+            /*****************************************************/
+            let caseCohort_geneSymbols = curator.capture.genes(this.getFormValue('caseCohort_otherGeneVariants')),
+                controlCohort_geneSymbols = curator.capture.genes(this.getFormValue('controlCohort_otherGeneVariants'));
+            let caseCohort_pmids = curator.capture.pmids(this.getFormValue('caseCohort_otherPmids')),
+                controlCohort_pmids = curator.capture.pmids(this.getFormValue('controlCohort_otherPmids'));
+
+            // Check that all gene symbols (both Case Cohort and Control Cohort) have the proper format (will check for existence later)
+            if (caseCohort_geneSymbols && caseCohort_geneSymbols.length && _(caseCohort_geneSymbols).any(function(id) { return id === null; })) {
+                // Gene symbol list is bad
+                formError = true;
+                this.setFormErrors('caseCohort_otherGeneVariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
+            }
+            if (controlCohort_geneSymbols && controlCohort_geneSymbols.length && _(controlCohort_geneSymbols).any(function(id) { return id === null; })) {
+                // Gene symbol list is bad
+                formError = true;
+                this.setFormErrors('controlCohort_otherGeneVariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
+            }
+
+            // Check that all pmids (both Case Cohort and Control Cohort) have the proper format (will check for existence later)
+            if (caseCohort_pmids && caseCohort_pmids.length && _(caseCohort_pmids).any(function(id) { return id === null; })) {
+                // PMID list is bad
+                formError = true;
+                this.setFormErrors('caseCohort_otherPmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
+            }
+            if (controlCohort_pmids && controlCohort_pmids.length && _(controlCohort_pmids).any(function(id) { return id === null; })) {
+                // PMID list is bad
+                formError = true;
+                this.setFormErrors('controlCohort_otherPmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
+            }
+
+            /*****************************************************/
+            /* 1) Validate disease(s) given the Orphanet IDs     */
+            /* 2) 'then' #1 returning gene data by symbols       */
+            /* 3) 'then' #2 returning articles by pmids          */
+            /* 4) 'then' #3 get Group object property values     */
+            /*    and put/post the data object to 'groups'       */
+            /*****************************************************/
             if (!formError) {
                 // Build search string from given ORPHA IDs
                 var searchStr;
@@ -264,7 +306,7 @@ const CaseControlCuration = React.createClass({
                             // Get array of missing Orphanet IDs
                             this.setState({submitBusy: false}); // submit error; re-enable submit button
                             var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                            this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
+                            this.setFormErrors('caseCohort_orphanetId', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
                             throw diseases;
                         }
                     }
@@ -275,21 +317,21 @@ const CaseControlCuration = React.createClass({
                 }, e => {
                     // The given orpha IDs couldn't be retrieved for some reason.
                     this.setState({submitBusy: false}); // submit error; re-enable submit button
-                    this.setFormErrors('orphanetid', 'The given diseases not found');
+                    this.setFormErrors('caseCohort_orphanetId', 'The given diseases not found');
                     throw e;
                 }).then(diseases => {
-                    if (geneSymbols && geneSymbols.length) {
+                    if (caseCohort_geneSymbols && caseCohort_geneSymbols.length) {
                         // At least one gene symbol entered; search the DB for them.
-                        searchStr = '/search/?type=gene&' + geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
+                        searchStr = '/search/?type=gene&' + caseCohort_geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
                         return this.getRestData(searchStr).then(genes => {
-                            if (genes['@graph'].length === geneSymbols.length) {
+                            if (genes['@graph'].length === caseCohort_geneSymbols.length) {
                                 // Successfully retrieved all genes
-                                groupGenes = genes;
+                                caseCohort_groupGenes = genes;
                                 return Promise.resolve(genes);
                             } else {
                                 this.setState({submitBusy: false}); // submit error; re-enable submit button
-                                var missingGenes = _.difference(geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
-                                this.setFormErrors('othergenevariants', missingGenes.join(', ') + ' not found');
+                                var missingGenes = _.difference(caseCohort_geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
+                                this.setFormErrors('caseCohort_otherGeneVariants', missingGenes.join(', ') + ' not found');
                                 throw genes;
                             }
                         });
@@ -299,18 +341,18 @@ const CaseControlCuration = React.createClass({
                     }
                 }).then(data => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
-                    if (pmids && pmids.length) {
+                    if (caseCohort_pmids && caseCohort_pmids.length) {
                         // User entered at least one PMID
-                        searchStr = '/search/?type=article&' + pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
+                        searchStr = '/search/?type=article&' + caseCohort_pmids.map(function(pmid) { return 'pmid=' + pmid; }).join('&');
                         return this.getRestData(searchStr).then(articles => {
-                            if (articles['@graph'].length === pmids.length) {
+                            if (articles['@graph'].length === caseCohort_pmids.length) {
                                 // Successfully retrieved all PMIDs, so just set groupArticles and return
-                                groupArticles = articles;
+                                caseCohort_groupArticles = articles;
                                 return Promise.resolve(articles);
                             } else {
                                 // some PMIDs were not in our db already
                                 // generate list of PMIDs and pubmed URLs for those PMIDs
-                                var missingPmids = _.difference(pmids, articles['@graph'].map(function(article) { return article.pmid; }));
+                                var missingPmids = _.difference(caseCohort_pmids, articles['@graph'].map(function(article) { return article.pmid; }));
                                 var missingPmidsUrls = [];
                                 for (var missingPmidsIndex = 0; missingPmidsIndex < missingPmids.length; missingPmidsIndex++) {
                                     missingPmidsUrls.push(external_url_map['PubMedSearch']  + missingPmids[missingPmidsIndex]);
@@ -334,7 +376,7 @@ const CaseControlCuration = React.createClass({
                                     // if there were invalid PMIDs, throw an error with a list of them
                                     if (invalidPmids.length > 0) {
                                         this.setState({submitBusy: false}); // submit error; re-enable submit button
-                                        this.setFormErrors('otherpmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
+                                        this.setFormErrors('caseCohort_otherPmids', 'PMID(s) ' + invalidPmids.join(', ') + ' not found');
                                         throw invalidPmids;
                                     }
                                     // otherwise, post the valid PMIDs
@@ -343,7 +385,7 @@ const CaseControlCuration = React.createClass({
                                             for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
                                                 articles['@graph'].push(data[dataIndex]['@graph'][0]);
                                             }
-                                            groupArticles = articles;
+                                            caseCohort_groupArticles = articles;
                                             return Promise.resolve(data);
                                         });
                                     }
@@ -356,157 +398,366 @@ const CaseControlCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // Now make the new group. If we're editing the form, first copy the old group
-                    // to make sure we have everything not from the form.
-                    var newGroup = this.state.group ? curator.flatten(this.state.group) : {};
-                    newGroup.label = this.getFormValue('groupname');
+                    let prefix = 'caseCohort_';
 
+                    /*****************************************************/
+                    /* Set Group Type                                    */
+                    /*****************************************************/
+                    newCaseGroup.groupType = ['Case cohort'];
+
+                    /*****************************************************/
+                    /* Group Label form field                            */
+                    /* Get input value for group property                */
+                    /*****************************************************/
+                    newCaseGroup.label = this.getFormValue(prefix + 'groupName');
+
+                    /*****************************************************/
+                    /* Group Method form fields                          */
+                    /* Get input values for group properties             */
+                    /* If a method object was created (at least          */
+                    /* one method field set), get its new object's       */
+                    /*****************************************************/
+                    var newMethod = methods.create.call(this, prefix);
+                    if (newMethod) {
+                        newCaseGroup.method = newMethod;
+                    }
+
+                    /*****************************************************/
+                    /* Group Common Diseases & Phenotypes form fields    */
+                    /* Get input values for group properties             */
+                    /*****************************************************/
                     // Get an array of all given disease IDs
                     if (groupDiseases) {
-                        newGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                        newCaseGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                    } else {
+                        delete newCaseGroup.commonDiagnosis;
                     }
-                    else {
-                        delete newGroup.commonDiagnosis;
-                    }
-
-                    // If a method object was created (at least one method field set), get its new object's
-                    var newMethod = methods.create.call(this);
-                    if (newMethod) {
-                        newGroup.method = newMethod;
-                    }
-
-                    // Fill in the group fields from the Common Diseases & Phenotypes panel
                     if (hpoids && hpoids.length) {
-                        newGroup.hpoIdInDiagnosis = hpoids;
+                        newCaseGroup.hpoIdInDiagnosis = hpoids;
+                    } else if (newCaseGroup.hpoIdInDiagnosis) {
+                        delete newCaseGroup.hpoIdInDiagnosis;
                     }
-                    else if (newGroup.hpoIdInDiagnosis) {
-                        delete newGroup.hpoIdInDiagnosis;
-                    }
-                    var phenoterms = this.getFormValue('phenoterms');
+                    var phenoterms = this.getFormValue(prefix + 'phenoTerms');
                     if (phenoterms) {
-                        newGroup.termsInDiagnosis = phenoterms;
-                    }
-                    else if (newGroup.termsInDiagnosis) {
-                        delete newGroup.termsInDiagnosis;
+                        newCaseGroup.termsInDiagnosis = phenoterms;
+                    } else if (newCaseGroup.termsInDiagnosis) {
+                        delete newCaseGroup.termsInDiagnosis;
                     }
                     if (nothpoids && nothpoids.length) {
-                        newGroup.hpoIdInElimination = nothpoids;
+                        newCaseGroup.hpoIdInElimination = nothpoids;
                     }
-                    phenoterms = this.getFormValue('notphenoterms');
+                    phenoterms = this.getFormValue(prefix + 'notphenoTerms');
                     if (phenoterms) {
-                        newGroup.termsInElimination = phenoterms;
+                        newCaseGroup.termsInElimination = phenoterms;
                     }
 
-                    // Fill in the group fields from the Group Demographics panel
-                    var value = this.getFormValue('malecount');
+                    /*****************************************************/
+                    /* Group Demographics form fields                    */
+                    /* Get input values for group properties             */
+                    /*****************************************************/
+                    var value = this.getFormValue(prefix + 'maleCount');
                     if (value) {
-                        newGroup.numberOfMale = parseInt(value, 10);
+                        newCaseGroup.numberOfMale = parseInt(value, 10);
                     }
-                    value = this.getFormValue('femalecount');
+                    value = this.getFormValue(prefix + 'femaleCount');
                     if (value) {
-                        newGroup.numberOfFemale = parseInt(value, 10);
+                        newCaseGroup.numberOfFemale = parseInt(value, 10);
                     }
-                    value = this.getFormValue('country');
+                    value = this.getFormValue(prefix + 'country');
                     if (value !== 'none') {
-                        newGroup.countryOfOrigin = value;
+                        newCaseGroup.countryOfOrigin = value;
                     }
-                    value = this.getFormValue('ethnicity');
+                    value = this.getFormValue(prefix + 'ethnicity');
                     if (value !== 'none') {
-                        newGroup.ethnicity = value;
+                        newCaseGroup.ethnicity = value;
                     }
-                    value = this.getFormValue('race');
+                    value = this.getFormValue(prefix + 'race');
                     if (value !== 'none') {
-                        newGroup.race = value;
+                        newCaseGroup.race = value;
                     }
-                    value = this.getFormValue('agerangetype');
+                    value = this.getFormValue(prefix + 'ageRangeType');
                     if (value !== 'none') {
-                        newGroup.ageRangeType = value + '';
+                        newCaseGroup.ageRangeType = value + '';
                     }
-                    value = this.getFormValue('agefrom');
+                    value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
-                        newGroup.ageRangeFrom = parseInt(value, 10);
+                        newCaseGroup.ageRangeFrom = parseInt(value, 10);
                     }
-                    value = this.getFormValue('ageto');
+                    value = this.getFormValue(prefix + 'ageTo');
                     if (value) {
-                        newGroup.ageRangeTo = parseInt(value, 10);
+                        newCaseGroup.ageRangeTo = parseInt(value, 10);
                     }
-                    value = this.getFormValue('ageunit');
+                    value = this.getFormValue(prefix + 'ageUnit');
                     if (value !== 'none') {
-                        newGroup.ageRangeUnit = value;
+                        newCaseGroup.ageRangeUnit = value;
                     }
 
-                    // Fill in the group fields from Group Information panel
-                    newGroup.totalNumberIndividuals = parseInt(this.getFormValue('indcount'), 10);
-                    if (this.getFormValue('indfamilycount')) newGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue('indfamilycount'), 10);
-                    if (this.getFormValue('notindfamilycount')) newGroup.numberOfIndividualsWithoutFamilyInformation = parseInt(this.getFormValue('notindfamilycount'), 10);
-                    if (this.getFormValue('indvariantgenecount')) newGroup.numberOfIndividualsWithVariantInCuratedGene = parseInt(this.getFormValue('indvariantgenecount'), 10);
-                    if (this.getFormValue('notindvariantgenecount')) newGroup.numberOfIndividualsWithoutVariantInCuratedGene = parseInt(this.getFormValue('notindvariantgenecount'), 10);
-                    if (this.getFormValue('indvariantothercount')) newGroup.numberOfIndividualsWithVariantInOtherGene = parseInt(this.getFormValue('indvariantothercount'), 10);
+                    /*****************************************************/
+                    /* Group Additional Information form fields          */
+                    /* Get input values for group properties             */
+                    /*****************************************************/
+                    // newGroup.totalNumberIndividuals = parseInt(this.getFormValue('indcount'), 10); /* Not needed in Case-Control */
+                    if (this.getFormValue(prefix + 'indFamilyCount')) newCaseGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue(prefix + 'indFamilyCount'), 10);
+                    // if (this.getFormValue('notindfamilycount')) newGroup.numberOfIndividualsWithoutFamilyInformation = parseInt(this.getFormValue('notindfamilycount'), 10);
+                    // if (this.getFormValue(prefix + 'otherGeneVariants')) newCaseGroup.numberOfIndividualsWithVariantInCuratedGene = parseInt(this.getFormValue(prefix + 'otherGeneVariants'), 10);
+                    // if (this.getFormValue('notindvariantgenecount')) newGroup.numberOfIndividualsWithoutVariantInCuratedGene = parseInt(this.getFormValue('notindvariantgenecount'), 10);
+                    if (this.getFormValue(prefix + 'indVariantOtherCount')) newCaseGroup.numberOfIndividualsWithVariantInOtherGene = parseInt(this.getFormValue(prefix + 'indVariantOtherCount'), 10);
 
                     // Add array of 'Other genes found to have variants in them'
-                    if (groupGenes) {
-                        newGroup.otherGenes = groupGenes['@graph'].map(function(article) { return article['@id']; });
+                    if (caseCohort_groupGenes) {
+                        newCaseGroup.otherGenes = caseCohort_groupGenes['@graph'].map(function(article) { return article['@id']; });
                     }
 
                     // Add array of other PMIDs
-                    if (groupArticles) {
-                        newGroup.otherPMIDs = groupArticles['@graph'].map(function(article) { return article['@id']; });
+                    if (caseCohort_groupArticles) {
+                        newCaseGroup.otherPMIDs = caseCohort_groupArticles['@graph'].map(function(article) { return article['@id']; });
                     }
 
-                    value = this.getFormValue('additionalinfogroup');
+                    value = this.getFormValue(prefix + 'additionalInfoGroup');
                     if (value) {
-                        newGroup.additionalInformation = value;
+                        newCaseGroup.additionalInformation = value;
                     }
 
-                    // Either update or create the group object in the DB
-                    if (this.state.group) {
+                    /*****************************************************/
+                    /* Group Power form fields                           */
+                    /* Get input values for group properties             */
+                    /* Case/Control Allele Frequency is calculated       */
+                    /*****************************************************/
+                    if (this.getFormValue(prefix + 'numGroupVariant')) newCaseGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
+                    if (this.getFormValue(prefix + 'numGroupGenotyped')) newCaseGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
+                    if (this.getFormValue(prefix + 'calcAlleleFreq')) newCaseGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
+
+                    /******************************************************/
+                    /* Either update or create the group object in the DB */
+                    /******************************************************/
+                    if (this.state.caseGroup) {
                         // We're editing a group. PUT the new group object to the DB to update the existing one.
-                        return this.putRestData('/groups/' + this.state.group.uuid, newGroup).then(data => {
+                        return this.putRestData('/groups/' + this.state.caseGroup.uuid, newCaseGroup).then(data => {
+                            this.setState({caseGroupUuid: data['@graph'][0]['@id']});
                             return Promise.resolve(data['@graph'][0]);
                         });
                     } else {
                         // We created a group; post it to the DB
-                        return this.postRestData('/groups/', newGroup).then(data => {
+                        return this.postRestData('/groups/', newCaseGroup).then(data => {
+                            this.setState({caseGroupUuid: data['@graph'][0]['@id']});
                             return Promise.resolve(data['@graph'][0]);
                         });
                     }
-                }).then(newGroup => {
-                    savedGroup = newGroup;
-                    if (!this.state.group) {
+                }).then(newCaseCohort => {
+                    let prefix = 'controlCohort_';
+
+                    /*****************************************************/
+                    /* Set Group Type                                    */
+                    /*****************************************************/
+                    newControlGroup.groupType = ['Control cohort'];
+
+                    /*****************************************************/
+                    /* Group Label form field                            */
+                    /* Get input value for group property                */
+                    /*****************************************************/
+                    newControlGroup.label = this.getFormValue(prefix + 'groupName');
+
+                    /*****************************************************/
+                    /* Group Method form fields                          */
+                    /* Get input values for group properties             */
+                    /* If a method object was created (at least          */
+                    /* one method field set), get its new object's       */
+                    /*****************************************************/
+                    var newMethod = methods.create.call(this, prefix);
+                    if (newMethod) {
+                        newControlGroup.method = newMethod;
+                    }
+
+                    /*****************************************************/
+                    /* Group Demographics form fields                    */
+                    /* Get input values for group properties             */
+                    /*****************************************************/
+                    var value = this.getFormValue(prefix + 'maleCount');
+                    if (value) {
+                        newControlGroup.numberOfMale = parseInt(value, 10);
+                    }
+                    value = this.getFormValue(prefix + 'femaleCount');
+                    if (value) {
+                        newControlGroup.numberOfFemale = parseInt(value, 10);
+                    }
+                    value = this.getFormValue(prefix + 'country');
+                    if (value !== 'none') {
+                        newControlGroup.countryOfOrigin = value;
+                    }
+                    value = this.getFormValue(prefix + 'ethnicity');
+                    if (value !== 'none') {
+                        newControlGroup.ethnicity = value;
+                    }
+                    value = this.getFormValue(prefix + 'race');
+                    if (value !== 'none') {
+                        newControlGroup.race = value;
+                    }
+                    value = this.getFormValue(prefix + 'ageRangeType');
+                    if (value !== 'none') {
+                        newControlGroup.ageRangeType = value + '';
+                    }
+                    value = this.getFormValue(prefix + 'ageFrom');
+                    if (value) {
+                        newControlGroup.ageRangeFrom = parseInt(value, 10);
+                    }
+                    value = this.getFormValue(prefix + 'ageTo');
+                    if (value) {
+                        newControlGroup.ageRangeTo = parseInt(value, 10);
+                    }
+                    value = this.getFormValue(prefix + 'ageUnit');
+                    if (value !== 'none') {
+                        newControlGroup.ageRangeUnit = value;
+                    }
+
+                    /*****************************************************/
+                    /* Group Additional Information form fields          */
+                    /* Get input values for group properties             */
+                    /*****************************************************/
+                    if (this.getFormValue(prefix + 'indFamilyCount')) newControlGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue(prefix + 'indFamilyCount'), 10);
+                    if (this.getFormValue(prefix + 'indVariantOtherCount')) newControlGroup.numberOfIndividualsWithVariantInOtherGene = parseInt(this.getFormValue(prefix + 'indVariantOtherCount'), 10);
+
+                    // Add array of 'Other genes found to have variants in them'
+                    if (controlCohort_groupGenes) {
+                        newControlGroup.otherGenes = controlCohort_groupGenes['@graph'].map(function(article) { return article['@id']; });
+                    }
+
+                    // Add array of other PMIDs
+                    if (controlCohort_groupArticles) {
+                        newControlGroup.otherPMIDs = controlCohort_groupArticles['@graph'].map(function(article) { return article['@id']; });
+                    }
+
+                    value = this.getFormValue(prefix + 'additionalInfoGroup');
+                    if (value) {
+                        newCaseGroup.additionalInformation = value;
+                    }
+
+                    /*****************************************************/
+                    /* Group Power form fields                           */
+                    /* Get input values for group properties             */
+                    /* Case/Control Allele Frequency is calculated       */
+                    /*****************************************************/
+                    if (this.getFormValue(prefix + 'numGroupVariant')) newControlGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
+                    if (this.getFormValue(prefix + 'numGroupGenotyped')) newControlGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
+                    if (this.getFormValue(prefix + 'calcAlleleFreq')) newControlGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
+
+                    /******************************************************/
+                    /* Either update or create the group object in the DB */
+                    /******************************************************/
+                    if (this.state.controlGroup) {
+                        // We're editing a group. PUT the new group object to the DB to update the existing one.
+                        return this.putRestData('/groups/' + this.state.controlGroup.uuid, newControlGroup).then(data => {
+                            this.setState({controlGroupUuid: data['@graph'][0]['@id']});
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    } else {
+                        // We created a group; post it to the DB
+                        return this.postRestData('/groups/', newControlGroup).then(data => {
+                            this.setState({controlGroupUuid: data['@graph'][0]['@id']});
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    }
+                }).then(newControlCohort => {
+                    /*****************************************************/
+                    /* Evidence score data object                        */
+                    /*****************************************************/
+                    let newScoreObj = CaseControlEvalScore.handleScoreObj.call(this);
+                    if (newScoreObj) {
+                        newEvidenceScore = newScoreObj;
+                    }
+
+                    /*************************************************************/
+                    /* Either update or create the case-control object in the DB */
+                    /*************************************************************/
+                    if (this.state.evidenceScore) {
+                        return this.putRestData('/evidencescore/' + this.state.evidenceScore.uuid, newEvidenceScore).then(data => {
+                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    } else {
+                        return this.postRestData('/evidencescore/', newEvidenceScore).then(data => {
+                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    }
+                }).then(newScore => {
+                    /*****************************************************/
+                    /* Get Case-Control object property values           */
+                    /* and put/post the data object to 'casecontrol'     */
+                    /*****************************************************/
+                    let newCaseControlObj = CaseControlEvalScore.handleCaseControlObj.call(this);
+                    if (newCaseControlObj) {
+                        newCaseControl = newCaseControlObj;
+                    }
+
+                    /*****************************************************/
+                    /* Case-Control Label form field                     */
+                    /* Append input value to other group properties      */
+                    /*****************************************************/
+                    newCaseControl.label = this.getFormValue('caseControlName');
+
+                    /*****************************************************/
+                    /* Append caseCohort, controlCohort & evidenceScore  */
+                    /* objects to caseControlStudies object              */
+                    /*****************************************************/
+                    if (this.state.caseGroupUuid) {
+                        newCaseControl.caseCohort = this.state.caseGroupUuid;
+                    }
+                    if (this.state.controlGroupUuid) {
+                        newCaseControl.controlCohort = this.state.controlGroupUuid;
+                    }
+                    if (this.state.evidenceScoreUuid) {
+                        newCaseControl.scores = [this.state.evidenceScoreUuid];
+                    }
+
+                    /*************************************************************/
+                    /* Either update or create the case-control object in the DB */
+                    /*************************************************************/
+                    if (this.state.caseControl) {
+                        return this.putRestData('/casecontrol/' + this.state.caseControl.uuid, newCaseControl).then(data => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    } else {
+                        return this.postRestData('/casecontrol/', newCaseControl).then(data => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    }
+                }).then(newCaseControl => {
+                    savedCaseControl = newCaseControl;
+                    if (!this.state.caseControl) {
                         return this.getRestData('/evidence/' + this.state.annotation.uuid, null, true).then(freshAnnotation => {
                             // Get a flattened copy of the fresh annotation object and put our new group into it,
                             // ready for writing.
                             var annotation = curator.flatten(freshAnnotation);
-                            if (!annotation.groups) {
-                                annotation.groups = [];
+                            if (!annotation.caseControlStudies) {
+                                annotation.caseControlStudies = [];
                             }
-                            annotation.groups.push(newGroup['@id']);
+                            annotation.caseControlStudies.push(newCaseControl['@id']);
 
                             // Post the modified annotation to the DB
                             return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                return Promise.resolve({group: newGroup, annotation: data['@graph'][0]});
+                                return Promise.resolve({caseControl: newCaseControl, annotation: data['@graph'][0]});
                             });
                         });
                     }
 
                     // Modifying an existing group; don't need to modify the annotation
-                    return Promise.resolve({group: newGroup, annotation: null});
+                    return Promise.resolve({caseControl: newCaseControl, annotation: null});
                 }).then(data => {
                     var meta;
 
-                    // Record history of the group creation
+                    // Record history of the Case-Control creation
                     if (data.annotation) {
                         // Record the creation of a new group
                         meta = {
-                            group: {
+                            caseControl: {
                                 gdm: this.state.gdm['@id'],
                                 article: this.state.annotation.article['@id']
                             }
                         };
-                        this.recordHistory('add', data.group, meta);
+                        this.recordHistory('add', data.caseControl, meta);
                     } else {
                         // Record the modification of an existing group
-                        this.recordHistory('modify', data.group);
+                        this.recordHistory('modify', data.caseControl);
                     }
 
                     // Navigate to Curation Central or Family Submit page, depending on previous page
@@ -514,7 +765,7 @@ const CaseControlCuration = React.createClass({
                     if (this.queryValues.editShortcut) {
                         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
                     } else {
-                        this.context.navigate('/group-submit/?gdm=' + this.state.gdm.uuid + '&group=' + savedGroup.uuid + '&evidence=' + this.state.annotation.uuid);
+                        this.context.navigate('/case-control-submit/?gdm=' + this.state.gdm.uuid + '&casecontrol=' + savedCaseControl.uuid + '&evidence=' + this.state.annotation.uuid);
                     }
                 }).catch(function(e) {
                     console.log('GROUP CREATION ERROR=: %o', e);
@@ -523,6 +774,7 @@ const CaseControlCuration = React.createClass({
         }
     },
 
+    // Method to render header labels for Case-Control, Case Cohort, & Control Cohort
     renderLabels(caseControlName, caseGroupName, controlGroupName) {
         if (caseControlName && caseGroupName && controlGroupName) {
             return (
@@ -563,8 +815,10 @@ const CaseControlCuration = React.createClass({
         let gdm = this.state.gdm;
         let annotation = this.state.annotation;
         let pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
-        let caseControl = this.state.caseControl, evidenceScore = this.state.evidenceScore;
-        let caseGroup = this.state.caseGroup, controlGroup = this.state.controlGroup, group = this.state.group;
+        let caseControl = this.state.caseControl,
+            evidenceScore = this.state.evidenceScore,
+            caseGroup = this.state.caseGroup,
+            controlGroup = this.state.controlGroup;
         let caseGroupMethod = (caseGroup && caseGroup.method && Object.keys(caseGroup.method).length) ? caseGroup.method : {};
         let controlGroupMethod = (controlGroup && controlGroup.method && Object.keys(controlGroup.method).length) ? controlGroup.method : {};
         let submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
@@ -573,21 +827,23 @@ const CaseControlCuration = React.createClass({
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.queryValues.caseGroupUuid = queryKeyValue('caseGroup', this.props.href);
-        this.queryValues.controlGroupUuid = queryKeyValue('controlGroup', this.props.href);
+        this.queryValues.caseControlUuid = queryKeyValue('casecontrol', this.props.href);
+        this.queryValues.evidenceScoreUuid = queryKeyValue('evidencescore', this.props.href);
+        this.queryValues.caseGroupUuid = queryKeyValue('casecohort', this.props.href);
+        this.queryValues.controlGroupUuid = queryKeyValue('controlcohort', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === '';
 
         // define where pressing the Cancel button should take you to
         var cancelUrl;
         if (gdm) {
-            cancelUrl = (!this.queryValues.groupUuid || this.queryValues.editShortcut) ?
+            cancelUrl = (!this.queryValues.caseControlUuid || this.queryValues.editShortcut) ?
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
-                : '/group-submit/?gdm=' + gdm.uuid + (group ? '&group=' + group.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
+                : '/case-control-submit/?gdm=' + gdm.uuid + (caseControl ? '&casecontrol=' + caseControl.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
 
         return (
             <div>
-                {(!this.queryValues.groupUuid || group) ?
+                {(!this.queryValues.caseControlUuid || caseControl) ?
                     <div>
                         <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} pmid={pmid} />
                         <div className="container">
@@ -597,7 +853,7 @@ const CaseControlCuration = React.createClass({
                                 </div>
                             : null}
                             <div className="viewer-titles">
-                                <h1>{(group ? 'Edit' : 'Curate') + ' Case-Control Evidence'}</h1>
+                                <h1>{(caseControl ? 'Edit' : 'Curate') + ' Case-Control Evidence'}</h1>
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     <span> &#x2F;&#x2F; {this.renderLabels(this.state.caseControlName, this.state.caseGroupName, this.state.controlGroupName)}</span>
@@ -645,8 +901,8 @@ const CaseControlCuration = React.createClass({
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
-                                            {group ?
-                                                <DeleteButton gdm={gdm} parent={annotation} item={group} pmid={pmid} />
+                                            {caseControl ?
+                                                <DeleteButton gdm={gdm} parent={annotation} item={caseControl} pmid={pmid} />
                                             : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
@@ -666,11 +922,11 @@ curator_page.register(CaseControlCuration, 'curator_page', 'case-control-curatio
 // Case-Control Name above other group curation panels.
 // Call with .call(this) to run in the same context as the calling component.
 function CaseControlName() {
-    const group = this.state.group;
+    const caseControl = this.state.caseControl;
 
     return (
         <div className="row section section-label">
-            <Input type="text" ref="caseControlName" label="Case-Control Label" value={group && group.label} maxLength="60" handleChange={this.handleChange}
+            <Input type="text" ref="caseControlName" label="Case-Control Label" value={caseControl && caseControl.label} maxLength="60" handleChange={this.handleChange}
                 error={this.getFormError('caseControlName')} clearError={this.clrFormErrors.bind(null, 'caseControlName')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
         </div>
@@ -680,15 +936,16 @@ function CaseControlName() {
 // Group Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupName(groupType) {
-    const group = this.state.group;
-    let label, groupName;
+    let label, groupName, group;
     if (groupType === 'case-cohort') {
         label = 'Case Cohort Label:';
         groupName = 'caseCohort_groupName';
+        group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
         label = 'Control Cohort Label:';
         groupName = 'controlCohort_groupName';
+        group = this.state.controlGroup;
     }
 
     return (
@@ -704,16 +961,17 @@ function GroupName(groupType) {
 // Common diseases group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupCommonDiseases(groupType) {
-    const group = this.state.group;
     let orphanetidVal, hpoidVal, nothpoidVal;
     let inputDisabled = (groupType === 'control-cohort') ? true : false;
-    let orphanetId, hpoId, phenoTerms, nothpoId, notphenoTerms;
+    let orphanetId, hpoId, phenoTerms, nothpoId, notphenoTerms, group, cohortLabel;
     if (groupType === 'case-cohort') {
         orphanetId = 'caseCohort_orphanetId';
         hpoId = 'caseCohort_hpoId';
         phenoTerms = 'caseCohort_phenoTerms';
         nothpoId = 'caseCohort_nothpoId';
         notphenoTerms = 'caseCohort_notphenoTerms';
+        cohortLabel = 'Case Cohort';
+        group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
         orphanetId = 'controlCohort_orphanetId';
@@ -721,6 +979,8 @@ function GroupCommonDiseases(groupType) {
         phenoTerms = 'controlCohort_phenoTerms';
         nothpoId = 'controlCohort_nothpoId';
         notphenoTerms = 'controlCohort_notphenoTerms';
+        cohortLabel = 'Control Cohort';
+        group = this.state.controlGroup;
     }
     if (group) {
         orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
@@ -743,7 +1003,7 @@ function GroupCommonDiseases(groupType) {
             <Input type="textarea" ref={phenoTerms} label={<LabelPhenoTerms />} rows="5" value={group && group.termsInDiagnosis} inputDisabled={inputDisabled}
                 error={this.getFormError(phenoTerms)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
+            <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in {cohortLabel}</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref={nothpoId} label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
                 error={this.getFormError(nothpoId)} clearError={this.clrFormErrors.bind(null, nothpoId)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
@@ -795,8 +1055,7 @@ var LabelPhenoTerms = React.createClass({
 // Demographics group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupDemographics(groupType) {
-    const group = this.state.group;
-    let maleCount, femaleCount, country, ethnicity, race, ageRangeType, ageFrom, ageTo, ageUnit, headerLabel;
+    let maleCount, femaleCount, country, ethnicity, race, ageRangeType, ageFrom, ageTo, ageUnit, headerLabel, group;
     if (groupType === 'case-cohort') {
         maleCount = 'caseCohort_maleCount';
         femaleCount = 'caseCohort_femaleCount';
@@ -808,6 +1067,7 @@ function GroupDemographics(groupType) {
         ageTo = 'caseCohort_ageTo';
         ageUnit = 'caseCohort_ageUnit';
         headerLabel = 'CASE';
+        group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
         maleCount = 'controlCohort_maleCount';
@@ -820,13 +1080,14 @@ function GroupDemographics(groupType) {
         ageTo = 'controlCohort_ageTo';
         ageUnit = 'controlCohort_ageUnit';
         headerLabel = 'CONTROL';
+        group = this.state.controlGroup;
     }
 
     return (
         <div className="row section section-demographics">
             <h3><i className="icon icon-chevron-right"></i> Demographics <span className="label label-group">{headerLabel}</span></h3>
             <Input type="number" ref={maleCount} label="# males:" value={group && group.numberOfMale}
-                error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
+                error={this.getFormError(maleCount)} clearError={this.clrFormErrors.bind(null, maleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref={femaleCount} label="# females:" value={group && group.numberOfFemale}
                 error={this.getFormError(femaleCount)} clearError={this.clrFormErrors.bind(null, femaleCount)}
@@ -894,14 +1155,14 @@ function GroupDemographics(groupType) {
 // Group information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupPower(groupType) {
-    const group = this.state.group;
-    let type, controlGroupType, numGroupVariant, numGroupGenotyped, calcAlleleFreq, headerLabel;
+    let type, controlGroupType, numGroupVariant, numGroupGenotyped, calcAlleleFreq, headerLabel, group;
     if (groupType === 'case-cohort') {
         type = 'Case';
         numGroupVariant = 'caseCohort_numGroupVariant';
         numGroupGenotyped = 'caseCohort_numGroupGenotyped';
         calcAlleleFreq = 'caseCohort_calcAlleleFreq';
         headerLabel = 'CASE';
+        group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
         type = 'Control';
@@ -910,6 +1171,7 @@ function GroupPower(groupType) {
         numGroupGenotyped = 'controlCohort_numGroupGenotyped';
         calcAlleleFreq = 'controlCohort_calcAlleleFreq';
         headerLabel = 'CONTROL';
+        group = this.state.controlGroup;
     }
 
     return(
@@ -932,13 +1194,13 @@ function GroupPower(groupType) {
                 </Input>
             }
             ****/}
-            <Input type="number" ref={numGroupVariant} label={'Numeric value of ' + type + 's with variant(s):'} value={group && group.numberOfIndividualsWithVariantInCuratedGene}
+            <Input type="number" ref={numGroupVariant} label={'Numeric value of ' + type + 's with variants in the gene in question:'} value={group && group.numberWithVariant}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={numGroupGenotyped} label={'Numeric value of all ' + type + 's genotyped/sequenced:'} value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
+            <Input type="number" ref={numGroupGenotyped} label={'Numeric value of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.numberOfIndividualsWithoutVariantInCuratedGene}
+            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency}
                 error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)} inputDisabled={true}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
@@ -955,13 +1217,8 @@ var LabelOtherGenes = React.createClass({
 // Additional Information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupAdditional(groupType) {
-    const group = this.state.group;
-    let otherpmidsVal;
-    let othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : null;
-    if (group) {
-        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
-    }
-    let indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel;
+    let otherpmidsVal, othergenevariantsVal;
+    let indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
     if (groupType === 'case-cohort') {
         indFamilyCount = 'caseCohort_indFamilyCount';
         indVariantOtherCount = 'caseCohort_indVariantOtherCount';
@@ -969,6 +1226,7 @@ function GroupAdditional(groupType) {
         additionalInfoGroup = 'caseCohort_additionalInfoGroup';
         otherPmids = 'caseCohort_otherPmids';
         headerLabel = 'CASE';
+        group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
         indFamilyCount = 'controlCohort_indFamilyCount';
@@ -977,15 +1235,20 @@ function GroupAdditional(groupType) {
         additionalInfoGroup = 'controlCohort_additionalInfoGroup';
         otherPmids = 'controlCohort_otherPmids';
         headerLabel = 'CONTROL';
+        group = this.state.controlGroup;
+    }
+    othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : null;
+    if (group) {
+        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
     }
 
     return (
         <div className="row section section-additional-info">
             <h3><i className="icon icon-chevron-right"></i> Additional Information <span className="label label-group">{headerLabel}</span></h3>
-            <Input type="number" ref={indFamilyCount} label="# individuals with family information:" value={group && group.numberOfIndividualsWithFamilyInformation}
+            <Input type="number" ref={indFamilyCount} label="Number of individuals with family information:" value={group && group.numberOfIndividualsWithFamilyInformation}
                 error={this.getFormError(indFamilyCount)} clearError={this.clrFormErrors.bind(null, indFamilyCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={indVariantOtherCount} label="# individuals with variant found in other gene:" value={group && group.numberOfIndividualsWithVariantInOtherGene}
+            <Input type="number" ref={indVariantOtherCount} label="Number of individuals with variant found in other gene:" value={group && group.numberOfIndividualsWithVariantInOtherGene}
                 error={this.getFormError(indVariantOtherCount)} clearError={this.clrFormErrors.bind(null, indVariantOtherCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref={otherGeneVariants} label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
