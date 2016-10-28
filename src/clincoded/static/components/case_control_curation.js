@@ -518,9 +518,27 @@ const CaseControlCuration = React.createClass({
                     /* Get input values for group properties             */
                     /* Case/Control Allele Frequency is calculated       */
                     /*****************************************************/
-                    if (this.getFormValue(prefix + 'numGroupVariant')) newCaseGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
-                    if (this.getFormValue(prefix + 'numGroupGenotyped')) newCaseGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
-                    if (this.getFormValue(prefix + 'calcAlleleFreq')) newCaseGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
+                    if (this.getFormValue(prefix + 'numGroupVariant')) {
+                        newCaseGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
+                    } else {
+                        if ('numberWithVariant' in newControlGroup) {
+                            delete newCaseGroup['numberWithVariant'];
+                        }
+                    }
+                    if (this.getFormValue(prefix + 'numGroupGenotyped')) {
+                        newCaseGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
+                    } else {
+                        if ('numberAllGenotypedSequenced' in newControlGroup) {
+                            delete newCaseGroup['numberAllGenotypedSequenced'];
+                        }
+                    }
+                    if (this.getFormValue(prefix + 'calcAlleleFreq')) {
+                        newCaseGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
+                    } else {
+                        if ('alleleFrequency' in newControlGroup) {
+                            delete newCaseGroup['alleleFrequency'];
+                        }
+                    }
 
                     /******************************************************/
                     /* Either update or create the group object in the DB */
@@ -630,9 +648,27 @@ const CaseControlCuration = React.createClass({
                     /* Get input values for group properties             */
                     /* Case/Control Allele Frequency is calculated       */
                     /*****************************************************/
-                    if (this.getFormValue(prefix + 'numGroupVariant')) newControlGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
-                    if (this.getFormValue(prefix + 'numGroupGenotyped')) newControlGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
-                    if (this.getFormValue(prefix + 'calcAlleleFreq')) newControlGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
+                    if (this.getFormValue(prefix + 'numGroupVariant')) {
+                        newControlGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
+                    } else {
+                        if ('numberWithVariant' in newControlGroup) {
+                            delete newControlGroup['numberWithVariant'];
+                        }
+                    }
+                    if (this.getFormValue(prefix + 'numGroupGenotyped')) {
+                        newControlGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
+                    } else {
+                        if ('numberAllGenotypedSequenced' in newControlGroup) {
+                            delete newControlGroup['numberAllGenotypedSequenced'];
+                        }
+                    }
+                    if (this.getFormValue(prefix + 'calcAlleleFreq')) {
+                        newControlGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
+                    } else {
+                        if ('alleleFrequency' in newControlGroup) {
+                            delete newControlGroup['alleleFrequency'];
+                        }
+                    }
 
                     /******************************************************/
                     /* Either update or create the group object in the DB */
