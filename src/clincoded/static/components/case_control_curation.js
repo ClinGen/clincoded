@@ -496,12 +496,7 @@ const CaseControlCuration = React.createClass({
                     /* Group Additional Information form fields          */
                     /* Get input values for group properties             */
                     /*****************************************************/
-                    // newGroup.totalNumberIndividuals = parseInt(this.getFormValue('indcount'), 10); /* Not needed in Case-Control */
                     if (this.getFormValue(prefix + 'indFamilyCount')) newCaseGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue(prefix + 'indFamilyCount'), 10);
-                    // if (this.getFormValue('notindfamilycount')) newGroup.numberOfIndividualsWithoutFamilyInformation = parseInt(this.getFormValue('notindfamilycount'), 10);
-                    // if (this.getFormValue(prefix + 'otherGeneVariants')) newCaseGroup.numberOfIndividualsWithVariantInCuratedGene = parseInt(this.getFormValue(prefix + 'otherGeneVariants'), 10);
-                    // if (this.getFormValue('notindvariantgenecount')) newGroup.numberOfIndividualsWithoutVariantInCuratedGene = parseInt(this.getFormValue('notindvariantgenecount'), 10);
-                    if (this.getFormValue(prefix + 'indVariantOtherCount')) newCaseGroup.numberOfIndividualsWithVariantInOtherGene = parseInt(this.getFormValue(prefix + 'indVariantOtherCount'), 10);
 
                     // Add array of 'Other genes found to have variants in them'
                     if (caseCohort_groupGenes) {
@@ -614,7 +609,6 @@ const CaseControlCuration = React.createClass({
                     /* Get input values for group properties             */
                     /*****************************************************/
                     if (this.getFormValue(prefix + 'indFamilyCount')) newControlGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue(prefix + 'indFamilyCount'), 10);
-                    if (this.getFormValue(prefix + 'indVariantOtherCount')) newControlGroup.numberOfIndividualsWithVariantInOtherGene = parseInt(this.getFormValue(prefix + 'indVariantOtherCount'), 10);
 
                     // Add array of 'Other genes found to have variants in them'
                     if (controlCohort_groupGenes) {
@@ -663,6 +657,9 @@ const CaseControlCuration = React.createClass({
                     let newScoreObj = CaseControlEvalScore.handleScoreObj.call(this);
                     if (newScoreObj) {
                         newEvidenceScore = newScoreObj;
+                        if (!newEvidenceScore.score) {
+                            delete newEvidenceScore['score'];
+                        }
                     }
 
                     /*************************************************************/
@@ -687,6 +684,18 @@ const CaseControlCuration = React.createClass({
                     let newCaseControlObj = CaseControlEvalScore.handleCaseControlObj.call(this);
                     if (newCaseControlObj) {
                         newCaseControl = newCaseControlObj;
+                        if (!newCaseControl.statisticalValues[0].value) {
+                            delete newCaseControl['statisticalValues'][0]['value'];
+                        }
+                        if (!newCaseControl.pValue) {
+                            delete newCaseControl['pValue'];
+                        }
+                        if (!newCaseControl.confidenceIntervalFrom) {
+                            delete newCaseControl['confidenceIntervalFrom'];
+                        }
+                        if (!newCaseControl.confidenceIntervalTo) {
+                            delete newCaseControl['confidenceIntervalTo'];
+                        }
                     }
 
                     /*****************************************************/
@@ -1194,14 +1203,14 @@ function GroupPower(groupType) {
                 </Input>
             }
             ****/}
-            <Input type="number" ref={numGroupVariant} label={'Numeric value of ' + type + 's with variants in the gene in question:'} value={group && group.numberWithVariant}
+            <Input type="number" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={numGroupGenotyped} label={'Numeric value of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
+            <Input type="number" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency}
-                error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)} inputDisabled={true}
+                error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -1221,7 +1230,6 @@ function GroupAdditional(groupType) {
     let indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
     if (groupType === 'case-cohort') {
         indFamilyCount = 'caseCohort_indFamilyCount';
-        indVariantOtherCount = 'caseCohort_indVariantOtherCount';
         otherGeneVariants = 'caseCohort_otherGeneVariants';
         additionalInfoGroup = 'caseCohort_additionalInfoGroup';
         otherPmids = 'caseCohort_otherPmids';
@@ -1230,7 +1238,6 @@ function GroupAdditional(groupType) {
     }
     if (groupType === 'control-cohort') {
         indFamilyCount = 'controlCohort_indFamilyCount';
-        indVariantOtherCount = 'controlCohort_indVariantOtherCount';
         otherGeneVariants = 'controlCohort_otherGeneVariants';
         additionalInfoGroup = 'controlCohort_additionalInfoGroup';
         otherPmids = 'controlCohort_otherPmids';
@@ -1247,9 +1254,6 @@ function GroupAdditional(groupType) {
             <h3><i className="icon icon-chevron-right"></i> Additional Information <span className="label label-group">{headerLabel}</span></h3>
             <Input type="number" ref={indFamilyCount} label="Number of individuals with family information:" value={group && group.numberOfIndividualsWithFamilyInformation}
                 error={this.getFormError(indFamilyCount)} clearError={this.clrFormErrors.bind(null, indFamilyCount)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={indVariantOtherCount} label="Number of individuals with variant found in other gene:" value={group && group.numberOfIndividualsWithVariantInOtherGene}
-                error={this.getFormError(indVariantOtherCount)} clearError={this.clrFormErrors.bind(null, indVariantOtherCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref={otherGeneVariants} label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
                 error={this.getFormError(otherGeneVariants)} clearError={this.clrFormErrors.bind(null, otherGeneVariants)}
