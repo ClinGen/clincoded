@@ -79,9 +79,6 @@ module.exports = {
                                     <option value="none">No Selection</option>
                                     <option disabled="disabled"></option>
                                     <option value="Odds Ratio">Odds Ratio</option>
-                                    <option value="Fischer's exact test">Fischer's exact test</option>
-                                    <option value="Beta">Beta</option>
-                                    <option value="Hazard Radio">Hazard Radio</option>
                                     <option value="Relative Risk">Relative Risk</option>
                                     <option value="Other">Other</option>
                                 </Input>
@@ -227,7 +224,7 @@ module.exports = {
         let newObj = {
             valueType: this.getFormValue('statisticValueType'),
             otherType: this.getFormValue('statisticOtherType'),
-            value: parseFloat(this.getFormValue('statisticValue'))
+            value: this.getFormValue('statisticValue') ? parseFloat(this.getFormValue('statisticValue')) : null
         };
         newArray.push(newObj);
 
@@ -236,9 +233,9 @@ module.exports = {
             studyType: this.getFormValue('studyType'),
             detectionMethod: this.getFormValue('detectionMethod'),
             statisticalValues: newArray,
-            pValue: parseFloat(this.getFormValue('pValue')),
-            confidenceIntervalFrom: parseFloat(this.getFormValue('confidenceIntervalFrom')),
-            confidenceIntervalTo: parseFloat(this.getFormValue('confidenceIntervalTo')),
+            pValue: this.getFormValue('pValue') ? parseFloat(this.getFormValue('pValue')) : null,
+            confidenceIntervalFrom: this.getFormValue('confidenceIntervalFrom') ? parseFloat(this.getFormValue('confidenceIntervalFrom')) : null,
+            confidenceIntervalTo: this.getFormValue('confidenceIntervalTo') ? parseFloat(this.getFormValue('confidenceIntervalTo')) : null,
             demographicInfoMatched: this.getFormValue('demographicInfoMatched'),
             factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched'),
             explanationForDemographicMatched: this.getFormValue('explanationForDemographicMatched'),
@@ -276,7 +273,7 @@ module.exports = {
 
         // Put together a new 'evidenceScores' object
         newScoreObj = {
-            score: parseInt(this.getFormValue('evidenceScore')),
+            score: this.getFormValue('evidenceScore') !== 'none' ? parseInt(this.getFormValue('evidenceScore'), 10) : null,
             evidenceType: 'Case control'
         };
 
