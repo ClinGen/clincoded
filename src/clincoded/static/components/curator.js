@@ -2224,6 +2224,12 @@ var DeleteButtonModal = React.createClass({
             }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
         }
+        if (item.caseControl) {
+            if (item.caseControl.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseControl, depth, mode, 'caseControlStudies'));
+        }
 
         // if the mode is 'delete', get the items' parents' info if needed, flatten the current item, set it as deleted
         // and inactive, and load the PUT and history record promises into the payload
@@ -2328,6 +2334,8 @@ var DeleteButtonModal = React.createClass({
                         deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
                     } else if (deletedItemType == 'experimental') {
                         deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
+                    } else if (deletedItemType == 'caseControl') {
+                        deletedParent.caseControlStudies = _.without(deletedParent.caseControlStudies, itemUuid);
                     }
                 } else {
                     if (deletedItemType == 'family') {
