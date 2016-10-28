@@ -38,10 +38,12 @@ module.exports = {
         if (case_control && case_control.studyType !== 'undefined') {
             caseControl = case_control;
         }
-        let evidenceScores = [{score: null, evidenceType: null, uuid: null}];
+        /*** Keep for next release enhancement
+        let evidenceScores = [{score: null, evidenceType: null}];
         if (scores && scores.length) {
             evidenceScores = scores;
         }
+        */
 
         return (
             <div>
@@ -70,8 +72,8 @@ module.exports = {
                     <h4 className="col-sm-7 col-sm-offset-5">Statistical Value</h4>
                     {caseControl.statisticalValues.map(entry => {
                         return (
-                            <div key={entry.valueType ? entry.valueType : 'none'} ref="caseControlStatistics">
-                                <Input type="select" ref="statisticVauleType" label="Value type:" defaultValue="none"
+                            <div key={entry.valueType ? entry.valueType : 'none'} className="caseControlStatistics">
+                                <Input type="select" ref="statisticValueType" label="Test statistic:" defaultValue="none"
                                     value={entry.valueType ? entry.valueType : 'none'} handleChange={this.handleChange}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
                                     <option value="none">No Selection</option>
@@ -87,15 +89,15 @@ module.exports = {
                                     error={this.getFormError('statisticOtherType')} clearError={this.clrFormErrors.bind(null, 'statisticOtherType')}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
                                     groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
-                                <Input type="number" ref="statisticVaule" label="Value:" value={entry.value ? entry.value : null}
-                                    error={this.getFormError('statisticVaule')} clearError={this.clrFormErrors.bind(null, 'statisticVaule')}
+                                <Input type="number" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null}
+                                    error={this.getFormError('statisticValue')} clearError={this.clrFormErrors.bind(null, 'statisticValue')}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                             </div>
                         );
                     })}
                     <h4 className="col-sm-7 col-sm-offset-5">Confidence/Significance</h4>
-                    <Input type="number" ref="pVaule" label="p-value (%):" value={caseControl.pValue ? caseControl.pValue : null}
-                        error={this.getFormError('pVaule')} clearError={this.clrFormErrors.bind(null, 'pVaule')}
+                    <Input type="number" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null}
+                        error={this.getFormError('pValue')} clearError={this.clrFormErrors.bind(null, 'pValue')}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                     <Input type="text-range" labelClassName="col-sm-6 control-label" label="Confidence interval (%):" wrapperClassName="col-sm-6">
                         <Input type="number" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
@@ -182,24 +184,20 @@ module.exports = {
                 </div>
                 <div className="row section section-score">
                     <h3><i className="icon icon-chevron-right"></i> Score Case-Control Study</h3>
-                    {evidenceScores.map(item => {
-                        return (
-                            <div key={item.score ? item.score : 'none'} ref="evidenceScores">
-                                <Input type="select" ref="evidenceScore" label="Score:" defaultValue="none" value={item.score ? item.score : 'none'}
-                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                                    <option value="none">No Selection</option>
-                                    <option disabled="disabled"></option>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                </Input>
-                            </div>
-                        );
-                    })}
+                    <div className="evidenceScores">
+                        <Input type="select" ref="evidenceScore" label="Score:" defaultValue="none" value={scores && scores.score ? scores.score : 'none'}
+                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                            <option value="none">No Selection</option>
+                            <option disabled="disabled"></option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </Input>
+                    </div>
                 </div>
             </div>
         );
@@ -211,25 +209,36 @@ module.exports = {
         newCaseControlObj.statisticalValues = [];
 
         // Iterate statistical values array
-        let statisticsObjects = this.refs['caseControlStatistics'],
+        /*** Keep for next release enhancement
+        let statisticsNodes = document.querySelectorAll('.caseControlStatistics'),
             newObj = {}, newArray = [];
+        let statisticsObjects = Array.from(statisticsNodes);
         statisticsObjects.forEach(obj => {
             newObj = {
-                valueType: obj.getFormValue('statisticVauleType'),
+                valueType: obj.getFormValue('statisticValueType'),
                 otherType: obj.getFormValue('statisticOtherType'),
-                value: obj.getFormValue('statisticVaule')
+                value: obj.getFormValue('statisticValue')
             };
             newArray.push(newObj);
         });
+        */
+
+        let newArray = [];
+        let newObj = {
+            valueType: this.getFormValue('statisticValueType'),
+            otherType: this.getFormValue('statisticOtherType'),
+            value: parseFloat(this.getFormValue('statisticValue'))
+        };
+        newArray.push(newObj);
 
         // Put together a new 'caseControl' object
         newCaseControlObj = {
             studyType: this.getFormValue('studyType'),
             detectionMethod: this.getFormValue('detectionMethod'),
             statisticalValues: newArray,
-            pValue: this.getFormValue('pVaule'),
-            confidenceIntervalFrom: this.getFormValue('confidenceIntervalFrom'),
-            confidenceIntervalTo: this.getFormValue('confidenceIntervalTo'),
+            pValue: parseFloat(this.getFormValue('pValue')),
+            confidenceIntervalFrom: parseFloat(this.getFormValue('confidenceIntervalFrom')),
+            confidenceIntervalTo: parseFloat(this.getFormValue('confidenceIntervalTo')),
             demographicInfoMatched: this.getFormValue('demographicInfoMatched'),
             factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched'),
             explanationForDemographicMatched: this.getFormValue('explanationForDemographicMatched'),
@@ -248,11 +257,13 @@ module.exports = {
 
     // Create new Evaluation-Score object based on the form values
     handleScoreObj() {
-        let newScoreObj = [];
+        let newScoreObj = {};
 
         // Iterate scores array
-        let scoreObjects = this.refs['evidenceScores'],
+        /*** Keep for next release enhancement
+        let scoreNodes = document.querySelectorAll('.evidenceScores'),
             newScore = {};
+        let scoreObjects = Array.from(scoreNodes);
         scoreObjects.forEach(obj => {
             newScore = {
                 score: obj.getFormValue('evidenceScore'),
@@ -261,6 +272,13 @@ module.exports = {
             // Put together a new 'evidenceScores' object
             newScoreObj.push(newScore);
         });
+        */
+
+        // Put together a new 'evidenceScores' object
+        newScoreObj = {
+            score: parseInt(this.getFormValue('evidenceScore')),
+            evidenceType: 'Case control'
+        };
 
         return Object.keys(newScoreObj).length ? newScoreObj : null;
     }
