@@ -1064,13 +1064,7 @@ var FamilyCuration = React.createClass({
         }
 
         // Fill in the group fields from the Family Demographics panel
-        var value = this.getFormValue('malecount');
-        if (value) { newFamily.numberOfMale = parseInt(value, 10); }
-
-        value = this.getFormValue('femalecount');
-        if (value) { newFamily.numberOfFemale = parseInt(value, 10); }
-
-        value = this.getFormValue('country');
+        var value = this.getFormValue('country');
         if (value !== 'none') { newFamily.countryOfOrigin = value; }
 
         value = this.getFormValue('ethnicity');
@@ -1078,18 +1072,6 @@ var FamilyCuration = React.createClass({
 
         value = this.getFormValue('race');
         if (value !== 'none') { newFamily.race = value; }
-
-        value = this.getFormValue('agerangetype');
-        if (value !== 'none') { newFamily.ageRangeType = value + ''; }
-
-        value = this.getFormValue('agefrom');
-        if (value) { newFamily.ageRangeFrom = parseInt(value, 10); }
-
-        value = this.getFormValue('ageto');
-        if (value) { newFamily.ageRangeTo = parseInt(value, 10); }
-
-        value = this.getFormValue('ageunit');
-        if (value !== 'none') { newFamily.ageRangeUnit = value; }
 
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
@@ -1529,12 +1511,6 @@ var FamilyDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="number" ref="malecount" label="# males:" value={family && family.numberOfMale}
-                error={this.getFormError('malecount')} clearError={this.clrFormErrors.bind(null, 'malecount')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="femalecount" label="# females:" value={family && family.numberOfFemale}
-                error={this.getFormError('femalecount')} clearError={this.clrFormErrors.bind(null, 'femalecount')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1563,34 +1539,6 @@ var FamilyDemographics = function() {
                 <option value="Mixed">Mixed</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
-            <div className="demographics-age-range">
-                <Input type="select" ref="agerangetype" label="Type:" defaultValue="none" value={family && family.ageRangeType}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option value="Onset">Onset</option>
-                    <option value="Report">Report</option>
-                    <option value="Diagnosis">Diagnosis</option>
-                    <option value="Death">Death</option>
-                </Input>
-                <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="number" ref="agefrom" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
-                        error={this.getFormError('agefrom')} clearError={this.clrFormErrors.bind(null, 'agefrom')} value={family && family.ageRangeFrom} />
-                    <span className="group-age-inter">to</span>
-                    <Input type="number" ref="ageto" inputClassName="input-inline" groupClassName="form-group-inline group-age-input" maxVal={150}
-                        error={this.getFormError('ageto')} clearError={this.clrFormErrors.bind(null, 'ageto')} value={family && family.ageRangeTo} />
-                </Input>
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={family && family.ageRangeUnit}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option value="Days">Days</option>
-                    <option value="Weeks">Weeks</option>
-                    <option value="Months">Months</option>
-                    <option value="Years">Years</option>
-                </Input>
-            </div>
         </div>
     );
 };
@@ -1604,7 +1552,7 @@ var FamilySegregation = function() {
 
     return (
         <div className="row">
-            <Input type="textarea" ref="SEGpedigreedesc" label="Pedigree description:" rows="5" value={segregation.pedigreeDescription} handleChange={this.handleChange}
+            <Input type="number" ref="SEGnoaffectedindividualsgeno" label={<span><strong>For Dominant AND Recerssive:</strong><br/>Number of AFFECTED individuals <i>with</i> genotype?</span>} rows="5" value={segregation.pedigreeDescription} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref="SEGpedigreesize" label="Pedigree size:" value={segregation.pedigreeSize} minVal={2} handleChange={this.handleChange}
                 error={this.getFormError('SEGpedigreesize')} clearError={this.clrFormErrors.bind(null, 'SEGpedigreesize')}
