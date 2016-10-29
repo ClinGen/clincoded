@@ -376,6 +376,11 @@
                     "title": "LOD in Aggregate Calculation",
                     "type": "boolean"
                 },
+                "reasonExplanation": {
+                    "title": "Explanation",
+                    "description": "Reason for including LOD or not",
+                    "type": "string"
+                },
                 "recessiveZygosity": {
                     "title": "Recessive Variant Zygosity",
                     "description": "For recessive only",
