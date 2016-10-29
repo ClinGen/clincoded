@@ -1075,13 +1075,15 @@ function CaseControlName() {
 // Group Name group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupName(groupType) {
-    let label, groupName, group;
+    let type, label, groupName, group;
     if (groupType === 'case-cohort') {
+        type = 'Case';
         label = 'Case Cohort Label:';
         groupName = 'caseCohort_groupName';
         group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
+        type = 'Control';
         label = 'Control Cohort Label:';
         groupName = 'controlCohort_groupName';
         group = this.state.controlGroup;
@@ -1092,7 +1094,7 @@ function GroupName(groupType) {
             <Input type="text" ref={groupName} label={label} value={group && group.label} maxLength="60" handleChange={this.handleChange}
                 error={this.getFormError(groupName)} clearError={this.clrFormErrors.bind(null, groupName)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-            <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Group')}</p>
+            <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote(type)}</p>
         </div>
     );
 }
@@ -1357,8 +1359,9 @@ var LabelOtherGenes = React.createClass({
 // as the calling component.
 function GroupAdditional(groupType) {
     let otherpmidsVal, othergenevariantsVal;
-    let indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
+    let type, indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
     if (groupType === 'case-cohort') {
+        type = 'Case';
         indFamilyCount = 'caseCohort_indFamilyCount';
         otherGeneVariants = 'caseCohort_otherGeneVariants';
         additionalInfoGroup = 'caseCohort_additionalInfoGroup';
@@ -1367,6 +1370,7 @@ function GroupAdditional(groupType) {
         group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
+        type = 'Control';
         indFamilyCount = 'controlCohort_indFamilyCount';
         otherGeneVariants = 'controlCohort_otherGeneVariants';
         additionalInfoGroup = 'controlCohort_additionalInfoGroup';
@@ -1388,15 +1392,15 @@ function GroupAdditional(groupType) {
             <Input type="text" ref={otherGeneVariants} label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
                 error={this.getFormError(otherGeneVariants)} clearError={this.clrFormErrors.bind(null, otherGeneVariants)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref={additionalInfoGroup} label="Additional Information about Group:" rows="5" value={group && group.additionalInformation}
+            <Input type="textarea" ref={additionalInfoGroup} label={'Additional Information about this ' + type + ':'} rows="5" value={group && group.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref={otherPmids} label="Enter PMID(s) that report evidence about this same Group:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref={otherPmids} label={'Enter PMID(s) that report evidence about this ' + type + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError(otherPmids)} clearError={this.clrFormErrors.bind(null, otherPmids)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">
                 Note: Any variants associated with probands that will be counted towards the Classification are not
-                captured at the Group level - variants and their association with probands are required to be captured
-                at the Family or Individual level. Once you submit the Group information, you will be prompted to enter
+                captured at the cohort level - variants and their association with probands are required to be captured
+                at the Family or Individual level. Once you submit the {type} information, you will be prompted to enter
                 Family/Individual information.
             </p>
         </div>
