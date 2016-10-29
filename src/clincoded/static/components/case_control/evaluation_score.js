@@ -222,29 +222,29 @@ module.exports = {
 
         let newArray = [];
         let newObj = {
-            valueType: this.getFormValue('statisticValueType'),
-            otherType: this.getFormValue('statisticOtherType'),
+            valueType: this.getFormValue('statisticValueType') !== 'none' ? this.getFormValue('statisticValueType') : null,
+            otherType: this.getFormValue('statisticOtherType') ? this.getFormValue('statisticOtherType') : null,
             value: this.getFormValue('statisticValue') ? parseFloat(this.getFormValue('statisticValue')) : null
         };
         newArray.push(newObj);
 
         // Put together a new 'caseControl' object
         newCaseControlObj = {
-            studyType: this.getFormValue('studyType'),
-            detectionMethod: this.getFormValue('detectionMethod'),
+            studyType: this.getFormValue('studyType') !== 'none' ? this.getFormValue('studyType') : null,
+            detectionMethod: this.getFormValue('detectionMethod') !== 'none' ? this.getFormValue('detectionMethod') : null,
             statisticalValues: newArray,
             pValue: this.getFormValue('pValue') ? parseFloat(this.getFormValue('pValue')) : null,
             confidenceIntervalFrom: this.getFormValue('confidenceIntervalFrom') ? parseFloat(this.getFormValue('confidenceIntervalFrom')) : null,
             confidenceIntervalTo: this.getFormValue('confidenceIntervalTo') ? parseFloat(this.getFormValue('confidenceIntervalTo')) : null,
-            demographicInfoMatched: this.getFormValue('demographicInfoMatched'),
-            factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched'),
+            demographicInfoMatched: this.getFormValue('demographicInfoMatched') !== 'none' ? this.getFormValue('demographicInfoMatched') : null,
+            factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched') !== 'none' ? this.getFormValue('factorOfDemographicInfoMatched') : null,
             explanationForDemographicMatched: this.getFormValue('explanationForDemographicMatched'),
-            geneticAncestryMatched: this.getFormValue('geneticAncestryMatched'),
-            factorOfGeneticAncestryNotMatched: this.getFormValue('factorOfGeneticAncestryNotMatched'),
+            geneticAncestryMatched: this.getFormValue('geneticAncestryMatched') !== 'none' ? this.getFormValue('geneticAncestryMatched') : null,
+            factorOfGeneticAncestryNotMatched: this.getFormValue('factorOfGeneticAncestryNotMatched') !== 'none' ? this.getFormValue('factorOfGeneticAncestryNotMatched') : null,
             explanationForGeneticAncestryNotMatched: this.getFormValue('explanationForGeneticAncestryNotMatched'),
-            diseaseHistoryEvaluated: this.getFormValue('diseaseHistoryEvaluated'),
+            diseaseHistoryEvaluated: this.getFormValue('diseaseHistoryEvaluated') !== 'none' ? this.getFormValue('diseaseHistoryEvaluated') : null,
             explanationForDiseaseHistoryEvaluation: this.getFormValue('explanationForDiseaseHistoryEvaluation'),
-            differInVariables: this.getFormValue('differInVariables'),
+            differInVariables: this.getFormValue('differInVariables') !== 'none' ? this.getFormValue('differInVariables') : null,
             explanationForDifference: this.getFormValue('explanationForDifference'),
             comments: this.getFormValue('comments')
         };
