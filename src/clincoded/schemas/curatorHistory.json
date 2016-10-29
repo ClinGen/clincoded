@@ -481,6 +481,14 @@
             "title": "GDM of PMID",
             "type": "string"
         },
+        "meta.caseControl.gdm": {
+            "title": "Case-Control GDM",
+            "type": "string"
+        },
+        "meta.caseControl.article": {
+            "title": "Case-Control article",
+            "type": "string"
+        },
         "meta.group.gdm": {
             "title": "Group GDM",
             "type": "string"
