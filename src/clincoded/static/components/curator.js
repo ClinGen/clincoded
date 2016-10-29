@@ -789,8 +789,8 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            {/* <a href={'/case-control/' + caseControl.uuid} title="View group in a new tab">View</a> */}
-            {curatorMatch ? <span><a href={
+            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View</a>
+            {curatorMatch ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
