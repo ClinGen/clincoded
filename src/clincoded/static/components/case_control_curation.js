@@ -1397,12 +1397,6 @@ function GroupAdditional(groupType) {
             <Input type="textarea" ref={otherPmids} label={'Enter PMID(s) that report evidence about this ' + type + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError(otherPmids)} clearError={this.clrFormErrors.bind(null, otherPmids)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">
-                Note: Any variants associated with probands that will be counted towards the Classification are not
-                captured at the cohort level - variants and their association with probands are required to be captured
-                at the Family or Individual level. Once you submit the {type} information, you will be prompted to enter
-                Family/Individual information.
-            </p>
         </div>
     );
 }
