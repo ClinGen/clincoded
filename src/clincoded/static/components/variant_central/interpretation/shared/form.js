@@ -372,6 +372,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
             if (freshInterpretation.disease) {
                 meta.interpretation.disease = freshInterpretation.disease['@id'];
             }
+            if (freshInterpretation.modeInheritance) {
+                meta.interpretation.modeInheritance = freshInterpretation.modeInheritance;
+            }
             this.recordHistory('modify', freshInterpretation, meta).then(result => {
                 // REST handling is done. Re-enable Save button, and send the interpretation object back to index.js
                 this.setState({submitBusy: false, updateMsg: <span className="text-success">Evaluations for {submittedCriteria.join(', ')} saved successfully!</span>});

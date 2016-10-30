@@ -1100,8 +1100,6 @@ class Interpretation(Item):
     def interpretation_status(self, evaluations=[], provisional_variant=[]):
         if len(provisional_variant) > 0:
             return 'Provisional'
-        elif len(evaluations) > 0:
-            return 'Evaluation'
         return 'In Progress'
 
     @calculated_property(schema={
