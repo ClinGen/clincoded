@@ -442,6 +442,11 @@
                             "type": "string",
                             "linkTo": "orphaPhenotype"
                         },
+                        "modeInheritance": {
+                            "title": "Mode of Inheritance",
+                            "description": "Mode of inheritance associated with the interpretation",
+                            "type": "string"
+                        },
                         "mode": {
                             "title": "Specific mode of change",
                             "description": "Specific mode of change",
@@ -559,6 +564,10 @@
         },
         "meta.interpretation.disease": {
             "title": "Orpha ID",
+            "type": "string"
+        },
+        "meta.interpretation.modeInheritance": {
+            "title": "Mode of Inheritance",
             "type": "string"
         },
         "meta.interpretation.mode": {
