@@ -1110,7 +1110,7 @@ function GroupCommonDiseases(groupType) {
 
     return (
         <div className="row section section-disease">
-            <h3><i className="icon icon-chevron-right"></i> Common Disease(s) & Phenotype(s)</h3>
+            <h3><i className="icon icon-chevron-right"></i> Disease(s) & Phenotype(s)</h3>
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">Please enter an Orphanet ID(s) and/or HPO ID(s) and/or Phenotype free text (required).</p>
             </div>
@@ -1400,7 +1400,7 @@ var CaseControlViewer = React.createClass({
                             </h2>
                         </div>
                         <div className="col-sm-6 case-cohort-view">
-                            <Panel title="Case Cohort - Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
+                            <Panel title="Case Cohort - Disease(s) & Phenotype(s)" panelClassName="panel-data">
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Orphanet Common Diagnosis</dt>
