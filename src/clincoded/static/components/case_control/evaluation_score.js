@@ -86,24 +86,20 @@ module.exports = {
                                     error={this.getFormError('statisticOtherType')} clearError={this.clrFormErrors.bind(null, 'statisticOtherType')}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
                                     groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
-                                <Input type="number" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null}
-                                    error={this.getFormError('statisticValue')} clearError={this.clrFormErrors.bind(null, 'statisticValue')}
-                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                                <Input type="text" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null} handleChange={this.handleChange}
+                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="e.g. number only" />
                             </div>
                         );
                     })}
                     <h4 className="col-sm-7 col-sm-offset-5">Confidence/Significance</h4>
-                    <Input type="number" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null}
-                        error={this.getFormError('pValue')} clearError={this.clrFormErrors.bind(null, 'pValue')}
-                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                    <Input type="text" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null} handleChange={this.handleChange}
+                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="e.g. number only" />
                     <Input type="text-range" labelClassName="col-sm-6 control-label" label="Confidence interval (%):" wrapperClassName="col-sm-6">
-                        <Input type="number" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
-                            error={this.getFormError('confidenceIntervalFrom')} clearError={this.clrFormErrors.bind(null, 'confidenceIntervalFrom')}
-                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} />
+                        <Input type="text" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} handleChange={this.handleChange} placeholder="e.g. number only" />
                         <span className="group-age-inter">to</span>
-                        <Input type="number" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
-                            error={this.getFormError('confidenceIntervalTo')} clearError={this.clrFormErrors.bind(null, 'confidenceIntervalTo')}
-                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} />
+                        <Input type="text" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} handleChange={this.handleChange} placeholder="e.g. number only" />
                     </Input>
                 </div>
                 <div className="row section section-bias-category">
@@ -222,29 +218,29 @@ module.exports = {
 
         let newArray = [];
         let newObj = {
-            valueType: this.getFormValue('statisticValueType') !== 'none' ? this.getFormValue('statisticValueType') : null,
-            otherType: this.getFormValue('statisticOtherType') ? this.getFormValue('statisticOtherType') : null,
+            valueType: this.getFormValue('statisticValueType') !== 'none' ? this.getFormValue('statisticValueType') : '',
+            otherType: this.getFormValue('statisticOtherType') !== 'none' ? this.getFormValue('statisticOtherType') : '',
             value: this.getFormValue('statisticValue') ? parseFloat(this.getFormValue('statisticValue')) : null
         };
         newArray.push(newObj);
 
         // Put together a new 'caseControl' object
         newCaseControlObj = {
-            studyType: this.getFormValue('studyType') !== 'none' ? this.getFormValue('studyType') : null,
-            detectionMethod: this.getFormValue('detectionMethod') !== 'none' ? this.getFormValue('detectionMethod') : null,
+            studyType: this.getFormValue('studyType') !== 'none' ? this.getFormValue('studyType') : '',
+            detectionMethod: this.getFormValue('detectionMethod') !== 'none' ? this.getFormValue('detectionMethod') : '',
             statisticalValues: newArray,
             pValue: this.getFormValue('pValue') ? parseFloat(this.getFormValue('pValue')) : null,
             confidenceIntervalFrom: this.getFormValue('confidenceIntervalFrom') ? parseFloat(this.getFormValue('confidenceIntervalFrom')) : null,
             confidenceIntervalTo: this.getFormValue('confidenceIntervalTo') ? parseFloat(this.getFormValue('confidenceIntervalTo')) : null,
-            demographicInfoMatched: this.getFormValue('demographicInfoMatched') !== 'none' ? this.getFormValue('demographicInfoMatched') : null,
-            factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched') !== 'none' ? this.getFormValue('factorOfDemographicInfoMatched') : null,
+            demographicInfoMatched: this.getFormValue('demographicInfoMatched') !== 'none' ? this.getFormValue('demographicInfoMatched') : '',
+            factorOfDemographicInfoMatched: this.getFormValue('factorOfDemographicInfoMatched') !== 'none' ? this.getFormValue('factorOfDemographicInfoMatched') : '',
             explanationForDemographicMatched: this.getFormValue('explanationForDemographicMatched'),
-            geneticAncestryMatched: this.getFormValue('geneticAncestryMatched') !== 'none' ? this.getFormValue('geneticAncestryMatched') : null,
-            factorOfGeneticAncestryNotMatched: this.getFormValue('factorOfGeneticAncestryNotMatched') !== 'none' ? this.getFormValue('factorOfGeneticAncestryNotMatched') : null,
+            geneticAncestryMatched: this.getFormValue('geneticAncestryMatched') !== 'none' ? this.getFormValue('geneticAncestryMatched') : '',
+            factorOfGeneticAncestryNotMatched: this.getFormValue('factorOfGeneticAncestryNotMatched') !== 'none' ? this.getFormValue('factorOfGeneticAncestryNotMatched') : '',
             explanationForGeneticAncestryNotMatched: this.getFormValue('explanationForGeneticAncestryNotMatched'),
-            diseaseHistoryEvaluated: this.getFormValue('diseaseHistoryEvaluated') !== 'none' ? this.getFormValue('diseaseHistoryEvaluated') : null,
+            diseaseHistoryEvaluated: this.getFormValue('diseaseHistoryEvaluated') !== 'none' ? this.getFormValue('diseaseHistoryEvaluated') : '',
             explanationForDiseaseHistoryEvaluation: this.getFormValue('explanationForDiseaseHistoryEvaluation'),
-            differInVariables: this.getFormValue('differInVariables') !== 'none' ? this.getFormValue('differInVariables') : null,
+            differInVariables: this.getFormValue('differInVariables') !== 'none' ? this.getFormValue('differInVariables') : '',
             explanationForDifference: this.getFormValue('explanationForDifference'),
             comments: this.getFormValue('comments')
         };
