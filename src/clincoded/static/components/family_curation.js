@@ -1318,11 +1318,6 @@ var FamilyCuration = React.createClass({
                                         </Panel>
 
                                         <PanelGroup accordion>
-                                            <AssessmentPanel panelTitle="Family — Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} noSeg={this.state.segregationFilled ? false : true}
-                                                updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} ownerNotAssessed={false} accordion open />
-                                        </PanelGroup>
-
-                                        <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
                                                 {FamilyVariant.call(this)}
                                             </Panel>
@@ -1582,7 +1577,7 @@ var FamilySegregation = function() {
                 <option value="Not Specified">Not Specified</option>
             </Input>
             <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="5" value={segregation.pedigreeLocation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <Input type="select" ref="SEGlodPublished" label="Published Calculated LOD score?:"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.lodPublished)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1651,14 +1646,6 @@ var FamilyVariant = function() {
 
                 return (
                     <div key={i} className="variant-panel">
-                        <div className="row">
-                            <div className="col-sm-7 col-sm-offset-5">
-                                <p className="alert alert-warning">
-                                    ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                    the same variant, and ensures the accurate counting of probands.
-                                </p>
-                            </div>
-                        </div>
                         {this.state.variantInfo[i] ?
                             <div>
                                 <div className="row">
