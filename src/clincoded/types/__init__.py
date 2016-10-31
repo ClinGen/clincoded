@@ -536,18 +536,21 @@ class CaseControl(Item):
     embedded = [
         'submitted_by',
         'caseCohort',
+        'caseCohort.commonDiagnosis',
         'caseCohort.submitted_by',
         'controlCohort',
         'controlCohort.submitted_by',
         'scores',
         'scores.submitted_by',
-        'associatedAnnotation',
-        'associatedAnnotation.article',
-        'associatedAnnotation.groups',
-        'associatedAnnotation.associatedGdm'
+        'associatedAnnotations',
+        'associatedAnnotations.article',
+        'associatedAnnotations.groups',
+        'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
     ]
     rev = {
-        'associatedAnnotation': ('annotation', 'caseControlStudies')
+        'associatedAnnotations': ('annotation', 'caseControlStudies')
     }
 
     @calculated_property(schema={
@@ -558,8 +561,8 @@ class CaseControl(Item):
             "linkFrom": "annotation.caseControlStudies"
         }
     })
-    def associatedAnnotation(self, request, associatedAnnotation):
-        return paths_filtered_by_status(request, associatedAnnotation)
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
@@ -946,8 +949,8 @@ class EvidenceScore(Item):
     embedded = [
         'submitted_by',
         'caseControl_scored',
-        'caseControl_scored.associatedAnnotation',
-        'caseControl_scored.associatedAnnotation.associatedGdm'
+        'caseControl_scored.associatedAnnotations',
+        'caseControl_scored.associatedAnnotations.associatedGdm'
     ]
     rev = {
         'caseControl_scored': ('caseControl', 'scores')
