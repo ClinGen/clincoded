@@ -667,7 +667,7 @@ function carValidateForm() {
     var formInput = this.getFormValue('resourceId');
 
     // valid if the input begins with 'CA', followed by 6 numbers
-    if (valid && !formInput.match(/^CA[0-9]{6}$/)) {
+    if (valid && !formInput.match(/^CA[0-9]+$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'Invalid CA ID');
     }
