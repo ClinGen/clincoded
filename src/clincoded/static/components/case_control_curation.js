@@ -1385,7 +1385,7 @@ function GroupAdditional(groupType) {
             <h3><i className="icon icon-chevron-right"></i> Additional Information <span className="label label-group">{headerLabel}</span></h3>
             <Input type="text" ref={otherGeneVariants} label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
                 error={this.getFormError(otherGeneVariants)} clearError={this.clrFormErrors.bind(null, otherGeneVariants)} inputDisabled={inputDisabled}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-genes" />
             <Input type="textarea" ref={additionalInfoGroup} label={'Additional Information about this ' + type + ':'} rows="5" value={group && group.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref={otherPmids} label={'Enter PMID(s) that report evidence about this ' + type + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
