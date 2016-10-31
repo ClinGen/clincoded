@@ -2465,6 +2465,10 @@ table.login-users-interpretations {
         visibility: hidden;
     }
 
+    .section-additional-info .other-genes {
+        visibility: hidden;
+    }
+
     .label-group {
         background-color: #91b6ca;
     }
@@ -2499,6 +2503,7 @@ table.login-users-interpretations {
     }
 }
 
-.control-cohort-view .panel.diseases {
+.control-cohort-view .panel.diseases,
+.control-cohort-view .additional-information .other-genes {
     visibility: hidden;
 }
