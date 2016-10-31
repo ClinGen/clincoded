@@ -590,8 +590,6 @@ const CaseControlCuration = React.createClass({
                     /* Group Additional Information form fields          */
                     /* Get input values for group properties             */
                     /*****************************************************/
-                    if (this.getFormValue(prefix + 'indFamilyCount')) newCaseGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue(prefix + 'indFamilyCount'), 10);
-
                     // Add array of 'Other genes found to have variants in them'
                     if (caseCohort_groupGenes) {
                         newCaseGroup.otherGenes = caseCohort_groupGenes['@graph'].map(function(article) { return article['@id']; });
@@ -720,8 +718,6 @@ const CaseControlCuration = React.createClass({
                     /* Group Additional Information form fields          */
                     /* Get input values for group properties             */
                     /*****************************************************/
-                    if (this.getFormValue(prefix + 'indFamilyCount')) newControlGroup.numberOfIndividualsWithFamilyInformation = parseInt(this.getFormValue(prefix + 'indFamilyCount'), 10);
-
                     // Add array of 'Other genes found to have variants in them'
                     if (controlCohort_groupGenes) {
                         newControlGroup.otherGenes = controlCohort_groupGenes['@graph'].map(function(article) { return article['@id']; });
@@ -1077,13 +1073,13 @@ function CaseControlName() {
 function GroupName(groupType) {
     let type, label, groupName, group;
     if (groupType === 'case-cohort') {
-        type = 'Case';
+        type = 'Case Cohort';
         label = 'Case Cohort Label:';
         groupName = 'caseCohort_groupName';
         group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
-        type = 'Control';
+        type = 'Control Cohort';
         label = 'Control Cohort Label:';
         groupName = 'controlCohort_groupName';
         group = this.state.controlGroup;
@@ -1227,10 +1223,10 @@ function GroupDemographics(groupType) {
     return (
         <div className="row section section-demographics">
             <h3><i className="icon icon-chevron-right"></i> Demographics <span className="label label-group">{headerLabel}</span></h3>
-            <Input type="number" ref={maleCount} label="# males:" value={group && group.numberOfMale}
+            <Input type="number" ref={maleCount} label="Number of males:" value={group && group.numberOfMale}
                 error={this.getFormError(maleCount)} clearError={this.clrFormErrors.bind(null, maleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={femaleCount} label="# females:" value={group && group.numberOfFemale}
+            <Input type="number" ref={femaleCount} label="Number of females:" value={group && group.numberOfFemale}
                 error={this.getFormError(femaleCount)} clearError={this.clrFormErrors.bind(null, femaleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref={country} label="Country of Origin:" defaultValue="none" value={group && group.countryOfOrigin}
@@ -1359,9 +1355,10 @@ var LabelOtherGenes = React.createClass({
 // as the calling component.
 function GroupAdditional(groupType) {
     let otherpmidsVal, othergenevariantsVal;
+    let inputDisabled = (groupType === 'control-cohort') ? true : false;
     let type, indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
     if (groupType === 'case-cohort') {
-        type = 'Case';
+        type = 'Case Cohort';
         indFamilyCount = 'caseCohort_indFamilyCount';
         otherGeneVariants = 'caseCohort_otherGeneVariants';
         additionalInfoGroup = 'caseCohort_additionalInfoGroup';
@@ -1370,7 +1367,7 @@ function GroupAdditional(groupType) {
         group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
-        type = 'Control';
+        type = 'Control Cohort';
         indFamilyCount = 'controlCohort_indFamilyCount';
         otherGeneVariants = 'controlCohort_otherGeneVariants';
         additionalInfoGroup = 'controlCohort_additionalInfoGroup';
@@ -1386,11 +1383,8 @@ function GroupAdditional(groupType) {
     return (
         <div className="row section section-additional-info">
             <h3><i className="icon icon-chevron-right"></i> Additional Information <span className="label label-group">{headerLabel}</span></h3>
-            <Input type="number" ref={indFamilyCount} label="Number of individuals with family information:" value={group && group.numberOfIndividualsWithFamilyInformation}
-                error={this.getFormError(indFamilyCount)} clearError={this.clrFormErrors.bind(null, indFamilyCount)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref={otherGeneVariants} label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
-                error={this.getFormError(otherGeneVariants)} clearError={this.clrFormErrors.bind(null, otherGeneVariants)}
+                error={this.getFormError(otherGeneVariants)} clearError={this.clrFormErrors.bind(null, otherGeneVariants)} inputDisabled={inputDisabled}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref={additionalInfoGroup} label={'Additional Information about this ' + type + ':'} rows="5" value={group && group.additionalInformation}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1577,11 +1571,6 @@ var CaseControlViewer = React.createClass({
                             <Panel title="Case Cohort — Additional Information" panelClassName="panel-data">
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>Number of individuals with family information</dt>
-                                        <dd>{caseCohort.numberOfIndividualsWithFamilyInformation}</dd>
-                                    </div>
-
-                                    <div>
                                         <dt>Other genes found to have variants in them</dt>
                                         <dd>{caseCohort.otherGenes && caseCohort.otherGenes.map(function(gene, i) {
                                             return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
@@ -1749,14 +1738,9 @@ var CaseControlViewer = React.createClass({
                                 </dl>
                             </Panel>
 
-                            <Panel title="Control Cohort — Additional Information" panelClassName="panel-data">
+                            <Panel title="Control Cohort — Additional Information" panelClassName="panel-data additional-information">
                                 <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Number of individuals with family information</dt>
-                                        <dd>{controlCohort.numberOfIndividualsWithFamilyInformation}</dd>
-                                    </div>
-
-                                    <div>
+                                    <div className="other-genes">
                                         <dt>Other genes found to have variants in them</dt>
                                         <dd>{controlCohort.otherGenes && controlCohort.otherGenes.map(function(gene, i) {
                                             return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
