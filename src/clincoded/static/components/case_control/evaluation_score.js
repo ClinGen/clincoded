@@ -87,19 +87,19 @@ module.exports = {
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
                                     groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
                                 <Input type="text" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null} handleChange={this.handleChange}
-                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="e.g. number only" />
+                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="Number only" />
                             </div>
                         );
                     })}
                     <h4 className="col-sm-7 col-sm-offset-5">Confidence/Significance</h4>
                     <Input type="text" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null} handleChange={this.handleChange}
-                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="e.g. number only" />
+                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="Number only" />
                     <Input type="text-range" labelClassName="col-sm-6 control-label" label="Confidence interval (%):" wrapperClassName="col-sm-6">
                         <Input type="text" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
-                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} handleChange={this.handleChange} placeholder="e.g. number only" />
+                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} handleChange={this.handleChange} placeholder="Number only" />
                         <span className="group-age-inter">to</span>
                         <Input type="text" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
-                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} handleChange={this.handleChange} placeholder="e.g. number only" />
+                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} handleChange={this.handleChange} placeholder="Number only" />
                     </Input>
                 </div>
                 <div className="row section section-bias-category">
