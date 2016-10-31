@@ -248,8 +248,7 @@ const CaseControlCuration = React.createClass({
             /*****************************************************/
             /* Applicable to both Case Cohort and Control Cohort */
             /*****************************************************/
-            let caseCohort_geneSymbols = curator.capture.genes(this.getFormValue('caseCohort_otherGeneVariants')),
-                controlCohort_geneSymbols = curator.capture.genes(this.getFormValue('controlCohort_otherGeneVariants'));
+            let caseCohort_geneSymbols = curator.capture.genes(this.getFormValue('caseCohort_otherGeneVariants'));
             let caseCohort_pmids = curator.capture.pmids(this.getFormValue('caseCohort_otherPmids')),
                 controlCohort_pmids = curator.capture.pmids(this.getFormValue('controlCohort_otherPmids'));
 
@@ -258,11 +257,6 @@ const CaseControlCuration = React.createClass({
                 // Gene symbol list is bad
                 formError = true;
                 this.setFormErrors('caseCohort_otherGeneVariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
-            }
-            if (controlCohort_geneSymbols && controlCohort_geneSymbols.length && _(controlCohort_geneSymbols).any(function(id) { return id === null; })) {
-                // Gene symbol list is bad
-                formError = true;
-                this.setFormErrors('controlCohort_otherGeneVariants', 'Use gene symbols (e.g. SMAD3) separated by commas');
             }
 
             // Check that all pmids (both Case Cohort and Control Cohort) have the proper format (will check for existence later)
@@ -344,30 +338,6 @@ const CaseControlCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(case_genes => {
-                    /*****************************************************/
-                    /* Control Group 'Additional Information' form field */
-                    /* Handle gene(s) input values                       */
-                    /*****************************************************/
-                    if (controlCohort_geneSymbols && controlCohort_geneSymbols.length) {
-                        // At least one gene symbol entered; search the DB for them.
-                        searchStr = '/search/?type=gene&' + controlCohort_geneSymbols.map(function(symbol) { return 'symbol=' + symbol; }).join('&');
-                        return this.getRestData(searchStr).then(genes => {
-                            if (genes['@graph'].length === controlCohort_geneSymbols.length) {
-                                // Successfully retrieved all genes
-                                controlCohort_groupGenes = genes;
-                                return Promise.resolve(genes);
-                            } else {
-                                this.setState({submitBusy: false}); // submit error; re-enable submit button
-                                var missingGenes = _.difference(controlCohort_geneSymbols, genes['@graph'].map(function(gene) { return gene.symbol; }));
-                                this.setFormErrors('controlCohort_otherGeneVariants', missingGenes.join(', ') + ' not found');
-                                throw genes;
-                            }
-                        });
-                    } else {
-                        // No genes entered; just pass null to the next then
-                        return Promise.resolve(null);
-                    }
-                }).then(control_genes => {
                     /*****************************************************/
                     /* Case Group 'Additional Information' form field    */
                     /* Handle 'Add any other PMID(s) that have evidence  */
@@ -718,11 +688,6 @@ const CaseControlCuration = React.createClass({
                     /* Group Additional Information form fields          */
                     /* Get input values for group properties             */
                     /*****************************************************/
-                    // Add array of 'Other genes found to have variants in them'
-                    if (controlCohort_groupGenes) {
-                        newControlGroup.otherGenes = controlCohort_groupGenes['@graph'].map(function(article) { return article['@id']; });
-                    }
-
                     // Add array of other PMIDs
                     if (controlCohort_groupArticles) {
                         newControlGroup.otherPMIDs = controlCohort_groupArticles['@graph'].map(function(article) { return article['@id']; });
@@ -1359,7 +1324,6 @@ function GroupAdditional(groupType) {
     let type, indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
     if (groupType === 'case-cohort') {
         type = 'Case Cohort';
-        indFamilyCount = 'caseCohort_indFamilyCount';
         otherGeneVariants = 'caseCohort_otherGeneVariants';
         additionalInfoGroup = 'caseCohort_additionalInfoGroup';
         otherPmids = 'caseCohort_otherPmids';
@@ -1368,8 +1332,6 @@ function GroupAdditional(groupType) {
     }
     if (groupType === 'control-cohort') {
         type = 'Control Cohort';
-        indFamilyCount = 'controlCohort_indFamilyCount';
-        otherGeneVariants = 'controlCohort_otherGeneVariants';
         additionalInfoGroup = 'controlCohort_additionalInfoGroup';
         otherPmids = 'controlCohort_otherPmids';
         headerLabel = 'CONTROL';
