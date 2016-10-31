@@ -326,11 +326,65 @@
                     "description": "Additional information of the segregation",
                     "type": "string"
                 },
-                "lodScore": {
-                    "title": "LOD Score",
-                    "description": "Score entered by user.",
-                    "comments": "May be changed to a calculated property later.",
+                "numberOfAffectedWithGenotype": {
+                    "title": "Number of AFFECTED Individuals with Genotype",
+                    "description": "For dominant and recessive",
                     "type": "number"
+                },
+                "numberOfUnaffectedWithoutBiallelicGenotype": {
+                    "title": "Number of UNAFFECTED Individuals without the Bialletic Genotype",
+                    "description": "Required for recessive only",
+                    "type": "number"
+                },
+                "numberOfSegregationsForThisFamily": {
+                    "title": "Number of Segregations Reproted for This Family",
+                    "type": "number"
+                },
+                "inconsistentSegregationAmongstTestedIndividuals": {
+                    "title": "Inconsistent Segregations amongst TESTED Individuals",
+                    "type": "string"
+                },
+                "explanationForInconsistent": {
+                    "title": "Explanation for the Inconsistent",
+                    "type": "string"
+                },
+                "familyConsanguineous": {
+                    "title": "Is this Family Consanguineous",
+                    "type": "string"
+                },
+                "pedigreeLocation": {
+                    "title": "Location of Pedigree in Publication",
+                    "description": "If pedigree provided in publication, indicate location",
+                    "type": "string"
+                },
+                "lodPublished": {
+                    "title": "LOD Score Published",
+                    "description": "Is there a LOD score published?",
+                    "type": "boolean"
+                },
+                "publishedLodScore": {
+                    "title": "Value of Published LOD Score",
+                    "description": "Entered by user.",
+                    "type": "number"
+                },
+                "estimatedLodScore": {
+                    "title": "Estimated LOD Score",
+                    "description": "In case no published LOD score",
+                    "type": "number"
+                },
+                "includeLodScoreInAggregateCalculation": {
+                    "title": "LOD in Aggregate Calculation",
+                    "type": "boolean"
+                },
+                "reasonExplanation": {
+                    "title": "Explanation",
+                    "description": "Reason for including LOD or not",
+                    "type": "string"
+                },
+                "recessiveZygosity": {
+                    "title": "Recessive Variant Zygosity",
+                    "description": "For recessive only",
+                    "type": "string"
                 },
                 "variants": {
                     "title": "Variants Associated with Proband",
