@@ -173,7 +173,7 @@ const CaseControlCuration = React.createClass({
         if (ref === 'controlCohort_groupName') {
             this.setState({controlGroupName: this.refs[ref].getValue()});
         }
-        if (ref === 'statisticVauleType') {
+        if (ref === 'statisticValueType') {
             this.refs[ref].getValue() === 'Other' ? this.setState({statisticOtherType: 'expanded'}) : this.setState({statisticOtherType: 'collapsed'});
         }
         if (ref === 'caseCohort_calcAlleleFreq' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
@@ -1318,7 +1318,7 @@ function GroupPower(groupType) {
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="e.g. number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
-                error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="e.g. number only"
+                error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. number only" />
