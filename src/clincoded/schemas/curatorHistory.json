@@ -36,6 +36,7 @@
                 "experimental",
                 "family",
                 "gdm",
+                "caseControl",
                 "group",
                 "individual",
                 "pathogenicity",
@@ -136,6 +137,35 @@
                             "description": "Unique id for Orphanet phenotypes.",
                             "type": "string",
                             "linkTo": "orphaPhenotype"
+                        }
+                    }
+                },
+                "caseControl": {
+                    "title": "Case Control history",
+                    "description": "History metadata for case control",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the case control",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article the case control provides evidence for",
+                            "type": "string",
+                            "linkTo": "article"
                         }
                     }
                 },
@@ -454,6 +484,14 @@
         },
         "meta.article.gdm": {
             "title": "GDM of PMID",
+            "type": "string"
+        },
+        "meta.caseControl.gdm": {
+            "title": "Case-Control GDM",
+            "type": "string"
+        },
+        "meta.caseControl.article": {
+            "title": "Case-Control article",
             "type": "string"
         },
         "meta.group.gdm": {
