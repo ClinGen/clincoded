@@ -53,20 +53,20 @@ var VAR_OTHER = 2; // Other description entered in a panel
 
 // Maps segregation field refs to schema properties
 var formMapSegregation = {
-    'SEGpedigreedesc': 'pedigreeDescription',
-    'SEGpedigreesize': 'pedigreeSize',
-    'SEGnogenerationsinpedigree': 'numberOfGenerationInPedigree',
-    'SEGconsanguineous': 'consanguineousFamily',
-    'SEGnocases': 'numberOfCases',
-    'SEGdenovo': 'deNovoType',
-    'SEGunaffectedcarriers': 'numberOfParentsUnaffectedCarriers',
-    'SEGnoaffected': 'numberOfAffectedAlleles',
-    'SEGnoaffected1': 'numberOfAffectedWithOneVariant',
-    'SEGnoaffected2': 'numberOfAffectedWithTwoVariants',
-    'SEGnounaffectedcarriers': 'numberOfUnaffectedCarriers',
-    'SEGnounaffectedindividuals': 'numberOfUnaffectedIndividuals',
-    'SEGbothvariants': 'probandAssociatedWithBoth',
-    'SEGaddedsegregationinfo': 'additionalInformation'
+    'SEGnumberOfAffectedWithGenotype': 'numberOfAffectedWithGenotype',
+    'SEGnumberOfUnaffectedWithoutBiallelicGenotype': 'numberOfUnaffectedWithoutBiallelicGenotype',
+    'SEGnumberOfSegregationsForThisFamily': 'numberOfSegregationsForThisFamily',
+    'SEGinconsistentSegregationAmongstTestedIndividuals': 'inconsistentSegregationAmongstTestedIndividuals',
+    'SEGexplanationForInconsistent': 'explanationForInconsistent',
+    'SEGfamilyConsanguineous': 'familyConsanguineous',
+    'SEGpedigreeLocation': 'pedigreeLocation',
+    'SEGlodPublished': 'lodPublished',
+    'SEGpublishedLodScore': 'publishedLodScore',
+    'SEGestimatedLodScore': 'estimatedLodScore',
+    'SEGincludeLodScoreInAggregateCalculation': 'includeLodScoreInAggregateCalculation',
+    'SEGreasonExplanation': 'reasonExplanation',
+    'SEGaddedsegregationinfo': 'additionalInformation',
+    'SEGrecessiveZygosity': 'recessiveZygosity'
 };
 
 var initialCv = {
@@ -112,7 +112,8 @@ var FamilyCuration = React.createClass({
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
-            recessiveZygosity: null // Determines whether to allow user to add 2nd variant
+            recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
+            lodPublished: null // Switch to show either calculated or estimated LOD score
         };
     },
 
@@ -130,7 +131,15 @@ var FamilyCuration = React.createClass({
             this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
-        } else if (ref === 'recessiveZygosity') {
+        } else if (ref === 'SEGlodPublished') {
+            if (this.refs[ref].getValue() === 'Yes') {
+                this.setState({lodPublished: 'Yes'});
+            } else if (this.refs[ref].getValue() === 'No') {
+                this.setState({lodPublished: 'No'});
+            } else {
+                this.setState({lodPublished: null});
+            }
+        } else if (ref === 'SEGrecessiveZygosity') {
             //Only show option to add 2nd variant if user selects 'Heterozygous'
             this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
                 if (this.state.variantCount > 1) {
@@ -366,7 +375,11 @@ var FamilyCuration = React.createClass({
                         for (var i = 0; i < segregation.variants.length; i++) {
                             if (segregation.variants[i].clinvarVariantId) {
                                 currVariantOption[i] = VAR_SPEC;
-                                stateObj.variantInfo[i] = {'clinvarVariantId': segregation.variants[i].clinvarVariantId, 'clinvarVariantTitle': segregation.variants[i].clinvarVariantTitle};
+                                stateObj.variantInfo[i] = {
+                                    'clinvarVariantId': segregation.variants[i].clinvarVariantId,
+                                    'clinvarVariantTitle': segregation.variants[i].clinvarVariantTitle,
+                                    'uuid': segregation.variants[i].uuid // Needed for links to variant assessment/curation
+                                };
                             } else if (segregation.variants[i].otherDescription) {
                                 currVariantOption[i] = VAR_OTHER;
                             } else {
@@ -715,13 +728,14 @@ var FamilyCuration = React.createClass({
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
-                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+                        let recessiveZygosity = this.getFormValue('VARrecessiveZygosity');
+                        let bothVariantsInTrans = this.getFormValue('bothVariantsInTrans');
 
                         // Build the search string depending on what the user entered
-                        if (otherVariantText) {
+                        if (recessiveZygosity) {
                             // Add this Other Description text to a new variant object
                             var newVariant = {};
-                            newVariant.otherDescription = otherVariantText;
+                            newVariant.otherDescription = recessiveZygosity;
                             newVariants.push(newVariant);
                         }
                     }
@@ -749,7 +763,7 @@ var FamilyCuration = React.createClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
-                    var label, diseases;
+                    var label, diseases, bothVariantsInTrans;
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -772,6 +786,7 @@ var FamilyCuration = React.createClass({
                     if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
+                        bothVariantsInTrans = this.getFormValue('individualBothVariantsInTrans');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
                         return makeStarterIndividual(label, diseases, familyVariants, this);
                     }
@@ -948,61 +963,71 @@ var FamilyCuration = React.createClass({
         // Unless others have assessed (in which case there's no segregation form), get the segregation
         // values from the form
         if (!this.cv.segregationAssessed) {
-            value1 = this.getFormValue('SEGpedigreedesc');
+            value1 = this.getFormValue('SEGnumberOfAffectedWithGenotype');
             if (value1) {
-                newSegregation[formMapSegregation['SEGpedigreedesc']] = value1;
+                newSegregation[formMapSegregation['SEGnumberOfAffectedWithGenotype']] = parseInt(value1, 10);
             }
-            value1 = this.getFormValue('SEGpedigreesize');
+            value1 = this.getFormValue('SEGnumberOfUnaffectedWithoutBiallelicGenotype');
             if (value1) {
-                newSegregation[formMapSegregation['SEGpedigreesize']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGnumberOfUnaffectedWithoutBiallelicGenotype']] = parseInt(value1, 10);
             }
-            value1 = this.getFormValue('SEGnogenerationsinpedigree');
+            value1 = this.getFormValue('SEGnumberOfSegregationsForThisFamily');
             if (value1) {
-                newSegregation[formMapSegregation['SEGnogenerationsinpedigree']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGnumberOfSegregationsForThisFamily']] = parseInt(value1, 10);
             }
-            value1 = this.getFormValue('SEGconsanguineous');
+            value1 = this.getFormValue('SEGinconsistentSegregationAmongstTestedIndividuals');
             if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGconsanguineous']] = value1 === 'Yes';
+                newSegregation[formMapSegregation['SEGinconsistentSegregationAmongstTestedIndividuals']] = value1;
             }
-            value1 = this.getFormValue('SEGnocases');
+            value1 = this.getFormValue('SEGexplanationForInconsistent');
             if (value1) {
-                newSegregation[formMapSegregation['SEGnocases']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGexplanationForInconsistent']] = value1;
             }
+            value1 = this.getFormValue('SEGfamilyConsanguineous');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGfamilyConsanguineous']] = value1;
+            }
+            value1 = this.getFormValue('SEGpedigreeLocation');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGpedigreeLocation']] = value1;
+            }
+            /*
             value1 = this.getFormValue('SEGdenovo');
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGdenovo']] = value1;
             }
-            value1 = this.getFormValue('SEGunaffectedcarriers');
+            */
+            value1 = this.getFormValue('SEGlodPublished');
             if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGunaffectedcarriers']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGlodPublished']] = value1 === 'Yes';
             }
-            value1 = this.getFormValue('SEGnoaffected');
+            value1 = this.getFormValue('SEGpublishedLodScore');
             if (value1) {
-                newSegregation[formMapSegregation['SEGnoaffected']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGpublishedLodScore']] = parseInt(value1, 10);
             }
-            value1 = this.getFormValue('SEGnoaffected1');
+            value1 = this.getFormValue('SEGestimatedLodScore');
             if (value1) {
-                newSegregation[formMapSegregation['SEGnoaffected1']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGestimatedLodScore']] = parseInt(value1, 10);
             }
-            value1 = this.getFormValue('SEGnoaffected2');
-            if (value1) {
-                newSegregation[formMapSegregation['SEGnoaffected2']] = parseInt(value1, 10);
-            }
-            value1 = this.getFormValue('SEGnounaffectedcarriers');
-            if (value1) {
-                newSegregation[formMapSegregation['SEGnounaffectedcarriers']] = parseInt(value1, 10);
-            }
-            value1 = this.getFormValue('SEGnounaffectedindividuals');
-            if (value1) {
-                newSegregation[formMapSegregation['SEGnounaffectedindividuals']] = parseInt(value1, 10);
-            }
-            value1 = this.getFormValue('SEGbothvariants');
+            value1 = this.getFormValue('SEGincludeLodScoreInAggregateCalculation');
             if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGbothvariants']] = value1 === 'Yes';
+                newSegregation[formMapSegregation['SEGincludeLodScoreInAggregateCalculation']] = value1 === 'Yes';
+            }
+            value1 = this.getFormValue('SEGreasonExplanation');
+            if (value1) {
+                newSegregation[formMapSegregation['SEGreasonExplanation']] = value1;
             }
             value1 = this.getFormValue('SEGaddedsegregationinfo');
             if (value1) {
                 newSegregation[formMapSegregation['SEGaddedsegregationinfo']] = value1;
+            }
+            /***********************************/
+            /* variant zygosity form field     */
+            /* Associated variant with Proband */
+            /***********************************/
+            value1 = this.getFormValue('SEGrecessiveZygosity');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGrecessiveZygosity']] = value1;
             }
         } else if (newFamily.segregation && Object.keys(newFamily.segregation).length) {
             newSegregation = _.clone(newFamily.segregation);
@@ -1274,7 +1299,7 @@ var FamilyCuration = React.createClass({
                                             {FamilyName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title="Family – Common Disease(s) & Phenotype(s)" open>
+                                            <Panel title="Family – Disease(s) & Phenotype(s)" open>
                                                 {FamilyCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
@@ -1305,23 +1330,23 @@ var FamilyCuration = React.createClass({
                                             </div>
                                         }
 
-                                        <Panel panelClassName="panel-data">
-                                            <dl className="dl-horizontal">
-                                                <dt>Assessments</dt>
-                                                <dd>
-                                                    {assessments.length ? assessments.map(function(assessment, i) {
-                                                        return (
-                                                            <span key={assessment.uuid}>
-                                                                {assessment.value} ({assessment.submitted_by.title})
-                                                                {i < assessments.length-1 ? <br /> : null}
-                                                            </span>
-                                                        );})
-                                                    :
-                                                    <div>None</div>
-                                                    }
-                                                </dd>
-                                            </dl>
-                                        </Panel>
+                                        {assessments && assessments.length ?
+                                            <Panel panelClassName="panel-data">
+                                                <dl className="dl-horizontal">
+                                                    <dt>Assessments</dt>
+                                                    <dd>
+                                                        {assessments.map(function(assessment, i) {
+                                                            return (
+                                                                <span key={assessment.uuid}>
+                                                                    {assessment.value} ({assessment.submitted_by.title})
+                                                                    {i < assessments.length-1 ? <br /> : null}
+                                                                </span>
+                                                            );})
+                                                        }
+                                                    </dd>
+                                                </dl>
+                                            </Panel>
+                                        : null}
 
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -1556,14 +1581,14 @@ var FamilySegregation = function() {
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
             <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recerssive:</strong><br/>Number of AFFECTED individuals <i>with</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recerssive Only:</strong><br/>Number of UNAFFECTED individuals <i>without</i> the bialletic genotype?</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="number" ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals" label="Were there any inconsistent segregations amongst TESTED individuals? (i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)"
                 defaultValue="none" value={segregation.inconsistentSegregationAmongstTestedIndividuals} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1584,6 +1609,7 @@ var FamilySegregation = function() {
             </Input>
             <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="5" value={segregation.pedigreeLocation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
+            <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
             <Input type="select" ref="SEGlodPublished" label="Published Calculated LOD score?:"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.lodPublished)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1592,11 +1618,14 @@ var FamilySegregation = function() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
-            <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/>(optional, and only if no published calculated LOD score)</span>} value={segregation.estimatedLodScore}
-                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {this.state.lodPublished === 'Yes' ?
+                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+            : null}
+            {this.state.lodPublished === 'No' ?
+                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/>(optional, and only if no published calculated LOD score)</span>} value={segregation.estimatedLodScore}
+                    handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+            : null}
             {/*** Collected at Individual level for PROBAND only
             <Input type="select" ref="SEGdenovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1614,7 +1643,7 @@ var FamilySegregation = function() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <Input type="textarea" ref="SEGpedigreeLocation" label="Explain reasoning:" rows="5" value={segregation.pedigreeLocation} handleChange={this.handleChange}
+            <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5" value={segregation.reasonExplanation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1628,6 +1657,7 @@ var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
+    let individualIncluded = family && family.individualIncluded ? family.individualIncluded : null;
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
@@ -1687,7 +1717,7 @@ var FamilyVariant = function() {
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         {this.state.variantInfo[i] && i === 0 ?
-                            <Input type="select" ref="recessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                            <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
                                 value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                                 <option value="none">No Selection</option>
@@ -1698,8 +1728,8 @@ var FamilyVariant = function() {
                             </Input>
                         : null}
                         {this.state.variantInfo[i] && i === 1 ?
-                            <Input type="select" ref="recessiveZygosity" label="Is this 2nd variant located in trans with 1st variant?" defaultValue="none"
-                                value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                            <Input type="select" ref="individualBothVariantsInTrans" label="Is this 2nd variant located in trans with 1st variant?" defaultValue="none"
+                                value={individualIncluded && individualIncluded.bothVariantsInTrans ? individualIncluded.bothVariantsInTrans : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
@@ -2034,16 +2064,6 @@ var FamilyViewer = React.createClass({
                         <Panel title="Family — Demographics" panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
-                                    <dt># Males</dt>
-                                    <dd>{family.numberOfMale}</dd>
-                                </div>
-
-                                <div>
-                                    <dt># Females</dt>
-                                    <dd>{family.numberOfFemale}</dd>
-                                </div>
-
-                                <div>
                                     <dt>Country of Origin</dt>
                                     <dd>{family.countryOfOrigin}</dd>
                                 </div>
@@ -2056,21 +2076,6 @@ var FamilyViewer = React.createClass({
                                 <div>
                                     <dt>Race</dt>
                                     <dd>{family.race}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>Age Range Type</dt>
-                                    <dd>{family.ageRangeType}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>Age Range</dt>
-                                    <dd>{family.ageRangeFrom || family.ageRangeTo ? <span>{family.ageRangeFrom + ' – ' + family.ageRangeTo}</span> : null}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>Age Range Unit</dt>
-                                    <dd>{family.ageRangeUnit}</dd>
                                 </div>
                             </dl>
                         </Panel>
@@ -2126,33 +2131,27 @@ var FamilyViewer = React.createClass({
 
                         {FamilySegregationViewer(segregation, assessments, true)}
 
-                        {this.cv.gdmUuid ?
+                        {this.cv.gdmUuid && validAssessments && validAssessments.length ?
                             <Panel panelClassName="panel-data">
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Assessments</dt>
                                         <dd>
-                                            {validAssessments.length ?
-                                                <div>
-                                                    {validAssessments.map(function(assessment, i) {
-                                                        return (
-                                                            <span key={assessment.uuid}>
-                                                                {i > 0 ? <br /> : null}
-                                                                {assessment.value+' ('+assessment.submitted_by.title+')'}
-                                                            </span>
-                                                        );
-                                                    })}
-                                                </div>
-                                            : <div>None</div>}
+                                            <div>
+                                                {validAssessments.map(function(assessment, i) {
+                                                    return (
+                                                        <span key={assessment.uuid}>
+                                                            {i > 0 ? <br /> : null}
+                                                            {assessment.value+' ('+assessment.submitted_by.title+')'}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
                                         </dd>
                                     </div>
                                 </dl>
                             </Panel>
                         : null}
-
-                        <AssessmentPanel panelTitle="Segregation Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                            assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
-                            noSeg={!haveSegregation} ownerNotAssessed={userFamily ? false : !familyUserAssessed} />
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {
@@ -2175,11 +2174,19 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {variant.otherDescription ?
+                                        {segregation.recessiveZygosity && i === 0 ?
                                             <div>
                                                 <dl className="dl-horizontal">
-                                                    <dt>Other description</dt>
-                                                    <dd>{variant.otherDescription}</dd>
+                                                    <dt>If Recessive, select variant zygosity</dt>
+                                                    <dd>{segregation.recessiveZygosity}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {family.individualIncluded && family.individualIncluded.bothVariantsInTrans && i === 1 ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Is this 2nd variant located in trans with 1st variant?</dt>
+                                                    <dd>{family.individualIncluded.bothVariantsInTrans}</dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2224,68 +2231,63 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
         <Panel title="Family — Segregation" panelClassName="panel-data" open={open}>
             <dl className="dl-horizontal">
                 <div>
-                    <dt>Pedigree description</dt>
-                    <dd>{segregation && segregation.pedigreeDescription}</dd>
+                    <dt>Number of AFFECTED individuals with genotype</dt>
+                    <dd>{segregation && segregation.numberOfAffectedWithGenotype}</dd>
                 </div>
 
                 <div>
-                    <dt>Pedigree size</dt>
-                    <dd>{segregation && segregation.pedigreeSize}</dd>
+                    <dt>Number of UNAFFECTED individuals without the bialletic genotype</dt>
+                    <dd>{segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype}</dd>
                 </div>
 
                 <div>
-                    <dt># generations in pedigree</dt>
-                    <dd>{segregation && segregation.numberOfGenerationInPedigree}</dd>
+                    <dt>Number of segregations reported for this family</dt>
+                    <dd>{segregation && segregation.numberOfSegregationsForThisFamily}</dd>
+                </div>
+
+                <div>
+                    <dt>Inconsistent segregations amongst TESTED individuals</dt>
+                    <dd>{segregation && segregation.inconsistentSegregationAmongstTestedIndividuals}</dd>
+                </div>
+
+                <div>
+                    <dt>Explanation for the inconsistent segregations</dt>
+                    <dd>{segregation && segregation.explanationForInconsistent}</dd>
                 </div>
 
                 <div>
                     <dt>Consanguineous family</dt>
-                    <dd>{segregation && segregation.consanguineousFamily === true ? 'Yes' : (segregation.consanguineousFamily === false ? 'No' : '')}</dd>
+                    <dd>{segregation && segregation.familyConsanguineous}</dd>
                 </div>
 
                 <div>
-                    <dt># cases (phenotype positive)</dt>
-                    <dd>{segregation && segregation.numberOfCases}</dd>
+                    <dt>Location of pedigree in publication</dt>
+                    <dd>{segregation && segregation.pedigreeLocation}</dd>
                 </div>
 
                 <div>
-                    <dt>de novo type</dt>
-                    <dd>{segregation && segregation.deNovoType}</dd>
+                    <dt>Published Calculated LOD score?</dt>
+                    <dd>{segregation && segregation.lodPublished === true ? 'Yes' : (segregation.lodPublished === false ? 'No' : '')}</dd>
                 </div>
 
                 <div>
-                    <dt># parents who are unaffected carriers</dt>
-                    <dd>{segregation && segregation.numberOfParentsUnaffectedCarriers}</dd>
+                    <dt>Published Calculated LOD score</dt>
+                    <dd>{segregation && segregation.publishedLodScore}</dd>
                 </div>
 
                 <div>
-                    <dt># affected individuals</dt>
-                    <dd>{segregation && segregation.numberOfAffectedAlleles}</dd>
+                    <dt>Estimated LOD score</dt>
+                    <dd>{segregation && segregation.estimatedLodScore}</dd>
                 </div>
 
                 <div>
-                    <dt># affected with 1 variant</dt>
-                    <dd>{segregation && segregation.numberOfAffectedWithOneVariant}</dd>
+                    <dt>Include LOD score in final aggregate calculation?</dt>
+                    <dd>{segregation && segregation.includeLodScoreInAggregateCalculation === true ? 'Yes' : (segregation.includeLodScoreInAggregateCalculation === false ? 'No' : '')}</dd>
                 </div>
 
                 <div>
-                    <dt># affected with 2 different variants or homozygous for 1</dt>
-                    <dd>{segregation && segregation.numberOfAffectedWithTwoVariants}</dd>
-                </div>
-
-                <div>
-                    <dt># unaffected carriers</dt>
-                    <dd>{segregation && segregation.numberOfUnaffectedCarriers}</dd>
-                </div>
-
-                <div>
-                    <dt># unaffected individuals</dt>
-                    <dd>{segregation && segregation.numberOfUnaffectedIndividuals}</dd>
-                </div>
-
-                <div>
-                    <dt>If more than 1 variant, is proband associated with both</dt>
-                    <dd>{segregation && segregation.probandAssociatedWithBoth === true ? 'Yes' : (segregation.probandAssociatedWithBoth === false ? 'No' : '')}</dd>
+                    <dt>Reason for including LOD or not</dt>
+                    <dd>{segregation && segregation.reasonExplanation}</dd>
                 </div>
 
                 <div>
