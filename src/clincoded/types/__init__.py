@@ -536,13 +536,18 @@ class CaseControl(Item):
     embedded = [
         'submitted_by',
         'caseCohort',
+        'caseCohort.commonDiagnosis',
+        'caseCohort.submitted_by',
         'controlCohort',
+        'controlCohort.submitted_by',
         'scores',
         'scores.submitted_by',
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.groups',
-        'associatedAnnotations.associatedGdm'
+        'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'caseControlStudies')
@@ -946,9 +951,7 @@ class EvidenceScore(Item):
         'evidenceScored',
         'caseControl_scored',
         'caseControl_scored.associatedAnnotations',
-        'caseControl_scored.associatedAnnotations.associatedGdm',
-        'individual_scored',
-        'experimental_scored'
+        'caseControl_scored.associatedAnnotations.associatedGdm'
     ]
     rev = {
         'caseControl_scored': ('caseControl', 'scores')
@@ -1441,6 +1444,10 @@ class History(Item):
         'meta.article.gdm',
         'meta.article.gdm.gene',
         'meta.article.gdm.disease',
+        'meta.caseControl.gdm',
+        'meta.caseControl.gdm.gene',
+        'meta.caseControl.gdm.disease',
+        'meta.caseControl.article',
         'meta.group.gdm',
         'meta.group.gdm.gene',
         'meta.group.gdm.disease',
