@@ -948,6 +948,11 @@ var IndividualCuration = React.createClass({
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} open>
+                                                {IndividualScore.call(this)}
+                                            </Panel>
+                                        </PanelGroup>
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
@@ -1433,6 +1438,25 @@ var LabelOtherPmids = React.createClass({
     }
 });
 
+// Additional Information family curation panel. Call with .call(this) to run in the same context
+// as the calling component.
+var IndividualScore = function() {
+    let individual = this.state.individual;
+    let scores = individual && individual.scores ? individual.scores : null;
+
+    return (
+        <div className="row">
+            <Input type="select" ref="scoreProband" label="Select Status:" defaultValue="none" value={scores && scores.length ? scores[0].scoreStatus : null}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option value="Score">Score</option>
+                <option value="Review">Review</option>
+                <option value="Contradicts">Contradicts</option>
+            </Input>
+        </div>
+    );
+};
 
 var IndividualViewer = React.createClass({
     render: function() {
