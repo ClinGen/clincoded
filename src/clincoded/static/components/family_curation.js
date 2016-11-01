@@ -111,7 +111,8 @@ var FamilyCuration = React.createClass({
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
-            existedOrphanetId: null // user-supplied value in Orphanet id input field
+            existedOrphanetId: null, // user-supplied value in Orphanet id input field
+            recessiveZygosity: null // Determines whether to allow user to add 2nd variant
         };
     },
 
@@ -129,6 +130,13 @@ var FamilyCuration = React.createClass({
             this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
+        } else if (ref === 'recessiveZygosity') {
+            //Only show option to add 2nd variant if user selects 'Heterozygous'
+            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
+                if (this.state.variantCount > 1) {
+                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
+                }
+            });
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -1545,7 +1553,7 @@ var FamilySegregation = function() {
 
     return (
         <div className="row">
-            <h4>Tested Individuals</h4>
+            <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
             <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recerssive:</strong><br/>Number of AFFECTED individuals <i>with</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -1584,10 +1592,10 @@ var FamilySegregation = function() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <h4>LOD Score (select one to include as score):</h4>
+            <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
             <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score<br/>(optional, and only if no published calculated LOD score)</span>} value={segregation.estimatedLodScore}
+            <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/>(optional, and only if no published calculated LOD score)</span>} value={segregation.estimatedLodScore}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {/*** Collected at Individual level for PROBAND only
             <Input type="select" ref="SEGdenovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType} handleChange={this.handleChange}
@@ -1648,25 +1656,25 @@ var FamilyVariant = function() {
                 return (
                     <div key={i} className="variant-panel">
                         {this.state.variantInfo[i] ?
-                            <div>
-                                <div className="row">
+                            <div className="variant-resources">
+                                <div className="row variant-data-source">
                                     <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
                                 </div>
                                 <div className="row">
                                     <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                     <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
                                 </div>
-                                <div className="row">
+                                <div className="row variant-assessment">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
-                                        <a className="btn btn-default" href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid}  target="_blank">Assess variant's gene impact</a>
+                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Assess variant's gene impact <i className="icon icon-external-link"></i></a>
                                     </span>
                                 </div>
-                                <div className="row">
+                                <div className="row variant-curation">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
-                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid}  target="_blank">View variant evidence in Variant Curation Interface</a>
+                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface <i className="icon icon-external-link"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -1678,6 +1686,28 @@ var FamilyVariant = function() {
                             buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                        {this.state.variantInfo[i] && i === 0 ?
+                            <Input type="select" ref="recessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                                value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Homozygous">Homozygous</option>
+                                <option value="Hemizygous">Hemizygous</option>
+                                <option value="Heterozygous">Heterozygous</option>
+                            </Input>
+                        : null}
+                        {this.state.variantInfo[i] && i === 1 ?
+                            <Input type="select" ref="recessiveZygosity" label="Is this 2nd variant located in trans with 1st variant?" defaultValue="none"
+                                value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not Specified">Not Specified</option>
+                            </Input>
+                        : null}
                     </div>
                 );
             })}
@@ -1706,10 +1736,11 @@ var FamilyVariant = function() {
                     }
                 </div>
             : null }
-            {this.state.variantCount < MAX_VARIANTS ?
+            {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
                 <div className="row">
                     <div className="col-sm-7 col-sm-offset-5 clearfix">
-                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
+                            title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
                             clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                     </div>
                 </div>
