@@ -337,7 +337,7 @@
                     "type": "number"
                 },
                 "numberOfSegregationsForThisFamily": {
-                    "title": "Number of Segregations Reproted for This Family",
+                    "title": "Number of Segregations Reported for This Family",
                     "type": "number"
                 },
                 "inconsistentSegregationAmongstTestedIndividuals": {
