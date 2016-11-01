@@ -1629,6 +1629,10 @@ function flattenGroup(group) {
         flat.control = group.control['@id'];
     }
 
+    if (group.groupType) {
+        flat.groupType = group.groupType;
+    }
+
     return flat;
 }
 
@@ -2232,11 +2236,11 @@ var DeleteButtonModal = React.createClass({
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseControlStudies, depth, mode, 'case control'));
         }
         if (item.caseCohort) {
-            hasChildren = false;
+            hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseCohort, depth, mode, 'case cohort'));
         }
         if (item.controlCohort) {
-            hasChildren = false;
+            hasChildren = true;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.controlCohort, depth, mode, 'control cohort'));
         }
 
@@ -2264,6 +2268,22 @@ var DeleteButtonModal = React.createClass({
             // flatten the target item and set its status to deleted
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
+
+            // When delete case control
+            if (item['@type'][0] === 'caseControl') {
+                // Set status = 'deleted' to case cohort
+                let uuid = item.caseCohort['@id'];
+                let deletedItem = flatten(item.caseCohort, 'group');
+                deletedItem.status = 'deleted';
+                this.putRestData(uuid + '?render=false', deletedItem);
+
+                // Set status = 'deleted' to control cohort
+                uuid = item.controlCohort['@id'];
+                deletedItem = flatten(item.controlCohort, 'group');
+                deletedItem.status = 'deleted';
+                this.putRestData(uuid + '?render=false', deletedItem);
+            }
+
             // define operationType and add flags as needed
             var operationType = 'delete';
             if (depth > 0) {
@@ -2305,6 +2325,7 @@ var DeleteButtonModal = React.createClass({
                     // Display case cohort and control cohort in a case control
                     tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem['@id']} onClick={this.linkout}>{tempSubItem['@type'][0]} {tempSubItem.label}</a></span>;
                     returnPayload.push(tempDisplayString);
+                    returnPayload = returnPayload.concat(this.recurseItem(tempSubItem, depth + 1, mode));
                 } else if (mode == 'id') {
                     // if the mode is 'id', grab the @ids of the child items
                     returnPayload.push(tempSubItem['@id']);
@@ -2364,10 +2385,6 @@ var DeleteButtonModal = React.createClass({
                             // Empty variants of parent object if target item is individual and parent is family
                             deletedParent.segregation.variants = [];
                         }
-                    } else if (deletedItemType == 'caseCohort') {
-                        deletedParent.caseCohort = _.without(deletedParent.caseCohort, itemUuid);
-                    } else if (deletedItemType == 'controlCohort') {
-                        deletedParent.controlCohort = _.without(deletedParent.controlCohort, itemUuid);
                     }
                 }
                 // PUT updated parent object w/ removed link to deleted item
