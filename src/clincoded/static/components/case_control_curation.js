@@ -685,10 +685,6 @@ const CaseControlCuration = React.createClass({
                     if (value !== 'none') {
                         newControlGroup.race = value;
                     }
-                    value = this.getFormValue(prefix + 'ageRangeType');
-                    if (value !== 'none') {
-                        newControlGroup.ageRangeType = value + '';
-                    }
                     value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
                         newControlGroup.ageRangeFrom = parseInt(value, 10);
@@ -1195,7 +1191,6 @@ function GroupDemographics(groupType) {
         country = 'controlCohort_country';
         ethnicity = 'controlCohort_ethnicity';
         race = 'controlCohort_race';
-        ageRangeType = 'controlCohort_ageRangeType';
         ageFrom = 'controlCohort_ageFrom';
         ageTo = 'controlCohort_ageTo';
         ageUnit = 'controlCohort_ageUnit';
@@ -1242,6 +1237,21 @@ function GroupDemographics(groupType) {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
+                {groupType === 'case-cohort' ?
+                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        <option value="none">No Selection</option>
+                        <option disabled="disabled"></option>
+                        <option value="Onset">Onset</option>
+                        <option value="Report">Report</option>
+                        <option value="Diagnosis">Diagnosis</option>
+                        <option value="Death">Death</option>
+                    </Input>
+                    :
+                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group invisible-placeholder" inputDisabled={true}>
+                    </Input>
+                }
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="number" ref={ageFrom} inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
                         error={this.getFormError(ageFrom)} clearError={this.clrFormErrors.bind(null, ageFrom)} value={group && group.ageRangeFrom} />
@@ -1621,11 +1631,6 @@ var CaseControlViewer = React.createClass({
                                     <div>
                                         <dt>Race</dt>
                                         <dd>{controlCohort.race}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Age Range Type</dt>
-                                        <dd>{controlCohort.ageRangeType}</dd>
                                     </div>
 
                                     <div>

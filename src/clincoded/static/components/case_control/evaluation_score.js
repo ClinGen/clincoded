@@ -12,7 +12,7 @@ import { Form, Input } from '../../libs/bootstrap/form';
 // and convert its values to an object.
 // This object assumes it has a React component's 'this', so these need to be called
 module.exports = {
-    
+
     // Renders Case-Control Evaluation & Score panel
     render(case_control, scores) {
         let statisticOtherType = this.state.statisticOtherType; // 'collapsed' or 'expanded'
@@ -82,7 +82,7 @@ module.exports = {
                                     <option value="Relative Risk">Relative Risk</option>
                                     <option value="Other">Other</option>
                                 </Input>
-                                <Input type="number" ref="statisticOtherType" label="Other test statistic:" value={entry.otherType ? entry.otherType : null}
+                                <Input type="text" ref="statisticOtherType" label="Other test statistic:" value={entry.otherType ? entry.otherType : null}
                                     error={this.getFormError('statisticOtherType')} clearError={this.clrFormErrors.bind(null, 'statisticOtherType')}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
                                     groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
