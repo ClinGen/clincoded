@@ -2516,3 +2516,16 @@ table.login-users-interpretations {
 .control-cohort-view .additional-information .other-genes {
     visibility: hidden;
 }
+
+.panel-body.panel-std {
+    .section {
+        h3 {
+            border-bottom: solid 1px lighten(#486e82, 35%);
+            color: #486e82;
+            font-size: 1.45em;
+            font-weight: 500;
+            margin: 0 0 30px 0;
+            padding: 5px 0;
+        }
+    }
+}
