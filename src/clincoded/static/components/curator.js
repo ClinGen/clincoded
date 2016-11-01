@@ -2228,7 +2228,6 @@ var DeleteButtonModal = React.createClass({
             }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
         }
-        //if (item.caseControl) {
         if (item.caseControlStudies) {
             if (item.caseControlStudies.length > 0) {
                 hasChildren = true;
@@ -2271,13 +2270,13 @@ var DeleteButtonModal = React.createClass({
 
             // When delete case control
             if (item['@type'][0] === 'caseControl') {
-                // Set status = 'deleted' to case cohort
+                // Set status 'deleted' to case cohort
                 let uuid = item.caseCohort['@id'];
                 let deletedItem = flatten(item.caseCohort, 'group');
                 deletedItem.status = 'deleted';
                 this.putRestData(uuid + '?render=false', deletedItem);
 
-                // Set status = 'deleted' to control cohort
+                // Set status 'deleted' to control cohort
                 uuid = item.controlCohort['@id'];
                 deletedItem = flatten(item.controlCohort, 'group');
                 deletedItem.status = 'deleted';

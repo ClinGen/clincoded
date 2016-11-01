@@ -186,7 +186,11 @@ var FormMixin = module.exports.FormMixin = {
                 // Validate that type="number" fields have a valid number in them
                 var numVal = this.getFormValueNumber(ref);
                 if (numVal === null) {
-                    this.setFormErrors(ref, 'Number only');
+                    if (ref.indexOf('numGroupVariant') > -1 || ref.indexOf('numGroupGenotyped') > -1) {
+                        this.setFormErrors(ref, 'non-decimal values only');
+                    } else {
+                        this.setFormErrors(ref, 'Number only');
+                    }
                     valid = false;
                 } else if (numVal !== '' && ((props.minVal && numVal < props.minVal) || (props.maxVal && numVal > props.maxVal))) {
                     valid = false;

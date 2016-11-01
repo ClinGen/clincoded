@@ -1315,13 +1315,13 @@ function GroupPower(groupType) {
             }
             ****/}
             <Input type="number" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
-                error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="e.g. number only"
+                error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="text" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. number only" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
         </div>
     );
 }
