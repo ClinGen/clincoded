@@ -1577,14 +1577,14 @@ var FamilySegregation = function() {
     var segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
 
     return (
-        <div className="row">
+        <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
             <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recerssive:</strong><br/>Number of AFFECTED individuals <i>with</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recerssive Only:</strong><br/>Number of UNAFFECTED individuals <i>without</i> the bialletic genotype?</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
             <Input type="number" ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
@@ -1607,7 +1607,7 @@ var FamilySegregation = function() {
                 <option value="No">No</option>
                 <option value="Not Specified">Not Specified</option>
             </Input>
-            <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="5" value={segregation.pedigreeLocation} handleChange={this.handleChange}
+            <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3" value={segregation.pedigreeLocation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
             <Input type="select" ref="SEGlodPublished" label="Published Calculated LOD score?:"
