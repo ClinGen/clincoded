@@ -153,7 +153,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <span className="family-submit-results-btn">
-                                                    <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + probandIndividual.uuid}>Edit proband Individual</a>
+                                                    <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + probandIndividual.uuid}>Score / Add information about proband</a>
                                                 </span>
                                             </div>
                                             <div className="col-md-6">
