@@ -1101,9 +1101,7 @@ var FamilyCuration = React.createClass({
             }
             // Update the form and display values with new data
             this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
-            // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
+            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle, 'uuid': data.uuid};
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
@@ -1622,6 +1620,9 @@ var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
+    let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
+    let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
+    let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
 
     return (
         <div className="row">
@@ -1656,6 +1657,18 @@ var FamilyVariant = function() {
                                     <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                     <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
                                 </div>
+                                <div className="row">
+                                    <span className="col-sm-5 control-label"><label></label></span>
+                                    <span className="col-sm-7 text-no-input">
+                                        <a className="btn btn-default" href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid}  target="_blank">Assess variant's gene impact</a>
+                                    </span>
+                                </div>
+                                <div className="row">
+                                    <span className="col-sm-5 control-label"><label></label></span>
+                                    <span className="col-sm-7 text-no-input">
+                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid}  target="_blank">View variant evidence in Variant Curation Interface</a>
+                                    </span>
+                                </div>
                             </div>
                         : null}
                         <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
@@ -1665,9 +1678,6 @@ var FamilyVariant = function() {
                             buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-variant-desc" />
-                        {curator.renderMutalyzerLink()}
                     </div>
                 );
             })}
@@ -1699,13 +1709,6 @@ var FamilyVariant = function() {
             {this.state.variantCount < MAX_VARIANTS ?
                 <div className="row">
                     <div className="col-sm-7 col-sm-offset-5 clearfix">
-                        {this.state.variantCount ?
-                            <p className="alert alert-warning">
-                                For a recessive condition, you must enter both variants believed to be causative for the disease in order that
-                                each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
-                                variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
-                            </p>
-                        : null}
                         <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title={this.state.variantCount ? "Add another variant associated with Individual" : "Add variant associated with Individual"}
                             clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                     </div>
