@@ -273,7 +273,7 @@
             "type": "array",
             "items": {
                 "title": "Score",
-                "description": "Score assigned by user. Limited to one ber user",
+                "description": "Score assigned by user. Limited to one per user",
                 "type": "string",
                 "linkTo": "evidenceScore"
             }
