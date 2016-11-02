@@ -711,7 +711,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 </div>
             : null}
             {familyAssessable ?
-                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View/Assess</a>
+                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View</a>
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
@@ -1673,7 +1673,9 @@ function flattenFamily(family) {
 
 var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
-    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
+    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
+    "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
+    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "reasonExplanation", "recessiveZygosity"];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
@@ -1694,7 +1696,7 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
-    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created"
+    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed"
 ];
 
 function flattenIndividual(individual) {
@@ -1719,6 +1721,13 @@ function flattenIndividual(individual) {
     if (individual.variants && individual.variants.length) {
         flat.variants = individual.variants.map(function(variant) {
             return variant['@id'];
+        });
+    }
+
+    // Flatten evidence scores
+    if (individual.scores && individual.scores.length) {
+        flat.scores = individual.scores.map(function(score) {
+            return score['@id'];
         });
     }
 
