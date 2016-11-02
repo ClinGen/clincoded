@@ -729,13 +729,12 @@ var FamilyCuration = React.createClass({
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
                         let recessiveZygosity = this.getFormValue('VARrecessiveZygosity');
-                        let bothVariantsInTrans = this.getFormValue('bothVariantsInTrans');
 
                         // Build the search string depending on what the user entered
                         if (recessiveZygosity) {
                             // Add this Other Description text to a new variant object
                             var newVariant = {};
-                            newVariant.otherDescription = recessiveZygosity;
+                            newVariant.recessiveZygosity = recessiveZygosity;
                             newVariants.push(newVariant);
                         }
                     }
@@ -763,7 +762,7 @@ var FamilyCuration = React.createClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(data => {
-                    var label, diseases, bothVariantsInTrans;
+                    var label, diseases;
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -786,7 +785,6 @@ var FamilyCuration = React.createClass({
                     if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
-                        bothVariantsInTrans = this.getFormValue('individualBothVariantsInTrans');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
                         return makeStarterIndividual(label, diseases, familyVariants, this);
                     }
@@ -2169,14 +2167,6 @@ var FamilyViewer = React.createClass({
                                                 <dl className="dl-horizontal">
                                                     <dt>If Recessive, select variant zygosity</dt>
                                                     <dd>{segregation.recessiveZygosity}</dd>
-                                                </dl>
-                                            </div>
-                                        : null }
-                                        {family.individualIncluded && family.individualIncluded.bothVariantsInTrans && i === 1 ?
-                                            <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>Is this 2nd variant located in trans with 1st variant?</dt>
-                                                    <dd>{family.individualIncluded.bothVariantsInTrans}</dd>
                                                 </dl>
                                             </div>
                                         : null }
