@@ -1728,20 +1728,18 @@ var FamilyVariant = function() {
                                 <option value="Heterozygous">Heterozygous</option>
                             </Input>
                         : null}
-                        {this.state.variantInfo[i] && i === 1 ?
-                            <Input type="select" ref="individualBothVariantsInTrans" label="Is this 2nd variant located in trans with 1st variant?" defaultValue="none"
-                                value={individualIncluded && individualIncluded.bothVariantsInTrans ? individualIncluded.bothVariantsInTrans : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                                <option value="Not Specified">Not Specified</option>
-                            </Input>
-                        : null}
                     </div>
                 );
             })}
+            {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
+                <div className="row">
+                    <div className="col-sm-7 col-sm-offset-5 clearfix">
+                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
+                            title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
+                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
+                    </div>
+                </div>
+            : null}
             {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel">
                     <Input type="text" ref="individualname" label="Individual Label"
@@ -1767,15 +1765,6 @@ var FamilyVariant = function() {
                     }
                 </div>
             : null }
-            {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
-                <div className="row">
-                    <div className="col-sm-7 col-sm-offset-5 clearfix">
-                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
-                            title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
-                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                    </div>
-                </div>
-            : null}
         </div>
     );
 };
