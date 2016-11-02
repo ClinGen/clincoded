@@ -1975,5 +1975,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "clingen.demo.curator@genome.stanford.edu",
+        "first_name": "ClinGen",
+        "last_name": "Test Curator",
+        "uuid": "7b112e8d-4e72-4336-b789-f7c0b241da01",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]

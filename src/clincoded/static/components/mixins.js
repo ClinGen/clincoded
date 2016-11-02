@@ -184,8 +184,8 @@ module.exports.Auth0 = {
                 },
                 body: JSON.stringify({
                     "client_id":   "fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs", // AUTH0: CLIENT ID
-                    "username":    "clingen.test.curator@genome.stanford.edu", // AUTH0: TEST CURATOR CREDENTIALS
-                    "password":    "curateme",
+                    "username":    "clingen.demo.curator@genome.stanford.edu", // AUTH0: TEST CURATOR CREDENTIALS
+                    "password":    "CLSZ6lJhOAhYBZRgGx5%BdkfgwRt%LnY)EXT",
                     "id_token":    "",
                     "connection":  "Username-Password-Authentication",
                     "grant_type":  "password",
