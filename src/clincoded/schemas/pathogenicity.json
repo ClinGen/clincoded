@@ -66,8 +66,7 @@
         },
         "comment": {
             "title": "Comment",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "geneImpactType": {
             "title": "Gene Impact for Variant",
