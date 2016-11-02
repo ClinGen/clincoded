@@ -2435,7 +2435,7 @@ var DeleteButtonModal = React.createClass({
             <div>
                 <div className="modal-body">
                     {message}
-                    <p>Are you sure you want to delete {itemLabel ? <span>Case Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
+                    <p>Are you sure you want to delete {itemLabel ? <span>Case-Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
                     {tree ?
                     <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
                     {tree.map(function(treeItem, i) {
