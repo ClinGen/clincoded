@@ -2235,11 +2235,11 @@ var DeleteButtonModal = React.createClass({
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseControlStudies, depth, mode, 'case control'));
         }
         if (item.caseCohort) {
-            hasChildren = true;
+            hasChildren = false;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseCohort, depth, mode, 'case cohort'));
         }
         if (item.controlCohort) {
-            hasChildren = true;
+            hasChildren = false;
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.controlCohort, depth, mode, 'control cohort'));
         }
 
@@ -2324,7 +2324,7 @@ var DeleteButtonModal = React.createClass({
                     // Display case cohort and control cohort in a case control
                     tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem['@id']} onClick={this.linkout}>{tempSubItem['@type'][0]} {tempSubItem.label}</a></span>;
                     returnPayload.push(tempDisplayString);
-                    returnPayload = returnPayload.concat(this.recurseItem(tempSubItem, depth + 1, mode));
+                    //returnPayload = returnPayload.concat(this.recurseItem(tempSubItem, depth + 1, mode));
                 } else if (mode == 'id') {
                     // if the mode is 'id', grab the @ids of the child items
                     returnPayload.push(tempSubItem['@id']);
