@@ -1381,12 +1381,10 @@ var IndividualVariantInfo = function() {
                                         <dd>{variant.clinvarVariantTitle}</dd>
                                     </div>
 
-                                    {family.recessiveZygosity && i === 0 ?
+                                    {segregation.recessiveZygosity && i === 0 ?
                                         <div>
-                                            <dl className="dl-horizontal">
-                                                <dt>If Recessive, select variant zygosity</dt>
-                                                <dd>{family.recessiveZygosity}</dd>
-                                            </dl>
+                                            <dt>If Recessive, select variant zygosity</dt>
+                                            <dd>{segregation.recessiveZygosity}</dd>
                                         </div>
                                     : null }
                                 </dl>
@@ -1614,7 +1612,8 @@ var IndividualViewer = React.createClass({
         var tempGdmPmid = curator.findGdmPmidFromObj(individual);
         var tempGdm = tempGdmPmid[0];
         var tempPmid = tempGdmPmid[1];
-        let family = this.state.family;
+        let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
+        let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
 
         return (
             <div>
@@ -1773,18 +1772,18 @@ var IndividualViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null}
-                                        {family && family.recessiveZygosity && i === 0 ?
+                                        {segregation && segregation.recessiveZygosity && i === 0 ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>If Recessive, select variant zygosity</dt>
-                                                    <dd>{family.recessiveZygosity}</dd>
+                                                    <dd>{segregation.recessiveZygosity}</dd>
                                                 </dl>
                                             </div>
                                         : null }
                                     </div>
                                 );
                             })}
-                            {family && variants ?
+                            {associatedFamily && variants ?
                                 <div className="variant-view-panel family-associated">
                                     <div>
                                         <dl className="dl-horizontal">
