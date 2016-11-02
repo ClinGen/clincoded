@@ -1579,17 +1579,18 @@ var FamilySegregation = function() {
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
-            <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recerssive:</strong><br/>Number of AFFECTED individuals <i>with</i> genotype?</span>}
+            <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recerssive Only:</strong><br/>Number of UNAFFECTED individuals <i>without</i> the bialletic genotype?</span>}
+            <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the bialletic genotype?</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
             <Input type="number" ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals" label="Were there any inconsistent segregations amongst TESTED individuals? (i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)"
+            <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals"
+                label={<span>Were there any inconsistent segregations amongst TESTED individuals? <i>(i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)</i></span>}
                 defaultValue="none" value={segregation.inconsistentSegregationAmongstTestedIndividuals} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1597,7 +1598,7 @@ var FamilySegregation = function() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/>(optional)</span>} rows="5" value={segregation.explanationForInconsistent} handleChange={this.handleChange}
+            <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5" value={segregation.explanationForInconsistent} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none" value={segregation.familyConsanguineous} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1623,7 +1624,7 @@ var FamilySegregation = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
-                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/>(optional, and only if no published calculated LOD score)</span>} value={segregation.estimatedLodScore}
+                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {/*** Collected at Individual level for PROBAND only
@@ -1719,7 +1720,7 @@ var FamilyVariant = function() {
                         {this.state.variantInfo[i] && i === 0 ?
                             <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
                                 value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Homozygous">Homozygous</option>
