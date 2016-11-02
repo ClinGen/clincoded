@@ -68,6 +68,7 @@ var IndividualCuration = React.createClass({
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
             submitBusy: false, // True while form is submitting
+            recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
             individualUuid: null,
             evidenceScoreUuid: null
         };
@@ -82,6 +83,13 @@ var IndividualCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
+        } else if (ref === 'SEGrecessiveZygosity') {
+            //Only show option to add 2nd variant if user selects 'Heterozygous'
+            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
+                if (this.state.variantCount > 1) {
+                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
+                }
+            });
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -92,13 +100,13 @@ var IndividualCuration = React.createClass({
                 // The changed item is in the last variant panel. If any fields in the last field have a value, disable
                 // the Add Another Variant button.
                 clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                // othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
                 this.setState({addVariantDisabled: !(clinvarid || othervariant)});
             }
 
             // Disable fields depending on what fields have values in them.
             clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
+            // othervariant = this.refs['VARothervariant' + refSuffix].getValue();
             var currVariantOption = this.state.variantOption;
             if (othervariant) {
                 this.refs['VARclinvarid' + refSuffix].resetValue();
@@ -553,13 +561,14 @@ var IndividualCuration = React.createClass({
                     if (!currIndividual || !(currIndividual.proband && family)) {
                         for (var i = 0; i < this.state.variantCount; i++) {
                             // Grab the values from the variant form panel
-                            var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+                            // var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+                            let recessiveZygosity = this.getFormValue('VARrecessiveZygosity');
 
                             // Build the search string depending on what the user entered
-                            if (otherVariantText) {
+                            if (recessiveZygosity) {
                                 // Add this Other Description text to a new variant object
                                 var newVariant = {};
-                                newVariant.otherDescription = otherVariantText;
+                                newVariant.recessiveZygosity = recessiveZygosity;
                                 newVariants.push(newVariant);
                             }
                         }
@@ -783,6 +792,22 @@ var IndividualCuration = React.createClass({
         value = this.getFormValue('proband');
         if (value && value !== 'none') { newIndividual.proband = value === "Yes"; }
 
+        /*************************************************/
+        /* Individual variant form fields.               */
+        /* Only applicable when individual is associated */
+        /* with a family and 1 or more variants          */
+        /*************************************************/
+        if (family && individualVariants) {
+            value = this.getFormValue('individualBothVariantsInTrans');
+            if (value !== 'none') { newIndividual.bothVariantsInTrans = value; }
+
+            value = this.getFormValue('individualDeNovo');
+            if (value !== 'none') { newIndividual.denovo = value; }
+
+            value = this.getFormValue('individualMaternityPaternityConfirmed');
+            if (value !== 'none') { newIndividual.maternityPaternityConfirmed = value; }
+        }
+
         return newIndividual;
     },
 
@@ -807,7 +832,7 @@ var IndividualCuration = React.createClass({
             this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
             // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
+            // this.refs['VARothervariant' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
@@ -1328,6 +1353,7 @@ var IndividualDemographics = function() {
 var IndividualVariantInfo = function() {
     var individual = this.state.individual;
     var family = this.state.family;
+    var segregation = family && family.segregation ? family.segregation : null;
     var gdm = this.state.gdm;
     var annotation = this.state.annotation;
     var variants = individual && individual.variants;
@@ -1347,17 +1373,46 @@ var IndividualVariantInfo = function() {
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>ClinVar VariationID</dt>
-                                        <dd>{variant.clinvarVariantId}</dd>
+                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
                                     </div>
 
                                     <div>
-                                        <dt>Other description</dt>
-                                        <dd>{variant.otherDescription}</dd>
+                                        <dt>ClinVar Preferred Title</dt>
+                                        <dd>{variant.clinvarVariantTitle}</dd>
                                     </div>
                                 </dl>
                             </div>
                         );
                     })}
+                    {variants.length ?
+                        <div  className="variant-panel">
+                            <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
+                                defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not Specified">Not Specified</option>
+                            </Input>
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                                defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Input>
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                                defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Input>
+                        </div>
+                    : null}
                 </div>
             :
                 <div>
@@ -1370,14 +1425,6 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
-                                <div className="row">
-                                    <div className="col-sm-7 col-sm-offset-5">
-                                        <p className="alert alert-warning">
-                                            ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                            the same variant, and ensures the accurate counting of probands.
-                                        </p>
-                                    </div>
-                                </div>
                                 {this.state.variantInfo[i] ?
                                     <div>
                                         <div className="row">
@@ -1409,23 +1456,25 @@ var IndividualVariantInfo = function() {
                                     buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                     updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                                {curator.renderMutalyzerLink()}
+                                {this.state.variantInfo[i] && i === 0 ?
+                                    <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                                        value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                        <option value="none">No Selection</option>
+                                        <option disabled="disabled"></option>
+                                        <option value="Homozygous">Homozygous</option>
+                                        <option value="Hemizygous">Hemizygous</option>
+                                        <option value="Heterozygous">Heterozygous</option>
+                                    </Input>
+                                : null}
                             </div>
                         );
                     })}
-                    {this.state.variantCount < MAX_VARIANTS ?
+                    {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
                         <div className="row">
                             <div className="col-sm-7 col-sm-offset-5 clearfix">
-                                {this.state.variantCount ?
-                                    <p className="alert alert-warning">
-                                        For a recessive condition, you must enter both variants believed to be causative for the disease in order that
-                                        each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
-                                        variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
-                                    </p>
-                                : null}
-                                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
+                                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
+                                    title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
                                     clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                             </div>
                         </div>
@@ -1714,17 +1763,41 @@ var IndividualViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null}
-                                        {variant.otherDescription ?
+                                        {individual.associatedFamilies && individual.associatedFamilies.length && i === 0 ?
                                             <div>
                                                 <dl className="dl-horizontal">
-                                                    <dt>Other description</dt>
-                                                    <dd>{variant.otherDescription}</dd>
+                                                    <dt>If Recessive, select variant zygosity</dt>
+                                                    <dd>{individual.associatedFamilies[0].recessiveZygosity ? individual.associatedFamilies[0].recessiveZygosity : null}</dd>
                                                 </dl>
                                             </div>
                                         : null }
                                     </div>
                                 );
                             })}
+                            {individual.associatedFamilies.length && variants ?
+                                <div className="variant-view-panel family-associated">
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</dt>
+                                            <dd>{individual.bothVariantsInTrans}</dd>
+                                        </dl>
+                                    </div>
+
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>If the individuals has one variant, is it <i>de novo</i> OR If the individual has 2 variants, is at least one <i>de novo</i>?</dt>
+                                            <dd>{individual.denovo}</dd>
+                                        </dl>
+                                    </div>
+
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</dt>
+                                            <dd>{individual.maternityPaternityConfirmed}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            : null}
                         </Panel>
 
                         <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
