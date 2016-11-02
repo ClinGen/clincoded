@@ -948,6 +948,7 @@ class EvidenceScore(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'evidenceScored',
         'caseControl_scored',
         'caseControl_scored.associatedAnnotations',
         'caseControl_scored.associatedAnnotations.associatedGdm'
