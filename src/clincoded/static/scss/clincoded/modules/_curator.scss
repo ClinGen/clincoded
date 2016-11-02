@@ -1117,6 +1117,15 @@
             word-wrap: break-word;
         }
     }
+
+    .variant-view-panel.family-associated {
+        margin-top: 10px;
+
+        dt {
+            overflow: auto;
+            white-space: normal;
+        }
+    }
 }
 
 .curation-variant-tab-group {
