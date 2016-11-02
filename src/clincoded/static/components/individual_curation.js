@@ -67,7 +67,9 @@ var IndividualCuration = React.createClass({
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            individualUuid: null,
+            evidenceScoreUuid: null
         };
     },
 
@@ -200,7 +202,7 @@ var IndividualCuration = React.createClass({
 
             // Update the individual name
             if (stateObj.individual) {
-                this.setState({individualName: stateObj.individual.label});
+                this.setState({individualName: stateObj.individual.label, individualUuid: stateObj.individual.uuid});
 
                 if (stateObj.individual.proband) {
                     // proband individual
@@ -208,6 +210,10 @@ var IndividualCuration = React.createClass({
                 }
                 else {
                     this.setState({proband_selected: false});
+                }
+                // Get evidenceScore object if exists
+                if (stateObj.individual.scores && stateObj.individual.scores.length) {
+                    this.setState({evidenceScoreUuid: stateObj.individual.scores[0].uuid});
                 }
             }
 
@@ -229,7 +235,11 @@ var IndividualCuration = React.createClass({
                     for (var i = 0; i < variants.length; i++) {
                         if (variants[i].clinvarVariantId) {
                             currVariantOption[i] = VAR_SPEC;
-                            stateObj.variantInfo[i] = {'clinvarVariantId': variants[i].clinvarVariantId, 'clinvarVariantTitle': variants[i].clinvarVariantTitle};
+                            stateObj.variantInfo[i] = {
+                                'clinvarVariantId': variants[i].clinvarVariantId,
+                                'clinvarVariantTitle': variants[i].clinvarVariantTitle,
+                                'uuid': variants[i].uuid
+                            };
                         } else if (variants[i].otherDescription) {
                             currVariantOption[i] = VAR_OTHER;
                         } else {
@@ -645,6 +655,7 @@ var IndividualCuration = React.createClass({
                     // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
                     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
                     recordIndividualHistory(this.state.gdm, this.state.annotation, data.individual, data.group, data.family, data.modified, this);
+                    if (!this.state.individualUuid) {this.setState({individualUuid: data.individual.uuid});}
 
                     // Navigate to Curation Central or Family Submit page, depending on previous page
                     this.resetAllFormValues();
@@ -658,6 +669,34 @@ var IndividualCuration = React.createClass({
                             submitLink += '&group=' + this.state.group.uuid;
                         }
                         this.context.navigate(submitLink);
+                    }
+                }).then(data => {
+                    /*****************************************************/
+                    /* Proband score status data object                  */
+                    /*****************************************************/
+                    let scoreStatus = this.getFormValue('scoreStatus');
+                    let newScoreStatusObj;
+                    if (scoreStatus) {
+                        newScoreStatusObj = {
+                            score: scoreStatus !== 'none' ? scoreStatus : '',
+                            evidenceType: 'Individual',
+                            evidenceScored: this.state.individualUuid
+                        };
+                    }
+
+                    /*************************************************************/
+                    /* Either update or create the score status object in the DB */
+                    /*************************************************************/
+                    if (this.state.evidenceScoreUuid) {
+                        return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newScoreStatusObj).then(data => {
+                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    } else {
+                        return this.postRestData('/evidencescore/', newScoreStatusObj).then(data => {
+                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
+                            return Promise.resolve(data['@graph'][0]);
+                        });
                     }
                 }).catch(function(e) {
                     console.log('INDIVIDUAL CREATION ERROR=: %o', e);
@@ -1292,6 +1331,9 @@ var IndividualVariantInfo = function() {
     var gdm = this.state.gdm;
     var annotation = this.state.annotation;
     var variants = individual && individual.variants;
+    let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
+    let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
+    let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
 
     return (
         <div className="row">
@@ -1345,6 +1387,18 @@ var IndividualVariantInfo = function() {
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                             <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                        </div>
+                                        <div className="row variant-assessment">
+                                            <span className="col-sm-5 control-label"><label></label></span>
+                                            <span className="col-sm-7 text-no-input">
+                                                <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Assess variant's gene impact <i className="icon icon-external-link"></i></a>
+                                            </span>
+                                        </div>
+                                        <div className="row variant-curation">
+                                            <span className="col-sm-5 control-label"><label></label></span>
+                                            <span className="col-sm-7 text-no-input">
+                                                <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface <i className="icon icon-external-link"></i></a>
+                                            </span>
                                         </div>
                                     </div>
                                 : null}
@@ -1438,7 +1492,7 @@ var LabelOtherPmids = React.createClass({
     }
 });
 
-// Additional Information family curation panel. Call with .call(this) to run in the same context
+// Score Proband panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualScore = function() {
     let individual = this.state.individual;
@@ -1446,7 +1500,7 @@ var IndividualScore = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="scoreProband" label="Select Status:" defaultValue="none" value={scores && scores.length ? scores[0].scoreStatus : null}
+            <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue="none" value={scores && scores.length ? scores[0].scoreStatus : null}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1466,6 +1520,7 @@ var IndividualViewer = React.createClass({
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+        let scores = individual && individual.scores ? individual.scores : null;
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1683,6 +1738,15 @@ var IndividualViewer = React.createClass({
                                 <dd>{individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
                                     return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                                 })}</dd>
+                            </dl>
+                        </Panel>
+
+                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Score Status</dt>
+                                    <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
+                                </div>
                             </dl>
                         </Panel>
                     </div>
