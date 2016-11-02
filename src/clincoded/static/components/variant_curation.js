@@ -435,7 +435,7 @@ var VariantCuration = React.createClass({
                                             <PanelGroup accordion>
                                                 <Panel title="Evaluation of Pathogenicity" open>
                                                     <div className="row">
-                                                        <Input type="select" ref="geneImpact" label="Select gene impact for variant:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                        <Input type="select" ref="geneimpact" label="Select gene impact for variant:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
                                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                                                             <option value="none">No Selection</option>
                                                             <option disabled="disabled"></option>
@@ -443,22 +443,35 @@ var VariantCuration = React.createClass({
                                                             <option value="non-LOF">Other variant with gene impact</option>
                                                             <option value="not-specified">Insufficient evidence for gene impact</option>
                                                         </Input>
-
-                                                        <Input type="select" ref="supportsegregation" label="Supporting segregation data:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                        <Input type="select" ref="supportexperimental" label="Does Experimental evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingExperimental)}
                                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                             <option value="none">No Selection</option>
                                                             <option disabled="disabled"></option>
                                                             <option value="Yes">Yes</option>
                                                             <option value="No">No</option>
                                                         </Input>
-                                                        <Input type="select" ref="supportexperimental" label="Supporting experimental data:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingExperimental)}
+                                                        <Input type="select" ref="supportsegregation" label="Does Segregation evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
                                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                             <option value="none">No Selection</option>
                                                             <option disabled="disabled"></option>
                                                             <option value="Yes">Yes</option>
                                                             <option value="No">No</option>
                                                         </Input>
-                                                        <Input type="textarea" ref="comments" label="Variant comments:" rows="5" value={pathogenicity && pathogenicity.comment}
+                                                        <Input type="select" ref="supportallelic" label="Does Allelic evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                                            <option value="none">No Selection</option>
+                                                            <option disabled="disabled"></option>
+                                                           <option value="Yes">Yes</option>
+                                                            <option value="No">No</option>
+                                                        </Input>
+                                                        <Input type="select" ref="supportcomputational" label="Does Computational predictive evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                                            <option value="none">No Selection</option>
+                                                            <option disabled="disabled"></option>
+                                                           <option value="Yes">Yes</option>
+                                                            <option value="No">No</option>
+                                                        </Input>
+                                                        <Input type="textarea" ref="comments" label="Add notes for anything regarding variant:" rows="5" value={pathogenicity && pathogenicity.comment}
                                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                     </div>
                                                 </Panel>
