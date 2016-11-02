@@ -2417,6 +2417,7 @@ var DeleteButtonModal = React.createClass({
     render: function() {
         var tree;
         var message;
+        var itemLabel;
         // generate custom messages and generate display tree for group and family delete confirm modals.
         // generic message for everything else.
         if (this.props.item['@type'][0] == 'group') {
@@ -2426,14 +2427,15 @@ var DeleteButtonModal = React.createClass({
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         } else if (this.props.item['@type'][0] == 'caseControl') {
-            message = <p><strong>Warning</strong>: Deleting this Case Control will also delete associated Case Cohort group and Control Cohort group (see them associated with the Case Control under its name, bolded below).</p>;
-            tree = this.recurseItem(this.props.item, 0, 'display');
+            //message = <p><strong>Warning</strong>: Deleting this Case-Control will also delete its associated Case Cohort and Control Cohort.</p>;
+            itemLabel = this.props.item.label;
+            //tree = this.recurseItem(this.props.item, 0, 'display');
         }
         return (
             <div>
                 <div className="modal-body">
                     {message}
-                    <p>Are you sure you want to delete this item?</p>
+                    <p>Are you sure you want to delete {itemLabel ? <span>Case Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
                     {tree ?
                     <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
                     {tree.map(function(treeItem, i) {
