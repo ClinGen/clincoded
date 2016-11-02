@@ -41,19 +41,12 @@
         "evidenceScored": {
             "title": "Evidence",
             "description": "UUID of scored evidence",
-            "type": "string",
-            "linkTo": [
-                "caseControl",
-                "family",
-                "Individual",
-                "Experimental"
-            ]
+            "type": "string"
         },
         "gdmId": {
             "title": "GDM ID",
             "description": "UUID of GDM the scored evidence belonging to",
-            "type": "string",
-            "linkTo": "gdm"
+            "type": "string"
         }
     },
     "columns": {
