@@ -684,10 +684,10 @@ var IndividualCuration = React.createClass({
                     /* Proband score status data object                  */
                     /*****************************************************/
                     let scoreStatus = this.getFormValue('scoreStatus');
-                    let newScoreStatusObj;
+                    let newScoreStatusObj = {};
                     if (scoreStatus) {
                         newScoreStatusObj = {
-                            score: scoreStatus !== 'none' ? scoreStatus : '',
+                            scoreStatus: scoreStatus !== 'none' ? scoreStatus : '',
                             evidenceType: 'Individual',
                             evidenceScored: this.state.individualUuid
                         };
@@ -698,12 +698,10 @@ var IndividualCuration = React.createClass({
                     /*************************************************************/
                     if (this.state.evidenceScoreUuid) {
                         return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newScoreStatusObj).then(data => {
-                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
                             return Promise.resolve(data['@graph'][0]);
                         });
                     } else {
                         return this.postRestData('/evidencescore/', newScoreStatusObj).then(data => {
-                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
                             return Promise.resolve(data['@graph'][0]);
                         });
                     }
