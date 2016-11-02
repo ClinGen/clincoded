@@ -69,6 +69,19 @@
             "type": "string",
             "default": ""
         },
+        "geneImpactType": {
+            "title": "Gene Impact for Variant",
+            "description": "LOF info",
+            "type": "string"
+        },
+        "allelicSupportGeneImpact": {
+            "title": "Does Allelic Evidence Support Gene Impact",
+            "type": "boolean"
+        },
+        "computationalSupportGeneImpact": {
+            "title": "Does Computational Predictive Evidence Support Gene Impact",
+            "type": "boolean"
+        },
         "assessments": {
             "title": "Assessments",
             "description": "List of assessments added from different curators",
@@ -100,10 +113,6 @@
         },
         "last_modified": {
             "title": "Last Modified",
-            "type": "string"
-        },
-        "numberOfAssessment": {
-            "title": "# Assessment",
             "type": "string"
         }
     }

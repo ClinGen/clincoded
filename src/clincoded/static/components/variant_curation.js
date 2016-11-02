@@ -435,48 +435,15 @@ var VariantCuration = React.createClass({
                                             <PanelGroup accordion>
                                                 <Panel title="Evaluation of Pathogenicity" open>
                                                     <div className="row">
-                                                        <Input type="select" ref="consistentdisease" label="Is variant type consistent with disease mechanism?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.consistentWithDiseaseMechanism)}
-                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                                        <Input type="select" ref="geneImpact" label="Select gene impact for variant:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                                                             <option value="none">No Selection</option>
                                                             <option disabled="disabled"></option>
-                                                            <option value="Yes">Yes</option>
-                                                            <option value="No">No</option>
+                                                            <option value="LOF">Predicted or observed null</option>
+                                                            <option value="non-LOF">Other variant with gene impact</option>
+                                                            <option value="not-specified">Insufficient evidence for gene impact</option>
                                                         </Input>
-                                                        <Input type="select" ref="functionaldomain" label="Variant within functional domain:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.withinFunctionalDomain)}
-                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                                            <option value="none">No Selection</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="Yes">Yes</option>
-                                                            <option value="No">No</option>
-                                                        </Input>
-                                                        <Input type="select" ref="frequencysupport" label="Does frequency data support pathogenicity?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.frequencySupportPathogenicity)}
-                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                                            <option value="none">No Selection</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="Yes">Yes</option>
-                                                            <option value="No">No</option>
-                                                        </Input>
-                                                        <Input type="select" ref="previouslyreported" label="Previously reported?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.previouslyReported)}
-                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                                            <option value="none">No Selection</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="Yes">Yes</option>
-                                                            <option value="No">No</option>
-                                                        </Input>
-                                                        <Input type="select" ref="denovo" label="de novo Type (inferred or confirmed):" defaultValue="none" value={denovoType}
-                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                                            <option value="none">No Selection</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="Inferred">Inferred</option>
-                                                            <option value="Confirmed">Confirmed</option>
-                                                        </Input>
-                                                        <Input type="select" ref="intrans" label="In trans with another variant:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.intransWithAnotherVariant)}
-                                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                                            <option value="none">No Selection</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="Yes">Yes</option>
-                                                            <option value="No">No</option>
-                                                        </Input>
+
                                                         <Input type="select" ref="supportsegregation" label="Supporting segregation data:" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
                                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                             <option value="none">No Selection</option>
