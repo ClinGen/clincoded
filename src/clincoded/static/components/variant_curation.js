@@ -478,31 +478,6 @@ var VariantCuration = React.createClass({
                                             </PanelGroup>
                                         : (pathogenicity ? <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} note="Note: To Edit the pathogenicity evaluation, first change your assessment to “Not assessed” and click Save, then Edit the Variant again."/> : null) }
 
-                                        <Panel panelClassName="panel-data">
-                                            <dl className="dl-horizontal">
-                                                <div>
-                                                    <dt>Assessments</dt>
-                                                    <dd>
-                                                        {validAssessments.length ?
-                                                            <div>
-                                                                {validAssessments.map(function(assessment, i) {
-                                                                    return (
-                                                                        <span key={assessment.uuid}>
-                                                                            {assessment.value} ({assessment.submitted_by.title})
-                                                                            {i < validAssessments.length-1 ? <br /> : null}
-                                                                        </span>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        :
-                                                            <div>None</div>
-                                                        }
-                                                    </dd>
-                                                </div>
-                                            </dl>
-                                        </Panel>
-
-                                        <AssessmentPanel panelTitle="Variant Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue} accordion open />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ?
