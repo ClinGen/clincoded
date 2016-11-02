@@ -1675,7 +1675,7 @@ var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGe
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
     "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
     "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
-    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "reasonExplanation", "recessiveZygosity"];
+    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "reasonExplanation"];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
@@ -1696,7 +1696,8 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
-    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed"
+    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed",
+    "recessiveZygosity"
 ];
 
 function flattenIndividual(individual) {
@@ -1874,7 +1875,7 @@ function flattenProvisionalVariant(provisional_variant) {
 
 
 var evidenceScoreSimpleProps = [
-    "score", "evidenceType"
+    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore"
 ];
 
 function flattenEvidenceScore(evidencescore) {
