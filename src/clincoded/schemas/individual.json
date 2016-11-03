@@ -267,6 +267,11 @@
             "title": "If de novo, is it maternity and paternity confirmed?",
             "type": "string"
         },
+        "recessiveZygosity": {
+            "title": "Recessive Variant Zygosity",
+            "description": "For recessive only",
+            "type": "string"
+        },
         "scores": {
             "title": "Scores",
             "description": "List of scores for this individual",
