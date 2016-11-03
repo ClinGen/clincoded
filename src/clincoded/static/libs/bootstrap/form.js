@@ -244,9 +244,7 @@ var Input = module.exports.Input = React.createClass({
     },
 
     getInitialState: function() {
-        return {
-            value: this.props.value
-        };
+        return {value: this.props.value};
     },
 
     // Get the text the user entered from the text-type field. Meant to be called from
