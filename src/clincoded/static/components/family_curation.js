@@ -1710,8 +1710,8 @@ var FamilyVariant = function() {
                                 <div className="row variant-assessment">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
-                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact <i className="icon icon-external-link"></i></a>
                                         <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
+                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact <i className="icon icon-external-link"></i></a>
                                     </span>
                                 </div>
                                 <div className="row variant-curation">
@@ -1758,7 +1758,7 @@ var FamilyVariant = function() {
             {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel">
                     <div className="col-sm-7 col-sm-offset-5 proband-label-note">
-                        <div className="alert alert-warning">Once this page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear - follow this link to complete scoring for this proband.</div>
+                        <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
                     </div>
                     <Input type="text" ref="individualname" label="Proband Label"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
