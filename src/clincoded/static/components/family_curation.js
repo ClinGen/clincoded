@@ -419,6 +419,17 @@ var FamilyCuration = React.createClass({
                         }
                     }
 
+                    if (stateObj.probandIndividual) {
+                        /*****************************************************/
+                        /* Show "Add 2nd variant" button if "Heterozygous"   */
+                        /* was previously selected but no 2nd variant added  */
+                        /*****************************************************/
+                        let probandIndividual = stateObj.probandIndividual;
+                        if (probandIndividual.recessiveZygosity && probandIndividual.recessiveZygosity.length) {
+                            this.setState({recessiveZygosity: probandIndividual.recessiveZygosity});
+                        }
+                    }
+
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
                     Object.keys(formMapSegregation).forEach(formRef => {
                         if (segregation.hasOwnProperty(formMapSegregation[formRef])) {
