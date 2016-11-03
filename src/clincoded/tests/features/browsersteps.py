@@ -183,6 +183,18 @@ def i_clear_field(browser, name):
     el.clear()
 
 
+@when(parse('I fill in the css element field "{css}" with "{value}"'))
+def i_fill_in_field(browser, css, value):
+    browser.find_by_css(css).fill(value)
+
+
+@when(parse('I clear field the css element field "{css}"'))
+def i_clear_field(browser, css):
+    el = browser.find_by_css(css)
+    assert el, 'Element not found'
+    el.clear()
+
+
 @when(parse('I type "{value}" to "{name}"'))
 def i_type_to(browser, name, value):
     for key in browser.type(name, value, slowly=True):
@@ -244,6 +256,7 @@ def i_press(browser, name):
         ("//*[@id='%(name)s']|"
          "//*[@name='%(name)s']|"
          "//button[contains(text(), '%(name)s')]|"
+         "//span[contains(text(), '%(name)s')]|"
          "//a[contains(text(), '%(name)s')]") % {'name': name})
     assert element, u'Element not found'
     element.first.click()
