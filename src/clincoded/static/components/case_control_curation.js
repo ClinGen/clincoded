@@ -176,24 +176,6 @@ const CaseControlCuration = React.createClass({
         if (ref === 'statisticValueType') {
             this.refs[ref].getValue() === 'Other' ? this.setState({statisticOtherType: 'expanded'}) : this.setState({statisticOtherType: 'collapsed'});
         }
-        if (ref === 'caseCohort_calcAlleleFreq' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'controlCohort_calcAlleleFreq' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'statisticValue' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'pValue' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'confidenceIntervalFrom' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'confidenceIntervalTo' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
     },
 
     submitForm(e) {
@@ -684,10 +666,6 @@ const CaseControlCuration = React.createClass({
                     value = this.getFormValue(prefix + 'race');
                     if (value !== 'none') {
                         newControlGroup.race = value;
-                    }
-                    value = this.getFormValue(prefix + 'ageRangeType');
-                    if (value !== 'none') {
-                        newControlGroup.ageRangeType = value + '';
                     }
                     value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
@@ -1195,7 +1173,6 @@ function GroupDemographics(groupType) {
         country = 'controlCohort_country';
         ethnicity = 'controlCohort_ethnicity';
         race = 'controlCohort_race';
-        ageRangeType = 'controlCohort_ageRangeType';
         ageFrom = 'controlCohort_ageFrom';
         ageTo = 'controlCohort_ageTo';
         ageUnit = 'controlCohort_ageUnit';
@@ -1206,10 +1183,10 @@ function GroupDemographics(groupType) {
     return (
         <div className="row section section-demographics">
             <h3><i className="icon icon-chevron-right"></i> Demographics <span className="label label-group">{headerLabel}</span></h3>
-            <Input type="number" ref={maleCount} label="Number of males:" value={group && group.numberOfMale}
+            <Input type="number" yesInteger={true} ref={maleCount} label="Number of males:" value={group && group.numberOfMale}
                 error={this.getFormError(maleCount)} clearError={this.clrFormErrors.bind(null, maleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={femaleCount} label="Number of females:" value={group && group.numberOfFemale}
+            <Input type="number" yesInteger={true} ref={femaleCount} label="Number of females:" value={group && group.numberOfFemale}
                 error={this.getFormError(femaleCount)} clearError={this.clrFormErrors.bind(null, femaleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref={country} label="Country of Origin:" defaultValue="none" value={group && group.countryOfOrigin}
@@ -1242,15 +1219,21 @@ function GroupDemographics(groupType) {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option value="Onset">Onset</option>
-                    <option value="Report">Report</option>
-                    <option value="Diagnosis">Diagnosis</option>
-                    <option value="Death">Death</option>
-                </Input>
+                {groupType === 'case-cohort' ?
+                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        <option value="none">No Selection</option>
+                        <option disabled="disabled"></option>
+                        <option value="Onset">Onset</option>
+                        <option value="Report">Report</option>
+                        <option value="Diagnosis">Diagnosis</option>
+                        <option value="Death">Death</option>
+                    </Input>
+                    :
+                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group invisible-placeholder" inputDisabled={true}>
+                    </Input>
+                }
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="number" ref={ageFrom} inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
                         error={this.getFormError(ageFrom)} clearError={this.clrFormErrors.bind(null, ageFrom)} value={group && group.ageRangeFrom} />
@@ -1314,14 +1297,15 @@ function GroupPower(groupType) {
                 </Input>
             }
             ****/}
-            <Input type="number" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
-                error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="e.g. number only"
+            <Input type="number" yesInteger={true} ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
+                error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
+            <Input type="number" yesInteger={true} ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. number only" />
+            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
+                error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
         </div>
     );
 }
@@ -1630,11 +1614,6 @@ var CaseControlViewer = React.createClass({
                                     <div>
                                         <dt>Race</dt>
                                         <dd>{controlCohort.race}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Age Range Type</dt>
-                                        <dd>{controlCohort.ageRangeType}</dd>
                                     </div>
 
                                     <div>
