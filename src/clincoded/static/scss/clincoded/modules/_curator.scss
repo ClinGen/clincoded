@@ -2541,8 +2541,8 @@ table.login-users-interpretations {
     .variant-assessment {
         .alert {
             padding: 8px 15px;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 6px;
         }
     }
 
@@ -2560,5 +2560,9 @@ table.login-users-interpretations {
             margin-top: 0;
             margin-bottom: 30px;
         }
+    }
+
+    .variant-panel .mutalyzer-link {
+        margin-bottom: 10px;
     }
 }
