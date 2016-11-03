@@ -217,7 +217,6 @@ var VariantCuration = React.createClass({
 
             var promise = this.formToPathogenicity(this.state.pathogenicity);
             promise.then(newPathogenicity => {
-                debugger;
                 if (this.state.pathogenicity) {
                     return this.putRestData(this.state.pathogenicity['@id'], newPathogenicity).then(data => {
                         return Promise.resolve({pathogenicity: data['@graph'][0]});
