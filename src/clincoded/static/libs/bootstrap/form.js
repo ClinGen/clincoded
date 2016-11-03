@@ -187,11 +187,12 @@ var FormMixin = module.exports.FormMixin = {
                 var numVal = this.getFormValueNumber(ref);
                 if (numVal === null) {
                     if (ref.indexOf('numGroupVariant') > -1 || ref.indexOf('numGroupGenotyped') > -1 || ref.indexOf('maleCount') > -1 || ref.indexOf('femaleCount') > -1) {
-                        this.setFormErrors(ref, 'non-decimal values only');
-                    } else {
+                        this.setFormErrors(ref, 'Non-decimal values only');
+                        valid = false;
+                    } else if (!this.getFormValue(ref).match(/^\d+\.\d+$/)) {
                         this.setFormErrors(ref, 'Number only');
+                        valid = false;
                     }
-                    valid = false;
                 } else if (numVal !== '' && ((props.minVal && numVal < props.minVal) || (props.maxVal && numVal > props.maxVal))) {
                     valid = false;
                     if (props.minVal && props.maxVal) {

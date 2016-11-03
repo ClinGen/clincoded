@@ -86,19 +86,23 @@ module.exports = {
                                     error={this.getFormError('statisticOtherType')} clearError={this.clrFormErrors.bind(null, 'statisticOtherType')}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
                                     groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
-                                <Input type="text" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null} handleChange={this.handleChange}
+                                <Input type="number" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null} handleChange={this.handleChange}
+                                    error={this.getFormError("statisticValue")} clearError={this.clrFormErrors.bind(null, "statisticValue")}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="Number only" />
                             </div>
                         );
                     })}
                     <h4 className="col-sm-7 col-sm-offset-5">Confidence/Significance</h4>
-                    <Input type="text" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null} handleChange={this.handleChange}
+                    <Input type="number" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null} handleChange={this.handleChange}
+                        error={this.getFormError("pValue")} clearError={this.clrFormErrors.bind(null, "pValue")}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="Number only" />
                     <Input type="text-range" labelClassName="col-sm-6 control-label" label="Confidence interval (%):" wrapperClassName="col-sm-6">
-                        <Input type="text" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                        <Input type="number" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                            error={this.getFormError("confidenceIntervalFrom")} clearError={this.clrFormErrors.bind(null, "confidenceIntervalFrom")}
                             value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} handleChange={this.handleChange} placeholder="Number only" />
                         <span className="group-age-inter">to</span>
-                        <Input type="text" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                        <Input type="number" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
+                            error={this.getFormError("confidenceIntervalTo")} clearError={this.clrFormErrors.bind(null, "confidenceIntervalTo")}
                             value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} handleChange={this.handleChange} placeholder="Number only" />
                     </Input>
                 </div>

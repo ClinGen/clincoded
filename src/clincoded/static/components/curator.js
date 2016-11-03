@@ -2319,16 +2319,6 @@ var DeleteButtonModal = React.createClass({
                     // call recurseItem on child item
                     returnPayload = returnPayload.concat(this.recurseItem(tempSubItem[i], depth + 1, mode));
                 }
-            } else if (type === 'case cohort' || type === 'control cohort') {
-                if (mode == 'display') {
-                    // Display case cohort and control cohort in a case control
-                    tempDisplayString = <span>{Array.apply(null, Array(depth)).map(function(e, i) {return <span key={i}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>;})}&#8627; <a href={tempSubItem['@id']} onClick={this.linkout}>{tempSubItem['@type'][0]} {tempSubItem.label}</a></span>;
-                    returnPayload.push(tempDisplayString);
-                    //returnPayload = returnPayload.concat(this.recurseItem(tempSubItem, depth + 1, mode));
-                } else if (mode == 'id') {
-                    // if the mode is 'id', grab the @ids of the child items
-                    returnPayload.push(tempSubItem['@id']);
-                }
             } else {
                 if (mode == 'display') {
                     // if childspace is empty, add a display line indicating the fact
@@ -2427,9 +2417,7 @@ var DeleteButtonModal = React.createClass({
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
         } else if (this.props.item['@type'][0] == 'caseControl') {
-            //message = <p><strong>Warning</strong>: Deleting this Case-Control will also delete its associated Case Cohort and Control Cohort.</p>;
             itemLabel = this.props.item.label;
-            //tree = this.recurseItem(this.props.item, 0, 'display');
         }
         return (
             <div>

@@ -176,24 +176,6 @@ const CaseControlCuration = React.createClass({
         if (ref === 'statisticValueType') {
             this.refs[ref].getValue() === 'Other' ? this.setState({statisticOtherType: 'expanded'}) : this.setState({statisticOtherType: 'collapsed'});
         }
-        if (ref === 'caseCohort_calcAlleleFreq' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'controlCohort_calcAlleleFreq' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'statisticValue' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'pValue' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'confidenceIntervalFrom' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
-        if (ref === 'confidenceIntervalTo' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        }
     },
 
     submitForm(e) {
@@ -1321,7 +1303,8 @@ function GroupPower(groupType) {
             <Input type="number" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="text" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
+            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
+                error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
         </div>
     );
