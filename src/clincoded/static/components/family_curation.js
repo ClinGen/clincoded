@@ -138,10 +138,6 @@ var FamilyCuration = React.createClass({
             } else {
                 this.setState({lodPublished: null});
             }
-        } else if (ref === 'SEGpublishedLodScore' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
-        } else if (ref === 'SEGestimatedLodScore' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
-            this.refs[ref].setValue('Enter a number only');
         } else if (ref === 'SEGrecessiveZygosity') {
             //Only show option to add 2nd variant if user selects 'Heterozygous'
             this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
@@ -990,16 +986,22 @@ var FamilyCuration = React.createClass({
         // values from the form
         if (!this.cv.segregationAssessed) {
             value1 = this.getFormValue('SEGnumberOfAffectedWithGenotype');
-            if (value1) {
+            if (value1 && !isNaN(parseInt(value1, 10))) {
                 newSegregation[formMapSegregation['SEGnumberOfAffectedWithGenotype']] = parseInt(value1, 10);
+            } else {
+                if (newSegregation[formMapSegregation['SEGnumberOfAffectedWithGenotype']]) { delete newSegregation[formMapSegregation['SEGnumberOfAffectedWithGenotype']]; }
             }
             value1 = this.getFormValue('SEGnumberOfUnaffectedWithoutBiallelicGenotype');
-            if (value1) {
+            if (value1 && !isNaN(parseInt(value1, 10))) {
                 newSegregation[formMapSegregation['SEGnumberOfUnaffectedWithoutBiallelicGenotype']] = parseInt(value1, 10);
+            } else {
+                if (newSegregation[formMapSegregation['SEGnumberOfUnaffectedWithoutBiallelicGenotype']]) { delete newSegregation[formMapSegregation['SEGnumberOfUnaffectedWithoutBiallelicGenotype']]; }
             }
             value1 = this.getFormValue('SEGnumberOfSegregationsForThisFamily');
-            if (value1) {
+            if (value1 && !isNaN(parseInt(value1, 10))) {
                 newSegregation[formMapSegregation['SEGnumberOfSegregationsForThisFamily']] = parseInt(value1, 10);
+            } else {
+                if (newSegregation[formMapSegregation['SEGnumberOfSegregationsForThisFamily']]) { delete newSegregation[formMapSegregation['SEGnumberOfSegregationsForThisFamily']]; }
             }
             value1 = this.getFormValue('SEGinconsistentSegregationAmongstTestedIndividuals');
             if (value1 !== 'none') {
@@ -1028,12 +1030,16 @@ var FamilyCuration = React.createClass({
                 newSegregation[formMapSegregation['SEGlodPublished']] = value1 === 'Yes';
             }
             value1 = this.getFormValue('SEGpublishedLodScore');
-            if (value1) {
+            if (value1 && !isNaN(parseFloat(value1))) {
                 newSegregation[formMapSegregation['SEGpublishedLodScore']] = parseFloat(value1);
+            } else {
+                if (newSegregation[formMapSegregation['SEGpublishedLodScore']]) { delete newSegregation[formMapSegregation['SEGpublishedLodScore']]; }
             }
             value1 = this.getFormValue('SEGestimatedLodScore');
-            if (value1) {
+            if (value1 && !isNaN(parseFloat(value1))) {
                 newSegregation[formMapSegregation['SEGestimatedLodScore']] = parseFloat(value1);
+            } else {
+                if (newSegregation[formMapSegregation['SEGestimatedLodScore']]) { delete newSegregation[formMapSegregation['SEGestimatedLodScore']]; }
             }
             value1 = this.getFormValue('SEGincludeLodScoreInAggregateCalculation');
             if (value1 !== 'none') {
@@ -1640,11 +1646,13 @@ var FamilySegregation = function() {
                 <option value="No">No</option>
             </Input>
             {this.state.lodPublished === 'Yes' ?
-                <Input type="text" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
+                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
+                    error={this.getFormError('SEGpublishedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGpublishedLodScore')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
-                <Input type="text" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
+                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
+                    error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
