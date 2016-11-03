@@ -810,7 +810,13 @@ var IndividualCuration = React.createClass({
         /*************************************************/
         if (individualVariants) {
             value = this.getFormValue('SEGrecessiveZygosity');
-            if (value !== 'none') { newIndividual.recessiveZygosity = value; }
+            if (value) {
+                if (value !== 'none') { newIndividual.recessiveZygosity = value; }
+            } else {
+                if (currIndividual && currIndividual.recessiveZygosity) {
+                    newIndividual.recessiveZygosity = currIndividual.recessiveZygosity;
+                }
+            }
 
             value = this.getFormValue('individualBothVariantsInTrans');
             if (value !== 'none') { newIndividual.bothVariantsInTrans = value; }
@@ -1502,7 +1508,7 @@ var IndividualVariantInfo = function() {
                             </div>
                         </div>
                     : null}
-                    {variants && variants.length ?
+                    {Object.keys(this.state.variantInfo).length > 0 ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
@@ -1831,7 +1837,7 @@ var IndividualViewer = React.createClass({
                                     </div>
                                 );
                             })}
-                            {associatedFamily && variants ?
+                            {variants && variants.length ?
                                 <div className="variant-view-panel family-associated">
                                     <div>
                                         <dl className="dl-horizontal">
