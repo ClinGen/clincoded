@@ -2537,4 +2537,28 @@ table.login-users-interpretations {
             padding: 5px 0;
         }
     }
+
+    .variant-assessment {
+        .alert {
+            padding: 8px 15px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    }
+
+    .proband-label-note {
+        .alert {
+            padding: 8px 15px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+    }
+
+    .score-status-note {
+        .alert {
+            padding: 8px 15px;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+    }
 }
