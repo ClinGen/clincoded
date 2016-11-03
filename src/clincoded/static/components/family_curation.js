@@ -970,7 +970,7 @@ var FamilyCuration = React.createClass({
                     // Navigate to Curation Central or Family Submit page, depending on previous page
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut && !initvar) {
-                        this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid + '&pmid=' + this.state.annotation.article.pmid);
+                        this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + data.family.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     } else {
                         this.context.navigate('/family-submit/?gdm=' + this.state.gdm.uuid + '&family=' + data.family.uuid + '&evidence=' + this.state.annotation.uuid + (initvar ? '&initvar' : '') + (hadvar ? '&hadvar' : ''));
                     }
