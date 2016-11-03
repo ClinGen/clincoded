@@ -298,15 +298,30 @@ var VariantCuration = React.createClass({
 
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
+        //var assessed = false;
+        var validAssessments = []; // filter out those with value Not Assessed
         if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
             _.map(gdm.variantPathogenicity, patho => {
-                if (patho.variant.uuid === variant.uuid) {
+                var pathoVariant = patho.variant;
+                if (pathoVariant.uuid === variant.uuid) {
+                    //allPathogenicityList.push(patho);
                     if (patho.submitted_by.uuid !== user) {
                         otherPathogenicityList.push(patho);
+                    }
+
+                    // collect assessments to the variant from different users
+                    if (patho.assessments && patho.assessments.length && patho.assessments[0].value !== 'Not Assessed') {
+                        //assessed = true;
+                        validAssessments.push(patho.assessments[0]);
                     }
                 }
             });
         }
+        //if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
+        //    otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
+        //        return fp.submitted_by.uuid !== user;
+        //    });
+        //}
 
         return (
             <div>
@@ -403,6 +418,30 @@ var VariantCuration = React.createClass({
                                                 </div>
                                             </Panel>
                                         </PanelGroup>
+
+                                        {validAssessments.length ?
+                                            <Panel panelClassName="panel-data">
+                                                <dl className="dl-horizontal">
+                                                    <div>
+                                                        <dt>Assessments</dt>
+                                                        <dd>
+                                                            <div>
+                                                                {validAssessments.map(function(assessment, i) {
+                                                                    return (
+                                                                        <span key={assessment.uuid}>
+                                                                            {assessment.value} ({assessment.submitted_by.title})
+                                                                            {i < validAssessments.length-1 ? <br /> : null}
+                                                                        </span>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </dd>
+                                                    </div>
+                                                </dl>
+                                            </Panel>
+                                            :
+                                            null
+                                        }
 
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
