@@ -1300,6 +1300,7 @@ var IndividualDemographics = function() {
     return (
         <div className="row">
             <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual && individual.sex}
+                error={this.getFormError('sex')} clearError={this.clrFormErrors.bind(null, 'sex')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
