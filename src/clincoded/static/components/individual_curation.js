@@ -69,7 +69,6 @@ var IndividualCuration = React.createClass({
             proband: null, // If we have an associated family that has a proband, this points at it
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
-            individualUuid: null,
             evidenceScoreUuid: null
         };
     },
@@ -100,13 +99,13 @@ var IndividualCuration = React.createClass({
                 // The changed item is in the last variant panel. If any fields in the last field have a value, disable
                 // the Add Another Variant button.
                 clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                // othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
+                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
                 this.setState({addVariantDisabled: !(clinvarid || othervariant)});
             }
 
             // Disable fields depending on what fields have values in them.
             clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            // othervariant = this.refs['VARothervariant' + refSuffix].getValue();
+            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
             var currVariantOption = this.state.variantOption;
             if (othervariant) {
                 this.refs['VARclinvarid' + refSuffix].resetValue();
@@ -210,7 +209,7 @@ var IndividualCuration = React.createClass({
 
             // Update the individual name
             if (stateObj.individual) {
-                this.setState({individualName: stateObj.individual.label, individualUuid: stateObj.individual.uuid});
+                this.setState({individualName: stateObj.individual.label});
 
                 if (stateObj.individual.proband) {
                     // proband individual
@@ -563,14 +562,13 @@ var IndividualCuration = React.createClass({
                     if (!currIndividual || !(currIndividual.proband && family)) {
                         for (var i = 0; i < this.state.variantCount; i++) {
                             // Grab the values from the variant form panel
-                            // var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
-                            let recessiveZygosity = this.getFormValue('VARrecessiveZygosity');
+                            var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
 
                             // Build the search string depending on what the user entered
-                            if (recessiveZygosity) {
+                            if (otherVariantText) {
                                 // Add this Other Description text to a new variant object
                                 var newVariant = {};
-                                newVariant.recessiveZygosity = recessiveZygosity;
+                                newVariant.otherDescription = otherVariantText;
                                 newVariants.push(newVariant);
                             }
                         }
@@ -852,7 +850,7 @@ var IndividualCuration = React.createClass({
             this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
             // Disable the 'Other description' textarea
-            // this.refs['VARothervariant' + fieldNum].resetValue();
+            this.refs['VARothervariant' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
@@ -1375,7 +1373,6 @@ var IndividualDemographics = function() {
 var IndividualVariantInfo = function() {
     var individual = this.state.individual;
     var family = this.state.family;
-    var segregation = family && family.segregation ? family.segregation : null;
     var gdm = this.state.gdm;
     var annotation = this.state.annotation;
     var variants = individual && individual.variants;
@@ -1402,6 +1399,13 @@ var IndividualVariantInfo = function() {
                                         <dt>ClinVar Preferred Title</dt>
                                         <dd>{variant.clinvarVariantTitle}</dd>
                                     </div>
+
+                                    {variant.otherDescription && variant.otherDescription.length ?
+                                        <div>
+                                            <dt>Other description</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </div>
+                                    : null}
 
                                     {individual.recessiveZygosity && i === 0 ?
                                         <div>
@@ -1485,6 +1489,9 @@ var IndividualVariantInfo = function() {
                                     buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                     updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                {curator.renderMutalyzerLink()}
                                 {this.state.variantInfo[i] && i === 0 ?
                                     <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
                                         value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
@@ -1826,6 +1833,14 @@ var IndividualViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null}
+                                        {variant.otherDescription ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
                                         {individual && individual.recessiveZygosity && i === 0 ?
                                             <div>
                                                 <dl className="dl-horizontal">
