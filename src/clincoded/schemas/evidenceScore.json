@@ -54,20 +54,12 @@
             "title": "UUID",
             "type": "string"
         },
-        "scoreStatus": {
-            "title": "Score Status",
-            "type": "string"
-        },
         "submitted_by.title": {
             "title": "Owner",
             "type": "string"
         },
         "evidenceType": {
             "title": "Evidence Type",
-            "type": "string"
-        },
-        "gdmId": {
-            "title": "GDM",
             "type": "string"
         }
     }
