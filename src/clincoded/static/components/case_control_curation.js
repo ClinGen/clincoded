@@ -1183,10 +1183,10 @@ function GroupDemographics(groupType) {
     return (
         <div className="row section section-demographics">
             <h3><i className="icon icon-chevron-right"></i> Demographics <span className="label label-group">{headerLabel}</span></h3>
-            <Input type="number" ref={maleCount} label="Number of males:" value={group && group.numberOfMale}
+            <Input type="number" yesInteger={true} ref={maleCount} label="Number of males:" value={group && group.numberOfMale}
                 error={this.getFormError(maleCount)} clearError={this.clrFormErrors.bind(null, maleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={femaleCount} label="Number of females:" value={group && group.numberOfFemale}
+            <Input type="number" yesInteger={true} ref={femaleCount} label="Number of females:" value={group && group.numberOfFemale}
                 error={this.getFormError(femaleCount)} clearError={this.clrFormErrors.bind(null, femaleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref={country} label="Country of Origin:" defaultValue="none" value={group && group.countryOfOrigin}
@@ -1297,10 +1297,10 @@ function GroupPower(groupType) {
                 </Input>
             }
             ****/}
-            <Input type="number" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
+            <Input type="number" yesInteger={true} ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
+            <Input type="number" yesInteger={true} ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
