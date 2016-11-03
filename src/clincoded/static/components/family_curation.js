@@ -400,7 +400,7 @@ var FamilyCuration = React.createClass({
                     } else if (segregation.lodPublished === false) {
                         this.setState({lodPublished: 'No'});
                     } else if (segregation.lodPublished === null || typeof segregation.lodPublished === 'undefined') {
-                        this.setState({lodPublished: 'Yes'});
+                        this.setState({lodPublished: null});
                     }
 
                     // Find the current user's segregation assessment from the segregation's assessment list
@@ -774,7 +774,8 @@ var FamilyCuration = React.createClass({
                     return Promise.resolve(null);
                 }).then(data => {
                     var label, diseases;
-                    let zygosity = this.getFormValue('SEGrecessiveZygosity');
+                    let zygosity = this.getFormValue('SEGrecessiveZygosity') && this.getFormValue('SEGrecessiveZygosity') !== 'none' ?
+                                    this.getFormValue('SEGrecessiveZygosity') : null;
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -2161,11 +2162,11 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {family.individualIncluded && family.individualIncluded.recessiveZygosity && i === 0 ?
+                                        {family.individualIncluded && family.individualIncluded[0].recessiveZygosity && i === 0 ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>If Recessive, select variant zygosity</dt>
-                                                    <dd>{family.individualIncluded.recessiveZygosity}</dd>
+                                                    <dd>{family.individualIncluded[0].recessiveZygosity}</dd>
                                                 </dl>
                                             </div>
                                         : null }
