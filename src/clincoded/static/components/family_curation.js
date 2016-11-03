@@ -65,8 +65,7 @@ var formMapSegregation = {
     'SEGestimatedLodScore': 'estimatedLodScore',
     'SEGincludeLodScoreInAggregateCalculation': 'includeLodScoreInAggregateCalculation',
     'SEGreasonExplanation': 'reasonExplanation',
-    'SEGaddedsegregationinfo': 'additionalInformation',
-    'SEGrecessiveZygosity': 'recessiveZygosity'
+    'SEGaddedsegregationinfo': 'additionalInformation'
 };
 
 var initialCv = {
@@ -139,6 +138,10 @@ var FamilyCuration = React.createClass({
             } else {
                 this.setState({lodPublished: null});
             }
+        } else if (ref === 'SEGpublishedLodScore' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
+            this.refs[ref].setValue('Enter a number only');
+        } else if (ref === 'SEGestimatedLodScore' && this.refs[ref].getValue() && isNaN(parseFloat(this.refs[ref].getValue()))) {
+            this.refs[ref].setValue('Enter a number only');
         } else if (ref === 'SEGrecessiveZygosity') {
             //Only show option to add 2nd variant if user selects 'Heterozygous'
             this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
@@ -390,6 +393,14 @@ var FamilyCuration = React.createClass({
                     } else if (stateObj.probandIndividual) {
                         // No variants in this family, but it does have a proband individual. Open one empty variant panel
                         stateObj.variantCount = 1;
+                    }
+
+                    if (segregation.lodPublished === true) {
+                        this.setState({lodPublished: 'Yes'});
+                    } else if (segregation.lodPublished === false) {
+                        this.setState({lodPublished: 'No'});
+                    } else if (segregation.lodPublished === null || typeof segregation.lodPublished === 'undefined') {
+                        this.setState({lodPublished: 'Yes'});
                     }
 
                     // Find the current user's segregation assessment from the segregation's assessment list
@@ -763,6 +774,7 @@ var FamilyCuration = React.createClass({
                     return Promise.resolve(null);
                 }).then(data => {
                     var label, diseases;
+                    let zygosity = this.getFormValue('SEGrecessiveZygosity');
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -773,7 +785,7 @@ var FamilyCuration = React.createClass({
 
                         // If the family has a proband, update it to the current variant list, and then immediately on to creating a family.
                         if (this.state.probandIndividual) {
-                            return updateProbandVariants(this.state.probandIndividual, familyVariants, this).then(data => {
+                            return updateProbandVariants(this.state.probandIndividual, familyVariants, zygosity, this).then(data => {
                                 return Promise.resolve(null);
                             });
                         }
@@ -786,7 +798,7 @@ var FamilyCuration = React.createClass({
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
-                        return makeStarterIndividual(label, diseases, familyVariants, this);
+                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, this);
                     }
 
                     // Family doesn't have any variants
@@ -1001,11 +1013,11 @@ var FamilyCuration = React.createClass({
             }
             value1 = this.getFormValue('SEGpublishedLodScore');
             if (value1) {
-                newSegregation[formMapSegregation['SEGpublishedLodScore']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGpublishedLodScore']] = parseFloat(value1);
             }
             value1 = this.getFormValue('SEGestimatedLodScore');
             if (value1) {
-                newSegregation[formMapSegregation['SEGestimatedLodScore']] = parseInt(value1, 10);
+                newSegregation[formMapSegregation['SEGestimatedLodScore']] = parseFloat(value1);
             }
             value1 = this.getFormValue('SEGincludeLodScoreInAggregateCalculation');
             if (value1 !== 'none') {
@@ -1018,14 +1030,6 @@ var FamilyCuration = React.createClass({
             value1 = this.getFormValue('SEGaddedsegregationinfo');
             if (value1) {
                 newSegregation[formMapSegregation['SEGaddedsegregationinfo']] = value1;
-            }
-            /***********************************/
-            /* variant zygosity form field     */
-            /* Associated variant with Proband */
-            /***********************************/
-            value1 = this.getFormValue('SEGrecessiveZygosity');
-            if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGrecessiveZygosity']] = value1;
             }
         } else if (newFamily.segregation && Object.keys(newFamily.segregation).length) {
             newSegregation = _.clone(newFamily.segregation);
@@ -1579,10 +1583,10 @@ var FamilySegregation = function() {
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
             <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the bialletic genotype?</span>}
+                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
+            <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for recessive)</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
+                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="number" ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
@@ -1618,22 +1622,13 @@ var FamilySegregation = function() {
                 <option value="No">No</option>
             </Input>
             {this.state.lodPublished === 'Yes' ?
-                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
+                <Input type="text" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
-                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
+                <Input type="text" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
-            {/*** Collected at Individual level for PROBAND only
-            <Input type="select" ref="SEGdenovo" label="de novo type:" defaultValue="none" value={segregation.deNovoType} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option value="Inferred">Inferred</option>
-                <option value="Confirmed">Confirmed</option>
-            </Input>
-            */}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1656,7 +1651,7 @@ var FamilyVariant = function() {
     var family = this.state.family;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
-    let individualIncluded = family && family.individualIncluded ? family.individualIncluded : null;
+    let probandIndividual = this.state.probandIndividual ? this.state.probandIndividual : null;
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
@@ -1697,7 +1692,8 @@ var FamilyVariant = function() {
                                 <div className="row variant-assessment">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
-                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Assess variant's gene impact <i className="icon icon-external-link"></i></a>
+                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact <i className="icon icon-external-link"></i></a>
+                                        <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
                                     </span>
                                 </div>
                                 <div className="row variant-curation">
@@ -1717,7 +1713,7 @@ var FamilyVariant = function() {
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         {this.state.variantInfo[i] && i === 0 ?
                             <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
-                                value={segregation && segregation.recessiveZygosity ? segregation.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
@@ -1740,7 +1736,10 @@ var FamilyVariant = function() {
             : null}
             {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
                 <div className="variant-panel">
-                    <Input type="text" ref="individualname" label="Individual Label"
+                    <div className="col-sm-7 col-sm-offset-5 proband-label-note">
+                        <div className="alert alert-warning">Once this page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear - follow this link to complete scoring for this proband.</div>
+                    </div>
+                    <Input type="text" ref="individualname" label="Proband Label"
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
@@ -2162,11 +2161,11 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {segregation.recessiveZygosity && i === 0 ?
+                                        {family.individualIncluded && family.individualIncluded.recessiveZygosity && i === 0 ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>If Recessive, select variant zygosity</dt>
-                                                    <dd>{segregation.recessiveZygosity}</dd>
+                                                    <dd>{family.individualIncluded.recessiveZygosity}</dd>
                                                 </dl>
                                             </div>
                                         : null }
