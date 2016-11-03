@@ -381,11 +381,6 @@
                     "description": "Reason for including LOD or not",
                     "type": "string"
                 },
-                "recessiveZygosity": {
-                    "title": "Recessive Variant Zygosity",
-                    "description": "For recessive only",
-                    "type": "string"
-                },
                 "variants": {
                     "title": "Variants Associated with Proband",
                     "description": "List of variant uuid(s)",
