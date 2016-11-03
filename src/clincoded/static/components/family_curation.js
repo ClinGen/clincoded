@@ -739,13 +739,13 @@ var FamilyCuration = React.createClass({
                     // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
                     for (var i = 0; i < this.state.variantCount; i++) {
                         // Grab the values from the variant form panel
-                        let recessiveZygosity = this.getFormValue('VARrecessiveZygosity');
+                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
 
                         // Build the search string depending on what the user entered
-                        if (recessiveZygosity) {
+                        if (otherVariantText) {
                             // Add this Other Description text to a new variant object
                             var newVariant = {};
-                            newVariant.recessiveZygosity = recessiveZygosity;
+                            newVariant.otherDescription = otherVariantText;
                             newVariants.push(newVariant);
                         }
                     }
@@ -774,6 +774,10 @@ var FamilyCuration = React.createClass({
                     return Promise.resolve(null);
                 }).then(data => {
                     var label, diseases;
+                    /*****************************************/
+                    /* Need to capture zygosity data and     */
+                    /* pass into the individual object       */
+                    /*****************************************/
                     let zygosity = this.getFormValue('SEGrecessiveZygosity') && this.getFormValue('SEGrecessiveZygosity') !== 'none' ?
                                     this.getFormValue('SEGrecessiveZygosity') : null;
 
@@ -1138,6 +1142,8 @@ var FamilyCuration = React.createClass({
             // Update the form and display values with new data
             this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
             newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle, 'uuid': data.uuid};
+            // Disable the 'Other description' textarea
+            this.refs['VARothervariant' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
@@ -1712,6 +1718,9 @@ var FamilyVariant = function() {
                             buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
+                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-variant-desc" />
+                        {curator.renderMutalyzerLink()}
                         {this.state.variantInfo[i] && i === 0 ?
                             <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
                                 value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
@@ -2159,6 +2168,14 @@ var FamilyViewer = React.createClass({
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
                                                     <dd>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.otherDescription ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Other description</dt>
+                                                    <dd>{variant.otherDescription}</dd>
                                                 </dl>
                                             </div>
                                         : null }
