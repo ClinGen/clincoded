@@ -357,7 +357,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                 {collectedVariants ?
                     <div className="variant-header clearfix">
                         <h2>Gene-Disease Record Variants</h2>
-                        <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
+                        <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
