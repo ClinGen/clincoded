@@ -165,7 +165,7 @@ var VariantCuration = React.createClass({
             let value = this.getFormValue('geneimpact');
             if (value !== 'none') {
                 newPathogenicity.geneImpactType = value;
-            } else {
+            } else if (newPathogenicity.geneImpactType) {
                 delete newPathogenicity.geneImpactType;
             }
             value = this.getFormValue('supportallelic');
@@ -186,18 +186,16 @@ var VariantCuration = React.createClass({
             } else {
                 delete newPathogenicity.supportingSegregation;
             }
-
             value = this.getFormValue('supportexperimental');
             if (value !== 'none') {
                 newPathogenicity.supportingExperimental = value === 'Yes';
             } else {
                 delete newPathogenicity.supportingExperimental;
             }
-
             value = this.getFormValue('comments');
             if (value) {
                 newPathogenicity.comment = value;
-            } else {
+            } else if (newPathogenicity.comment) {
                 delete newPathogenicity.comment;
             }
 
@@ -297,30 +295,22 @@ var VariantCuration = React.createClass({
 
         // If we're editing a pathogenicity, get a list of all the variant's pathogenicities, except for the one
         // we're editing. This is to display the list of past curations.
-        //var assessed = false;
         var validAssessments = []; // filter out those with value Not Assessed
         if (this.queryValues.all && variant && gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
             _.map(gdm.variantPathogenicity, patho => {
                 var pathoVariant = patho.variant;
                 if (pathoVariant.uuid === variant.uuid) {
-                    //allPathogenicityList.push(patho);
                     if (patho.submitted_by.uuid !== user) {
                         otherPathogenicityList.push(patho);
                     }
 
                     // collect assessments to the variant from different users
                     if (patho.assessments && patho.assessments.length && patho.assessments[0].value !== 'Not Assessed') {
-                        //assessed = true;
                         validAssessments.push(patho.assessments[0]);
                     }
                 }
             });
         }
-        //if (this.queryValues.all && variant && variant.associatedPathogenicities && variant.associatedPathogenicities.length) {
-        //    otherPathogenicityList = _(variant.associatedPathogenicities).filter(function(fp) {
-        //        return fp.submitted_by.uuid !== user;
-        //    });
-        //}
 
         return (
             <div>
@@ -398,14 +388,14 @@ var VariantCuration = React.createClass({
                                                         <option value="Yes">Yes</option>
                                                         <option value="No">No</option>
                                                     </Input>
-                                                    <Input type="select" ref="supportallelic" label="Does Allelic evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                    <Input type="select" ref="supportallelic" label="Does Allelic evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.allelicSupportGeneImpact)}
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                         <option value="none">No Selection</option>
                                                         <option disabled="disabled"></option>
                                                        <option value="Yes">Yes</option>
                                                         <option value="No">No</option>
                                                     </Input>
-                                                    <Input type="select" ref="supportcomputational" label="Does Computational predictive evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.supportingSegregation)}
+                                                    <Input type="select" ref="supportcomputational" label="Does Computational predictive evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.computationalSupportGeneImpact)}
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                         <option value="none">No Selection</option>
                                                         <option disabled="disabled"></option>
