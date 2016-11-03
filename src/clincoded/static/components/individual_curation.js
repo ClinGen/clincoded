@@ -1938,7 +1938,7 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
     newIndividual.diagnosis = diseases;
     newIndividual.variants = variants;
     newIndividual.proband = true;
-    newIndividual.recessiveZygosity = zygosity;
+    if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {
@@ -1949,7 +1949,7 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
 
 // Update the individual with the variants, and write the updated individual to the DB.
 var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, zygosity, context) {
-    var updateNeeded = true;
+    var updateNeeded = true, updateZygosityOnly = false;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -1959,10 +1959,19 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         updateNeeded = !!missing.length;
     }
 
+    if (zygosity !== individual.recessiveZygosity) {
+        updateNeeded = true;
+        updateZygosityOnly = true;
+    }
+
     if (updateNeeded) {
         var writerIndividual = curator.flatten(individual);
-        writerIndividual.variants = variants;
-        writerIndividual.recessiveZygosity = zygosity;
+        if (!updateZygosityOnly) { writerIndividual.variants = variants; }
+        if (zygosity) {
+            writerIndividual.recessiveZygosity = zygosity;
+        } else {
+            delete writerIndividual['recessiveZygosity'];
+        }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
             return Promise.resolve(data['@graph'][0]);
