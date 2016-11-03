@@ -1371,7 +1371,7 @@ var ExperimentalCuration = React.createClass({
                                                 </Panel>
 
                                                 <PanelGroup accordion>
-                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker}
+                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} note={<NoteAssessment />}
                                                         updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
                                                 </PanelGroup>
                                             </div>
@@ -2231,6 +2231,14 @@ var LabelClinVarVariantTitle = React.createClass({
 var LabelOtherVariant = React.createClass({
     render: function() {
         return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
+    }
+});
+
+var NoteAssessment = React.createClass({
+    render: function() {
+        return (
+            <div className="alert alert-warning">Note: The next release will provide a calculated score for this experimental evidence based on the information provided as well as the ability to adjust this score within the allowed range specified by the Clinical Validity Classification.</div>
+        );
     }
 });
 
