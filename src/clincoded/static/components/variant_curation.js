@@ -505,13 +505,13 @@ var VariantCurationView = React.createClass({
 var VariantViewer = React.createClass({
     render: function() {
         var pathogenicity = this.props.context;
-        var variant = pathogenicity.variantId;
+        var variant = pathogenicity.variant;
 
         return (
             <div className="container">
                 <div className="row group-curation-content">
                     <div className="viewer-titles">
-                        <h1>View Variant: {variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription}</h1>
+                        <h1>View Variant: {variant && variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription}</h1>
                     </div>
                     <VariantCurationView pathogenicity={pathogenicity} />
                 </div>
