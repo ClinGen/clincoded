@@ -146,7 +146,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div className="submit-results-panel-info">
                                         <p>An Individual entry for the proband <strong><a href={'/individual/' + probandIndividual.uuid}>{probandIndividual.label}</a></strong> and its associated variant(s) has been created.</p>
-                                        <p>You can add additional information for this proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
+                                        <p>You can score and add additional information about this proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
                                         <p><em><strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc. For a proband, variant information can only be added or edited on the Family page as it is associated with segregation information.</em></p>
                                     </div>
                                     <div className="submit-results-buttons">
