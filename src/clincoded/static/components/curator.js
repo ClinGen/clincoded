@@ -1516,6 +1516,10 @@ function flattenGroup(group) {
         flat.control = group.control['@id'];
     }
 
+    if (group.groupType) {
+        flat.groupType = group.groupType;
+    }
+
     return flat;
 }
 
@@ -2111,11 +2115,19 @@ var DeleteButtonModal = React.createClass({
             }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
         }
-        if (item.caseControl) {
-            if (item.caseControl.length > 0) {
+        if (item.caseControlStudies) {
+            if (item.caseControlStudies.length > 0) {
                 hasChildren = true;
             }
-            returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseControl, depth, mode, 'caseControlStudies'));
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseControlStudies, depth, mode, 'case control'));
+        }
+        if (item.caseCohort) {
+            hasChildren = false;
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseCohort, depth, mode, 'case cohort'));
+        }
+        if (item.controlCohort) {
+            hasChildren = false;
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.controlCohort, depth, mode, 'control cohort'));
         }
 
         // if the mode is 'delete', get the items' parents' info if needed, flatten the current item, set it as deleted
@@ -2142,6 +2154,22 @@ var DeleteButtonModal = React.createClass({
             // flatten the target item and set its status to deleted
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
+
+            // When delete case control
+            if (item['@type'][0] === 'caseControl') {
+                // Set status 'deleted' to case cohort
+                let uuid = item.caseCohort['@id'];
+                let deletedItem = flatten(item.caseCohort, 'group');
+                deletedItem.status = 'deleted';
+                this.putRestData(uuid + '?render=false', deletedItem);
+
+                // Set status 'deleted' to control cohort
+                uuid = item.controlCohort['@id'];
+                deletedItem = flatten(item.controlCohort, 'group');
+                deletedItem.status = 'deleted';
+                this.putRestData(uuid + '?render=false', deletedItem);
+            }
+
             // define operationType and add flags as needed
             var operationType = 'delete';
             if (depth > 0) {
@@ -2266,6 +2294,7 @@ var DeleteButtonModal = React.createClass({
     render: function() {
         var tree;
         var message;
+        var itemLabel;
         // generate custom messages and generate display tree for group and family delete confirm modals.
         // generic message for everything else.
         if (this.props.item['@type'][0] == 'group') {
@@ -2274,12 +2303,14 @@ var DeleteButtonModal = React.createClass({
         } else if (this.props.item['@type'][0] == 'family') {
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
+        } else if (this.props.item['@type'][0] == 'caseControl') {
+            itemLabel = this.props.item.label;
         }
         return (
             <div>
                 <div className="modal-body">
                     {message}
-                    <p>Are you sure you want to delete this item?</p>
+                    <p>Are you sure you want to delete {itemLabel ? <span>Case-Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
                     {tree ?
                     <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
                     {tree.map(function(treeItem, i) {
