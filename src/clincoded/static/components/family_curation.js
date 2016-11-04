@@ -1605,13 +1605,13 @@ var FamilySegregation = function() {
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
-            <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
+            <Input type="number" yesInteger={true} ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
-            <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for recessive)</span>}
+            <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for recessive)</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
+            <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
@@ -1809,7 +1809,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span className="normal">(only when ClinVar VariationID is not available):</span></span>;
+        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> whenever possible)</span>:</span>;
     }
 });
 
