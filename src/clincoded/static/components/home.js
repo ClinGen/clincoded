@@ -1,6 +1,8 @@
 'use strict';
 var React = require('react');
 var globals = require('./globals');
+var url = require('url');
+var moment = require('moment');
 
 var SignIn = module.exports.SignIn = React.createClass({
     render: function() {
@@ -18,6 +20,22 @@ var SignIn = module.exports.SignIn = React.createClass({
 });
 
 var Home = module.exports.Home = React.createClass({
+    getInitialState: function() {
+        var demoWarning = false;
+        var productionWarning = false;
+        if (/production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // check if production URL. Enable productionWarning if it is.
+            productionWarning = true;
+        } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
+            // if neither production nor curation URL, enable demoWarning.
+            demoWarning = true;
+        }
+        return {
+            demoWarning: demoWarning,
+            productionWarning: productionWarning
+        };
+    },
+
     render: function() {
         if (this.props.session && this.props.session['auth.userid'] !== undefined) {
             window.location.href = '/dashboard/';
@@ -34,6 +52,13 @@ var Home = module.exports.Home = React.createClass({
                                 <p className="lead">ClinGen is a National Institutes of Health (NIH)-funded resource dedicated to building an authoritative central resource that defines the clinical relevance of genes and variants for use in precision medicine and research. One of the key goals of ClinGen is to implement an evidence-based consensus for curating genes and variants. For more information on the ClinGen resource, please visit the ClinGen portal at <a href="https://www.clinicalgenome.org" target="_blank">clinicalgenome.org <i className="icon icon-external-link"></i></a>.</p>
                             </div>
                         </div>
+                    </div>
+                    <div className="row demo-access-note">
+                        {this.state.demoWarning ?
+                            <div>Explore a demo version of the ClinGen interfaces by clicking on the "Demo Login" button located in the header above.</div>
+                            :
+                            <div>Explore a demo version of the ClinGen interfaces at <a href="https://curation-test.clinicalgenome.org/">curation-test.clinicalgenome.org <i className="icon icon-external-link"></i></a></div>
+                        }
                     </div>
                     <div className="row">
                         <div className="col-sm-6">
@@ -62,7 +87,7 @@ var Home = module.exports.Home = React.createClass({
                     </div>
                     <hr/>
                     <footer>
-                        <p>&copy; 2016 <a href="https://www.clinicalgenome.org" target="_blank">ClinGen</a> - All rights reserved</p>
+                        <p>&copy; {moment().format("YYYY")} <a href="https://www.clinicalgenome.org" target="_blank">ClinGen</a> - All rights reserved</p>
                     </footer>
                 </div>
             </div>
