@@ -2172,7 +2172,7 @@ var FamilyViewer = React.createClass({
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {
                                 return (
-                                    <div className="variant-view-panel" key={variant.uuid}>
+                                    <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
                                         <h5>Variant {i + 1}</h5>
                                         {variant.clinvarVariantId ?
                                             <div>
@@ -2198,12 +2198,20 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {family.individualIncluded && family.individualIncluded[0].recessiveZygosity && i === 0 ?
+                                        {family.individualIncluded && family.individualIncluded.length && i === 0 ?
                                             <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>If Recessive, select variant zygosity</dt>
-                                                    <dd>{family.individualIncluded[0].recessiveZygosity}</dd>
-                                                </dl>
+                                                {family.individualIncluded.map(function(ind, index) {
+                                                    return (
+                                                        <div key={index}>
+                                                            {ind.proband && ind.recessiveZygosity ?
+                                                                <dl className="dl-horizontal">
+                                                                    <dt>If Recessive, select variant zygosity</dt>
+                                                                    <dd>{ind.recessiveZygosity}</dd>
+                                                                </dl>
+                                                            : null}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         : null }
                                     </div>
