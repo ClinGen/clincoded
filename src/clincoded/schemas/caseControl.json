@@ -1,0 +1,162 @@
+{
+    "title": "CaseControl",
+    "id": "/profiles/caseControl.json",
+    "description": "Schema for storing case-control study data",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+        "label",
+        "caseCohort",
+        "controlCohort"
+    ],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/standard_status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "label": {
+            "title": "Label",
+            "type": "string"
+        },
+        "caseCohort": {
+            "title": "Case Cohort",
+            "description": "Group used as case cohort",
+            "type": "string",
+            "linkTo": "group"
+        },
+        "controlCohort": {
+            "title": "Control Cohort",
+            "description": "Group used as control cohort",
+            "type": "string",
+            "linkTo": "group"
+        },
+        "studyType": {
+            "title": "Study Type",
+            "type": "string"
+        },
+        "detectionMethod": {
+            "title": "Detection Method",
+            "type": "string"
+        },
+        "statisticalValues": {
+            "title": "Statistical Values",
+            "description": "List of statistical values",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "valueType": {
+                        "title": "Value Type",
+                        "type": "string"
+                    },
+                    "otherType": {
+                        "title": "Other Type",
+                        "description": "Description of other type",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "pValue": {
+            "title": "p-Value",
+            "type": "number"
+        },
+        "confidenceIntervalFrom": {
+            "title": "Confidence Interval",
+            "description": "Minimum of confidence interval",
+            "type": "number"
+        },
+        "confidenceIntervalTo": {
+            "title": "Confidence Interval",
+            "description": "Maximum of confidence interval",
+            "type": "number"
+        },
+        "demographicInfoMatched": {
+            "title": "Demographic Info Matched",
+            "description": "Whether case and control cohorts are mateched by demogtaphic information?",
+            "type": "string"
+        },
+        "factorOfDemographicInfoMatched": {
+            "title": "Type of Demographic Info Matched",
+            "type": "string"
+        },
+        "explanationForDemographicMatched": {
+            "title": "Explanation",
+            "description": "Explanation for selecting type of demographic info",
+            "type": "string"
+        },
+        "geneticAncestryMatched": {
+            "title": "Genetic Ancestry Matched",
+            "description": "Whether case and control cohorts are matched for genetic ancestry?",
+            "type": "string"
+        },
+        "factorOfGeneticAncestryNotMatched": {
+            "title": "Type of Genetic Ancestry Matched",
+            "type": "string"
+        },
+        "explanationForGeneticAncestryNotMatched": {
+            "title": "Explanation",
+            "description": "Explanation for selecting type of genetic ancestry",
+            "type": "string"
+        },
+        "diseaseHistoryEvaluated": {
+            "title": "Primary Disease Evaluated",
+            "description": "Whether primary disease and/or family history of disease are evaluated?",
+            "type": "string"
+        },
+        "explanationForDiseaseHistoryEvaluation": {
+            "title": "Explanation",
+            "description": "Explanation for selecting type of disease evaluation",
+            "type": "string"
+        },
+        "differInVariables": {
+            "title": "Differ In Other Variables",
+            "description": "Whether case and control cohorts differ in any other variables?",
+            "type": "string"
+        },
+        "explanationForDifference": {
+            "title": "Explanation",
+            "description": "Explanation if differing",
+            "type": "string"
+        },
+        "comments": {
+            "title": "Comments",
+            "type": "string"
+        },
+        "scores": {
+            "title": "Scores",
+            "description": "List of score assigned to case control study. Limited to one per user.",
+            "type": "array",
+            "items": {
+                "title": "Score",
+                "type": "string",
+                "linkTo": "evidenceScore"
+            }
+        }
+    },
+    "columns": {
+        "label": {
+            "title": "Label",
+            "type": "string"
+        },
+        "caseCohort.label": {
+            "title": "Case Cohort",
+            "type": "string"
+        },
+        "controlCohort.label": {
+            "title": "Control Cohort",
+            "type": "string"
+        }
+    }
+}

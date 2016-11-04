@@ -201,7 +201,10 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
         //disabled: React.PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
         panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
         label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
-        note: React.PropTypes.string, // Note to display below the dropdown
+        note: React.PropTypes.oneOfType([ // Note to display below the dropdown
+            React.PropTypes.string,
+            React.PropTypes.object
+        ]),
         updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
         assessmentSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         disableDefault: React.PropTypes.bool, // TRUE to disable the Default (Not Assessed) item
@@ -279,7 +282,7 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
                                 </Input>
                             }
                             {this.props.note ?
-                                <p className="col-sm-7 col-sm-offset-5">{this.props.note}</p>
+                                <div className="col-sm-7 col-sm-offset-5">{this.props.note}</div>
                             : null}
                         </div>
                         {this.props.assessmentSubmit ?

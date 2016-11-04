@@ -67,7 +67,9 @@ var IndividualCuration = React.createClass({
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
+            evidenceScoreUuid: null
         };
     },
 
@@ -80,6 +82,13 @@ var IndividualCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
+        } else if (ref === 'SEGrecessiveZygosity') {
+            //Only show option to add 2nd variant if user selects 'Heterozygous'
+            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
+                if (this.state.variantCount > 1) {
+                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
+                }
+            });
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -209,6 +218,11 @@ var IndividualCuration = React.createClass({
                 else {
                     this.setState({proband_selected: false});
                 }
+                // Get evidenceScore object if exists
+                // FIXME: Need to handle an array of scores
+                if (stateObj.individual.scores && stateObj.individual.scores.length) {
+                    this.setState({evidenceScoreUuid: stateObj.individual.scores[0].uuid});
+                }
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
@@ -229,7 +243,11 @@ var IndividualCuration = React.createClass({
                     for (var i = 0; i < variants.length; i++) {
                         if (variants[i].clinvarVariantId) {
                             currVariantOption[i] = VAR_SPEC;
-                            stateObj.variantInfo[i] = {'clinvarVariantId': variants[i].clinvarVariantId, 'clinvarVariantTitle': variants[i].clinvarVariantTitle};
+                            stateObj.variantInfo[i] = {
+                                'clinvarVariantId': variants[i].clinvarVariantId,
+                                'clinvarVariantTitle': variants[i].clinvarVariantTitle,
+                                'uuid': variants[i].uuid
+                            };
                         } else if (variants[i].otherDescription) {
                             currVariantOption[i] = VAR_OTHER;
                         } else {
@@ -348,6 +366,7 @@ var IndividualCuration = React.createClass({
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
+            var individualScores = []; // FIXME: Need to be able to handle array of scores
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -579,9 +598,42 @@ var IndividualCuration = React.createClass({
 
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
+                }).then(response => {
+                    /*****************************************************/
+                    /* Proband score status data object                  */
+                    /*****************************************************/
+                    let newScoreStatusObj = {};
+                    let scoreStatus = this.getFormValue('scoreStatus') && this.getFormValue('scoreStatus') !== 'none' ? this.getFormValue('scoreStatus') : null;
+                    if (scoreStatus) {
+                        newScoreStatusObj = {
+                            scoreStatus: scoreStatus,
+                            evidenceType: 'Individual'
+                        };
+                        /*************************************************************/
+                        /* Either update or create the score status object in the DB */
+                        /*************************************************************/
+                        if (this.state.evidenceScoreUuid) {
+                            return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newScoreStatusObj).then(modifiedScoreObj => {
+                                // FIXME: Need to be able to handle array of scores
+                                if (modifiedScoreObj) {
+                                    individualScores.push(modifiedScoreObj['@graph'][0]['@id']);
+                                }
+                                return Promise.resolve(individualScores);
+                            });
+                        } else {
+                            return this.postRestData('/evidencescore/', newScoreStatusObj).then(newScoreObject => {
+                                if (newScoreObject) {
+                                    individualScores.push(newScoreObject['@graph'][0]['@id']);
+                                }
+                                return Promise.resolve(individualScores);
+                            });
+                        }
+                    } else {
+                        return Promise.resolve(null);
+                    }
                 }).then(data => {
                     // Make a new individual object based on form fields.
-                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids);
+                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, individualScores, hpoids, nothpoids);
                     return this.writeIndividualObj(newIndividual);
                 }).then(newIndividual => {
                     var promise;
@@ -659,6 +711,7 @@ var IndividualCuration = React.createClass({
                         }
                         this.context.navigate(submitLink);
                     }
+
                 }).catch(function(e) {
                     console.log('INDIVIDUAL CREATION ERROR=: %o', e);
                 });
@@ -668,7 +721,7 @@ var IndividualCuration = React.createClass({
 
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
-    createIndividual: function(individualDiseases, individualArticles, individualVariants, hpoids, nothpoids) {
+    createIndividual: function(individualDiseases, individualArticles, individualVariants, individualScores, hpoids, nothpoids) {
         var value;
         var currIndividual = this.state.individual;
         var family = this.state.family;
@@ -740,9 +793,38 @@ var IndividualCuration = React.createClass({
             newIndividual.variants = individualVariants;
         }
 
+        if (individualScores) {
+            newIndividual.scores = individualScores;
+        }
+
         // Set the proband boolean
         value = this.getFormValue('proband');
         if (value && value !== 'none') { newIndividual.proband = value === "Yes"; }
+
+        /*************************************************/
+        /* Individual variant form fields.               */
+        /* Only applicable when individual is associated */
+        /* with a family and 1 or more variants          */
+        /*************************************************/
+        if (individualVariants) {
+            value = this.getFormValue('SEGrecessiveZygosity');
+            if (value) {
+                if (value !== 'none') { newIndividual.recessiveZygosity = value; }
+            } else {
+                if (currIndividual && currIndividual.recessiveZygosity) {
+                    newIndividual.recessiveZygosity = currIndividual.recessiveZygosity;
+                }
+            }
+
+            value = this.getFormValue('individualBothVariantsInTrans');
+            if (value !== 'none') { newIndividual.bothVariantsInTrans = value; }
+
+            value = this.getFormValue('individualDeNovo');
+            if (value !== 'none') { newIndividual.denovo = value; }
+
+            value = this.getFormValue('individualMaternityPaternityConfirmed');
+            if (value !== 'none') { newIndividual.maternityPaternityConfirmed = value; }
+        }
 
         return newIndividual;
     },
@@ -948,6 +1030,13 @@ var IndividualCuration = React.createClass({
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
+                                        {this.state.proband || this.state.proband_selected ?
+                                            <PanelGroup accordion>
+                                                <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} open>
+                                                    {IndividualScore.call(this)}
+                                                </Panel>
+                                            </PanelGroup>
+                                        : null}
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
@@ -1211,7 +1300,8 @@ var IndividualDemographics = function() {
     return (
         <div className="row">
             <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual && individual.sex}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                error={this.getFormError('sex')} clearError={this.clrFormErrors.bind(null, 'sex')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Male">Male</option>
@@ -1287,6 +1377,9 @@ var IndividualVariantInfo = function() {
     var gdm = this.state.gdm;
     var annotation = this.state.annotation;
     var variants = individual && individual.variants;
+    let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
+    let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
+    let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
 
     return (
         <div className="row">
@@ -1300,17 +1393,60 @@ var IndividualVariantInfo = function() {
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>ClinVar VariationID</dt>
-                                        <dd>{variant.clinvarVariantId}</dd>
+                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
                                     </div>
 
                                     <div>
-                                        <dt>Other description</dt>
-                                        <dd>{variant.otherDescription}</dd>
+                                        <dt>ClinVar Preferred Title</dt>
+                                        <dd>{variant.clinvarVariantTitle}</dd>
                                     </div>
+
+                                    {variant.otherDescription && variant.otherDescription.length ?
+                                        <div>
+                                            <dt>Other description</dt>
+                                            <dd>{variant.otherDescription}</dd>
+                                        </div>
+                                    : null}
+
+                                    {individual.recessiveZygosity && i === 0 ?
+                                        <div>
+                                            <dt>If Recessive, select variant zygosity</dt>
+                                            <dd>{individual.recessiveZygosity}</dd>
+                                        </div>
+                                    : null }
                                 </dl>
                             </div>
                         );
                     })}
+                    {variants && variants.length ?
+                        <div  className="variant-panel">
+                            <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
+                                defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not Specified">Not Specified</option>
+                            </Input>
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                                defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Input>
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                                defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Input>
+                        </div>
+                    : null}
                 </div>
             :
                 <div>
@@ -1323,14 +1459,6 @@ var IndividualVariantInfo = function() {
 
                         return (
                             <div key={i} className="variant-panel">
-                                <div className="row">
-                                    <div className="col-sm-7 col-sm-offset-5">
-                                        <p className="alert alert-warning">
-                                            ClinVar VariationID should be provided in all instances it exists. This is the only way to associate probands from different studies with
-                                            the same variant, and ensures the accurate counting of probands.
-                                        </p>
-                                    </div>
-                                </div>
                                 {this.state.variantInfo[i] ?
                                     <div>
                                         <div className="row">
@@ -1340,6 +1468,18 @@ var IndividualVariantInfo = function() {
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                             <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                        </div>
+                                        <div className="row variant-assessment">
+                                            <span className="col-sm-5 control-label"><label></label></span>
+                                            <span className="col-sm-7 text-no-input">
+                                                <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact <i className="icon icon-external-link"></i></a>
+                                            </span>
+                                        </div>
+                                        <div className="row variant-curation">
+                                            <span className="col-sm-5 control-label"><label></label></span>
+                                            <span className="col-sm-7 text-no-input">
+                                                <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface <i className="icon icon-external-link"></i></a>
+                                            </span>
                                         </div>
                                     </div>
                                 : null}
@@ -1353,22 +1493,56 @@ var IndividualVariantInfo = function() {
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {curator.renderMutalyzerLink()}
+                                {this.state.variantInfo[i] && i === 0 ?
+                                    <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                                        value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                        <option value="none">No Selection</option>
+                                        <option disabled="disabled"></option>
+                                        <option value="Homozygous">Homozygous</option>
+                                        <option value="Hemizygous">Hemizygous</option>
+                                        <option value="Heterozygous">Heterozygous</option>
+                                    </Input>
+                                : null}
                             </div>
                         );
                     })}
-                    {this.state.variantCount < MAX_VARIANTS ?
+                    {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
                         <div className="row">
                             <div className="col-sm-7 col-sm-offset-5 clearfix">
-                                {this.state.variantCount ?
-                                    <p className="alert alert-warning">
-                                        For a recessive condition, you must enter both variants believed to be causative for the disease in order that
-                                        each may be associated with the Individual and assessed (except in the case of homozygous recessive, then the
-                                        variant need only be entered once). Additionally, each variant must be assessed as supports for the Individual to be counted.
-                                    </p>
-                                : null}
-                                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right" title="Add another variant associated with Individual"
+                                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
+                                    title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
                                     clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
                             </div>
+                        </div>
+                    : null}
+                    {Object.keys(this.state.variantInfo).length > 0 ?
+                        <div  className="variant-panel">
+                            <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
+                                defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not Specified">Not Specified</option>
+                            </Input>
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                                defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Input>
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                                defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                <option value="none">No Selection</option>
+                                <option disabled="disabled"></option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Input>
                         </div>
                     : null}
                 </div>
@@ -1433,6 +1607,28 @@ var LabelOtherPmids = React.createClass({
     }
 });
 
+// Score Proband panel. Call with .call(this) to run in the same context
+// as the calling component.
+var IndividualScore = function() {
+    let individual = this.state.individual;
+    let scores = individual && individual.scores ? individual.scores : null;
+
+    return (
+        <div className="row">
+            <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue="none" value={scores && scores.length ? scores[0].scoreStatus : null}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option value="Score">Score</option>
+                <option value="Review">Review</option>
+                <option value="Contradicts">Contradicts</option>
+            </Input>
+            <div className="col-sm-7 col-sm-offset-5 score-status-note">
+                <div className="alert alert-warning">Note: The next release will provide a calculated score for this proband based on the information provided as well as the ability to adjust this score within the allowed range specified by the Clinical Validity Classification.</div>
+            </div>
+        </div>
+    );
+};
 
 var IndividualViewer = React.createClass({
     render: function() {
@@ -1442,6 +1638,7 @@ var IndividualViewer = React.createClass({
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+        let scores = individual && individual.scores ? individual.scores : null;
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1477,6 +1674,8 @@ var IndividualViewer = React.createClass({
         var tempGdmPmid = curator.findGdmPmidFromObj(individual);
         var tempGdm = tempGdmPmid[0];
         var tempPmid = tempGdmPmid[1];
+        let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
+        let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
 
         return (
             <div>
@@ -1643,9 +1842,41 @@ var IndividualViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
+                                        {individual && individual.recessiveZygosity && i === 0 ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>If Recessive, select variant zygosity</dt>
+                                                    <dd>{individual.recessiveZygosity}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
                                     </div>
                                 );
                             })}
+                            {variants && variants.length ?
+                                <div className="variant-view-panel family-associated">
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</dt>
+                                            <dd>{individual.bothVariantsInTrans}</dd>
+                                        </dl>
+                                    </div>
+
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>If the individuals has one variant, is it <i>de novo</i> OR If the individual has 2 variants, is at least one <i>de novo</i>?</dt>
+                                            <dd>{individual.denovo}</dd>
+                                        </dl>
+                                    </div>
+
+                                    <div>
+                                        <dl className="dl-horizontal">
+                                            <dt>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</dt>
+                                            <dd>{individual.maternityPaternityConfirmed}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            : null}
                         </Panel>
 
                         <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
@@ -1659,6 +1890,15 @@ var IndividualViewer = React.createClass({
                                 <dd>{individual.otherPMIDs && individual.otherPMIDs.map(function(article, i) {
                                     return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                                 })}</dd>
+                            </dl>
+                        </Panel>
+
+                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
+                            <dl className="dl-horizontal">
+                                <div>
+                                    <dt>Score Status</dt>
+                                    <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
+                                </div>
                             </dl>
                         </Panel>
                     </div>
@@ -1692,13 +1932,14 @@ var LabelPanelTitleView = React.createClass({
 // Make a starter individual from the family and write it to the DB; always called from
 // family curation. Pass an array of disease objects to add, as well as an array of variants.
 // Returns a promise once the Individual object is written.
-var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, context) {
+var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, zygosity, context) {
     var newIndividual = {};
 
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
     newIndividual.variants = variants;
     newIndividual.proband = true;
+    if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {
@@ -1708,8 +1949,8 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
 
 
 // Update the individual with the variants, and write the updated individual to the DB.
-var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, context) {
-    var updateNeeded = true;
+var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, zygosity, context) {
+    var updateNeeded = true, updateZygosityOnly = false;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -1719,9 +1960,19 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         updateNeeded = !!missing.length;
     }
 
+    if (zygosity !== individual.recessiveZygosity) {
+        updateNeeded = true;
+        updateZygosityOnly = true;
+    }
+
     if (updateNeeded) {
         var writerIndividual = curator.flatten(individual);
-        writerIndividual.variants = variants;
+        if (!updateZygosityOnly) { writerIndividual.variants = variants; }
+        if (zygosity) {
+            writerIndividual.recessiveZygosity = zygosity;
+        } else {
+            delete writerIndividual['recessiveZygosity'];
+        }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
             return Promise.resolve(data['@graph'][0]);

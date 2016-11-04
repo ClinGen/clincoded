@@ -498,7 +498,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -530,7 +530,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="label label-primary">VEP</a>
+                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
                             <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                         </h3>
                     </div>
@@ -572,7 +572,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                <dd className="col-lg-3">UCSC</dd>
+                                <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
                             }
                             {(links_38 || links_37) ?
                                 <dd>Variation Viewer [
@@ -582,7 +582,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                <dd className="col-lg-4">Variation Viewer</dd>
+                                <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer <i className="icon icon-external-link"></i></a></dd>
                             }
                             {(links_38 || links_37) ?
                                 <dd>Ensembl Browser [
@@ -592,7 +592,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     ]
                                 </dd>
                                 :
-                                <dd className="col-lg-3">Ensembl Browser</dd>
+                                <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser <i className="icon icon-external-link"></i></a></dd>
                             }
                         </dl>
                     </div>

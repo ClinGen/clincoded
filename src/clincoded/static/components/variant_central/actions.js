@@ -89,7 +89,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                     variant: variantObj['@id']
                 }
             };
-            this.recordHistory('add-hide', interpretation['@graph'][0], meta).then(result => {
+            this.recordHistory('add', interpretation['@graph'][0], meta).then(result => {
                 window.location.href = '/variant-central/?edit=true&variant=' + variantObj.uuid + '&interpretation=' + newInterpretationUuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
             });
         }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
@@ -98,7 +98,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     render: function() {
         let hasExistingInterpretation = this.props.interpretation ? true : false;
         if (!hasExistingInterpretation) {
-            let variant = this.props.variantData
+            let variant = this.props.variantData;
             if (variant && variant.associatedInterpretations && variant.associatedInterpretations.length) {
                 for (let interpretation of variant.associatedInterpretations) {
                     if (interpretation.submitted_by.uuid === this.props.session.user_properties.uuid) {
@@ -272,7 +272,7 @@ var AssociateDisease = React.createClass({
             this.setState({submitResourceBusy: true});
             // Get the free-text values for the Orphanet ID to check against the DB
             var orphaId = this.getFormValue('orphanetid');
-            var interpretationDisease, currInterpretation;
+            var interpretationDisease, currInterpretation, flatInterpretation;
 
             if (orphaId !== '') {
                 orphaId = orphaId.match(/^ORPHA([0-9]{1,6})$/i)[1];
@@ -287,7 +287,7 @@ var AssociateDisease = React.createClass({
                     this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
                         currInterpretation = interpretation;
                         // get up-to-date copy of interpretation object and flatten it
-                        var flatInterpretation = curator.flatten(currInterpretation);
+                        flatInterpretation = curator.flatten(currInterpretation);
                         // if the interpretation object does not have a disease object, create it
                         if (!('disease' in flatInterpretation)) {
                             flatInterpretation.disease = '';
@@ -310,6 +310,9 @@ var AssociateDisease = React.createClass({
                                         mode: 'edit-disease'
                                     }
                                 };
+                                if (flatInterpretation.modeInheritance) {
+                                    meta.interpretation.modeInheritance = flatInterpretation.modeInheritance;
+                                }
                                 return this.recordHistory('modify', currInterpretation, meta).then(result => {
                                     this.setState({submitResourceBusy: false});
                                     // Need 'submitResourceBusy' state to proceed closing modal
@@ -456,24 +459,24 @@ var AssociateInheritance = React.createClass({
         // Invoke button progress indicator
         this.setState({submitResourceBusy: true});
 
-        let inheritance = this.getFormValue('inheritance');
-        let interpretationDisease, currInterpretation;
+        let modeInheritance = this.getFormValue('inheritance');
+        let currInterpretation;
 
         this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
             currInterpretation = interpretation;
             // get up-to-date copy of interpretation object and flatten it
             var flatInterpretation = curator.flatten(currInterpretation);
 
-            // if inheritance is set to none, either delete the key in interpretation object, or if
+            // if modeInheritance is set to none, either delete the key in interpretation object, or if
             // the key is already blank, return null and close modal
-            if (inheritance === 'no-moi') {
+            if (modeInheritance === 'no-moi') {
                 if ('modeInheritance' in flatInterpretation) {
                     delete flatInterpretation['modeInheritance'];
                 } else {
                     return null;
                 }
             } else {
-                flatInterpretation.modeInheritance = inheritance;
+                flatInterpretation.modeInheritance = modeInheritance;
             }
 
             return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
@@ -483,6 +486,12 @@ var AssociateInheritance = React.createClass({
                         mode: 'edit-inheritance'
                     }
                 };
+                if (modeInheritance !== 'no-moi') {
+                    meta.interpretation.modeInheritance = modeInheritance;
+                }
+                if (currInterpretation.disease) {
+                    meta.interpretation.disease = currInterpretation.disease['@id'];
+                }
                 return this.recordHistory('modify', currInterpretation, meta).then(result => {
                     this.setState({submitResourceBusy: false});
                     // Need 'submitResourceBusy' state to proceed closing modal

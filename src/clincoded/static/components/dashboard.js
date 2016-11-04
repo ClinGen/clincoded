@@ -40,9 +40,9 @@ var Dashboard = React.createClass({
         return gene + "–" + disease;
     },
 
-    cleanGdmModelName: function(model) {
+    cleanHpoName: function(term) {
         // remove (HP:#######) from model name
-        return model.indexOf('(') > -1 ? model.substring(0, model.indexOf('(') - 1) : model;
+        return term.indexOf('(') > -1 ? term.substring(0, term.indexOf('(') - 1) : term;
     },
 
     setUserData: function(props) {
@@ -72,7 +72,7 @@ var Dashboard = React.createClass({
                         gdmList.push({
                             uuid: gdmResult.uuid,
                             gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
-                            gdmModel: this.cleanGdmModelName(gdmResult.modeInheritance),
+                            gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
                             status: gdmResult.gdm_status,
                             date_created: gdmResult.date_created
                         });
@@ -87,18 +87,17 @@ var Dashboard = React.createClass({
             if (vciInterpURLs.length > 0) {
                 this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
                     vciInterpResults.map(vciInterpResult => {
-                        if (vciInterpResult.evaluation_count > 0) {
-                            vciInterpList.push({
-                                uuid: vciInterpResult.uuid,
-                                variantUuid: vciInterpResult.variant.uuid,
-                                clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
-                                hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
-                                hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
-                                diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
-                                status: vciInterpResult.interpretation_status,
-                                date_created: vciInterpResult.date_created
-                            });
-                        }
+                        vciInterpList.push({
+                            uuid: vciInterpResult.uuid,
+                            variantUuid: vciInterpResult.variant.uuid,
+                            clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
+                            hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
+                            hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
+                            diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
+                            modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
+                            status: vciInterpResult.interpretation_status,
+                            date_created: vciInterpResult.date_created
+                        });
                     });
                     this.setState({vciInterpList: vciInterpList, vciInterpListLoading: false});
                 });
@@ -188,7 +187,8 @@ var Dashboard = React.createClass({
                                             }
                                             </strong></span></div>
                                             <span className="block-link-no-color title-ellipsis">
-                                                {item.diseaseTerm ? item.diseaseTerm : "No disease associated"}
+                                                <strong>Disease</strong>: {item.diseaseTerm ? item.diseaseTerm : "None added"}
+                                                <br /><strong>Mode of Inheritance</strong>: {item.modeInheritance ? <i>{item.modeInheritance}</i> : "None added"}
                                                 <br /><span className="block-link-no-color"><strong>Status</strong>: {item.status}
                                                 <br /><strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
                                             </span>

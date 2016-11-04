@@ -1,0 +1,66 @@
+{
+    "title": "Evidence Score",
+    "id": "/profiles/evidenceScore.json",
+    "description": "Schema for storing score to evidence in GCI",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/standard_status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "scoreStatus": {
+            "title": "Score Status",
+            "description": "Score, Review or Contradicts",
+            "default": "Score",
+            "type": "string"
+        },
+        "calculatedScore": {
+            "title": "Calculated Score",
+            "description": "Automatically calculated score value",
+            "type": "number"
+        },
+        "score": {
+            "title": "Modified Score",
+            "description": "Score modified by user",
+            "type": "number"
+        },
+        "evidenceType": {
+            "title": "Evidence Type",
+            "description": "Type (Case control, Individual or Experimental) of evidence scored",
+            "type": "string"
+        },
+        "evidenceScored": {
+            "title": "Evidence",
+            "description": "UUID of scored evidence",
+            "type": "string"
+        },
+        "gdmId": {
+            "title": "GDM ID",
+            "description": "UUID of GDM the scored evidence belonging to",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "uuid": {
+            "title": "UUID",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Owner",
+            "type": "string"
+        },
+        "evidenceType": {
+            "title": "Evidence Type",
+            "type": "string"
+        }
+    }
+}

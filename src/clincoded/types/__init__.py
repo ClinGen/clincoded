@@ -312,6 +312,8 @@ class Gdm(Item):
         'annotations.individuals.variants.associatedPathogenicities.submitted_by',
         'annotations.individuals.otherPMIDs',
         'annotations.individuals.otherPMIDs.submitted_by',
+        'annotations.individuals.scores',
+        'annotations.individuals.scores.submitted_by',
         'annotations.experimentalData',
         'annotations.experimentalData.submitted_by',
         'annotations.experimentalData.variants',
@@ -323,7 +325,13 @@ class Gdm(Item):
         'annotations.experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
-        'annotations.experimentalData.assessments.submitted_by'
+        'annotations.experimentalData.assessments.submitted_by',
+        'annotations.caseControlStudies',
+        'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.caseCohort',
+        'annotations.caseControlStudies.controlCohort',
+        'annotations.caseControlStudies.scores',
+        'annotations.caseControlStudies.scores.submitted_by'
     ]
 
     @calculated_property(schema={
@@ -422,7 +430,6 @@ class Annotation(Item):
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
-        # 'groups.control',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
@@ -449,6 +456,8 @@ class Annotation(Item):
         'individuals.variants.submitted_by',
         'individuals.otherPMIDs',
         'individuals.otherPMIDs.submitted_by',
+        'individuals.scores',
+        'individuals.scores.submitted_by',
         'experimentalData',
         'experimentalData.submitted_by',
         'experimentalData.variants',
@@ -457,7 +466,13 @@ class Annotation(Item):
         'experimentalData.proteinInteractions.interactingGenes',
         'associatedGdm',
         'experimentalData.assessments',
-        'experimentalData.assessments.submitted_by'
+        'experimentalData.assessments.submitted_by',
+        'caseControlStudies',
+        'caseControlStudies.submitted_by',
+        'caseControlStudies.caseCohort',
+        'caseControlStudies.controlCohort',
+        'caseControlStudies.scores',
+        'caseControlStudies.scores.submitted_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -509,6 +524,49 @@ class Annotation(Item):
         if len(experimentalData) > 0:
             return len(experimentalData)
         return ""
+
+
+@collection(
+    name='casecontrol',
+    unique_key='caseControl:uuid',
+    properties={
+        'title': 'Case Control',
+        'description': 'List of case-control objects in all GDM(s)',
+    })
+class CaseControl(Item):
+    item_type = 'caseControl'
+    schema = load_schema('clincoded:schemas/caseControl.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseCohort',
+        'caseCohort.commonDiagnosis',
+        'caseCohort.submitted_by',
+        'controlCohort',
+        'controlCohort.submitted_by',
+        'scores',
+        'scores.submitted_by',
+        'associatedAnnotations',
+        'associatedAnnotations.article',
+        'associatedAnnotations.groups',
+        'associatedAnnotations.associatedGdm',
+        'associatedAnnotations.associatedGdm.disease',
+        'associatedAnnotations.associatedGdm.gene'
+    ]
+    rev = {
+        'associatedAnnotations': ('annotation', 'caseControlStudies')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated annotation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "annotation.caseControlStudies"
+        }
+    })
+    def associatedAnnotations(self, request, associatedAnnotations):
+        return paths_filtered_by_status(request, associatedAnnotations)
 
 
 @collection(
@@ -664,6 +722,8 @@ class Individual(Item):
         'otherPMIDs.submitted_by',
         'assessments',
         'assessments.submitted_by',
+        'scores',
+        'scores.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -882,6 +942,57 @@ class Assessment(Item):
 
 
 @collection(
+    name='evidencescore',
+    unique_key='evidenceScore:uuid',
+    properties={
+        'title': 'Evidence Score',
+        'description': 'List of score assigned to evidence',
+    })
+class EvidenceScore(Item):
+    item_type = 'evidenceScore'
+    schema = load_schema('clincoded:schemas/evidenceScore.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'caseControl_scored',
+        'caseControl_scored.associatedAnnotations',
+        'caseControl_scored.associatedAnnotations.associatedGdm',
+        'individual_scored',
+        'individual_scored.associatedAnnotations',
+        'individual_scored.associatedAnnotations.associatedGdm',
+        'individual_scored.associatedFamilies',
+        'individual_scored.associatedFamilies.associatedAnnotations',
+        'individual_scored.associatedFamilies.associatedAnnotations.associatedGdm'
+    ]
+    rev = {
+        'caseControl_scored': ('caseControl', 'scores'),
+        'individual_scored': ('individual', 'scores')
+    }
+
+    @calculated_property(schema={
+        "title": "Case Control Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "caseControl.scores"
+        }
+    })
+    def caseControl_scored(self, request, caseControl_scored):
+        return paths_filtered_by_status(request, caseControl_scored)
+
+    @calculated_property(schema={
+        "title": "Individual Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "individual.scores"
+        }
+    })
+    def individual_scored(self, request, individual_scored):
+        return paths_filtered_by_status(request, individual_scored)
+
+
+@collection(
     name='provisional',
     unique_key='provisionalClassification:uuid',
     properties={
@@ -1018,8 +1129,6 @@ class Interpretation(Item):
     def interpretation_status(self, evaluations=[], provisional_variant=[]):
         if len(provisional_variant) > 0:
             return 'Provisional'
-        elif len(evaluations) > 0:
-            return 'Evaluation'
         return 'In Progress'
 
     @calculated_property(schema={
@@ -1358,6 +1467,10 @@ class History(Item):
         'meta.article.gdm',
         'meta.article.gdm.gene',
         'meta.article.gdm.disease',
+        'meta.caseControl.gdm',
+        'meta.caseControl.gdm.gene',
+        'meta.caseControl.gdm.disease',
+        'meta.caseControl.article',
         'meta.group.gdm',
         'meta.group.gdm.gene',
         'meta.group.gdm.disease',

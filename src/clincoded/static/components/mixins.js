@@ -76,8 +76,8 @@ class Timeout {
     }
 }
 
-
-module.exports.Persona = {
+module.exports.Auth0 = {
+    // Mixin for providing Auth0 Authentication functionality. Call in app.js
     childContextTypes: {
         fetch: React.PropTypes.func
     },
@@ -88,26 +88,67 @@ module.exports.Persona = {
         };
     },
 
-    getInitialState: function () {
+    getInitialState: function() {
+        // Define loadingComplete and session here so they are available to mixin, as well as main app
         return {
             loadingComplete: false,
             session: {}
         };
     },
 
-    componentDidMount: function () {
-        // Login / logout actions must be deferred until persona is ready.
+    componentDidMount: function() {
         this.extractSessionCookie();
-        $script.ready('persona', this.configurePersona);
+        this.setState({loadingComplete: true});
+        if (window.Auth0Lock !== undefined) {
+            // CHANGEME
+            this.lock = new window.Auth0Lock(
+                'fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs', // AUTH0: CLIENT ID
+                'clingen.auth0.com', // AUTH0: LOGIN DOMAIN
+                {
+                    additionalSignUpFields: [
+                        {
+                            name: "name",
+                            placeholder: "Your full name"
+                        }
+                    ],
+                    auth: {
+                        redirect: false
+                    },
+                    avatar: null,
+                    socialButtonStyle: 'big',
+                    theme: {
+                        logo: '/static/img/clingen-logo-only.svg',
+                        primaryColor: '#294297'
+                    },
+                    languageDictionary: {
+                        title: "ClinGen Curator Interface"
+                    }
+                }
+            );
+            this.lock.on('authenticated', this.handleAuth0Login);
+        } else {
+            // Auth0Lock is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
+            // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
+            // instead of the normal home page as jest expects. The following is a workaround to mimic the normal
+            // home page despite Auth0Lock not being found.
+            let auth0_not_found = {};
+            auth0_not_found = {
+                "@id": "/",
+                "@type": ["portal"],
+                "portal_title": "ClinGen",
+                "title": "Home"
+            };
+            this.setState({context: auth0_not_found});
+        }
     },
 
     ajaxPrefilter: function (options, original, xhr) {
+        // Function to specify request headers of all ajax requests
         var http_method = options.type;
         if (http_method === 'GET' || http_method === 'HEAD') return;
         var session = this.state.session;
         var userid = session['auth.userid'];
         if (userid) {
-            // XXX Server should use this to check user is logged in
             xhr.setRequestHeader('X-Session-Userid', userid);
         }
         if (session._csrft_) {
@@ -115,128 +156,111 @@ module.exports.Persona = {
         }
     },
 
-    fetch: function (url, options) {
-        options = _.extend({credentials: 'same-origin'}, options);
-        var http_method = options.method || 'GET';
-        if (!(http_method === 'GET' || http_method === 'HEAD')) {
-            var headers = options.headers = _.extend({}, options.headers);
-            var session = this.state.session;
-            //var userid = session['auth.userid'];
-            //if (userid) {
-            //    // Server uses this to check user is logged in
-            //    headers['X-If-Match-User'] = userid;
-            //}
-            if (session._csrft_) {
-                headers['X-CSRF-Token'] = session._csrft_;
+    triggerLogin: function(e, retrying) {
+        // pressing the Login button shows the Auth0 Lock modal
+        var $script = require('scriptjs');
+        if (this.state.session && !this.state.session._csrft_) {
+            this.fetch('/session');
+        }
+        this.lock.show();
+    },
+
+    triggerAutoLogin: function(e, retrying) {
+        // pressing the Demo Login button automatically logs in the user to the test curator
+        // account. Only enabled on non-production/curation instances
+        var $script = require('scriptjs');
+        if (this.state.session && !this.state.session._csrft_) {
+            this.fetch('/session');
+        }
+
+        this.fetch(
+            'https://clingen.auth0.com/oauth/ro', // AUTH0: LOGIN DOMAIN
+            {
+                xcsrf_disable: true,
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "client_id":   "fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs", // AUTH0: CLIENT ID
+                    "username":    "clingen.demo.curator@genome.stanford.edu", // AUTH0: TEST CURATOR CREDENTIALS
+                    "password":    "CLSZ6lJhOAhYBZRgGx5%BdkfgwRt%LnY)EXT",
+                    "id_token":    "",
+                    "connection":  "Username-Password-Authentication",
+                    "grant_type":  "password",
+                    "scope":       "openid",
+                    "device":      ""
+                })
             }
-        }
-        // Strip url fragment.
-        var url_hash = url.indexOf('#');
-        if (url_hash > -1) {
-            url = url.slice(0, url_hash);
-        }
-        var request = fetch(url, options);
-        request.xhr_begin = 1 * new Date();
-        request.then(response => {
-            request.xhr_end = 1 * new Date();
-            var stats_header = response.headers.get('X-Stats') || '';
-            request.server_stats = require('querystring').parse(stats_header);
-            request.etag = response.headers.get('ETag');
-            this.extractSessionCookie();
-        });
-        return request;
-    },
-
-    extractSessionCookie: function () {
-        var cookie = require('cookie-monster');
-        var session_cookie = cookie(document).get('session');
-        if (this.state.session_cookie !== session_cookie) {
-            this.setState({
-                session_cookie: session_cookie,
-                session: this.parseSessionCookie(session_cookie)
-            });
-        }
-    },
-
-    componentDidUpdate: function (prevProps, prevState) {
-        if (prevState.session['auth.userid'] && !this.state.session['auth.userid']) {
-            // Session expired.
-            $script.ready('persona', function () {
-                navigator.id.logout();
-            });
-        }
-    },
-
-    parseSessionCookie: function (session_cookie) {
-        var Buffer = require('buffer').Buffer;
-        var session;
-        if (session_cookie) {
-            // URL-safe base64
-            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
-            // First 64 chars is the sha-512 server signature
-            // Payload is [accessed, created, data]
-            try {
-                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
-            } catch (e) {
-            }
-        }
-        return session || {};
-    },
-
-    configurePersona: function () {
-        this._persona_watched = false;
-        navigator.id.watch({
-            loggedInUser: this.state.session['auth.userid'] || null,
-            onlogin: this.handlePersonaLogin,
-            onlogout: this.handlePersonaLogout,
-            onmatch: this.handlePersonaMatch,
-            onready: this.handlePersonaReady
+        ).then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        }).then(session => {
+            this.handleAuth0Login(session);
         });
     },
 
-    handlePersonaLogin: function (assertion, retrying) {
-        this._persona_watched = true;
-        if (!assertion) return;
+    triggerLoginFail: function() {
+        // Login failed (not sure when this ever happens)
+        let login_failure = {};
+        login_failure['@type'] = ['LoginDenied', 'error'];
+        this.setState({context: login_failure, loadingComplete: true});
+    },
+
+    handleAuth0Login: function (authResult, retrying) {
+        // method that handles what happens after Auth0 Lock modal interaction.
+        // most of this logic was in triggerLogin previously
+        var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
+        if (!accessToken) return;
+        this.sessionPropertiesRequest = true;
         this.fetch('/login', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({assertion: assertion})
+            body: JSON.stringify({accessToken: accessToken})
         })
         .then(response => {
+            this.lock.hide();
             if (!response.ok) throw response;
             return response.json();
         })
         .then(session => {
+            this.setState({session: session});
+            // Login was successful, so forward user to dashboard or target URI as necessary
             var next_url = window.location.href;
-            if (window.location.hash == '#logged-out') {
-                next_url = window.location.pathname + window.location.search;
-            }
-            this.navigate(next_url, {replace: true}).then(() => {
+            if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
+                this.navigate(next_url, {replace: true}).then(() => {
+                    this.setState({loadingComplete: true});
+                });
+            } else {
                 this.setState({loadingComplete: true});
-            });
+            }
         }, err => {
+            this.sessionPropertiesRequest = null;
             parseError(err).then(data => {
+                // Server session creds might have changed.
                 if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
                     if (!retrying) {
-                        window.setTimeout(this.handlePersonaLogin.bind(this, assertion, true));
+                        window.setTimeout(this.handleAuth0Login);
                         return;
                     }
                 }
                 // If there is an error, show the error messages
-                navigator.id.logout();
-                this.setState({context: data, loadingComplete: true});
+                this.setState({context: data});
             });
         });
     },
 
-    handlePersonaLogout: function () {
-        this._persona_watched = true;
-        console.log("Persona thinks we need to log out");
+    triggerLogout: function() {
+        // Called when the user presses the logout button. Log the user out of Google and forward them to the proper page
         var session = this.state.session;
-        if (!(session && session['auth.userid'])) return;
+        if (!(session && session['auth.userid'])) {
+            return;
+        }
+
         this.fetch('/logout?redirect=false', {
             headers: {'Accept': 'application/json'}
         })
@@ -259,30 +283,65 @@ module.exports.Persona = {
         });
     },
 
-    handlePersonaMatch: function () {
-        this._persona_watched = true;
-        this.setState({loadingComplete: true});
-    },
-
-    handlePersonaReady: function () {
-        console.log('persona ready');
-        // Handle Safari https://github.com/mozilla/persona/issues/3905
-        if (!this._persona_watched) {
-            this.setState({loadingComplete: true});
+    extractSessionCookie: function () {
+        // Function for extracting data out of the session cookie and save the info to the reactjs state
+        var cookie = require('cookie-monster');
+        var session_cookie = cookie(document).get('session');
+        if (this.state.session_cookie !== session_cookie) {
+            this.setState({
+                session_cookie: session_cookie,
+                session: this.parseSessionCookie(session_cookie)
+            });
         }
     },
 
-    triggerLogin: function (event) {
-        var request_params = {}; // could be site name
-        console.log('Logging in (persona) ');
-        navigator.id.request(request_params);
+    parseSessionCookie: function (session_cookie) {
+        // Helper function for extractSessionCookie()
+        var Buffer = require('buffer').Buffer;
+        var session;
+        if (session_cookie) {
+            // URL-safe base64
+            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
+            // First 64 chars is the sha-512 server signature
+            // Payload is [accessed, created, data]
+            try {
+                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
+            } catch (e) {
+                console.log('Error while parsing session cookie');
+                // error'ed
+            }
+        }
+        return session || {};
     },
 
-    triggerLogout: function (event) {
-        console.log('Logging out (persona)');
-        navigator.id.logout();
+    fetch: function (url, options) {
+        options = _.extend({credentials: 'same-origin'}, options);
+        var http_method = options.method || 'GET';
+        if (!(http_method === 'GET' || http_method === 'HEAD')) {
+            var headers = options.headers = _.extend({}, options.headers);
+            var session = this.state.session;
+            if (session._csrft_ && !options.xcsrf_disable) {
+                headers['X-CSRF-Token'] = session._csrft_;
+            }
+        }
+        // Strip url fragment.
+        var url_hash = url.indexOf('#');
+        if (url_hash > -1) {
+            url = url.slice(0, url_hash);
+        }
+        var request = fetch(url, options);
+        request.xhr_begin = 1 * new Date();
+        request.then(response => {
+            request.xhr_end = 1 * new Date();
+            var stats_header = response.headers.get('X-Stats') || '';
+            request.server_stats = require('querystring').parse(stats_header);
+            request.etag = response.headers.get('ETag');
+            this.extractSessionCookie();
+        });
+        return request;
     }
 };
+
 
 class UnsavedChangesToken {
     constructor(manager) {

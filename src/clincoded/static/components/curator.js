@@ -159,7 +159,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
-                            <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         <span>&nbsp;
@@ -171,59 +170,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                     </h1>
                                     <h2><i>{mode}</i></h2>
                                 </span>
-                            </div>
-                            <div className="provisional-info-panel">
-                                <table border="1" style={{'width':'100%'}}>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div className="provisional-title">
-                                                    <strong>Last Saved Summary & Provisional Classification</strong>
-                                                </div>
-                                                {   provisionalExist ?
-                                                        <div>
-                                                            <div className="provisional-data-left">
-                                                                <span>
-                                                                    Last Saved Summary<br />
-                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                                </span>
-                                                            </div>
-                                                            <div className="provisional-data-center">
-                                                                <span>
-                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                    Provisional Classification: {provisional.alteredClassification}
-                                                                    { summaryPage ?
-                                                                        null
-                                                                        :
-                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    :
-                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
-                                                }
-                                            </td>
-                                            <td className="button-box" rowSpan="2">
-                                                { summaryButton ?
-                                                    ( summaryPage ?
-                                                        <button type="button" className="btn btn-primary" disabled="disabled">
-                                                            Generate New Summary
-                                                        </button>
-                                                        :
-                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                        </a>
-                                                    )
-                                                    :
-                                                    null
-                                                }
-                                            </td>
-                                        </tr>
-                                        <tr style={{height:'10px'}}></tr>
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
@@ -357,7 +303,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                 {collectedVariants ?
                     <div className="variant-header clearfix">
                         <h2>Gene-Disease Record Variants</h2>
-                        <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
+                        <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
@@ -511,8 +457,9 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var caseControlUrl = curatorMatch ? ('/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
         var experimentalUrl = curatorMatch ? ('/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var groupRenders = [], familyRenders = [], individualRenders = [], experimentalRenders = [];
+        var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
@@ -566,6 +513,14 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
 
+        // Add to the array of case-control renders
+        if (annotation && annotation.caseControlStudies) {
+            let caseControlObj = annotation.caseControlStudies.map(caseControl => {
+                return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch)}</div>;
+            });
+            caseControlRenders = caseControlRenders.concat(caseControlObj);
+        }
+
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
@@ -587,17 +542,26 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
             <div>
                 {annotation ?
                     <Panel panelClassName="panel-evidence-groups" title={'Evidence for PMID:' + annotation.article.pmid}>
-                        <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
-                            {groupRenders}
+                        <Panel panelClassName="genetic-evidence-group" title={<h4><i className="icon icon-user"></i> Genetic Evidence</h4>}>
+                            <div className="group-separator"><span className="subhead"><i className="icon icon-chevron-right"></i> Case Level</span></div>
+                            <Panel title={<CurationPaletteTitles title="Group" url={groupUrl} />} panelClassName="panel-evidence">
+                                {groupRenders}
+                            </Panel>
+                            <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
+                                {familyRenders}
+                            </Panel>
+                            <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
+                                {individualRenders}
+                            </Panel>
+                            <div className="group-separator"><span className="subhead"><i className="icon icon-chevron-right"></i> Case-Control</span></div>
+                            <Panel title={<CurationPaletteTitles title="Case-Control" url={caseControlUrl} />} panelClassName="panel-evidence">
+                                {caseControlRenders}
+                            </Panel>
                         </Panel>
-                        <Panel title={<CurationPaletteTitles title="Family" url={familyUrl} />} panelClassName="panel-evidence">
-                            {familyRenders}
-                        </Panel>
-                        <Panel title={<CurationPaletteTitles title="Individual" url={individualUrl} />} panelClassName="panel-evidence">
-                            {individualRenders}
-                        </Panel>
-                        <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
-                            {experimentalRenders}
+                        <Panel panelClassName="experimental-group" title={<h4><i className="icon icon-flask"></i> Experimental Evidence</h4>}>
+                            <Panel title={<CurationPaletteTitles title="Experimental Data" url={experimentalUrl} />} panelClassName="panel-evidence">
+                                {experimentalRenders}
+                            </Panel>
                         </Panel>
                         {variantRenders && variantRenders.length ?
                             <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence">
@@ -693,7 +657,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                 </div>
             : null}
             {familyAssessable ?
-                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View/Assess</a>
+                <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View</a>
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
             {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
             {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
@@ -756,6 +720,30 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             : null}
             <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+        </div>
+    );
+};
+
+// Render a case-control in the curator palette.
+var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
+    return (
+        <div className="panel-evidence-group">
+            <h5><span className="title-ellipsis dotted" title={caseControl.label}>{caseControl.label}</span></h5>
+            <div className="evidence-curation-info">
+                {caseControl.submitted_by ?
+                    <p className="evidence-curation-info">{caseControl.submitted_by.title}</p>
+                : null}
+                <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
+            </div>
+            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View</a>
+            {curatorMatch ? <span> | <a href={
+                '/case-control-curation/?editsc&gdm=' + gdm.uuid +
+                '&evidence=' + annotation.uuid +
+                '&casecontrol=' + caseControl.uuid +
+                '&evidencescore=' + caseControl.scores[0].uuid +
+                '&casecohort=' + caseControl.caseCohort.uuid +
+                '&controlcohort=' + caseControl.controlCohort.uuid
+            } title="Edit this case-control">Edit</a></span> : null}
         </div>
     );
 };
@@ -1027,8 +1015,8 @@ var CuratorRecordHeader = React.createClass({
                 <div className="curation-data-curator">
                     {gdm ?
                         <dl className="inline-dl clearfix">
-                            <dt>Status: </dt><dd>{gdm.gdm_status}</dd>
-                            <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> – {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
+                            <dt>Status: </dt><dd>{gdm.gdm_status === 'Summary/Provisional Classifications' ? 'In progress' : gdm.gdm_status}</dd>
+                            <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {annotationOwners && annotationOwners.length && latestAnnotation ?
                                 <div>
                                     <dt>Participants: </dt>
@@ -1448,6 +1436,14 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenProvisionalVariant(obj);
                 break;
 
+            case 'evidenceScore':
+                flat = flattenEvidenceScore(obj);
+                break;
+
+            case 'caseControl':
+                flat = flattenCaseControl(obj);
+                break;
+
             case 'interpretation':
                 flat = flattenInterpretation(obj);
                 break;
@@ -1519,6 +1515,13 @@ function flattenAnnotation(annotation) {
         });
     }
 
+    // Flatten caseControlStudies
+    if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
+        flat.caseControlStudies = annotation.caseControlStudies.map(function(data) {
+            return data['@id'];
+        });
+    }
+
     return flat;
 }
 
@@ -1526,7 +1529,8 @@ function flattenAnnotation(annotation) {
 var groupSimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
     "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "totalNumberIndividuals", "numberOfIndividualsWithFamilyInformation",
     "numberOfIndividualsWithoutFamilyInformation", "numberOfIndividualsWithVariantInCuratedGene", "numberOfIndividualsWithoutVariantInCuratedGene",
-    "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created"
+    "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created", "numberWithVariant", "numberAllGenotypedSequenced",
+    "alleleFrequency"
 ];
 
 function flattenGroup(group) {
@@ -1569,6 +1573,10 @@ function flattenGroup(group) {
 
     if (group.control) {
         flat.control = group.control['@id'];
+    }
+
+    if (group.groupType) {
+        flat.groupType = group.groupType;
     }
 
     return flat;
@@ -1615,7 +1623,9 @@ function flattenFamily(family) {
 
 var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
-    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation"];
+    "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
+    "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
+    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "reasonExplanation"];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
@@ -1636,7 +1646,8 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
-    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created"
+    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed",
+    "recessiveZygosity"
 ];
 
 function flattenIndividual(individual) {
@@ -1661,6 +1672,13 @@ function flattenIndividual(individual) {
     if (individual.variants && individual.variants.length) {
         flat.variants = individual.variants.map(function(variant) {
             return variant['@id'];
+        });
+    }
+
+    // Flatten evidence scores
+    if (individual.scores && individual.scores.length) {
+        flat.scores = individual.scores.map(function(score) {
+            return score['@id'];
         });
     }
 
@@ -1752,7 +1770,8 @@ function flattenGdm(gdm) {
 
 var pathogenicitySimpleProps = [
     "date_created", "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported",
-    "denovoType", "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "supportingExperimental", "comment"
+    "denovoType", "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "supportingExperimental", "comment",
+    "geneImpactType", "allelicSupportGeneImpact", "computationalSupportGeneImpact"
 ];
 
 function flattenPathogenicity(pathogenicity) {
@@ -1801,6 +1820,45 @@ var provisionalVariantSimpleProps = [
 
 function flattenProvisionalVariant(provisional_variant) {
     var flat = cloneSimpleProps(provisional_variant, provisionalVariantSimpleProps);
+
+    return flat;
+}
+
+
+var evidenceScoreSimpleProps = [
+    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore"
+];
+
+function flattenEvidenceScore(evidencescore) {
+    var flat = cloneSimpleProps(evidencescore, evidenceScoreSimpleProps);
+
+    return flat;
+}
+
+
+var caseControlSimpleProps = [
+    "label", "studyType", "detectionMethod", "statisticalValues", "pValue", "confidenceIntervalFrom", "confidenceIntervalTo",
+    "diseaseHistoryEvaluated", "demographicInfoMatched", "geneticAncestryMatched", "factorOfGeneticAncestryNotMatched",
+    "factorOfDemographicInfoMatched", "differInVariables", "explanationForDemographicMatched", "explanationForDiseaseHistoryEvaluation",
+    "explanationForGeneticAncestryNotMatched", "comments", "date_created"
+];
+
+function flattenCaseControl(casecontrol) {
+    var flat = cloneSimpleProps(casecontrol, caseControlSimpleProps);
+
+    if (casecontrol.caseCohort) {
+        flat.caseCohort = casecontrol.caseCohort['@id'];
+    }
+
+    if (casecontrol.controlCohort) {
+        flat.controlCohort = casecontrol.controlCohort['@id'];
+    }
+
+    if (casecontrol.scores && casecontrol.scores.length) {
+        flat.scores = casecontrol.scores.map(function(score) {
+            return score['@id'];
+        });
+    }
 
     return flat;
 }
@@ -2127,6 +2185,20 @@ var DeleteButtonModal = React.createClass({
             }
             returnPayload = returnPayload.concat(this.recurseItemLoop(item.experimentalData, depth, mode, 'experimental datas'));
         }
+        if (item.caseControlStudies) {
+            if (item.caseControlStudies.length > 0) {
+                hasChildren = true;
+            }
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseControlStudies, depth, mode, 'case control'));
+        }
+        if (item.caseCohort) {
+            hasChildren = false;
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.caseCohort, depth, mode, 'case cohort'));
+        }
+        if (item.controlCohort) {
+            hasChildren = false;
+            returnPayload = returnPayload.concat(this.recurseItemLoop(item.controlCohort, depth, mode, 'control cohort'));
+        }
 
         // if the mode is 'delete', get the items' parents' info if needed, flatten the current item, set it as deleted
         // and inactive, and load the PUT and history record promises into the payload
@@ -2152,6 +2224,22 @@ var DeleteButtonModal = React.createClass({
             // flatten the target item and set its status to deleted
             var deletedItem = flatten(item);
             deletedItem.status = 'deleted';
+
+            // When delete case control
+            if (item['@type'][0] === 'caseControl') {
+                // Set status 'deleted' to case cohort
+                let uuid = item.caseCohort['@id'];
+                let deletedItem = flatten(item.caseCohort, 'group');
+                deletedItem.status = 'deleted';
+                this.putRestData(uuid + '?render=false', deletedItem);
+
+                // Set status 'deleted' to control cohort
+                uuid = item.controlCohort['@id'];
+                deletedItem = flatten(item.controlCohort, 'group');
+                deletedItem.status = 'deleted';
+                this.putRestData(uuid + '?render=false', deletedItem);
+            }
+
             // define operationType and add flags as needed
             var operationType = 'delete';
             if (depth > 0) {
@@ -2231,6 +2319,8 @@ var DeleteButtonModal = React.createClass({
                         deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
                     } else if (deletedItemType == 'experimental') {
                         deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
+                    } else if (deletedItemType == 'caseControl') {
+                        deletedParent.caseControlStudies = _.without(deletedParent.caseControlStudies, itemUuid);
                     }
                 } else {
                     if (deletedItemType == 'family') {
@@ -2274,6 +2364,7 @@ var DeleteButtonModal = React.createClass({
     render: function() {
         var tree;
         var message;
+        var itemLabel;
         // generate custom messages and generate display tree for group and family delete confirm modals.
         // generic message for everything else.
         if (this.props.item['@type'][0] == 'group') {
@@ -2282,12 +2373,14 @@ var DeleteButtonModal = React.createClass({
         } else if (this.props.item['@type'][0] == 'family') {
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
+        } else if (this.props.item['@type'][0] == 'caseControl') {
+            itemLabel = this.props.item.label;
         }
         return (
             <div>
                 <div className="modal-body">
                     {message}
-                    <p>Are you sure you want to delete this item?</p>
+                    <p>Are you sure you want to delete {itemLabel ? <span>Case-Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
                     {tree ?
                     <div><strong>{this.props.item['@type'][0]} {this.props.item.label}</strong><br />
                     {tree.map(function(treeItem, i) {

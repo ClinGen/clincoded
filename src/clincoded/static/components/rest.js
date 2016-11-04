@@ -19,7 +19,7 @@ var addQueryKey = globals.addQueryKey;
 // this.postRestData(uri,obj): POST given object to the given URI. Returns written data as a promise.
 
 var RestMixin = module.exports.RestMixin = {
-    // Borrow 'fetch' function from Persona mixin used by App component
+    // Borrow 'fetch' function from Auth0 mixin used by App component
     contextTypes: {
         fetch: React.PropTypes.func
     },
@@ -31,7 +31,6 @@ var RestMixin = module.exports.RestMixin = {
         }).then(response => {
             // Success response, but might not necessarily be a success; check 'ok' before use
             if (!response.ok) { if (errorHandler) { errorHandler(); } throw response; }
-
             // Actual success. Get the response's JSON as a promise.
             return response.text();
         }, error => {

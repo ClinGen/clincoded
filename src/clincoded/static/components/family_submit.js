@@ -134,7 +134,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                     : null}
                     {family ?
                         <div className="viewer-titles submit-titles">
-                            <h1>Family Information: {family.label}</h1> <a href={editFamilyLink} className="btn btn-info">Edit/Assess</a>
+                            <h1>Family Information: {family.label}</h1> <a href={editFamilyLink} className="btn btn-info">Edit</a>
                             {group ?
                                 <h2>{'Group association: ' + group.label}</h2>
                             : null}
@@ -146,14 +146,14 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                 <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
                                     <div className="submit-results-panel-info">
                                         <p>An Individual entry for the proband <strong><a href={'/individual/' + probandIndividual.uuid}>{probandIndividual.label}</a></strong> and its associated variant(s) has been created.</p>
-                                        <p>You can add additional information for this proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
+                                        <p>You can score and add additional information about this proband, create an entry for a non-proband in this Family, or return to the Record Curation page.</p>
                                         <p><em><strong>Note</strong>: Individual information includes associated variant(s), phenotypes, sex, etc. For a proband, variant information can only be added or edited on the Family page as it is associated with segregation information.</em></p>
                                     </div>
                                     <div className="submit-results-buttons">
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <span className="family-submit-results-btn">
-                                                    <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + probandIndividual.uuid}>Edit proband Individual</a>
+                                                    <a className="btn btn-default" href={'/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + probandIndividual.uuid}>Score / Add information about proband</a>
                                                 </span>
                                             </div>
                                             <div className="col-md-6">

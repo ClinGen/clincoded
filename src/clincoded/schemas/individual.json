@@ -254,6 +254,35 @@
             "type": "boolean",
             "default": false
         },
+        "bothVariantsInTrans": {
+            "title": "Is the 2nd variant located in trans with the 1st one?",
+            "description": "For recessive heterozygous only",
+            "type": "string"
+        },
+        "denovo": {
+            "title": "Does associated variant cause de novo in individual?",
+            "type": "string"
+        },
+        "maternityPaternityConfirmed": {
+            "title": "If de novo, is it maternity and paternity confirmed?",
+            "type": "string"
+        },
+        "recessiveZygosity": {
+            "title": "Recessive Variant Zygosity",
+            "description": "For recessive only",
+            "type": "string"
+        },
+        "scores": {
+            "title": "Scores",
+            "description": "List of scores for this individual",
+            "type": "array",
+            "items": {
+                "title": "Score",
+                "description": "Score assigned by user. Limited to one per user",
+                "type": "string",
+                "linkTo": "evidenceScore"
+            }
+        },
         "active": {
             "description": "boolean switch to set if the individual avaliable for curation.",
             "type": "boolean",
@@ -268,10 +297,6 @@
         "is_proband": {
             "title": "Probands",
             "type": "string"
-        },
-        "assessment_count": {
-            "title": "# Assessment",
-            "type": "number"
         },
         "submitted_by.title": {
             "title": "Creator",
