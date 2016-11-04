@@ -451,6 +451,15 @@
         padding-top: 0;
         border-top: none;
     }
+
+    .btn-last {
+        margin-top: 5px;
+        margin-bottom: 30px;
+    }
+
+    .variant-curation {
+        margin-bottom: 10px;
+    }
 }
 
 .variant-view-panel {
@@ -1100,12 +1109,21 @@
     .variant-view-panel {
         dt {
             text-align: left;
-            width: 172px;
+            width: 300px;
         }
 
         dd {
             word-break: break-all;
             word-wrap: break-word;
+        }
+    }
+
+    .variant-view-panel.family-associated {
+        margin-top: 10px;
+
+        dt {
+            overflow: auto;
+            white-space: normal;
         }
     }
 }
@@ -2506,6 +2524,47 @@ table.login-users-interpretations {
 .control-cohort-view .panel.diseases,
 .control-cohort-view .additional-information .other-genes {
     visibility: hidden;
+}
+
+.panel-body.panel-std {
+    .section {
+        h3 {
+            border-bottom: solid 1px lighten(#486e82, 35%);
+            color: #486e82;
+            font-size: 1.45em;
+            font-weight: 500;
+            margin: 0 0 30px 0;
+            padding: 5px 0;
+        }
+    }
+
+    .variant-assessment {
+        .alert {
+            padding: 8px 15px;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+    }
+
+    .proband-label-note {
+        .alert {
+            padding: 8px 15px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+    }
+
+    .score-status-note {
+        .alert {
+            padding: 8px 15px;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+    }
+
+    .variant-panel .mutalyzer-link {
+        margin-bottom: 10px;
+    }
 }
 
 .non-bold-font {

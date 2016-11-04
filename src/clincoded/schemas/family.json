@@ -337,7 +337,7 @@
                     "type": "number"
                 },
                 "numberOfSegregationsForThisFamily": {
-                    "title": "Number of Segregations Reproted for This Family",
+                    "title": "Number of Segregations Reported for This Family",
                     "type": "number"
                 },
                 "inconsistentSegregationAmongstTestedIndividuals": {
@@ -379,11 +379,6 @@
                 "reasonExplanation": {
                     "title": "Explanation",
                     "description": "Reason for including LOD or not",
-                    "type": "string"
-                },
-                "recessiveZygosity": {
-                    "title": "Recessive Variant Zygosity",
-                    "description": "For recessive only",
                     "type": "string"
                 },
                 "variants": {

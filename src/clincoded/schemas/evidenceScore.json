@@ -17,14 +17,49 @@
         "schema_version": {
             "default": "1"
         },
+        "scoreStatus": {
+            "title": "Score Status",
+            "description": "Score, Review or Contradicts",
+            "default": "Score",
+            "type": "string"
+        },
+        "calculatedScore": {
+            "title": "Calculated Score",
+            "description": "Automatically calculated score value",
+            "type": "number"
+        },
         "score": {
-            "title": "Score",
-            "description": "Score to evidence",
+            "title": "Modified Score",
+            "description": "Score modified by user",
             "type": "number"
         },
         "evidenceType": {
             "title": "Evidence Type",
-            "description": "Type (Case control, Segregation, Individual, Experimental) of evidence scored",
+            "description": "Type (Case control, Individual or Experimental) of evidence scored",
+            "type": "string"
+        },
+        "evidenceScored": {
+            "title": "Evidence",
+            "description": "UUID of scored evidence",
+            "type": "string"
+        },
+        "gdmId": {
+            "title": "GDM ID",
+            "description": "UUID of GDM the scored evidence belonging to",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "uuid": {
+            "title": "UUID",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Owner",
+            "type": "string"
+        },
+        "evidenceType": {
+            "title": "Evidence Type",
             "type": "string"
         }
     }

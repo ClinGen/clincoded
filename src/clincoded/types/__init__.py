@@ -312,6 +312,8 @@ class Gdm(Item):
         'annotations.individuals.variants.associatedPathogenicities.submitted_by',
         'annotations.individuals.otherPMIDs',
         'annotations.individuals.otherPMIDs.submitted_by',
+        'annotations.individuals.scores',
+        'annotations.individuals.scores.submitted_by',
         'annotations.experimentalData',
         'annotations.experimentalData.submitted_by',
         'annotations.experimentalData.variants',
@@ -454,6 +456,8 @@ class Annotation(Item):
         'individuals.variants.submitted_by',
         'individuals.otherPMIDs',
         'individuals.otherPMIDs.submitted_by',
+        'individuals.scores',
+        'individuals.scores.submitted_by',
         'experimentalData',
         'experimentalData.submitted_by',
         'experimentalData.variants',
@@ -718,6 +722,8 @@ class Individual(Item):
         'otherPMIDs.submitted_by',
         'assessments',
         'assessments.submitted_by',
+        'scores',
+        'scores.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -950,10 +956,17 @@ class EvidenceScore(Item):
         'submitted_by',
         'caseControl_scored',
         'caseControl_scored.associatedAnnotations',
-        'caseControl_scored.associatedAnnotations.associatedGdm'
+        'caseControl_scored.associatedAnnotations.associatedGdm',
+        'individual_scored',
+        'individual_scored.associatedAnnotations',
+        'individual_scored.associatedAnnotations.associatedGdm',
+        'individual_scored.associatedFamilies',
+        'individual_scored.associatedFamilies.associatedAnnotations',
+        'individual_scored.associatedFamilies.associatedAnnotations.associatedGdm'
     ]
     rev = {
-        'caseControl_scored': ('caseControl', 'scores')
+        'caseControl_scored': ('caseControl', 'scores'),
+        'individual_scored': ('individual', 'scores')
     }
 
     @calculated_property(schema={
@@ -966,6 +979,17 @@ class EvidenceScore(Item):
     })
     def caseControl_scored(self, request, caseControl_scored):
         return paths_filtered_by_status(request, caseControl_scored)
+
+    @calculated_property(schema={
+        "title": "Individual Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "individual.scores"
+        }
+    })
+    def individual_scored(self, request, individual_scored):
+        return paths_filtered_by_status(request, individual_scored)
 
 
 @collection(

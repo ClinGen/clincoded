@@ -208,7 +208,6 @@
             "publishedLodScore": 1,
             "estimatedLodScore": 3,
             "includeLodScoreInAggregateCalculation": true,
-            "recessiveZygosity": "Homozygous",
             "variants": [
                 "e496545c-2685-11e5-a4b3-60f81dc5b05a"
             ],
