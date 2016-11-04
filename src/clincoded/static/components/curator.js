@@ -95,6 +95,65 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             var pmid = this.props.pmid;
+            var i, j, k;
+            // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
+            if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
+                for (i in gdm.provisionalClassifications) {
+                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
+                        provisionalExist = true;
+                        provisional = gdm.provisionalClassifications[i];
+                        break;
+                    }
+                }
+            }
+
+            // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
+            var supportedVariants = getUserPathogenicity(gdm, session);
+            if (!summaryButton && gdm.annotations && gdm.annotations.length > 0 && supportedVariants && supportedVariants.length > 0) {
+                for (i in gdm.annotations) {
+                    var annotation = gdm.annotations[i];
+                    if (annotation.individuals && annotation.individuals.length > 0 && searchProbandIndividual(annotation.individuals, supportedVariants)) {
+                        summaryButton = true;
+                        break;
+                    }
+                    if (!summaryButton && annotation.families && annotation.families.length > 0) {
+                        for (j in annotation.families) {
+                            if (annotation.families[j].individualIncluded && annotation.families[j].individualIncluded.length > 0 &&
+                                searchProbandIndividual(annotation.families[j].individualIncluded, supportedVariants)) {
+                                summaryButton = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (summaryButton) {
+                        break;
+                    }
+                    else if (annotation.groups && annotation.groups.length > 0) {
+                        for (j in annotation.groups) {
+                            if (annotation.groups[j].familyIncluded && annotation.groups[j].familyIncluded.length > 0) {
+                                for (k in annotation.groups[j].familyIncluded) {
+                                    if (annotation.groups[j].familyIncluded[k].individualIncluded && annotation.groups[j].familyIncluded[k].individualIncluded.length > 0 &&
+                                        searchProbandIndividual(annotation.groups[j].familyIncluded[k].individualIncluded, supportedVariants)) {
+                                        summaryButton = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (summaryButton) {
+                                break;
+                            }
+                            else if (annotation.groups[j].individualIncluded && annotation.groups[j].individualIncluded.length > 0 &&
+                                searchProbandIndividual(annotation.groups[j].individualIncluded, supportedVariants)) {
+                                summaryButton = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (summaryButton) {
+                        break;
+                    }
+                }
+            }
 
             return (
                 <div>
@@ -244,7 +303,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                 {collectedVariants ?
                     <div className="variant-header clearfix">
                         <h2>Gene-Disease Record Variants</h2>
-                        <p>Click a variant to View, Curate, or Edit/Assess it. The icon indicates curation by one or more curators.</p>
+                        <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
                             var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
