@@ -1605,13 +1605,13 @@ var FamilySegregation = function() {
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
-            <Input type="number" ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
+            <Input type="number" yesInteger={true} ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
-            <Input type="number" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for recessive)</span>}
+            <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for recessive)</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
+            <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
@@ -1809,7 +1809,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span className="normal">(only when ClinVar VariationID is not available):</span></span>;
+        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> whenever possible)</span>:</span>;
     }
 });
 
@@ -2172,7 +2172,7 @@ var FamilyViewer = React.createClass({
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {variants.map(function(variant, i) {
                                 return (
-                                    <div className="variant-view-panel" key={variant.uuid}>
+                                    <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
                                         <h5>Variant {i + 1}</h5>
                                         {variant.clinvarVariantId ?
                                             <div>
@@ -2198,12 +2198,20 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {family.individualIncluded && family.individualIncluded[0].recessiveZygosity && i === 0 ?
+                                        {family.individualIncluded && family.individualIncluded.length && i === 0 ?
                                             <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>If Recessive, select variant zygosity</dt>
-                                                    <dd>{family.individualIncluded[0].recessiveZygosity}</dd>
-                                                </dl>
+                                                {family.individualIncluded.map(function(ind, index) {
+                                                    return (
+                                                        <div key={index}>
+                                                            {ind.proband && ind.recessiveZygosity ?
+                                                                <dl className="dl-horizontal">
+                                                                    <dt>If Recessive, select variant zygosity</dt>
+                                                                    <dd>{ind.recessiveZygosity}</dd>
+                                                                </dl>
+                                                            : null}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         : null }
                                     </div>
