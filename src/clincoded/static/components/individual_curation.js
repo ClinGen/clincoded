@@ -808,22 +808,40 @@ var IndividualCuration = React.createClass({
         /*************************************************/
         if (individualVariants) {
             value = this.getFormValue('SEGrecessiveZygosity');
-            if (value) {
-                if (value !== 'none') { newIndividual.recessiveZygosity = value; }
+            if (value && value !== 'none') {
+                newIndividual.recessiveZygosity = value;
             } else {
-                if (currIndividual && currIndividual.recessiveZygosity) {
-                    newIndividual.recessiveZygosity = currIndividual.recessiveZygosity;
+                if (newIndividual && newIndividual.recessiveZygosity) {
+                    delete newIndividual['recessiveZygosity'];
                 }
             }
 
             value = this.getFormValue('individualBothVariantsInTrans');
-            if (value !== 'none') { newIndividual.bothVariantsInTrans = value; }
+            if (value && value !== 'none') {
+                newIndividual.bothVariantsInTrans = value;
+            } else {
+                if (newIndividual && newIndividual.bothVariantsInTrans) {
+                    delete newIndividual['bothVariantsInTrans'];
+                }
+            }
 
             value = this.getFormValue('individualDeNovo');
-            if (value !== 'none') { newIndividual.denovo = value; }
+            if (value && value !== 'none') {
+                newIndividual.denovo = value;
+            } else {
+                if (newIndividual && newIndividual.denovo) {
+                    delete newIndividual['denovo'];
+                }
+            }
 
             value = this.getFormValue('individualMaternityPaternityConfirmed');
-            if (value !== 'none') { newIndividual.maternityPaternityConfirmed = value; }
+            if (value && value !== 'none') {
+                newIndividual.maternityPaternityConfirmed = value;
+            } else {
+                if (newIndividual && newIndividual.maternityPaternityConfirmed) {
+                    delete newIndividual['maternityPaternityConfirmed'];
+                }
+            }
         }
 
         return newIndividual;
@@ -1566,7 +1584,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description <span className="normal">(only when ClinVar VariationID is not available)</span>:</span>;
+        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> whenever possible)</span>:</span>;
     }
 });
 
@@ -1950,7 +1968,7 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
 
 // Update the individual with the variants, and write the updated individual to the DB.
 var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, zygosity, context) {
-    var updateNeeded = true, updateZygosityOnly = false;
+    var updateNeeded = true;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -1958,20 +1976,33 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         // Need to convert individual variant array to array of variant @ids, because that's what's in the variants array.
         var missing = _.difference(variants, individual.variants.map(function(variant) { return variant['@id']; }));
         updateNeeded = !!missing.length;
+    } else if (individual.variants && individual.variants.length !== variants.length) {
+        /********************************************************************************************/
+        /* Update individual's variant object if either one of the following is true:               */
+        /* 1) Add 2 variants to proband in family first, but then remove 1 of them after submitting */
+        /* 2) Add 1 variant to proband in family first, but then add 1 more after submitting        */
+        /********************************************************************************************/
+        updateNeeded = true;
     }
 
+    /***********************************************************/
+    /* Update individual's recessiveZygosity property if:      */
+    /* The passed argument is different from the strored value */
+    /***********************************************************/
     if (zygosity !== individual.recessiveZygosity) {
         updateNeeded = true;
-        updateZygosityOnly = true;
     }
 
     if (updateNeeded) {
         var writerIndividual = curator.flatten(individual);
-        if (!updateZygosityOnly) { writerIndividual.variants = variants; }
+        writerIndividual.variants = variants;
         if (zygosity) {
             writerIndividual.recessiveZygosity = zygosity;
         } else {
             delete writerIndividual['recessiveZygosity'];
+        }
+        if (individual.scores && individual.scores.length) {
+            writerIndividual.scores = individual.scores;
         }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
