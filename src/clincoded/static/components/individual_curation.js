@@ -1911,14 +1911,17 @@ var IndividualViewer = React.createClass({
                             </dl>
                         </Panel>
 
-                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
-                            <dl className="dl-horizontal">
-                                <div>
-                                    <dt>Score Status</dt>
-                                    <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
-                                </div>
-                            </dl>
-                        </Panel>
+                        {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
+                            <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Score Status</dt>
+                                        <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
+                                    </div>
+                                </dl>
+                            </Panel>
+                        : null}
+
                     </div>
                 </div>
             </div>
