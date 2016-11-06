@@ -1048,7 +1048,7 @@ var IndividualCuration = React.createClass({
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {this.state.proband || this.state.proband_selected ?
+                                        {(this.state.family && this.state.proband_selected) || (!this.state.family && this.state.proband_selected) ?
                                             <PanelGroup accordion>
                                                 <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} open>
                                                     {IndividualScore.call(this)}
