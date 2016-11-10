@@ -60,7 +60,7 @@ var IndividualCuration = React.createClass({
             annotation: null, // Annotation object given in query string
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
-            variantCount: 1, // Number of variants to display
+            variantCount: 0, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
             variantInfo: {}, // Extra holding info for variant display
             individualName: '', // Currently entered individual name
@@ -83,13 +83,23 @@ var IndividualCuration = React.createClass({
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
         } else if (ref === 'SEGrecessiveZygosity') {
+            let tempValue = this.refs[ref].getValue();
+            if (tempValue === 'Heterozygous') {
+                this.setState({variantCount: 2});
+            } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
+                this.setState({variantCount: 1});
+            } else {
+                this.setState({variantCount: 0});
+            }
+            /*
             //Only show option to add 2nd variant if user selects 'Heterozygous'
             this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
                 if (this.state.variantCount > 1) {
                     this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
                 }
             });
-        } else if (ref.substring(0, 3) === 'VAR') {
+            */
+        } else if (ref === 'variantId1' || ref === 'variantId2') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
             var lastVariantSuffix = (this.state.variantCount - 1) + '';
@@ -326,7 +336,7 @@ var IndividualCuration = React.createClass({
     validateVariants: function() {
         var valid;
         var anyInvalid = false;
-
+        /*
         // Check Variant panel inputs for correct formats
         for (var i = 0; i < this.state.variantCount; i++) {
             // Check dbSNP ID for a valid format
@@ -349,7 +359,7 @@ var IndividualCuration = React.createClass({
                 }
             }
         }
-
+        */
         return !anyInvalid;
     },
 
@@ -1468,6 +1478,15 @@ var IndividualVariantInfo = function() {
                 </div>
             :
                 <div>
+                    <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                        value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        <option value="none">No Selection</option>
+                        <option disabled="disabled"></option>
+                        <option value="Homozygous">Homozygous</option>
+                        <option value="Hemizygous">Hemizygous</option>
+                        <option value="Heterozygous">Heterozygous</option>
+                    </Input>
                     {_.range(this.state.variantCount).map(i => {
                         var variant;
 
@@ -1511,29 +1530,9 @@ var IndividualVariantInfo = function() {
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {curator.renderMutalyzerLink()}
-                                {this.state.variantInfo[i] && i === 0 ?
-                                    <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
-                                        value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
-                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                        <option value="none">No Selection</option>
-                                        <option disabled="disabled"></option>
-                                        <option value="Homozygous">Homozygous</option>
-                                        <option value="Hemizygous">Hemizygous</option>
-                                        <option value="Heterozygous">Heterozygous</option>
-                                    </Input>
-                                : null}
                             </div>
                         );
                     })}
-                    {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
-                        <div className="row">
-                            <div className="col-sm-7 col-sm-offset-5 clearfix">
-                                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
-                                    title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
-                                    clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                            </div>
-                        </div>
-                    : null}
                     {Object.keys(this.state.variantInfo).length > 0 ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
