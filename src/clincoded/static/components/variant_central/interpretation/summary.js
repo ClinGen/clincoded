@@ -69,12 +69,14 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
             provisionalReason: nextProps.provisionalReason,
             provisionalInterpretation: nextProps.provisionalInterpretation
         }, () => {
-            if (!this.state.provisionalPathogenicity) {
-                this.refs['provisional-pathogenicity'].resetSelectedOption();
-                this.refs['provisional-reason'].resetValue();
-            } else {
-                this.refs['provisional-pathogenicity'].setValue(this.state.provisionalPathogenicity);
-                this.refs['provisional-reason'].setValue(this.state.provisionalReason);
+            if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length) {
+                if (!this.state.provisionalPathogenicity) {
+                    this.refs['provisional-pathogenicity'].resetSelectedOption();
+                    this.refs['provisional-reason'].resetValue();
+                } else {
+                    this.refs['provisional-pathogenicity'].setValue(this.state.provisionalPathogenicity);
+                    this.refs['provisional-reason'].setValue(this.state.provisionalReason);
+                }
             }
         });
     },
