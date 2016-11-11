@@ -1191,6 +1191,7 @@ var FamilyCuration = React.createClass({
 
         // Set state
         this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.clrFormErrors('SEGrecessiveZygosity');
     },
 
     // Determine whether a Family is associated with a Group
