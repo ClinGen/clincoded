@@ -99,34 +99,6 @@ var IndividualCuration = React.createClass({
                 }
             });
             */
-        } else if (ref === 'variantId1' || ref === 'variantId2') {
-            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
-            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
-            var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var refSuffix = ref.match(/\d+$/);
-            refSuffix = refSuffix && refSuffix[0];
-            if (refSuffix && (lastVariantSuffix === refSuffix)) {
-                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
-                // the Add Another Variant button.
-                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
-            }
-
-            // Disable fields depending on what fields have values in them.
-            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
-            var currVariantOption = this.state.variantOption;
-            if (othervariant) {
-                this.refs['VARclinvarid' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (dbsnpid || clinvarid || hgvsterm) {
-                this.refs['VARothervariant' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_SPEC;
-            } else {
-                currVariantOption[refSuffix] = VAR_NONE;
-            }
-            this.setState({variantOption: currVariantOption});
         } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
@@ -384,6 +356,11 @@ var IndividualCuration = React.createClass({
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
+            let variantId0 = this.getFormValue('VARclinvarid0'),
+                variantId1 = this.getFormValue('VARclinvarid1'),
+                variantText0 = this.getFormValue('VARothervariant0'),
+                variantText1 = this.getFormValue('VARothervariant1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (this.state.proband_selected && (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; }))) {
@@ -415,6 +392,19 @@ var IndividualCuration = React.createClass({
                 // NOT HPOID list is bad
                 formError = true;
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Check to see if the right number of variants exist
+            if (SEGrecessiveZygosity === 'Heterozygous') {
+                if ((!variantId0 && !variantText0) || (!variantId1 && !variantText1)) {
+                    formError = true;
+                    this.setFormErrors('SEGrecessiveZygosity', 'For Heterozygous, two variants must be specified');
+                }
+            } else if (SEGrecessiveZygosity === 'Hemizygous' || SEGrecessiveZygosity === 'Homozygous') {
+                if (!variantId0 && !variantText0) {
+                    formError = true;
+                    this.setFormErrors('SEGrecessiveZygosity', `For ${SEGrecessiveZygosity}, one variant must be specified`);
+                }
             }
 
             if (!formError) {
@@ -1479,6 +1469,7 @@ var IndividualVariantInfo = function() {
             :
                 <div>
                     <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                        error={this.getFormError('SEGrecessiveZygosity')} clearError={this.clrFormErrors.bind(null, 'SEGrecessiveZygosity')}
                         value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
