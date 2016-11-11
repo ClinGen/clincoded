@@ -847,11 +847,6 @@ var IndividualCuration = React.createClass({
         return newIndividual;
     },
 
-    // Add another variant section to the FamilyVariant panel
-    handleAddVariant: function() {
-        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
-    },
-
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
     updateClinvarVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
@@ -879,6 +874,7 @@ var IndividualCuration = React.createClass({
         }
         // Set state
         this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.clrFormErrors('SEGrecessiveZygosity');
     },
 
     // Determine whether a Family is associated with a Group
