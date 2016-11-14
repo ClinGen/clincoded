@@ -60,9 +60,10 @@ var IndividualCuration = React.createClass({
             annotation: null, // Annotation object given in query string
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
-            variantCount: 0, // Number of variants to display
+            variantCount: 1, // Number of variants to display
             variantOption: [VAR_NONE], // One variant panel, and nothing entered
             variantInfo: {}, // Extra holding info for variant display
+            variantRequired: false, // specifies whether or not variant information is required
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
@@ -85,11 +86,11 @@ var IndividualCuration = React.createClass({
         } else if (ref === 'SEGrecessiveZygosity') {
             let tempValue = this.refs[ref].getValue();
             if (tempValue === 'Heterozygous') {
-                this.setState({variantCount: 2});
+                this.setState({variantCount: 2, variantRequired: true});
             } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
-                this.setState({variantCount: 1});
+                this.setState({variantCount: 1, variantRequired: true});
             } else {
-                this.setState({variantCount: 0});
+                this.setState({variantCount: 1, variantRequired: false});
             }
             /*
             //Only show option to add 2nd variant if user selects 'Heterozygous'
@@ -216,7 +217,8 @@ var IndividualCuration = React.createClass({
                 if (stateObj.individual.variants && stateObj.individual.variants.length && !(stateObj.individual.proband && stateObj.family)) {
                     var variants = stateObj.individual.variants;
                     // This individual has variants
-                    stateObj.variantCount = variants.length;
+                    stateObj.variantCount = variants.length ? variants.length : 1;
+                    stateObj.variantRequired = stateObj.individual.recessiveZygosity ? true : false;
                     stateObj.addVariantDisabled = false;
                     stateObj.variantInfo = {};
 
@@ -1486,7 +1488,7 @@ var IndividualVariantInfo = function() {
                                 {this.state.variantInfo[i] ?
                                     <div>
                                         <div className="row">
-                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
                                             <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                         </div>
                                         <div className="row">
@@ -1510,7 +1512,7 @@ var IndividualVariantInfo = function() {
                                 <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                                <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant variantRequired={this.state.variantRequired} />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
                                     buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} clearButtonClass="btn-inline-spacer"
                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                     updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
@@ -1558,13 +1560,13 @@ var IndividualVariantInfo = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:{this.props.variantRequired ? ' *' : null}</strong></span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
     }
 });
 
