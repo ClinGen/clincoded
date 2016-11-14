@@ -84,6 +84,7 @@ var IndividualCuration = React.createClass({
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
         } else if (ref === 'SEGrecessiveZygosity') {
+            // set the variant count and variant required as necessary
             let tempValue = this.refs[ref].getValue();
             if (tempValue === 'Heterozygous') {
                 this.setState({variantCount: 2, variantRequired: true});
@@ -92,14 +93,6 @@ var IndividualCuration = React.createClass({
             } else {
                 this.setState({variantCount: 1, variantRequired: false});
             }
-            /*
-            //Only show option to add 2nd variant if user selects 'Heterozygous'
-            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
-                if (this.state.variantCount > 1) {
-                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
-                }
-            });
-            */
         } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {

@@ -99,7 +99,7 @@ var FamilyCuration = React.createClass({
             annotation: null, // Annotation object given in query string
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
-            variantCount: 0, // Number of variants to display
+            variantCount: 1, // Number of variants to display
             variantOption: [], // One variant panel, and nothing entered
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
@@ -139,12 +139,15 @@ var FamilyCuration = React.createClass({
                 this.setState({lodPublished: null});
             }
         } else if (ref === 'SEGrecessiveZygosity') {
-            //Only show option to add 2nd variant if user selects 'Heterozygous'
-            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
-                if (this.state.variantCount > 1) {
-                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
-                }
-            });
+            // set the variant count and variant required as necessary
+            let tempValue = this.refs[ref].getValue();
+            if (tempValue === 'Heterozygous') {
+                this.setState({variantCount: 2, variantRequired: true});
+            } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
+                this.setState({variantCount: 1, variantRequired: true});
+            } else {
+                this.setState({variantCount: 1, variantRequired: false});
+            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -366,6 +369,7 @@ var FamilyCuration = React.createClass({
                     if (segregation.variants && segregation.variants.length) {
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
+                        stateObj.variantRequired = stateObj.individual.recessiveZygosity ? true : false;
                         stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
 
@@ -535,6 +539,11 @@ var FamilyCuration = React.createClass({
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
+            let variantId0 = this.getFormValue('VARclinvarid0'),
+                variantId1 = this.getFormValue('VARclinvarid1'),
+                variantText0 = this.getFormValue('VARothervariant0'),
+                variantText1 = this.getFormValue('VARothervariant1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
@@ -571,6 +580,19 @@ var FamilyCuration = React.createClass({
                 // NOT HPOID list is bad
                 formError = true;
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Check to see if the right number of variants exist
+            if (SEGrecessiveZygosity === 'Heterozygous') {
+                if ((!variantId0 && !variantText0) || (!variantId1 && !variantText1)) {
+                    formError = true;
+                    this.setFormErrors('SEGrecessiveZygosity', 'For Heterozygous, two variants must be specified');
+                }
+            } else if (SEGrecessiveZygosity === 'Hemizygous' || SEGrecessiveZygosity === 'Homozygous') {
+                if (!variantId0 && !variantText0) {
+                    formError = true;
+                    this.setFormErrors('SEGrecessiveZygosity', `For ${SEGrecessiveZygosity}, one variant must be specified`);
+                }
             }
 
             if (!formError) {
@@ -1688,8 +1710,8 @@ var FamilyVariant = function() {
             {!family || !family.segregation || !family.segregation.variants || family.segregation.variants.length === 0 ?
                 <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
-                        To create and have the option to count a proband associated with a variant(s) for this Family, you need to add variant information in this section.
-                        The proband (an Individual) will be created upon submission using the label you supply here. You will be able to add additional information about the proband
+                        If you would like to score the proband for this family in addition to the LOD score for segregation, you need to create the Individual proband,
+                        including adding their associated variant(s). Please follow the steps below -- you will be able to add additional information about the proband
                         following submission of Family information.
                     </p>
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1697,6 +1719,44 @@ var FamilyVariant = function() {
                     </p>
                 </div>
             : null}
+            {!this.state.probandIndividual ?
+                <div className="variant-panel">
+                    <div className="col-sm-7 col-sm-offset-5 proband-label-note">
+                        <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
+                    </div>
+                    <Input type="text" ref="individualname" label="Proband Label"
+                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.individualRequired} />
+                    <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
+                    {this.state.orpha ?
+                        <div className="form-group">
+                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
+                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
+                        </div>
+                        : null
+                    }
+                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
+                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
+                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
+                    { this.state.orpha ?
+                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
+                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
+                        :
+                        null
+                    }
+                </div>
+            : null }
+            <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                error={this.getFormError('SEGrecessiveZygosity')} clearError={this.clrFormErrors.bind(null, 'SEGrecessiveZygosity')}
+                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option value="Homozygous">Homozygous</option>
+                <option value="Hemizygous">Hemizygous</option>
+                <option value="Heterozygous">Heterozygous</option>
+            </Input>
             {_.range(this.state.variantCount).map(i => {
                 var variant;
 
@@ -1709,7 +1769,7 @@ var FamilyVariant = function() {
                         {this.state.variantInfo[i] ?
                             <div className="variant-resources">
                                 <div className="row variant-data-source">
-                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
                                     <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
                                 </div>
                                 <div className="row">
@@ -1734,77 +1794,29 @@ var FamilyVariant = function() {
                         <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
                             error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
+                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant variantRequired={this.state.variantRequired} />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                             buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} clearButtonClass="btn-inline-spacer"
                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                             updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
                         <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                             handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-variant-desc" />
                         {curator.renderMutalyzerLink()}
-                        {this.state.variantInfo[i] && i === 0 ?
-                            <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
-                                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                <option value="Homozygous">Homozygous</option>
-                                <option value="Hemizygous">Hemizygous</option>
-                                <option value="Heterozygous">Heterozygous</option>
-                            </Input>
-                        : null}
                     </div>
                 );
             })}
-            {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
-                <div className="row">
-                    <div className="col-sm-7 col-sm-offset-5 clearfix">
-                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
-                            title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
-                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                    </div>
-                </div>
-            : null}
-            {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
-                <div className="variant-panel">
-                    <div className="col-sm-7 col-sm-offset-5 proband-label-note">
-                        <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
-                    </div>
-                    <Input type="text" ref="individualname" label="Proband Label"
-                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                    <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
-                    {this.state.orpha ?
-                        <div className="form-group">
-                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
-                        </div>
-                        : null
-                    }
-                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
-                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
-                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                    { this.state.orpha ?
-                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
-                        :
-                        null
-                    }
-                </div>
-            : null }
         </div>
     );
 };
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:{this.props.variantRequired ? ' *' : null}</strong></span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
     }
 });
 
