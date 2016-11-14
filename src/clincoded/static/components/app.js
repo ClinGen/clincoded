@@ -92,7 +92,8 @@ var App = module.exports = React.createClass({
             var ContentView = globals.content_views.lookup(context, current_action);
             content = <ContentView {...this.props} context={context} href={this.state.href}
                 loadingComplete={this.state.loadingComplete} session={this.state.session}
-                portal={this.state.portal} navigate={this.navigate} href_url={href_url} />;
+                portal={this.state.portal} navigate={this.navigate} href_url={href_url}
+                demoVersion={this.state.demoWarning} />;
         }
         var errors = this.state.errors.map(function (error) {
             return <div className="alert alert-error"></div>;
