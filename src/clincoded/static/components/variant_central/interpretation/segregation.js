@@ -82,6 +82,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Case-control)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="case-control"
+                            tableName={<span>Curated Literature Evidence (Case-control)</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content" open>
@@ -99,6 +103,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segreagtion-data"
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Segregation data)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="segreagtion-data"
+                            tableName={<span>Curated Literature Evidence (Segregation data)</span>} variant={this.props.data} />
                     : null}
                 </Panel></PanelGroup>
 
@@ -118,6 +126,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="de-novo"
+                            tableName={<span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content" open>
@@ -135,6 +147,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="allele-data"
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="allele-data"
+                            tableName={<span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>} variant={this.props.data} />
                     : null}
                 </Panel></PanelGroup>
 
@@ -154,6 +170,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Alternate mechanism for disease)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="alternate-mechanism"
+                            tableName={<span>Curated Literature Evidence (Alternate mechanism for disease)</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content" open>
@@ -171,6 +191,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="specificity-of-phenotype"
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Specificity of phenotype)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="specificity-of-phenotype"
+                            tableName={<span>Curated Literature Evidence (Specificity of phenotype)</span>} variant={this.props.data} />
                     : null}
                 </Panel></PanelGroup>
 

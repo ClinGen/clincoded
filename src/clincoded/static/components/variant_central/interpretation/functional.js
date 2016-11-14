@@ -74,6 +74,10 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="experimental" subcategory="experimental-studies"
+                            tableName={<span>Curated Literature Evidence (Experimental Studies)</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?

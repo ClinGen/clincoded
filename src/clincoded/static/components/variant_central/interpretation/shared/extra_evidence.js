@@ -402,7 +402,7 @@ var ExtraEvidenceTableViewAll = module.exports.ExtraEvidenceTableViewAll = React
                                 relevantEvidenceList.map(evidence => {
                                     return (this.renderInterpretationExtraEvidence(evidence));
                                 })
-                            : <span>&nbsp;&nbsp;No evidence added.</span>}
+                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
                 </div>
