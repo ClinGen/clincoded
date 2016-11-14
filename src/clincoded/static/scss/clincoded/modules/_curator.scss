@@ -1324,9 +1324,7 @@
             .computational .datasource-clingen .table th,
             .computational .datasource-clingen .table td,
             .computational .datasource-other .table th,
-            .computational .datasource-other .table td,
-            .computational .datasource-splice .table th,
-            .computational .datasource-splice .table td {
+            .computational .datasource-other .table td {
                 width: 25%;
             }
 
@@ -1344,16 +1342,12 @@
                 margin-top: 20px;
             }
 
-            .computational .datasource-splice .table {
-                .row-span {
-                    border-left: 1px solid #ddd;
-                    border-right: 1px solid #ddd;
-                    font-weight: bold;
+            .computational .datasource-splice {
+                .panel-body a {
+                    display: inline-block;
+                    margin-right: 20px;
                 }
 
-                tfoot td {
-                    font-weight: bold;
-                }
             }
 
             .gene-specific .datasource-constraint-scores .table thead td,
@@ -1571,8 +1565,8 @@
             display: inline-block;
 
             &:not(:last-child) {
-            margin-right: 20px;
-        }
+                margin-right: 20px;
+            }
         }
     }
 }
