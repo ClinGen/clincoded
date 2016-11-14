@@ -60,6 +60,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Observed in healthy adult(s))</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="case-segregation" subcategory="observed-in-healthy"
+                            tableName={<span>Curated Literature Evidence (Observed in healthy adult(s))</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content" open>
