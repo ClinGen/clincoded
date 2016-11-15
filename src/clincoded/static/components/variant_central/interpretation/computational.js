@@ -567,9 +567,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
-                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                             </div>
                         </div>
                     </Panel></PanelGroup>
@@ -647,9 +647,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
-                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                             </div>
                         </div>
                     </Panel></PanelGroup>
