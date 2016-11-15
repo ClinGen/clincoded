@@ -20,19 +20,13 @@ var SignIn = module.exports.SignIn = React.createClass({
 });
 
 var Home = module.exports.Home = React.createClass({
+    propTypes: {
+        demoVersion: React.PropTypes.bool
+    },
+
     getInitialState: function() {
-        var demoWarning = false;
-        var productionWarning = false;
-        if (/production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
-            // check if production URL. Enable productionWarning if it is.
-            productionWarning = true;
-        } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
-            // if neither production nor curation URL, enable demoWarning.
-            demoWarning = true;
-        }
         return {
-            demoWarning: demoWarning,
-            productionWarning: productionWarning
+            demoVersion: this.props.demoVersion
         };
     },
 
@@ -54,7 +48,7 @@ var Home = module.exports.Home = React.createClass({
                         </div>
                     </div>
                     <div className="row demo-access-note">
-                        {this.state.demoWarning ?
+                        {this.state.demoVersion ?
                             <div>Explore a demo version of the ClinGen interfaces by clicking on the "Demo Login" button located in the header above.</div>
                             :
                             <div>Explore a demo version of the ClinGen interfaces at <a href="https://curation-test.clinicalgenome.org/">curation-test.clinicalgenome.org <i className="icon icon-external-link"></i></a></div>
