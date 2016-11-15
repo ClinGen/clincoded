@@ -694,6 +694,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     </Panel></PanelGroup>
 
                     <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
+                                    evidenceData={null} evidenceDataUpdated={true}
+                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
                         <div className="panel panel-info datasource-clinvar">
                             <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                             <div className="panel-content-wrapper">
@@ -711,16 +721,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         {(this.props.data && !this.state.interpretation) ?
                             <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="other-variants-in-codon"
                                 tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>} variant={this.props.data} />
-                        : null}
-                        {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
                         : null}
                     </Panel></PanelGroup>
                 </div>
@@ -893,6 +893,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 {this.state.selectedSubtab == 'indel' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
+                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
+                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
                             <div className="panel-body">
@@ -938,16 +948,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         {(this.props.data && !this.state.interpretation) ?
                             <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="molecular-consequence-inframe-indel"
                                 tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>} variant={this.props.data} />
-                        : null}
-                        {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
-                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
-                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
                         : null}
                     </Panel></PanelGroup>
                 </div>
