@@ -1039,7 +1039,7 @@ var IndividualCuration = React.createClass({
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
-                                        {this.state.proband || this.state.proband_selected ?
+                                        {(this.state.family && this.state.proband_selected) || (!this.state.family && this.state.proband_selected) ?
                                             <PanelGroup accordion>
                                                 <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} open>
                                                     {IndividualScore.call(this)}
@@ -1892,14 +1892,17 @@ var IndividualViewer = React.createClass({
                             </dl>
                         </Panel>
 
-                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
-                            <dl className="dl-horizontal">
-                                <div>
-                                    <dt>Score Status</dt>
-                                    <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
-                                </div>
-                            </dl>
-                        </Panel>
+                        {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
+                            <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Score Status</dt>
+                                        <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
+                                    </div>
+                                </dl>
+                            </Panel>
+                        : null}
+
                     </div>
                 </div>
             </div>
