@@ -57,6 +57,15 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                             </div>
                         </div>
                     : null}
+                    {(this.props.data && this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="hotspot-functiona-domain"
+                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Hotspot or functional domain)</span>}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="experimental" subcategory="hotspot-functiona-domain"
+                            tableName={<span>Curated Literature Evidence (Hotspot or functional domain)</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
                 <PanelGroup accordion><Panel title="Experimental Studies" panelBodyClassName="panel-wide-content" open>
                     {(this.props.data && this.state.interpretation) ?
@@ -73,6 +82,10 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies"
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="experimental" subcategory="experimental-studies"
+                            tableName={<span>Curated Literature Evidence (Experimental Studies)</span>} variant={this.props.data} />
                     : null}
                 </Panel></PanelGroup>
 

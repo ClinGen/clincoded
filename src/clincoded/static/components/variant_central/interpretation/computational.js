@@ -9,6 +9,7 @@ var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixi
 var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var extraEvidence = require('./shared/extra_evidence');
 
 var queryKeyValue = globals.queryKeyValue;
 var editQueryValue = globals.editQueryValue;
@@ -572,9 +573,28 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                             </div>
                         </div>
+                        {(this.props.data && this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="functional-conservation-splicing-predictors"
+                                tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>} variant={this.props.data} />
+                        : null}
                     </Panel></PanelGroup>
 
                     <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
+                                    evidenceData={null} evidenceDataUpdated={true}
+                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
                         <div className="panel panel-info datasource-clinvar">
                             <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                             <div className="panel-content-wrapper">
@@ -585,14 +605,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="other-variants-in-codon"
+                                tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>} variant={this.props.data} />
                         : null}
                     </Panel></PanelGroup>
                 </div>
@@ -628,6 +647,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </thead>
                             </table>
                         </div>
+                        {(this.props.data && this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="null-variant-analysis"
+                                tableName={<span>Curated Literature Evidence (Null variant analysis)</span>} variant={this.props.data} />
+                        : null}
                     </Panel></PanelGroup>
                 </div>
                 : null}
@@ -652,12 +680,31 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                             </div>
                         </div>
+                        {(this.props.data && this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="molecular-consequence-silent-intron"
+                                tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>} variant={this.props.data} />
+                        : null}
                     </Panel></PanelGroup>
                 </div>
                 : null}
                 {this.state.selectedSubtab == 'indel' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
+                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
+                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
                             <div className="panel-body">
@@ -696,14 +743,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
-                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
-                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="molecular-consequence-inframe-indel"
+                                tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>} variant={this.props.data} />
                         : null}
                     </Panel></PanelGroup>
                 </div>

@@ -292,14 +292,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                             : null}
                             <tr>
                                 <td colSpan="3">
-                                    {!this.state.tempEvidence ?
-                                        <span>
-                                            <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
-                                                buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-
-                                            &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
-                                        </span>
-                                    : null}
                                     {this.state.tempEvidence ?
                                         <div>
                                             <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
@@ -319,9 +311,98 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                                 </div>
                                             </Form>
                                         </div>
-                                    : null}
+                                    :
+                                        <span>
+                                            <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
+                                                buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+
+                                            &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
+                                        </span>
+                                    }
                                 </td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+});
+
+
+// Class to render the extra evidence table in VCI in view-only, view-all mode
+var ExtraEvidenceTableViewAll = module.exports.ExtraEvidenceTableViewAll = React.createClass({
+    mixins: [RestMixin, FormMixin, CuratorHistory],
+
+    propTypes: {
+        tableName: React.PropTypes.object, // table name as HTML object
+        category: React.PropTypes.string, // category (usually the tab) the evidence is part of
+        subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
+        variant: React.PropTypes.object, // parent variant object
+    },
+
+    contextTypes: {
+        fetch: React.PropTypes.func // Function to perform a search
+    },
+
+    getInitialState: function() {
+        return {
+            variant: this.props.variant // parent variant object
+        };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        // Update variant object when received
+        if (nextProps.variant) {
+            this.setState({variant: nextProps.variant});
+        }
+    },
+
+    renderInterpretationExtraEvidence: function(extra_evidence) {
+        // for rendering the evidence in tabular format
+        return (
+            <tr key={extra_evidence.uuid}>
+                <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
+                <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
+                <td className="col-md-2">{extra_evidence.submitted_by.title}</td>
+            </tr>
+        );
+    },
+
+    render: function() {
+        let relevantEvidenceList = [];
+        if (this.state.variant && this.state.variant.associatedInterpretations) {
+            this.state.variant.associatedInterpretations.map(interpretation => {
+                if (interpretation.extra_evidence_list) {
+                    interpretation.extra_evidence_list.map(extra_evidence => {
+                        if (extra_evidence.subcategory === this.props.subcategory) {
+                            relevantEvidenceList.push(extra_evidence);
+                        }
+                    });
+                }
+            });
+        }
+
+        return (
+            <div className="panel panel-info">
+                <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
+                <div className="panel-content-wrapper">
+                    <table className="table">
+                        {relevantEvidenceList.length > 0 ?
+                            <thead>
+                                <tr>
+                                    <th>Article</th>
+                                    <th>Evidence</th>
+                                    <th>Submitted by</th>
+                                </tr>
+                            </thead>
+                        : null}
+                        <tbody>
+                            {relevantEvidenceList.length > 0 ?
+                                relevantEvidenceList.map(evidence => {
+                                    return (this.renderInterpretationExtraEvidence(evidence));
+                                })
+                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
                 </div>
