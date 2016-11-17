@@ -9,6 +9,7 @@ var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixi
 var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var extraEvidence = require('./shared/extra_evidence');
 
 var queryKeyValue = globals.queryKeyValue;
 var editQueryValue = globals.editQueryValue;
@@ -567,123 +568,33 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
-                                <span className="pull-right">
-                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
-                                </span>
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                             </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>5' or 3'</th>
-                                        <th>Score Range</th>
-                                        <th>Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th colSpan="4">WT Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th colSpan="4">Variant Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
                         </div>
-
-                        <div className="panel panel-info datasource-additional">
-                            <div className="panel-heading"><h3 className="panel-title">Additional Information</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Distance to nearest splice site</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Exon location</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Distance of truncation mutation from end of last exon</th>
-                                        <th><span className="wip">IN PROGRESS</span></th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
+                        {(this.props.data && this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="functional-conservation-splicing-predictors"
+                                tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>} variant={this.props.data} />
+                        : null}
                     </Panel></PanelGroup>
 
                     <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
+                                    evidenceData={null} evidenceDataUpdated={true}
+                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
                         <div className="panel panel-info datasource-clinvar">
                             <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
                             <div className="panel-content-wrapper">
@@ -694,14 +605,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaMissense2Update} variantUuid={this.props.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="other-variants-in-codon"
+                                tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>} variant={this.props.data} />
                         : null}
                     </Panel></PanelGroup>
                 </div>
@@ -737,6 +647,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 </thead>
                             </table>
                         </div>
+                        {(this.props.data && this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="null-variant-analysis"
+                                tableName={<span>Curated Literature Evidence (Null variant analysis)</span>} variant={this.props.data} />
+                        : null}
                     </Panel></PanelGroup>
                 </div>
                 : null}
@@ -756,106 +675,36 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
-                                <span className="pull-right">
-                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">See data in MaxEntScan <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">See data in NNSPLICE <i className="icon icon-external-link"></i></a>
-                                    <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">See data in HumanSplicingFinder <i className="icon icon-external-link"></i></a>
-                                </span>
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE <i className="icon icon-external-link"></i></a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
                             </div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Source</th>
-                                        <th>5' or 3'</th>
-                                        <th>Score Range</th>
-                                        <th>Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th colSpan="4">WT Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th colSpan="4">Variant Sequence</th>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">5'</td>
-                                        <td>[0-12]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>MaxEntScan</td>
-                                        <td rowSpan="3" className="row-span">3'</td>
-                                        <td>[0-16]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NNSPLICE</td>
-                                        <td>[0-1]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HumanSplicingFinder</td>
-                                        <td>[0-100]</td>
-                                        <td><span className="wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan="4">Average Change to Nearest Splice Site: <span className="splice-avg-change wip">IN PROGRESS</span></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
                         </div>
+                        {(this.props.data && this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="molecular-consequence-silent-intron"
+                                tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>} variant={this.props.data} />
+                        : null}
                     </Panel></PanelGroup>
                 </div>
                 : null}
                 {this.state.selectedSubtab == 'indel' ?
                 <div role="tabpanel" className="tab-panel">
                     <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                        {(this.props.data && this.state.interpretation) ?
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
+                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
+                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
+                        </div>
+                        : null}
                         <div className="panel panel-info">
                             <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
                             <div className="panel-body">
@@ -894,14 +743,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
-                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
-                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaIndel1Change}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel"
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
+                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        : null}
+                        {(this.props.data && !this.state.interpretation) ?
+                            <extraEvidence.ExtraEvidenceTableViewAll category="predictors" subcategory="molecular-consequence-inframe-indel"
+                                tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>} variant={this.props.data} />
                         : null}
                     </Panel></PanelGroup>
                 </div>

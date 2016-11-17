@@ -187,7 +187,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     : null}
                     {this.state.selectedTab == 'population' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationPopulation data={variant}
+                        <CurationInterpretationPopulation data={variant} href_url={this.props.href_url}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}

@@ -11,6 +11,7 @@ var CompleteSection = require('./shared/complete_section').CompleteSection;
 var parseAndLogError = require('../../mixins').parseAndLogError;
 var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
 var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var extraEvidence = require('./shared/extra_evidence');
 
 var external_url_map = globals.external_url_map;
 var dbxref_prefix_map = globals.dbxref_prefix_map;
@@ -58,7 +59,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         ext_ensemblVariation: React.PropTypes.object,
         ext_singleNucleotide: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
-        loading_ensemblVariation: React.PropTypes.bool
+        loading_ensemblVariation: React.PropTypes.bool,
+        href_url: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -857,6 +859,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             }
                         </div>
                     </div>
+
+                    {(this.props.data && this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTable category="population" subcategory="population"
+                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
+                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    : null}
+                    {(this.props.data && !this.state.interpretation) ?
+                        <extraEvidence.ExtraEvidenceTableViewAll category="population" subcategory="population"
+                            tableName={<span>Curated Literature Evidence (Population)</span>} variant={this.props.data} />
+                    : null}
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?
