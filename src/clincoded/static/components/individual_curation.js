@@ -299,37 +299,6 @@ var IndividualCuration = React.createClass({
         }
     },
 
-    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
-    validateVariants: function() {
-        var valid;
-        var anyInvalid = false;
-        /*
-        // Check Variant panel inputs for correct formats
-        for (var i = 0; i < this.state.variantCount; i++) {
-            // Check dbSNP ID for a valid format
-            var value = this.getFormValue('VARdbsnpid' + i);
-            if (value) {
-                valid = value.match(/^\s*(rs\d{1,8})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
-                    anyInvalid = true;
-                }
-            }
-
-            // Check dbSNP ID for a valid format
-            value = this.getFormValue('VARclinvarid' + i);
-            if (value) {
-                valid = value.match(/^\s*(\d{1,10})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
-                    anyInvalid = true;
-                }
-            }
-        }
-        */
-        return !anyInvalid;
-    },
-
     // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
@@ -338,7 +307,7 @@ var IndividualCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault() && this.validateVariants()) {
+        if (this.validateDefault()) {
             var family = this.state.family;
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
@@ -387,6 +356,18 @@ var IndividualCuration = React.createClass({
                 // NOT HPOID list is bad
                 formError = true;
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Get variant uuid's if they were added via the modals
+            for (var i = 0; i < this.state.variantCount; i++) {
+                // Grab the values from the variant form panel
+                var variantId = this.getFormValue('VARclinvarid' + i);
+
+                // Build the search string depending on what the user entered
+                if (variantId) {
+                    // Make a search string for these terms
+                    individualVariants.push('/variants/' + variantId);
+                }
             }
 
             // Check to see if the right number of variants exist
@@ -496,52 +477,7 @@ var IndividualCuration = React.createClass({
                     }
                 }).then(data => {
                     var newVariants = [];
-                    if (!currIndividual || !(currIndividual.proband && family)) {
-                        // We're not editing a variant, or we're editing an individual that's not a proband in a family.
-                        // Handle variants; start by making an array of search terms, one for each variant in the form.
-                        // If this is a proband individual, its variants can only be edited from its associated family.
-
-                        // Build an array of search strings for each of the ClinVar IDs entered in the form.
-                        var searchStrs = [];
-                        for (var i = 0; i < this.state.variantCount; i++) {
-                            // Grab the values from the variant form panel
-                            var clinvarId = this.getFormValue('VARclinvarid' + i);
-
-                            // Build the search string depending on what the user entered
-                            if (clinvarId) {
-                                // Make a search string for these terms
-                                searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
-                            }
-                        }
-
-                        // If at least one variant search string built, perform the search
-                        if (searchStrs.length) {
-                            // Search DB for all matching terms for all variants entered
-                            return this.getRestDatas(
-                                searchStrs
-                            ).then(results => {
-                                // 'result' is an array of search results, one per search string. There should only be one result per array element --
-                                // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                                results.forEach(function(result, i) {
-                                    if (result.total) {
-                                        // Search got a result. Add a string for family.variants for this existing variant
-                                        individualVariants.push(result['@graph'][0]['@id']);
-                                    } else {
-                                        // Search got no result; make a new variant and save it in an array so we can write them.
-                                        var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
-                                        if (termResult) {
-                                            var newVariant = {};
-                                            newVariant.clinvarVariantId = termResult.term;
-                                            newVariants.push(newVariant);
-                                        }
-                                    }
-                                }, this);
-
-                                // Pass new variant array to the next THEN to write them.
-                                return Promise.resolve(newVariants);
-                            });
-                        }
-                    } else if (currIndividual && currIndividual.proband && family) {
+                    if (currIndividual && currIndividual.proband && family) {
                         // Editing a proband in a family. Get updated variants list from the target individual since it is changed from the Family edit page
                         return this.getRestData('/individuals/' + currIndividual.uuid).then(updatedIndiv => {
                             newVariants = updatedIndiv.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
@@ -855,8 +791,8 @@ var IndividualCuration = React.createClass({
                 addVariantDisabled = true;
             }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
+            this.refs['VARclinvarid' + fieldNum].setValue(data['uuid']);
+            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle}; // CHANGEME
             // Disable the 'Other description' textarea
             this.refs['VARothervariant' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
@@ -1502,9 +1438,11 @@ var IndividualVariantInfo = function() {
                                         </div>
                                     </div>
                                 : null}
-                                <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
+                                <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
                                     error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
+                                <br />
+
                                 <div className="row">
                                     <div className="form-group">
                                         <span className="col-sm-5 control-label"><label>{!this.state.variantInfo[i] ? "Add Variant:" : "Clear Variant Selection:"}</label></span>
