@@ -322,8 +322,8 @@ var IndividualCuration = React.createClass({
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
-            let variantId0 = this.getFormValue('VARclinvarid0'),
-                variantId1 = this.getFormValue('VARclinvarid1'),
+            let variantUuid0 = this.getFormValue('variantUuid0'),
+                variantUuid1 = this.getFormValue('variantUuid1'),
                 variantText0 = this.getFormValue('VARothervariant0'),
                 variantText1 = this.getFormValue('VARothervariant1');
 
@@ -362,7 +362,7 @@ var IndividualCuration = React.createClass({
             // Get variant uuid's if they were added via the modals
             for (var i = 0; i < this.state.variantCount; i++) {
                 // Grab the values from the variant form panel
-                var variantId = this.getFormValue('VARclinvarid' + i);
+                var variantId = this.getFormValue('variantUuid' + i);
 
                 // Build the search string depending on what the user entered
                 if (variantId) {
@@ -373,12 +373,12 @@ var IndividualCuration = React.createClass({
 
             // Check to see if the right number of variants exist
             if (SEGrecessiveZygosity === 'Heterozygous') {
-                if ((!variantId0 && !variantText0) || (!variantId1 && !variantText1)) {
+                if ((!variantUuid0 && !variantText0) || (!variantUuid1 && !variantText1)) {
                     formError = true;
                     this.setFormErrors('SEGrecessiveZygosity', 'For Heterozygous, two variants must be specified');
                 }
             } else if (SEGrecessiveZygosity === 'Hemizygous' || SEGrecessiveZygosity === 'Homozygous') {
-                if (!variantId0 && !variantText0) {
+                if (!variantUuid0 && !variantText0) {
                     formError = true;
                     this.setFormErrors('SEGrecessiveZygosity', `For ${SEGrecessiveZygosity}, one variant must be specified`);
                 }
@@ -792,7 +792,7 @@ var IndividualCuration = React.createClass({
                 addVariantDisabled = true;
             }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data['uuid']);
+            this.refs['variantUuid' + fieldNum].setValue(data['uuid']);
             newVariantInfo[fieldNum] = {
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
@@ -803,7 +803,7 @@ var IndividualCuration = React.createClass({
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
-            this.refs['VARclinvarid' + fieldNum].setValue('');
+            this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
             // Reenable the 'Other description' textarea
             currVariantOption[parseInt(fieldNum)] = VAR_NONE;
@@ -1453,8 +1453,8 @@ var IndividualVariantInfo = function() {
                                         </div>
                                     </div>
                                 : null}
-                                <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
-                                    error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                                <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
+                                    error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <br />
 
