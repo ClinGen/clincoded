@@ -221,8 +221,9 @@ var IndividualCuration = React.createClass({
                         if (variants[i].clinvarVariantId) {
                             currVariantOption[i] = VAR_SPEC;
                             stateObj.variantInfo[i] = {
-                                'clinvarVariantId': variants[i].clinvarVariantId,
-                                'clinvarVariantTitle': variants[i].clinvarVariantTitle,
+                                'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
+                                'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
+                                'carId': variants[i].carId ? variants[i].carId : null,
                                 'uuid': variants[i].uuid
                             };
                         } else if (variants[i].otherDescription) {
@@ -792,7 +793,11 @@ var IndividualCuration = React.createClass({
             }
             // Update the form and display values with new data
             this.refs['VARclinvarid' + fieldNum].setValue(data['uuid']);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle}; // CHANGEME
+            newVariantInfo[fieldNum] = {
+                'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
+                'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
+                'carId': data.carId ? data.carId : null
+            };
             // Disable the 'Other description' textarea
             this.refs['VARothervariant' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
@@ -1416,14 +1421,24 @@ var IndividualVariantInfo = function() {
                             <div key={i} className="variant-panel">
                                 {this.state.variantInfo[i] ?
                                     <div>
-                                        <div className="row">
-                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
-                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
-                                        </div>
-                                        <div className="row">
-                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                            <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                        </div>
+                                        {this.state.variantInfo[i].clinvarVariantId ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                                <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                            </div>
+                                        : null}
+                                        {this.state.variantInfo[i].clinvarVariantTitle ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                            </div>
+                                        : null}
+                                        {this.state.variantInfo[i].carId ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label>CAR ID:</label></span>
+                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].carId}</span>
+                                            </div>
+                                        : null}
                                         <div className="row variant-assessment">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1445,16 +1460,16 @@ var IndividualVariantInfo = function() {
 
                                 <div className="row">
                                     <div className="form-group">
-                                        <span className="col-sm-5 control-label"><label>{!this.state.variantInfo[i] ? "Add Variant:" : "Clear Variant Selection:"}</label></span>
+                                        <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
                                         <span className="col-sm-7">
-                                            <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant variantRequired={this.state.variantRequired} />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
-                                                buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                            <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                                 initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                                 updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} buttonOnly={true} />
                                             {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                             {!this.state.variantInfo[i] ?
-                                                <AddResourceId resourceType="car" labelVisible={false} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
-                                                    buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit CAR ID" : "Add CAR ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                    buttonText="Add CAR ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                                     updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} buttonOnly={true} />
                                             : null}
