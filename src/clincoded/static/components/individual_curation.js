@@ -1507,18 +1507,20 @@ var IndividualVariantInfo = function() {
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <div className="row">
                                     <div className="form-group">
-                                    <span className="col-sm-5 control-label"><label>Add Variant</label></span>
-                                    <span className="col-sm-7">
-                                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant variantRequired={this.state.variantRequired} />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
-                                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRender={false} clearButtonClass="btn-inline-spacer"
-                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                            updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} buttonOnly={true} />
-                                        <span> - or - </span>
-                                        <AddResourceId resourceType="car" labelVisible={false} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
-                                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit CAR ID" : "Add CAR ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRender={false} clearButtonClass="btn-inline-spacer"
-                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                            updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} buttonOnly={true} />
-                                    </span>
+                                        <span className="col-sm-5 control-label"><label>{!this.state.variantInfo[i] ? "Add Variant:" : "Clear Variant Selection:"}</label></span>
+                                        <span className="col-sm-7">
+                                            <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant variantRequired={this.state.variantRequired} />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                                updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} buttonOnly={true} />
+                                            {!this.state.variantInfo[i] ? <span> - or - </span> : null}
+                                            {!this.state.variantInfo[i] ?
+                                                <AddResourceId resourceType="car" labelVisible={false} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                    buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit CAR ID" : "Add CAR ID" } protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                    initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                                    updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} buttonOnly={true} />
+                                            : null}
+                                        </span>
                                     </div>
                                 </div>
                                 <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
