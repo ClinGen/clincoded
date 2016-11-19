@@ -93,6 +93,16 @@ var IndividualCuration = React.createClass({
             } else {
                 this.setState({variantCount: 1, variantRequired: false});
             }
+        } else if (ref.indexOf('variantDesc') > -1) {
+            let variantIdx = ref.slice(-1);
+            let tempValue = this.refs[ref].getValue();
+            let tempVariantOption = this.state.variantOption;
+            if (tempValue) {
+                tempVariantOption[parseInt(variantIdx)] = VAR_OTHER;
+            } else {
+                tempVariantOption[parseInt(variantIdx)] = VAR_NONE;
+            }
+            this.setState({variantOption: tempVariantOption});
         } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
@@ -324,8 +334,8 @@ var IndividualCuration = React.createClass({
             let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
             let variantUuid0 = this.getFormValue('variantUuid0'),
                 variantUuid1 = this.getFormValue('variantUuid1'),
-                variantText0 = this.getFormValue('VARothervariant0'),
-                variantText1 = this.getFormValue('VARothervariant1');
+                variantText0 = this.getFormValue('variantDesc0'),
+                variantText1 = this.getFormValue('variantDesc1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (this.state.proband_selected && (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; }))) {
@@ -494,7 +504,7 @@ var IndividualCuration = React.createClass({
                     if (!currIndividual || !(currIndividual.proband && family)) {
                         for (var i = 0; i < this.state.variantCount; i++) {
                             // Grab the values from the variant form panel
-                            var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
+                            var otherVariantText = this.getFormValue('variantDesc' + i).trim();
 
                             // Build the search string depending on what the user entered
                             if (otherVariantText) {
@@ -799,7 +809,7 @@ var IndividualCuration = React.createClass({
                 'carId': data.carId ? data.carId : null
             };
             // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
+            this.refs['variantDesc' + fieldNum].resetValue();
             currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
         } else {
             // Reset the form and display values
@@ -1453,7 +1463,7 @@ var IndividualVariantInfo = function() {
                                         </div>
                                     </div>
                                 : null}
-                                <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
+                                <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
                                     error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <br />
@@ -1476,7 +1486,7 @@ var IndividualVariantInfo = function() {
                                         </span>
                                     </div>
                                 </div>
-                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
+                                <Input type="textarea" ref={'variantDesc' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                 {curator.renderMutalyzerLink()}
                             </div>
