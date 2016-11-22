@@ -1400,8 +1400,6 @@ var IndividualVariantInfo = function() {
                                 <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
                                     error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                                <br />
-
                                 <div className="row">
                                     <div className="form-group">
                                         <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
