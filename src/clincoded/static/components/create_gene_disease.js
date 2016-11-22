@@ -19,7 +19,6 @@ var Alert = modal.Alert;
 var ModalMixin = modal.ModalMixin;
 var Panel = panel.Panel;
 
-
 var CreateGeneDisease = React.createClass({
     mixins: [FormMixin, RestMixin, ModalMixin, CuratorHistory],
 
@@ -29,7 +28,19 @@ var CreateGeneDisease = React.createClass({
     },
 
     getInitialState: function() {
-        return {gdm: {}};
+        return {
+            gdm: {},
+            adjectiveRequired: false
+        };
+    },
+
+    // Handle value changes in modeInheritance dropdown selection
+    handleChange: function(ref, e) {
+        if (ref === 'hpo') {
+            //Only show option to select moi adjective if user selects 'X-linked inheritance'
+            let selected = this.refs[ref].getValue();
+            selected.indexOf('X-linked inheritance') > -1 ? this.setState({adjectiveRequired: true}) : this.setState({adjectiveRequired: false});
+        }
     },
 
     // Form content validation
@@ -59,11 +70,18 @@ var CreateGeneDisease = React.createClass({
         this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
         this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         this.saveFormValue('hpo', this.refs.hpo.getValue());
+        if (this.state.adjectiveRequired) {
+            this.saveFormValue('moiAdjective', this.refs.moiAdjective.getValue());
+        }
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('hpo');
+            let adjective;
+            if (this.state.adjectiveRequired) {
+                adjective = this.getFormValue('moiAdjective');
+            }
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
             // If either error out, set the form error fields
@@ -80,11 +98,21 @@ var CreateGeneDisease = React.createClass({
                 ).then(gdmSearch => {
                     if (gdmSearch.total === 0) {
                         // Matching GDM not found. Create a new GDM
-                        var newGdm = {
-                            gene: geneId,
-                            disease: orphaId,
-                            modeInheritance: mode
-                        };
+                        let newGdm = {};
+                        if (this.state.adjectiveRequired) {
+                            newGdm = {
+                                gene: geneId,
+                                disease: orphaId,
+                                modeInheritance: mode,
+                                modeInheritanceAdjective: adjective
+                            };
+                        } else {
+                            newGdm = {
+                                gene: geneId,
+                                disease: orphaId,
+                                modeInheritance: mode
+                            };
+                        }
 
                         // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
                         // of the new GDM in the query string.
@@ -132,7 +160,7 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select"
+                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
                                     <option value="select" disabled="disabled">Select</option>
@@ -141,6 +169,17 @@ var CreateGeneDisease = React.createClass({
                                         return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
                                     })}
                                 </Input>
+                                {this.state.adjectiveRequired ?
+                                    <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="select"
+                                        error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
+                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective" required>
+                                        <option value="select" disabled="disabled">Select</option>
+                                        <option disabled="disabled"></option>
+                                        <option value="Dominant">Dominant</option>
+                                        <option value="Recessive">Recessive</option>
+                                        <option value="Primarily recessive with milder female expression">Primarily recessive with milder female expression</option>
+                                    </Input>
+                                : null}
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>
