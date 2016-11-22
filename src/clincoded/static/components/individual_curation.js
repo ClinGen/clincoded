@@ -31,6 +31,8 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
+import VariantEvidenceScore from './evidence_score/variant_evidence_score';
+
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
 
@@ -69,6 +71,7 @@ var IndividualCuration = React.createClass({
             proband: null, // If we have an associated family that has a proband, this points at it
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
+            showScoreInput: false, // Determines whether to show additional form fields for proband score
             evidenceScoreUuid: null
         };
     },
@@ -89,6 +92,9 @@ var IndividualCuration = React.createClass({
                     this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
                 }
             });
+        } else if (ref == 'scoreStatus') {
+            this.refs[ref].getValue() === 'Score' ? this.setState({showScoreInput: true}) : this.setState({showScoreInput: false});
+
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -985,6 +991,8 @@ var IndividualCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
+        let showScoreInput = this.state.showScoreInput;
+
         // define where pressing the Cancel button should take you to
         var cancelUrl;
         if (gdm) {
@@ -1050,8 +1058,8 @@ var IndividualCuration = React.createClass({
                                         </PanelGroup>
                                         {this.state.proband || this.state.proband_selected ?
                                             <PanelGroup accordion>
-                                                <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} open>
-                                                    {IndividualScore.call(this)}
+                                                <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
+                                                    {VariantEvidenceScore.render.call(this, individual, 2, 3, [0,1,2,3], "Some reason", showScoreInput)}
                                                 </Panel>
                                             </PanelGroup>
                                         : null}
