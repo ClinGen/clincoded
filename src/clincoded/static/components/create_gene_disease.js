@@ -147,6 +147,8 @@ var CreateGeneDisease = React.createClass({
     },
 
     render: function() {
+        let adjectiveRequired = this.state.adjectiveRequired;
+
         return (
             <div className="container">
                 <h1>{this.props.context.title}</h1>
@@ -169,17 +171,16 @@ var CreateGeneDisease = React.createClass({
                                         return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
                                     })}
                                 </Input>
-                                {this.state.adjectiveRequired ?
-                                    <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="select"
-                                        error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
-                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective" required>
-                                        <option value="select" disabled="disabled">Select</option>
-                                        <option disabled="disabled"></option>
-                                        <option value="Dominant">Dominant</option>
-                                        <option value="Recessive">Recessive</option>
-                                        <option value="Primarily recessive with milder female expression">Primarily recessive with milder female expression</option>
-                                    </Input>
-                                : null}
+                                <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="none"
+                                    error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective"
+                                    required={adjectiveRequired ? true : false} inputDisabled={adjectiveRequired ? false : true}>
+                                    <option value="none" disabled="disabled">Select</option>
+                                    <option disabled="disabled"></option>
+                                    <option value="Dominant">Dominant</option>
+                                    <option value="Recessive">Recessive</option>
+                                    <option value="Primarily recessive with milder female expression">Primarily recessive with milder female expression</option>
+                                </Input>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>
