@@ -1726,7 +1726,7 @@ function flattenExperimental(experimental) {
 
 
 var gdmSimpleProps = [
-    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active"
+    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active", "modeInheritanceAdjective"
 ];
 
 function flattenGdm(gdm) {
