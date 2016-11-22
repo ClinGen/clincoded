@@ -2577,6 +2577,27 @@ table.login-users-interpretations {
     .variant-panel .mutalyzer-link {
         margin-bottom: 10px;
     }
+
+    dl.calculated-score {
+        width: 100%;
+        margin-bottom: 15px;
+        padding-left: 4px;
+
+        dt {
+            width: 41.66667%;
+        }
+
+        dd {
+            width: 58.33333%;
+            padding-left: 15px;
+        }
+    }
+}
+
+.proband-evidence-score {
+    .panel-body.panel-std {
+        padding-top: 25px;
+    }
 }
 
 .non-bold-font {
