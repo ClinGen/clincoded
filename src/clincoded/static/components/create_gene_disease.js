@@ -30,6 +30,8 @@ var CreateGeneDisease = React.createClass({
     getInitialState: function() {
         return {
             gdm: {},
+            adjectives: [],
+            adjectiveDisabled: true,
             adjectiveRequired: false
         };
     },
@@ -39,7 +41,39 @@ var CreateGeneDisease = React.createClass({
         if (ref === 'hpo') {
             //Only show option to select moi adjective if user selects 'X-linked inheritance'
             let selected = this.refs[ref].getValue();
-            selected.indexOf('X-linked inheritance') > -1 ? this.setState({adjectiveRequired: true}) : this.setState({adjectiveRequired: false});
+            if (selected.indexOf('X-linked inheritance') > -1) {
+                this.setState({
+                    adjectiveDisabled: false,
+                    adjectiveRequired: true,
+                    adjectives: modesOfInheritance['X-linked inheritance (HP:0001417)']
+                });
+            } else if (selected.indexOf('Autosomal dominant inheritance') > -1) {
+                this.setState({
+                    adjectiveDisabled: false,
+                    adjectiveRequired: false,
+                    adjectives: modesOfInheritance['Autosomal dominant inheritance (HP:0000006)']
+                });
+            } else if (selected.indexOf('Autosomal recessive inheritance') > -1) {
+                this.setState({
+                    adjectiveDisabled: false,
+                    adjectiveRequired: false,
+                    adjectives: modesOfInheritance['Autosomal recessive inheritance (HP:0000007)']
+                });
+            } else if (selected.indexOf('Mitochondrial inheritance') > -1) {
+                this.setState({
+                    adjectiveDisabled: false,
+                    adjectiveRequired: false,
+                    adjectives: modesOfInheritance['Mitochondrial inheritance (HP:0001427)']
+                });
+            } else if (selected.indexOf('Other') > -1) {
+                this.setState({
+                    adjectiveDisabled: false,
+                    adjectiveRequired: false,
+                    adjectives: modesOfInheritance['Other']
+                });
+            } else {
+                this.setState({adjectiveDisabled: true, adjectiveRequired: false});
+            }
         }
     },
 
@@ -147,7 +181,10 @@ var CreateGeneDisease = React.createClass({
     },
 
     render: function() {
+        let adjectives = this.state.adjectives;
+        let adjectiveDisabled = this.state.adjectiveDisabled;
         let adjectiveRequired = this.state.adjectiveRequired;
+        const moiKeys = Object.keys(modesOfInheritance);
 
         return (
             <div className="container">
@@ -167,19 +204,19 @@ var CreateGeneDisease = React.createClass({
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
                                     <option value="select" disabled="disabled">Select</option>
                                     <option value="" disabled="disabled"></option>
-                                    {modesOfInheritance.map(function(modeOfInheritance, i) {
+                                    {moiKeys.map(function(modeOfInheritance, i) {
                                         return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
                                     })}
                                 </Input>
                                 <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="none"
                                     error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective"
-                                    required={adjectiveRequired ? true : false} inputDisabled={adjectiveRequired ? false : true}>
+                                    required={adjectiveRequired} inputDisabled={adjectiveDisabled}>
                                     <option value="none" disabled="disabled">Select</option>
                                     <option disabled="disabled"></option>
-                                    <option value="Dominant">Dominant</option>
-                                    <option value="Recessive">Recessive</option>
-                                    <option value="Primarily recessive with milder female expression">Primarily recessive with milder female expression</option>
+                                    {adjectives.map(function(adjective, i) {
+                                        return <option key={i} value={adjective}>{adjective}</option>;
+                                    })}
                                 </Input>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
