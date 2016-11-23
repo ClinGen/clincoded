@@ -1562,8 +1562,10 @@ var FamilySegregation = function() {
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
     var family = this.state.family;
+    var gdm = this.state.gdm;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
+    var annotation = this.state.annotation;
     let probandIndividual = this.state.probandIndividual ? this.state.probandIndividual : null;
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
@@ -1610,7 +1612,9 @@ var FamilyVariant = function() {
                         null
                     }
                 </div>
-            : null }
+            :
+                <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
+            }
             <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
                 error={this.getFormError('SEGrecessiveZygosity')} clearError={this.clrFormErrors.bind(null, 'SEGrecessiveZygosity')}
                 value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
