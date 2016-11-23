@@ -1842,7 +1842,6 @@ var LabelPanelTitleView = React.createClass({
 // Returns a promise once the Individual object is written.
 var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, zygosity, context) {
     var newIndividual = {};
-
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
     newIndividual.variants = variants;

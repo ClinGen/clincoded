@@ -123,6 +123,18 @@ var FamilyCuration = React.createClass({
             this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
+        } else if (ref === 'individualname' || ref === 'individualorphanetid') {
+            let individualName = this.refs['individualname'].getValue();
+            let individualOrphanetId = this.refs['individualorphanetid'].getValue();
+            if (individualName || individualOrphanetId) {
+                this.setState({individualRequired: true, variantRequired: true});
+            } else if (!individualName && !individualOrphanetId) {
+                if (this.refs['SEGrecessiveZygosity'].getValue() !== 'none' || this.refs['variantUuid0'].getValue() || (this.refs['variantUuid1'] && this.refs['variantUuid1'].getValue())) {
+                    this.setState({individualRequired: true, variantRequired: true});
+                } else {
+                    this.setState({individualRequired: false, variantRequired: false});
+                }
+            }
         } else if (ref === 'SEGlodPublished') {
             if (this.refs[ref].getValue() === 'Yes') {
                 this.setState({lodPublished: 'Yes'});
@@ -135,11 +147,15 @@ var FamilyCuration = React.createClass({
             // set the variant count and variant required as necessary
             let tempValue = this.refs[ref].getValue();
             if (tempValue === 'Heterozygous') {
-                this.setState({variantCount: 2, variantRequired: true});
+                this.setState({variantCount: 2, individualRequired: true, variantRequired: true});
             } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
-                this.setState({variantCount: 1, variantRequired: true});
+                this.setState({variantCount: 1, individualRequired: true, variantRequired: true});
             } else {
-                this.setState({variantCount: 1, variantRequired: false});
+                if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
+                    this.setState({variantCount: 1, individualRequired: true, variantRequired: true});
+                } else {
+                    this.setState({variantCount: 1, individualRequired: false, variantRequired: false});
+                }
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
@@ -177,6 +193,7 @@ var FamilyCuration = React.createClass({
         var hpoIds = '';
         var hpoFreeText = '';
         if (fromTarget == 'group') {
+            this.setState({individualRequired: true, variantRequired: true});
             if (this.state.group) {
                 // We have a group, so get the disease array from it.
                 associatedGroups = [this.state.group];
@@ -221,6 +238,7 @@ var FamilyCuration = React.createClass({
                 }
             }
         } else if (fromTarget == 'family') {
+            this.setState({individualRequired: true, variantRequired: true});
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
             var errors = this.state.formErrors;
@@ -287,7 +305,12 @@ var FamilyCuration = React.createClass({
                 this.setState({familyName: stateObj.family.label});
 
                 if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
+                    let tempOrphanetTerms = [];
+                    stateObj.family.commonDiagnosis.map(diagnosis => {
+                        tempOrphanetTerms.push('ORPHA' + diagnosis.orphaNumber);
+                    });
                     this.setState({orpha: true});
+                    this.setState({existedOrphanetId: tempOrphanetTerms.join(', ').toUpperCase()});
                 }
                 else {
                     this.setState({orpha: false});
@@ -297,14 +320,12 @@ var FamilyCuration = React.createClass({
             if (stateObj.family) {
                 // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
                 stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
-
                 // See if any associated individual is a proband
                 if (stateObj.family.individualIncluded.length) {
                     stateObj.probandIndividual = _(stateObj.family.individualIncluded).find(function(individual) {
                         return individual.proband;
                     });
                 }
-
                 // See if we need to disable the Add Variant button based on the number of variants configured
                 var segregation = stateObj.family.segregation;
                 if (segregation) {
@@ -312,10 +333,9 @@ var FamilyCuration = React.createClass({
                     if (segregation.variants && segregation.variants.length) {
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
-                        stateObj.variantRequired = stateObj.individual.recessiveZygosity ? true : false;
+                        stateObj.variantRequired = stateObj.probandIndividual.recessiveZygosity ? true : false;
                         stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
-
                         // For each incoming variant, set the form value
                         var currVariantOption = [];
                         for (var i = 0; i < segregation.variants.length; i++) {
@@ -332,7 +352,6 @@ var FamilyCuration = React.createClass({
                         // No variants in this family, but it does have a proband individual. Open one empty variant panel
                         stateObj.variantCount = 1;
                     }
-
                     if (segregation.lodPublished === true) {
                         this.setState({lodPublished: 'Yes'});
                     } else if (segregation.lodPublished === false) {
@@ -345,7 +364,6 @@ var FamilyCuration = React.createClass({
                     if (segregation.assessments && segregation.assessments.length) {
                         // Find the assessment belonging to the logged-in curator, if any.
                         userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
-
                         // See if any assessments are non-default
                         this.cv.segregationAssessed = _(segregation.assessments).find(function(assessment) {
                             return assessment.value !== Assessments.DEFAULT_VALUE;
@@ -356,7 +374,6 @@ var FamilyCuration = React.createClass({
                             this.cv.othersAssessed = Assessments.othersAssessed(segregation.assessments, user.uuid);
                         }
                     }
-
                     if (stateObj.probandIndividual) {
                         /*****************************************************/
                         /* Show "Add 2nd variant" button if "Heterozygous"   */
@@ -364,10 +381,9 @@ var FamilyCuration = React.createClass({
                         /*****************************************************/
                         let probandIndividual = stateObj.probandIndividual;
                         if (probandIndividual.recessiveZygosity && probandIndividual.recessiveZygosity.length) {
-                            this.setState({recessiveZygosity: probandIndividual.recessiveZygosity});
+                            this.setState({SEGrecessiveZygosity: probandIndividual.recessiveZygosity});
                         }
                     }
-
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
                     Object.keys(formMapSegregation).forEach(formRef => {
                         if (segregation.hasOwnProperty(formMapSegregation[formRef])) {
@@ -458,8 +474,8 @@ var FamilyCuration = React.createClass({
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
-            let variantId0 = this.getFormValue('VARclinvarid0'),
-                variantId1 = this.getFormValue('VARclinvarid1');
+            let variantId0 = this.getFormValue('variantUuid0'),
+                variantId1 = this.getFormValue('variantUuid1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
@@ -507,6 +523,13 @@ var FamilyCuration = React.createClass({
                 if (variantId) {
                     // Make a search string for these terms
                     familyVariants.push('/variants/' + variantId);
+                }
+            }
+
+            if (this.state.individualRequired || this.state.variantRequired) {
+                if (!variantId0) {
+                    formError = true;
+                    this.setFormErrors('individualorphanetid', 'You must specify a variant if you are defining a proband individual');
                 }
             }
 
@@ -1019,7 +1042,7 @@ var FamilyCuration = React.createClass({
                 addVariantDisabled = true;
             }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
+            this.refs['variantUuid' + fieldNum].setValue(data.uuid);
             newVariantInfo[fieldNum] = {
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
@@ -1027,7 +1050,7 @@ var FamilyCuration = React.createClass({
             };
         } else {
             // Reset the form and display values
-            this.refs['VARclinvarid' + fieldNum].setValue('');
+            this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
         }
 
@@ -1035,23 +1058,28 @@ var FamilyCuration = React.createClass({
         // First check if data entered in either ClinVar Variant ID or Other description at each variant
         var noVariantData = true;
         _.range(this.state.variantCount).map(i => {
-            if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
+            if (this.refs['variantUuid' + i].getValue()) {
                 noVariantData = false;
             }
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
         if (noVariantData) {
-            this.setState({individualRequired: false});
+            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue() || this.refs['SEGrecessiveZygosity'].getValue() !== 'none') {
+                this.setState({individualRequired: true, variantRequired: true});
+            } else {
+                this.setState({individualRequired: false, variantRequired: false});
+            }
             var errors = this.state.formErrors;
             errors['individualname'] = '';
             errors['individualorphanetid'] = '';
             this.setState({formErrors: errors});
         } else {
-            this.setState({individualRequired: true});
+            this.setState({individualRequired: true, variantRequired: true});
         }
 
         // Set state
         this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.clrFormErrors('individualorphanetid');
         this.clrFormErrors('SEGrecessiveZygosity');
     },
 
@@ -1563,7 +1591,7 @@ var FamilyVariant = function() {
                     <div className="col-sm-7 col-sm-offset-5 proband-label-note">
                         <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
                     </div>
-                    <Input type="text" ref="individualname" label="Proband Label"
+                    <Input type="text" ref="individualname" label="Proband Label" handleChange={this.handleChange}
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.individualRequired} />
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
@@ -1574,7 +1602,7 @@ var FamilyVariant = function() {
                         </div>
                         : null
                     }
-                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
+                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15" handleChange={this.handleChange}
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
