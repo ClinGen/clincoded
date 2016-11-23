@@ -1285,15 +1285,26 @@ var IndividualVariantInfo = function() {
                                 <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>ClinVar VariationID</dt>
-                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
-                                    </div>
+                                    {variant.clinvarVariantId ?
+                                        <div>
+                                            <dt>ClinVar VariationID</dt>
+                                            <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                        </div>
+                                    : null}
 
-                                    <div>
-                                        <dt>ClinVar Preferred Title</dt>
-                                        <dd>{variant.clinvarVariantTitle}</dd>
-                                    </div>
+                                    {variant.clinvarVariantTitle ?
+                                        <div>
+                                            <dt>ClinVar Preferred Title</dt>
+                                            <dd>{variant.clinvarVariantTitle}</dd>
+                                        </div>
+                                    : null}
+
+                                    {variant.carId ?
+                                        <div>
+                                            <dt>CAR ID</dt>
+                                            <dd>{variant.carId}</dd>
+                                        </div>
+                                    : null}
 
                                     {variant.otherDescription && variant.otherDescription.length ?
                                         <div>

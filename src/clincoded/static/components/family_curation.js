@@ -337,7 +337,6 @@ var FamilyCuration = React.createClass({
                         stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
                         // For each incoming variant, set the form value
-                        var currVariantOption = [];
                         for (var i = 0; i < segregation.variants.length; i++) {
                             if (segregation.variants[i].clinvarVariantId) {
                                 stateObj.variantInfo[i] = {
@@ -347,7 +346,6 @@ var FamilyCuration = React.createClass({
                                 };
                             }
                         }
-                        stateObj.variantOption = currVariantOption;
                     } else if (stateObj.probandIndividual) {
                         // No variants in this family, but it does have a proband individual. Open one empty variant panel
                         stateObj.variantCount = 1;
@@ -1032,7 +1030,6 @@ var FamilyCuration = React.createClass({
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
     updateClinvarVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
@@ -1063,7 +1060,7 @@ var FamilyCuration = React.createClass({
             }
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
-        if (noVariantData) {
+        if (noVariantData && this.refs['individualname']) {
             if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue() || this.refs['SEGrecessiveZygosity'].getValue() !== 'none') {
                 this.setState({individualRequired: true, variantRequired: true});
             } else {
@@ -1078,7 +1075,7 @@ var FamilyCuration = React.createClass({
         }
 
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled});
         this.clrFormErrors('individualorphanetid');
         this.clrFormErrors('SEGrecessiveZygosity');
     },
