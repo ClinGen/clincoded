@@ -94,6 +94,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            // Display selected MOI adjective if any. Otherwise, display selected MOI.
             var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             var pmid = this.props.pmid;
             var i, j, k;
