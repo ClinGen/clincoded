@@ -79,6 +79,20 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         });
     },
 
+    // Method to display either mode of inheritance adjective,
+    // or just mode of inheritance if no adjective
+    renderSelectedModeInheritance: function(interpretation) {
+        let moi = '';
+        if (interpretation.modeInheritanceAdjective) {
+            moi = interpretation.modeInheritanceAdjective;
+        } else if (interpretation.modeInheritance) {
+            moi = interpretation.modeInheritance;
+        }
+        return (
+            <span>{moi && moi.length ? this.renderModeInheritanceLink(moi) : 'None'}</span>
+        );
+    },
+
     // Method to construct mode of inheritance linkout
     renderModeInheritanceLink: function(modeInheritance) {
         if (modeInheritance) {
@@ -382,7 +396,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>Mode of Inheritance:</dt>
-                                                <dd className="modeInheritance">{interpretation.modeInheritance ? this.renderModeInheritanceLink(interpretation.modeInheritance) : 'None'}</dd>
+                                                <dd className="modeInheritance">{this.renderSelectedModeInheritance(interpretation)}</dd>
                                             </dl>
                                         </div>
                                     </div>
