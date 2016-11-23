@@ -1866,7 +1866,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
