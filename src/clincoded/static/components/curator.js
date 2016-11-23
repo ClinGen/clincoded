@@ -94,6 +94,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
@@ -168,7 +169,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </span>
                                     </h1>
-                                    <h2><i>{mode}</i></h2>
+                                    <h2><i>{modeInheritanceAdjective ? modeInheritanceAdjective : mode}</i></h2>
                                 </span>
                         </div>
                     </div>
