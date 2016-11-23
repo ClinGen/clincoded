@@ -446,8 +446,61 @@ var AssociateInheritance = React.createClass({
 
     getInitialState: function() {
         return {
-            submitResourceBusy: false
+            submitResourceBusy: false,
+            adjectives: [],
+            adjectiveDisabled: true
         };
+    },
+
+    componentDidMount: function() {
+        if (this.props.interpretation) {
+            if (this.props.interpretation.modeInheritance) {
+                let moi = this.props.interpretation.modeInheritance;
+                let adjective = this.props.interpretation.modeInheritanceAdjective;
+                this.parseModeInheritance(moi, adjective ? adjective : 'none');
+            }
+        }
+    },
+
+    // Handle value changes in modeInheritance dropdown selection
+    handleChange: function(ref, e) {
+        if (ref === 'inheritance') {
+            this.parseModeInheritance(this.refs[ref].getValue(), 'none');
+        }
+    },
+
+    parseModeInheritance: function(modeInheritance, defaultValue) {
+        if (modeInheritance && modeInheritance.length) {
+            /******************************************************/
+            /* If 'X-linked inheritance', or 'Other',             */
+            /* or 'Autosomal dominant inheritance',               */
+            /* or 'Autosomal recessive inheritance is selected,   */
+            /* enable adjective menu only.                        */
+            /* Everything else, disable adjective menu.           */
+            /* Req'd adjective isn't needed in VCI (no scoring)   */
+            /******************************************************/
+            if (modeInheritance.indexOf('X-linked inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['X-linked inheritance (HP:0001417)'], defaultValue);
+            } else if (modeInheritance.indexOf('Autosomal dominant inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Autosomal dominant inheritance (HP:0000006)'], defaultValue);
+            } else if (modeInheritance.indexOf('Autosomal recessive inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Autosomal recessive inheritance (HP:0000007)'], defaultValue);
+            } else if (modeInheritance.indexOf('Mitochondrial inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Mitochondrial inheritance (HP:0001427)'], defaultValue);
+            } else if (modeInheritance.indexOf('Other') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Other'], defaultValue);
+            } else {
+                this.handleAdjectives(true, [], defaultValue);
+            }
+        }
+    },
+
+    // Helper method for the 'handleChange' method to minimize repetitive code
+    handleAdjectives: function(adjectiveDisabled, adjectives, defaultValue) {
+        this.setState({
+            adjectiveDisabled: adjectiveDisabled,
+            adjectives: adjectives
+        }, () => {this.refs.moiAdjective.setValue(defaultValue);});
     },
 
     // When the form is submitted...
@@ -455,11 +508,16 @@ var AssociateInheritance = React.createClass({
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         // Get values from form and validate them
         this.saveFormValue('inheritance', this.refs.inheritance.getValue());
+        let moiAdjectiveValue = this.refs.moiAdjective.getValue();
+        if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
+            this.saveFormValue('moiAdjective', moiAdjectiveValue);
+        }
 
         // Invoke button progress indicator
         this.setState({submitResourceBusy: true});
 
         let modeInheritance = this.getFormValue('inheritance');
+        let adjective = this.getFormValue('moiAdjective');
         let currInterpretation;
 
         this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
@@ -472,11 +530,17 @@ var AssociateInheritance = React.createClass({
             if (modeInheritance === 'no-moi') {
                 if ('modeInheritance' in flatInterpretation) {
                     delete flatInterpretation['modeInheritance'];
+                    if ('modeInheritanceAdjective' in flatInterpretation) {
+                        delete flatInterpretation['modeInheritanceAdjective'];
+                    }
                 } else {
                     return null;
                 }
             } else {
                 flatInterpretation.modeInheritance = modeInheritance;
+                if (adjective && adjective.length) {
+                    flatInterpretation['modeInheritanceAdjective'] = adjective;
+                }
             }
 
             return this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
@@ -517,7 +581,11 @@ var AssociateInheritance = React.createClass({
     },
 
     render: function() {
-        var defaultModeInheritance = 'select';
+        let adjectives = this.state.adjectives;
+        let adjectiveDisabled = this.state.adjectiveDisabled;
+        const moiKeys = Object.keys(modesOfInheritance);
+
+        let defaultModeInheritance = 'select';
         if (this.props.interpretation) {
             if (this.props.interpretation.modeInheritance) {
                 defaultModeInheritance = this.props.interpretation.modeInheritance;
@@ -528,13 +596,23 @@ var AssociateInheritance = React.createClass({
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-box">
                     <div className="modal-body clearfix">
-                        <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance}
+                        <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance} handleChange={this.handleChange}
                             error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
                             <option value="no-moi">No mode of inheritance</option>
                             <option value="" disabled="disabled"></option>
-                            {modesOfInheritance.map(function(modeOfInheritance, i) {
+                            {moiKeys.map(function(modeOfInheritance, i) {
                                 return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
+                            })}
+                        </Input>
+                         <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none'
+                            error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective"
+                            inputDisabled={adjectiveDisabled}>
+                            <option value="none" disabled="disabled">Select</option>
+                            <option disabled="disabled"></option>
+                            {adjectives.map(function(adjective, i) {
+                                return <option key={i} value={adjective}>{adjective}</option>;
                             })}
                         </Input>
                     </div>
