@@ -338,10 +338,11 @@ var FamilyCuration = React.createClass({
                         stateObj.variantInfo = {};
                         // For each incoming variant, set the form value
                         for (var i = 0; i < segregation.variants.length; i++) {
-                            if (segregation.variants[i].clinvarVariantId) {
+                            if (segregation.variants[i].clinvarVariantId || segregation.variants[i].carId) {
                                 stateObj.variantInfo[i] = {
                                     'clinvarVariantId': segregation.variants[i].clinvarVariantId,
                                     'clinvarVariantTitle': segregation.variants[i].clinvarVariantTitle,
+                                    'carId': segregation.variants[i].carId ? segregation.variants[i].carId : null,
                                     'uuid': segregation.variants[i].uuid // Needed for links to variant assessment/curation
                                 };
                             }
@@ -1667,15 +1668,17 @@ var FamilyVariant = function() {
                             <div className="form-group">
                                 <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
                                 <span className="col-sm-7">
-                                    <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
-                                        buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
-                                        initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                        updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                    {this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId ?
+                                        <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
+                                            buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                            updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                    : null}
                                     {!this.state.variantInfo[i] ? <span> - or - </span> : null}
-                                    {!this.state.variantInfo[i] ?
+                                    {this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId ?
                                         <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                                             buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
-                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
                                             updateParentForm={this.updateVariantId} buttonOnly={true} />
                                     : null}
                                 </span>
