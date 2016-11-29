@@ -1674,7 +1674,7 @@ var FamilyVariant = function() {
                                     {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                     {!this.state.variantInfo[i] ?
                                         <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
-                                            buttonText="Add CAR ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                            buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                             updateParentForm={this.updateVariantId} buttonOnly={true} />
                                     : null}
