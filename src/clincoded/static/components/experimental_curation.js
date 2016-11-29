@@ -446,6 +446,7 @@ var ExperimentalCuration = React.createClass({
                                     'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
                                     'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                     'carId': variants[i].carId ? variants[i].carId : null,
+                                    'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
                                     'uuid': variants[i].uuid
                                 };
                             }
@@ -1104,6 +1105,7 @@ var ExperimentalCuration = React.createClass({
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
+                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
                 'uuid': data.uuid
             };
         } else {
@@ -2059,8 +2061,14 @@ var ExperimentalDataVariant = function() {
                                     : null}
                                     {this.state.variantInfo[i].carId ?
                                         <div className="row">
-                                            <span className="col-sm-5 control-label"><label>CAR ID:</label></span>
-                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].carId}</span>
+                                            <span className="col-sm-5 control-label"><label>{<LabelCARVariant />}</label></span>
+                                            <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
+                                        </div>
+                                    : null}
+                                    {this.state.variantInfo[i].grch38 ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
+                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38}</span>
                                         </div>
                                     : null}
                                 </div>
@@ -2105,13 +2113,25 @@ var ExperimentalDataVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+    }
+});
+
+var LabelCARVariant = React.createClass({
+    render: function() {
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> Variation ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+    }
+});
+
+var LabelCARVariantTitle = React.createClass({
+    render: function() {
+        return <span><strong>Genomic HGVS Title (GRCh38):</strong></span>;
     }
 });
 
