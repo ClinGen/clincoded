@@ -240,7 +240,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     }
                 } else if (this.props.criteria.indexOf('PS4') > -1) {
                     if (criteriaEvalConflictValues.indexOf(this.refs['PS4-status'].getValue()) > -1) {
-                        manualCheck1 = 'PM4';
+                        manualCheck1 = 'PS4';
                         manualCheck2 = 'PM2';
                     }
                 }
