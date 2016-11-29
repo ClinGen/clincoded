@@ -2065,7 +2065,7 @@ var ExperimentalDataVariant = function() {
                                             <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                         </div>
                                     : null}
-                                    {this.state.variantInfo[i].grch38 ?
+                                    {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
                                             <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38}</span>

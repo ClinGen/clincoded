@@ -1281,15 +1281,15 @@ var IndividualVariantInfo = function() {
         <div className="row">
             {individual && individual.proband && family ?
                 <div>
+                    <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
-                                <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
                                     {variant.clinvarVariantId ?
                                         <div>
-                                            <dt>ClinVar VariationID</dt>
+                                            <dt>ClinVar Variation ID</dt>
                                             <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
                                         </div>
                                     : null}
@@ -1303,8 +1303,15 @@ var IndividualVariantInfo = function() {
 
                                     {variant.carId ?
                                         <div>
-                                            <dt>CAR ID</dt>
+                                            <dt>ClinGen Allele Registry Variation ID</dt>
                                             <dd>{variant.carId}</dd>
+                                        </div>
+                                    : null}
+
+                                    {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                        <div>
+                                            <dt>Genomic HGVS Title (GRCh38)</dt>
+                                            <dd>{variant.hgvsNames.GRCh38}</dd>
                                         </div>
                                     : null}
 
