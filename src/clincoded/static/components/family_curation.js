@@ -1638,14 +1638,24 @@ var FamilyVariant = function() {
                     <div key={i} className="variant-panel">
                         {this.state.variantInfo[i] ?
                             <div className="variant-resources">
-                                <div className="row variant-data-source">
-                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
-                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
-                                </div>
-                                <div className="row">
-                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                    <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                </div>
+                                {this.state.variantInfo[i].clinvarVariantId ?
+                                    <div className="row variant-data-source">
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
+                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
+                                    </div>
+                                : null}
+                                {this.state.variantInfo[i].clinvarVariantTitle ?
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                        <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                    </div>
+                                : null}
+                                {this.state.variantInfo[i].carId ?
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label>CAR ID:</label></span>
+                                        <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].carId}</span>
+                                    </div>
+                                : null}
                                 <div className="row variant-assessment">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
