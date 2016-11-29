@@ -1028,7 +1028,7 @@ var FamilyCuration = React.createClass({
     },
 
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
-    updateClinvarVariantId: function(data, fieldNum) {
+    updateVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
         var addVariantDisabled;
         if (data) {
@@ -1043,7 +1043,8 @@ var FamilyCuration = React.createClass({
             newVariantInfo[fieldNum] = {
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
-                'carId': data.carId ? data.carId : null
+                'carId': data.carId ? data.carId : null,
+                'uuid': data.uuid
             };
         } else {
             // Reset the form and display values
@@ -1669,13 +1670,13 @@ var FamilyVariant = function() {
                                     <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                                         buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                         initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                        updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
+                                        updateParentForm={this.updateVariantId} buttonOnly={true} />
                                     {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                     {!this.state.variantInfo[i] ?
                                         <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                                             buttonText="Add CAR ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                            updateParentForm={this.updateClinvarVariantId} buttonOnly={true} />
+                                            updateParentForm={this.updateVariantId} buttonOnly={true} />
                                     : null}
                                 </span>
                             </div>
