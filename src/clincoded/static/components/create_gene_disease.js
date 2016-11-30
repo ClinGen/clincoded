@@ -31,8 +31,7 @@ var CreateGeneDisease = React.createClass({
         return {
             gdm: {},
             adjectives: [],
-            adjectiveDisabled: true,
-            adjectiveRequired: false
+            adjectiveDisabled: true
         };
     },
 
@@ -49,26 +48,25 @@ var CreateGeneDisease = React.createClass({
             /* Everything else, disable adjective menu.           */
             /******************************************************/
             if (selected.indexOf('X-linked inheritance') > -1) {
-                this.handleAdjectives(false, true, modesOfInheritance['X-linked inheritance (HP:0001417)']);
+                this.handleAdjectives(false, modesOfInheritance['X-linked inheritance (HP:0001417)']);
             } else if (selected.indexOf('Autosomal dominant inheritance') > -1) {
-                this.handleAdjectives(false, false, modesOfInheritance['Autosomal dominant inheritance (HP:0000006)']);
+                this.handleAdjectives(false, modesOfInheritance['Autosomal dominant inheritance (HP:0000006)']);
             } else if (selected.indexOf('Autosomal recessive inheritance') > -1) {
-                this.handleAdjectives(false, false, modesOfInheritance['Autosomal recessive inheritance (HP:0000007)']);
+                this.handleAdjectives(false, modesOfInheritance['Autosomal recessive inheritance (HP:0000007)']);
             } else if (selected.indexOf('Mitochondrial inheritance') > -1) {
-                this.handleAdjectives(false, false, modesOfInheritance['Mitochondrial inheritance (HP:0001427)']);
+                this.handleAdjectives(false, modesOfInheritance['Mitochondrial inheritance (HP:0001427)']);
             } else if (selected.indexOf('Other') > -1) {
-                this.handleAdjectives(false, false, modesOfInheritance['Other']);
+                this.handleAdjectives(false, modesOfInheritance['Other']);
             } else {
-                this.handleAdjectives(true, false, []);
+                this.handleAdjectives(true, []);
             }
         }
     },
 
     // Helper method for the 'handleChange' method to minimize repetitive code
-    handleAdjectives: function(adjectiveDisabled, adjectiveRequired, adjectives) {
+    handleAdjectives: function(adjectiveDisabled, adjectives) {
         this.setState({
             adjectiveDisabled: adjectiveDisabled,
-            adjectiveRequired: adjectiveRequired,
             adjectives: adjectives
         }, () => {this.refs.moiAdjective.setValue('none');});
     },
@@ -170,7 +168,6 @@ var CreateGeneDisease = React.createClass({
     render: function() {
         let adjectives = this.state.adjectives;
         let adjectiveDisabled = this.state.adjectiveDisabled;
-        let adjectiveRequired = this.state.adjectiveRequired;
         const moiKeys = Object.keys(modesOfInheritance);
 
         return (
@@ -196,9 +193,8 @@ var CreateGeneDisease = React.createClass({
                                     })}
                                 </Input>
                                 <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="none"
-                                    error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective"
-                                    required={adjectiveRequired} inputDisabled={adjectiveDisabled}>
+                                    error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')} inputDisabled={adjectiveDisabled}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
                                     <option value="none" disabled="disabled">Select</option>
                                     <option disabled="disabled"></option>
                                     {adjectives.map(function(adjective, i) {
