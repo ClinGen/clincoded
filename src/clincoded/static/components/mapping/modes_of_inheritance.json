@@ -20,10 +20,10 @@
         "X-linked recessive inheritance (HP:0001419)",
         "X-linked primarily recessive with milder female expression"
     ],
-    "Y-linked inheritance (HP:0001450)": [],
-    "Somatic mutation (HP:0001428)": [],
-    "Multifactorial inheritance (HP:0001426)": [],
     "Other": [
+        "Y-linked inheritance (HP:0001450)",
+        "Somatic mutation (HP:0001428)",
+        "Multifactorial inheritance (HP:0001426)",
         "Codominant inheritance",
         "Semidominant inheritance"
     ],
