@@ -1303,15 +1303,15 @@ var IndividualVariantInfo = function() {
 
                                     {variant.carId ?
                                         <div>
-                                            <dt>ClinGen Allele Registry Variation ID</dt>
+                                            <dt>ClinGen Allele Registry ID</dt>
                                             <dd>{variant.carId}</dd>
                                         </div>
                                     : null}
 
                                     {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
                                         <div>
-                                            <dt>Genomic HGVS Title (GRCh38)</dt>
-                                            <dd>{variant.hgvsNames.GRCh38}</dd>
+                                            <dt>Genomic HGVS Title</dt>
+                                            <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                         </div>
                                     : null}
 
@@ -1499,7 +1499,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelCARVariant = React.createClass({
     render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> Variation ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
     }
 });
 

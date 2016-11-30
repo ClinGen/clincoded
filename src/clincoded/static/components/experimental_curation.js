@@ -2125,7 +2125,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelCARVariant = React.createClass({
     render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> Variation ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
     }
 });
 
