@@ -2068,7 +2068,7 @@ var ExperimentalDataVariant = function() {
                                     {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
-                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38}</span>
+                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                         </div>
                                     : null}
                                 </div>
@@ -2131,7 +2131,7 @@ var LabelCARVariant = React.createClass({
 
 var LabelCARVariantTitle = React.createClass({
     render: function() {
-        return <span><strong>Genomic HGVS Title (GRCh38):</strong></span>;
+        return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
