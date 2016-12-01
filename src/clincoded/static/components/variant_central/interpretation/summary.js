@@ -82,34 +82,37 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     // Method to display either mode of inheritance adjective,
     // or just mode of inheritance if no adjective
     renderSelectedModeInheritance: function(interpretation) {
-        let moi = '';
-        if (interpretation.modeInheritanceAdjective) {
-            moi = interpretation.modeInheritanceAdjective;
-        } else if (interpretation.modeInheritance) {
+        let moi = '', moiAdjective = '';
+
+        if (interpretation.modeInheritance) {
             moi = interpretation.modeInheritance;
+            if (interpretation.modeInheritanceAdjective) {
+                moiAdjective = interpretation.modeInheritanceAdjective;
+            }
         }
         return (
-            <span>{moi && moi.length ? this.renderModeInheritanceLink(moi) : 'None'}</span>
+            <span>{moi && moi.length ? this.renderModeInheritanceLink(moi, moiAdjective) : 'None'}</span>
         );
     },
 
     // Method to construct mode of inheritance linkout
-    renderModeInheritanceLink: function(modeInheritance) {
+    renderModeInheritanceLink: function(modeInheritance, modeInheritanceAdjective) {
         if (modeInheritance) {
             let start = modeInheritance.indexOf('(');
             let end = modeInheritance.indexOf(')');
             let hpoNumber;
+            let adjective = modeInheritanceAdjective && modeInheritanceAdjective.length ? ' (' + modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] + ')' : null;
             if (start && end) {
                 hpoNumber = modeInheritance.substring(start+1, end);
             }
             if (hpoNumber && hpoNumber.indexOf('HP:') > -1) {
                 let hpoLink = 'http://compbio.charite.de/hpoweb/showterm?id=' + hpoNumber;
                 return (
-                    <a href={hpoLink} target="_blank">{modeInheritance}</a>
+                    <span><a href={hpoLink} target="_blank">{modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</a>{adjective}</span>
                 );
             } else {
                 return (
-                    <span>{modeInheritance}</span>
+                    <span>{modeInheritance + adjective}</span>
                 );
             }
         }
