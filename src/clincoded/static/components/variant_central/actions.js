@@ -540,6 +540,10 @@ var AssociateInheritance = React.createClass({
                 flatInterpretation.modeInheritance = modeInheritance;
                 if (adjective && adjective.length) {
                     flatInterpretation['modeInheritanceAdjective'] = adjective;
+                } else {
+                    if ('modeInheritanceAdjective' in flatInterpretation) {
+                        delete flatInterpretation['modeInheritanceAdjective'];
+                    }
                 }
             }
 
@@ -605,14 +609,13 @@ var AssociateInheritance = React.createClass({
                                 return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
                             })}
                         </Input>
-                         <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none'
+                         <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none' inputDisabled={adjectiveDisabled}
                             error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective"
-                            inputDisabled={adjectiveDisabled}>
+                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
                             <option value="none" disabled="disabled">Select</option>
                             <option disabled="disabled"></option>
                             {adjectives.map(function(adjective, i) {
-                                return <option key={i} value={adjective}>{adjective}</option>;
+                                return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
                             })}
                         </Input>
                     </div>
