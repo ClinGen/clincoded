@@ -125,6 +125,10 @@ class Variant(Item):
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
         'associatedInterpretations.provisional_variant',
+        'associatedInterpretations.extra_evidence_list',
+        'associatedInterpretations.extra_evidence_list.submitted_by',
+        'associatedInterpretations.extra_evidence_list.articles',
+        'associatedInterpretations.extra_evidence_list.articles.submitted_by'
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
