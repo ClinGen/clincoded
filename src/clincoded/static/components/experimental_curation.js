@@ -2050,7 +2050,7 @@ var ExperimentalDataVariant = function() {
                                     {this.state.variantInfo[i].clinvarVariantId ?
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
                                         </div>
                                     : null}
                                     {this.state.variantInfo[i].clinvarVariantTitle ?
@@ -2062,7 +2062,7 @@ var ExperimentalDataVariant = function() {
                                     {this.state.variantInfo[i].carId ?
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelCARVariant />}</label></span>
-                                            <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
+                                            <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId} <i className="icon icon-external-link"></i></a></span>
                                         </div>
                                     : null}
                                     {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?

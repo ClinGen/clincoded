@@ -1655,7 +1655,7 @@ var FamilyVariant = function() {
                                 {this.state.variantInfo[i].carId ?
                                     <div className="row">
                                         <span className="col-sm-5 control-label"><label><LabelCARVariant variantRequired={this.state.variantRequired} /></label></span>
-                                        <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
+                                        <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId} <i className="icon icon-external-link"></i></a></span>
                                     </div>
                                 : null}
                                 {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
