@@ -198,7 +198,7 @@ var CreateGeneDisease = React.createClass({
                                     <option value="none" disabled="disabled">Select</option>
                                     <option disabled="disabled"></option>
                                     {adjectives.map(function(adjective, i) {
-                                        return <option key={i} value={adjective}>{adjective}</option>;
+                                        return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
                                     })}
                                 </Input>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
