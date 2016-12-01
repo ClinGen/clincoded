@@ -170,7 +170,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </span>
                                     </h1>
-                                    <h2><i>{modeInheritanceAdjective ? modeInheritanceAdjective : mode}</i></h2>
+                                    <h2><i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></h2>
                                 </span>
                         </div>
                     </div>
