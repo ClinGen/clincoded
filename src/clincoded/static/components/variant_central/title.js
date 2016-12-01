@@ -48,11 +48,11 @@ var Title = module.exports.Title = React.createClass({
         let modeInheritanceAdjective = interpretation && interpretation.modeInheritanceAdjective ? interpretation.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         if (interpretation) {
             if (interpretation.disease && interpretation.disease.term && interpretation.modeInheritance) {
-                associatedDisease = <span>This interpretation is associated with <strong>{interpretation.disease.term}</strong> - <i>{modeInheritanceAdjective ? modeInheritanceAdjective : mode}</i></span>;
+                associatedDisease = <span>This interpretation is associated with <strong>{interpretation.disease.term}</strong> - <i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></span>;
             } else if (interpretation.disease && interpretation.disease.term) {
                 associatedDisease = <span>This interpretation is associated with <strong>{interpretation.disease.term}</strong></span>;
             } else if (interpretation.modeInheritance) {
-                associatedDisease = <span>This interpretation is associated with <strong>no disease</strong> - <i>{modeInheritanceAdjective ? modeInheritanceAdjective : mode}</i></span>;
+                associatedDisease = <span>This interpretation is associated with <strong>no disease</strong> - <i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></span>;
             } else {
                 associatedDisease = 'This interpretation is not yet associated with a disease or mode of inheritance';
             }
