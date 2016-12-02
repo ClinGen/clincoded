@@ -488,7 +488,7 @@ function clinvarTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214 <i className="icon icon-external-link"></i></a>).</span>
+                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>
                     </p>
                 </span>;
             break;
@@ -571,7 +571,7 @@ function clinvarRenderResourceResult() {
                 <div className="row">
                     <div className="row">
                         <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
                     </div>
                     {this.state.tempResource.hgvsNames ?
                         <div className="row">
@@ -651,7 +651,7 @@ function carTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323 <i className="icon icon-external-link"></i></a>).</span>
+                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>
                     </p>
                 </span>;
             break;
@@ -731,12 +731,12 @@ function carRenderResourceResult() {
                 <div className="row">
                     <div className="row">
                         <span className="col-xs-4 col-md-4 control-label"><label>CA ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong> <i className="icon icon-external-link"></i></a></span>
+                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong></a></span>
                     </div>
                     {this.state.tempResource.clinvarVariantId ?
                         <div className="row">
                             <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
-                            <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                            <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
                         </div>
                     : null}
                     {this.state.tempResource.hgvsNames ?
