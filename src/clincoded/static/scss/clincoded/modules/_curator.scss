@@ -2590,6 +2590,11 @@ table.login-users-interpretations {
 .proband-evidence-score {
     .panel-body.panel-std {
         padding-top: 25px;
+
+        label i {
+            display: block;
+            font-weight: normal;
+        }
     }
 }
 
