@@ -72,7 +72,9 @@ var IndividualCuration = React.createClass({
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
             showScoreInput: false, // Determines whether to show additional form fields for proband score
-            evidenceScoreUuid: null
+            evidenceVariantKind: null, // Variant kind value for proband score
+            evidenceScoreUuid: null,
+            evidenceScores: []
         };
     },
 
@@ -93,8 +95,22 @@ var IndividualCuration = React.createClass({
                 }
             });
         } else if (ref == 'scoreStatus') {
+            // Render or remove the default score, score range, and explanation fields
             this.refs[ref].getValue() === 'Score' ? this.setState({showScoreInput: true}) : this.setState({showScoreInput: false});
-
+        } else if (ref == 'variantKind') {
+            // Get the variant case scenario for determining the default score and score range
+            let selected = this.refs[ref].getValue();
+            if (selected !== 'none') {
+                this.setState({evidenceVariantKind: selected}, () => {
+                    // Reset score range dropdown options if any changes
+                    this.refs.scoreRange.setValue('none');
+                });
+            } else {
+                this.setState({evidenceVariantKind: null}, () => {
+                    // Reset score range dropdown options if any changes
+                    this.refs.scoreRange.setValue('none');
+                });
+            }
         } else if (ref.substring(0, 3) === 'VAR') {
             // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
             // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
@@ -227,7 +243,10 @@ var IndividualCuration = React.createClass({
                 // Get evidenceScore object if exists
                 // FIXME: Need to handle an array of scores
                 if (stateObj.individual.scores && stateObj.individual.scores.length) {
-                    this.setState({evidenceScoreUuid: stateObj.individual.scores[0].uuid});
+                    this.setState({
+                        evidenceScoreUuid: stateObj.individual.scores[0].uuid,
+                        evidenceScore: stateObj.individual.scores
+                    });
                 }
             }
 
@@ -992,6 +1011,8 @@ var IndividualCuration = React.createClass({
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
         let showScoreInput = this.state.showScoreInput;
+        let evidenceVariantKind = this.state.evidenceVariantKind;
+        let evidenceScores = this.state.evidenceScores;
 
         // define where pressing the Cancel button should take you to
         var cancelUrl;
@@ -1059,7 +1080,7 @@ var IndividualCuration = React.createClass({
                                         {(this.state.family && this.state.proband_selected) || (!this.state.family && this.state.proband_selected) ?
                                             <PanelGroup accordion>
                                                 <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                                    {VariantEvidenceScore.render.call(this, individual, 2, 3, [0,1,2,3], "Some reason", showScoreInput)}
+                                                    {VariantEvidenceScore.render.call(this, evidenceScores, gdm.modeInheritance, showScoreInput, evidenceVariantKind)}
                                                 </Panel>
                                             </PanelGroup>
                                         : null}
@@ -1327,7 +1348,7 @@ var IndividualDemographics = function() {
         <div className="row">
             <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual && individual.sex}
                 error={this.getFormError('sex')} clearError={this.clrFormErrors.bind(null, 'sex')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Male">Male</option>
