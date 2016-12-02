@@ -33,6 +33,16 @@
             "description": "Score modified by user",
             "type": "number"
         },
+        "variantKind": {
+            "title": "Kind of Evidence Variant",
+            "description": "Variant impact on the scoring",
+            "type": "string"
+        },
+        "changeReason": {
+            "title": "Reason of Change",
+            "description": "User-provided explanation of selecting a different score from the score range",
+            "type": "string"
+        },
         "evidenceType": {
             "title": "Evidence Type",
             "description": "Type (Case control, Individual or Experimental) of evidence scored",
