@@ -367,7 +367,10 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         var interpretations = context['@graph'];
         var searchTerm = this.state.searchTerm;
         var filteredInterpretations;
-        var sortIconClass = {status: 'tcell-sort', variant: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
+        var sortIconClass = {
+            status: 'tcell-sort', variant: 'tcell-sort', disease: 'tcell-sort', moi: 'tcell-sort',
+            last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'
+        };
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         // Filter Interpretations
@@ -407,12 +410,15 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                             <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
                                 <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
                             </div>
-                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
+                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'variant')}>
                                 <div>Variant Preferred Title<span className={sortIconClass.variant}></span></div>
                                 <div>Variant ID(s)</div>
                             </div>
-                            <div className="table-cell-gdm">
-                                Participants
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'disease')}>
+                                Disease<span className={sortIconClass.disease}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'moi')}>
+                                Mode of Inheritance<span className={sortIconClass.moi}></span>
                             </div>
                             <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
                                 Last Edited<span className={sortIconClass.last}></span>
@@ -437,6 +443,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                             let grch38 = interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null;
                             let orphanetId = interpretation.disease && interpretation.disease.orphaNumber ? interpretation.disease.orphaNumber : null;
                             let diseaseTerm = interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null;
+                            let modeInheritance = interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
                             let createdTime = moment(interpretation.date_created);
                             //var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
                             //var participants = annotationOwners.map(function(owner) { return owner.title; }).join(', ');
@@ -450,11 +457,20 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     </div>
 
                                     <div className="table-cell-gdm-main">
-                                        <div>{clinvarVariantId} – {clinvarVariantTitle}</div>
+                                        <div>{clinvarVariantTitle ? clinvarVariantTitle : grch38}</div>
+                                        <div>
+                                            {clinvarVariantId ? <span>ClinVar Variation ID: <strong>{clinvarVariantId}</strong></span> : null}
+                                            {clinvarVariantId && carId ? " // " : null}
+                                            {carId ? <span>ClinGen Allele Registry ID: <strong>{carId}</strong></span> : null}
+                                        </div>
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        {/*participants*/}
+                                        {diseaseTerm ? <span>{diseaseTerm} (ORPHA{orphanetId})</span> : null}
+                                    </div>
+
+                                    <div className="table-cell-gdm">
+                                        {modeInheritance ? modeInheritance : null}
                                     </div>
 
                                     <div className="table-cell-gdm">
