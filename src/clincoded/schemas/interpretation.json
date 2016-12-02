@@ -128,13 +128,29 @@
         }
     },
     "columns": {
-        "variant.variant_identifier": {
-            "title": "Variant ID",
+        "uuid": {
+            "title": "Interpretation UUID",
             "type": "string"
         },
-        "variant.source": {
-            "title": "Variant Source",
+        "variant.uuid": {
+            "title": "Variant UUID",
             "type": "string"
+        },
+        "variant.clinvarVariantId": {
+            "title": "Variant ClinVar ID",
+            "type": "string"
+        },
+        "variant.clinvarVariantTitle": {
+            "title": "Variant ClinVar Title",
+            "type": "string"
+        },
+        "variant.carId": {
+            "title": "Variant CA ID",
+            "type": "string"
+        },
+        "variant.hgvsNames": {
+            "title": "Variant HGVS Names",
+            "type": "object"
         },
         "interpretation_status": {
             "title": "Interpretation Status",
@@ -144,8 +160,16 @@
             "title": "Genes",
             "type": "string"
         },
-        "interpretation_disease": {
-            "title": "Disease",
+        "disease.orphaNumber": {
+            "title": "Disease Orphanet Number",
+            "type": "string"
+        },
+        "disease.term": {
+            "title": "Disease Orphanet Term",
+            "type": "string"
+        },
+        "modeInheritance": {
+            "title": "Mode of Inheritance",
             "type": "string"
         },
         "evaluation_count": {
