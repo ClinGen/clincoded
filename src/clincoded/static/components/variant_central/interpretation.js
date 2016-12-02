@@ -317,8 +317,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         this.setState({sortCol: sortCol, reversed: reversed});
     },
 
-    // Call-back for the JS sorting function. Expects GDMs to compare in a and b. Depending on the column currently selected
-    // for sorting, this function sorts on the relevant parts of the GDM.
+    // Call-back for the JS sorting function. Expects Interpretationss to compare in a and b. Depending on the column currently selected
+    // for sorting, this function sorts on the relevant parts of the Interpretation.
     sortCol: function(a, b) {
         var diff;
 
@@ -369,7 +369,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         var latestTime = 0;
         if (evaluations && evaluations.length) {
             evaluations.forEach(function(evaluation) {
-                // Get Unix timestamp version of annotation's time and compare against the saved version.
+                // Get Unix timestamp version of evaluations's time and compare against the saved version.
                 var time = moment(evaluation.date_created).format('x');
                 if (latestTime < time) {
                     latestEvaluation = evaluation;
@@ -516,7 +516,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
 globals.content_views.register(InterpretationCollection, 'interpretation_collection');
 
 
-// Render the GDM status legend
+// Render the Interpretation status legend
 var InterpretationStatusLegend = React.createClass({
     render: function() {
         return (
