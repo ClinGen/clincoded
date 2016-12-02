@@ -43,7 +43,7 @@ var Home = module.exports.Home = React.createClass({
                                 <h1>ClinGen Curator Interfaces</h1>
                                 <h4>Variant Curation &#8226; Gene Curation</h4>
                                 <p className="lead">Access to these interfaces is currently restricted to ClinGen curators. If you are a ClinGen curator, you may request an account at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</p>
-                                <p className="lead">ClinGen is a National Institutes of Health (NIH)-funded resource dedicated to building an authoritative central resource that defines the clinical relevance of genes and variants for use in precision medicine and research. One of the key goals of ClinGen is to implement an evidence-based consensus for curating genes and variants. For more information on the ClinGen resource, please visit the ClinGen portal at <a href="https://www.clinicalgenome.org" target="_blank">clinicalgenome.org <i className="icon icon-external-link"></i></a>.</p>
+                                <p className="lead">ClinGen is a National Institutes of Health (NIH)-funded resource dedicated to building an authoritative central resource that defines the clinical relevance of genes and variants for use in precision medicine and research. One of the key goals of ClinGen is to implement an evidence-based consensus for curating genes and variants. For more information on the ClinGen resource, please visit the ClinGen portal at <a href="https://www.clinicalgenome.org" target="_blank">clinicalgenome.org</a>.</p>
                             </div>
                         </div>
                     </div>
@@ -51,7 +51,7 @@ var Home = module.exports.Home = React.createClass({
                         {this.state.demoVersion ?
                             <div>Explore a demo version of the ClinGen interfaces by clicking on the "Demo Login" button located in the header above.</div>
                             :
-                            <div>Explore a demo version of the ClinGen interfaces at <a href="https://curation-test.clinicalgenome.org/">curation-test.clinicalgenome.org <i className="icon icon-external-link"></i></a></div>
+                            <div>Explore a demo version of the ClinGen interfaces at <a href="https://curation-test.clinicalgenome.org/">curation-test.clinicalgenome.org</a></div>
                         }
                     </div>
                     <div className="row">
