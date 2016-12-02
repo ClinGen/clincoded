@@ -181,7 +181,8 @@ a[href^="http://"]:after,
 a[href^="https://"]:after,
 a.external-link:after {
     font-family: FontAwesome;
-    content: " \f08e";
+    content: "\a0\f08e";
+    font-weight: normal;
 }
 
 // Disable external-link icon for clinicalgenome.org and localhost links
@@ -190,6 +191,8 @@ a[href^="instance.clinicalgenome.org/"]:after,
 a[href^="demo.clinicalgenome.org/"]:after,
 a[href^="production.clinicalgenome.org/"]:after,
 a[href^="curation-test.clinicalgenome.org/"]:after,
-a[href^="curation.clinicalgenome.org/"]:after {
+a[href^="curation.clinicalgenome.org/"]:after,
+a.no-external-link:after {
     content: "";
+    padding-left: 0;
 }
