@@ -180,6 +180,14 @@
             "title": "# Provisional",
             "type": "number"
         },
+        "submitted_by.last_name": {
+            "title": "Creator Last Name",
+            "type": "string"
+        },
+        "submitted_by.first_name": {
+            "title": "Creator First Name",
+            "type": "string"
+        },
         "submitted_by.title": {
             "title": "Creator",
             "type": "string"

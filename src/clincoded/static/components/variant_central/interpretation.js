@@ -330,12 +330,18 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         switch (this.state.sortCol) {
             case 'status':
                 var statuses = Object.keys(statusMappings);
-                var statusIndexA = statuses.indexOf(a.gdm_status);
-                var statusIndexB = statuses.indexOf(b.gdm_status);
+                var statusIndexA = statuses.indexOf(a.interpretation_status);
+                var statusIndexB = statuses.indexOf(b.interpretation_status);
                 diff = statusIndexA - statusIndexB;
                 break;
-            case 'gdm':
-                diff = a.gene.symbol > b.gene.symbol ? 1 : -1;
+            case 'variant':
+                diff = (a.variant.clinvarVariantId ? a.variant.clinvarVariantId : a.variant.carId) > (b.variant.clinvarVariantId ? b.variant.clinvarVariantId : b.variant.carId) ? 1 : -1;
+                break;
+            case 'disease':
+                diff = (a.disease && a.disease.orphaNumber ? a.disease.orphaNumber : "") > (b.disease && b.disease.orphaNumber ? b.disease.orphaNumber : "") ? 1 : -1;
+                break;
+            case 'moi':
+                diff = (a.modeInheritance ? a.modeInheritance : "") > (b.modeInheritance ? b.modeInheritance : "") ? 1 : -1;
                 break;
             case 'last':
                 var aAnnotation = curator.findLatestAnnotation(a);
