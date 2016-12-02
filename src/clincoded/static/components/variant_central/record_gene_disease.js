@@ -90,7 +90,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 ]
                             </dd>
                             :
-                            <dd><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
+                            <dd><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser</a></dd>
                         }
                         {(links_38 || links_37) ?
                             <dd>Variation Viewer [
@@ -100,7 +100,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 ]
                             </dd>
                             :
-                            <dd><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer <i className="icon icon-external-link"></i></a></dd>
+                            <dd><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer</a></dd>
                         }
                         {(links_38 || links_37) ?
                             <dd>Ensembl Browser [
@@ -110,7 +110,7 @@ var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React
                                 ]
                             </dd>
                             :
-                            <dd><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser <i className="icon icon-external-link"></i></a></dd>
+                            <dd><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser</a></dd>
                         }
                     </dl>
                 </div>

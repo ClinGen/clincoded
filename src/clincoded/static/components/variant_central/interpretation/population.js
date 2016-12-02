@@ -624,7 +624,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">ExAC {variantExac}
                     <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC</a>
                 </h3>
             );
         } else {
@@ -644,7 +644,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">1000 Genomes: {variantTGenomes}
                     <a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                    <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl</a>
                 </h3>
             );
         } else {
@@ -664,7 +664,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">Exome Sequencing Project (ESP): {variantEsp}
                     <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
+                    <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP</a>
                 </h3>
             );
         } else {
