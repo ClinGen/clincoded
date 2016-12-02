@@ -180,6 +180,10 @@
             "title": "# Provisional",
             "type": "number"
         },
+        "evaluations": {
+            "title": "Evaluations",
+            "type": "string"
+        },
         "submitted_by.last_name": {
             "title": "Creator Last Name",
             "type": "string"

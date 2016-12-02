@@ -292,11 +292,6 @@ var InterpretationModifyHistory = React.createClass({
 globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
 
 
-
-
-
-
-
 // Map Interpretation statuses from
 var statusMappings = {
 //  Status from Interpretation        CSS class                Short name for screen display
@@ -344,8 +339,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                 diff = (a.modeInheritance ? a.modeInheritance : "") > (b.modeInheritance ? b.modeInheritance : "") ? 1 : -1;
                 break;
             case 'last':
-                var aAnnotation = curator.findLatestAnnotation(a);
-                var bAnnotation = curator.findLatestAnnotation(b);
+                var aAnnotation = this.findLatestEvaluations(a);
+                var bAnnotation = this.findLatestEvaluations(b);
                 diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? -1 : 1);
                 break;
             case 'creator':
@@ -366,6 +361,23 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
     searchChange: function(ref, e) {
         var searchVal = this.refs[ref].getValue().toLowerCase();
         this.setState({searchTerm: searchVal});
+    },
+
+    findLatestEvaluations: function(interpretation) {
+        var evaluations = interpretation && interpretation.evaluations;
+        var latestEvaluation = null;
+        var latestTime = 0;
+        if (evaluations && evaluations.length) {
+            evaluations.forEach(function(evaluation) {
+                // Get Unix timestamp version of annotation's time and compare against the saved version.
+                var time = moment(evaluation.date_created).format('x');
+                if (latestTime < time) {
+                    latestEvaluation = evaluation;
+                    latestTime = time;
+                }
+            });
+        }
+        return latestEvaluation;
     },
 
     render: function () {
@@ -436,12 +448,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {filteredInterpretations.sort(this.sortCol).map(function(interpretation) {
-                            console.log(interpretation);
-                            //var annotationOwners = curator.getAnnotationOwners(gdm);
-                            //var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
-                            //var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-                            //var term = truncateString(gdm.disease.term, 30);
+                        {filteredInterpretations.sort(this.sortCol).map(interpretation => {
                             let variantUuid = interpretation.variant.uuid;
                             let clinvarVariantId = interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null;
                             let clinvarVariantTitle = interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null;
@@ -451,8 +458,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                             let diseaseTerm = interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null;
                             let modeInheritance = interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
                             let createdTime = moment(interpretation.date_created);
-                            //var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                            //var participants = annotationOwners.map(function(owner) { return owner.title; }).join(', ');
+                            let latestEvaluation = interpretation && this.findLatestEvaluations(interpretation);
+                            let latestTime = latestEvaluation ? moment(latestEvaluation.date_created) : '';
                             let statusString = statusMappings[interpretation.interpretation_status].cssClass; // Convert status string to CSS class
                             let iconClass = 'icon gdm-status-icon-' + statusString;
 
@@ -480,12 +487,12 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        {/*latestTime ?
+                                        {latestTime ?
                                             <div>
                                                 <div>{latestTime.format("YYYY MMM DD")}</div>
                                                 <div>{latestTime.format("h:mm a")}</div>
                                             </div>
-                                        : null*/}
+                                        : null}
                                     </div>
 
                                     <div className="table-cell-gdm">
