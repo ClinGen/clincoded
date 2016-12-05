@@ -1826,7 +1826,8 @@ function flattenProvisionalVariant(provisional_variant) {
 
 
 var evidenceScoreSimpleProps = [
-    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore"
+    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore",
+    "variantKind", "changeReason"
 ];
 
 function flattenEvidenceScore(evidencescore) {
