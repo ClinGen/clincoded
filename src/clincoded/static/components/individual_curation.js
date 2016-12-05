@@ -32,6 +32,7 @@ var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
 import VariantEvidenceScore from './evidence_score/variant_evidence_score';
+import { userScore } from './evidence_score/helpers/user_score';
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -74,7 +75,8 @@ var IndividualCuration = React.createClass({
             showScoreInput: false, // Determines whether to show additional form fields for proband score
             evidenceVariantKind: null, // Variant kind value for proband score
             evidenceScoreUuid: null,
-            evidenceScores: []
+            evidenceScores: [],
+            userEvidenceScore: {}
         };
     },
 
@@ -240,12 +242,27 @@ var IndividualCuration = React.createClass({
                 else {
                     this.setState({proband_selected: false});
                 }
-                // Get evidenceScore object if exists
-                // FIXME: Need to handle an array of scores
+                // Get evidenceScore object for the logged-in user if exists
                 if (stateObj.individual.scores && stateObj.individual.scores.length) {
-                    this.setState({
-                        evidenceScoreUuid: stateObj.individual.scores[0].uuid,
-                        evidenceScore: stateObj.individual.scores
+                    this.setState({evidenceScores: stateObj.individual.scores}, () => {
+                        // FIXME: Repetitive code as seen in variant_evidence_score.js
+                        let curratorScore;
+                        let evidenceScores = this.state.evidenceScores ? this.state.evidenceScores : [];
+                        let user = this.props.session && this.props.session.user_properties;
+                        // Find if any scores for the segregation are owned by the currently logged-in user
+                        if (evidenceScores && evidenceScores.length) {
+                            // Find the score belonging to the logged-in curator, if any.
+                            curratorScore = userScore(evidenceScores, user && user.uuid);
+                        }
+                        if (curratorScore) {
+                            this.setState({
+                                userEvidenceScore: curratorScore,
+                                evidenceScoreUuid: curratorScore.uuid
+                            });
+                            // Render or remove the default score, score range, and explanation fields
+                            curratorScore.scoreStatus && curratorScore.scoreStatus === 'Score' ? this.setState({showScoreInput: true}) : this.setState({showScoreInput: false});
+                            curratorScore.variantKind && curratorScore.variantKind !== 'none' ? this.setState({evidenceVariantKind: curratorScore.variantKind}) : this.setState({evidenceVariantKind: null});
+                        }
                     });
                 }
             }
@@ -627,18 +644,33 @@ var IndividualCuration = React.createClass({
                     /*****************************************************/
                     /* Proband score status data object                  */
                     /*****************************************************/
-                    let newScoreStatusObj = {};
-                    let scoreStatus = this.getFormValue('scoreStatus') && this.getFormValue('scoreStatus') !== 'none' ? this.getFormValue('scoreStatus') : null;
-                    if (scoreStatus) {
-                        newScoreStatusObj = {
-                            scoreStatus: scoreStatus,
-                            evidenceType: 'Individual'
-                        };
+                    let newEvidenceScore = this.state.curratorScore ? curator.flatten(this.state.curratorScore) : {};
+                    let newEvidenceScoreObj = VariantEvidenceScore.handleEvidenceScoreObj.call(this);
+                    if (newEvidenceScoreObj) {
+                        newEvidenceScore = newEvidenceScoreObj;
+                        if (!newEvidenceScore.scoreStatus) {
+                            delete newEvidenceScore['scoreStatus'];
+                        }
+                        if (!newEvidenceScore.variantKind) {
+                            delete newEvidenceScore['variantKind'];
+                        }
+                        if (!newEvidenceScore.calculatedScore) {
+                            delete newEvidenceScore['calculatedScore'];
+                        }
+                        if (!newEvidenceScore.score) {
+                            delete newEvidenceScore['score'];
+                        }
+                        if (!newEvidenceScore.changeReason) {
+                            delete newEvidenceScore['changeReason'];
+                        }
+                    }
+
+                    if (Object.keys(newEvidenceScore).length) {
                         /*************************************************************/
                         /* Either update or create the score status object in the DB */
                         /*************************************************************/
                         if (this.state.evidenceScoreUuid) {
-                            return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newScoreStatusObj).then(modifiedScoreObj => {
+                            return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newEvidenceScore).then(modifiedScoreObj => {
                                 // FIXME: Need to be able to handle array of scores
                                 if (modifiedScoreObj) {
                                     individualScores.push(modifiedScoreObj['@graph'][0]['@id']);
@@ -646,7 +678,7 @@ var IndividualCuration = React.createClass({
                                 return Promise.resolve(individualScores);
                             });
                         } else {
-                            return this.postRestData('/evidencescore/', newScoreStatusObj).then(newScoreObject => {
+                            return this.postRestData('/evidencescore/', newEvidenceScore).then(newScoreObject => {
                                 if (newScoreObject) {
                                     individualScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
