@@ -49,6 +49,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
         buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
         clearButtonRender: React.PropTypes.bool, // specify whether or not the Clear button should be rendered
+        editButtonRenderHide: React.PropTypes.bool, // specify whether or not the Edit button should be hidden
         parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
@@ -104,7 +105,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         if (this.props.buttonOnly) {
             return (
                 <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
-                    {this.buttonRender()}
+                    {this.props.editButtonRenderHide && this.props.initialFormValue ? null : this.buttonRender()}
                     {this.props.clearButtonRender && this.props.initialFormValue ?
                         this.clearButtonRender()
                     : null}
@@ -116,7 +117,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                     <span className="col-sm-5 control-label">{this.props.labelVisible ? this.props.label : null}</span>
                     <span className="col-sm-7">
                         <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
-                            {this.buttonRender()}
+                            {this.props.editButtonRenderHide && this.props.initialFormValue ? null : this.buttonRender()}
                             {this.props.clearButtonRender && this.props.initialFormValue ?
                                 this.clearButtonRender()
                             : null}
