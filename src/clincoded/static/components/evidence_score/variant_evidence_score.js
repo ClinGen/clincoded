@@ -15,6 +15,8 @@ const consoleMsgStyles = "color: white; background-color: red; padding: 2px";
 // Utility function to display the Proband individual score panel,
 // and convert its values to an object.
 // This object assumes it has a React component's 'this', so these need to be called
+let evidenceDefaultScore;
+
 module.exports = {
 
     // Renders Proband individual score panel
@@ -56,7 +58,6 @@ module.exports = {
             }
         });
         // Get the default score value as a number
-        let evidenceDefaultScore;
         if (curratorScore && curratorScore.calculatedScore) {
             evidenceDefaultScore = defaultScore(modeInheritanceType, evidenceVariantKind, curratorScore.calculatedScore);
         } else {
@@ -118,7 +119,10 @@ module.exports = {
 
         // Put together a new 'evidenceScore' object
         newEvidenceScoreObj = {
-            score: this.getFormValue('changedScore') !== 'none' ? parseFloat(this.getFormValue('changedScore')) : null,
+            scoreStatus: this.getFormValue('scoreStatus') !== 'none' ? this.getFormValue('scoreStatus') : null,
+            variantKind: this.getFormValue('variantKind') !== 'none' ? this.getFormValue('variantKind') : null,
+            calculatedScore: evidenceDefaultScore ? evidenceDefaultScore : null,
+            score: this.getFormValue('scoreRange') !== 'none' ? parseFloat(this.getFormValue('scoreRange')) : null,
             changeReason: this.getFormValue('changeReason'),
             evidenceType: 'Individual'
         };
