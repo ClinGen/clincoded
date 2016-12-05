@@ -34,12 +34,6 @@ var AddResourceId = add_external_resource.AddResourceId;
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
 
-// Settings for this.state.varOption
-var VAR_NONE = 0; // No variants entered in a panel
-var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
-var VAR_OTHER = 2; // Other description entered in a panel
-
-
 var IndividualCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
@@ -61,8 +55,8 @@ var IndividualCuration = React.createClass({
             extraIndividualCount: 0, // Number of extra families to create
             extraIndividualNames: [], // Names of extra families to create
             variantCount: 1, // Number of variants to display
-            variantOption: [VAR_NONE], // One variant panel, and nothing entered
             variantInfo: {}, // Extra holding info for variant display
+            variantRequired: false, // specifies whether or not variant information is required
             individualName: '', // Currently entered individual name
             addVariantDisabled: true, // True if Add Another Variant button enabled
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
@@ -83,40 +77,15 @@ var IndividualCuration = React.createClass({
         } else if (ref === 'individualname') {
             this.setState({individualName: this.refs[ref].getValue()});
         } else if (ref === 'SEGrecessiveZygosity') {
-            //Only show option to add 2nd variant if user selects 'Heterozygous'
-            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
-                if (this.state.variantCount > 1) {
-                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
-                }
-            });
-        } else if (ref.substring(0, 3) === 'VAR') {
-            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
-            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
-            var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var refSuffix = ref.match(/\d+$/);
-            refSuffix = refSuffix && refSuffix[0];
-            if (refSuffix && (lastVariantSuffix === refSuffix)) {
-                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
-                // the Add Another Variant button.
-                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
-            }
-
-            // Disable fields depending on what fields have values in them.
-            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
-            var currVariantOption = this.state.variantOption;
-            if (othervariant) {
-                this.refs['VARclinvarid' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (dbsnpid || clinvarid || hgvsterm) {
-                this.refs['VARothervariant' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_SPEC;
+            // set the variant count and variant required as necessary
+            let tempValue = this.refs[ref].getValue();
+            if (tempValue === 'Heterozygous') {
+                this.setState({variantCount: 2, variantRequired: true});
+            } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
+                this.setState({variantCount: 1, variantRequired: true});
             } else {
-                currVariantOption[refSuffix] = VAR_NONE;
+                this.setState({variantCount: 1, variantRequired: false});
             }
-            this.setState({variantOption: currVariantOption});
         } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
@@ -234,27 +203,23 @@ var IndividualCuration = React.createClass({
                 if (stateObj.individual.variants && stateObj.individual.variants.length && !(stateObj.individual.proband && stateObj.family)) {
                     var variants = stateObj.individual.variants;
                     // This individual has variants
-                    stateObj.variantCount = variants.length;
+                    stateObj.variantCount = variants.length ? variants.length : 1;
+                    stateObj.variantRequired = stateObj.individual.recessiveZygosity ? true : false;
                     stateObj.addVariantDisabled = false;
                     stateObj.variantInfo = {};
 
                     // Go through each variant to determine how its form fields should be disabled.
-                    var currVariantOption = [];
                     for (var i = 0; i < variants.length; i++) {
-                        if (variants[i].clinvarVariantId) {
-                            currVariantOption[i] = VAR_SPEC;
+                        if (variants[i].clinvarVariantId || variants[i].carId) {
                             stateObj.variantInfo[i] = {
-                                'clinvarVariantId': variants[i].clinvarVariantId,
-                                'clinvarVariantTitle': variants[i].clinvarVariantTitle,
+                                'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
+                                'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
+                                'carId': variants[i].carId ? variants[i].carId : null,
+                                'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
                                 'uuid': variants[i].uuid
                             };
-                        } else if (variants[i].otherDescription) {
-                            currVariantOption[i] = VAR_OTHER;
-                        } else {
-                            currVariantOption[i] = VAR_NONE;
                         }
                     }
-                    stateObj.variantOption = currVariantOption;
                 }
             }
 
@@ -322,37 +287,6 @@ var IndividualCuration = React.createClass({
         }
     },
 
-    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
-    validateVariants: function() {
-        var valid;
-        var anyInvalid = false;
-
-        // Check Variant panel inputs for correct formats
-        for (var i = 0; i < this.state.variantCount; i++) {
-            // Check dbSNP ID for a valid format
-            var value = this.getFormValue('VARdbsnpid' + i);
-            if (value) {
-                valid = value.match(/^\s*(rs\d{1,8})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARdbsnpid' + i, 'Use dbSNP IDs (e.g. rs1748)');
-                    anyInvalid = true;
-                }
-            }
-
-            // Check dbSNP ID for a valid format
-            value = this.getFormValue('VARclinvarid' + i);
-            if (value) {
-                valid = value.match(/^\s*(\d{1,10})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
-                    anyInvalid = true;
-                }
-            }
-        }
-
-        return !anyInvalid;
-    },
-
     // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
@@ -361,7 +295,7 @@ var IndividualCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault() && this.validateVariants()) {
+        if (this.validateDefault()) {
             var family = this.state.family;
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
@@ -374,6 +308,9 @@ var IndividualCuration = React.createClass({
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
+            let variantUuid0 = this.getFormValue('variantUuid0'),
+                variantUuid1 = this.getFormValue('variantUuid1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (this.state.proband_selected && (!orphaIds || !orphaIds.length || _(orphaIds).any(function(id) { return id === null; }))) {
@@ -405,6 +342,31 @@ var IndividualCuration = React.createClass({
                 // NOT HPOID list is bad
                 formError = true;
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Get variant uuid's if they were added via the modals
+            for (var i = 0; i < this.state.variantCount; i++) {
+                // Grab the values from the variant form panel
+                var variantId = this.getFormValue('variantUuid' + i);
+
+                // Build the search string depending on what the user entered
+                if (variantId) {
+                    // Make a search string for these terms
+                    individualVariants.push('/variants/' + variantId);
+                }
+            }
+
+            // Check to see if the right number of variants exist
+            if (SEGrecessiveZygosity === 'Heterozygous') {
+                if (!variantUuid0 || !variantUuid1) {
+                    formError = true;
+                    this.setFormErrors('SEGrecessiveZygosity', 'For Heterozygous, two variants must be specified');
+                }
+            } else if (SEGrecessiveZygosity === 'Hemizygous' || SEGrecessiveZygosity === 'Homozygous') {
+                if (!variantUuid0) {
+                    formError = true;
+                    this.setFormErrors('SEGrecessiveZygosity', `For ${SEGrecessiveZygosity}, one variant must be specified`);
+                }
             }
 
             if (!formError) {
@@ -501,52 +463,7 @@ var IndividualCuration = React.createClass({
                     }
                 }).then(data => {
                     var newVariants = [];
-                    if (!currIndividual || !(currIndividual.proband && family)) {
-                        // We're not editing a variant, or we're editing an individual that's not a proband in a family.
-                        // Handle variants; start by making an array of search terms, one for each variant in the form.
-                        // If this is a proband individual, its variants can only be edited from its associated family.
-
-                        // Build an array of search strings for each of the ClinVar IDs entered in the form.
-                        var searchStrs = [];
-                        for (var i = 0; i < this.state.variantCount; i++) {
-                            // Grab the values from the variant form panel
-                            var clinvarId = this.getFormValue('VARclinvarid' + i);
-
-                            // Build the search string depending on what the user entered
-                            if (clinvarId) {
-                                // Make a search string for these terms
-                                searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
-                            }
-                        }
-
-                        // If at least one variant search string built, perform the search
-                        if (searchStrs.length) {
-                            // Search DB for all matching terms for all variants entered
-                            return this.getRestDatas(
-                                searchStrs
-                            ).then(results => {
-                                // 'result' is an array of search results, one per search string. There should only be one result per array element --
-                                // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                                results.forEach(function(result, i) {
-                                    if (result.total) {
-                                        // Search got a result. Add a string for family.variants for this existing variant
-                                        individualVariants.push(result['@graph'][0]['@id']);
-                                    } else {
-                                        // Search got no result; make a new variant and save it in an array so we can write them.
-                                        var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
-                                        if (termResult) {
-                                            var newVariant = {};
-                                            newVariant.clinvarVariantId = termResult.term;
-                                            newVariants.push(newVariant);
-                                        }
-                                    }
-                                }, this);
-
-                                // Pass new variant array to the next THEN to write them.
-                                return Promise.resolve(newVariants);
-                            });
-                        }
-                    } else if (currIndividual && currIndividual.proband && family) {
+                    if (currIndividual && currIndividual.proband && family) {
                         // Editing a proband in a family. Get updated variants list from the target individual since it is changed from the Family edit page
                         return this.getRestData('/individuals/' + currIndividual.uuid).then(updatedIndiv => {
                             newVariants = updatedIndiv.variants.map(function(variant) { return '/variants/' + variant.uuid + '/'; });
@@ -557,42 +474,7 @@ var IndividualCuration = React.createClass({
                     // No variant search strings. Go to next THEN.
                     return Promise.resolve([]);
                 }).then(newVariants => {
-                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
-                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    if (!currIndividual || !(currIndividual.proband && family)) {
-                        for (var i = 0; i < this.state.variantCount; i++) {
-                            // Grab the values from the variant form panel
-                            var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
-
-                            // Build the search string depending on what the user entered
-                            if (otherVariantText) {
-                                // Add this Other Description text to a new variant object
-                                var newVariant = {};
-                                newVariant.otherDescription = otherVariantText;
-                                newVariants.push(newVariant);
-                            }
-                        }
-
-                        // Now write the new variants to the DB, and push their @ids to the family variant
-                        if (newVariants && newVariants.length) {
-                            return this.postRestDatas(
-                                '/variants/', newVariants
-                            ).then(results => {
-                                if (results && results.length) {
-                                    // Write the new variants to history
-                                    results.forEach(function(result) {
-                                        this.recordHistory('add', result['@graph'][0]);
-                                    }, this);
-
-                                    // Add the newly written variants to the family
-                                    results.forEach(result => {
-                                        individualVariants.push(result['@graph'][0]['@id']);
-                                    });
-                                }
-                                return Promise.resolve(results);
-                            });
-                        }
-                    } else if (currIndividual && currIndividual.proband && family) {
+                    if (currIndividual && currIndividual.proband && family) {
                         individualVariants = newVariants;
                     }
 
@@ -847,15 +729,9 @@ var IndividualCuration = React.createClass({
         return newIndividual;
     },
 
-    // Add another variant section to the FamilyVariant panel
-    handleAddVariant: function() {
-        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
-    },
-
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
-    updateClinvarVariantId: function(data, fieldNum) {
+    updateVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
@@ -865,20 +741,22 @@ var IndividualCuration = React.createClass({
                 addVariantDisabled = true;
             }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
-            // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+            this.refs['variantUuid' + fieldNum].setValue(data['uuid']);
+            newVariantInfo[fieldNum] = {
+                'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
+                'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
+                'carId': data.carId ? data.carId : null,
+                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'uuid': data.uuid
+            };
         } else {
             // Reset the form and display values
-            this.refs['VARclinvarid' + fieldNum].setValue('');
+            this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
-            // Reenable the 'Other description' textarea
-            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
         }
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled});
+        this.clrFormErrors('SEGrecessiveZygosity');
     },
 
     // Determine whether a Family is associated with a Group
@@ -1403,21 +1281,39 @@ var IndividualVariantInfo = function() {
         <div className="row">
             {individual && individual.proband && family ?
                 <div>
+                    <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
-                                <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                                 <h5>Variant {i + 1}</h5>
                                 <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>ClinVar VariationID</dt>
-                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
-                                    </div>
+                                    {variant.clinvarVariantId ?
+                                        <div>
+                                            <dt>ClinVar Variation ID</dt>
+                                            <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                        </div>
+                                    : null}
 
-                                    <div>
-                                        <dt>ClinVar Preferred Title</dt>
-                                        <dd>{variant.clinvarVariantTitle}</dd>
-                                    </div>
+                                    {variant.clinvarVariantTitle ?
+                                        <div>
+                                            <dt>ClinVar Preferred Title</dt>
+                                            <dd>{variant.clinvarVariantTitle}</dd>
+                                        </div>
+                                    : null}
+
+                                    {variant.carId ?
+                                        <div>
+                                            <dt>ClinGen Allele Registry ID</dt>
+                                            <dd>{variant.carId}</dd>
+                                        </div>
+                                    : null}
+
+                                    {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                        <div>
+                                            <dt>Genomic HGVS Title</dt>
+                                            <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
+                                        </div>
+                                    : null}
 
                                     {variant.otherDescription && variant.otherDescription.length ?
                                         <div>
@@ -1468,6 +1364,16 @@ var IndividualVariantInfo = function() {
                 </div>
             :
                 <div>
+                    <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
+                        error={this.getFormError('SEGrecessiveZygosity')} clearError={this.clrFormErrors.bind(null, 'SEGrecessiveZygosity')}
+                        value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        <option value="none">No Selection</option>
+                        <option disabled="disabled"></option>
+                        <option value="Homozygous">Homozygous</option>
+                        <option value="Hemizygous">Hemizygous</option>
+                        <option value="Heterozygous">Heterozygous</option>
+                    </Input>
                     {_.range(this.state.variantCount).map(i => {
                         var variant;
 
@@ -1479,14 +1385,30 @@ var IndividualVariantInfo = function() {
                             <div key={i} className="variant-panel">
                                 {this.state.variantInfo[i] ?
                                     <div>
-                                        <div className="row">
-                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
-                                        </div>
-                                        <div className="row">
-                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                            <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                        </div>
+                                        {this.state.variantInfo[i].clinvarVariantId ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                                <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
+                                            </div>
+                                        : null}
+                                        {this.state.variantInfo[i].clinvarVariantTitle ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                            </div>
+                                        : null}
+                                        {this.state.variantInfo[i].carId ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
+                                                <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId} <i className="icon icon-external-link"></i></a></span>
+                                            </div>
+                                        : null}
+                                        {this.state.variantInfo[i].grch38 ?
+                                            <div className="row">
+                                                <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
+                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
+                                            </div>
+                                        : null}
                                         <div className="row variant-assessment">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1501,39 +1423,32 @@ var IndividualVariantInfo = function() {
                                         </div>
                                     </div>
                                 : null}
-                                <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
-                                    error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                                <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
+                                    error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                                <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
-                                    buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
-                                    initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                    updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                                <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                                {curator.renderMutalyzerLink()}
-                                {this.state.variantInfo[i] && i === 0 ?
-                                    <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
-                                        value={individual && individual.recessiveZygosity ? individual.recessiveZygosity : 'none'} handleChange={this.handleChange}
-                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                        <option value="none">No Selection</option>
-                                        <option disabled="disabled"></option>
-                                        <option value="Homozygous">Homozygous</option>
-                                        <option value="Hemizygous">Hemizygous</option>
-                                        <option value="Heterozygous">Heterozygous</option>
-                                    </Input>
-                                : null}
+                                <div className="row">
+                                    <div className="form-group">
+                                        <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
+                                        <span className="col-sm-7">
+                                            {!this.state.variantInfo[i] || (this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId) ?
+                                                <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                    buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                    initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                                    updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                            : null}
+                                            {!this.state.variantInfo[i] ? <span> - or - </span> : null}
+                                            {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
+                                                <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                    buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                    initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
+                                                    updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                            : null}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         );
                     })}
-                    {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
-                        <div className="row">
-                            <div className="col-sm-7 col-sm-offset-5 clearfix">
-                                <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
-                                    title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
-                                    clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                            </div>
-                        </div>
-                    : null}
                     {Object.keys(this.state.variantInfo).length > 0 ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
@@ -1572,13 +1487,25 @@ var IndividualVariantInfo = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
+    }
+});
+
+var LabelCARVariant = React.createClass({
+    render: function() {
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+    }
+});
+
+var LabelCARVariantTitle = React.createClass({
+    render: function() {
+        return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
@@ -1955,7 +1882,6 @@ var LabelPanelTitleView = React.createClass({
 // Returns a promise once the Individual object is written.
 var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, zygosity, context) {
     var newIndividual = {};
-
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
     newIndividual.variants = variants;

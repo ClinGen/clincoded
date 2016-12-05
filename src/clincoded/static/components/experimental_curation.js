@@ -37,11 +37,6 @@ var AddResourceId = add_external_resource.AddResourceId;
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
 
-// Settings for this.state.varOption
-var VAR_NONE = 0; // No variants entered in a panel
-var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
-var VAR_OTHER = 2; // Other description entered in a panel
-
 var initialCv = {
     assessmentTracker: null, // Tracking object for a single assessment
     experimentalDataAssessed: false, // TRUE if experimental data has been assessed by self or others
@@ -100,7 +95,6 @@ var ExperimentalCuration = React.createClass({
             rescuePRHPO: false,
             rescuePRFT: false,
             variantCount: 0, // Number of variants to display
-            variantOption: [], // One variant panel, and nothing entered
             variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
             submitBusy: false // True while form is submitting
@@ -304,37 +298,6 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
-        } else if (ref.substring(0, 3) === 'VAR') {
-            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
-            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
-            var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var refSuffix = ref.match(/\d+$/);
-            refSuffix = refSuffix && refSuffix[0];
-            if (refSuffix && (lastVariantSuffix === refSuffix)) {
-                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
-                // the Add Another Variant button.
-                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
-            }
-
-            // Disable fields depending on what fields have values in them.
-            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
-            var currVariantOption = this.state.variantOption;
-            if (othervariant) {
-                // Something entered in Other; clear the ClinVar ID and set the variantOption state to disable it.
-                this.refs['VARclinvarid' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (clinvarid) {
-                // Something entered in ClinCar ID; clear the Other field and set the variantOption state to disable it.
-                this.refs['VARothervariant' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_SPEC;
-            } else {
-                // Nothing entered anywhere; enable everything.
-                currVariantOption[refSuffix] = VAR_NONE;
-            }
-            this.setState({variantOption: currVariantOption});
         }
     },
 
@@ -477,18 +440,17 @@ var ExperimentalCuration = React.createClass({
                         stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
 
-                        var currVariantOption = [];
                         for (var i = 0; i < variants.length; i++) {
-                            if (variants[i].clinvarVariantId) {
-                                currVariantOption[i] = VAR_SPEC;
-                                stateObj.variantInfo[i] = {'clinvarVariantId': variants[i].clinvarVariantId, 'clinvarVariantTitle': variants[i].clinvarVariantTitle};
-                            } else if (variants[i].otherDescription) {
-                                currVariantOption[i] = VAR_OTHER;
-                            } else {
-                                currVariantOption[i] = VAR_NONE;
+                            if (variants[i].clinvarVariantId || variants[i].carId) {
+                                stateObj.variantInfo[i] = {
+                                    'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
+                                    'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
+                                    'carId': variants[i].carId ? variants[i].carId : null,
+                                    'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                    'uuid': variants[i].uuid
+                                };
                             }
                         }
-                        stateObj.variantOption = currVariantOption;
                     }
                 }
 
@@ -626,7 +588,7 @@ var ExperimentalCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault() && this.validateVariants()) {
+        if (this.validateDefault()) {
             var groupGenes;
             var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs, efoIDs;
             var formError = false;
@@ -970,6 +932,18 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
 
+                // Get variant uuid's if they were added via the modals
+                for (var j = 0; j < this.state.variantCount; j++) {
+                    // Grab the values from the variant form panel
+                    var variantId = this.getFormValue('variantUuid' + j);
+
+                    // Build the search string depending on what the user entered
+                    if (variantId) {
+                        // Make a search string for these terms
+                        experimentalDataVariants.push('/variants/' + variantId);
+                    }
+                }
+
                 var searchStr = '';
                 this.setState({submitBusy: true});
                 // Begin with empty promise
@@ -1000,94 +974,6 @@ var ExperimentalCuration = React.createClass({
                         // No genes entered; just pass null to the next then
                         return Promise.resolve(null);
                     }
-                }).then(data => {
-                    // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
-                    // of those kinds of variants generates a new variant object). For any that already exist, push them onto
-                    // the array of the experimental data's variants. For any that don't, pass them to the next THEN to write them to the DB.
-                    var newVariants = [];
-
-                    // Build an array of search strings for each of the ClinVar IDs entered in the form.
-                    var searchStrs = [];
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var clinvarId = this.getFormValue('VARclinvarid' + i);
-
-                        // Build the search string depending on what the user entered
-                        if (clinvarId) {
-                            // Make a search string for these terms
-                            searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
-                        }
-                    }
-
-                    // If at least one variant search string built, perform the search
-                    if (searchStrs.length) {
-                        // Search DB for all matching terms for all variants entered
-                        return this.getRestDatas(
-                            searchStrs
-                        ).then(results => {
-                            // 'result' is an array of search results, one per search string. There should only be one result per array element --
-                            // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                            results.forEach(function(result, i) {
-                                if (result.total) {
-                                    // Search got a result. Add a string for experimentalData.variants for this existing variant
-                                    experimentalDataVariants.push(result['@graph'][0]['@id']);
-                                } else {
-                                    // Search got no result; make a new variant and save it in an array so we can write them.
-                                    // Look for the term in the filters to see what term failed to find a match
-                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
-                                    if (termResult) {
-                                        var newVariant = {};
-                                        newVariant.clinvarVariantId = termResult.term;
-                                        newVariants.push(newVariant);
-                                    }
-                                }
-                            }, this);
-
-                            // Pass new variant array to the next THEN to write them.
-                            return Promise.resolve(newVariants);
-                        });
-                    }
-
-                    // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(newVariants);
-                }).then(newVariants => {
-                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
-                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
-
-                        // Build the search string depending on what the user entered
-                        if (otherVariantText) {
-                            // Add this Other Description text to a new variant object
-                            var newVariant = {};
-                            newVariant.otherDescription = otherVariantText;
-                            newVariants.push(newVariant);
-                        }
-                    }
-
-                    // Now write the new variants to the DB, and push their @ids to the experimental data variant
-                    if (newVariants && newVariants.length) {
-                        return this.postRestDatas(
-                            '/variants/', newVariants
-                        ).then(results => {
-                            if (results && results.length) {
-                                // Write the new variants to history
-                                results.forEach(function(result) {
-                                    this.recordHistory('add', result['@graph'][0]);
-                                }, this);
-
-                                // Add the newly written variants to the experimental data
-                                results.forEach(result => {
-                                    experimentalDataVariants.push(result['@graph'][0]['@id']);
-                                });
-                            }
-                            return Promise.resolve(results);
-                        });
-                    }
-
-                    // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(null);
                 }).then(data => {
                     var gdmUuid = this.state.gdm && this.state.gdm.uuid;
                     var experimentalUuid = this.state.experimental && this.state.experimental.uuid;
@@ -1202,30 +1088,9 @@ var ExperimentalCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
-    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
-    validateVariants: function() {
-        var valid;
-        var anyInvalid = false;
-
-        // Check Variant panel inputs for correct formats
-        for (var i = 0; i < this.state.variantCount; i++) {
-            var value = this.getFormValue('VARclinvarid' + i);
-            if (value) {
-                valid = value.match(/^\s*(\d{1,10})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
-                    anyInvalid = true;
-                }
-            }
-        }
-
-        return !anyInvalid;
-    },
-
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
-    updateClinvarVariantId: function(data, fieldNum) {
+    updateVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
@@ -1235,20 +1100,21 @@ var ExperimentalCuration = React.createClass({
                 addVariantDisabled = true;
             }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
-            // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+            this.refs['variantUuid' + fieldNum].setValue(data['uuid']);
+            newVariantInfo[fieldNum] = {
+                'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
+                'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
+                'carId': data.carId ? data.carId : null,
+                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'uuid': data.uuid
+            };
         } else {
             // Reset the form and display values
-            this.refs['VARclinvarid' + fieldNum].setValue('');
+            this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
-            // Reenable the 'Other description' textarea
-            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
         }
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled});
     },
 
     render: function() {
@@ -2181,26 +2047,55 @@ var ExperimentalDataVariant = function() {
                             </div>
                             {this.state.variantInfo[i] ?
                                 <div>
-                                    <div className="row">
-                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
-                                    </div>
-                                    <div className="row">
-                                       <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                        <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                    </div>
+                                    {this.state.variantInfo[i].clinvarVariantId ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
+                                        </div>
+                                    : null}
+                                    {this.state.variantInfo[i].clinvarVariantTitle ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                            <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                        </div>
+                                    : null}
+                                    {this.state.variantInfo[i].carId ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelCARVariant />}</label></span>
+                                            <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId} <i className="icon icon-external-link"></i></a></span>
+                                        </div>
+                                    : null}
+                                    {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
+                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
+                                        </div>
+                                    : null}
                                 </div>
                             : null}
-                            <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
-                                error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                            <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
+                                error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                            <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Experimental'], 'variantList': this.state.variantInfo}}
-                                buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
-                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                            <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                            {curator.renderMutalyzerLink()}
+                            <div className="row">
+                                <div className="form-group">
+                                    <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
+                                    <span className="col-sm-7">
+                                        {!this.state.variantInfo[i] || (this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId) ?
+                                            <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                                updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                        : null}
+                                        {!this.state.variantInfo[i] ? <span> - or - </span> : null}
+                                        {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
+                                            <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
+                                                updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                        : null}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     );
                 })}
@@ -2218,13 +2113,25 @@ var ExperimentalDataVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+    }
+});
+
+var LabelCARVariant = React.createClass({
+    render: function() {
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+    }
+});
+
+var LabelCARVariantTitle = React.createClass({
+    render: function() {
+        return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
