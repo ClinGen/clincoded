@@ -2,13 +2,13 @@
     "Autosomal dominant inheritance (HP:0000006)": [
         "with maternal imprinting (HP:0012275)",
         "with paternal imprinting (HP:0012274)",
-        "Sex-limited (HP:0001470)",
+        "sex-limited (HP:0001470)",
         "with genetic anticipation",
         "primarily or exclusively de novo"
     ],
     "Autosomal recessive inheritance (HP:0000007)": [
         "with genetic anticipation",
-        "Sex-limited"
+        "sex-limited"
     ],
     "Mitochondrial inheritance (HP:0001427)": [
         "primarily or exclusively homoplasmic",
