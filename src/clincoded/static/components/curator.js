@@ -809,7 +809,9 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
-    var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+    let clinvarRepresentation = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : null);
+    let carRepresentation = variant.hgvsNames && variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.carId ? variant.carId : null);
+    let variantTitle = clinvarRepresentation ? clinvarRepresentation : carRepresentation;
 
     return (
         <div className="panel-evidence-group">
