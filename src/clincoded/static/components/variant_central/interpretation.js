@@ -457,7 +457,9 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                             let orphanetId = interpretation.disease && interpretation.disease.orphaNumber ? interpretation.disease.orphaNumber : null;
                             let diseaseTerm = interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null;
                             let modeInheritance = interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
+                            console.log(interpretation.date_created);
                             let createdTime = moment(interpretation.date_created);
+                            console.log(createdTime);
                             let latestEvaluation = interpretation && this.findLatestEvaluations(interpretation);
                             let latestTime = latestEvaluation ? moment(latestEvaluation.date_created) : '';
                             let statusString = statusMappings[interpretation.interpretation_status].cssClass; // Convert status string to CSS class
