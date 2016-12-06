@@ -343,7 +343,7 @@ var VariantCuration = React.createClass({
                                     <div className="row variant-association-header">
                                         <dl className="dl-horizontal">
                                             <dt>{gdm && annotation ? <a href={`/curation-central/?gdm=${gdm.uuid}&pmid=${annotation.article.pmid}`}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; ClinGen Allele Registry ID</dt>
-                                            <dd><a href={`${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for variant ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
+                                            <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for variant ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </dl>
                                         <dl className="dl-horizontal">
                                             <dt>Genomic HGVS Term</dt>
