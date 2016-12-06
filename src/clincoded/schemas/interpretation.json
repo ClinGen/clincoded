@@ -125,6 +125,12 @@
                 "type": "string",
                 "linkTo": "extra_evidence"
             }
+        },
+        "modeInheritanceAdjective": {
+            "title": "Adjective",
+            "description": "Adjective for Mode of Inheritance",
+            "type": "string",
+            "default": ""
         }
     },
     "columns": {
