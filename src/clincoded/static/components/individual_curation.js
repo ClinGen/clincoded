@@ -109,6 +109,7 @@ var IndividualCuration = React.createClass({
                     this.refs.scoreRange.setValue('none');
                     // Reset explanation if score status is changed
                     this.refs.changeReason.resetValue();
+                    this.setState({requiredScoreExplanation: false});
                 });
             } else {
                 this.setState({showScoreInput: false, disableVariantKindInput: true});
@@ -130,6 +131,7 @@ var IndividualCuration = React.createClass({
                 this.refs.scoreRange.setValue('none');
                 // Reset explanation if default score is changed
                 this.refs.changeReason.resetValue();
+                this.setState({requiredScoreExplanation: false});
             });
         } else if (ref == 'scoreRange') {
             /****************************************************/
