@@ -568,7 +568,7 @@ var IndividualCuration = React.createClass({
                     /*****************************************************/
                     /* Proband score status data object                  */
                     /*****************************************************/
-                    let newEvidenceScore = this.state.userEvidenceScore ? curator.flatten(this.state.userEvidenceScore) : {};
+                    let newEvidenceScore = Object.keys(this.state.userEvidenceScore).length ? curator.flatten(this.state.userEvidenceScore) : {};
                     let newEvidenceScoreObj = VariantEvidenceScore.handleEvidenceScoreObj.call(this);
                     if (newEvidenceScoreObj) {
                         newEvidenceScore = newEvidenceScoreObj;
