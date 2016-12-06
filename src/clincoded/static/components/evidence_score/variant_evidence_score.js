@@ -20,7 +20,7 @@ let evidenceDefaultScore;
 module.exports = {
 
     // Renders Proband individual score panel
-    render(evidenceScores, modeInheritance, showScoreInput, evidenceVariantKind) {
+    render(evidenceScores, modeInheritance, showScoreInput, evidenceVariantKind, updateDefaultScore, disableVariantKindInput, requiredScoreExplanation) {
         let curratorScore;
         let user = this.props.session && this.props.session.user_properties;
 
@@ -59,12 +59,22 @@ module.exports = {
         });
         // Get the default score value as a number
         if (curratorScore && curratorScore.calculatedScore) {
-            evidenceDefaultScore = defaultScore(modeInheritanceType, evidenceVariantKind, curratorScore.calculatedScore);
+            if (updateDefaultScore) {
+                // A different scenario is selected after a pre-existing score is loaded from db
+                evidenceDefaultScore = defaultScore(modeInheritanceType, evidenceVariantKind);
+            } else {
+                // A pre-existing score is loaded from db
+                evidenceDefaultScore = defaultScore(modeInheritanceType, evidenceVariantKind, curratorScore.calculatedScore);
+            }
         } else {
+            // New score for the evidence
             evidenceDefaultScore = defaultScore(modeInheritanceType, evidenceVariantKind);
         }
         // Get the score range as an array
-        let evidenceScoreRange = scoreRange(modeInheritanceType, evidenceVariantKind).length ? scoreRange(modeInheritanceType, evidenceVariantKind) : [];
+        let evidenceScoreRange = [];
+        if (scoreRange(modeInheritanceType, evidenceVariantKind, evidenceDefaultScore).length) {
+            evidenceScoreRange = scoreRange(modeInheritanceType, evidenceVariantKind, evidenceDefaultScore);
+        }
 
         return (
             <div className="row">
@@ -78,7 +88,7 @@ module.exports = {
                     <option value="Contradicts">Contradicts</option>
                 </Input>
                 <Input type="select" ref="variantKind" label="Select a scenario:" defaultValue="none" handleChange={this.handleChange}
-                    value={curratorScore && curratorScore.variantKind ? curratorScore.variantKind : null}
+                    value={curratorScore && curratorScore.variantKind ? curratorScore.variantKind : null} inputDisabled={disableVariantKindInput}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -92,8 +102,8 @@ module.exports = {
                             <dt className="col-sm-5 control-label">Default Score</dt>
                             <dd className="col-sm-7">{evidenceDefaultScore ? evidenceDefaultScore : 'Insufficient information to obtain score'}</dd>
                         </dl>
-                        <Input type="select" ref="scoreRange" label={<span>Select a score from range:<i>(optional)</i></span>} defaultValue="none"
-                            value={curratorScore && curratorScore.score ? curratorScore.score : null}
+                        <Input type="select" ref="scoreRange" label={<span>Select a different score:<i>(optional)</i></span>} defaultValue="none"
+                            value={curratorScore && curratorScore.score ? curratorScore.score : null}  handleChange={this.handleChange}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                             inputDisabled={evidenceScoreRange && evidenceScoreRange.length ? false : true}>
                             <option value="none">No Selection</option>
@@ -102,11 +112,12 @@ module.exports = {
                                 return <option key={i} value={score}>{score}</option>;
                             })}
                         </Input>
-                        <Input type="textarea" ref="changeReason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
+                        <Input type="textarea" ref="changeReason" required={requiredScoreExplanation} inputDisabled={!requiredScoreExplanation}
+                            label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
                             value={curratorScore && curratorScore.changeReason ? curratorScore.changeReason : ''}
+                            error={this.getFormError('changeReason')} clearError={this.clrFormErrors.bind(null, 'changeReason')}
                             placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
-                            rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
-                            groupClassName="form-group" />
+                            rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                     </div>
                 : null}
             </div>
