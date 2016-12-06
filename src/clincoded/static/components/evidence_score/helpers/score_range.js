@@ -6,8 +6,8 @@
 
 import SCORE_MAPS from '../constants/score_maps';
 
-export function scoreRange(modeInheritance, variantKind) {
-    let range = [];
+export function scoreRange(modeInheritance, variantKind, defaultScore) {
+    let range = [], filterRange = [];
     const scoreKeys = Object.keys(SCORE_MAPS);
 
     if (modeInheritance && variantKind) {
@@ -21,5 +21,11 @@ export function scoreRange(modeInheritance, variantKind) {
         range = [];
     }
 
-    return range;
+    if (range.length && defaultScore) {
+        filterRange = range.filter(score => {
+            return score !== defaultScore;
+        });
+    }
+
+    return filterRange;
 }
