@@ -333,7 +333,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                 diff = (a.variant.clinvarVariantId ? a.variant.clinvarVariantId : a.variant.carId) > (b.variant.clinvarVariantId ? b.variant.clinvarVariantId : b.variant.carId) ? 1 : -1;
                 break;
             case 'disease':
-                diff = (a.disease && a.disease.orphaNumber ? a.disease.orphaNumber : "") > (b.disease && b.disease.orphaNumber ? b.disease.orphaNumber : "") ? 1 : -1;
+                diff = (a.disease && a.disease.term ? a.disease.term : "") > (b.disease && b.disease.term ? b.disease.term : "") ? 1 : -1;
                 break;
             case 'moi':
                 diff = (a.modeInheritance ? a.modeInheritance : "") > (b.modeInheritance ? b.modeInheritance : "") ? 1 : -1;
