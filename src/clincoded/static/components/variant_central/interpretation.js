@@ -496,7 +496,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        <div>{interpretation.submitted_by.title}</div>
+                                        <div>{interpretation.submitted_by.last_name}, {interpretation.submitted_by.first_name}</div>
                                     </div>
 
                                     <div className="table-cell-gdm">
