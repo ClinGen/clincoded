@@ -341,7 +341,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
             case 'last':
                 var aAnnotation = this.findLatestEvaluations(a);
                 var bAnnotation = this.findLatestEvaluations(b);
-                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? -1 : 1);
+                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? 1 : -1);
                 break;
             case 'creator':
                 var aLower = a.submitted_by.last_name.toLowerCase();
