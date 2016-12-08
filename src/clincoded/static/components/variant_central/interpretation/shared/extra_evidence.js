@@ -24,6 +24,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         category: React.PropTypes.string, // category (usually the tab) the evidence is part of
         subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
         href_url: React.PropTypes.object, // href_url object
+        session: React.PropTypes.object, // session object
         variant: React.PropTypes.object, // parent variant object
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
@@ -213,6 +214,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
         // for rendering the evidence in tabular format
+        console.log(extra_evidence);
         return (
             <tr key={extra_evidence.uuid}>
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
@@ -220,9 +222,13 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 <td className="col-md-2">
                     {extra_evidence.submitted_by.title}
                     ({extra_evidence.date_created})
-                    <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
-                    <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
-                        clickHandler={() => this.deleteEvidence(extra_evidence)} />
+                    {this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
+                        <div>
+                            <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                            <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
+                                clickHandler={() => this.deleteEvidence(extra_evidence)} />
+                        </div>
+                    : null}
                 </td>
             </tr>
         );
