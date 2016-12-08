@@ -221,7 +221,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
                 <td className="col-md-2">
                     {extra_evidence.submitted_by.title} ({moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")})
-                    {this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
+                    {!this.props.viewOnly && this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
                         <div>
                             <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                             <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
@@ -306,38 +306,39 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                         ? this.renderInterpretationExtraEvidenceEdit(evidence)
                                         : this.renderInterpretationExtraEvidence(evidence));
                                 })
+                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
+                            {!this.props.viewOnly ?
+                                <tr>
+                                    <td colSpan="3">
+                                        {this.state.tempEvidence ?
+                                            <span>
+                                                <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
+                                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                                    <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
+                                                        labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
+                                                    <div className="clearfix">
+                                                        <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
+                                                            buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                                        <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
+                                                        <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                                                            submitBusy={this.state.submitBusy} inputDisabled={!(this.state.descriptionInput && this.state.descriptionInput.length > 0)} />
+                                                        {this.state.updateMsg ?
+                                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                                        : null}
+                                                    </div>
+                                                </Form>
+                                            </span>
+                                        :
+                                            <span>
+                                                <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
+                                                    buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+
+                                                &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
                             : null}
-                            <tr>
-                                <td colSpan="3">
-                                    {this.state.tempEvidence ?
-                                        <div>
-                                            <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
-
-                                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
-                                                    labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
-                                                <div className="clearfix">
-                                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
-                                                        buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
-                                                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                        submitBusy={this.state.submitBusy} inputDisabled={!(this.state.descriptionInput && this.state.descriptionInput.length > 0)} />
-                                                    {this.state.updateMsg ?
-                                                        <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                    : null}
-                                                </div>
-                                            </Form>
-                                        </div>
-                                    :
-                                        <span>
-                                            <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
-                                                buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-
-                                            &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
-                                        </span>
-                                    }
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
