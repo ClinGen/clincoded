@@ -177,6 +177,10 @@
             "title": "Creator",
             "type": "string"
         },
+        "submitted_by.first_name": {
+            "title": "Creator",
+            "type": "string"
+        },
         "submitted_by.email": {
             "title": "Creator email",
             "type": "string"

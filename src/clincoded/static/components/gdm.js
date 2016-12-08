@@ -11,7 +11,7 @@ var Input = form.Input;
 var truncateString = globals.truncateString;
 
 
-// Map GDM statuses from 
+// Map GDM statuses from
 var statusMappings = {
 //  Status from GDM                         CSS class                Short name for screen display
     'Created':                             {cssClass: 'created',     shortName: 'Created'},
@@ -57,7 +57,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             case 'last':
                 var aAnnotation = curator.findLatestAnnotation(a);
                 var bAnnotation = curator.findLatestAnnotation(b);
-                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? -1 : 1);
+                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? 1 : -1);
                 break;
             case 'creator':
                 var aLower = a.submitted_by.last_name.toLowerCase();
@@ -170,7 +170,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        <div>{gdm.submitted_by.title}</div>
+                                        <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
                                     </div>
 
                                     <div className="table-cell-gdm">
@@ -198,7 +198,7 @@ var GdmStatusLegend = React.createClass({
                 <div className="gdm-status-legend">
                     {Object.keys(statusMappings).map(function(status, i) {
                         var iconClass = 'icon gdm-status-icon-' + statusMappings[status].cssClass;
-                        
+
                         return (
                             <div className={"col-sm-2 gdm-status-item" + (i === 0 ? ' col-sm-offset-1' : '')} key={i}>
                                 <span className={iconClass}></span>
