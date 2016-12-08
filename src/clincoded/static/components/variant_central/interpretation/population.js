@@ -863,7 +863,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     {(this.props.data && this.state.interpretation) ?
                         <extraEvidence.ExtraEvidenceTable category="population" subcategory="population"
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
                     {(this.props.data && !this.state.interpretation) ?
                         <extraEvidence.ExtraEvidenceTableViewAll category="population" subcategory="population"
