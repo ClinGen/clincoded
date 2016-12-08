@@ -65,6 +65,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     getInitialState: function() {
         return {
+            data: this.props.data,
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
@@ -109,6 +110,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
+        if (this.props.data) {
+            this.setState({data: this.props.data});
+        }
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
             // set desired CI if previous data for it exists
@@ -241,8 +245,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
             // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
-            let hgvs_GRCh37 = (this.props.data.hgvsNames.GRCh37) ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
-            let hgvs_GRCh38 = (this.props.data.hgvsNames.GRCh38) ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
+            let hgvs_GRCh37 = (this.state.data.hgvsNames.GRCh37) ? this.state.data.hgvsNames.GRCh37 : this.state.data.hgvsNames.gRCh37;
+            let hgvs_GRCh38 = (this.state.data.hgvsNames.GRCh38) ? this.state.data.hgvsNames.GRCh38 : this.state.data.hgvsNames.gRCh38;
             let populationObj = this.state.populationObj;
             let updated1000GData = false;
             // get extra 1000Genome information
@@ -721,12 +725,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 </div>
 
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
                                 evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                 criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
@@ -861,8 +865,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?

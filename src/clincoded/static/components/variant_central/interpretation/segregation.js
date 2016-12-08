@@ -32,50 +32,51 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
     getInitialState: function() {
         return {
+            data: this.props.data,
             clinvar_id: null,
             interpretation: this.props.interpretation
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
+        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
     },
 
     render: function() {
         return (
             <div className="variant-interpretation segregation">
                 <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup1} criteria={['BS2']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="observed-in-healthy" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Observed in healthy adult(s))</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['PS4']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="case-control" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Case-control)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content" open>
@@ -84,36 +85,36 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup3} criteria={['BS4', 'PP1']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup3Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup3Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segreagtion-data" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Segregation data)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup4} criteria={['PM6', 'PS2']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup4Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="de-novo" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup5} criteria={['BP2', 'PM3']}
@@ -125,51 +126,51 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="allele-data" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Alternate mechanism for disease" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup6} criteria={['BP5']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup6Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup6Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="alternate-mechanism" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Alternate mechanism for disease)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup7} criteria={['PP4']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup7Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup7Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="specificity-of-phenotype" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Specificity of phenotype)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup8} criteria={['BP6', 'PP5']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
-                                    formDataUpdater={criteriaGroup8Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaGroup8Change}
+                                    formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup8Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>

@@ -60,6 +60,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
     getInitialState: function() {
         return {
+            variantData: this.props.variantData,
             interpretation: this.props.interpretation,
             ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
@@ -89,7 +90,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     componentWillReceiveProps: function(nextProps) {
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
-        this.setState({interpretation: nextProps.interpretation});
+        this.setState({variantData: nextProps.variantData, interpretation: nextProps.interpretation});
         if (nextProps.ext_myGeneInfo) {
             this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
         }
@@ -152,7 +153,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
     },
 
     render: function() {
-        var variant = this.props.variantData;
+        var variant = this.state.variantData;
         var interpretation = this.state.interpretation;
         var completedSections = this.state.interpretation && this.state.interpretation.completed_sections ? this.state.interpretation.completed_sections : [];
         var populationTabChecked = false;

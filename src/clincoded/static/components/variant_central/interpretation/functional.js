@@ -32,6 +32,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
 
     getInitialState: function() {
         return {
+            data: this.props.data,
             clinvar_id: null,
             interpretation: this.props.interpretation,
             submitBusy: false,
@@ -40,43 +41,43 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
+        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
     },
 
     render: function() {
         return (
             <div className="variant-interpretation functional">
                 <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup1} criteria={['PM1']}
                                     evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="hotspot-functiona-domain" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Hotspot or functional domain)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
                 <PanelGroup accordion><Panel title="Experimental Studies" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['BS3', 'PS3']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BS3', 'PS3']]}
-                                    formDataUpdater={criteriaGroup2Update} variantUuid={this.props.data['@id']} formChangeHandler={criteriaGroup2Change}
+                                    formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup2Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                             </div>
                         </div>
                     : null}
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
-                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.props.data && !this.state.interpretation} />
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?
