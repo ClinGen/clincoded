@@ -20,6 +20,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
+        viewOnly: React.PropTypes.bool, // True if extra evidence is in view-only mode
         tableName: React.PropTypes.object, // table name as HTML object
         category: React.PropTypes.string, // category (usually the tab) the evidence is part of
         subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of

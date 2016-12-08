@@ -859,16 +859,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             }
                         </div>
                     </div>
-
-                    {(this.props.data && this.state.interpretation) ?
-                        <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
-                            variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    : null}
-                    {(this.props.data && !this.state.interpretation) ?
-                        <extraEvidence.ExtraEvidenceTableViewAll category="population" subcategory="population"
-                            tableName={<span>Curated Literature Evidence (Population)</span>} variant={this.props.data} />
-                    : null}
+                    <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
+                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
+                        variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.props.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?
