@@ -214,14 +214,12 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
         // for rendering the evidence in tabular format
-        console.log(extra_evidence);
         return (
             <tr key={extra_evidence.uuid}>
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
                 <td className="col-md-2">
-                    {extra_evidence.submitted_by.title}
-                    ({extra_evidence.date_created})
+                    {extra_evidence.submitted_by.title} ({moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")})
                     {this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
                         <div>
                             <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
@@ -296,7 +294,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                 <tr>
                                     <th>Article</th>
                                     <th>Evidence</th>
-                                    <th></th>
+                                    <th>Submitted by</th>
                                 </tr>
                             </thead>
                         : null}
