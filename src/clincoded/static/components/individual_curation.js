@@ -31,9 +31,8 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-import VariantEvidenceScore from './evidence_score/variant_evidence_score';
-import { userScore } from './evidence_score/helpers/user_score';
-import RenderEvidenceScores from './evidence_score/helpers/render_scores';
+var ScoreMain = require('./score/main').ScoreMain;
+var ScoreViewer = require('./score/viewer').ScoreViewer;
 
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 2;
@@ -67,15 +66,43 @@ var IndividualCuration = React.createClass({
             proband: null, // If we have an associated family that has a proband, this points at it
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
-            showScoreInput: false, // Determines whether to show additional form fields for proband score
-            evidenceVariantKind: null, // Variant kind value for proband score
-            evidenceScoreUuid: null,
-            evidenceScores: [],
-            userEvidenceScore: {},
-            updateDefaultScore: false,
-            disableVariantKindInput: true,
-            requiredScoreExplanation: false
+            userScoreObj: {} // Logged-in user's score object
         };
+    },
+
+    // Create new evidenceScore object based on the form values
+    handleUserScoreObj: function(scoreStatus, caseInfoType, defaultScore, score, scoreExplanation, evidenceType, scoreUuid, evidenceScored) {
+        let newUserScoreObj = this.state.userScoreObj;
+
+        // Put together a new user score object
+        if (scoreStatus && scoreStatus !== 'none') {
+            newUserScoreObj['scoreStatus'] = scoreStatus;
+            if (caseInfoType && caseInfoType !== 'none') {
+                newUserScoreObj['caseInfoType'] = caseInfoType;
+            }
+            if (defaultScore) {
+                newUserScoreObj['calculatedScore'] = defaultScore;
+            }
+            if (score) {
+                newUserScoreObj['score'] = score;
+            }
+            if (scoreExplanation && scoreExplanation.length) {
+                newUserScoreObj['scoreExplanation'] = scoreExplanation;
+            }
+            if (evidenceType && evidenceType.length) {
+                newUserScoreObj['evidenceType'] = evidenceType;
+            }
+            if (scoreUuid && scoreUuid.length) {
+                newUserScoreObj['uuid'] = scoreUuid;
+            }
+            if (evidenceScored && evidenceScored.length) {
+                newUserScoreObj['evidenceScored'] = evidenceScored;
+            }
+        }
+
+        if (Object.keys(newUserScoreObj).length) {
+            this.setState({userScoreObj: newUserScoreObj});
+        }
     },
 
     // Handle value changes in various form fields
@@ -97,53 +124,6 @@ var IndividualCuration = React.createClass({
             } else {
                 this.setState({variantCount: 1, variantRequired: false});
             }
-        } else if (ref == 'scoreStatus') {
-            // Render or remove the default score, score range, and explanation fields
-            let selected = this.refs[ref].getValue();
-            if (selected === 'Score' || selected === 'Review') {
-                this.setState({showScoreInput: true, disableVariantKindInput: false}, () => {
-                    // Reset score range dropdown options if these changes apply
-                    this.refs.scoreRange.setValue('none');
-                    // Reset explanation if score status is changed
-                    this.refs.changeReason.resetValue();
-                    this.setState({requiredScoreExplanation: false});
-                });
-            } else {
-                this.setState({showScoreInput: false, disableVariantKindInput: true});
-            }
-            this.setState({evidenceVariantKind: null, updateDefaultScore: true}, () => {
-                // Reset variant scenario dropdown options if any changes
-                this.refs.variantKind.setValue('none');
-            });
-        } else if (ref == 'variantKind') {
-            // Get the variant case scenario for determining the default score and score range
-            let selected = this.refs[ref].getValue();
-            if (selected !== 'none') {
-                this.setState({evidenceVariantKind: selected});
-            } else {
-                this.setState({evidenceVariantKind: null});
-            }
-            this.setState({updateDefaultScore: true}, () => {
-                // Reset score range dropdown options if any changes
-                this.refs.scoreRange.setValue('none');
-                // Reset explanation if default score is changed
-                this.refs.changeReason.resetValue();
-                this.setState({requiredScoreExplanation: false});
-            });
-        } else if (ref == 'scoreRange') {
-            /****************************************************/
-            /* If a different score is selected from the range, */
-            /* make explanation text box "required".            */
-            /****************************************************/
-            let selected = this.refs[ref].getValue();
-            if (selected !== 'none') {
-                this.setState({requiredScoreExplanation: true});
-            } else {
-                this.setState({requiredScoreExplanation: false}, () => {
-                    // Reset explanation if default score is kept
-                    this.refs.changeReason.resetValue();
-                });
-            } 
         } else if (ref === 'proband' && this.refs[ref].getValue() === 'Yes') {
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
@@ -244,37 +224,6 @@ var IndividualCuration = React.createClass({
                 }
                 else {
                     this.setState({proband_selected: false});
-                }
-                // Get evidenceScore object for the logged-in user if exists
-                if (stateObj.individual.scores && stateObj.individual.scores.length) {
-                    this.setState({evidenceScores: stateObj.individual.scores}, () => {
-                        // FIXME: Repetitive code as seen in variant_evidence_score.js
-                        let curatorScore;
-                        let evidenceScores = this.state.evidenceScores ? this.state.evidenceScores : [];
-                        let user = this.props.session && this.props.session.user_properties;
-                        // Find if any scores for the segregation are owned by the currently logged-in user
-                        if (evidenceScores && evidenceScores.length) {
-                            // Find the score belonging to the logged-in curator, if any.
-                            curatorScore = userScore(evidenceScores, user && user.uuid);
-                        }
-                        if (curatorScore) {
-                            this.setState({
-                                userEvidenceScore: curatorScore,
-                                evidenceScoreUuid: curatorScore.uuid
-                            });
-                            // Render or remove the default score, score range, and explanation fields
-                            if (curatorScore.scoreStatus && (curatorScore.scoreStatus === 'Score' || curatorScore.scoreStatus === 'Review')) {
-                                this.setState({showScoreInput: true, disableVariantKindInput: false}, () => {
-                                    if (!isNaN(parseFloat(curatorScore.score)) && curatorScore.changeReason.length) {
-                                        this.setState({requiredScoreExplanation: true});
-                                    }
-                                });
-                            } else {
-                                this.setState({showScoreInput: false, disableVariantKindInput: true});
-                            }
-                            curatorScore.variantKind && curatorScore.variantKind !== 'none' ? this.setState({evidenceVariantKind: curatorScore.variantKind}) : this.setState({evidenceVariantKind: null});
-                        }
-                    });
                 }
             }
 
@@ -568,33 +517,31 @@ var IndividualCuration = React.createClass({
                     /*****************************************************/
                     /* Proband score status data object                  */
                     /*****************************************************/
-                    let newEvidenceScore = Object.keys(this.state.userEvidenceScore).length ? curator.flatten(this.state.userEvidenceScore) : {};
-                    let newEvidenceScoreObj = VariantEvidenceScore.handleEvidenceScoreObj.call(this);
-                    if (newEvidenceScoreObj) {
-                        newEvidenceScore = newEvidenceScoreObj;
-                        if (!newEvidenceScore.scoreStatus) {
-                            delete newEvidenceScore['scoreStatus'];
+                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? curator.flatten(this.state.userScoreObj) : {};
+                    if (newUserScoreObj) {
+                        if (!newUserScoreObj.scoreStatus) {
+                            delete newUserScoreObj['scoreStatus'];
                         }
-                        if (!newEvidenceScore.variantKind) {
-                            delete newEvidenceScore['variantKind'];
+                        if (!newUserScoreObj.caseInfoType) {
+                            delete newUserScoreObj['caseInfoType'];
                         }
-                        if (!newEvidenceScore.calculatedScore) {
-                            delete newEvidenceScore['calculatedScore'];
+                        if (!newUserScoreObj.calculatedScore) {
+                            delete newUserScoreObj['calculatedScore'];
                         }
-                        if (!newEvidenceScore.score) {
-                            delete newEvidenceScore['score'];
+                        if (!newUserScoreObj.score) {
+                            delete newUserScoreObj['score'];
                         }
-                        if (!newEvidenceScore.changeReason) {
-                            delete newEvidenceScore['changeReason'];
+                        if (!newUserScoreObj.scoreExplanation) {
+                            delete newUserScoreObj['scoreExplanation'];
                         }
                     }
 
-                    if (Object.keys(newEvidenceScore).length) {
+                    if (Object.keys(newUserScoreObj).length) {
                         /*************************************************************/
                         /* Either update or create the score status object in the DB */
                         /*************************************************************/
-                        if (this.state.evidenceScoreUuid) {
-                            return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newEvidenceScore).then(modifiedScoreObj => {
+                        if (newUserScoreObj.uuid) {
+                            return this.putRestData('/evidencescore/' + newUserScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // FIXME: Need to be able to handle array of scores
                                 if (modifiedScoreObj) {
                                     individualScores.push(modifiedScoreObj['@graph'][0]['@id']);
@@ -602,7 +549,7 @@ var IndividualCuration = React.createClass({
                                 return Promise.resolve(individualScores);
                             });
                         } else {
-                            return this.postRestData('/evidencescore/', newEvidenceScore).then(newScoreObject => {
+                            return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
                                 if (newScoreObject) {
                                     individualScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
@@ -962,14 +909,6 @@ var IndividualCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === "";
 
-        // Props to be passed to evidence scoring
-        let showScoreInput = this.state.showScoreInput;
-        let evidenceVariantKind = this.state.evidenceVariantKind;
-        let evidenceScores = this.state.evidenceScores;
-        let updateDefaultScore = this.state.updateDefaultScore;
-        let disableVariantKindInput = this.state.disableVariantKindInput;
-        let requiredScoreExplanation = this.state.requiredScoreExplanation;
-
         // define where pressing the Cancel button should take you to
         var cancelUrl;
         if (gdm) {
@@ -977,6 +916,9 @@ var IndividualCuration = React.createClass({
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/individual-submit/?gdm=' + gdm.uuid + (individual ? '&individual=' + individual.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
+
+        // Find any pre-existing scores associated with the evidence
+        let evidenceScores = individual && individual.scores ? individual.scores : [];
 
         return (
             <div>
@@ -1037,13 +979,13 @@ var IndividualCuration = React.createClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                                        {VariantEvidenceScore.render.call(this, evidenceScores, gdm.modeInheritance, showScoreInput, evidenceVariantKind,
-                                                        updateDefaultScore, disableVariantKindInput, requiredScoreExplanation)}
+                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="In"
+                                                            handleUserScoreObj={this.handleUserScoreObj} />
                                                     </Panel>
                                                 </PanelGroup>
                                                 {evidenceScores.length > 1 ?
                                                     <Panel panelClassName="panel-data">
-                                                        {RenderEvidenceScores.render.call(this, evidenceScores, true)}
+                                                        <ScoreViewer evidence={individual} otherScores={true} />
                                                     </Panel>
                                                 : null}
                                             </div>
@@ -1698,7 +1640,7 @@ var IndividualViewer = React.createClass({
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        let scores = individual && individual.scores ? individual.scores : null;
+        let evidenceScores = individual && individual.scores ? individual.scores : [];
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1954,9 +1896,18 @@ var IndividualViewer = React.createClass({
                         </Panel>
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
-                            <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
-                                {RenderEvidenceScores.render.call(this, scores)}
-                            </Panel>
+                            <div>
+                                <Panel panelClassName="panel-data">
+                                    {evidenceScores.length > 1 ?
+                                        <ScoreViewer evidence={individual} />
+                                        :
+                                        <div className="row">This evidence has not been scored.</div>
+                                    }
+                                </Panel>
+                                <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
+                                    <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} />
+                                </Panel>
+                            </div>
                         : null}
 
                     </div>
