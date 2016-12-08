@@ -1829,7 +1829,7 @@ function flattenProvisionalVariant(provisional_variant) {
 
 var evidenceScoreSimpleProps = [
     "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore",
-    "variantKind", "changeReason"
+    "caseInfoType", "scoreExplanation"
 ];
 
 function flattenEvidenceScore(evidencescore) {
