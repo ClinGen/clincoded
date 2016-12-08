@@ -174,7 +174,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 
                     {this.state.selectedTab == '' || this.state.selectedTab == 'basic-info' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url}
+                        <CurationInterpretationBasicInfo data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
@@ -187,7 +187,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     : null}
                     {this.state.selectedTab == 'population' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationPopulation data={variant} href_url={this.props.href_url}
+                        <CurationInterpretationPopulation data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
@@ -199,7 +199,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     : null}
                     {this.state.selectedTab == 'predictors' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationComputational data={variant} href_url={this.props.href_url}
+                        <CurationInterpretationComputational data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_bustamante={this.state.ext_bustamante}
@@ -213,19 +213,19 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     : null}
                     {this.state.selectedTab == 'experimental' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url}
+                        <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'segregation-case' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url}
+                        <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'gene-centric' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url}
+                        <CurationInterpretationGeneSpecific data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_myGeneInfo={this.state.ext_myGeneInfo}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
