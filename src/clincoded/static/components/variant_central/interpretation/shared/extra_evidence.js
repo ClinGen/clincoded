@@ -24,6 +24,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         category: React.PropTypes.string, // category (usually the tab) the evidence is part of
         subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
         href_url: React.PropTypes.object, // href_url object
+        variant: React.PropTypes.object, // parent variant object
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -42,11 +43,16 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             editEvidenceId: null, // the ID of the evidence to be edited from the table
             descriptionInput: null, // state to store the description input content
             editDescriptionInput: null, // state to store the edit description input content
-            interpretation: this.props.interpretation // parent interpretation object
+            variant: this.props.variant, // parent variant object
+            interpretation: this.props.interpretation ? this.props.interpretation : null // parent interpretation object
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
+        // Update variant object when received
+        if (nextProps.variant) {
+            this.setState({variant: nextProps.variant});
+        }
         // Update interpretation object when received
         if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
@@ -212,6 +218,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
                 <td className="col-md-2">
+                    {extra_evidence.submitted_by.title}
+                    ({extra_evidence.date_created})
                     <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                     <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
                         clickHandler={() => this.deleteEvidence(extra_evidence)} />
@@ -256,10 +264,14 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
 
     render: function() {
         let relevantEvidenceList = [];
-        if (this.state.interpretation && this.state.interpretation.extra_evidence_list) {
-            this.state.interpretation.extra_evidence_list.map(extra_evidence => {
-                if (extra_evidence.subcategory === this.props.subcategory) {
-                    relevantEvidenceList.push(extra_evidence);
+        if (this.state.variant && this.state.variant.associatedInterpretations) {
+            this.state.variant.associatedInterpretations.map(interpretation => {
+                if (interpretation.extra_evidence_list) {
+                    interpretation.extra_evidence_list.map(extra_evidence => {
+                        if (extra_evidence.subcategory === this.props.subcategory) {
+                            relevantEvidenceList.push(extra_evidence);
+                        }
+                    });
                 }
             });
         }
