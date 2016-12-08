@@ -979,7 +979,7 @@ var IndividualCuration = React.createClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="In"
+                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
                                                             handleUserScoreObj={this.handleUserScoreObj} />
                                                     </Panel>
                                                 </PanelGroup>
@@ -1905,7 +1905,7 @@ var IndividualViewer = React.createClass({
                                     }
                                 </Panel>
                                 <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                    <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} />
+                                    <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual" />
                                 </Panel>
                             </div>
                         : null}
