@@ -268,18 +268,21 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     render: function() {
-        let relevantEvidenceList = [];
+        let relevantEvidenceListRaw = [];
         if (this.state.variant && this.state.variant.associatedInterpretations) {
             this.state.variant.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.map(extra_evidence => {
                         if (extra_evidence.subcategory === this.props.subcategory) {
-                            relevantEvidenceList.push(extra_evidence);
+                            relevantEvidenceListRaw.push(extra_evidence);
                         }
                     });
                 }
             });
         }
+        let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
+            return evidence.date_created;
+        }).reverse();
         let parentObj = {/* // BEHAVIOR TBD
             '@type': ['evidenceList'],
             'evidenceList': relevantEvidenceList
@@ -300,13 +303,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                             </thead>
                         : null}
                         <tbody>
-                            {relevantEvidenceList.length > 0 ?
-                                relevantEvidenceList.map(evidence => {
-                                    return (this.state.editEvidenceId === evidence['@id']
-                                        ? this.renderInterpretationExtraEvidenceEdit(evidence)
-                                        : this.renderInterpretationExtraEvidence(evidence));
-                                })
-                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                             {!this.props.viewOnly ?
                                 <tr>
                                     <td colSpan="3">
@@ -339,6 +335,13 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                     </td>
                                 </tr>
                             : null}
+                            {relevantEvidenceList.length > 0 ?
+                                relevantEvidenceList.map(evidence => {
+                                    return (this.state.editEvidenceId === evidence['@id']
+                                        ? this.renderInterpretationExtraEvidenceEdit(evidence)
+                                        : this.renderInterpretationExtraEvidence(evidence));
+                                })
+                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
                 </div>
