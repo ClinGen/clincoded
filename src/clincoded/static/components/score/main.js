@@ -16,7 +16,9 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         evidence: React.PropTypes.object, // Individual, Experimental or Case Control
         modeInheritance: React.PropTypes.string, // Mode of Inheritance
         evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
-        handleUserScoreObj: React.PropTypes.func
+        handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
+        scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        submitBusy: React.PropTypes.bool // TRUE while the form submit is running
     },
 
     getInitialState() {
@@ -65,9 +67,9 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     handleSelectChange(ref, e) {
-        if (ref == 'scoreStatus') {
+        if (this.refs.scoreStatus) {
             // Render or remove the case info types, default score, score range, and explanation fields
-            let selected = this.refs[ref].getValue();
+            let selected = this.refs.scoreStatus.getValue();
             let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
             if (selected === 'Score' || (selected === 'Review' && modeInheritanceType.length)) {
                 this.setState({showScoreInput: true}, () => {
@@ -84,9 +86,9 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                 // Reset variant scenario dropdown options if any changes
                 this.refs.caseInfoType.setValue('none');
             });
-        } else if (ref == 'caseInfoType') {
+        } else if (this.refs.caseInfoType) {
             // Get the variant case info type for determining the default score and score range
-            let selected = this.refs[ref].getValue();
+            let selected = this.refs.caseInfoType.getValue();
             if (selected !== 'none') {
                 this.setState({caseInfoType: selected});
             } else {
@@ -99,12 +101,12 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                 this.refs.scoreExplanation.resetValue();
                 this.setState({requiredScoreExplanation: false});
             });
-        } else if (ref == 'scoreRange') {
+        } else if (this.refs.scoreRange) {
             /****************************************************/
             /* If a different score is selected from the range, */
             /* make explanation text box "required".            */
             /****************************************************/
-            let selected = this.refs[ref].getValue();
+            let selected = this.refs.scoreRange.getValue();
             if (selected !== 'none') {
                 this.setState({requiredScoreExplanation: true});
             } else {
@@ -273,6 +275,11 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                             error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
                             placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
                             rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                    </div>
+                : null}
+                {this.props.scoreSubmit ?
+                    <div className="curation-submit clearfix">
+                        <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit} title="Save" submitBusy={this.props.submitBusy} />
                     </div>
                 : null}
             </div>
