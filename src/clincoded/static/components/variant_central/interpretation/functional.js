@@ -58,7 +58,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                     : null}
                     {(this.props.data && this.state.interpretation) ?
-                        <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="hotspot-functiona-domain"
+                        <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="hotspot-functiona-domain" session={this.props.session}
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Hotspot or functional domain)</span>}
                             variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
@@ -79,7 +79,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                     : null}
                     {(this.props.data && this.state.interpretation) ?
-                        <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies"
+                        <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}
                             href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
                             variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}

@@ -421,9 +421,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var computationObjDiffFlag = this.state.computationObjDiffFlag;
         var singleNucleotide = this.state.ext_singleNucleotide;
 
-        console.log('computational');
-        console.log(this.props.session);
-
         var variant = this.props.data;
         var gRCh38 = null;
         var gRCh37 = null;
@@ -577,7 +574,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors"
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
                                 variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         : null}
@@ -608,7 +605,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon"
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
                                 variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         : null}
@@ -651,7 +648,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </table>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis"
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
                                 variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         : null}
@@ -684,7 +681,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron"
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
                                 variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         : null}
@@ -746,7 +743,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel"
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
                                 variant={this.props.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         : null}
