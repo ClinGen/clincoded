@@ -222,7 +222,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                     {extra_evidence.submitted_by.title} ({moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")})
                     {this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
                         <div>
-                            <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                            <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                             <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
                                 clickHandler={() => this.deleteEvidence(extra_evidence)} />
                         </div>
@@ -254,7 +254,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                             labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleDescriptionChange} />
                         <div className="clearfix">
                             <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
-                            <Input type="submit" inputClassName="btn-info pull-right btn-inline-spacer" id="submit" title="Edit"
+                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
                                 submitBusy={this.state.editBusy} inputDisabled={!(this.state.editDescriptionInput && this.state.editDescriptionInput.length > 0)} />
                             {this.state.updateMsg ?
                                 <div className="submit-info pull-right">{this.state.updateMsg}</div>
