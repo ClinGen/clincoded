@@ -327,30 +327,36 @@ var VariantCuration = React.createClass({
                         <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
                             <h2>
-                                {variant.clinvarVariantId ?
-                                    <div className="row variant-association-header">
-                                        <dl className="dl-horizontal">
-                                            <dt>{gdm && annotation ? <a href={`/curation-central/?gdm=${gdm.uuid}&pmid=${annotation.article.pmid}`}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; ClinVar Variation ID</dt>
-                                            <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
-                                        </dl>
-                                        <dl className="dl-horizontal">
-                                            <dt>ClinVar Preferred Title</dt>
-                                            <dd>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
-                                        </dl>
+                                <div className="row variant-association-header">
+                                    <div>
+                                        {gdm && annotation ? <a href={`/curation-central/?gdm=${gdm.uuid}&pmid=${annotation.article.pmid}`}><i className="icon icon-briefcase"></i></a> : null}
+                                        {variant.clinvarVariantId ?
+                                            <span>
+                                                <span className="term-name"> &#x2F;&#x2F; ClinVar Variation ID: </span>
+                                                <span className="term-value"><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></span>
+                                            </span>
+                                        : null}
+                                        {variant.carId ?
+                                            <span>
+                                                <span className="term-name"> &#x2F;&#x2F; ClinGen Allele Registry ID: </span>
+                                                <span className="term-value"><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for variant ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></span>
+                                            </span>
+                                        : null}
                                     </div>
-                                : null}
-                                {variant.carId && !variant.clinvarVariantId ?
-                                    <div className="row variant-association-header">
-                                        <dl className="dl-horizontal">
-                                            <dt>{gdm && annotation ? <a href={`/curation-central/?gdm=${gdm.uuid}&pmid=${annotation.article.pmid}`}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; ClinGen Allele Registry ID</dt>
-                                            <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for variant ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
-                                        </dl>
-                                        <dl className="dl-horizontal">
-                                            <dt>Genomic HGVS Term</dt>
-                                            <dd>{variant.hgvsNames && variant.hgvsNames.GRCh38 ? `${variant.hgvsNames.GRCh38} (GRCh38)` : null}</dd>
-                                        </dl>
+                                    <div>
+                                        {variant.clinvarVariantTitle ?
+                                            <span>
+                                                <span className="term-name">ClinVar Preferred Title: </span>
+                                                <span className="term-value">{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</span>
+                                            </span>
+                                        :
+                                            <span>
+                                                <span className="term-name">Genomic HGVS Term: </span>
+                                                <span className="term-value">{variant.hgvsNames && variant.hgvsNames.GRCh38 ? `${variant.hgvsNames.GRCh38} (GRCh38)` : null}</span>
+                                            </span>
+                                        }
                                     </div>
-                                : null}
+                                </div>
                             </h2>
                         : null}
                     </div>
