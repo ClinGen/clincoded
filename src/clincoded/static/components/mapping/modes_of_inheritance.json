@@ -1,11 +1,30 @@
-[
-    "Autosomal dominant inheritance (HP:0000006)",
-    "Autosomal recessive inheritance (HP:0000007)",
-    "Unknown",
-    "Mitochondrial inheritance (HP:0001427)",
-    "Multifactorial inheritance (HP:0001426)",
-    "Somatic mutation (HP:0001428)",
-    "X-linked inheritance (HP:0001417)",
-    "Y-linked inheritance (HP:0001450)",
-    "Other"
-]
+{
+    "Autosomal dominant inheritance (HP:0000006)": [
+        "with maternal imprinting (HP:0012275)",
+        "with paternal imprinting (HP:0012274)",
+        "sex-limited (HP:0001470)",
+        "with genetic anticipation",
+        "primarily or exclusively de novo"
+    ],
+    "Autosomal recessive inheritance (HP:0000007)": [
+        "with genetic anticipation",
+        "sex-limited"
+    ],
+    "Mitochondrial inheritance (HP:0001427)": [
+        "primarily or exclusively homoplasmic",
+        "primarily or exclusively heteroplasmic"
+    ],
+    "X-linked inheritance (HP:0001417)": [
+        "dominant (HP:0001423)",
+        "recessive (HP:0001419)",
+        "primarily recessive with milder female expression"
+    ],
+    "Other": [
+        "Y-linked inheritance (HP:0001450)",
+        "Somatic mutation (HP:0001428)",
+        "Multifactorial inheritance (HP:0001426)",
+        "Codominant inheritance",
+        "Semidominant inheritance"
+    ],
+    "Unknown": []
+}
