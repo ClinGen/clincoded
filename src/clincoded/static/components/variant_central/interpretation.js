@@ -7,9 +7,11 @@ var form = require('../../libs/bootstrap/form');
 var Form = form.Form;
 var Input = form.Input;
 var FormMixin = form.FormMixin;
+var curator = require('../curator');
 
 var queryKeyValue = globals.queryKeyValue;
 var editQueryValue = globals.editQueryValue;
+var truncateString = globals.truncateString;
 
 // Import individual tab components
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
@@ -289,3 +291,250 @@ var InterpretationModifyHistory = React.createClass({
 });
 
 globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
+
+
+// Map Interpretation statuses from
+var statusMappings = {
+//  Status from Interpretation        CSS class                Short name for screen display
+    'In Progress':                    {cssClass: 'in-progress', shortName: 'In Progress'},
+    'Provisional':                    {cssClass: 'provisional', shortName: 'Provisional'}
+};
+
+var InterpretationCollection = module.exports.InterpretationCollection = React.createClass({
+    mixins: [FormMixin],
+
+    getInitialState: function() {
+        return {
+            sortCol: 'variant',
+            reversed: false,
+            searchTerm: ''
+        };
+    },
+
+    // Handle clicks in the table header for sorting
+    sortDir: function(colName) {
+        var reversed = colName === this.state.sortCol ? !this.state.reversed : false;
+        var sortCol = colName;
+        this.setState({sortCol: sortCol, reversed: reversed});
+    },
+
+    // Call-back for the JS sorting function. Expects Interpretationss to compare in a and b. Depending on the column currently selected
+    // for sorting, this function sorts on the relevant parts of the Interpretation.
+    sortCol: function(a, b) {
+        var diff;
+
+        switch (this.state.sortCol) {
+            case 'status':
+                var statuses = Object.keys(statusMappings);
+                var statusIndexA = statuses.indexOf(a.interpretation_status);
+                var statusIndexB = statuses.indexOf(b.interpretation_status);
+                diff = statusIndexA - statusIndexB;
+                break;
+            case 'variant':
+                diff = (a.variant.clinvarVariantId ? a.variant.clinvarVariantId : a.variant.carId) > (b.variant.clinvarVariantId ? b.variant.clinvarVariantId : b.variant.carId) ? 1 : -1;
+                break;
+            case 'disease':
+                diff = (a.disease && a.disease.term ? a.disease.term : "") > (b.disease && b.disease.term ? b.disease.term : "") ? 1 : -1;
+                break;
+            case 'moi':
+                diff = (a.modeInheritance ? a.modeInheritance : "") > (b.modeInheritance ? b.modeInheritance : "") ? 1 : -1;
+                break;
+            case 'last':
+                var aAnnotation = this.findLatestEvaluations(a);
+                var bAnnotation = this.findLatestEvaluations(b);
+                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? 1 : -1);
+                break;
+            case 'creator':
+                var aLower = a.submitted_by.last_name.toLowerCase();
+                var bLower = b.submitted_by.last_name.toLowerCase();
+                diff = aLower > bLower ? 1 : (aLower === bLower ? 0 : -1);
+                break;
+            case 'created':
+                diff = Date.parse(a.date_created) - Date.parse(b.date_created);
+                break;
+            default:
+                diff = 0;
+                break;
+        }
+        return this.state.reversed ? -diff : diff;
+    },
+
+    searchChange: function(ref, e) {
+        var searchVal = this.refs[ref].getValue().toLowerCase();
+        this.setState({searchTerm: searchVal});
+    },
+
+    findLatestEvaluations: function(interpretation) {
+        var evaluations = interpretation && interpretation.evaluations;
+        var latestEvaluation = null;
+        var latestTime = 0;
+        if (evaluations && evaluations.length) {
+            evaluations.forEach(function(evaluation) {
+                // Get Unix timestamp version of evaluations's time and compare against the saved version.
+                var time = moment(evaluation.date_created).format('x');
+                if (latestTime < time) {
+                    latestEvaluation = evaluation;
+                    latestTime = time;
+                }
+            });
+        }
+        return latestEvaluation;
+    },
+
+    render: function () {
+        var context = this.props.context;
+        var interpretations = context['@graph'];
+        var searchTerm = this.state.searchTerm;
+        var filteredInterpretations;
+        var sortIconClass = {
+            status: 'tcell-sort', variant: 'tcell-sort', disease: 'tcell-sort', moi: 'tcell-sort',
+            last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'
+        };
+        sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
+
+        // Filter Interpretations
+        if (searchTerm) {
+            filteredInterpretations = interpretations.filter(function(interpretation) {
+                return (
+                    (interpretation.variant.clinvarVariantId && interpretation.variant.clinvarVariantId.toLowerCase().indexOf(searchTerm) !== -1) ||
+                    (interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm) !== -1) ||
+                    (interpretation.variant.carId && interpretation.variant.carId.toLowerCase().indexOf(searchTerm) !== -1) ||
+                    (interpretation.variant.hvgsNames && interpretation.variant.hgvsNames.GRCh38 && interpretation.variant.hgvsNames.GRCh38.toLowerCase().indexOf(searchTerm) !== -1) ||
+                    (interpretation.disease && interpretation.disease.orphaNumber && interpretation.disease.orphaNumber.indexOf(searchTerm) !== -1) ||
+                    (interpretation.disease && interpretation.disease.term && interpretation.disease.term.toLowerCase().indexOf(searchTerm) !== -1)
+                );
+            });
+        } else {
+            filteredInterpretations = interpretations;
+        }
+
+        return (
+            <div className="container">
+                <div className="row gdm-header">
+                    <div className="col-sm-12 col-md-8">
+                        <h1>All Interpretations</h1>
+                    </div>
+                    <div className="col-md-1"></div>
+                    <div className="col-sm-12 col-md-3">
+                        <Form formClassName="form-std gdm-filter-form">
+                            <Input type="text" ref="q" placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
+                                labelClassName="control-label" groupClassName="form-group" />
+                        </Form>
+                    </div>
+                </div>
+                <InterpretationStatusLegend />
+                <div className="table-responsive">
+                    <div className="table-gdm">
+                        <div className="table-header-gdm">
+                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
+                                <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
+                            </div>
+                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'variant')}>
+                                <div>Variant Preferred Title<span className={sortIconClass.variant}></span></div>
+                                <div>Variant ID(s)</div>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'disease')}>
+                                Disease<span className={sortIconClass.disease}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'moi')}>
+                                Mode of Inheritance<span className={sortIconClass.moi}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
+                                Last Edited<span className={sortIconClass.last}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'creator')}>
+                                Creator<span className={sortIconClass.creator}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'created')}>
+                                Created<span className={sortIconClass.created}></span>
+                            </div>
+                        </div>
+                        {filteredInterpretations.sort(this.sortCol).map(interpretation => {
+                            let variantUuid = interpretation.variant.uuid;
+                            let clinvarVariantId = interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null;
+                            let clinvarVariantTitle = interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null;
+                            let carId = interpretation.variant.carId ? interpretation.variant.carId : null;
+                            let grch38 = interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null;
+                            let orphanetId = interpretation.disease && interpretation.disease.orphaNumber ? interpretation.disease.orphaNumber : null;
+                            let diseaseTerm = interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null;
+                            let modeInheritance = interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
+                            let createdTime = moment(interpretation.date_created);
+                            let latestEvaluation = interpretation && this.findLatestEvaluations(interpretation);
+                            let latestTime = latestEvaluation ? moment(latestEvaluation.date_created) : '';
+                            let statusString = statusMappings[interpretation.interpretation_status].cssClass; // Convert status string to CSS class
+                            let iconClass = 'icon gdm-status-icon-' + statusString;
+
+                            return (
+                                <a className="table-row-gdm" href={'/variant-central/?variant=' + variantUuid} key={interpretation.uuid}>
+                                    <div className="table-cell-gdm-status">
+                                        <span className={iconClass} title={interpretation.interpretation_status}></span>
+                                    </div>
+
+                                    <div className="table-cell-gdm-main">
+                                        <div>{clinvarVariantTitle ? clinvarVariantTitle : grch38}</div>
+                                        <div>
+                                            {clinvarVariantId ? <span>ClinVar Variation ID: <strong>{clinvarVariantId}</strong></span> : null}
+                                            {clinvarVariantId && carId ? " // " : null}
+                                            {carId ? <span>ClinGen Allele Registry ID: <strong>{carId}</strong></span> : null}
+                                        </div>
+                                    </div>
+
+                                    <div className="table-cell-gdm">
+                                        {diseaseTerm ? <span>{diseaseTerm} (ORPHA{orphanetId})</span> : null}
+                                    </div>
+
+                                    <div className="table-cell-gdm">
+                                        {modeInheritance ? modeInheritance : null}
+                                    </div>
+
+                                    <div className="table-cell-gdm">
+                                        {latestTime ?
+                                            <div>
+                                                <div>{latestTime.format("YYYY MMM DD")}</div>
+                                                <div>{latestTime.format("h:mm a")}</div>
+                                            </div>
+                                        : null}
+                                    </div>
+
+                                    <div className="table-cell-gdm">
+                                        <div>{interpretation.submitted_by.last_name}, {interpretation.submitted_by.first_name}</div>
+                                    </div>
+
+                                    <div className="table-cell-gdm">
+                                        <div>{createdTime.format("YYYY MMM DD")}</div>
+                                        <div>{createdTime.format("h:mm a")}</div>
+                                    </div>
+                                </a>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+});
+
+globals.content_views.register(InterpretationCollection, 'interpretation_collection');
+
+
+// Render the Interpretation status legend
+var InterpretationStatusLegend = React.createClass({
+    render: function() {
+        return (
+            <div className="row">
+                <div className="gdm-status-legend">
+                    {Object.keys(statusMappings).map(function(status, i) {
+                        var iconClass = 'icon gdm-status-icon-' + statusMappings[status].cssClass;
+
+                        return (
+                            <div className={"col-sm-2 gdm-status-item" + (i === 0 ? ' col-sm-offset-1' : '')} key={i}>
+                                <span className={iconClass}></span>
+                                <span className="gdm-status-text">{statusMappings[status].shortName}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+});
