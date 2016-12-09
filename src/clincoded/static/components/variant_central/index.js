@@ -207,6 +207,7 @@ var VariantCurationHub = React.createClass({
                         this.setState({
                             loading_bustamante: false
                         });
+                        console.log('Bustamante Fetch Error: %o', err);
                     });
                 }).catch(err => {
                     this.setState({
