@@ -245,8 +245,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
             // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
-            let hgvs_GRCh37 = (this.state.data.hgvsNames.GRCh37) ? this.state.data.hgvsNames.GRCh37 : this.state.data.hgvsNames.gRCh37;
-            let hgvs_GRCh38 = (this.state.data.hgvsNames.GRCh38) ? this.state.data.hgvsNames.GRCh38 : this.state.data.hgvsNames.gRCh38;
+            // update off of this.props.data as it is more stable, and this.state.data does not contain relevant updates
+            let hgvs_GRCh37 = this.props.data.hgvsNames.GRCh37 ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
+            let hgvs_GRCh38 = this.props.data.hgvsNames.GRCh38 ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
             let populationObj = this.state.populationObj;
             let updated1000GData = false;
             // get extra 1000Genome information
