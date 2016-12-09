@@ -217,18 +217,21 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         // for rendering the evidence in tabular format
         return (
             <tr key={extra_evidence.uuid}>
-                <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
-                <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
-                <td className="col-md-2">
-                    {extra_evidence.submitted_by.title} ({moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")})
-                    {!this.props.viewOnly && this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
-                        <div>
-                            <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
-                            <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
-                                clickHandler={() => this.deleteEvidence(extra_evidence)} />
-                        </div>
-                    : null}
-                </td>
+                <td className={!this.props.viewOnly ? "col-md-3" : "col-md-5"}><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
+                <td className="col-md-3"><p className="word-break">{extra_evidence.evidenceDescription}</p></td>
+                <td className="col-md-2">{extra_evidence.submitted_by.title}</td>
+                <td className="col-md-2">{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                {!this.props.viewOnly ?
+                    <td className="col-md-2">
+                        {!this.props.viewOnly && this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
+                            <div>
+                                <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                                <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
+                                    clickHandler={() => this.deleteEvidence(extra_evidence)} />
+                            </div>
+                        : null}
+                    </td>
+                : null}
             </tr>
         );
     },
@@ -246,7 +249,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     renderInterpretationExtraEvidenceEdit: function(extra_evidence) {
         return (
             <tr key={extra_evidence.uuid}>
-                <td colSpan="3">
+                <td colSpan="5">
                     <PmidSummary article={extra_evidence.articles[0]} className="alert alert-info" pmidLinkout />
                     <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
                         <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
@@ -298,14 +301,16 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                 <tr>
                                     <th>Article</th>
                                     <th>Evidence</th>
-                                    <th>Submitted by</th>
+                                    <th>Submitted By</th>
+                                    <th>Date Added</th>
+                                    {!this.state.viewOnly? <th></th> : null}
                                 </tr>
                             </thead>
                         : null}
                         <tbody>
                             {!this.props.viewOnly ?
                                 <tr>
-                                    <td colSpan="3">
+                                    <td colSpan="5">
                                         {this.state.tempEvidence ?
                                             <span>
                                                 <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
@@ -341,7 +346,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                         ? this.renderInterpretationExtraEvidenceEdit(evidence)
                                         : this.renderInterpretationExtraEvidence(evidence));
                                 })
-                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
+                            : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
                 </div>
