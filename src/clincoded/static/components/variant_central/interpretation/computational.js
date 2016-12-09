@@ -152,7 +152,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.setState({interpretation: nextProps.interpretation});
+        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
         // update data based on api call results
         if (nextProps.ext_myVariantInfo) {
             this.parseOtherPredData(nextProps.ext_myVariantInfo);

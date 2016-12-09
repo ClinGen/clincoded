@@ -203,6 +203,10 @@ var VariantCurationHub = React.createClass({
                 }).then(data => {
                     this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
                         this.setState({ext_bustamante: result, loading_bustamante: false});
+                    }).catch(err => {
+                        this.setState({
+                            loading_bustamante: false
+                        });
                     });
                 }).catch(err => {
                     this.setState({
