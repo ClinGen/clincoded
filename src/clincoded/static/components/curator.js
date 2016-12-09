@@ -94,6 +94,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            // Display selected MOI adjective if any. Otherwise, display selected MOI.
+            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
@@ -168,7 +170,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             }
                                         </span>
                                     </h1>
-                                    <h2><i>{mode}</i></h2>
+                                    <h2><i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></h2>
                                 </span>
                         </div>
                     </div>
@@ -1726,7 +1728,7 @@ function flattenExperimental(experimental) {
 
 
 var gdmSimpleProps = [
-    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active"
+    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active", "modeInheritanceAdjective"
 ];
 
 function flattenGdm(gdm) {
@@ -1864,7 +1866,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties

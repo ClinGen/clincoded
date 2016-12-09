@@ -19,7 +19,6 @@ var Alert = modal.Alert;
 var ModalMixin = modal.ModalMixin;
 var Panel = panel.Panel;
 
-
 var CreateGeneDisease = React.createClass({
     mixins: [FormMixin, RestMixin, ModalMixin, CuratorHistory],
 
@@ -29,7 +28,47 @@ var CreateGeneDisease = React.createClass({
     },
 
     getInitialState: function() {
-        return {gdm: {}};
+        return {
+            gdm: {},
+            adjectives: [],
+            adjectiveDisabled: true
+        };
+    },
+
+    // Handle value changes in modeInheritance dropdown selection
+    handleChange: function(ref, e) {
+        if (ref === 'hpo') {
+            let selected = this.refs[ref].getValue();
+            /******************************************************/
+            /* If 'X-linked inheritance' is selected,             */
+            /* enable adjective menu and set it a required field. */
+            /* If 'Autosomal dominant inheritance' is selected,   */
+            /* or 'Autosomal recessive inheritance is selected,   */
+            /* enable adjective menu only & set it not required.  */
+            /* Everything else, disable adjective menu.           */
+            /******************************************************/
+            if (selected.indexOf('X-linked inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['X-linked inheritance (HP:0001417)']);
+            } else if (selected.indexOf('Autosomal dominant inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Autosomal dominant inheritance (HP:0000006)']);
+            } else if (selected.indexOf('Autosomal recessive inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Autosomal recessive inheritance (HP:0000007)']);
+            } else if (selected.indexOf('Mitochondrial inheritance') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Mitochondrial inheritance (HP:0001427)']);
+            } else if (selected.indexOf('Other') > -1) {
+                this.handleAdjectives(false, modesOfInheritance['Other']);
+            } else {
+                this.handleAdjectives(true, []);
+            }
+        }
+    },
+
+    // Helper method for the 'handleChange' method to minimize repetitive code
+    handleAdjectives: function(adjectiveDisabled, adjectives) {
+        this.setState({
+            adjectiveDisabled: adjectiveDisabled,
+            adjectives: adjectives
+        }, () => {this.refs.moiAdjective.setValue('none');});
     },
 
     // Form content validation
@@ -59,11 +98,16 @@ var CreateGeneDisease = React.createClass({
         this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
         this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         this.saveFormValue('hpo', this.refs.hpo.getValue());
+        let moiAdjectiveValue = this.refs.moiAdjective.getValue();
+        if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
+            this.saveFormValue('moiAdjective', moiAdjectiveValue);
+        }
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
             var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('hpo');
+            let adjective = this.getFormValue('moiAdjective');
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
             // If either error out, set the form error fields
@@ -80,11 +124,14 @@ var CreateGeneDisease = React.createClass({
                 ).then(gdmSearch => {
                     if (gdmSearch.total === 0) {
                         // Matching GDM not found. Create a new GDM
-                        var newGdm = {
+                        let newGdm = {
                             gene: geneId,
                             disease: orphaId,
                             modeInheritance: mode
                         };
+                        if (adjective && adjective.length) {
+                            newGdm['modeInheritanceAdjective'] = adjective;
+                        }
 
                         // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
                         // of the new GDM in the query string.
@@ -119,6 +166,10 @@ var CreateGeneDisease = React.createClass({
     },
 
     render: function() {
+        let adjectives = this.state.adjectives;
+        let adjectiveDisabled = this.state.adjectiveDisabled;
+        const moiKeys = Object.keys(modesOfInheritance);
+
         return (
             <div className="container">
                 <h1>{this.props.context.title}</h1>
@@ -132,13 +183,22 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select"
+                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
                                     <option value="select" disabled="disabled">Select</option>
                                     <option value="" disabled="disabled"></option>
-                                    {modesOfInheritance.map(function(modeOfInheritance, i) {
+                                    {moiKeys.map(function(modeOfInheritance, i) {
                                         return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
+                                    })}
+                                </Input>
+                                <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="none"
+                                    error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')} inputDisabled={adjectiveDisabled}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
+                                    <option value="none" disabled="disabled">Select</option>
+                                    <option disabled="disabled"></option>
+                                    {adjectives.map(function(adjective, i) {
+                                        return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
                                     })}
                                 </Input>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />

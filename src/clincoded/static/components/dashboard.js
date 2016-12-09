@@ -147,6 +147,7 @@ var Dashboard = React.createClass({
                                         <i className="icon icon-question-circle"></i>
                                     </a>
                                 </li>
+                                <li><a href="/interpretations/">View list of all Variant Interpretations</a></li>
                                 <li><a href="/create-gene-disease/">Create Gene-Disease Record</a></li>
                                 <li><a href="/gdm/">View list of all Gene-Disease Records</a></li>
                             </ul>

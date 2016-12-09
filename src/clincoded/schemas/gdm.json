@@ -108,6 +108,12 @@
             "description": "boolean switch to set if the gdm avaliable for curation.",
             "type": "boolean",
             "default": true
+        },
+        "modeInheritanceAdjective": {
+            "title": "Adjective",
+            "description": "Adjective for Mode of Inheritance",
+            "type": "string",
+            "default": ""
         }
     },
     "columns": {
@@ -168,6 +174,10 @@
             "type": "string"
         },
         "submitted_by.last_name": {
+            "title": "Creator",
+            "type": "string"
+        },
+        "submitted_by.first_name": {
             "title": "Creator",
             "type": "string"
         },
