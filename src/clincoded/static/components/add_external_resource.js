@@ -652,7 +652,7 @@ function carTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323</a>).</span>
+                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={`http:${external_url_map['CARallele']}CA003323.html`} target="_blank">CA003323</a>).</span>
                     </p>
                 </span>;
             break;
@@ -732,12 +732,12 @@ function carRenderResourceResult() {
                 <div className="row">
                     <div className="row">
                         <span className="col-xs-4 col-md-4 control-label"><label>CA ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong></a></span>
+                        <span className="col-xs-8 col-md-8 text-no-input"><a href={`${this.props.protocol}${external_url_map['CARallele']}${this.state.tempResource.carId}.html`} target="_blank"><strong>{this.state.tempResource.carId}</strong></a></span>
                     </div>
                     {this.state.tempResource.clinvarVariantId ?
                         <div className="row">
                             <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
-                            <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
+                            <span className="col-xs-8 col-md-8 text-no-input"><a href={`${external_url_map['ClinVarSearch']}${this.state.tempResource.clinvarVariantId}`} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
                         </div>
                     : null}
                     {this.state.tempResource.hgvsNames ?
