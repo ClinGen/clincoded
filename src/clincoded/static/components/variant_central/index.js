@@ -91,7 +91,9 @@ var VariantCurationHub = React.createClass({
 
     // Retrieve the variant object from db with the given uuid
     getClinVarData: function(uuid) {
+        console.log("I trigger");
         return this.getRestData('/variants/' + uuid, null, true).then(response => {
+            console.log("I trigger2");
             // The variant object successfully retrieved
             this.setState({variantObj: response});
             // ping out external resources (all async)

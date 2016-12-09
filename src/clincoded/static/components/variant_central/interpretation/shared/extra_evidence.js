@@ -217,10 +217,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         // for rendering the evidence in tabular format
         return (
             <tr key={extra_evidence.uuid}>
-                <td className={!this.props.viewOnly ? "col-md-3" : "col-md-5"}><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
+                <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-3"><p className="word-break">{extra_evidence.evidenceDescription}</p></td>
-                <td className="col-md-2">{extra_evidence.submitted_by.title}</td>
-                <td className="col-md-2">{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{extra_evidence.submitted_by.title}</td>
+                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
                 {!this.props.viewOnly ?
                     <td className="col-md-2">
                         {!this.props.viewOnly && this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
