@@ -138,11 +138,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentWillReceiveProps: function(nextProps) {
-        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
-        // when props are updated, update the parent interpreatation object, if applicable
-        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
-            this.setState({interpretation: nextProps.interpretation});
-        }
+        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
         // set desired CI if previous data for it exists
         this.getPrevSetDesiredCI(nextProps.interpretation);
         // update data based on api call results
