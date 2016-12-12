@@ -144,7 +144,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                         <div className="panel-body">
                             {(myGeneInfo) ?
                                 <a href={external_url_map['ClinVar'] + '?term=' + myGeneInfo.symbol + '%5Bgene%5D'}
-                                    target="_blank">Search ClinVar for variants in this gene <i className="icon icon-external-link"></i></a>
+                                    target="_blank">Search ClinVar for variants in this gene</a>
                                 :
                                 <span>No other variants found in this gene at ClinVar.</span>
                             }
@@ -178,7 +178,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                         {ensemblGeneId ?
                                             <a href={dbxref_prefix_map['ENSEMBL'] + ensemblGeneId + ';db=core'} target="_blank">{ensemblGeneId}</a>
                                             :
-                                            <a href="http://ensembl.org" target="_blank">Search Ensembl <i className="icon icon-external-link"></i></a>
+                                            <a href="http://ensembl.org" target="_blank">Search Ensembl</a>
                                         }
                                     </dd>
                                 </dl>

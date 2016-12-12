@@ -375,7 +375,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         return (
                             <dl className="inline-dl clearfix">
                                 <dt>Additional ClinVar variants found in the same codon: <span className="condon-variant-count">{codon.count-1}</span></dt>
-                                <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon <i className="icon icon-external-link"></i></a>)</dd>
+                                <dd>(<a href={external_url_map['ClinVar'] + '?term=' + codon.term + '+%5Bvariant+name%5D+and+' + codon.symbol} target="_blank">Search ClinVar for variants in this codon</a>)</dd>
                             </dl>
                         );
                     } else {
@@ -568,9 +568,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
-                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan</a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE</a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder</a>
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
@@ -675,9 +675,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                         <div className="panel panel-info datasource-splice">
                             <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                             <div className="panel-body">
-                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE <i className="icon icon-external-link"></i></a>
-                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder <i className="icon icon-external-link"></i></a>
+                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan</a>
+                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE</a>
+                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder</a>
                             </div>
                         </div>
                         {(this.props.data && this.state.interpretation) ?
@@ -717,7 +717,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser <i className="icon icon-external-link"></i></a></dd>
+                                        <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser</a></dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Variation Viewer [
@@ -727,7 +727,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer <i className="icon icon-external-link"></i></a></dd>
+                                        <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer</a></dd>
                                     }
                                     {(links_38 || links_37) ?
                                         <dd>Ensembl Browser [
@@ -737,7 +737,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             ]
                                         </dd>
                                         :
-                                        <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser <i className="icon icon-external-link"></i></a></dd>
+                                        <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser</a></dd>
                                     }
                                 </dl>
                             </div>

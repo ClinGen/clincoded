@@ -434,7 +434,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
-                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID: {article.pmid} <i className="icon icon-external-link"></i></a></span> : null}
+                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID: {article.pmid}</a></span> : null}
                 </p>
             );
         } else {
@@ -2039,7 +2039,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
     return (
         <p className="col-sm-7 col-sm-offset-5 mutalyzer-link">
-            (e.g. CA ID whenever possible; otherwise RCV, rs ID, or HGVS)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer <i className="icon icon-external-link"></i></a>
+            (e.g. CA ID whenever possible; otherwise RCV, rs ID, or HGVS)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>
         </p>
     );
 };
