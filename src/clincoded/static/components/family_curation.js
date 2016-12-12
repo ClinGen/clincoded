@@ -97,7 +97,6 @@ var FamilyCuration = React.createClass({
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
             individualRequired: null, // Boolean for set up requirement of proband
-            variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
@@ -125,9 +124,9 @@ var FamilyCuration = React.createClass({
             let individualName = this.refs['individualname'].getValue();
             let individualOrphanetId = this.refs['individualorphanetid'].getValue();
             if (individualName || individualOrphanetId) {
-                this.setState({individualRequired: true, variantRequired: true});
+                this.setState({individualRequired: true});
             } else if (!individualName && !individualOrphanetId) {
-                this.setState({individualRequired: false, variantRequired: false});
+                this.setState({individualRequired: false});
             }
         } else if (ref === 'SEGlodPublished') {
             if (this.refs[ref].getValue() === 'Yes') {
@@ -188,7 +187,7 @@ var FamilyCuration = React.createClass({
         var hpoIds = '';
         var hpoFreeText = '';
         if (fromTarget == 'group') {
-            this.setState({individualRequired: true, variantRequired: true});
+            this.setState({individualRequired: true});
             if (this.state.group) {
                 // We have a group, so get the disease array from it.
                 associatedGroups = [this.state.group];
@@ -233,7 +232,7 @@ var FamilyCuration = React.createClass({
                 }
             }
         } else if (fromTarget == 'family') {
-            this.setState({individualRequired: true, variantRequired: true});
+            this.setState({individualRequired: true});
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
             var errors = this.state.formErrors;
@@ -328,7 +327,6 @@ var FamilyCuration = React.createClass({
                     if (segregation.variants && segregation.variants.length) {
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
-                        stateObj.variantRequired = stateObj.probandIndividual.recessiveZygosity ? true : false;
                         stateObj.variantInfo = {};
                         // For each incoming variant, set the form value
                         for (var i = 0; i < segregation.variants.length; i++) {
@@ -517,7 +515,7 @@ var FamilyCuration = React.createClass({
                 }
             }
 
-            if (this.state.individualRequired || this.state.variantRequired) {
+            if (this.state.individualRequired) {
                 if (!variantId0) {
                     formError = true;
                     this.setFormErrors('individualorphanetid', 'You must specify a variant if you are defining a proband individual');
@@ -1034,16 +1032,16 @@ var FamilyCuration = React.createClass({
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
         if (noVariantData && this.refs['individualname']) {
             if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
-                this.setState({individualRequired: true, variantRequired: true});
+                this.setState({individualRequired: true});
             } else {
-                this.setState({individualRequired: false, variantRequired: false});
+                this.setState({individualRequired: false});
             }
             var errors = this.state.formErrors;
             errors['individualname'] = '';
             errors['individualorphanetid'] = '';
             this.setState({formErrors: errors});
         } else {
-            this.setState({individualRequired: true, variantRequired: true});
+            this.setState({individualRequired: true});
         }
 
         // Set state
@@ -1611,7 +1609,7 @@ var FamilyVariant = function() {
                             <div className="variant-resources">
                                 {this.state.variantInfo[i].clinvarVariantId ?
                                     <div className="row variant-data-source">
-                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
                                         <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                     </div>
                                 : null}
@@ -1623,7 +1621,7 @@ var FamilyVariant = function() {
                                 : null}
                                 {this.state.variantInfo[i].carId ?
                                     <div className="row">
-                                        <span className="col-sm-5 control-label"><label><LabelCARVariant variantRequired={this.state.variantRequired} /></label></span>
+                                        <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
                                         <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                     </div>
                                 : null}
@@ -1653,7 +1651,7 @@ var FamilyVariant = function() {
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                         <div className="row">
                             <div className="form-group">
-                                <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
+                                <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:</label> : <label>Clear Variant Selection:</label>}</span>
                                 <span className="col-sm-7">
                                     {!this.state.variantInfo[i] || (this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId) ?
                                         <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
@@ -1680,7 +1678,7 @@ var FamilyVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
     }
 });
 
@@ -1692,7 +1690,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelCARVariant = React.createClass({
     render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
     }
 });
 
