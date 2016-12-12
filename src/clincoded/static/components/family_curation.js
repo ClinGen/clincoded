@@ -1637,7 +1637,7 @@ var FamilyVariant = function() {
                                 {this.state.variantInfo[i].clinvarVariantId ?
                                     <div className="row variant-data-source">
                                         <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
-                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
+                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                     </div>
                                 : null}
                                 {this.state.variantInfo[i].clinvarVariantTitle ?
@@ -1649,7 +1649,7 @@ var FamilyVariant = function() {
                                 {this.state.variantInfo[i].carId ?
                                     <div className="row">
                                         <span className="col-sm-5 control-label"><label><LabelCARVariant variantRequired={this.state.variantRequired} /></label></span>
-                                        <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId} <i className="icon icon-external-link"></i></a></span>
+                                        <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                     </div>
                                 : null}
                                 {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
@@ -1662,13 +1662,13 @@ var FamilyVariant = function() {
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
                                         <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact <i className="icon icon-external-link"></i></a>
+                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
                                     </span>
                                 </div>
                                 <div className="row variant-curation">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
-                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface <i className="icon icon-external-link"></i></a>
+                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface</a>
                                     </span>
                                 </div>
                             </div>
@@ -1729,7 +1729,7 @@ var LabelCARVariantTitle = React.createClass({
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> whenever possible)</span>:</span>;
+        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
     }
 });
 
