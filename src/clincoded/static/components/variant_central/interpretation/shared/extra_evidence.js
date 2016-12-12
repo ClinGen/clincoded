@@ -301,8 +301,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                 <tr>
                                     <th>Article</th>
                                     <th>Evidence</th>
-                                    <th>Submitted By</th>
-                                    <th>Date Added</th>
+                                    <th>Submitted by</th>
+                                    <th>Last edited</th>
                                     {!this.state.viewOnly? <th></th> : null}
                                 </tr>
                             </thead>
