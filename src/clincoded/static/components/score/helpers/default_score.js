@@ -7,15 +7,15 @@
 
 import SCORE_MAPS from '../constants/score_maps';
 
-export function defaultScore(modeInheritance, variantKind, savedScore) {
+export function defaultScore(modeInheritance, caseInfoType, savedScore) {
     let score;
     const scoreKeys = Object.keys(SCORE_MAPS);
 
     if (savedScore) {
         score = savedScore;
     } else {
-        if (modeInheritance && variantKind) {
-            let matched = modeInheritance + '_' + variantKind;
+        if (modeInheritance && caseInfoType) {
+            let matched = modeInheritance + '_' + caseInfoType;
             scoreKeys.forEach(key => {
                 if (matched === key) {
                     score = SCORE_MAPS[matched].DEFAULT_SCORE;
