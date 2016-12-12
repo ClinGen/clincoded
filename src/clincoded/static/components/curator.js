@@ -720,7 +720,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     </span>
                 </div>
             : null}
-            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
+            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
@@ -737,7 +737,7 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View</a>
+            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
@@ -786,7 +786,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     </span>
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Assess</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
