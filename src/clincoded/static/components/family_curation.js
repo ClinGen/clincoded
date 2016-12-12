@@ -102,7 +102,7 @@ var FamilyCuration = React.createClass({
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
-            recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
+            recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             lodPublished: null // Switch to show either calculated or estimated LOD score
         };
     },
@@ -127,11 +127,7 @@ var FamilyCuration = React.createClass({
             if (individualName || individualOrphanetId) {
                 this.setState({individualRequired: true, variantRequired: true});
             } else if (!individualName && !individualOrphanetId) {
-                if (this.refs['SEGrecessiveZygosity'].getValue() !== 'none' || this.refs['variantUuid0'].getValue() || (this.refs['variantUuid1'] && this.refs['variantUuid1'].getValue())) {
-                    this.setState({individualRequired: true, variantRequired: true});
-                } else {
-                    this.setState({individualRequired: false, variantRequired: false});
-                }
+                this.setState({individualRequired: false, variantRequired: false});
             }
         } else if (ref === 'SEGlodPublished') {
             if (this.refs[ref].getValue() === 'Yes') {
@@ -141,19 +137,20 @@ var FamilyCuration = React.createClass({
             } else {
                 this.setState({lodPublished: null});
             }
-        } else if (ref === 'SEGrecessiveZygosity') {
-            // set the variant count and variant required as necessary
-            let tempValue = this.refs[ref].getValue();
-            if (tempValue === 'Heterozygous') {
-                this.setState({individualRequired: true, variantRequired: true});
-            } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
-                this.setState({individualRequired: true, variantRequired: true});
+        } else if (ref === 'zygosityHomozygous') {
+            console.log('clicked');
+            if (this.refs[ref].toggleValue()) {
+                this.setState({recessiveZygosity: 'Homozygous'});
+                this.refs['zygosityHemizygous'].resetValue();
             } else {
-                if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
-                    this.setState({individualRequired: true, variantRequired: true});
-                } else {
-                    this.setState({individualRequired: false, variantRequired: false});
-                }
+                this.setState({recessiveZygosity: null});
+            }
+        } else if (ref === 'zygosityHemizygous') {
+            if (this.refs[ref].toggleValue()) {
+                this.setState({recessiveZygosity: 'Hemizygous'});
+                this.refs['zygosityHomozygous'].resetValue();
+            } else {
+                this.setState({recessiveZygosity: null});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
@@ -375,7 +372,7 @@ var FamilyCuration = React.createClass({
                         /*****************************************************/
                         let probandIndividual = stateObj.probandIndividual;
                         if (probandIndividual.recessiveZygosity && probandIndividual.recessiveZygosity.length) {
-                            this.setState({SEGrecessiveZygosity: probandIndividual.recessiveZygosity});
+                            this.setState({recessiveZygosity: probandIndividual.recessiveZygosity});
                         }
                     }
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
@@ -467,7 +464,7 @@ var FamilyCuration = React.createClass({
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
-            let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
+            let recessiveZygosity = this.state.recessiveZygosity;
             let variantId0 = this.getFormValue('variantUuid0'),
                 variantId1 = this.getFormValue('variantUuid1');
 
@@ -524,19 +521,6 @@ var FamilyCuration = React.createClass({
                 if (!variantId0) {
                     formError = true;
                     this.setFormErrors('individualorphanetid', 'You must specify a variant if you are defining a proband individual');
-                }
-            }
-
-            // Check to see if the right number of variants exist
-            if (SEGrecessiveZygosity === 'Heterozygous') {
-                if (!variantId0 || !variantId1) {
-                    formError = true;
-                    this.setFormErrors('SEGrecessiveZygosity', 'For Heterozygous, two variants must be specified');
-                }
-            } else if (SEGrecessiveZygosity === 'Hemizygous' || SEGrecessiveZygosity === 'Homozygous') {
-                if (!variantId0) {
-                    formError = true;
-                    this.setFormErrors('SEGrecessiveZygosity', `For ${SEGrecessiveZygosity}, one variant must be specified`);
                 }
             }
 
@@ -664,8 +648,7 @@ var FamilyCuration = React.createClass({
                     /* Need to capture zygosity data and     */
                     /* pass into the individual object       */
                     /*****************************************/
-                    let zygosity = this.getFormValue('SEGrecessiveZygosity') && this.getFormValue('SEGrecessiveZygosity') !== 'none' ?
-                                    this.getFormValue('SEGrecessiveZygosity') : null;
+                    let zygosity = this.state.recessiveZygosity;
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -1050,7 +1033,7 @@ var FamilyCuration = React.createClass({
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
         if (noVariantData && this.refs['individualname']) {
-            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue() || this.refs['SEGrecessiveZygosity'].getValue() !== 'none') {
+            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
                 this.setState({individualRequired: true, variantRequired: true});
             } else {
                 this.setState({individualRequired: false, variantRequired: false});
@@ -1066,7 +1049,8 @@ var FamilyCuration = React.createClass({
         // Set state
         this.setState({variantInfo: newVariantInfo, variantCount: variantCount});
         this.clrFormErrors('individualorphanetid');
-        this.clrFormErrors('SEGrecessiveZygosity');
+        this.clrFormErrors('zygosityHemizygous');
+        this.clrFormErrors('zygosityHomozygous');
     },
 
     // Determine whether a Family is associated with a Group
@@ -1606,12 +1590,12 @@ var FamilyVariant = function() {
             }
             <Input type="checkbox" ref="zygosityHomozygous" label="If this is a recessive condition, check here if homozygous:"
                 error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
-                handleChange={this.handleChange} defaultChecked="false" checked="false"
+                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
             </Input>
             <Input type="checkbox" ref="zygosityHemizygous" label="Check here if the inheritance pattern is hemizygous:"
                 error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
-                handleChange={this.handleChange} defaultChecked="false" checked="false"
+                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
             </Input>
             {_.range(MAX_VARIANTS).map(i => {
