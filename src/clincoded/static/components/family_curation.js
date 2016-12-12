@@ -96,7 +96,6 @@ var FamilyCuration = React.createClass({
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
-            addVariantDisabled: false, // True if Add Another Variant button enabled
             individualRequired: null, // Boolean for set up requirement of proband
             variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
@@ -333,7 +332,6 @@ var FamilyCuration = React.createClass({
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
                         stateObj.variantRequired = stateObj.probandIndividual.recessiveZygosity ? true : false;
-                        stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
                         // For each incoming variant, set the form value
                         for (var i = 0; i < segregation.variants.length; i++) {
@@ -1024,14 +1022,7 @@ var FamilyCuration = React.createClass({
     updateVariantId: function(data, fieldNum) {
         let newVariantInfo = _.clone(this.state.variantInfo);
         let variantCount = this.state.variantCount;
-        let addVariantDisabled;
         if (data) {
-            // Enable/Disable Add Variant button as needed
-            if (fieldNum == 0) {
-                addVariantDisabled = false;
-            } else {
-                addVariantDisabled = true;
-            }
             // Update the form and display values with new data
             this.refs['variantUuid' + fieldNum].setValue(data.uuid);
             newVariantInfo[fieldNum] = {
@@ -1073,7 +1064,7 @@ var FamilyCuration = React.createClass({
         }
 
         // Set state
-        this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled, variantCount: variantCount});
+        this.setState({variantInfo: newVariantInfo, variantCount: variantCount});
         this.clrFormErrors('individualorphanetid');
         this.clrFormErrors('SEGrecessiveZygosity');
     },
