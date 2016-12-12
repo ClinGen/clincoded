@@ -303,7 +303,14 @@ var IndividualCuration = React.createClass({
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
-            var individualScores = []; // FIXME: Need to be able to handle array of scores
+            var evidenceScores = []; // Holds new array of scores
+            let individualScores = currIndividual && currIndividual.scores ? currIndividual.scores : [];
+            // Find any pre-existing score(s) and put their '@id' values into an array
+            if (individualScores.length) {
+                individualScores.forEach(score => {
+                    evidenceScores.push(score['@id']);
+                });
+            }
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -495,18 +502,16 @@ var IndividualCuration = React.createClass({
                         /*************************************************************/
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                                // FIXME: Need to be able to handle array of scores
-                                if (modifiedScoreObj) {
-                                    individualScores.push(modifiedScoreObj['@graph'][0]['@id']);
-                                }
-                                return Promise.resolve(individualScores);
+                                // Only need to update the evidence score object
+                                return Promise.resolve(evidenceScores);
                             });
                         } else {
                             return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
                                 if (newScoreObject) {
-                                    individualScores.push(newScoreObject['@graph'][0]['@id']);
+                                    // Add the new score to array
+                                    evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
-                                return Promise.resolve(individualScores);
+                                return Promise.resolve(evidenceScores);
                             });
                         }
                     } else {
@@ -514,7 +519,7 @@ var IndividualCuration = React.createClass({
                     }
                 }).then(data => {
                     // Make a new individual object based on form fields.
-                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, individualScores, hpoids, nothpoids);
+                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, evidenceScores, hpoids, nothpoids);
                     return this.writeIndividualObj(newIndividual);
                 }).then(newIndividual => {
                     var promise;
