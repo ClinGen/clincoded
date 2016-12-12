@@ -83,6 +83,8 @@ var CurationCentral = React.createClass({
             }
 
             return gdm;
+        }).catch(function(e) {
+            console.log('GETGDM ERROR=: %o', e);
         });
     },
 
