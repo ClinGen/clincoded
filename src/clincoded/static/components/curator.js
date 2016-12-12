@@ -95,7 +95,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             // Display selected MOI adjective if any. Otherwise, display selected MOI.
-            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective ? this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
