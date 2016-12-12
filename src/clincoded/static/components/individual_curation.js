@@ -346,7 +346,7 @@ var IndividualCuration = React.createClass({
             }
 
             // Get variant uuid's if they were added via the modals
-            for (var i = 0; i < this.state.variantCount; i++) {
+            for (var i = 0; i < MAX_VARIANTS; i++) {
                 // Grab the values from the variant form panel
                 var variantId = this.getFormValue('variantUuid' + i);
 
