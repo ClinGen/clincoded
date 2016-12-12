@@ -137,7 +137,6 @@ var FamilyCuration = React.createClass({
                 this.setState({lodPublished: null});
             }
         } else if (ref === 'zygosityHomozygous') {
-            console.log('clicked');
             if (this.refs[ref].toggleValue()) {
                 this.setState({recessiveZygosity: 'Homozygous'});
                 this.refs['zygosityHemizygous'].resetValue();
