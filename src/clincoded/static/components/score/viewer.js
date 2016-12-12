@@ -9,6 +9,7 @@ var _ = require('underscore');
 // Render scores viewer in Gene Curation Interface
 var ScoreViewer = module.exports.ScoreViewer = React.createClass({
     propTypes: {
+        session: React.PropTypes.object, // Session object passed from parent
         evidence: React.PropTypes.object, // Individual, Experimental or Case Control
         otherScores: React.PropTypes.bool // TRUE if we only want show scores by others
     },
