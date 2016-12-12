@@ -54,7 +54,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         });
         // Get evidenceScore object for the logged-in user if exists
         let evidenceObj = this.props.evidence;
-        if (evidenceObj.scores && evidenceObj.scores.length) {
+        if (evidenceObj && evidenceObj.scores && evidenceObj.scores.length) {
             this.setState({evidenceScores: evidenceObj.scores}, () => {
                 let loggedInUserScore = this.getUserScore(evidenceObj.scores);
                 if (loggedInUserScore) {
@@ -219,7 +219,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         let scoreExplanation = this.state.scoreExplanation;
         let evidenceType = this.props.evidenceType;
         let scoreUuid = this.state.userScoreUuid;
-        let evidenceScored = this.props.evidence.uuid;
+        let evidenceScored = this.props.evidence ? this.props.evidence.uuid : null;
 
         let newUserScoreObj = {};
 
