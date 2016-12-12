@@ -1561,7 +1561,7 @@ var FamilyVariant = function() {
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
 
     return (
-        <div className="row">
+        <div className="row form-row-helper">
             {!family || !family.segregation || !family.segregation.variants || family.segregation.variants.length === 0 ?
                 <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1606,12 +1606,12 @@ var FamilyVariant = function() {
             }
             <Input type="checkbox" ref="zygosityHomozygous" label="If this is a recessive condition, check here if homozygous:"
                 error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
-                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                handleChange={this.handleChange} defaultChecked="false" checked="false"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
             </Input>
             <Input type="checkbox" ref="zygosityHemizygous" label="Check here if the inheritance pattern is hemizygous:"
                 error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
-                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+                handleChange={this.handleChange} defaultChecked="false" checked="false"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
             </Input>
             {_.range(MAX_VARIANTS).map(i => {

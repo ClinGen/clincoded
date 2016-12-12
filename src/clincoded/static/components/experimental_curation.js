@@ -1273,7 +1273,7 @@ var ExperimentalNameType = function() {
     var experimental = this.state.experimental;
 
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
                     <p>Select which experiment type you would like to curate:</p>
@@ -1353,7 +1353,7 @@ var TypeBiochemicalFunction = function() {
         biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for a GO ID (e.g. biological_process = GO:0008150)</p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
@@ -1506,7 +1506,7 @@ var TypeProteinInteractions = function() {
         proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="text" ref="interactingGenes" label={<LabelInteractingGenes />}
                 error={this.getFormError('interactingGenes')} clearError={this.clrFormErrors.bind(null, 'interactingGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1573,7 +1573,7 @@ var TypeExpression = function() {
         expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> for an organ type (e.g. heart = UBERON_0015228)</p>
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
@@ -1669,7 +1669,7 @@ var TypeFunctionalAlteration = function() {
         functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="select" ref="cellMutationOrEngineeredEquivalent" label="Patient cells with candidate mutation or engineered equivalent?:"
                 error={this.getFormError('cellMutationOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'cellMutationOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1756,7 +1756,7 @@ var TypeModelSystems = function() {
         modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="select" ref="animalOrCellCulture" label="Non-human animal or cell-culture model?:"
                 error={this.getFormError('animalOrCellCulture')} clearError={this.clrFormErrors.bind(null, 'animalOrCellCulture')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1887,7 +1887,7 @@ var TypeRescue = function() {
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="select" ref="patientCellOrEngineeredEquivalent" label="Patient cells with or engineered equivalent?:"
                 error={this.getFormError('patientCellOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'patientCellOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
