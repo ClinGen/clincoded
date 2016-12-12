@@ -514,13 +514,6 @@ var FamilyCuration = React.createClass({
                 }
             }
 
-            if (this.state.individualRequired) {
-                if (!variantId0) {
-                    formError = true;
-                    this.setFormErrors('individualorphanetid', 'You must specify a variant if you are defining a proband individual');
-                }
-            }
-
             if (!formError) {
                 // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
