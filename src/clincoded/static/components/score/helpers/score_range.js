@@ -6,12 +6,12 @@
 
 import SCORE_MAPS from '../constants/score_maps';
 
-export function scoreRange(modeInheritance, variantKind, defaultScore) {
+export function scoreRange(modeInheritance, caseInfoType, defaultScore) {
     let range = [], filterRange = [];
     const scoreKeys = Object.keys(SCORE_MAPS);
 
-    if (modeInheritance && variantKind) {
-        let matched = modeInheritance + '_' + variantKind;
+    if (modeInheritance && caseInfoType) {
+        let matched = modeInheritance + '_' + caseInfoType;
         scoreKeys.forEach(key => {
             if (matched === key) {
                 range = SCORE_MAPS[matched].SCORE_RANGE;
