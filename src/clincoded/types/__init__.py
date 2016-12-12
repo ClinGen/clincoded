@@ -834,7 +834,9 @@ class Experimental(Item):
         'associatedAnnotations.associatedGdm.disease',
         'associatedAnnotations.associatedGdm.gene',
         'assessments',
-        'assessments.submitted_by'
+        'assessments.submitted_by',
+        'scores',
+        'scores.submitted_by'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'experimentalData')
