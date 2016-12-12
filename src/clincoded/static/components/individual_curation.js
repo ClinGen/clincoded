@@ -1601,10 +1601,19 @@ var IndividualViewer = React.createClass({
         this.setState({userScoreObj: newUserScoreObj});
     },
 
+    // Redirect to Curation-Central page
+    handlePageRedirect: function() {
+        let tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+        let tempGdm = tempGdmPmid[0];
+        let tempPmid = tempGdmPmid[1];
+        window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+    },
+
     scoreSubmit: function(e) {
-        let individual = this.props.context;
-        let evidenceScores = [];
+        let individual = this.props.context,
+            evidenceScores = [];
         let individualScores = individual && individual.scores ? individual.scores : [];
+        // Find any pre-existing score(s) and put their '@id' values into an array
         if (individualScores.length) {
             individualScores.forEach(score => {
                 evidenceScores.push(score['@id']);
@@ -1622,37 +1631,28 @@ var IndividualViewer = React.createClass({
             /***********************************************************/
             if (this.state.userScoreObj.uuid) {
                 return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                    /*
-                    if (modifiedScoreObj) {
-                        evidenceScores.push(modifiedScoreObj['@graph'][0]['@id']);
-                    }
-                    */
                     this.setState({submitBusy: false});
                     return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
                 }).then(data => {
-                    var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
-                    var tempGdm = tempGdmPmid[0];
-                    var tempPmid = tempGdmPmid[1];
-                    window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+                    this.handlePageRedirect();
                 });
             } else {
                 return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
                     if (newScoreObject) {
+                        // Add new score @id to array
                         evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                     }
                     return Promise.resolve(evidenceScores);
                 }).then(newScoresArray => {
                     let newIndividual = curator.flatten(individual);
+                    // Update individual's scores property
                     newIndividual['scores'] = newScoresArray;
                     this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
                         this.setState({submitBusy: false});
                         return Promise.resolve(updatedIndividualObj['@graph'][0]);
                     });
                 }).then(data => {
-                    var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
-                    var tempGdm = tempGdmPmid[0];
-                    var tempPmid = tempGdmPmid[1];
-                    window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+                    this.handlePageRedirect();
                 });
             }
         }
