@@ -37,7 +37,8 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
             showScoreInput: false, // TRUE if either 'Score' or 'Review' is selected
             updateDefaultScore: false, // TRUE if either 'Score Status' or 'Case Information type' are changed
             requiredScoreExplanation: false, // TRUE if a different score is selected from the range
-            submitBusy: false // TRUE while form is submitting
+            submitBusy: false, // TRUE while form is submitting
+            disableScoreStatus: false // TRUE if Individual evidence has no variants at all
         };
     },
 
@@ -46,7 +47,11 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        this.loadData();
+        // FIXME: Hacks for getting modeInheritance props from a new caseControl evidence no scoring
+        // and avoid infinite loop from an existing caseControl evidence with scoring
+        if (nextProps.modeInheritacne !== this.props.modeInheritance && !this.props.evidence && this.props.evidenceType === 'Case control') {
+            this.loadData();
+        }
     },
 
     loadData() {
@@ -58,6 +63,11 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         });
         // Get evidenceScore object for the logged-in user if exists
         let evidenceObj = this.props.evidence;
+        if (evidenceObj && this.props.evidenceType === 'Individual') {
+            if (!evidenceObj.variants || (evidenceObj.variants && evidenceObj.variants.length < 1)) {
+                this.setState({disableScoreStatus: true});
+            }
+        }
         if (evidenceObj && evidenceObj.scores && evidenceObj.scores.length) {
             this.setState({evidenceScores: evidenceObj.scores}, () => {
                 let loggedInUserScore = this.getUserScore(evidenceObj.scores);
@@ -380,6 +390,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         let showScoreInput = this.state.showScoreInput;
         let updateDefaultScore = this.state.updateDefaultScore;
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
+        let disableScoreStatus = this.state.disableScoreStatus;
 
         // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
         let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
@@ -388,7 +399,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
             <div>
                 <div className="row">
                     <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue={scoreStatus}
-                        value={scoreStatus} handleChange={this.handleScoreStatusChange}
+                        value={scoreStatus} handleChange={this.handleScoreStatusChange} inputDisabled={disableScoreStatus}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
