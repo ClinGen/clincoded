@@ -742,7 +742,6 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
-                '&evidencescore=' + caseControl.scores[0].uuid +
                 '&casecohort=' + caseControl.caseCohort.uuid +
                 '&controlcohort=' + caseControl.controlCohort.uuid
             } title="Edit this case-control">Edit</a></span> : null}
