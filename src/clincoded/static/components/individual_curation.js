@@ -1744,6 +1744,14 @@ var IndividualViewer = React.createClass({
                         </Panel>
 
                         <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
+                            {individual && individual.recessiveZygosity ?
+                                <div>
+                                    <dl className="dl-horizontal">
+                                        <dt>If Recessive, select variant zygosity</dt>
+                                        <dd>{individual.recessiveZygosity}</dd>
+                                    </dl>
+                                </div>
+                            : null }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div key={i} className="variant-view-panel">
@@ -1785,14 +1793,6 @@ var IndividualViewer = React.createClass({
                                                 <dl className="dl-horizontal">
                                                     <dt>Other description</dt>
                                                     <dd>{variant.otherDescription}</dd>
-                                                </dl>
-                                            </div>
-                                        : null }
-                                        {individual && individual.recessiveZygosity && i === 0 ?
-                                            <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>If Recessive, select variant zygosity</dt>
-                                                    <dd>{individual.recessiveZygosity}</dd>
                                                 </dl>
                                             </div>
                                         : null }

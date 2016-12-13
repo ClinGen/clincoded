@@ -2055,6 +2055,22 @@ var FamilyViewer = React.createClass({
                         : null}
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
+                            {family.individualIncluded && family.individualIncluded.length ?
+                                <div>
+                                    {family.individualIncluded.map(function(ind, index) {
+                                        return (
+                                            <div key={index}>
+                                                {ind.proband && ind.recessiveZygosity ?
+                                                    <dl className="dl-horizontal">
+                                                        <dt>If Recessive, select variant zygosity</dt>
+                                                        <dd>{ind.recessiveZygosity}</dd>
+                                                    </dl>
+                                                : null}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            : null }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
@@ -2097,22 +2113,6 @@ var FamilyViewer = React.createClass({
                                                     <dt>Other description</dt>
                                                     <dd>{variant.otherDescription}</dd>
                                                 </dl>
-                                            </div>
-                                        : null }
-                                        {family.individualIncluded && family.individualIncluded.length && i === 0 ?
-                                            <div>
-                                                {family.individualIncluded.map(function(ind, index) {
-                                                    return (
-                                                        <div key={index}>
-                                                            {ind.proband && ind.recessiveZygosity ?
-                                                                <dl className="dl-horizontal">
-                                                                    <dt>If Recessive, select variant zygosity</dt>
-                                                                    <dd>{ind.recessiveZygosity}</dd>
-                                                                </dl>
-                                                            : null}
-                                                        </div>
-                                                    );
-                                                })}
                                             </div>
                                         : null }
                                     </div>
