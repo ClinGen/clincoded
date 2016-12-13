@@ -2084,7 +2084,7 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                        {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>Genomic HGVS Title</dt>
