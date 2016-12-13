@@ -17,6 +17,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         evidence: React.PropTypes.object, // Individual, Experimental or Case Control
         modeInheritance: React.PropTypes.string, // Mode of Inheritance
         evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
+        variantInfo: React.PropTypes.object, // Variant count for Individual evidence
         handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
         scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         submitBusy: React.PropTypes.bool // TRUE while the form submit is running
@@ -34,6 +35,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
             modifiedScore: null, // Score that is selected by curator and it is different from the calculated default score
             scoreRange: [], // Calculated score range
             scoreExplanation: null, // Explanation for selecting a different score from the calculated default score
+            variantInfo: this.props.variantInfo, // Variant count for Individual evidence
             showScoreInput: false, // TRUE if either 'Score' or 'Review' is selected
             updateDefaultScore: false, // TRUE if either 'Score Status' or 'Case Information type' are changed
             requiredScoreExplanation: false, // TRUE if a different score is selected from the range
@@ -52,6 +54,15 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         if (nextProps.modeInheritacne !== this.props.modeInheritance && !this.props.evidence && this.props.evidenceType === 'Case control') {
             this.loadData();
         }
+        if (nextProps.variantInfo !== this.props.variantInfo && !this.props.evidence && this.props.evidenceType === 'Individual') {
+            this.setState({variantInfo: nextProps.variantInfo}, () => {
+                if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
+                    this.setState({disableScoreStatus: false});
+                } else {
+                    this.setState({disableScoreStatus: true});
+                }
+            });
+        }
     },
 
     loadData() {
@@ -61,13 +72,23 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
             let caseInfoTypeGroup = this.getCaseInfoTypeGroup(modeInheritanceType);
             this.setState({caseInfoTypeGroup: caseInfoTypeGroup});
         });
-        // Get evidenceScore object for the logged-in user if exists
+
         let evidenceObj = this.props.evidence;
+
+        // If the individual evidence has no variants at all, disable the Score Status form field
         if (evidenceObj && this.props.evidenceType === 'Individual') {
             if (!evidenceObj.variants || (evidenceObj.variants && evidenceObj.variants.length < 1)) {
                 this.setState({disableScoreStatus: true});
             }
+        } else if (!evidenceObj && this.props.evidenceType === 'Individual') {
+            if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
+                this.setState({disableScoreStatus: false});
+            } else {
+                this.setState({disableScoreStatus: true});
+            }
         }
+
+        // Get evidenceScore object for the logged-in user if exists
         if (evidenceObj && evidenceObj.scores && evidenceObj.scores.length) {
             this.setState({evidenceScores: evidenceObj.scores}, () => {
                 let loggedInUserScore = this.getUserScore(evidenceObj.scores);
@@ -183,9 +204,14 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                     caseInfoType: null,
                     defaultScore: null,
                     modifiedScore: null,
+                    scoreRange: [],
                     scoreExplanation: null,
                     requiredScoreExplanation: false
-                }, () => {this.updateUserScoreObj();});
+                }, () => {
+                    this.refs.scoreRange.resetValue();
+                    this.refs.scoreExplanation.resetValue();
+                    this.updateUserScoreObj();
+                });
             }
         }
     },
