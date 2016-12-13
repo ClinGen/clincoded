@@ -1275,7 +1275,7 @@ var IndividualVariantInfo = function() {
                                     {variant.clinvarVariantId ?
                                         <div>
                                             <dt>ClinVar Variation ID</dt>
-                                            <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                            <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                         </div>
                                     : null}
 
@@ -1289,7 +1289,7 @@ var IndividualVariantInfo = function() {
                                     {variant.carId ?
                                         <div>
                                             <dt>ClinGen Allele Registry ID</dt>
-                                            <dd>{variant.carId}</dd>
+                                            <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </div>
                                     : null}
 
@@ -1752,7 +1752,7 @@ var IndividualViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -1764,6 +1764,22 @@ var IndividualViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null}
+                                        {variant.carId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinGen Allele Registry ID</dt>
+                                                    <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Genomic HGVS Title</dt>
+                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
