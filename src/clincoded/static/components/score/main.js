@@ -45,6 +45,10 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         this.loadData();
     },
 
+    componentWillReceiveProps: function(nextProps) {
+        this.loadData();
+    },
+
     loadData() {
         // Prep the following when the component is loaded
         let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
