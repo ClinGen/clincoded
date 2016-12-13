@@ -2060,12 +2060,10 @@ var FamilyViewer = React.createClass({
                                     {family.individualIncluded.map(function(ind, index) {
                                         return (
                                             <div key={index}>
-                                                {ind.proband && ind.recessiveZygosity ?
-                                                    <dl className="dl-horizontal">
-                                                        <dt>If Recessive, select variant zygosity</dt>
-                                                        <dd>{ind.recessiveZygosity}</dd>
-                                                    </dl>
-                                                : null}
+                                                <dl className="dl-horizontal">
+                                                    <dt>Zygosity</dt>
+                                                    <dd>{ind.proband && ind.recessiveZygosity ? ind.recessiveZygosity : "None selected"}</dd>
+                                                </dl>
                                             </div>
                                         );
                                     })}
