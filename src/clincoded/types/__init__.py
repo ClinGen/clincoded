@@ -330,6 +330,8 @@ class Gdm(Item):
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
         'annotations.experimentalData.assessments.submitted_by',
+        'annotations.experimentalData.scores',
+        'annotations.experimentalData.scores.submitted_by',
         'annotations.caseControlStudies',
         'annotations.caseControlStudies.submitted_by',
         'annotations.caseControlStudies.caseCohort',
@@ -471,6 +473,8 @@ class Annotation(Item):
         'associatedGdm',
         'experimentalData.assessments',
         'experimentalData.assessments.submitted_by',
+        'experimentalData.scores',
+        'experimentalData.scores.submitted_by',
         'caseControlStudies',
         'caseControlStudies.submitted_by',
         'caseControlStudies.caseCohort',
@@ -968,11 +972,15 @@ class EvidenceScore(Item):
         'individual_scored.associatedAnnotations.associatedGdm',
         'individual_scored.associatedFamilies',
         'individual_scored.associatedFamilies.associatedAnnotations',
-        'individual_scored.associatedFamilies.associatedAnnotations.associatedGdm'
+        'individual_scored.associatedFamilies.associatedAnnotations.associatedGdm',
+        'experimental_scored',
+        'experimental_scored.associatedAnnotations',
+        'experimental_scored.associatedAnnotations.associatedGdm'
     ]
     rev = {
         'caseControl_scored': ('caseControl', 'scores'),
-        'individual_scored': ('individual', 'scores')
+        'individual_scored': ('individual', 'scores'),
+        'experimental_scored': ('experimental', 'scores')
     }
 
     @calculated_property(schema={
@@ -996,6 +1004,17 @@ class EvidenceScore(Item):
     })
     def individual_scored(self, request, individual_scored):
         return paths_filtered_by_status(request, individual_scored)
+
+    @calculated_property(schema={
+        "title": "Experimental Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "experimental.scores"
+        }
+    })
+    def experimental_scored(self, request, experimental_scored):
+        return paths_filtered_by_status(request, experimental_scored)
 
 
 @collection(
