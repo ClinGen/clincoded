@@ -2069,7 +2069,7 @@ var ExperimentalDataVariant = function() {
                                     {this.state.variantInfo[i].clinvarVariantId ?
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
+                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                         </div>
                                     : null}
                                     {this.state.variantInfo[i].clinvarVariantTitle ?
@@ -2081,7 +2081,7 @@ var ExperimentalDataVariant = function() {
                                     {this.state.variantInfo[i].carId ?
                                         <div className="row">
                                             <span className="col-sm-5 control-label"><label>{<LabelCARVariant />}</label></span>
-                                            <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId} <i className="icon icon-external-link"></i></a></span>
+                                            <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                         </div>
                                     : null}
                                     {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
@@ -2675,7 +2675,7 @@ var ExperimentalViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2684,6 +2684,22 @@ var ExperimentalViewer = React.createClass({
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
                                                     <dd>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.carId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinGen Allele Registry ID</dt>
+                                                    <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Genomic HGVS Title</dt>
+                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                                 </dl>
                                             </div>
                                         : null }
