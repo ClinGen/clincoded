@@ -2746,7 +2746,7 @@ var ExperimentalViewer = React.createClass({
                             }
                         </Panel>
                         {this.cv.gdmUuid ?
-                            <Panel title="Experimental Data Assessment" panelClassName="proband-evidence-score" open>
+                            <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score-viewer" open>
                                 <ScoreMain evidence={experimental} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Experimental"
                                 session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                             </Panel>
