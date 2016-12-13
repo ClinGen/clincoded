@@ -1885,7 +1885,7 @@ var FamilyViewer = React.createClass({
         //    }
         //}
 
-        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
+        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : []) : [];
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation

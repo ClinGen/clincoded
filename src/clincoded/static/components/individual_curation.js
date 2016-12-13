@@ -1564,7 +1564,7 @@ var IndividualViewer = React.createClass({
     render: function() {
         var individual = this.props.context;
         var method = individual.method;
-        var variants = (individual.variants && individual.variants.length) ? individual.variants : [{}];
+        var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
