@@ -508,12 +508,11 @@
     .variant-association-header {
         padding-left: 15px;
 
-        dt {
-            font-weight: normal;
-            padding-right: 5px;
+        .term-name {
+            font-weight: 400;
         }
 
-        dd {
+        .term-value {
             word-break: break-all;
             word-wrap: break-word;
         }

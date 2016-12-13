@@ -95,7 +95,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             // Display selected MOI adjective if any. Otherwise, display selected MOI.
-            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective ? this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
@@ -285,6 +285,15 @@ var searchProbandIndividual = function(individualList, variantList) {
     return false;
 };
 
+// function to get the preferred display title for variants. Current preferential order is clinvar variant title > clinvar variant ID
+// > grch38 hgvs term > CA ID
+var getVariantTitle = function(variant) {
+    let clinvarRepresentation = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : null);
+    let carRepresentation = variant.hgvsNames && variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.carId ? variant.carId : null);
+    let variantTitle = clinvarRepresentation ? clinvarRepresentation : carRepresentation;
+
+    return variantTitle;
+};
 
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = React.createClass({
@@ -308,8 +317,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                         <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
-                            var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
-                                (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+                            var variantName = getVariantTitle(variant);
                             var userPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -811,7 +819,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
-    var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+    let variantTitle = getVariantTitle(variant);
 
     return (
         <div className="panel-evidence-group">

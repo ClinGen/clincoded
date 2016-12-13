@@ -326,28 +326,38 @@ var VariantCuration = React.createClass({
                         {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
                         <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
-                            <h2>{variant.clinvarVariantId ?
+                            <h2>
                                 <div className="row variant-association-header">
-                                    <dl className="dl-horizontal">
-                                        <dt>{gdm && annotation ? <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + annotation.article.pmid}><i className="icon icon-briefcase"></i></a> : null} &#x2F;&#x2F; VariationID</dt>
-                                        <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
-                                    </dl>
-                                    <dl className="dl-horizontal">
-                                        <dt>ClinVar Preferred Title</dt>
-                                        <dd>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</dd>
-                                    </dl>
+                                    <div>
+                                        {gdm && annotation ? <a href={`/curation-central/?gdm=${gdm.uuid}&pmid=${annotation.article.pmid}`}><i className="icon icon-briefcase"></i></a> : null}
+                                        {variant.clinvarVariantId ?
+                                            <span>
+                                                <span className="term-name"> &#x2F;&#x2F; ClinVar Variation ID: </span>
+                                                <span className="term-value"><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></span>
+                                            </span>
+                                        : null}
+                                        {variant.carId ?
+                                            <span>
+                                                <span className="term-name"> &#x2F;&#x2F; ClinGen Allele Registry ID: </span>
+                                                <span className="term-value"><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for variant ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></span>
+                                            </span>
+                                        : null}
+                                    </div>
+                                    <div>
+                                        {variant.clinvarVariantTitle ?
+                                            <span>
+                                                <span className="term-name">ClinVar Preferred Title: </span>
+                                                <span className="term-value">{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</span>
+                                            </span>
+                                        :
+                                            <span>
+                                                <span className="term-name">Genomic HGVS Term: </span>
+                                                <span className="term-value">{variant.hgvsNames && variant.hgvsNames.GRCh38 ? `${variant.hgvsNames.GRCh38} (GRCh38)` : null}</span>
+                                            </span>
+                                        }
+                                    </div>
                                 </div>
-                            :
-                                <div className="row variant-association-header">
-                                    <dl className="dl-horizontal">
-                                        {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (gdm.annotations[0].article.pmid ? '&pmid=' + gdm.annotations[0].article.pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
-                                    </dl>
-                                    <dl className="dl-horizontal">
-                                        <dt>Other Description</dt>
-                                        <dd>{variant.otherDescription ? variant.otherDescription : null}</dd>
-                                    </dl>
-                                </div>
-                            }</h2>
+                            </h2>
                         : null}
                     </div>
                     <div className="row group-curation-content">

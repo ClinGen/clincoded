@@ -2103,8 +2103,8 @@ var FamilyViewer = React.createClass({
                                         {variant.clinvarVariantId ?
                                             <div>
                                                 <dl className="dl-horizontal">
-                                                    <dt>ClinVar VariationID</dt>
-                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dt>ClinVar Variation ID</dt>
+                                                    <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2113,6 +2113,22 @@ var FamilyViewer = React.createClass({
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
                                                     <dd>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.carId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinGen Allele Registry ID</dt>
+                                                    <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Genomic HGVS Title</dt>
+                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                                 </dl>
                                             </div>
                                         : null }
