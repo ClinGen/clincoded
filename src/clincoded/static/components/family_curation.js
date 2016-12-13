@@ -1583,6 +1583,7 @@ var FamilyVariant = function() {
                 handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
             </Input>
+            <p className="alert alert-info">Note: if homozygous, enter only 1 variant below</p>
             <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
                 error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
                 handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
