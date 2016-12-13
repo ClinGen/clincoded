@@ -1349,7 +1349,7 @@ var IndividualVariantInfo = function() {
                 </div>
             :
                 <div>
-                    <Input type="checkbox" ref="zygosityHomozygous" label="If this is a recessive condition, check here if homozygous:"
+                    <Input type="checkbox" ref="zygosityHomozygous" label="Check here if the inheritance pattern is homozygous:"
                         error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
                         handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">

@@ -1578,7 +1578,7 @@ var FamilyVariant = function() {
             :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
             }
-            <Input type="checkbox" ref="zygosityHomozygous" label="If this is a recessive condition, check here if homozygous:"
+            <Input type="checkbox" ref="zygosityHomozygous" label="Check here if the inheritance pattern is homozygous:"
                 error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
                 handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
