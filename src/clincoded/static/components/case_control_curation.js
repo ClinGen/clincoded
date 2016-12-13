@@ -1017,7 +1017,7 @@ const CaseControlCuration = React.createClass({
                                             </Panel>
                                         : null}
                                         <PanelGroup accordion>
-                                            <Panel title="Case-Control Score" panelClassName="case-control-eval-score" open>
+                                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
                                                 <ScoreMain evidence={caseControl} modeInheritance={modeOfInheritance} evidenceType="Case control"
                                                 session={session} handleUserScoreObj={this.handleUserScoreObj} />
                                             </Panel>
@@ -1921,7 +1921,7 @@ var CaseControlViewer = React.createClass({
                                     <div className="row">This evidence has not been scored.</div>
                                 }
                             </Panel>
-                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
+                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                 <ScoreMain evidence={this.props.context} modeInheritance={tempGdm.modeInheritance} evidenceType="Case control"
                                 session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                             </Panel>
