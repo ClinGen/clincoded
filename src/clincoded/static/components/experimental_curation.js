@@ -995,7 +995,7 @@ var ExperimentalCuration = React.createClass({
                         });
                     }
                     /*****************************************************/
-                    /* Proband score status data object                  */
+                    /* Evidence score data object                        */
                     /*****************************************************/
                     let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
@@ -1030,7 +1030,7 @@ var ExperimentalCuration = React.createClass({
 
                     // If we add a new score, add it to the experimental object
                     if (scoreArray && scoreArray.length) {
-                        newExperimental['scores'] = scoreArray;
+                        newExperimental.scores = scoreArray;
                     }
 
                     if (this.state.experimental) {
