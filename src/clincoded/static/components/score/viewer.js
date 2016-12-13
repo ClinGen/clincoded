@@ -68,7 +68,7 @@ var ScoreViewer = module.exports.ScoreViewer = React.createClass({
             <div className="row">
                 {scores.map((item, i) => {
                     return (
-                        <div key={i} className="variant-view-panel">
+                        <div key={i} className="evidence-score-list-viewer">
                             <h5>{item.submitted_by.title}</h5>
                             {item.scoreStatus && item.scoreStatus === 'Score' ?
                                 <div>
