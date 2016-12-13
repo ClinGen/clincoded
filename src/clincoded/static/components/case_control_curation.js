@@ -953,7 +953,6 @@ const CaseControlCuration = React.createClass({
 
         // Find any pre-existing scores associated with the evidence
         let evidenceScores = caseControl && caseControl.scores && caseControl.scores.length ? caseControl.scores : [];
-        console.log("caseControl is === " + JSON.stringify(caseControl));
 
         return (
             <div>
@@ -1019,7 +1018,7 @@ const CaseControlCuration = React.createClass({
                                         : null}
                                         <PanelGroup accordion>
                                             <Panel title="Case-Control Score" panelClassName="case-control-eval-score" open>
-                                                <ScoreMain evidence={null} modeInheritance={modeOfInheritance} evidenceType="Case control"
+                                                <ScoreMain evidence={caseControl} modeInheritance={modeOfInheritance} evidenceType="Case control"
                                                 session={session} handleUserScoreObj={this.handleUserScoreObj} />
                                             </Panel>
                                         </PanelGroup>
@@ -1923,7 +1922,7 @@ var CaseControlViewer = React.createClass({
                                 }
                             </Panel>
                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
-                                <ScoreMain evidence={null} modeInheritance={tempGdm.modeInheritance} evidenceType="Case control"
+                                <ScoreMain evidence={this.props.context} modeInheritance={tempGdm.modeInheritance} evidenceType="Case control"
                                 session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                             </Panel>
                         </div>
