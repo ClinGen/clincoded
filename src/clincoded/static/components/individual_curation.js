@@ -1263,7 +1263,7 @@ var IndividualVariantInfo = function() {
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
 
     return (
-        <div className="row">
+        <div className="row form-row-helper">
             {individual && individual.proband && family ?
                 <div>
                     <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
@@ -1354,7 +1354,7 @@ var IndividualVariantInfo = function() {
                         handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     </Input>
-                    <p className="col-sm-7 col-sm-offset-5">
+                    <p className="col-sm-7 col-sm-offset-5 input-note-below">
                         Note: if homozygous, enter only 1 variant below
                     </p>
                     <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
