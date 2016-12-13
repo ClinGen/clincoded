@@ -877,6 +877,7 @@ var IndividualCuration = React.createClass({
 
         // Find any pre-existing scores associated with the evidence
         let evidenceScores = individual && individual.scores ? individual.scores : [];
+        let variantInfo = this.state.variantInfo;
 
         return (
             <div>
@@ -937,7 +938,7 @@ var IndividualCuration = React.createClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
+                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
                                                             session={session} handleUserScoreObj={this.handleUserScoreObj} />
                                                     </Panel>
                                                 </PanelGroup>
@@ -1951,7 +1952,7 @@ var IndividualViewer = React.createClass({
                                         <div className="row">This evidence has not been scored.</div>
                                     }
                                 </Panel>
-                                <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
+                                <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
                                     <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                     session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                                 </Panel>
