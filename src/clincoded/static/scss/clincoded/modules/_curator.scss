@@ -2603,9 +2603,13 @@ table.login-users-interpretations {
         }
     }
 }
+
 .panel.case-control-evidence-score,
 .panel.experimental-evidence-score,
-.panel.proband-evidence-score {
+.panel.proband-evidence-score,
+.panel.case-control-evidence-score-viewer,
+.panel.experimental-evidence-score-viewer,
+.panel.proband-evidence-score-viewer {
     .panel-body.panel-std {
         padding-top: 25px;
 
