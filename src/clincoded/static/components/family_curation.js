@@ -262,9 +262,6 @@ var FamilyCuration = React.createClass({
 
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
     calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
-        console.log(numAffected);
-        console.log(numUnaffected);
-        console.log(numSegregation);
         let lodScore = null;
         if (lodCalcMode === 'AD') {
             // LOD scoring if GDM is Autosomal dominant
@@ -281,11 +278,12 @@ var FamilyCuration = React.createClass({
             }
         }
         if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
-            console.log(lodScore);
+            if (lodScore) {
+                lodScore = parseFloat(lodScore.toFixed(2));
+            }
             // Update state and form field if relevant
             this.setState({lodScore: lodScore});
             if (this.refs['SEGestimatedLodScore']) {
-                console.log('what');
                 this.refs['SEGestimatedLodScore'].setValue(lodScore);
             }
         }
@@ -375,7 +373,6 @@ var FamilyCuration = React.createClass({
 
                 // Calculate LOD from stored values, if applicable...
                 if (stateObj.lodLocked) {
-                    console.log(stateObj.family);
                     this.calculateEstimatedLOD(
                         stateObj.lodCalcMode,
                         stateObj.family.segregation.numberOfAffectedWithGenotype ? stateObj.family.segregation.numberOfAffectedWithGenotype : null,
