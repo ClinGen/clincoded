@@ -31,7 +31,7 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-var ScoreMain = require('./score/main').ScoreMain;
+var ScoreIndividual = require('./score/individual_score').ScoreIndividual;
 var ScoreViewer = require('./score/viewer').ScoreViewer;
 
 const MAX_VARIANTS = 2;
@@ -923,7 +923,7 @@ var IndividualCuration = React.createClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
+                                                        <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
                                                             session={session} handleUserScoreObj={this.handleUserScoreObj} />
                                                     </Panel>
                                                 </PanelGroup>
@@ -1936,7 +1936,7 @@ var IndividualViewer = React.createClass({
                                     }
                                 </Panel>
                                 <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
-                                    <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
+                                    <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                     session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                                 </Panel>
                             </div>
