@@ -462,8 +462,6 @@ var FamilyCuration = React.createClass({
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
-            let variantId0 = this.getFormValue('variantUuid0'),
-                variantId1 = this.getFormValue('variantUuid1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
@@ -473,7 +471,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.individualRequired) {
+            if (this.state.individualRequired && !this.state.probandIndividual) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
