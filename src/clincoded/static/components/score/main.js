@@ -49,12 +49,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        // FIXME: Hacks for getting modeInheritance props from a new caseControl evidence no scoring
-        // and avoid infinite loop from an existing caseControl evidence with scoring
-        if (nextProps.modeInheritacne !== this.props.modeInheritance && !this.props.evidence && this.props.evidenceType === 'Case control') {
-            this.loadData();
-        }
-        if (nextProps.variantInfo !== this.props.variantInfo && !this.props.evidence && this.props.evidenceType === 'Individual') {
+        if (nextProps.variantInfo !== this.props.variantInfo && !this.props.evidence) {
             this.setState({variantInfo: nextProps.variantInfo}, () => {
                 if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
                     this.setState({disableScoreStatus: false});
