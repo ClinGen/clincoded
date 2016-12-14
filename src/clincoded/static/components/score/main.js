@@ -71,11 +71,11 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         let evidenceObj = this.props.evidence;
 
         // If the individual evidence has no variants at all, disable the Score Status form field
-        if (evidenceObj && this.props.evidenceType === 'Individual') {
+        if (evidenceObj) {
             if (!evidenceObj.variants || (evidenceObj.variants && evidenceObj.variants.length < 1)) {
                 this.setState({disableScoreStatus: true});
             }
-        } else if (!evidenceObj && this.props.evidenceType === 'Individual') {
+        } else {
             if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
                 this.setState({disableScoreStatus: false});
             } else {
