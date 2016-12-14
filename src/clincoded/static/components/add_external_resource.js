@@ -672,6 +672,22 @@ function carValidateForm() {
         valid = false;
         this.setFormErrors('resourceId', 'Invalid CA ID');
     }
+
+    // valid if parent object is family, individual or experimental and input isn't already associated with it
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'variantList') {
+        // loop through received variantlist and make sure that the variant is not already associated
+        for (var i in this.props.parentObj.variantList) {
+            // but don't check against the field it's editing against, in case it is an edit
+            if (i != this.props.fieldNum && this.props.parentObj.variantList.hasOwnProperty(i)) {
+                if (this.props.parentObj.variantList[i].carId == formInput) {
+                    valid = false;
+                    this.setFormErrors('resourceId', 'This variant has already been associated with this piece of ' + this.props.parentObj['@type'][1] + ' evidence.');
+                    this.setState({submitBusy: false});
+                    break;
+                }
+            }
+        }
+    }
     return valid;
 }
 function carQueryResource() {
