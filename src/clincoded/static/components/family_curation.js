@@ -1579,7 +1579,7 @@ var FamilySegregation = function() {
             <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3" value={segregation.pedigreeLocation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
-            <Input type="select" ref="SEGlodPublished" label="Published Calculated LOD score?:"
+            <Input type="select" ref="SEGlodPublished" label="Published LOD score?:"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.lodPublished)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1593,11 +1593,11 @@ var FamilySegregation = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
-                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>}
+                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published LOD score)</i></span>}
                     inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate estimated LOD score" : "Number only"} />
+                    placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
