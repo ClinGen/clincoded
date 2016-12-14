@@ -380,7 +380,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                 calcDefaultScore = defaultScore(modeInheritanceType, caseInfoType);
             } else {
                 // A pre-existing score is loaded from db
-                calcDefaultScore = defaultScore(modeInheritanceType, caseInfoType, loggedInUserScore.calculatedScore);
+                calcDefaultScore = defaultScore(modeInheritanceType, caseInfoType, null, loggedInUserScore.calculatedScore);
             }
         } else {
             // New. No pre-exisitng score for the currently logged-in user
@@ -392,11 +392,11 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
 
     // Find the calculated score range given the types of
     // Mode of Inheritance and Case Information
-    getScoreRange(modeInheritanceType, caseInfoType, calcDefaultScore) {
+    getScoreRange(modeInheritanceType, caseInfoType, defaultScore) {
         let calcScoreRange = [];
 
-        if (scoreRange(modeInheritanceType, caseInfoType, defaultScore).length) {
-            calcScoreRange = scoreRange(modeInheritanceType, caseInfoType, defaultScore);
+        if (scoreRange(modeInheritanceType, caseInfoType, null, defaultScore).length) {
+            calcScoreRange = scoreRange(modeInheritanceType, caseInfoType, null, defaultScore);
         }
 
         return calcScoreRange;
