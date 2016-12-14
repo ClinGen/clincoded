@@ -175,10 +175,15 @@ var FamilyCuration = React.createClass({
             }
 
             // Update Estimated LOD if it should be automatically calculated
-            if (this.state.lodLocked && (ref === 'SEGnumberOfSegregationsForThisFamily'
-                || ref === 'SEGnumberOfAffectedWithGenotype'
-                || ref === 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')) {
-                this.calculateEstimatedLOD();
+            if (this.state.lodLocked && (ref === 'SEGnumberOfAffectedWithGenotype'
+                || ref === 'SEGnumberOfUnaffectedWithoutBiallelicGenotype'
+                || ref === 'SEGnumberOfSegregationsForThisFamily')) {
+                this.calculateEstimatedLOD(
+                    this.state.lodCalcMode,
+                    this.refs['SEGnumberOfAffectedWithGenotype'].getValue(),
+                    this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].getValue(),
+                    this.refs['SEGnumberOfSegregationsForThisFamily'].getValue()
+                );
             }
 
             // Now change the state of the assessment dropdown if needed
@@ -256,41 +261,31 @@ var FamilyCuration = React.createClass({
     },
 
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
-    calculateEstimatedLOD: function() {
+    calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
+        console.log(numAffected);
+        console.log(numUnaffected);
+        console.log(numSegregation);
         let lodScore = null;
-        if (this.state.lodCalcMode === 'AD') {
+        if (lodCalcMode === 'AD') {
             // LOD scoring if GDM is Autosomal dominant
-            let numSegregation = this.refs['SEGnumberOfSegregationsForThisFamily'].getValue();
             if (numSegregation !== '') {
                 numSegregation = parseInt(numSegregation);
-                if (numSegregation == 4) {
-                    lodScore = 1.2;
-                } else if (numSegregation >= 5 && numSegregation < 7) {
-                    lodScore = 1.5;
-                } else if (numSegregation >= 7 && numSegregation < 10) {
-                    lodScore = 2.1;
-                } else if (numSegregation >= 10) {
-                    lodScore = 3;
-                }
+                lodScore = Math.log(1 / Math.pow(0.5, numSegregation)) / Math.log(10);
             }
-        } else if (this.state.lodCalcMode === 'AR') {
+        } else if (lodCalcMode === 'AR') {
             // LOD scoring if GDM is Autosomal recessive
-            let numAffected = this.refs['SEGnumberOfAffectedWithGenotype'];
-            let numUnaffected = this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'];
             if (numAffected !== '' && numUnaffected !== '') {
                 numAffected = parseInt(numAffected);
                 numUnaffected = parseInt(numUnaffected);
-                if (numAffected == 2 && numUnaffected >= 3) {
-                    lodScore = 1;
-                } else if (numAffected >= 3 && numUnaffected >= 3) {
-                    lodScore = 1.5;
-                }
+                lodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
         }
-        if (this.state.lodCalcMode === 'AD' || this.state.lodCalcMode === 'AR') {
+        if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
+            console.log(lodScore);
             // Update state and form field if relevant
             this.setState({lodScore: lodScore});
             if (this.refs['SEGestimatedLodScore']) {
+                console.log('what');
                 this.refs['SEGestimatedLodScore'].setValue(lodScore);
             }
         }
@@ -376,6 +371,20 @@ var FamilyCuration = React.createClass({
                 }
                 else {
                     this.setState({orpha: false});
+                }
+
+                // Calculate LOD from stored values, if applicable...
+                if (stateObj.lodLocked) {
+                    console.log(stateObj.family);
+                    this.calculateEstimatedLOD(
+                        stateObj.lodCalcMode,
+                        stateObj.family.segregation.numberOfAffectedWithGenotype ? stateObj.family.segregation.numberOfAffectedWithGenotype : null,
+                        stateObj.family.segregation.numberOfUnaffectedWithoutBiallelicGenotype ? stateObj.family.segregation.numberOfUnaffectedWithoutBiallelicGenotype : null,
+                        stateObj.family.segregation.numberOfSegregationsForThisFamily ? stateObj.family.segregation.numberOfSegregationsForThisFamily : null
+                    );
+                } else {
+                    // ... otherwise, show the stored LOD score, if available
+                    this.lodScore = stateObj.family.estimatedLodScore ? stateObj.family.estimatedLodScore : null;
                 }
             }
 
