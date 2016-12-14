@@ -9,7 +9,7 @@ import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 
 // Render scoring panel in Gene Curation Interface
-var ScoreMain = module.exports.ScoreMain = React.createClass({
+var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
