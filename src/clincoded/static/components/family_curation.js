@@ -102,7 +102,9 @@ var FamilyCuration = React.createClass({
             submitBusy: false, // True while form is submitting
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
-            lodPublished: null // Switch to show either calculated or estimated LOD score
+            lodPublished: null, // Switch to show either calculated or estimated LOD score
+            lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
+            lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
         };
     },
 
@@ -291,6 +293,19 @@ var FamilyCuration = React.createClass({
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
             if (stateObj.gdm && stateObj.gdm.omimId) {
                 this.setOmimIdState(stateObj.gdm.omimId);
+            }
+
+            // Update the LOD locked and calculation modes
+            if (stateObj.gdm && stateObj.gdm.modeInheritance) {
+                if (stateObj.gdm.modeInheritance.indexOf('Autosomal dominant') > -1) {
+                    stateObj.lodLocked = true;
+                    stateObj.lodCalcMode = 'AD';
+                } else if (stateObj.gdm.modeInheritance.indexOf('Autosomal recessive') > -1) {
+                    stateObj.lodLocked = true;
+                    stateObj.lodCalcMode = 'AR';
+                } else {
+                    stateObj.lodLocked = false;
+                }
             }
 
             // Update the family name
