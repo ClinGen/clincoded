@@ -728,7 +728,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     </span>
                 </div>
             : null}
-            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
+            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
@@ -745,12 +745,11 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View</a>
+            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
-                '&evidencescore=' + caseControl.scores[0].uuid +
                 '&casecohort=' + caseControl.caseCohort.uuid +
                 '&controlcohort=' + caseControl.controlCohort.uuid
             } title="Edit this case-control">Edit</a></span> : null}
@@ -794,7 +793,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     </span>
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Assess</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
@@ -1836,7 +1835,8 @@ function flattenProvisionalVariant(provisional_variant) {
 
 
 var evidenceScoreSimpleProps = [
-    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore"
+    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore",
+    "caseInfoType", "scoreExplanation"
 ];
 
 function flattenEvidenceScore(evidencescore) {

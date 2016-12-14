@@ -34,6 +34,9 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
+var ScoreMain = require('./score/main').ScoreMain;
+var ScoreViewer = require('./score/viewer').ScoreViewer;
+
 // Will be great to convert to 'const' when available
 var MAX_VARIANTS = 5;
 
@@ -97,8 +100,14 @@ var ExperimentalCuration = React.createClass({
             variantCount: 0, // Number of variants to display
             variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            userScoreObj: {} // Logged-in user's score object
         };
+    },
+
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
     },
 
     // sets the description text below the experimental data type dropdown
@@ -975,14 +984,43 @@ var ExperimentalCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
-                    var experimentalUuid = this.state.experimental && this.state.experimental.uuid;
+                    let currExperimental = this.state.experimental;
+                    let currExperimentalUuid = currExperimental && currExperimental.uuid;
+                    let evidenceScores = []; // Holds new array of scores
+                    let experimentalScores = currExperimental && currExperimental.scores && currExperimental.scores.length ? currExperimental.scores : [];
+                    // Find any pre-existing score(s) and put their '@id' values into an array
+                    if (experimentalScores.length) {
+                        experimentalScores.forEach(score => {
+                            evidenceScores.push(score['@id']);
+                        });
+                    }
+                    /*****************************************************/
+                    /* Evidence score data object                        */
+                    /*****************************************************/
+                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
-                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the experimental data object.
-                    return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid).then(assessmentInfo => {
-                        return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
-                    });
-                }).then(assessment => {
+                    if (Object.keys(newUserScoreObj).length) {
+                        /*************************************************************/
+                        /* Either update or create the score status object in the DB */
+                        /*************************************************************/
+                        if (this.state.userScoreObj.uuid) {
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                // Only need to update the evidence score object
+                                return Promise.resolve(evidenceScores);
+                            });
+                        } else {
+                            return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                                if (newScoreObject) {
+                                    // Add the new score to array
+                                    evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                                }
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
+                    } else {
+                        return Promise.resolve(null);
+                    }
+                }).then(scoreArray => {
                     var promise;
 
                     // Add variants if they've been found
@@ -990,23 +1028,20 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.variants = experimentalDataVariants;
                     }
 
-                    // If we made a new assessment, add it to the experimental data's assessments
-                    if (assessment.assessment && !assessment.updatedAssessment) {
-                        if (!newExperimental.assessments) {
-                            newExperimental.assessments = [];
-                        }
-                        newExperimental.assessments.push(assessment.assessment['@id']);
+                    // If we add a new score, add it to the experimental object
+                    if (scoreArray && scoreArray.length) {
+                        newExperimental.scores = scoreArray;
                     }
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: false});
+                            return Promise.resolve({data: data['@graph'][0], experimentalAdded: false});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: true});
+                            return Promise.resolve({data: data['@graph'][0], experimentalAdded: true});
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
@@ -1021,29 +1056,16 @@ var ExperimentalCuration = React.createClass({
 
                                     // Post the modified annotation to the DB
                                     return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                        return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                        return Promise.resolve({data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                                     });
                                 });
                             } else {
-                                return Promise.resolve({assessment: null, updatedAssessment: false, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                return Promise.resolve({data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                             }
                         });
                     }
 
                     return promise;
-                }).then(data => {
-                    // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
-                    var newAssessment = data.assessment;
-                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
-                    var experimentalUuid = data.data ? data.data.uuid : this.state.experimental.uuid;
-                    if (newAssessment && !newAssessment.evidence_id) {
-                        // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                        // Nothing relies on this operation completing, so don't wait for a promise from it.
-                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid, newAssessment);
-                    }
-
-                    // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve(data);
                 }).then(data => {
                     // Record history of the group creation
                     var meta, historyPromise;
@@ -1060,14 +1082,6 @@ var ExperimentalCuration = React.createClass({
                         // Record the modification of an existing group
                         historyPromise = this.recordHistory('modify', data.data);
                     }
-
-                    // After writing the experimental data history, write the assessment if any
-                    historyPromise.then(() => {
-                        // If we're assessing a family segregation, write that to history
-                        if (data.data && data.assessment) {
-                            this.saveAssessmentHistory(data.assessment, this.state.gdm, data.data, data.updatedAssessment);
-                        }
-                    });
 
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
@@ -1122,20 +1136,16 @@ var ExperimentalCuration = React.createClass({
         var annotation = this.state.annotation;
         var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
+        /****************************************/
+        /* Retain pre-existing assessments data */
+        /****************************************/
         var assessments = experimental && experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
-        //var is_assessed =false; // filter out Not Assessed
         var validAssessments = [];
         _.map(assessments, assessment => {
             if (assessment.value !== 'Not Assessed') {
                 validAssessments.push(assessment);
             }
         });
-        //for (var i in assessments) {
-        //    if (assessments[i].value !== 'Not Assessed') {
-        //        is_assessed = true;
-        //        break;
-        //    }
-        //}
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
@@ -1152,6 +1162,9 @@ var ExperimentalCuration = React.createClass({
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/experimental-submit/?gdm=' + gdm.uuid + (experimental ? '&experimental=' + experimental.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
+
+        // Find any pre-existing scores associated with the evidence
+        let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
 
         return (
             <div>
@@ -1235,10 +1248,16 @@ var ExperimentalCuration = React.createClass({
                                                         </div>
                                                     </dl>
                                                 </Panel>
-
+                                                {evidenceScores.length > 1 ?
+                                                    <Panel panelClassName="panel-data">
+                                                        <ScoreViewer evidence={experimental} otherScores={true} session={session} />
+                                                    </Panel>
+                                                : null}
                                                 <PanelGroup accordion>
-                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} note={<NoteAssessment />}
-                                                        updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                                    <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score" open>
+                                                        <ScoreMain evidence={experimental} modeInheritance={gdm.modeInheritance} evidenceType="Experimental"
+                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                    </Panel>
                                                 </PanelGroup>
                                             </div>
                                         : null}
@@ -2162,74 +2181,72 @@ var ExperimentalViewer = React.createClass({
         return {
             assessments: null, // Array of assessments for the experimental data
             updatedAssessment: '', // Updated assessment value
+            userScoreObj: {}, // Logged-in user's score object
             submitBusy: false // True while form is submitting
         };
     },
 
-    // Handle the assessment submit button
-    assessmentSubmit: function(e) {
-        var updatedExperimental;
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
+    },
 
-        // GET the experimental object to have the most up-to-date version
-        this.getRestData('/experimental/' + this.props.context.uuid).then(data => {
-            this.setState({submitBusy: true});
-            var experimental = data;
+    // Redirect to Curation-Central page
+    handlePageRedirect: function() {
+        let tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+        let tempGdm = tempGdmPmid[0];
+        let tempPmid = tempGdmPmid[1];
+        window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+    },
 
-            // Write the assessment to the DB, if there was one.
-            return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
-                // Save assessment to history
-                this.saveAssessmentHistory(assessmentInfo.assessment, null, experimental, assessmentInfo.update);
-
-                // If we made a new assessment, add it to the experimental data's assessments
-                if (assessmentInfo.assessment && !assessmentInfo.update) {
-                    updatedExperimental = curator.flatten(experimental);
-                    if (!updatedExperimental.assessments) {
-                        updatedExperimental.assessments = [];
-                    }
-                    updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
-
-                    // Write the updated experimental data object to the DB
-                    return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
-                        return this.getRestData('/experimental/' + data['@graph'][0].uuid);
-                    });
-                }
-
-                // Didn't update the experimental data object; if updated the assessment, reload the experimental data
-                if (assessmentInfo.update) {
-                    return this.getRestData('/experimental/' + experimental.uuid);
-                }
-
-                // Not updating the experimental data
-                return Promise.resolve(experimental);
+    // Handle the score submit button
+    scoreSubmit: function(e) {
+        let experimental = this.props.context,
+            evidenceScores = [];
+        let experimentalScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        // Find any pre-existing score(s) and put their '@id' values into an array
+        if (experimentalScores.length) {
+            experimentalScores.forEach(score => {
+                evidenceScores.push(score['@id']);
             });
-        }).then(updatedExperimental => {
-            // update the assessmentTracker object so it accounts for any new assessments
-            var userAssessment;
-            var assessments = updatedExperimental.assessments;
-            var user = this.props.session && this.props.session.user_properties;
+        }
+        /*****************************************************/
+        /* Experimental score status data object             */
+        /*****************************************************/
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
-            // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (assessments && assessments.length) {
-                // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+        if (Object.keys(newUserScoreObj).length) {
+            this.setState({submitBusy: true});
+            /***********************************************************/
+            /* Either update or create the user score object in the DB */
+            /***********************************************************/
+            if (this.state.userScoreObj.uuid) {
+                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                    this.setState({submitBusy: false});
+                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            } else {
+                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    if (newScoreObject) {
+                        // Add new score @id to array
+                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                    }
+                    return Promise.resolve(evidenceScores);
+                }).then(newScoresArray => {
+                    let newExperimental = curator.flatten(experimental);
+                    // Update individual's scores property
+                    newExperimental['scores'] = newScoresArray;
+                    this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                    });
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
             }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, updatedExperimental.evidenceType);
-
-            // Wrote the experimental data, so update the assessments state to the new assessment list
-            if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
-                this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
-            }
-
-            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
-            return Promise.resolve(null);
-        }).then(data => {
-            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
-            var tempGdm = tempGdmPmid[0];
-            var tempPmid = tempGdmPmid[1];
-            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
-        }).catch(function(e) {
-            console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
-        });
+        }
     },
 
     componentWillMount: function() {
@@ -2273,20 +2290,16 @@ var ExperimentalViewer = React.createClass({
 
     render: function() {
         var experimental = this.props.context;
+        /****************************************/
+        /* Retain pre-existing assessments data */
+        /****************************************/
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
-        //var is_assessed = false;
         var validAssessments = [];
         _.map(assessments, assessment => {
             if (assessment.value !== 'Not Assessed') {
                 validAssessments.push(assessment);
             }
         });
-        //for (var i in assessments) {
-        //    if (assessments[i].value !== 'Not Assessed') {
-        //        is_assessed = true;
-        //        break;
-        //    }
-        //}
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
@@ -2309,6 +2322,8 @@ var ExperimentalViewer = React.createClass({
         var tempGdmPmid = curator.findGdmPmidFromObj(experimental);
         var tempGdm = tempGdmPmid[0];
         var tempPmid = tempGdmPmid[1];
+
+        let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
 
         return (
             <div>
@@ -2701,6 +2716,7 @@ var ExperimentalViewer = React.createClass({
                             })}
                         </Panel>
                         : null}
+                        {/* Retain pre-existing assessments data in display */}
                         <Panel panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
@@ -2722,10 +2738,18 @@ var ExperimentalViewer = React.createClass({
                                 </div>
                             </dl>
                         </Panel>
+                        <Panel panelClassName="panel-data">
+                            {evidenceScores.length > 0 ?
+                                <ScoreViewer evidence={experimental} session={this.props.session} />
+                                :
+                                <div className="row">This evidence has not been scored.</div>
+                            }
+                        </Panel>
                         {this.cv.gdmUuid ?
-                            <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
-                                ownerNotAssessed={!(experimentalUserAssessed || userExperimental)} noSeg={false} />
+                            <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score-viewer" open>
+                                <ScoreMain evidence={experimental} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Experimental"
+                                session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                            </Panel>
                         : null}
                     </div>
                 </div>

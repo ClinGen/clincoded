@@ -2574,6 +2574,59 @@ table.login-users-interpretations {
     .variant-panel .mutalyzer-link {
         margin-bottom: 10px;
     }
+
+    dl.calculated-score {
+        width: 100%;
+        margin-bottom: 15px;
+        padding-left: 4px;
+
+        dt {
+            width: 41.66667%;
+        }
+
+        dd {
+            width: 58.33333%;
+            padding-left: 15px;
+        }
+    }
+
+    .evidence-score-list-viewer {
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+        h5 {
+            margin-top: 0;
+            padding-bottom: 5px;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #ddd;
+
+        }
+    }
+}
+.panel.case-control-evidence-score,
+.panel.experimental-evidence-score,
+.panel.proband-evidence-score {
+    .panel-body.panel-std {
+        padding-top: 25px;
+
+        label i {
+            display: block;
+            font-weight: normal;
+        }
+    }
+}
+
+.panel.case-control-evidence-score-viewer,
+.panel.experimental-evidence-score-viewer,
+.panel.proband-evidence-score-viewer {
+    .panel-body.panel-std {
+        dl.calculated-score {
+            dt {
+                padding-left: 10px;
+                text-align: left;
+            }
+        }
+    }
 }
 
 .non-bold-font {

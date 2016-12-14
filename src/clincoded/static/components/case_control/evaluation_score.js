@@ -179,6 +179,7 @@ module.exports = {
                         value={caseControl.comments ? caseControl.comments : null}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                 </div>
+                {/*** Replaced with new score implementation ***
                 <div className="row section section-score">
                     <h3><i className="icon icon-chevron-right"></i> Score Case-Control Study</h3>
                     <div className="evidenceScores">
@@ -196,6 +197,7 @@ module.exports = {
                         </Input>
                     </div>
                 </div>
+                */}
             </div>
         );
     },

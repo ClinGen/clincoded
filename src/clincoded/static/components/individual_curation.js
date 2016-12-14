@@ -31,6 +31,9 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
+var ScoreMain = require('./score/main').ScoreMain;
+var ScoreViewer = require('./score/viewer').ScoreViewer;
+
 const MAX_VARIANTS = 2;
 
 var IndividualCuration = React.createClass({
@@ -60,8 +63,13 @@ var IndividualCuration = React.createClass({
             proband: null, // If we have an associated family that has a proband, this points at it
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
-            evidenceScoreUuid: null
+            userScoreObj: {} // Logged-in user's score object
         };
+    },
+
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
     },
 
     // Handle value changes in various form fields
@@ -188,11 +196,6 @@ var IndividualCuration = React.createClass({
                 else {
                     this.setState({proband_selected: false});
                 }
-                // Get evidenceScore object if exists
-                // FIXME: Need to handle an array of scores
-                if (stateObj.individual.scores && stateObj.individual.scores.length) {
-                    this.setState({evidenceScoreUuid: stateObj.individual.scores[0].uuid});
-                }
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
@@ -301,7 +304,14 @@ var IndividualCuration = React.createClass({
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = null, individualArticles, individualVariants = [];
-            var individualScores = []; // FIXME: Need to be able to handle array of scores
+            var evidenceScores = []; // Holds new array of scores
+            let individualScores = currIndividual && currIndividual.scores ? currIndividual.scores : [];
+            // Find any pre-existing score(s) and put their '@id' values into an array
+            if (individualScores.length) {
+                individualScores.forEach(score => {
+                    evidenceScores.push(score['@id']);
+                });
+            }
             var formError = false;
 
             // Parse the comma-separated list of Orphanet IDs
@@ -472,30 +482,24 @@ var IndividualCuration = React.createClass({
                     /*****************************************************/
                     /* Proband score status data object                  */
                     /*****************************************************/
-                    let newScoreStatusObj = {};
-                    let scoreStatus = this.getFormValue('scoreStatus') && this.getFormValue('scoreStatus') !== 'none' ? this.getFormValue('scoreStatus') : null;
-                    if (scoreStatus) {
-                        newScoreStatusObj = {
-                            scoreStatus: scoreStatus,
-                            evidenceType: 'Individual'
-                        };
+                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+
+                    if (Object.keys(newUserScoreObj).length) {
                         /*************************************************************/
                         /* Either update or create the score status object in the DB */
                         /*************************************************************/
-                        if (this.state.evidenceScoreUuid) {
-                            return this.putRestData('/evidencescore/' + this.state.evidenceScoreUuid, newScoreStatusObj).then(modifiedScoreObj => {
-                                // FIXME: Need to be able to handle array of scores
-                                if (modifiedScoreObj) {
-                                    individualScores.push(modifiedScoreObj['@graph'][0]['@id']);
-                                }
-                                return Promise.resolve(individualScores);
+                        if (this.state.userScoreObj.uuid) {
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                // Only need to update the evidence score object
+                                return Promise.resolve(evidenceScores);
                             });
                         } else {
-                            return this.postRestData('/evidencescore/', newScoreStatusObj).then(newScoreObject => {
+                            return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
                                 if (newScoreObject) {
-                                    individualScores.push(newScoreObject['@graph'][0]['@id']);
+                                    // Add the new score to array
+                                    evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
-                                return Promise.resolve(individualScores);
+                                return Promise.resolve(evidenceScores);
                             });
                         }
                     } else {
@@ -503,7 +507,7 @@ var IndividualCuration = React.createClass({
                     }
                 }).then(data => {
                     // Make a new individual object based on form fields.
-                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, individualScores, hpoids, nothpoids);
+                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, evidenceScores, hpoids, nothpoids);
                     return this.writeIndividualObj(newIndividual);
                 }).then(newIndividual => {
                     var promise;
@@ -856,6 +860,10 @@ var IndividualCuration = React.createClass({
                 : '/individual-submit/?gdm=' + gdm.uuid + (individual ? '&individual=' + individual.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
 
+        // Find any pre-existing scores associated with the evidence
+        let evidenceScores = individual && individual.scores ? individual.scores : [];
+        let variantInfo = this.state.variantInfo;
+
         return (
             <div>
                 {(!this.queryValues.individualUuid || individual) ?
@@ -912,11 +920,19 @@ var IndividualCuration = React.createClass({
                                             </Panel>
                                         </PanelGroup>
                                         {(this.state.family && this.state.proband_selected) || (!this.state.family && this.state.proband_selected) ?
-                                            <PanelGroup accordion>
-                                                <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} open>
-                                                    {IndividualScore.call(this)}
-                                                </Panel>
-                                            </PanelGroup>
+                                            <div>
+                                                <PanelGroup accordion>
+                                                    <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
+                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
+                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                    </Panel>
+                                                </PanelGroup>
+                                                {evidenceScores.length > 1 ?
+                                                    <Panel panelClassName="panel-data">
+                                                        <ScoreViewer evidence={individual} otherScores={true} session={session} />
+                                                    </Panel>
+                                                : null}
+                                            </div>
                                         : null}
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
@@ -1561,6 +1577,79 @@ var IndividualScore = function() {
 };
 
 var IndividualViewer = React.createClass({
+    // Start:: Evidence score submission hanlding for viewer
+    mixins: [RestMixin],
+
+    getInitialState: function() {
+        return {
+            userScoreObj: {}, // Logged-in user's score object
+            submitBusy: false // True while form is submitting
+        };
+    },
+
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
+    },
+
+    // Redirect to Curation-Central page
+    handlePageRedirect: function() {
+        let tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+        let tempGdm = tempGdmPmid[0];
+        let tempPmid = tempGdmPmid[1];
+        window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+    },
+
+    scoreSubmit: function(e) {
+        let individual = this.props.context,
+            evidenceScores = [];
+        let individualScores = individual && individual.scores ? individual.scores : [];
+        // Find any pre-existing score(s) and put their '@id' values into an array
+        if (individualScores.length) {
+            individualScores.forEach(score => {
+                evidenceScores.push(score['@id']);
+            });
+        }
+        /*****************************************************/
+        /* Proband score status data object                  */
+        /*****************************************************/
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+
+        if (Object.keys(newUserScoreObj).length) {
+            this.setState({submitBusy: true});
+            /***********************************************************/
+            /* Either update or create the user score object in the DB */
+            /***********************************************************/
+            if (this.state.userScoreObj.uuid) {
+                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                    this.setState({submitBusy: false});
+                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            } else {
+                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    if (newScoreObject) {
+                        // Add new score @id to array
+                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                    }
+                    return Promise.resolve(evidenceScores);
+                }).then(newScoresArray => {
+                    let newIndividual = curator.flatten(individual);
+                    // Update individual's scores property
+                    newIndividual['scores'] = newScoresArray;
+                    this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                    });
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            }
+        }
+    },
+    // End:: Evidence score submission hanlding for viewer
+
     render: function() {
         var individual = this.props.context;
         var method = individual.method;
@@ -1568,7 +1657,7 @@ var IndividualViewer = React.createClass({
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        let scores = individual && individual.scores ? individual.scores : null;
+        let evidenceScores = individual && individual.scores ? individual.scores : [];
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1838,14 +1927,19 @@ var IndividualViewer = React.createClass({
                         </Panel>
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
-                            <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Score Status</dt>
-                                        <dd>{scores && scores.length ? scores[0].scoreStatus : null}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
+                            <div>
+                                <Panel panelClassName="panel-data">
+                                    {evidenceScores.length > 0 ?
+                                        <ScoreViewer evidence={individual} session={this.props.session} />
+                                        :
+                                        <div className="row">This evidence has not been scored.</div>
+                                    }
+                                </Panel>
+                                <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
+                                    <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
+                                    session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                                </Panel>
+                            </div>
                         : null}
 
                     </div>
