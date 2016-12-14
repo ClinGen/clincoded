@@ -49,12 +49,14 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        if (nextProps.variantInfo !== this.props.variantInfo && !this.props.evidence) {
+        if (nextProps.variantInfo !== this.props.variantInfo) {
             this.setState({variantInfo: nextProps.variantInfo}, () => {
                 if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
                     this.setState({disableScoreStatus: false});
                 } else {
-                    this.setState({disableScoreStatus: true});
+                    this.setState({disableScoreStatus: true, scoreStatus: null, showScoreInput: false}, () => {
+                        this.refs.scoreStatus.resetValue();
+                    });
                 }
             });
         }
