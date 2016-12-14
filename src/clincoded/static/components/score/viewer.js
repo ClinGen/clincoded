@@ -71,7 +71,7 @@ var ScoreViewer = module.exports.ScoreViewer = React.createClass({
                         <div key={i} className="evidence-score-list-viewer">
                             <h5>{item.submitted_by.title}</h5>
                             <div>
-                                {item.scoreStatus && item.scoreStatus !== 'none' ?
+                                {item.scoreStatus && item.scoreStatus !== 'none' && this.props.evidence['@type'][0] !== 'caseControl' ?
                                     <dl className="dl-horizontal">
                                         <dt>Score Status</dt>
                                         <dd>{item.scoreStatus}</dd>
