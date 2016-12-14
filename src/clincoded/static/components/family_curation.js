@@ -170,12 +170,20 @@ var FamilyCuration = React.createClass({
                 }
             }
 
-            // Update state for LOD score
+            // Update states for LOD scores; reset SEGincludeLodScoreInAggregateCalculation dropdown if blank
             if (ref === 'SEGestimatedLodScore') {
-                this.setState({estimatedLodScore: this.refs[ref].getValue()});
+                let estimatedLodScore = this.refs[ref].getValue();
+                this.setState({estimatedLodScore: estimatedLodScore});
+                if (estimatedLodScore == '') {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
             }
             if (ref === 'SEGpublishedLodScore') {
-                this.setState({publishedLodScore: this.refs[ref].getValue()});
+                let publishedLodScore = this.refs[ref].getValue();
+                this.setState({publishedLodScore: publishedLodScore});
+                if (publishedLodScore == '') {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
             }
 
             // Update Estimated LOD if it should be automatically calculated
@@ -289,6 +297,10 @@ var FamilyCuration = React.createClass({
             this.setState({estimatedLodScore: estimatedLodScore});
             if (this.refs['SEGestimatedLodScore']) {
                 this.refs['SEGestimatedLodScore'].setValue(estimatedLodScore);
+            }
+            // Reset the SEGincludeLodScoreInAggregateCalculation dropdown if there is no calculated estimated lod score
+            if (!estimatedLodScore && this.refs['SEGincludeLodScoreInAggregateCalculation']) {
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
             }
         }
     },
