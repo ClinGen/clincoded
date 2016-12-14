@@ -103,7 +103,8 @@ var FamilyCuration = React.createClass({
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             lodPublished: null, // Switch to show either calculated or estimated LOD score
-            lodScore: null, // track LOD value
+            estimatedLodScore: null, // track estimated LOD value
+            publishedLodScore: null, // track published LOD value
             lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
             lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
         };
@@ -171,7 +172,10 @@ var FamilyCuration = React.createClass({
 
             // Update state for LOD score
             if (ref === 'SEGestimatedLodScore') {
-                this.setState({lodScore: this.refs[ref].getValue()});
+                this.setState({estimatedLodScore: this.refs[ref].getValue()});
+            }
+            if (ref === 'SEGpublishedLodScore') {
+                this.setState({publishedLodScore: this.refs[ref].getValue()});
             }
 
             // Update Estimated LOD if it should be automatically calculated
@@ -262,29 +266,29 @@ var FamilyCuration = React.createClass({
 
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
     calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
-        let lodScore = null;
+        let estimatedLodScore = null;
         if (lodCalcMode === 'AD') {
             // LOD scoring if GDM is Autosomal dominant
             if (numSegregation !== '') {
                 numSegregation = parseInt(numSegregation);
-                lodScore = Math.log(1 / Math.pow(0.5, numSegregation)) / Math.log(10);
+                estimatedLodScore = Math.log(1 / Math.pow(0.5, numSegregation)) / Math.log(10);
             }
         } else if (lodCalcMode === 'AR') {
             // LOD scoring if GDM is Autosomal recessive
             if (numAffected !== '' && numUnaffected !== '') {
                 numAffected = parseInt(numAffected);
                 numUnaffected = parseInt(numUnaffected);
-                lodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
+                estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
         }
         if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
-            if (lodScore) {
-                lodScore = parseFloat(lodScore.toFixed(2));
+            if (estimatedLodScore) {
+                estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
             }
             // Update state and form field if relevant
-            this.setState({lodScore: lodScore});
+            this.setState({estimatedLodScore: estimatedLodScore});
             if (this.refs['SEGestimatedLodScore']) {
-                this.refs['SEGestimatedLodScore'].setValue(lodScore);
+                this.refs['SEGestimatedLodScore'].setValue(estimatedLodScore);
             }
         }
     },
@@ -381,7 +385,8 @@ var FamilyCuration = React.createClass({
                     );
                 } else {
                     // ... otherwise, show the stored LOD score, if available
-                    stateObj.lodScore = stateObj.family.segregation.estimatedLodScore ? stateObj.family.segregation.estimatedLodScore : null;
+                    stateObj.estimatedLodScore = stateObj.family.segregation.estimatedLodScore ? stateObj.family.segregation.estimatedLodScore : null;
+                    stateObj.publishedLodScore = stateObj.family.segregation.publishedLodScore ? stateObj.family.segregation.publishedLodScore : null;
                 }
             }
 
@@ -1577,13 +1582,14 @@ var FamilySegregation = function() {
             : null}
             {this.state.lodPublished === 'No' ?
                 <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>}
-                    inputDisabled={this.state.lodLocked} value={this.state.lodScore}
+                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
-                    handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+                    handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                    placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate estimated LOD score" : "Number only"} />
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={(this.state.lodPublished === 'Yes' && !this.state.publishedLodScore) || (this.state.lodPublished === 'No' && !this.state.estimatedLodScore)}>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
