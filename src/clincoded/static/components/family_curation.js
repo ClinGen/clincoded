@@ -103,6 +103,7 @@ var FamilyCuration = React.createClass({
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             lodPublished: null, // Switch to show either calculated or estimated LOD score
+            lodScore: null, // track LOD value
             lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
             lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
         };
@@ -166,6 +167,18 @@ var FamilyCuration = React.createClass({
                 if (this.cv.filledSegregations[ref]) {
                     delete this.cv.filledSegregations[ref];
                 }
+            }
+
+            // Update state for LOD score
+            if (ref === 'SEGestimatedLodScore') {
+                this.setState({lodScore: this.refs[ref].getValue()});
+            }
+
+            // Update Estimated LOD if it should be automatically calculated
+            if (this.state.lodLocked && (ref === 'SEGnumberOfSegregationsForThisFamily'
+                || ref === 'SEGnumberOfAffectedWithGenotype'
+                || ref === 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')) {
+                this.calculateEstimatedLOD();
             }
 
             // Now change the state of the assessment dropdown if needed
@@ -239,6 +252,47 @@ var FamilyCuration = React.createClass({
             var errors = this.state.formErrors;
             errors['individualorphanetid'] = '';
             this.setState({formErrors: errors});
+        }
+    },
+
+    // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
+    calculateEstimatedLOD: function() {
+        let lodScore = null;
+        if (this.state.lodCalcMode === 'AD') {
+            // LOD scoring if GDM is Autosomal dominant
+            let numSegregation = this.refs['SEGnumberOfSegregationsForThisFamily'].getValue();
+            if (numSegregation !== '') {
+                numSegregation = parseInt(numSegregation);
+                if (numSegregation >= 0 && numSegregation < 5) {
+                    lodScore = 1.2;
+                } else if (numSegregation >= 5 && numSegregation < 7) {
+                    lodScore = 1.5;
+                } else if (numSegregation >= 7 && numSegregation < 10) {
+                    lodScore = 2.1;
+                } else if (numSegregation >= 10) {
+                    lodScore = 3;
+                }
+            }
+        } else if (this.state.lodCalcMode === 'AR') {
+            // LOD scoring if GDM is Autosomal recessive
+            let numAffected = this.refs['SEGnumberOfAffectedWithGenotype'];
+            let numUnaffected = this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'];
+            if (numAffected !== '' && numUnaffected !== '') {
+                numAffected = parseInt(numAffected);
+                numUnaffected = parseInt(numUnaffected);
+                if (numAffected == 2 && numUnaffected >= 3) {
+                    lodScore = 1;
+                } else if (numAffected >= 3 && numUnaffected >= 3) {
+                    lodScore = 1.5;
+                }
+            }
+        }
+        if (this.state.lodCalcMode === 'AD' || this.state.lodCalcMode === 'AR') {
+            // Update state and form field if relevant
+            this.setState({lodScore: lodScore});
+            if (this.refs['SEGestimatedLodScore']) {
+                this.refs['SEGestimatedLodScore'].setValue(lodScore);
+            }
         }
     },
 
@@ -1516,7 +1570,8 @@ var FamilySegregation = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
-                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
+                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>}
+                    inputDisabled={this.state.lodLocked} value={this.state.lodScore}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
