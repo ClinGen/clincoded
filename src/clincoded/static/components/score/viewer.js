@@ -70,32 +70,38 @@ var ScoreViewer = module.exports.ScoreViewer = React.createClass({
                     return (
                         <div key={i} className="evidence-score-list-viewer">
                             <h5>{item.submitted_by.title}</h5>
-                            {item.scoreStatus && item.scoreStatus === 'Score' ?
-                                <div>
+                            <div>
+                                {item.scoreStatus && item.scoreStatus !== 'none' ?
                                     <dl className="dl-horizontal">
                                         <dt>Score Status</dt>
                                         <dd>{item.scoreStatus}</dd>
                                     </dl>
+                                : null}
+                                {item.caseInfoType ?
                                     <dl className="dl-horizontal">
-                                        <dt>Variant Kind</dt>
-                                        <dd>{item.caseInfoType ? renderCaseInfoType(item.caseInfoType) : null}</dd>
+                                        <dt>Case Information Type</dt>
+                                        <dd>{renderCaseInfoType(item.caseInfoType)}</dd>
                                     </dl>
+                                : null}
+                                {item.calculatedScore ?
                                     <dl className="dl-horizontal">
                                         <dt>Default Score</dt>
-                                        <dd>{item.calculatedScore ? item.calculatedScore : null}</dd>
+                                        <dd>{item.calculatedScore}</dd>
                                     </dl>
+                                : null}
+                                {item.score ?
                                     <dl className="dl-horizontal">
                                         <dt>Changed Score</dt>
-                                        <dd>{item.score ? item.score : null}</dd>
+                                        <dd>{item.score}</dd>
                                     </dl>
+                                : null}
+                                {item.scoreExplanation ?
                                     <dl className="dl-horizontal">
                                         <dt>Reaon(s) for score change</dt>
-                                        <dd>{item.scoreExplanation ? item.scoreExplanation : null}</dd>
+                                        <dd>{item.scoreExplanation}</dd>
                                     </dl>
-                                </div>
-                                :
-                                <div><dl className="dl-horizontal"><dt>Score Status</dt><dd>{item.scoreStatus}</dd></dl></div>
-                            }
+                                : null}
+                            </div>
                         </div>
                     );
                 })}
