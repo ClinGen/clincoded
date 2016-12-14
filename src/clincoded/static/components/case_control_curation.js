@@ -24,7 +24,7 @@ const PmidSummary = curator.PmidSummary;
 const DeleteButton = curator.DeleteButton;
 const PmidDoiButtons = curator.PmidDoiButtons;
 
-var ScoreMain = require('./score/main').ScoreMain;
+var ScoreCaseControl = require('./score/case_control_score').ScoreCaseControl;
 var ScoreViewer = require('./score/viewer').ScoreViewer;
 
 const CaseControlCuration = React.createClass({
@@ -42,7 +42,6 @@ const CaseControlCuration = React.createClass({
     getInitialState() {
         return {
             gdm: null, // GDM object given in UUID
-            modeInheritance: null, // Mode of Inheritance
             annotation: null, // Annotation object given in UUID
             caseControl: null,
             caseControlUuid: null,
@@ -133,10 +132,6 @@ const CaseControlCuration = React.createClass({
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
             if (stateObj.gdm && stateObj.gdm.omimId) {
                 this.setOmimIdState(stateObj.gdm.omimId);
-            }
-
-            if (stateObj.gdm && stateObj.gdm.modeInheritance) {
-                this.setState({modeInheritance: stateObj.gdm.modeInheritance});
             }
 
             // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
@@ -743,15 +738,15 @@ const CaseControlCuration = React.createClass({
                         });
                     }
                 }).then(newControlCohort => {
+                    let currCaseControl = this.state.caseControl;
                     let evidenceScores = []; // Holds new array of scores
-                    let caseControlScores = newCaseControl && newCaseControl.scores && newCaseControl.scores.length ? newCaseControl.scores : [];
+                    let caseControlScores = currCaseControl && currCaseControl.scores && currCaseControl.scores.length ? currCaseControl.scores : [];
                     // Find any pre-existing score(s) and put their '@id' values into an array
                     if (caseControlScores.length) {
                         caseControlScores.forEach(score => {
                             evidenceScores.push(score['@id']);
                         });
                     }
-
                     /*****************************************************/
                     /* Evidence score data object                        */
                     /*****************************************************/
@@ -924,7 +919,6 @@ const CaseControlCuration = React.createClass({
 
     render() {
         let gdm = this.state.gdm;
-        let modeOfInheritance = this.state.modeInheritance;
         let annotation = this.state.annotation;
         let pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         let caseControl = this.state.caseControl,
@@ -1018,7 +1012,7 @@ const CaseControlCuration = React.createClass({
                                         : null}
                                         <PanelGroup accordion>
                                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
-                                                <ScoreMain evidence={caseControl} modeInheritance={modeOfInheritance} evidenceType="Case control"
+                                                <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
                                                 session={session} handleUserScoreObj={this.handleUserScoreObj} />
                                             </Panel>
                                         </PanelGroup>
@@ -1922,8 +1916,8 @@ var CaseControlViewer = React.createClass({
                                 }
                             </Panel>
                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
-                                <ScoreMain evidence={this.props.context} modeInheritance={tempGdm.modeInheritance} evidenceType="Case control"
-                                session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                                <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
+                                    handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                             </Panel>
                         </div>
                     </div>
