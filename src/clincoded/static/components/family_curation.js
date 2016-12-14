@@ -381,7 +381,7 @@ var FamilyCuration = React.createClass({
                     );
                 } else {
                     // ... otherwise, show the stored LOD score, if available
-                    this.lodScore = stateObj.family.estimatedLodScore ? stateObj.family.estimatedLodScore : null;
+                    stateObj.lodScore = stateObj.family.segregation.estimatedLodScore ? stateObj.family.segregation.estimatedLodScore : null;
                 }
             }
 
