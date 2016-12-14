@@ -42,8 +42,7 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-// Will be great to convert to 'const' when available
-var MAX_VARIANTS = 2;
+const MAX_VARIANTS = 2;
 
 // Maps segregation field refs to schema properties
 var formMapSegregation = {
@@ -93,18 +92,16 @@ var FamilyCuration = React.createClass({
             annotation: null, // Annotation object given in query string
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
-            variantCount: 1, // Number of variants to display
+            variantCount: 0, // Number of variants loaded
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
-            addVariantDisabled: false, // True if Add Another Variant button enabled
             individualRequired: null, // Boolean for set up requirement of proband
-            variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
-            recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
+            recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             lodPublished: null // Switch to show either calculated or estimated LOD score
         };
     },
@@ -127,13 +124,9 @@ var FamilyCuration = React.createClass({
             let individualName = this.refs['individualname'].getValue();
             let individualOrphanetId = this.refs['individualorphanetid'].getValue();
             if (individualName || individualOrphanetId) {
-                this.setState({individualRequired: true, variantRequired: true});
+                this.setState({individualRequired: true});
             } else if (!individualName && !individualOrphanetId) {
-                if (this.refs['SEGrecessiveZygosity'].getValue() !== 'none' || this.refs['variantUuid0'].getValue() || (this.refs['variantUuid1'] && this.refs['variantUuid1'].getValue())) {
-                    this.setState({individualRequired: true, variantRequired: true});
-                } else {
-                    this.setState({individualRequired: false, variantRequired: false});
-                }
+                this.setState({individualRequired: false});
             }
         } else if (ref === 'SEGlodPublished') {
             if (this.refs[ref].getValue() === 'Yes') {
@@ -143,19 +136,19 @@ var FamilyCuration = React.createClass({
             } else {
                 this.setState({lodPublished: null});
             }
-        } else if (ref === 'SEGrecessiveZygosity') {
-            // set the variant count and variant required as necessary
-            let tempValue = this.refs[ref].getValue();
-            if (tempValue === 'Heterozygous') {
-                this.setState({variantCount: 2, individualRequired: true, variantRequired: true});
-            } else if (tempValue === 'Homozygous' || tempValue === 'Hemizygous') {
-                this.setState({variantCount: 1, individualRequired: true, variantRequired: true});
+        } else if (ref === 'zygosityHomozygous') {
+            if (this.refs[ref].toggleValue()) {
+                this.setState({recessiveZygosity: 'Homozygous'});
+                this.refs['zygosityHemizygous'].resetValue();
             } else {
-                if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
-                    this.setState({variantCount: 1, individualRequired: true, variantRequired: true});
-                } else {
-                    this.setState({variantCount: 1, individualRequired: false, variantRequired: false});
-                }
+                this.setState({recessiveZygosity: null});
+            }
+        } else if (ref === 'zygosityHemizygous') {
+            if (this.refs[ref].toggleValue()) {
+                this.setState({recessiveZygosity: 'Hemizygous'});
+                this.refs['zygosityHomozygous'].resetValue();
+            } else {
+                this.setState({recessiveZygosity: null});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
@@ -193,7 +186,7 @@ var FamilyCuration = React.createClass({
         var hpoIds = '';
         var hpoFreeText = '';
         if (fromTarget == 'group') {
-            this.setState({individualRequired: true, variantRequired: true});
+            this.setState({individualRequired: true});
             if (this.state.group) {
                 // We have a group, so get the disease array from it.
                 associatedGroups = [this.state.group];
@@ -238,7 +231,7 @@ var FamilyCuration = React.createClass({
                 }
             }
         } else if (fromTarget == 'family') {
-            this.setState({individualRequired: true, variantRequired: true});
+            this.setState({individualRequired: true});
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
             var errors = this.state.formErrors;
@@ -333,8 +326,6 @@ var FamilyCuration = React.createClass({
                     if (segregation.variants && segregation.variants.length) {
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
-                        stateObj.variantRequired = stateObj.probandIndividual.recessiveZygosity ? true : false;
-                        stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
                         // For each incoming variant, set the form value
                         for (var i = 0; i < segregation.variants.length; i++) {
@@ -348,9 +339,6 @@ var FamilyCuration = React.createClass({
                                 };
                             }
                         }
-                    } else if (stateObj.probandIndividual) {
-                        // No variants in this family, but it does have a proband individual. Open one empty variant panel
-                        stateObj.variantCount = 1;
                     }
                     if (segregation.lodPublished === true) {
                         this.setState({lodPublished: 'Yes'});
@@ -381,7 +369,7 @@ var FamilyCuration = React.createClass({
                         /*****************************************************/
                         let probandIndividual = stateObj.probandIndividual;
                         if (probandIndividual.recessiveZygosity && probandIndividual.recessiveZygosity.length) {
-                            this.setState({SEGrecessiveZygosity: probandIndividual.recessiveZygosity});
+                            this.setState({recessiveZygosity: probandIndividual.recessiveZygosity});
                         }
                     }
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
@@ -473,7 +461,7 @@ var FamilyCuration = React.createClass({
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
-            let SEGrecessiveZygosity = this.getFormValue('SEGrecessiveZygosity');
+            let recessiveZygosity = this.state.recessiveZygosity;
             let variantId0 = this.getFormValue('variantUuid0'),
                 variantId1 = this.getFormValue('variantUuid1');
 
@@ -515,7 +503,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Get variant uuid's if they were added via the modals
-            for (var i = 0; i < this.state.variantCount; i++) {
+            for (var i = 0; i < MAX_VARIANTS; i++) {
                 // Grab the values from the variant form panel
                 var variantId = this.getFormValue('variantUuid' + i);
 
@@ -523,26 +511,6 @@ var FamilyCuration = React.createClass({
                 if (variantId) {
                     // Make a search string for these terms
                     familyVariants.push('/variants/' + variantId);
-                }
-            }
-
-            if (this.state.individualRequired || this.state.variantRequired) {
-                if (!variantId0) {
-                    formError = true;
-                    this.setFormErrors('individualorphanetid', 'You must specify a variant if you are defining a proband individual');
-                }
-            }
-
-            // Check to see if the right number of variants exist
-            if (SEGrecessiveZygosity === 'Heterozygous') {
-                if (!variantId0 || !variantId1) {
-                    formError = true;
-                    this.setFormErrors('SEGrecessiveZygosity', 'For Heterozygous, two variants must be specified');
-                }
-            } else if (SEGrecessiveZygosity === 'Hemizygous' || SEGrecessiveZygosity === 'Homozygous') {
-                if (!variantId0) {
-                    formError = true;
-                    this.setFormErrors('SEGrecessiveZygosity', `For ${SEGrecessiveZygosity}, one variant must be specified`);
                 }
             }
 
@@ -670,8 +638,7 @@ var FamilyCuration = React.createClass({
                     /* Need to capture zygosity data and     */
                     /* pass into the individual object       */
                     /*****************************************/
-                    let zygosity = this.getFormValue('SEGrecessiveZygosity') && this.getFormValue('SEGrecessiveZygosity') !== 'none' ?
-                                    this.getFormValue('SEGrecessiveZygosity') : null;
+                    let zygosity = this.state.recessiveZygosity;
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -1024,22 +991,11 @@ var FamilyCuration = React.createClass({
         return newFamily;
     },
 
-    // Add another variant section to the FamilyVariant panel
-    handleAddVariant: function() {
-        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
-    },
-
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
     updateVariantId: function(data, fieldNum) {
-        var newVariantInfo = _.clone(this.state.variantInfo);
-        var addVariantDisabled;
+        let newVariantInfo = _.clone(this.state.variantInfo);
+        let variantCount = this.state.variantCount;
         if (data) {
-            // Enable/Disable Add Variant button as needed
-            if (fieldNum == 0) {
-                addVariantDisabled = false;
-            } else {
-                addVariantDisabled = true;
-            }
             // Update the form and display values with new data
             this.refs['variantUuid' + fieldNum].setValue(data.uuid);
             newVariantInfo[fieldNum] = {
@@ -1049,39 +1005,42 @@ var FamilyCuration = React.createClass({
                 'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
                 'uuid': data.uuid
             };
+            variantCount += 1;  // We have one more variant to show
         } else {
             // Reset the form and display values
             this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
+            variantCount -= 1;  // we have one less variant to show
         }
 
         // if variant data entered, must enter proband individual name and orphanet
         // First check if data entered in either ClinVar Variant ID or Other description at each variant
         var noVariantData = true;
-        _.range(this.state.variantCount).map(i => {
+        _.range(variantCount).map(i => {
             if (this.refs['variantUuid' + i].getValue()) {
                 noVariantData = false;
             }
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
         if (noVariantData && this.refs['individualname']) {
-            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue() || this.refs['SEGrecessiveZygosity'].getValue() !== 'none') {
-                this.setState({individualRequired: true, variantRequired: true});
+            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
+                this.setState({individualRequired: true});
             } else {
-                this.setState({individualRequired: false, variantRequired: false});
+                this.setState({individualRequired: false});
             }
             var errors = this.state.formErrors;
             errors['individualname'] = '';
             errors['individualorphanetid'] = '';
             this.setState({formErrors: errors});
         } else {
-            this.setState({individualRequired: true, variantRequired: true});
+            this.setState({individualRequired: true});
         }
 
         // Set state
-        this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled});
+        this.setState({variantInfo: newVariantInfo, variantCount: variantCount});
         this.clrFormErrors('individualorphanetid');
-        this.clrFormErrors('SEGrecessiveZygosity');
+        this.clrFormErrors('zygosityHemizygous');
+        this.clrFormErrors('zygosityHomozygous');
     },
 
     // Determine whether a Family is associated with a Group
@@ -1576,7 +1535,7 @@ var FamilyVariant = function() {
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
 
     return (
-        <div className="row">
+        <div className="row form-row-helper">
             {!family || !family.segregation || !family.segregation.variants || family.segregation.variants.length === 0 ?
                 <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1619,17 +1578,17 @@ var FamilyVariant = function() {
             :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
             }
-            <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
-                error={this.getFormError('SEGrecessiveZygosity')} clearError={this.clrFormErrors.bind(null, 'SEGrecessiveZygosity')}
-                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
+            <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
+                error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
+                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                <option value="none">No Selection</option>
-                <option disabled="disabled"></option>
-                <option value="Homozygous">Homozygous</option>
-                <option value="Hemizygous">Hemizygous</option>
-                <option value="Heterozygous">Heterozygous</option>
             </Input>
-            {_.range(this.state.variantCount).map(i => {
+            <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
+                error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
+                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            </Input>
+            {_.range(MAX_VARIANTS).map(i => {
                 var variant;
 
                 if (variants && variants.length) {
@@ -1642,7 +1601,7 @@ var FamilyVariant = function() {
                             <div className="variant-resources">
                                 {this.state.variantInfo[i].clinvarVariantId ?
                                     <div className="row variant-data-source">
-                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant variantRequired={this.state.variantRequired} />}</label></span>
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
                                         <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                     </div>
                                 : null}
@@ -1654,8 +1613,8 @@ var FamilyVariant = function() {
                                 : null}
                                 {this.state.variantInfo[i].carId ?
                                     <div className="row">
-                                        <span className="col-sm-5 control-label"><label><LabelCARVariant variantRequired={this.state.variantRequired} /></label></span>
-                                        <span className="col-sm-7 text-no-input"><a href={`${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
+                                        <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
+                                        <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                     </div>
                                 : null}
                                 {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
@@ -1684,7 +1643,7 @@ var FamilyVariant = function() {
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                         <div className="row">
                             <div className="form-group">
-                                <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
+                                <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:</label> : <label>Clear Variant Selection:</label>}</span>
                                 <span className="col-sm-7">
                                     {!this.state.variantInfo[i] || (this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId) ?
                                         <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
@@ -1711,7 +1670,7 @@ var FamilyVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
     }
 });
 
@@ -1723,7 +1682,7 @@ var LabelClinVarVariantTitle = React.createClass({
 
 var LabelCARVariant = React.createClass({
     render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
     }
 });
 
@@ -1926,7 +1885,7 @@ var FamilyViewer = React.createClass({
         //    }
         //}
 
-        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
+        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : []) : [];
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
@@ -2096,6 +2055,20 @@ var FamilyViewer = React.createClass({
                         : null}
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
+                            {family.individualIncluded && family.individualIncluded.length ?
+                                <div>
+                                    {family.individualIncluded.map(function(ind, index) {
+                                        return (
+                                            <div key={index}>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Zygosity</dt>
+                                                    <dd>{ind.proband && ind.recessiveZygosity ? ind.recessiveZygosity : "None selected"}</dd>
+                                                </dl>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            : null }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
@@ -2124,7 +2097,7 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
-                                        {variant.hgvsNames && variant.hgvsNames.GRCh38 ?
+                                        {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>Genomic HGVS Title</dt>
@@ -2138,22 +2111,6 @@ var FamilyViewer = React.createClass({
                                                     <dt>Other description</dt>
                                                     <dd>{variant.otherDescription}</dd>
                                                 </dl>
-                                            </div>
-                                        : null }
-                                        {family.individualIncluded && family.individualIncluded.length && i === 0 ?
-                                            <div>
-                                                {family.individualIncluded.map(function(ind, index) {
-                                                    return (
-                                                        <div key={index}>
-                                                            {ind.proband && ind.recessiveZygosity ?
-                                                                <dl className="dl-horizontal">
-                                                                    <dt>If Recessive, select variant zygosity</dt>
-                                                                    <dd>{ind.recessiveZygosity}</dd>
-                                                                </dl>
-                                                            : null}
-                                                        </div>
-                                                    );
-                                                })}
                                             </div>
                                         : null }
                                     </div>
