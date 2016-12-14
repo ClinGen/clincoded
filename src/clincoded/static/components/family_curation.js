@@ -263,7 +263,7 @@ var FamilyCuration = React.createClass({
             let numSegregation = this.refs['SEGnumberOfSegregationsForThisFamily'].getValue();
             if (numSegregation !== '') {
                 numSegregation = parseInt(numSegregation);
-                if (numSegregation >= 0 && numSegregation < 5) {
+                if (numSegregation == 4) {
                     lodScore = 1.2;
                 } else if (numSegregation >= 5 && numSegregation < 7) {
                     lodScore = 1.5;
