@@ -877,6 +877,22 @@ var NewCalculation = function() {
         }
     }
 
+    /* TEMP VARIABLES FOR NEW TABLE */
+    let probandOtherVariantCount, probandOtherVariantPoints, probandOtherVariantPointsCounted;
+    let probandNullVariantCount, probandNullVariantPoints, probandNullVariantPointsCounted;
+    let variantDenovoCount, variantDenovoPoints, variantDenovoPointsCounted;
+    let twoVariantsNotProvenCount, twoVariantsNotProvenPoints, twoVariantsNotProvenPointsCounted;
+    let twoVariantsProvenCount, twoVariantsProvenPoints, twoVariantsProvenPointsCounted;
+    let segregationCount, segregationPoints, segregationPointsCounted;
+    let caseControlCount, caseControlPoints, caseControlPointsCounted;
+    let biochemicalFunctionCount, biochemicalFunctionPoints, biochemicalFunctionPointsCounted;
+    let proteinInteractionsCount, proteinInteractionsPoints, proteinInteractionsPointsCounted;
+    let expressionCount, expressionPoints, expressionPointsCounted;
+    let functionalAlterationCount, functionalAlterationPoints, functionalAlterationPointsCounted;
+    let modelSystemsCount, modelSystemsPoints, modelSystemsPointsCounted;
+    let rescueCount, rescuePoints, rescuePointsCounted;
+    let totalPoints;
+
     return (
         <div>
             <PanelGroup accordion>
@@ -965,54 +981,54 @@ var NewCalculation = function() {
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="subtitle row-header">Proband with other variant type with some evidence of gene impact</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{probandOtherVariantCount}</td>
+                                            <td>{probandOtherVariantPoints}</td>
+                                            <td>{probandOtherVariantPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="subtitle row-header">Proband with predicted or proven null variant</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{probandNullVariantCount}</td>
+                                            <td>{probandNullVariantPoints}</td>
+                                            <td>{probandNullVariantPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="subtitle row-header">Variant is <i>de novo</i></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{variantDenovoCount}</td>
+                                            <td>{variantDenovoPoints}</td>
+                                            <td>{variantDenovoPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
-                                            <td className="subtitle row-header">2 variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td className="subtitle row-header">Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                            <td>{twoVariantsNotProvenCount}</td>
+                                            <td>{twoVariantsNotProvenPoints}</td>
+                                            <td>{twoVariantsNotProvenPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="subtitle row-header">Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{twoVariantsProvenCount}</td>
+                                            <td>{twoVariantsProvenPoints}</td>
+                                            <td>{twoVariantsProvenPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td colSpan="2" className="title row-header">Segregation</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{segregationCount}</td>
+                                            <td>{segregationPoints}</td>
+                                            <td>{segregationPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td colSpan="3" className="title row-header area-bottom-cells">Case-Control</td>
-                                            <td className="area-bottom-cells"></td>
-                                            <td className="area-bottom-cells"></td>
-                                            <td className="area-bottom-cells"></td>
+                                            <td className="area-bottom-cells">{caseControlCount}</td>
+                                            <td className="area-bottom-cells">{caseControlPoints}</td>
+                                            <td className="area-bottom-cells">{caseControlPointsCounted}</td>
                                         </tr>
                                         <tr className="narrow-line"></tr>
                                         <tr className="area-top-cells count-title-row">
@@ -1032,53 +1048,53 @@ var NewCalculation = function() {
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="title row-header">Biochemical Functions</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{biochemicalFunctionCount}</td>
+                                            <td>{biochemicalFunctionPoints}</td>
+                                            <td>{biochemicalFunctionPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="title row-header">Protein Interactions</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{proteinInteractionsCount}</td>
+                                            <td>{proteinInteractionsPoints}</td>
+                                            <td>{proteinInteractionsPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td className="left-padding"></td>
                                             <td className="title row-header">Expression</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{expressionCount}</td>
+                                            <td>{expressionPoints}</td>
+                                            <td>{expressionPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td colSpan="2" className="title row-header">Functional Alteration</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{functionalAlterationCount}</td>
+                                            <td>{functionalAlterationPoints}</td>
+                                            <td>{functionalAlterationPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding"></td>
                                             <td colSpan="2" className="title row-header">Model Systems</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{modelSystemsCount}</td>
+                                            <td>{modelSystemsPoints}</td>
+                                            <td>{modelSystemsPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td className="left-padding area-bottom-cells"></td>
                                             <td colSpan="2" className="title row-header area-bottom-cells">Rescue</td>
-                                            <td className="area-bottom-cells"></td>
-                                            <td className="area-bottom-cells"></td>
-                                            <td className="area-bottom-cells"></td>
+                                            <td className="area-bottom-cells">{rescueCount}</td>
+                                            <td className="area-bottom-cells">{rescuePoints}</td>
+                                            <td className="area-bottom-cells">{rescuePointsCounted}</td>
                                         </tr>
                                         <tr className="narrow-line"></tr>
                                         <tr className="area-top-cells count-title-row">
                                             <td colSpan="3" className="title larger row-header">Total Points</td>
                                             <td></td>
                                             <td></td>
-                                            <td></td>
+                                            <td className="title larger">{totalPoints}</td>
                                         </tr>
                                     </tbody>
                                 </table>
