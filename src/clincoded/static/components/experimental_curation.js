@@ -100,7 +100,8 @@ var ExperimentalCuration = React.createClass({
             variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
             submitBusy: false, // True while form is submitting
-            userScoreObj: {} // Logged-in user's score object
+            userScoreObj: {}, // Logged-in user's score object
+            formError: false
         };
     },
 
@@ -595,6 +596,15 @@ var ExperimentalCuration = React.createClass({
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // Make sure there is an explanation for the score selected differently from the default score
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+        if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
+        }
+
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var groupGenes;
@@ -993,15 +1003,10 @@ var ExperimentalCuration = React.createClass({
                             evidenceScores.push(score['@id']);
                         });
                     }
-                    /*****************************************************/
-                    /* Evidence score data object                        */
-                    /*****************************************************/
-                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
-
+                    /*************************************************************/
+                    /* Either update or create the score status object in the DB */
+                    /*************************************************************/
                     if (Object.keys(newUserScoreObj).length) {
-                        /*************************************************************/
-                        /* Either update or create the score status object in the DB */
-                        /*************************************************************/
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -1236,12 +1241,12 @@ var ExperimentalCuration = React.createClass({
                                         : null}
                                         {this.state.experimentalNameVisible ?
                                             <div>
-                                                <Panel panelClassName="panel-data">
-                                                    <dl className="dl-horizontal">
-                                                        <div>
-                                                            <dt>Assessments</dt>
-                                                            <dd>
-                                                                {validAssessments.length ?
+                                                {validAssessments.length ?
+                                                    <Panel panelClassName="panel-data">
+                                                        <dl className="dl-horizontal">
+                                                            <div>
+                                                                <dt>Assessments</dt>
+                                                                <dd>
                                                                     <div>
                                                                         {validAssessments.map(function(assessment, i) {
                                                                             return (
@@ -1252,20 +1257,15 @@ var ExperimentalCuration = React.createClass({
                                                                             );
                                                                         })}
                                                                     </div>
-                                                                : <div>None</div>}
-                                                            </dd>
-                                                        </div>
-                                                    </dl>
-                                                </Panel>
-                                                {evidenceScores.length > 1 ?
-                                                    <Panel panelClassName="panel-data">
-                                                        <ScoreViewer evidence={experimental} otherScores={true} session={session} />
+                                                                </dd>
+                                                            </div>
+                                                        </dl>
                                                     </Panel>
                                                 : null}
                                                 <PanelGroup accordion>
-                                                    <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score" open>
+                                                    <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
                                                         <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
-                                                            evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                            evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -2179,7 +2179,7 @@ var NoteAssessment = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -2192,7 +2192,8 @@ var ExperimentalViewer = React.createClass({
             updatedAssessment: '', // Updated assessment value
             userScoreObj: {}, // Logged-in user's score object
             submitBusy: false, // True while form is submitting
-            experimentalEvidenceType: null
+            experimentalEvidenceType: null,
+            formError: false
         };
     },
 
@@ -2226,6 +2227,10 @@ var ExperimentalViewer = React.createClass({
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
         if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
             this.setState({submitBusy: true});
             /***********************************************************/
             /* Either update or create the user score object in the DB */
@@ -2738,12 +2743,12 @@ var ExperimentalViewer = React.createClass({
                         </Panel>
                         : null}
                         {/* Retain pre-existing assessments data in display */}
-                        <Panel panelClassName="panel-data">
-                            <dl className="dl-horizontal">
-                                <div>
-                                    <dt>Assessments</dt>
-                                    <dd>
-                                        {validAssessments.length ?
+                        {validAssessments.length ?
+                            <Panel panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Assessments</dt>
+                                        <dd>
                                             <div>
                                                 {validAssessments.map(function(assessment, i) {
                                                     return (
@@ -2754,22 +2759,20 @@ var ExperimentalViewer = React.createClass({
                                                     );
                                                 })}
                                             </div>
-                                        : <div>None</div>}
-                                    </dd>
-                                </div>
-                            </dl>
-                        </Panel>
-                        <Panel panelClassName="panel-data">
-                            {evidenceScores.length > 0 ?
-                                <ScoreViewer evidence={experimental} session={this.props.session} />
-                                :
-                                <div className="row">This evidence has not been scored.</div>
-                            }
-                        </Panel>
-                        {this.cv.gdmUuid ?
-                            <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score-viewer" open>
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </Panel>
+                        : null}
+                        {evidenceScores.length > 1 ?
+                            <Panel panelClassName="panel-data">
+                                <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
+                            </Panel>
+                        : null}
+                        {this.cv.gdmUuid && (evidenceScores.length > 0 || (evidenceScores.length < 1 && userExperimental)) ?
+                            <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
-                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
                             </Panel>
                         : null}
                     </div>
