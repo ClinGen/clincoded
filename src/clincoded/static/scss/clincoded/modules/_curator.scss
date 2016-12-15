@@ -2617,6 +2617,16 @@ table.login-users-interpretations {
             display: block;
             font-weight: normal;
         }
+
+        label>span {
+            position: relative;
+
+            &>span:last-child {
+                position: absolute;
+                top: -38px;
+                left: 4px;
+            }
+        }
     }
 }
 
