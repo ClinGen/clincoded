@@ -936,226 +936,149 @@ var NewCalculation = function() {
                                 <table className="summary-matrix">
                                     <tbody>
                                         <tr>
-                                            <td rowSpan="2" className="title larger top-single-cell area-bottom-cells most-left">Assertion<br />Criteria</td>
-                                            <td rowSpan="2" className="title larger top-single-cell area-bottom-cells">Criteria Description</td>
-                                            <td colSpan="8" className="title top-multiple-cell">Number of Points</td>
-                                            <td rowSpan="2" className="title larger vertical-title-most-left-cell area-bottom-cells">
-                                                <div className="vertical-transform-0">Score</div>
-                                            </td>
-                                        </tr>
-                                        <tr className="area-bottom-cells">
-                                            <td className="title larger score-cells top-number-cell">0</td>
-                                            <td className="title larger score-cells top-number-cell">1</td>
-                                            <td className="title larger score-cells top-number-cell">2</td>
-                                            <td className="title larger score-cells top-number-cell">3</td>
-                                            <td className="title larger score-cells top-number-cell">4</td>
-                                            <td className="title larger score-cells top-number-cell">5</td>
-                                            <td className="title larger score-cells top-number-cell">6</td>
-                                            <td className="title larger score-cells top-number-cell">7</td>
+                                            <td className="title larger col-header area-bottom-cells"colSpan="3"></td>
+                                            <td className="title larger col-header score-cols area-bottom-cells">Count</td>
+                                            <td className="title larger col-header score-cols area-bottom-cells">Total Points</td>
+                                            <td className="title larger col-header score-cols area-bottom-cells">Points Counted</td>
                                         </tr>
                                         <tr className="narrow-line"></tr>
                                         <tr className="area-top-cells count-title-row">
-                                            <td rowSpan="2" className="title most-left"># Probands</td>
-                                            <td rowSpan="2" className="description">Total # of curated unrelated probands with variants that provide convincing evidence for disease causality</td>
-                                            <td>N/A</td>
-                                            <td>1-3</td>
-                                            <td>4-6</td>
-                                            <td>7-9</td>
-                                            <td>10-12</td>
-                                            <td>13-15</td>
-                                            <td>16-18</td>
-                                            <td>19+</td>
-                                            <td rowSpan="2" className="result-cells score-cells title larger">{probandScore}</td>
+                                            <td colSpan="3" className="title larger row-header">Genetic Evidence</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
-                                        <tr className="dark-row">
-                                            {probandRow.map(function(item, i) {
-                                                return (
-                                                    <td key={'item' + i} className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
-                                                );
-                                            })}
+                                        <tr className="area-top-cells count-title-row">
+                                            <td colSpan="3" className="title row-header">Case Level</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
-                                        <tr className="count-title-row">
-                                            <td rowSpan="2"  className="title most-left"># Publications</td>
-                                            <td rowSpan="2" className="description"># of curated independent publications reporting human variants in the gene under consideration</td>
-                                            <td>N/A</td>
-                                            <td>1</td>
-                                            <td>2</td>
-                                            <td>3</td>
-                                            <td>4</td>
-                                            <td>5+</td>
-                                            <td rowSpan="2" colSpan="2" className="empty-cell"></td>
-                                            <td rowSpan="2" className="result-cells score-cells title larger">{pubScore}</td>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td colSpan="2" className="title row-header">Variant</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
-                                        <tr className="dark-row">
-                                            {pubRow.map(function(item, i) {
-                                                return (
-                                                    <td key={'item' + i} className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
-                                                );
-                                            })}
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="subtitle row-header">Proband with other variant type with some evidence of gene impact</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
-                                        <tr className="count-title-row">
-                                            <td rowSpan="2" className="title area-bottom-cells most-left">Time (yrs)</td>
-                                            <td rowSpan="2" className="description area-bottom-cells"># of years since initial report defining a gene-disease association (if &#8804; 2 pubs, then max score for time = 1)</td>
-                                            <td>current yr</td>
-                                            <td>1-3 yr</td>
-                                            <td>&gt;3 yr</td>
-                                            <td rowSpan="2" colSpan="5" className="empty-cell area-bottom-cells">&nbsp;</td>
-                                            <td rowSpan="2" className="result-cells score-cells title larger area-bottom-cells">{timeScore}</td>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="subtitle row-header">Proband with predicted or proven null variant</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
-                                        <tr className="dark-row area-bottom-cells">
-                                            {timeRow.map(function(item, i) {
-                                                return (
-                                                    <td key={'item' + i} className={item !== '' ? 'result-cells' : 'around-count-cells dark-cells'}>{item}</td>
-                                                );
-                                            })}
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="subtitle row-header">Variant is <i>de novo</i></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
-                                        <tr className="narrow-line"></tr>
-                                        <tr className="area-top-cells area-bottom-cells">
-                                            <td className="title most-left">Experimental<br />Evidence<br />Points</td>
-                                            <td className="description" ># of points assigned for gene-level experimental evidence supporting a role for this gene in disease</td>
-                                            <td colSpan="8">
-                                                <table className="exp-matrix">
-                                                    <tbody>
-                                                        <tr className="top-row">
-                                                            <td className="exp-evidence-category-cells">Evidence Category</td>
-                                                            <td>Evidence Type</td>
-                                                            <td className="exp-vertical-title-cells">
-                                                                <div className="score-vertical-content vertical-transform-2">Evidence<br />Points</div>
-                                                            </td>
-                                                            <td className="exp-vertical-title-cells">
-                                                                <div className="score-vertical-content vertical-transform-1">Count</div>
-                                                            </td>
-                                                            <td className="exp-vertical-title-cells">
-                                                                <div className="score-vertical-content vertical-transform-2">Category<br /> Max Score</div>
-                                                            </td>
-                                                            <td className="exp-vertical-title-cells">
-                                                                <div className="score-vertical-content vertical-transform-2">Category<br />Score</div>
-                                                            </td>
-                                                            <td className="exp-vertical-title-cells">
-                                                                <div className="score-vertical-content vertical-transform-3">Experimental<br />Max Score</div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td rowSpan="3" className="title exp-evidence-category-cells">Function</td>
-                                                            <td className="title">Biochemical Function</td>
-                                                            <td>0.5</td>
-                                                            <td className={expType['Biochemical Function'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Biochemical Function'] > 0 ? expType['Biochemical Function'] : ''}</td>
-                                                            <td rowSpan="3">2</td>
-                                                            <td rowSpan="3" className={exp_scores[0] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[0] > 0 ? (exp_scores[0] < 2 ? exp_scores[0] : 2) : ''}</td>
-                                                            <td rowSpan="9">6</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="title">Protein Interaction</td>
-                                                            <td>0.5</td>
-                                                            <td className={expType['Protein Interactions'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Protein Interactions'] > 0 ? expType['Protein Interactions'] : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="title">Expression</td>
-                                                            <td>0.5</td>
-                                                            <td className={expType['Expression'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Expression'] > 0 ? expType['Expression'] : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td rowSpan="2" className="title exp-evidence-category-cells">Functional<br />Alteration</td>
-                                                            <td className="title">Patient Cells</td>
-                                                            <td>1</td>
-                                                            <td className={expType['Functional Alteration (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Patient cells)'] > 0 ? expType['Functional Alteration (Patient cells)'] : ''}</td>
-                                                            <td rowSpan="2">2</td>
-                                                            <td rowSpan="2" className={exp_scores[1] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[1] > 0 ? (exp_scores[1] < 2 ? exp_scores[1]: 2) : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="title">Non-Patient Cells</td>
-                                                            <td>0.5</td>
-                                                            <td className={expType['Functional Alteration (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Functional Alteration (Engineered equivalent)'] > 0 ? expType['Functional Alteration (Engineered equivalent)'] : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td rowSpan="4" className="title exp-evidence-category-cells">Models and<br />Rescue</td>
-                                                            <td className="title">Animal Model</td>
-                                                            <td>2</td>
-                                                            <td className={expType['Model Systems (Animal model)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Animal model)'] > 0 ? expType['Model Systems (Animal model)'] : ''}</td>
-                                                            <td rowSpan="4">4</td>
-                                                            <td rowSpan="4" className={exp_scores[2] > 0 ? 'result-cells title larger score-cells' : 'dark-cells'}>{exp_scores[2] > 0 ? (exp_scores[2] < 4 ? exp_scores[2] : 4) : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="title">Cell Culture Model</td>
-                                                            <td>1</td>
-                                                            <td className={expType['Model Systems (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Model Systems (Engineered equivalent)'] > 0 ? expType['Model Systems (Engineered equivalent)'] : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="title">Rescue in Patient Cells</td>
-                                                            <td>2</td>
-                                                            <td className={expType['Rescue (Patient cells)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Rescue (Patient cells)'] > 0 ? expType['Rescue (Patient cells)'] : ''}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="title">Rescue in Engineered Equivalent</td>
-                                                            <td>1</td>
-                                                            <td className={expType['Rescue (Engineered equivalent)'] > 0 ? 'result-cells' : 'dark-cells'}>{expType['Rescue (Engineered equivalent)'] > 0 ? expType['Rescue (Engineered equivalent)'] : ''}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                            <td className="title larger result-cells score-cells">{expScore}</td>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="subtitle row-header">2 variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="subtitle row-header">Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td colSpan="2" className="title row-header">Segregation</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td colSpan="3" className="title row-header area-bottom-cells">Case-Control</td>
+                                            <td className="area-bottom-cells"></td>
+                                            <td className="area-bottom-cells"></td>
+                                            <td className="area-bottom-cells"></td>
                                         </tr>
                                         <tr className="narrow-line"></tr>
-                                        <tr>
-                                            <td colSpan="10" className="total-score-cell title larger area-top-cells area-bottom-cells">Total Score</td>
-                                            <td className="result-cells title larger score-cells larger area-top-cells area-bottom-cells">{totalScore}</td>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td colSpan="3" className="title larger row-header">Experimental Evidence</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td colSpan="2" className="title row-header">Function</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="title row-header">Biochemical Functions</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="title row-header">Protein Interactions</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td className="left-padding"></td>
+                                            <td className="title row-header">Expression</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td colSpan="2" className="title row-header">Functional Alteration</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding"></td>
+                                            <td colSpan="2" className="title row-header">Model Systems</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td className="left-padding area-bottom-cells"></td>
+                                            <td colSpan="2" className="title row-header area-bottom-cells">Rescue</td>
+                                            <td className="area-bottom-cells"></td>
+                                            <td className="area-bottom-cells"></td>
+                                            <td className="area-bottom-cells"></td>
                                         </tr>
                                         <tr className="narrow-line"></tr>
-                                        <tr>
-                                            <td colSpan="7" rowSpan="2" className="description classification-cell">
-                                                {   autoClassification === 'Limited' ? LimitedClassification.call() :
-                                                    (   autoClassification === 'Moderate' ? ModerateClassification.call() :
-                                                        (   autoClassification === 'Strong' ? StrongClassification.call() :
-                                                            (   autoClassification === 'Definitive' ? DefinitiveClassification.call() : null)
-                                                        )
-                                                    )
-                                                }
-                                                <hr />
-                                                <p className="title title-p">Notes</p>
-                                                <p>
-                                                    &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
-                                                    occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
-                                                </p>
-                                                <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
-                                            </td>
-                                            <td colSpan="4" className="classification-score-top">
-                                                <table>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td className="title">Classification</td>
-                                                            <td className="title">Total Score</td>
-                                                        </tr>
-                                                        <tr className="narrow-line-2"></tr>
-                                                        <tr className={autoClassification === 'Limited' ? 'high-light-row' : null}>
-                                                            <td>Limited</td>
-                                                            <td className={autoClassification === 'Limited' ? "title score-cells" : "non-high-light"}>2-8</td>
-                                                        </tr>
-                                                        <tr className="narrow-line-2"></tr>
-                                                        <tr className={autoClassification === 'Moderate' ? 'high-light-row' : null}>
-                                                            <td>Moderate</td>
-                                                            <td className={autoClassification === 'Moderate' ? "title score-cells" : "non-high-light"}>9-12</td>
-                                                        </tr>
-                                                        <tr className="narrow-line-2"></tr>
-                                                        <tr className={autoClassification === 'Strong' ? 'high-light-row' : null}>
-                                                            <td>Strong</td>
-                                                            <td className={autoClassification === 'Strong' ? "title score-cells" : "non-high-light"}>13-16</td>
-                                                        </tr>
-                                                        <tr className="narrow-line-2"></tr>
-                                                        <tr className={autoClassification === 'Definitive' ? 'high-light-row' : null}>
-                                                            <td>Definitive</td>
-                                                            <td className={autoClassification === 'Definitive' ? "title score-cells" : "non-high-light"}>17-20</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="4" className="classification-score-bottom">
-                                                <p className="alert alert-info">
-                                                    <span className="title">Note:</span> If the total calculated score contains a half point, it is rounded down to the
-                                                    nearest whole integer for determining the calculated classification.
-                                                </p>
-                                            </td>
+                                        <tr className="area-top-cells count-title-row">
+                                            <td colSpan="3" className="title larger row-header">Total Points</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
                                     </tbody>
                                 </table>
