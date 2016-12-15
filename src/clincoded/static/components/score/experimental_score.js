@@ -19,7 +19,8 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
         evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
         handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
         scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool // TRUE while the form submit is running
+        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
+        formError: React.PropTypes.bool // TRUE if no explanation is given for a different score
     },
 
     getInitialState() {
@@ -36,7 +37,9 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             showScoreInput: false, // TRUE if either 'Score' or 'Review' is selected
             updateDefaultScore: false, // TRUE if either 'Score Status' or 'Case Information type' are changed
             requiredScoreExplanation: false, // TRUE if a different score is selected from the range
-            submitBusy: false // TRUE while form is submitting
+            submitBusy: false, // TRUE while form is submitting
+            willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
+            formError: false // TRUE if no explanation is given for a different score
         };
     },
 
@@ -54,6 +57,9 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             this.setState({experimentalEvidenceType: nextProps.experimentalEvidenceType, scoreStatus: null, showScoreInput: false}, () => {
                 this.refs.scoreStatus.resetValue();
             });
+        }
+        if (nextProps.formError && nextProps.formError !== this.props.formError) {
+            this.setState({formError: true});
         }
     },
 
@@ -76,6 +82,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                     /* (although its score won't be counted from the summary).                            */
                     /**************************************************************************************/
                     if (scoreStatus && (scoreStatus === 'Score' || scoreStatus === 'Review')) {
+                        scoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
                         this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
                             // If the score form fields are allowed, then proceed with the following
@@ -117,6 +124,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             let selectedScoreStatus = this.refs.scoreStatus.getValue();
             this.setState({scoreStatus: selectedScoreStatus});
             if (selectedScoreStatus === 'Score' || selectedScoreStatus === 'Review') {
+                selectedScoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
                 let calcDefaultScore = this.getDefaultScore(experimentalEvidenceType, null, this.state.updateDefaultScore);
                 // Reset the states and update the calculated default score
                 // Reset score range dropdown options if any changes
@@ -131,14 +139,19 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                 }, () => {
                     let calcScoreRange = this.getScoreRange(experimentalEvidenceType, calcDefaultScore);
                     this.setState({scoreRange: calcScoreRange}, () => {
-                        this.refs.scoreRange.resetValue();
+                        if (this.refs.scoreRange && this.refs.scoreRange.getValue()) {
+                            this.refs.scoreRange.resetValue();
+                        }
                     });
-                    this.refs.scoreExplanation.resetValue();
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue()) {
+                        this.refs.scoreExplanation.resetValue();
+                    }
                     this.updateUserScoreObj();
                 });
             } else {
                 this.setState({
                     showScoreInput: false,
+                    willNotCountScore: false,
                     defaultScore: null,
                     modifiedScore: null,
                     scoreRange: [],
@@ -205,7 +218,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             }
         }
 
-        if (calculatedScore) {
+        if (!isNaN(parseFloat(calculatedScore))) {
             newUserScoreObj['calculatedScore'] = parseFloat(calculatedScore);
         } else {
             if ('calculatedScore' in newUserScoreObj) {
@@ -213,7 +226,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             }
         }
 
-        if (score) {
+        if (!isNaN(parseFloat(score))) {
             newUserScoreObj['score'] = parseFloat(score);
         } else {
             if ('score' in newUserScoreObj) {
@@ -272,7 +285,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                 }
             } else if (experimentalType.indexOf('Rescue') > -1) {
                 if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Patient cells') > -1) {
-                    type = RESCUE + '_ANIMAL_MODEL';
+                    type = RESCUE + '_PATIENT_CELLS';
                 } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
                     type = RESCUE + '_ENGINEERED_EQUIVALENT';
                 }
@@ -338,6 +351,8 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
         let showScoreInput = this.state.showScoreInput;
         let updateDefaultScore = this.state.updateDefaultScore;
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
+        let willNotCountScore = this.state.willNotCountScore;
+        let formError = this.state.formError;
  
         return (
             <div>
@@ -351,6 +366,9 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                         <option value="Review">Review</option>
                         <option value="Contradicts">Contradicts</option>
                     </Input>
+                    {willNotCountScore ?
+                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
+                    : null}
                     {showScoreInput ?
                         <div>
                             <dl className="dl-horizontal calculated-score">
@@ -371,7 +389,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                                 label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
                                 value={scoreExplanation} handleChange={this.handleScoreExplanation}
                                 error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
-                                placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
+                                placeholder={!formError ? "Note: If you selected a score different from the default score, you must provide a reason for the change here." : "Please provide a reason."}
                                 rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                         </div>
                     : null}
