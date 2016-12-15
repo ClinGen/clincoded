@@ -20,7 +20,8 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         variantInfo: React.PropTypes.object, // Variant count for Individual evidence
         handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
         scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool // TRUE while the form submit is running
+        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
+        formError: React.PropTypes.bool // TRUE if no explanation is given for a different score
     },
 
     getInitialState() {
@@ -37,10 +38,13 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             scoreExplanation: null, // Explanation for selecting a different score from the calculated default score
             variantInfo: this.props.variantInfo, // Variant count for Individual evidence
             showScoreInput: false, // TRUE if either 'Score' or 'Review' is selected
+            showCaseInfoTypeOnly: false, // TRUE if Mode of Inheritance is not AD, AR, or X-Linked
             updateDefaultScore: false, // TRUE if either 'Score Status' or 'Case Information type' are changed
             requiredScoreExplanation: false, // TRUE if a different score is selected from the range
             submitBusy: false, // TRUE while form is submitting
-            disableScoreStatus: false // TRUE if Individual evidence has no variants at all
+            disableScoreStatus: false, // TRUE if Individual evidence has no variants at all
+            willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
+            formError: false // TRUE if no explanation is given for a different score
         };
     },
 
@@ -59,6 +63,9 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     });
                 }
             });
+        }
+        if (nextProps.formError && nextProps.formError !== this.props.formError) {
+            this.setState({formError: true});
         }
     },
 
@@ -101,6 +108,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     if (scoreStatus && (scoreStatus === 'Score' || (scoreStatus === 'Review' && modeInheritanceType.length))) {
                         this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
+                            scoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
                             // If the score form fields are allowed, then proceed with the following
                             let caseInfoType = loggedInUserScore.caseInfoType,
                                 defaultScore = loggedInUserScore.calculatedScore,
@@ -124,6 +132,15 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                             }
                             this.updateUserScoreObj();
                         });
+                    } else if (scoreStatus === 'Supports' || (scoreStatus === 'Review' && modeInheritanceType.length < 1)) {
+                        this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
+                            this.refs.scoreStatus.setValue(scoreStatus);
+                            let caseInfoType = loggedInUserScore.caseInfoType;
+                            this.setState({showCaseInfoTypeOnly: true, caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
+                                this.refs.caseInfoType.setValue(caseInfoType);
+                                this.updateUserScoreObj();
+                            });
+                        });
                     } else {
                         this.setState({scoreStatus: scoreStatus ? scoreStatus : null}, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
@@ -144,31 +161,31 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             let selectedScoreStatus = this.refs.scoreStatus.getValue();
             this.setState({scoreStatus: selectedScoreStatus});
             if (selectedScoreStatus === 'Score' || (selectedScoreStatus === 'Review' && modeInheritanceType.length)) {
+                selectedScoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
                 // Reset the states and update the calculated default score
                 // Reset variant scenario dropdown options if any changes
                 // Reset score range dropdown options if any changes
                 // Reset explanation if score status is changed
                 this.setState({
                     showScoreInput: true,
+                    showCaseInfoTypeOnly: false,
+                    updateDefaultScore: true
+                }, () => {this.updateUserScoreObj();});
+            } else if (selectedScoreStatus === 'Supports' || (selectedScoreStatus === 'Review' && modeInheritanceType.length < 1)) {
+                this.setState({
+                    showScoreInput: true,
+                    showCaseInfoTypeOnly: true
+                }, () => {this.updateUserScoreObj();});
+            } else {
+                this.setState({
+                    showScoreInput: false,
+                    showCaseInfoTypeOnly: false,
+                    willNotCountScore: false,
                     caseInfoType: null,
                     defaultScore: null,
                     modifiedScore: null,
                     scoreExplanation: null,
-                    requiredScoreExplanation: false,
-                    updateDefaultScore: true
-                }, () => {
-                    this.refs.caseInfoType.resetValue();
-                    this.refs.scoreRange.resetValue();
-                    this.refs.scoreExplanation.resetValue();
-                    this.updateUserScoreObj();
-                });
-            } else {
-                this.setState({
-                    showScoreInput: false,
-                    caseInfoType: null,
-                    defaultScore: null,
-                    modifiedScore: null,
-                    scoreExplanation: null
+                    requiredScoreExplanation: false
                 }, () => {this.updateUserScoreObj();});
             }
         }
@@ -191,9 +208,13 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                 }, () => {
                     let calcScoreRange = this.getScoreRange(modeInheritanceType, selectedCaseInfoType, calcDefaultScore);
                     this.setState({scoreRange: calcScoreRange}, () => {
-                        this.refs.scoreRange.resetValue();
+                        if (this.refs.scoreRange && this.refs.scoreRange.getValue()) {
+                            this.refs.scoreRange.resetValue();
+                        }
                     });
-                    this.refs.scoreExplanation.resetValue();
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue()) {
+                        this.refs.scoreExplanation.resetValue();
+                    }
                     this.updateUserScoreObj();
                 });
             } else {
@@ -330,8 +351,8 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             } else if (modeInheritance.indexOf('X-linked') > -1) {
                 modeInheritanceType = X_LINKED;
             } else {
+                // Mode of Inheritance is not either AD, AR, or X-Linked
                 modeInheritanceType = '';
-                console.warn("Can't calculate score. Reason - improper mode of inheritance.");
             }
         }
 
@@ -411,9 +432,12 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         let scoreExplanation = this.state.scoreExplanation ? this.state.scoreExplanation : '';
         let scoreRange = this.state.scoreRange ? this.state.scoreRange : [];
         let showScoreInput = this.state.showScoreInput;
+        let showCaseInfoTypeOnly = this.state.showCaseInfoTypeOnly;
         let updateDefaultScore = this.state.updateDefaultScore;
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
         let disableScoreStatus = this.state.disableScoreStatus;
+        let willNotCountScore = this.state.willNotCountScore;
+        let formError = this.state.formError;
 
         // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
         let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
@@ -430,6 +454,12 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                         <option value="Review">Review</option>
                         <option value="Contradicts">Contradicts</option>
                     </Input>
+                    {disableScoreStatus ?
+                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Proband must be associated with at least one variant to Score this evidence.</p></div>
+                    : null}
+                    {willNotCountScore ?
+                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
+                    : null}
                     {showScoreInput ?
                         <div>
                             <Input type="select" ref="caseInfoType" label="Confirm Case Information type:" defaultValue={caseInfoType}
@@ -441,26 +471,30 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                                     return <option key={i} value={item.TYPE}>{item.DESCRIPTION}</option>;
                                 })}
                             </Input>
-                            <dl className="dl-horizontal calculated-score">
-                                <dt className="col-sm-5 control-label">Default Score</dt>
-                                <dd className="col-sm-7">{defaultScore}</dd>
-                            </dl>
-                            <Input type="select" ref="scoreRange" label={<span>Select a score different from default score:<i>(optional)</i></span>}
-                                defaultValue={modifiedScore.toString()} value={modifiedScore.toString()} handleChange={this.handleScoreRangeChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                                inputDisabled={scoreRange && scoreRange.length ? false : true}>
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                {scoreRange.map(function(score, i) {
-                                    return <option key={i} value={score}>{score}</option>;
-                                })}
-                            </Input>
-                            <Input type="textarea" ref="scoreExplanation" required={requiredScoreExplanation} inputDisabled={!requiredScoreExplanation}
-                                label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
-                                value={scoreExplanation} handleChange={this.handleScoreExplanation}
-                                error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
-                                placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
-                                rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            {!showCaseInfoTypeOnly ?
+                                <div>
+                                    <dl className="dl-horizontal calculated-score">
+                                        <dt className="col-sm-5 control-label">Default Score</dt>
+                                        <dd className="col-sm-7">{defaultScore}</dd>
+                                    </dl>
+                                    <Input type="select" ref="scoreRange" label={<span>Select a score different from default score:<i>(optional)</i></span>}
+                                        defaultValue={modifiedScore.toString()} value={modifiedScore.toString()} handleChange={this.handleScoreRangeChange}
+                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                                        inputDisabled={scoreRange && scoreRange.length ? false : true}>
+                                        <option value="none">No Selection</option>
+                                        <option disabled="disabled"></option>
+                                        {scoreRange.map(function(score, i) {
+                                            return <option key={i} value={score}>{score}</option>;
+                                        })}
+                                    </Input>
+                                    <Input type="textarea" ref="scoreExplanation" required={requiredScoreExplanation} inputDisabled={!requiredScoreExplanation}
+                                        label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
+                                        value={scoreExplanation} handleChange={this.handleScoreExplanation}
+                                        error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
+                                        placeholder={!formError ? "Note: If you selected a score different from the default score, you must provide a reason for the change here." : "Please provide a reason."}
+                                        rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                </div>
+                            : null}
                         </div>
                     : null}
                 </div>
