@@ -161,6 +161,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
+                            <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         <span>&nbsp;
@@ -172,6 +173,59 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                     </h1>
                                     <h2><i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></h2>
                                 </span>
+                            </div>
+                            <div className="provisional-info-panel">
+                                <table border="1" style={{'width':'100%'}}>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div className="provisional-title">
+                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   provisionalExist ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Last Saved Summary<br />
+                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Provisional Classification: {provisional.alteredClassification}
+                                                                    { summaryPage ?
+                                                                        null
+                                                                        :
+                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    :
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                }
+                                            </td>
+                                            <td className="button-box" rowSpan="2">
+                                                { summaryButton ?
+                                                    ( summaryPage ?
+                                                        <button type="button" className="btn btn-primary" disabled="disabled">
+                                                            Generate New Summary
+                                                        </button>
+                                                        :
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                        </a>
+                                                    )
+                                                    :
+                                                    null
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr style={{height:'10px'}}></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
