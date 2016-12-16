@@ -185,6 +185,11 @@ var FamilyCuration = React.createClass({
                     this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                 }
             }
+            if (ref === 'SEGlodPublished') {
+                if (this.refs[ref].getValue() === 'none') {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            }
 
             // Update Estimated LOD if it should be automatically calculated
             if (this.state.lodLocked && (ref === 'SEGnumberOfAffectedWithGenotype'
