@@ -185,7 +185,8 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     defaultScore: null,
                     modifiedScore: null,
                     scoreExplanation: null,
-                    requiredScoreExplanation: false
+                    requiredScoreExplanation: false,
+                    formError: false
                 }, () => {this.updateUserScoreObj();});
             }
         }
@@ -224,7 +225,8 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     modifiedScore: null,
                     scoreRange: [],
                     scoreExplanation: null,
-                    requiredScoreExplanation: false
+                    requiredScoreExplanation: false,
+                    formError: false
                 }, () => {
                     this.refs.scoreRange.resetValue();
                     this.refs.scoreExplanation.resetValue();
@@ -249,7 +251,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                 });
             } else {
                 // Reset explanation if default score is kept
-                this.setState({scoreExplanation: null, requiredScoreExplanation: false}, () => {
+                this.setState({scoreExplanation: null, requiredScoreExplanation: false, formError: false}, () => {
                     this.refs.scoreExplanation.resetValue();
                     this.updateUserScoreObj();
                 });
@@ -261,7 +263,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         if (this.refs.scoreExplanation) {
             // Parse the score explanation entered by the curator
             let scoreExplanation = this.refs.scoreExplanation.getValue();
-            this.setState({scoreExplanation: scoreExplanation}, () => {
+            this.setState({scoreExplanation: scoreExplanation, formError: false}, () => {
                 this.updateUserScoreObj();
             });
         }
@@ -491,8 +493,11 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                                         label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
                                         value={scoreExplanation} handleChange={this.handleScoreExplanation}
                                         error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
-                                        placeholder={!formError ? "Note: If you selected a score different from the default score, you must provide a reason for the change here." : "Please provide a reason."}
+                                        placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
                                         rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                    {formError ?
+                                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">A reason is required for the changed score.</p></div>
+                                    : null}
                                 </div>
                             : null}
                         </div>
