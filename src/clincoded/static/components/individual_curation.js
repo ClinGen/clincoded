@@ -1450,7 +1450,7 @@ var IndividualVariantInfo = function() {
                             </div>
                         );
                     })}
-                    {Object.keys(this.state.variantInfo).length > 0 ?
+                    {Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
@@ -1886,7 +1886,7 @@ var IndividualViewer = React.createClass({
                                     </div>
                                 );
                             })}
-                            {variants && variants.length ?
+                            {variants && variants.length && individual.proband ?
                                 <div className="variant-view-panel family-associated">
                                     <div>
                                         <dl className="dl-horizontal">
