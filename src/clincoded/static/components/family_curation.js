@@ -133,12 +133,20 @@ var FamilyCuration = React.createClass({
                 this.setState({individualRequired: false});
             }
         } else if (ref === 'SEGlodPublished') {
-            if (this.refs[ref].getValue() === 'Yes') {
+            let lodPublished = this.refs[ref].getValue();
+            if (lodPublished === 'Yes') {
                 this.setState({lodPublished: 'Yes'});
-            } else if (this.refs[ref].getValue() === 'No') {
-                this.setState({lodPublished: 'No'});
+                if (!this.state.publishedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            } else if (lodPublished === 'No') {
+                this.setState({lodPublished: 'No', publishedLodScore: null});
+                if (!this.state.estimatedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
             } else {
-                this.setState({lodPublished: null});
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                this.setState({lodPublished: null, publishedLodScore: null});
             }
         } else if (ref === 'zygosityHomozygous') {
             if (this.refs[ref].toggleValue()) {
@@ -182,11 +190,6 @@ var FamilyCuration = React.createClass({
                 let publishedLodScore = this.refs[ref].getValue();
                 this.setState({publishedLodScore: publishedLodScore});
                 if (publishedLodScore == '') {
-                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
-                }
-            }
-            if (ref === 'SEGlodPublished') {
-                if (this.refs[ref].getValue() === 'none') {
                     this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                 }
             }
