@@ -86,7 +86,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
         var provisional;
         var provisionalExist = false;
-        var summaryButton = false;
+        var summaryButton = true;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
