@@ -289,6 +289,9 @@ var FamilyCuration = React.createClass({
                 estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
         }
+        if (isNaN(estimatedLodScore)) {
+            estimatedLodScore = null;
+        }
         if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
             if (estimatedLodScore) {
                 estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
