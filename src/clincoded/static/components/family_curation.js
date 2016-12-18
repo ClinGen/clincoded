@@ -133,12 +133,20 @@ var FamilyCuration = React.createClass({
                 this.setState({individualRequired: false});
             }
         } else if (ref === 'SEGlodPublished') {
-            if (this.refs[ref].getValue() === 'Yes') {
+            let lodPublished = this.refs[ref].getValue();
+            if (lodPublished === 'Yes') {
                 this.setState({lodPublished: 'Yes'});
-            } else if (this.refs[ref].getValue() === 'No') {
-                this.setState({lodPublished: 'No'});
+                if (!this.state.publishedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            } else if (lodPublished === 'No') {
+                this.setState({lodPublished: 'No', publishedLodScore: null});
+                if (!this.state.estimatedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
             } else {
-                this.setState({lodPublished: null});
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                this.setState({lodPublished: null, publishedLodScore: null});
             }
         } else if (ref === 'zygosityHomozygous') {
             if (this.refs[ref].toggleValue()) {
@@ -288,6 +296,9 @@ var FamilyCuration = React.createClass({
                 numUnaffected = parseInt(numUnaffected);
                 estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
+        }
+        if (isNaN(estimatedLodScore)) {
+            estimatedLodScore = null;
         }
         if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
             if (estimatedLodScore) {
@@ -1599,7 +1610,8 @@ var FamilySegregation = function() {
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={(this.state.lodPublished === 'Yes' && !this.state.publishedLodScore) || (this.state.lodPublished === 'No' && !this.state.estimatedLodScore)}>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                inputDisabled={(this.state.lodPublished === null) || (this.state.lodPublished === 'Yes' && !this.state.publishedLodScore) || (this.state.lodPublished === 'No' && !this.state.estimatedLodScore)}>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
