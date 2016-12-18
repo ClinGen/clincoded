@@ -34,11 +34,10 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-var ScoreMain = require('./score/main').ScoreMain;
+var ScoreExperimental = require('./score/experimental_score').ScoreExperimental;
 var ScoreViewer = require('./score/viewer').ScoreViewer;
 
-// Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+const MAX_VARIANTS = 5;
 
 var initialCv = {
     assessmentTracker: null, // Tracking object for a single assessment
@@ -101,7 +100,8 @@ var ExperimentalCuration = React.createClass({
             variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
             submitBusy: false, // True while form is submitting
-            userScoreObj: {} // Logged-in user's score object
+            userScoreObj: {}, // Logged-in user's score object
+            formError: false
         };
     },
 
@@ -596,6 +596,15 @@ var ExperimentalCuration = React.createClass({
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // Make sure there is an explanation for the score selected differently from the default score
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+        if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
+        }
+
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var groupGenes;
@@ -994,15 +1003,10 @@ var ExperimentalCuration = React.createClass({
                             evidenceScores.push(score['@id']);
                         });
                     }
-                    /*****************************************************/
-                    /* Evidence score data object                        */
-                    /*****************************************************/
-                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
-
+                    /*************************************************************/
+                    /* Either update or create the score status object in the DB */
+                    /*************************************************************/
                     if (Object.keys(newUserScoreObj).length) {
-                        /*************************************************************/
-                        /* Either update or create the score status object in the DB */
-                        /*************************************************************/
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -1165,6 +1169,16 @@ var ExperimentalCuration = React.createClass({
 
         // Find any pre-existing scores associated with the evidence
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        let experimentalEvidenceType;
+        if (this.state.experimentalType === 'Biochemical Function' || this.state.experimentalType === 'Protein Interactions' || this.state.experimentalType === 'Expression') {
+            experimentalEvidenceType = null;
+        } else if (this.state.experimentalType === 'Functional Alteration') {
+            experimentalEvidenceType = this.state.functionalAlterationPCEE;
+        } else if (this.state.experimentalType === 'Model Systems') {
+            experimentalEvidenceType = this.state.modelSystemsNHACCM;
+        } else if (this.state.experimentalType === 'Rescue') {
+            experimentalEvidenceType = this.state.rescuePCEE;
+        }
 
         return (
             <div>
@@ -1227,12 +1241,12 @@ var ExperimentalCuration = React.createClass({
                                         : null}
                                         {this.state.experimentalNameVisible ?
                                             <div>
-                                                <Panel panelClassName="panel-data">
-                                                    <dl className="dl-horizontal">
-                                                        <div>
-                                                            <dt>Assessments</dt>
-                                                            <dd>
-                                                                {validAssessments.length ?
+                                                {validAssessments.length ?
+                                                    <Panel panelClassName="panel-data">
+                                                        <dl className="dl-horizontal">
+                                                            <div>
+                                                                <dt>Assessments</dt>
+                                                                <dd>
                                                                     <div>
                                                                         {validAssessments.map(function(assessment, i) {
                                                                             return (
@@ -1243,20 +1257,15 @@ var ExperimentalCuration = React.createClass({
                                                                             );
                                                                         })}
                                                                     </div>
-                                                                : <div>None</div>}
-                                                            </dd>
-                                                        </div>
-                                                    </dl>
-                                                </Panel>
-                                                {evidenceScores.length > 1 ?
-                                                    <Panel panelClassName="panel-data">
-                                                        <ScoreViewer evidence={experimental} otherScores={true} session={session} />
+                                                                </dd>
+                                                            </div>
+                                                        </dl>
                                                     </Panel>
                                                 : null}
                                                 <PanelGroup accordion>
-                                                    <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score" open>
-                                                        <ScoreMain evidence={experimental} modeInheritance={gdm.modeInheritance} evidenceType="Experimental"
-                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                    <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
+                                                        <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
+                                                            evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -2170,7 +2179,7 @@ var NoteAssessment = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -2182,7 +2191,9 @@ var ExperimentalViewer = React.createClass({
             assessments: null, // Array of assessments for the experimental data
             updatedAssessment: '', // Updated assessment value
             userScoreObj: {}, // Logged-in user's score object
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            experimentalEvidenceType: null,
+            formError: false
         };
     },
 
@@ -2216,6 +2227,10 @@ var ExperimentalViewer = React.createClass({
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
         if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
             this.setState({submitBusy: true});
             /***********************************************************/
             /* Either update or create the user score object in the DB */
@@ -2261,6 +2276,16 @@ var ExperimentalViewer = React.createClass({
         if (typeof this.props.session.user_properties !== undefined) {
             var user = this.props.session && this.props.session.user_properties;
             this.loadAssessmentTracker(user);
+        }
+
+        if (experimental.evidenceType === 'Biochemical Function' || experimental.evidenceType === 'Protein Interactions' || experimental.evidenceType === 'Expression') {
+            this.setState({experimentalEvidenceType: null});
+        } else if (experimental.evidenceType === 'Functional Alteration') {
+            this.setState({experimentalEvidenceType: experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
+        } else if (experimental.evidenceType === 'Model Systems') {
+            this.setState({experimentalEvidenceType: experimental.modelSystems.animalOrCellCulture});
+        } else if (experimental.evidenceType === 'Rescue') {
+            this.setState({experimentalEvidenceType: experimental.rescue.patientCellOrEngineeredEquivalent});
         }
     },
 
@@ -2324,6 +2349,7 @@ var ExperimentalViewer = React.createClass({
         var tempPmid = tempGdmPmid[1];
 
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        let experimentalEvidenceType = this.state.experimentalEvidenceType;
 
         return (
             <div>
@@ -2717,12 +2743,12 @@ var ExperimentalViewer = React.createClass({
                         </Panel>
                         : null}
                         {/* Retain pre-existing assessments data in display */}
-                        <Panel panelClassName="panel-data">
-                            <dl className="dl-horizontal">
-                                <div>
-                                    <dt>Assessments</dt>
-                                    <dd>
-                                        {validAssessments.length ?
+                        {validAssessments.length ?
+                            <Panel panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Assessments</dt>
+                                        <dd>
                                             <div>
                                                 {validAssessments.map(function(assessment, i) {
                                                     return (
@@ -2733,22 +2759,20 @@ var ExperimentalViewer = React.createClass({
                                                     );
                                                 })}
                                             </div>
-                                        : <div>None</div>}
-                                    </dd>
-                                </div>
-                            </dl>
-                        </Panel>
-                        <Panel panelClassName="panel-data">
-                            {evidenceScores.length > 0 ?
-                                <ScoreViewer evidence={experimental} session={this.props.session} />
-                                :
-                                <div className="row">This evidence has not been scored.</div>
-                            }
-                        </Panel>
-                        {this.cv.gdmUuid ?
-                            <Panel title="Experimental Data Assessment" panelClassName="experimental-evidence-score-viewer" open>
-                                <ScoreMain evidence={experimental} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Experimental"
-                                session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </Panel>
+                        : null}
+                        {evidenceScores.length > 1 ?
+                            <Panel panelClassName="panel-data">
+                                <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
+                            </Panel>
+                        : null}
+                        {this.cv.gdmUuid && (evidenceScores.length > 0 || (evidenceScores.length < 1 && userExperimental)) ?
+                            <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
+                                <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
+                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
                             </Panel>
                         : null}
                     </div>

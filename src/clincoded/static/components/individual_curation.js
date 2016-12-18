@@ -31,7 +31,7 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-var ScoreMain = require('./score/main').ScoreMain;
+var ScoreIndividual = require('./score/individual_score').ScoreIndividual;
 var ScoreViewer = require('./score/viewer').ScoreViewer;
 
 const MAX_VARIANTS = 2;
@@ -298,6 +298,15 @@ var IndividualCuration = React.createClass({
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // Make sure there is an explanation for the score selected differently from the default score
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+        if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
+        }
+
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var family = this.state.family;
@@ -479,15 +488,10 @@ var IndividualCuration = React.createClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(response => {
-                    /*****************************************************/
-                    /* Proband score status data object                  */
-                    /*****************************************************/
-                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
-
+                    /*************************************************************/
+                    /* Either update or create the score status object in the DB */
+                    /*************************************************************/
                     if (Object.keys(newUserScoreObj).length) {
-                        /*************************************************************/
-                        /* Either update or create the score status object in the DB */
-                        /*************************************************************/
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -923,15 +927,10 @@ var IndividualCuration = React.createClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
-                                                        <ScoreMain evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
-                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                        <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
+                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError} />
                                                     </Panel>
                                                 </PanelGroup>
-                                                {evidenceScores.length > 1 ?
-                                                    <Panel panelClassName="panel-data">
-                                                        <ScoreViewer evidence={individual} otherScores={true} session={session} />
-                                                    </Panel>
-                                                : null}
                                             </div>
                                         : null}
                                         <div className="curation-submit clearfix">
@@ -1583,7 +1582,8 @@ var IndividualViewer = React.createClass({
     getInitialState: function() {
         return {
             userScoreObj: {}, // Logged-in user's score object
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            formError: false
         };
     },
 
@@ -1616,6 +1616,10 @@ var IndividualViewer = React.createClass({
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
         if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
             this.setState({submitBusy: true});
             /***********************************************************/
             /* Either update or create the user score object in the DB */
@@ -1652,6 +1656,8 @@ var IndividualViewer = React.createClass({
 
     render: function() {
         var individual = this.props.context;
+        var user = this.props.session && this.props.session.user_properties;
+        var userIndividual = user && individual && individual.submitted_by ? user.uuid === individual.submitted_by.uuid : false;
         var method = individual.method;
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
@@ -1928,17 +1934,17 @@ var IndividualViewer = React.createClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                <Panel panelClassName="panel-data">
-                                    {evidenceScores.length > 0 ?
-                                        <ScoreViewer evidence={individual} session={this.props.session} />
-                                        :
-                                        <div className="row">This evidence has not been scored.</div>
-                                    }
-                                </Panel>
-                                <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
-                                    <ScoreMain evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
-                                    session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
-                                </Panel>
+                                {evidenceScores.length > 1 ?
+                                    <Panel panelClassName="panel-data">
+                                        <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
+                                    </Panel>
+                                : null}
+                                {evidenceScores.length > 0 || (evidenceScores.length < 1 && userIndividual) ?
+                                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
+                                        <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
+                                        session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
+                                    </Panel>
+                                : null}
                             </div>
                         : null}
 

@@ -41,6 +41,51 @@ const SCORE_MAPS = {
         SCORE_RANGE: [0, 0.5, 1, 1.5],
         MAX_SCORE: 12
     },
+    FUNCTION_BIOCHEMICAL_FUNCTION: {
+        DEFAULT_SCORE: 0.5,
+        SCORE_RANGE: [0.5, 1, 1.5, 2],
+        MAX_SCORE: 2
+    },
+    FUNCTION_PROTEIN_INTERACTIONS: {
+        DEFAULT_SCORE: 0.5,
+        SCORE_RANGE: [0.5, 1, 1.5, 2],
+        MAX_SCORE: 2
+    },
+    FUNCTION_EXPRESSION: {
+        DEFAULT_SCORE: 0.5,
+        SCORE_RANGE: [0.5, 1, 1.5, 2],
+        MAX_SCORE: 2
+    },
+    FUNCTIONAL_ALTERATION_PATIENT_CELLS: {
+        DEFAULT_SCORE: 1,
+        SCORE_RANGE: [1, 1.5, 2],
+        MAX_SCORE: 2
+    },
+    FUNCTIONAL_ALTERATION_ENGINEERED_EQUIVALENT: {
+        DEFAULT_SCORE: 0.5,
+        SCORE_RANGE: [0.5, 1],
+        MAX_SCORE: 2
+    },
+    MODEL_SYSTEMS_ANIMAL_MODEL: {
+        DEFAULT_SCORE: 2,
+        SCORE_RANGE: [2, 2.5, 3, 3.5, 4],
+        MAX_SCORE: 2
+    },
+    MODEL_SYSTEMS_ENGINEERED_EQUIVALENT: {
+        DEFAULT_SCORE: 1,
+        SCORE_RANGE: [0.5, 1, 1.5, 2],
+        MAX_SCORE: 2
+    },
+    RESCUE_PATIENT_CELLS: {
+        DEFAULT_SCORE: 2,
+        SCORE_RANGE: [2, 2.5, 3, 3.5, 4],
+        MAX_SCORE: 2
+    },
+    RESCUE_ENGINEERED_EQUIVALENT: {
+        DEFAULT_SCORE: 1,
+        SCORE_RANGE: [0.5, 1, 1.5, 2],
+        MAX_SCORE: 2
+    }
 };
 
 export default SCORE_MAPS;
