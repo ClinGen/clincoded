@@ -554,8 +554,6 @@ var FamilyCuration = React.createClass({
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
-            let variantId0 = this.getFormValue('variantUuid0'),
-                variantId1 = this.getFormValue('variantUuid1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
@@ -565,7 +563,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.variantCount > 0 && !this.state.probandIndividual && this.state.individualRequired) {
+            if (this.state.individualRequired && !this.state.probandIndividual) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
@@ -642,7 +640,7 @@ var FamilyCuration = React.createClass({
                     throw e;
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
-                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
+                    if (!this.state.probandIndividual && this.state.individualRequired) {
                         var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
@@ -750,7 +748,7 @@ var FamilyCuration = React.createClass({
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
-                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
+                    if (!this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });

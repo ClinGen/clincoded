@@ -1977,8 +1977,11 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
     var newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
-    newIndividual.variants = variants;
     newIndividual.proband = true;
+    if (variants) {
+        // It's possible to create a proband w/o variants at the moment
+        newIndividual.variants = variants;
+    }
     if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
 
     // We created an individual; post it to the DB and return a promise with the new individual
@@ -1998,12 +2001,9 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         // Need to convert individual variant array to array of variant @ids, because that's what's in the variants array.
         var missing = _.difference(variants, individual.variants.map(function(variant) { return variant['@id']; }));
         updateNeeded = !!missing.length;
-    } else if (individual.variants && individual.variants.length !== variants.length) {
-        /********************************************************************************************/
-        /* Update individual's variant object if either one of the following is true:               */
-        /* 1) Add 2 variants to proband in family first, but then remove 1 of them after submitting */
-        /* 2) Add 1 variant to proband in family first, but then add 1 more after submitting        */
-        /********************************************************************************************/
+    } else if ((individual.variants && individual.variants.length !== variants.length)
+        || (!individual.variants && individual.variants && individual.variants.length > 0)) {
+        // Update individual's variant object if the number of variants do not match
         updateNeeded = true;
     }
 
@@ -2017,7 +2017,13 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
 
     if (updateNeeded) {
         var writerIndividual = curator.flatten(individual);
-        writerIndividual.variants = variants;
+        // manage variants variable in individual object
+        if (!variants) {
+            delete writerIndividual['variants'];
+        } else {
+            writerIndividual.variants = variants;
+        }
+        // manage zygosity variable in individual object
         if (zygosity) {
             writerIndividual.recessiveZygosity = zygosity;
         } else {
