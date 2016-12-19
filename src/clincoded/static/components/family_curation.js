@@ -133,12 +133,20 @@ var FamilyCuration = React.createClass({
                 this.setState({individualRequired: false});
             }
         } else if (ref === 'SEGlodPublished') {
-            if (this.refs[ref].getValue() === 'Yes') {
+            let lodPublished = this.refs[ref].getValue();
+            if (lodPublished === 'Yes') {
                 this.setState({lodPublished: 'Yes'});
-            } else if (this.refs[ref].getValue() === 'No') {
-                this.setState({lodPublished: 'No'});
+                if (!this.state.publishedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            } else if (lodPublished === 'No') {
+                this.setState({lodPublished: 'No', publishedLodScore: null});
+                if (!this.state.estimatedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
             } else {
-                this.setState({lodPublished: null});
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                this.setState({lodPublished: null, publishedLodScore: null});
             }
         } else if (ref === 'zygosityHomozygous') {
             if (this.refs[ref].toggleValue()) {
@@ -288,6 +296,9 @@ var FamilyCuration = React.createClass({
                 numUnaffected = parseInt(numUnaffected);
                 estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
+        }
+        if (isNaN(estimatedLodScore)) {
+            estimatedLodScore = null;
         }
         if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
             if (estimatedLodScore) {
@@ -554,8 +565,6 @@ var FamilyCuration = React.createClass({
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
-            let variantId0 = this.getFormValue('variantUuid0'),
-                variantId1 = this.getFormValue('variantUuid1');
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
@@ -565,7 +574,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.variantCount > 0 && !this.state.probandIndividual && this.state.individualRequired) {
+            if (this.state.individualRequired && !this.state.probandIndividual) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
@@ -642,7 +651,7 @@ var FamilyCuration = React.createClass({
                     throw e;
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
-                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
+                    if (!this.state.probandIndividual && this.state.individualRequired) {
                         var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
@@ -750,7 +759,7 @@ var FamilyCuration = React.createClass({
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
-                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
+                    if (!this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -1601,7 +1610,8 @@ var FamilySegregation = function() {
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={(this.state.lodPublished === 'Yes' && !this.state.publishedLodScore) || (this.state.lodPublished === 'No' && !this.state.estimatedLodScore)}>
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                inputDisabled={(this.state.lodPublished === null) || (this.state.lodPublished === 'Yes' && !this.state.publishedLodScore) || (this.state.lodPublished === 'No' && !this.state.estimatedLodScore)}>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>

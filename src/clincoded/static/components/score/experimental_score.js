@@ -2,45 +2,44 @@
 
 import React, { PropTypes } from 'react';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, X_LINKED } from './constants/evidence_types';
-import CASE_INFO_TYPES from './constants/case_info_types';
+import { FUNCTION, FUNCTIONAL_ALTERATION, MODEL_SYSTEMS, RESCUE } from './constants/evidence_types';
 import { defaultScore } from './helpers/default_score';
 import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 
 // Render scoring panel in Gene Curation Interface
-var ScoreMain = module.exports.ScoreMain = React.createClass({
+var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
     mixins: [FormMixin],
 
     propTypes: {
         session: React.PropTypes.object, // Session object passed from parent
         evidence: React.PropTypes.object, // Individual, Experimental or Case Control
-        modeInheritance: React.PropTypes.string, // Mode of Inheritance
-        evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
-        variantInfo: React.PropTypes.object, // Variant count for Individual evidence
+        experimentalType: React.PropTypes.string, // Experimental types
+        experimentalEvidenceType: React.PropTypes.string, // Experimental evidence types
+        evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
         handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
         scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool // TRUE while the form submit is running
+        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
+        formError: React.PropTypes.bool // TRUE if no explanation is given for a different score
     },
 
     getInitialState() {
         return {
             evidenceScores: [], // One or more scores
             userScoreUuid: null, // Pre-existing logged-in user's score uuuid
-            modeInheritanceType: null, // Mode of Inheritance types
-            caseInfoTypeGroup: [], // Array of Case Information types given the Mode of Inheritance type
+            experimentalType: this.props.experimentalType, // Experimental types
+            experimentalEvidenceType: this.props.experimentalEvidenceType, // Types of experimental evidence
             scoreStatus: null, // Score status that allow scoring (e.g. 'Score', 'Review')
-            caseInfoType: null, // Case information type (e.g. 'Variant is De Novo')
             defaultScore: null, // Calculated default score given the 'Score Status' or 'Case Information type'
             modifiedScore: null, // Score that is selected by curator and it is different from the calculated default score
             scoreRange: [], // Calculated score range
             scoreExplanation: null, // Explanation for selecting a different score from the calculated default score
-            variantInfo: this.props.variantInfo, // Variant count for Individual evidence
             showScoreInput: false, // TRUE if either 'Score' or 'Review' is selected
             updateDefaultScore: false, // TRUE if either 'Score Status' or 'Case Information type' are changed
             requiredScoreExplanation: false, // TRUE if a different score is selected from the range
             submitBusy: false, // TRUE while form is submitting
-            disableScoreStatus: false // TRUE if Individual evidence has no variants at all
+            willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
+            formError: false // TRUE if no explanation is given for a different score
         };
     },
 
@@ -49,44 +48,25 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        // FIXME: Hacks for getting modeInheritance props from a new caseControl evidence no scoring
-        // and avoid infinite loop from an existing caseControl evidence with scoring
-        if (nextProps.modeInheritacne !== this.props.modeInheritance && !this.props.evidence && this.props.evidenceType === 'Case control') {
-            this.loadData();
-        }
-        if (nextProps.variantInfo !== this.props.variantInfo && !this.props.evidence && this.props.evidenceType === 'Individual') {
-            this.setState({variantInfo: nextProps.variantInfo}, () => {
-                if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
-                    this.setState({disableScoreStatus: false});
-                } else {
-                    this.setState({disableScoreStatus: true});
-                }
+        if (nextProps.experimentalType !== this.props.experimentalType) {
+            this.setState({experimentalType: nextProps.experimentalType, scoreStatus: null, showScoreInput: false}, () => {
+                this.refs.scoreStatus.resetValue();
             });
+        }
+        if (nextProps.experimentalEvidenceType !== this.props.experimentalEvidenceType) {
+            this.setState({experimentalEvidenceType: nextProps.experimentalEvidenceType, scoreStatus: null, showScoreInput: false}, () => {
+                this.refs.scoreStatus.resetValue();
+            });
+        }
+        if (nextProps.formError && nextProps.formError !== this.props.formError) {
+            this.setState({formError: true});
         }
     },
 
     loadData() {
+        let experimentalEvidenceType = this.getExperimentalEvidenceType(this.state.experimentalType, this.state.experimentalEvidenceType);
         // Prep the following when the component is loaded
-        let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
-        this.setState({modeInheritanceType: modeInheritanceType}, () => {
-            let caseInfoTypeGroup = this.getCaseInfoTypeGroup(modeInheritanceType);
-            this.setState({caseInfoTypeGroup: caseInfoTypeGroup});
-        });
-
         let evidenceObj = this.props.evidence;
-
-        // If the individual evidence has no variants at all, disable the Score Status form field
-        if (evidenceObj && this.props.evidenceType === 'Individual') {
-            if (!evidenceObj.variants || (evidenceObj.variants && evidenceObj.variants.length < 1)) {
-                this.setState({disableScoreStatus: true});
-            }
-        } else if (!evidenceObj && this.props.evidenceType === 'Individual') {
-            if (this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0) {
-                this.setState({disableScoreStatus: false});
-            } else {
-                this.setState({disableScoreStatus: true});
-            }
-        }
 
         // Get evidenceScore object for the logged-in user if exists
         if (evidenceObj && evidenceObj.scores && evidenceObj.scores.length) {
@@ -101,21 +81,18 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                     /* or when 'Review' is selected given the matched Mode of Inheritance types           */
                     /* (although its score won't be counted from the summary).                            */
                     /**************************************************************************************/
-                    if (scoreStatus && (scoreStatus === 'Score' || (scoreStatus === 'Review' && modeInheritanceType.length))) {
+                    if (scoreStatus && (scoreStatus === 'Score' || scoreStatus === 'Review')) {
+                        scoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
                         this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
                             // If the score form fields are allowed, then proceed with the following
-                            let caseInfoType = loggedInUserScore.caseInfoType,
-                                defaultScore = loggedInUserScore.calculatedScore,
+                            let defaultScore = loggedInUserScore.calculatedScore,
                                 modifiedScore = loggedInUserScore.score,
                                 scoreExplanation = loggedInUserScore.scoreExplanation,
                                 calcScoreRange = [];
-                            this.setState({caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
-                                this.refs.caseInfoType.setValue(caseInfoType);
-                            });
                             this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null});
                             this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
-                                calcScoreRange = this.getScoreRange(modeInheritanceType, caseInfoType, defaultScore);
+                                calcScoreRange = this.getScoreRange(experimentalEvidenceType, defaultScore);
                                 this.setState({scoreRange: calcScoreRange}, () => {
                                     this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                                 });
@@ -140,76 +117,48 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     handleScoreStatusChange(e) {
-        let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
+        let experimentalEvidenceType = this.getExperimentalEvidenceType(this.state.experimentalType, this.state.experimentalEvidenceType);
         if (this.refs.scoreStatus) {
-            // Render or remove the case info types, default score, score range, and explanation fields
+            // Render or remove the default score, score range, and explanation fields
             // Parse score status value and set the state
             let selectedScoreStatus = this.refs.scoreStatus.getValue();
             this.setState({scoreStatus: selectedScoreStatus});
-            if (selectedScoreStatus === 'Score' || (selectedScoreStatus === 'Review' && modeInheritanceType.length)) {
+            if (selectedScoreStatus === 'Score' || selectedScoreStatus === 'Review') {
+                selectedScoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
+                let calcDefaultScore = this.getDefaultScore(experimentalEvidenceType, null, this.state.updateDefaultScore);
                 // Reset the states and update the calculated default score
-                // Reset variant scenario dropdown options if any changes
                 // Reset score range dropdown options if any changes
                 // Reset explanation if score status is changed
                 this.setState({
                     showScoreInput: true,
-                    caseInfoType: null,
-                    defaultScore: null,
+                    defaultScore: calcDefaultScore,
                     modifiedScore: null,
                     scoreExplanation: null,
                     requiredScoreExplanation: false,
                     updateDefaultScore: true
                 }, () => {
-                    this.refs.caseInfoType.resetValue();
-                    this.refs.scoreRange.resetValue();
-                    this.refs.scoreExplanation.resetValue();
+                    let calcScoreRange = this.getScoreRange(experimentalEvidenceType, calcDefaultScore);
+                    this.setState({scoreRange: calcScoreRange}, () => {
+                        if (this.refs.scoreRange && this.refs.scoreRange.getValue()) {
+                            this.refs.scoreRange.resetValue();
+                        }
+                    });
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue()) {
+                        this.refs.scoreExplanation.resetValue();
+                    }
                     this.updateUserScoreObj();
                 });
             } else {
                 this.setState({
                     showScoreInput: false,
-                    caseInfoType: null,
-                    defaultScore: null,
-                    modifiedScore: null,
-                    scoreExplanation: null
-                }, () => {this.updateUserScoreObj();});
-            }
-        }
-    },
-
-    handleCaseInfoTypeChange(e) {
-        let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
-        if (this.refs.caseInfoType) {
-            // Get the variant case info type for determining the default score and score range
-            // Parse Case Information type value and set the state
-            let selectedCaseInfoType = this.refs.caseInfoType.getValue();
-            this.setState({caseInfoType: selectedCaseInfoType, updateDefaultScore: true});
-            if (selectedCaseInfoType && selectedCaseInfoType !== 'none') {
-                let calcDefaultScore = this.getDefaultScore(modeInheritanceType, selectedCaseInfoType, null, this.state.updateDefaultScore);
-                this.setState({
-                    defaultScore: calcDefaultScore,
-                    modifiedScore: null,
-                    scoreExplanation: null,
-                    requiredScoreExplanation: false
-                }, () => {
-                    let calcScoreRange = this.getScoreRange(modeInheritanceType, selectedCaseInfoType, calcDefaultScore);
-                    this.setState({scoreRange: calcScoreRange}, () => {
-                        this.refs.scoreRange.resetValue();
-                    });
-                    this.refs.scoreExplanation.resetValue();
-                    this.updateUserScoreObj();
-                });
-            } else {
-                this.setState({
-                    caseInfoType: null,
+                    willNotCountScore: false,
                     defaultScore: null,
                     modifiedScore: null,
                     scoreRange: [],
                     scoreExplanation: null,
-                    requiredScoreExplanation: false
+                    requiredScoreExplanation: false,
+                    formError: false
                 }, () => {
-                    this.refs.scoreRange.resetValue();
-                    this.refs.scoreExplanation.resetValue();
                     this.updateUserScoreObj();
                 });
             }
@@ -231,7 +180,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                 });
             } else {
                 // Reset explanation if default score is kept
-                this.setState({scoreExplanation: null, requiredScoreExplanation: false}, () => {
+                this.setState({scoreExplanation: null, requiredScoreExplanation: false, formError: false}, () => {
                     this.refs.scoreExplanation.resetValue();
                     this.updateUserScoreObj();
                 });
@@ -243,7 +192,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         if (this.refs.scoreExplanation) {
             // Parse the score explanation entered by the curator
             let scoreExplanation = this.refs.scoreExplanation.getValue();
-            this.setState({scoreExplanation: scoreExplanation}, () => {
+            this.setState({scoreExplanation: scoreExplanation, formError: false}, () => {
                 this.updateUserScoreObj();
             });
         }
@@ -253,7 +202,6 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     // the currently logged-in user
     updateUserScoreObj() {
         let scoreStatus = this.state.scoreStatus;
-        let caseInfoType = this.state.caseInfoType;
         let calculatedScore = this.state.defaultScore;
         let score = this.state.modifiedScore;
         let scoreExplanation = this.state.scoreExplanation;
@@ -271,15 +219,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
             }
         }
 
-        if (caseInfoType && caseInfoType !== 'none') {
-            newUserScoreObj['caseInfoType'] = caseInfoType;
-        } else {
-            if ('caseInfoType' in newUserScoreObj) {
-                delete newUserScoreObj['caseInfoType'];
-            }
-        }
-
-        if (calculatedScore) {
+        if (!isNaN(parseFloat(calculatedScore))) {
             newUserScoreObj['calculatedScore'] = parseFloat(calculatedScore);
         } else {
             if ('calculatedScore' in newUserScoreObj) {
@@ -287,7 +227,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
             }
         }
 
-        if (score) {
+        if (!isNaN(parseFloat(score))) {
             newUserScoreObj['score'] = parseFloat(score);
         } else {
             if ('score' in newUserScoreObj) {
@@ -321,40 +261,39 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         }
     },
 
-    // Determine mode of inheritance type via modeInheritance
-    getModeInheritanceType(modeInheritance) {
-        let modeInheritanceType;
+    // Determine experimental evidence type
+    getExperimentalEvidenceType(experimentalType, experimentalEvidenceType) {
+        let type;
 
-        if (modeInheritance && modeInheritance.length) {
-            if (modeInheritance.indexOf('Autosomal dominant inheritance') > -1) {
-                modeInheritanceType = AUTOSOMAL_DOMINANT;
-            } else if (modeInheritance.indexOf('Autosomal recessive inheritance') > -1) {
-                modeInheritanceType = AUTOSOMAL_RECESSIVE;
-            } else if (modeInheritance.indexOf('X-linked') > -1) {
-                modeInheritanceType = X_LINKED;
-            } else {
-                modeInheritanceType = '';
-                console.warn("Can't calculate score. Reason - improper mode of inheritance.");
+        if (experimentalType && experimentalType.length) {
+            if (experimentalType.indexOf('Biochemical Function') > -1) {
+                type = FUNCTION + '_BIOCHEMICAL_FUNCTION';
+            } else if (experimentalType.indexOf('Protein Interactions') > -1) {
+                type = FUNCTION + '_PROTEIN_INTERACTIONS';
+            } else if (experimentalType.indexOf('Expression') > -1) {
+                type = FUNCTION + '_EXPRESSION';
+            } else if (experimentalType.indexOf('Functional Alteration') > -1) {
+                if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Patient cells') > -1) {
+                    type = FUNCTIONAL_ALTERATION + '_PATIENT_CELLS';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
+                    type = FUNCTIONAL_ALTERATION + '_ENGINEERED_EQUIVALENT';
+                }
+            } else if (experimentalType.indexOf('Model Systems') > -1) {
+                if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Animal model') > -1) {
+                    type = MODEL_SYSTEMS + '_ANIMAL_MODEL';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
+                    type = MODEL_SYSTEMS + '_ENGINEERED_EQUIVALENT';
+                }
+            } else if (experimentalType.indexOf('Rescue') > -1) {
+                if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Patient cells') > -1) {
+                    type = RESCUE + '_PATIENT_CELLS';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
+                    type = RESCUE + '_ENGINEERED_EQUIVALENT';
+                }
             }
         }
 
-        return modeInheritanceType;
-    },
-
-    // Find the group of Case Information types given the Mode of Inheritance
-    getCaseInfoTypeGroup(modeInheritanceType) {
-        // Put CASE_INFO_TYPES object keys into an array
-        const caseInfoTypeKeys = Object.keys(CASE_INFO_TYPES);
-        // Default group of Case Information types in dropdown selection
-        let caseInfoTypeGroup = CASE_INFO_TYPES.OTHER;
-        // Assign different group of Case Information types given the matched Mode of Inheritance type
-        caseInfoTypeKeys.forEach(key => {
-            if (modeInheritanceType && modeInheritanceType === key) {
-                caseInfoTypeGroup = CASE_INFO_TYPES[modeInheritanceType];
-            }
-        });
-
-        return caseInfoTypeGroup;
+        return type;
     },
 
     // Find the score owned by the currently logged-in user
@@ -370,33 +309,33 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     },
 
     // Find the default calculated score given the types of
-    // Mode of Inheritance and Case Information
-    getDefaultScore(modeInheritanceType, caseInfoType, loggedInUserScore, updateDefaultScore) {
+    // experimentalType and experimentalEvidenceType
+    getDefaultScore(experimentalEvidenceType, loggedInUserScore, updateDefaultScore) {
         let calcDefaultScore;
 
         if (loggedInUserScore && loggedInUserScore.calculatedScore) {
             if (updateDefaultScore) {
                 // A different scenario is selected after a pre-existing score is loaded from db
-                calcDefaultScore = defaultScore(modeInheritanceType, caseInfoType);
+                calcDefaultScore = defaultScore(null, null, experimentalEvidenceType);
             } else {
                 // A pre-existing score is loaded from db
-                calcDefaultScore = defaultScore(modeInheritanceType, caseInfoType, loggedInUserScore.calculatedScore);
+                calcDefaultScore = defaultScore(null, null, experimentalEvidenceType, loggedInUserScore.calculatedScore);
             }
         } else {
             // New. No pre-exisitng score for the currently logged-in user
-            calcDefaultScore = defaultScore(modeInheritanceType, caseInfoType);
+            calcDefaultScore = defaultScore(null, null, experimentalEvidenceType);
         }
         
         return calcDefaultScore;
     },
 
     // Find the calculated score range given the types of
-    // Mode of Inheritance and Case Information
-    getScoreRange(modeInheritanceType, caseInfoType, calcDefaultScore) {
+    // experimentalType and experimentalEvidenceType
+    getScoreRange(experimentalEvidenceType, defaultScore) {
         let calcScoreRange = [];
 
-        if (scoreRange(modeInheritanceType, caseInfoType, defaultScore).length) {
-            calcScoreRange = scoreRange(modeInheritanceType, caseInfoType, defaultScore);
+        if (scoreRange(null, null, experimentalEvidenceType, defaultScore).length) {
+            calcScoreRange = scoreRange(null, null, experimentalEvidenceType, defaultScore);
         }
 
         return calcScoreRange;
@@ -405,10 +344,7 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
     render() {
         // states
         let evidenceScores = this.state.evidenceScores;
-        let modeInheritanceType = this.state.modeInheritanceType;
-        let caseInfoTypeGroup = this.state.caseInfoTypeGroup.length ? this.state.caseInfoTypeGroup : [];
         let scoreStatus = this.state.scoreStatus ? this.state.scoreStatus : 'none';
-        let caseInfoType = this.state.caseInfoType ? this.state.caseInfoType : 'none';
         let defaultScore = this.state.defaultScore ? this.state.defaultScore : 'Insufficient information to obtain score';
         let modifiedScore = this.state.modifiedScore ? this.state.modifiedScore : 'none';
         let scoreExplanation = this.state.scoreExplanation ? this.state.scoreExplanation : '';
@@ -416,34 +352,26 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
         let showScoreInput = this.state.showScoreInput;
         let updateDefaultScore = this.state.updateDefaultScore;
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
-        let disableScoreStatus = this.state.disableScoreStatus;
-
-        // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
-        let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
+        let willNotCountScore = this.state.willNotCountScore;
+        let formError = this.state.formError;
  
         return (
             <div>
                 <div className="row">
                     <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue={scoreStatus}
-                        value={scoreStatus} handleChange={this.handleScoreStatusChange} inputDisabled={disableScoreStatus}
+                        value={scoreStatus} handleChange={this.handleScoreStatusChange}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
-                        <option value={shouldCalcScore ? 'Score' : 'Supports'}>{shouldCalcScore ? 'Score' : 'Supports'}</option>
+                        <option value="Score">Score</option>
                         <option value="Review">Review</option>
                         <option value="Contradicts">Contradicts</option>
                     </Input>
+                    {willNotCountScore ?
+                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
+                    : null}
                     {showScoreInput ?
                         <div>
-                            <Input type="select" ref="caseInfoType" label="Confirm Case Information type:" defaultValue={caseInfoType}
-                                value={caseInfoType} handleChange={this.handleCaseInfoTypeChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                {caseInfoTypeGroup.map(function(item, i) {
-                                    return <option key={i} value={item.TYPE}>{item.DESCRIPTION}</option>;
-                                })}
-                            </Input>
                             <dl className="dl-horizontal calculated-score">
                                 <dt className="col-sm-5 control-label">Default Score</dt>
                                 <dd className="col-sm-7">{defaultScore}</dd>
@@ -464,6 +392,9 @@ var ScoreMain = module.exports.ScoreMain = React.createClass({
                                 error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
                                 placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
                                 rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            {formError ?
+                                <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">A reason is required for the changed score.</p></div>
+                            : null}
                         </div>
                     : null}
                 </div>
