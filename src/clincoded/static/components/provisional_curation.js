@@ -877,24 +877,449 @@ var NewCalculation = function() {
         }
     }
 
-    /* TEMP VARIABLES FOR NEW TABLE */
-    let probandOtherVariantCount, probandOtherVariantPoints, probandOtherVariantPointsCounted;
-    let probandNullVariantCount, probandNullVariantPoints, probandNullVariantPointsCounted;
-    let variantDenovoCount, variantDenovoPoints, variantDenovoPointsCounted;
-    let twoVariantsNotProvenCount, twoVariantsNotProvenPoints, twoVariantsNotProvenPointsCounted;
-    let twoVariantsProvenCount, twoVariantsProvenPoints, twoVariantsProvenPointsCounted;
-    let segregationCount, segregationPoints, segregationPointsCounted;
-    let caseControlCount, caseControlPoints, caseControlPointsCounted;
-    let biochemicalFunctionCount, biochemicalFunctionPoints, biochemicalFunctionPointsCounted;
-    let proteinInteractionsCount, proteinInteractionsPoints, proteinInteractionsPointsCounted;
-    let expressionCount, expressionPoints, expressionPointsCounted;
-    let functionalAlterationCount, functionalAlterationPoints, functionalAlterationPointsCounted;
-    let modelSystemsCount, modelSystemsPoints, modelSystemsPointsCounted;
-    let rescueCount, rescuePoints, rescuePointsCounted;
-    let totalPoints;
+    /*****************************************************/
+    /* VARIABLES FOR EVIDENCE SCORE TABLE                */
+    /*****************************************************/
+    let probandOtherVariantCount = 0, probandOtherVariantPoints = 0, probandOtherVariantPointsCounted = 0;
+    let probandNullVariantCount = 0, probandNullVariantPoints = 0, probandNullVariantPointsCounted = 0;
+    let variantDenovoCount = 0, variantDenovoPoints = 0, variantDenovoPointsCounted = 0;
+    let twoVariantsNotProvenCount = 0, twoVariantsNotProvenPoints = 0, twoVariantsNotProvenPointsCounted = 0;
+    let twoVariantsProvenCount = 0, twoVariantsProvenPoints = 0, twoVariantsProvenPointsCounted = 0;
+    let segregationCount = 0, segregationPoints = 0, segregationPointsCounted = 0;
+    let caseControlCount = 0, caseControlPoints = 0, caseControlPointsCounted = 0;
+    let biochemicalFunctionCount = 0, biochemicalFunctionPoints = 0, biochemicalFunctionPointsCounted = 0;
+    let proteinInteractionsCount = 0, proteinInteractionsPoints = 0, proteinInteractionsPointsCounted = 0;
+    let expressionCount = 0, expressionPoints = 0, expressionPointsCounted = 0;
+    let functionalAlterationCount = 0, functionalAlterationPoints = 0, functionalAlterationPointsCounted = 0;
+    let modelSystemsCount = 0, modelSystemsPoints = 0, modelSystemsPointsCounted = 0;
+    let rescueCount = 0, rescuePoints = 0, rescuePointsCounted = 0;
+    let totalPoints = 0;
+
+    /*****************************************************/
+    /* Find all proband individuals that had been scored */
+    /*****************************************************/
+    let probandTotal = []; // Total proband combined
+    let probandFamily = []; // Total probands associated with families from all annotations
+    let probandIndividual = []; // Total proband individuals from all annotations
+
+    // Get all (associated with families) probands that have scores
+    annotations.forEach(annotation => {
+        let individualMatched = [];
+        if (annotation.families.length) {
+            annotation.families.forEach(family => {
+                if (family.individualIncluded.length) {
+                    individualMatched = family.individualIncluded.filter(individual => {
+                        if (individual.proband === true && (individual.scores && individual.scores.length)) {
+                            return true;
+                        }
+                    });
+                }
+            });
+        }
+        individualMatched.forEach(item => {
+            probandFamily.push(item);
+        });
+    });
+
+    // Get all (not associated with families) probands that have scores
+    annotations.forEach(annotation => {
+        let individualMatched = [];
+        if (annotation.individuals.length) {
+            individualMatched = annotation.individuals.filter(individual => {
+                if (individual.proband === true && (individual.scores && individual.scores.length)) {
+                    return true;
+                }
+            });
+        }
+        individualMatched.forEach(item => {
+            probandIndividual.push(item);
+        });
+    });
+
+    // Combine all probands
+    probandTotal = probandFamily.concat(probandIndividual);
+    /****************************************************/
+
+    /*****************************************************/
+    /* Find all case-control that had been scored        */
+    /*****************************************************/
+    let caseControlTotal = []; // Total case control
+
+    // Get all case-control that have scores
+    annotations.forEach(annotation => {
+        let caseControlMatched = [];
+        if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
+            caseControlMatched = annotation.caseControlStudies.filter(caseControl => {
+                if (caseControl.scores && caseControl.scores.length) {
+                    return true;
+                }
+            });
+        }
+        caseControlMatched.forEach(item => {
+            caseControlTotal.push(item);
+        });
+    });
+    /****************************************************/
+
+    /*****************************************************/
+    /* Find all experimental that had been scored        */
+    /*****************************************************/
+    let experimentalBiochemicalFunction = [],
+        experimentalProteinInteractions = [],
+        experimentalExpression = [],
+        experimentalFunctionalAlteration = [],
+        experimentalModelSystems = [],
+        experimentalRescue = [];
+
+    // Find all experimental evidence (grouped by type)
+    // FIXME: Need a function to minimize repetitive code
+    annotations.forEach(annotation => {
+        if (annotation.experimentalData && annotation.experimentalData.length) {
+            experimentalBiochemicalFunction = annotation.experimentalData.filter(experimental => {
+                if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
+                    return true;
+                }
+            });
+            experimentalProteinInteractions = annotation.experimentalData.filter(experimental => {
+                if (experimental.evidenceType && experimental.evidenceType === 'Protein Interactions') {
+                    return true;
+                }
+            });
+            experimentalExpression = annotation.experimentalData.filter(experimental => {
+                if (experimental.evidenceType && experimental.evidenceType === 'Expression') {
+                    return true;
+                }
+            });
+            experimentalFunctionalAlteration = annotation.experimentalData.filter(experimental => {
+                if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
+                    return true;
+                }
+            });
+            experimentalModelSystems = annotation.experimentalData.filter(experimental => {
+                if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
+                    return true;
+                }
+            });
+            experimentalRescue = annotation.experimentalData.filter(experimental => {
+                if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
+                    return true;
+                }
+            });
+        }
+    });
+
+    // Find all experimental evidence (grouped by type) that had been scored
+    let experimentalBiochemicalFunctionTotal = [],
+        experimentalProteinInteractionsTotal = [],
+        experimentalExpressionTotal = [],
+        experimentalFunctionalAlterationTotal = [],
+        experimentalModelSystemsTotal = [],
+        experimentalRescueTotal = [];
+
+    // FIXME: Need a function to minimize repetitive code
+    if (experimentalBiochemicalFunction.length) {
+        experimentalBiochemicalFunctionTotal = experimentalBiochemicalFunction.filter(item => {
+            if (item.scores && item.scores.length) {
+                return true;
+            }
+        });
+    }
+    if (experimentalProteinInteractions.length) {
+        experimentalProteinInteractionsTotal = experimentalProteinInteractions.filter(item => {
+            if (item.scores && item.scores.length) {
+                return true;
+            }
+        });
+    }
+    if (experimentalExpression.length) {
+        experimentalExpressionTotal = experimentalExpression.filter(item => {
+            if (item.scores && item.scores.length) {
+                return true;
+            }
+        });
+    }
+    if (experimentalFunctionalAlteration.length) {
+        experimentalFunctionalAlterationTotal = experimentalFunctionalAlteration.filter(item => {
+            if (item.scores && item.scores.length) {
+                return true;
+            }
+        });
+    }
+    if (experimentalModelSystems.length) {
+        experimentalModelSystemsTotal = experimentalModelSystems.filter(item => {
+            if (item.scores && item.scores.length) {
+                return true;
+            }
+        });
+    }
+    if (experimentalRescue.length) {
+        experimentalRescueTotal = experimentalRescue.filter(item => {
+            if (item.scores && item.scores.length) {
+                return true;
+            }
+        });
+    }
+    /****************************************************/
+
+    const MAX_SCORE_CONSTANTS = {
+        VARIANT_IS_DE_NOVO: 12,
+        PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
+        OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
+        TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO: 12,
+        TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS: 12,
+        BIOCHEMCAL_FUNCTION: 2,
+        PROTEIN_INTERACTIONS: 2,
+        EXPRESSION: 2,
+        FUNCTIONAL_ALTERATION: 2,
+        MODEL_SYSTEMS: 4,
+        RESCUE: 4
+    };
+
+    /*****************************************************/
+    /* Collect all proband scores into an array          */
+    /*****************************************************/
+    let probandScores = [];
+    probandTotal.forEach(proband => {
+        proband.scores.forEach(score => {
+            probandScores.push(score);
+        });
+    });
+
+    /*****************************************************/
+    /* Calculate count and total points for each         */
+    /* Case Information type occurance                   */
+    /*****************************************************/
+    // Case Information type === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT'
+    let probandOtherVariant = probandScores.filter(scoreObj => {
+        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && scoreObj.scoreStatus === 'Score') {
+            return true;
+        }
+    });
+    probandOtherVariantCount = probandOtherVariant.length ? probandOtherVariant.length : 0;
+    probandOtherVariant.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            probandOtherVariantPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            probandOtherVariantPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (probandOtherVariantPoints < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT) {
+        probandOtherVariantPointsCounted = probandOtherVariantPoints;
+    } else {
+        probandOtherVariantPointsCounted = MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
+    }
+
+    // Case Information type === 'PREDICTED_OR_PROVEN_NULL_VARIANT'
+    let probandNullVariant = probandScores.filter(scoreObj => {
+        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && scoreObj.scoreStatus === 'Score') {
+            return true;
+        }
+    });
+    probandNullVariantCount = probandNullVariant.length ? probandNullVariant.length : 0;
+    probandNullVariant.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            probandNullVariantPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            probandNullVariantPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (probandNullVariantPoints < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT) {
+        probandNullVariantPointsCounted = probandNullVariantPoints;
+    } else {
+        probandNullVariantPointsCounted = MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
+    }
+
+    // Case Information type === 'VARIANT_IS_DE_NOVO'
+    let variantDenovo = probandScores.filter(scoreObj => {
+        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'VARIANT_IS_DE_NOVO' && scoreObj.scoreStatus === 'Score') {
+            return true;
+        }
+    });
+    variantDenovoCount = variantDenovo.length ? variantDenovo.length : 0;
+    variantDenovo.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            variantDenovoPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            variantDenovoPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (variantDenovoPoints < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO) {
+        variantDenovoPointsCounted = variantDenovoPoints;
+    } else {
+        variantDenovoPointsCounted = MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
+    }
+
+    // Case Information type === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS'
+    let twoVariantsNotProven = probandScores.filter(scoreObj => {
+        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && scoreObj.scoreStatus === 'Score') {
+            return true;
+        }
+    });
+    twoVariantsNotProvenCount = twoVariantsNotProven.length ? twoVariantsNotProven.length : 0;
+    twoVariantsNotProven.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            twoVariantsNotProvenPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            twoVariantsNotProvenPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (twoVariantsNotProvenPoints < MAX_SCORE_CONSTANTS.TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS) {
+        twoVariantsNotProvenPointsCounted = twoVariantsNotProvenPoints;
+    } else {
+        twoVariantsNotProvenPointsCounted = MAX_SCORE_CONSTANTS.TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS;
+    }
+
+    // Case Information type === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO'
+    let twoVariantsProven = probandScores.filter(scoreObj => {
+        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && scoreObj.scoreStatus === 'Score') {
+            return true;
+        }
+    });
+    twoVariantsProvenCount = twoVariantsProven.length ? twoVariantsProven.length : 0;
+    twoVariantsProven.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            twoVariantsProvenPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            twoVariantsProvenPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (twoVariantsProvenPoints < MAX_SCORE_CONSTANTS.TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO) {
+        twoVariantsProvenPointsCounted = twoVariantsProvenPoints;
+    } else {
+        twoVariantsProvenPointsCounted = MAX_SCORE_CONSTANTS.TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO;
+    }
+    /*****************************************************/
+
+    /*****************************************************/
+    /* Collect all case-control scores into an array     */
+    /* Add all score values together                     */
+    /*****************************************************/
+    let caseControlScores = [], caseControlScoreSum = 0;
+    caseControlTotal.forEach(item => {
+        item.scores.forEach(score => {
+            caseControlScores.push(score);
+        });
+    });
+    caseControlScores.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            caseControlPoints += parseFloat(item.score);
+        }
+    });
+    caseControlCount = caseControlTotal.length ? caseControlTotal.length : 0;
+    // FIXME: Find out the max score for case-control from curators
+    if (caseControlPoints < 6) {
+        caseControlPointsCounted = caseControlPoints;
+    } else {
+        caseControlPointsCounted = 6;
+    }
+    /*****************************************************/
+
+    /*****************************************************/
+    /* Calculate count and total points for each         */
+    /* Experimental evidence type occurance              */
+    /*****************************************************/
+    // Experimental evidence type === 'Biochemical Function'
+    let biochemicalFunction = getExpScoreList(experimentalBiochemicalFunctionTotal);
+    biochemicalFunctionCount = biochemicalFunction.length ? biochemicalFunction.length : 0; // Count of scored evidence of this type
+    biochemicalFunction.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            biochemicalFunctionPoints += parseFloat(item.score); // Use the score selected by curator (if any)
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            biochemicalFunctionPoints += parseFloat(item.calculatedScore); // Otherwise, use default score (if any)
+        }
+    });
+    if (biochemicalFunctionPoints < MAX_SCORE_CONSTANTS.BIOCHEMCAL_FUNCTION) {
+        biochemicalFunctionPointsCounted = biochemicalFunctionPoints; // If less than the max allowed points, use the sum of points
+    } else {
+        biochemicalFunctionPointsCounted = MAX_SCORE_CONSTANTS.BIOCHEMCAL_FUNCTION; // Otherwise, use the max allowed points
+    }
+
+    // Experimental evidence type === 'Protein Interactions'
+    let proteinInteractions = getExpScoreList(experimentalProteinInteractionsTotal);
+    proteinInteractionsCount = proteinInteractions.length ? proteinInteractions.length : 0; // Count of scored evidence of this type
+    proteinInteractions.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            proteinInteractionsPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            proteinInteractionsPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (proteinInteractionsPoints < MAX_SCORE_CONSTANTS.PROTEIN_INTERACTIONS) {
+        proteinInteractionsPointsCounted = proteinInteractionsPoints;
+    } else {
+        proteinInteractionsPointsCounted = MAX_SCORE_CONSTANTS.PROTEIN_INTERACTIONS;
+    }
+
+    // Experimental evidence type === 'Expression'
+    let expression = getExpScoreList(experimentalExpressionTotal);
+    expressionCount = expression.length ? expression.length : 0; // Count of scored evidence of this type
+    expression.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            expressionPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            expressionPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (expressionPoints < MAX_SCORE_CONSTANTS.EXPRESSION) {
+        expressionPointsCounted = expressionPoints;
+    } else {
+        expressionPointsCounted = MAX_SCORE_CONSTANTS.EXPRESSION;
+    }
+
+    // Experimental evidence type === 'Functional Alteration'
+    let functionalAlteration = getExpScoreList(experimentalFunctionalAlterationTotal);
+    functionalAlterationCount = functionalAlteration.length ? functionalAlteration.length : 0; // Count of scored evidence of this type
+    functionalAlteration.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            functionalAlterationPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            functionalAlterationPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (functionalAlterationPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION) {
+        functionalAlterationPointsCounted = functionalAlterationPoints;
+    } else {
+        functionalAlterationPointsCounted = MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION;
+    }
+
+    // Experimental evidence type === 'Model Systems'
+    let modelSystems = getExpScoreList(experimentalModelSystemsTotal);
+    modelSystemsCount = modelSystems.length ? modelSystems.length : 0; // Count of scored evidence of this type
+    modelSystems.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            modelSystemsPoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            modelSystemsPoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (modelSystemsPoints < MAX_SCORE_CONSTANTS.MODEL_SYSTEMS) {
+        modelSystemsPointsCounted = modelSystemsPoints;
+    } else {
+        modelSystemsPointsCounted = MAX_SCORE_CONSTANTS.MODEL_SYSTEMS;
+    }
+
+    // Experimental evidence type === 'Rescue'
+    let rescue = getExpScoreList(experimentalRescueTotal);
+    rescueCount = rescue.length ? rescue.length : 0; // Count of scored evidence of this type
+    rescue.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            rescuePoints += parseFloat(item.score);
+        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
+            rescuePoints += parseFloat(item.calculatedScore);
+        }
+    });
+    if (rescuePoints < MAX_SCORE_CONSTANTS.RESCUE) {
+        rescuePointsCounted = rescuePoints;
+    } else {
+        rescuePointsCounted = MAX_SCORE_CONSTANTS.RESCUE;
+    }
+    /*****************************************************/
+
+    // console.log("probandScores is === " + JSON.stringify(probandScores));
 
     return (
         <div>
+            {/**** No longer needed for Score Summary. Will be deleted.
             <PanelGroup accordion>
                 <Panel title="New Count of Assessments" open>
                     <table className="assessment-counting">
@@ -937,6 +1362,7 @@ var NewCalculation = function() {
                     </table>
                 </Panel>
             </PanelGroup>
+            */}
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <PanelGroup accordion>
                     <Panel title="New Summary & Provisional Classification" open>
@@ -1154,6 +1580,20 @@ var NewCalculation = function() {
         </div>
     );
 };
+
+// Method to return a list of experimental evidence scores
+// by score status
+function getExpScoreList(evidenceList) {
+    let newArray = [];
+    evidenceList.forEach(evidence => {
+        evidence.scores.forEach(item => {
+            if (item.scoreStatus === 'Score') {
+                newArray.push(item);
+            }
+        });
+    });
+    return newArray;
+}
 
 // Function to check if an itme exists in an array(list)
 var in_array = function(item, list) {
