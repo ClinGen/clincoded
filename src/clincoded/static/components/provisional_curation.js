@@ -1040,6 +1040,7 @@ var NewCalculation = function() {
         OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
         TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO: 12,
         TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS: 12,
+        CASE_CONTROL: 12,
         BIOCHEMCAL_FUNCTION: 2,
         PROTEIN_INTERACTIONS: 2,
         EXPRESSION: 2,
@@ -1179,9 +1180,8 @@ var NewCalculation = function() {
         }
     });
     caseControlCount = caseControlTotal.length ? caseControlTotal.length : 0;
-    // FIXME: Find out the max score for case-control from curators
-    if (caseControlPoints < 6) {
-        caseControlPointsCounted = caseControlPoints;
+    if (caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL) {
+        caseControlPointsCounted = MAX_SCORE_CONSTANTS.CASE_CONTROL;
     } else {
         caseControlPointsCounted = 6;
     }
