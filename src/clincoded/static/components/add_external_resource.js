@@ -49,6 +49,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
         buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
         clearButtonRender: React.PropTypes.bool, // specify whether or not the Clear button should be rendered
+        editButtonRenderHide: React.PropTypes.bool, // specify whether or not the Edit button should be hidden
         parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
@@ -104,7 +105,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
         if (this.props.buttonOnly) {
             return (
                 <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
-                    {this.buttonRender()}
+                    {this.props.editButtonRenderHide && this.props.initialFormValue ? null : this.buttonRender()}
                     {this.props.clearButtonRender && this.props.initialFormValue ?
                         this.clearButtonRender()
                     : null}
@@ -116,7 +117,7 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
                     <span className="col-sm-5 control-label">{this.props.labelVisible ? this.props.label : null}</span>
                     <span className="col-sm-7">
                         <div className={"inline-button-wrapper" + (this.props.wrapperClass ? " " + this.props.wrapperClass : "")}>
-                            {this.buttonRender()}
+                            {this.props.editButtonRenderHide && this.props.initialFormValue ? null : this.buttonRender()}
                             {this.props.clearButtonRender && this.props.initialFormValue ?
                                 this.clearButtonRender()
                             : null}
@@ -488,7 +489,7 @@ function clinvarTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214 <i className="icon icon-external-link"></i></a>).</span>
+                        <span>Enter a ClinVar VariationID. The VariationID can be found in the light blue box on a variant page (example: <a href={external_url_map['ClinVarSearch'] + '139214'} target="_blank">139214</a>).</span>
                     </p>
                 </span>;
             break;
@@ -571,7 +572,7 @@ function clinvarRenderResourceResult() {
                 <div className="row">
                     <div className="row">
                         <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
                     </div>
                     {this.state.tempResource.hgvsNames ?
                         <div className="row">
@@ -651,7 +652,7 @@ function carTxt(field, extra) {
             txt =
                 <span>
                     <p className="alert alert-info">
-                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={external_url_map['CARallele'] + 'CA003323.html'} target="_blank">CA003323 <i className="icon icon-external-link"></i></a>).</span>
+                        <span>Enter a ClinGen Allele Registry ID (CA ID). The CA ID is returned when you register an allele with the ClinGen Allele Registry (example: <a href={`http:${external_url_map['CARallele']}CA003323.html`} target="_blank">CA003323</a>).</span>
                     </p>
                 </span>;
             break;
@@ -670,6 +671,22 @@ function carValidateForm() {
     if (valid && !formInput.match(/^CA[0-9]+$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'Invalid CA ID');
+    }
+
+    // valid if parent object is family, individual or experimental and input isn't already associated with it
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'variantList') {
+        // loop through received variantlist and make sure that the variant is not already associated
+        for (var i in this.props.parentObj.variantList) {
+            // but don't check against the field it's editing against, in case it is an edit
+            if (i != this.props.fieldNum && this.props.parentObj.variantList.hasOwnProperty(i)) {
+                if (this.props.parentObj.variantList[i].carId == formInput) {
+                    valid = false;
+                    this.setFormErrors('resourceId', 'This variant has already been associated with this piece of ' + this.props.parentObj['@type'][1] + ' evidence.');
+                    this.setState({submitBusy: false});
+                    break;
+                }
+            }
+        }
     }
     return valid;
 }
@@ -731,12 +748,12 @@ function carRenderResourceResult() {
                 <div className="row">
                     <div className="row">
                         <span className="col-xs-4 col-md-4 control-label"><label>CA ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['CARallele'] + this.state.tempResource.carId + '.html'} target="_blank"><strong>{this.state.tempResource.carId}</strong> <i className="icon icon-external-link"></i></a></span>
+                        <span className="col-xs-8 col-md-8 text-no-input"><a href={`${this.props.protocol}${external_url_map['CARallele']}${this.state.tempResource.carId}.html`} target="_blank"><strong>{this.state.tempResource.carId}</strong></a></span>
                     </div>
                     {this.state.tempResource.clinvarVariantId ?
                         <div className="row">
                             <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
-                            <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong> <i className="icon icon-external-link"></i></a></span>
+                            <span className="col-xs-8 col-md-8 text-no-input"><a href={`${external_url_map['ClinVarSearch']}${this.state.tempResource.clinvarVariantId}`} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
                         </div>
                     : null}
                     {this.state.tempResource.hgvsNames ?

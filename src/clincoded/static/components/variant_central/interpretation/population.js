@@ -65,6 +65,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     getInitialState: function() {
         return {
+            data: this.props.data,
             clinvar_id: null, // ClinVar ID
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
@@ -109,6 +110,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentDidMount: function() {
+        if (this.props.data) {
+            this.setState({data: this.props.data});
+        }
         if (this.props.interpretation) {
             this.setState({interpretation: this.props.interpretation});
             // set desired CI if previous data for it exists
@@ -134,11 +138,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     componentWillReceiveProps: function(nextProps) {
-        // this block is for handling props and states when props (external data) is updated after the initial load/rendering
-        // when props are updated, update the parent interpreatation object, if applicable
-        if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
-            this.setState({interpretation: nextProps.interpretation});
-        }
+        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
         // set desired CI if previous data for it exists
         this.getPrevSetDesiredCI(nextProps.interpretation);
         // update data based on api call results
@@ -241,8 +241,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
             // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
-            let hgvs_GRCh37 = (this.props.data.hgvsNames.GRCh37) ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
-            let hgvs_GRCh38 = (this.props.data.hgvsNames.GRCh38) ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
+            // update off of this.props.data as it is more stable, and this.state.data does not contain relevant updates
+            let hgvs_GRCh37 = this.props.data.hgvsNames.GRCh37 ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
+            let hgvs_GRCh38 = this.props.data.hgvsNames.GRCh38 ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
             let populationObj = this.state.populationObj;
             let updated1000GData = false;
             // get extra 1000Genome information
@@ -624,7 +625,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">ExAC {variantExac}
                     <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC <i className="icon icon-external-link"></i></a>
+                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC</a>
                 </h3>
             );
         } else {
@@ -644,7 +645,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">1000 Genomes: {variantTGenomes}
                     <a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl <i className="icon icon-external-link"></i></a>
+                    <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl</a>
                 </h3>
             );
         } else {
@@ -664,7 +665,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">Exome Sequencing Project (ESP): {variantEsp}
                     <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP <i className="icon icon-external-link"></i></a>
+                    <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP</a>
                 </h3>
             );
         } else {
@@ -721,12 +722,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 </div>
 
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
-                    {(this.props.data && this.state.interpretation) ?
+                    {(this.state.data && this.state.interpretation) ?
                     <div className="row">
                         <div className="col-sm-12">
                             <CurationInterpretationForm renderedFormContent={criteriaGroup1}
                                 evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.props.data['@id']}
+                                formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                 criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                 interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                         </div>
@@ -859,16 +860,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             }
                         </div>
                     </div>
-
-                    {(this.props.data && this.state.interpretation) ?
-                        <extraEvidence.ExtraEvidenceTable category="population" subcategory="population"
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
-                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                    : null}
-                    {(this.props.data && !this.state.interpretation) ?
-                        <extraEvidence.ExtraEvidenceTableViewAll category="population" subcategory="population"
-                            tableName={<span>Curated Literature Evidence (Population)</span>} variant={this.props.data} />
-                    : null}
+                    <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
+                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
+                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                        viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?

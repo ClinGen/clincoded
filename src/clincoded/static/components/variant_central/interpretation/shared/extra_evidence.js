@@ -20,10 +20,13 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
+        viewOnly: React.PropTypes.bool, // True if extra evidence is in view-only mode
         tableName: React.PropTypes.object, // table name as HTML object
         category: React.PropTypes.string, // category (usually the tab) the evidence is part of
         subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
         href_url: React.PropTypes.object, // href_url object
+        session: React.PropTypes.object, // session object
+        variant: React.PropTypes.object, // parent variant object
         interpretation: React.PropTypes.object, // parent interpretation object
         updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
@@ -42,11 +45,16 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
             editEvidenceId: null, // the ID of the evidence to be edited from the table
             descriptionInput: null, // state to store the description input content
             editDescriptionInput: null, // state to store the edit description input content
-            interpretation: this.props.interpretation // parent interpretation object
+            variant: this.props.variant, // parent variant object
+            interpretation: this.props.interpretation ? this.props.interpretation : null // parent interpretation object
         };
     },
 
     componentWillReceiveProps: function(nextProps) {
+        // Update variant object when received
+        if (nextProps.variant) {
+            this.setState({variant: nextProps.variant});
+        }
         // Update interpretation object when received
         if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
@@ -210,12 +218,20 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
         return (
             <tr key={extra_evidence.uuid}>
                 <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
-                <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
-                <td className="col-md-2">
-                    <button className="btn btn-info btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
-                    <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
-                        clickHandler={() => this.deleteEvidence(extra_evidence)} />
-                </td>
+                <td className="col-md-3"><p className="word-break">{extra_evidence.evidenceDescription}</p></td>
+                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{extra_evidence.submitted_by.title}</td>
+                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                {!this.props.viewOnly ?
+                    <td className="col-md-2">
+                        {!this.props.viewOnly && this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
+                            <div>
+                                <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                                <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
+                                    clickHandler={() => this.deleteEvidence(extra_evidence)} />
+                            </div>
+                        : null}
+                    </td>
+                : null}
             </tr>
         );
     },
@@ -233,7 +249,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     renderInterpretationExtraEvidenceEdit: function(extra_evidence) {
         return (
             <tr key={extra_evidence.uuid}>
-                <td colSpan="3">
+                <td colSpan="5">
                     <PmidSummary article={extra_evidence.articles[0]} className="alert alert-info" pmidLinkout />
                     <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
                         <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
@@ -242,7 +258,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                             labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleDescriptionChange} />
                         <div className="clearfix">
                             <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
-                            <Input type="submit" inputClassName="btn-info pull-right btn-inline-spacer" id="submit" title="Edit"
+                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
                                 submitBusy={this.state.editBusy} inputDisabled={!(this.state.editDescriptionInput && this.state.editDescriptionInput.length > 0)} />
                             {this.state.updateMsg ?
                                 <div className="submit-info pull-right">{this.state.updateMsg}</div>
@@ -255,14 +271,21 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
     },
 
     render: function() {
-        let relevantEvidenceList = [];
-        if (this.state.interpretation && this.state.interpretation.extra_evidence_list) {
-            this.state.interpretation.extra_evidence_list.map(extra_evidence => {
-                if (extra_evidence.subcategory === this.props.subcategory) {
-                    relevantEvidenceList.push(extra_evidence);
+        let relevantEvidenceListRaw = [];
+        if (this.state.variant && this.state.variant.associatedInterpretations) {
+            this.state.variant.associatedInterpretations.map(interpretation => {
+                if (interpretation.extra_evidence_list) {
+                    interpretation.extra_evidence_list.map(extra_evidence => {
+                        if (extra_evidence.subcategory === this.props.subcategory) {
+                            relevantEvidenceListRaw.push(extra_evidence);
+                        }
+                    });
                 }
             });
         }
+        let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
+            return evidence.date_created;
+        }).reverse();
         let parentObj = {/* // BEHAVIOR TBD
             '@type': ['evidenceList'],
             'evidenceList': relevantEvidenceList
@@ -278,131 +301,52 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
                                 <tr>
                                     <th>Article</th>
                                     <th>Evidence</th>
-                                    <th></th>
+                                    <th>Submitted by</th>
+                                    <th>Last edited</th>
+                                    {!this.state.viewOnly? <th></th> : null}
                                 </tr>
                             </thead>
                         : null}
                         <tbody>
+                            {!this.props.viewOnly ?
+                                <tr>
+                                    <td colSpan="5">
+                                        {this.state.tempEvidence ?
+                                            <span>
+                                                <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
+                                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                                    <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
+                                                        labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
+                                                    <div className="clearfix">
+                                                        <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
+                                                            buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                                        <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
+                                                        <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                                                            submitBusy={this.state.submitBusy} inputDisabled={!(this.state.descriptionInput && this.state.descriptionInput.length > 0)} />
+                                                        {this.state.updateMsg ?
+                                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                                        : null}
+                                                    </div>
+                                                </Form>
+                                            </span>
+                                        :
+                                            <span>
+                                                <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
+                                                    buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+
+                                                &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            : null}
                             {relevantEvidenceList.length > 0 ?
                                 relevantEvidenceList.map(evidence => {
                                     return (this.state.editEvidenceId === evidence['@id']
                                         ? this.renderInterpretationExtraEvidenceEdit(evidence)
                                         : this.renderInterpretationExtraEvidence(evidence));
                                 })
-                            : null}
-                            <tr>
-                                <td colSpan="3">
-                                    {this.state.tempEvidence ?
-                                        <div>
-                                            <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
-
-                                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
-                                                    labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
-                                                <div className="clearfix">
-                                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
-                                                        buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-                                                    <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
-                                                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                        submitBusy={this.state.submitBusy} inputDisabled={!(this.state.descriptionInput && this.state.descriptionInput.length > 0)} />
-                                                    {this.state.updateMsg ?
-                                                        <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                    : null}
-                                                </div>
-                                            </Form>
-                                        </div>
-                                    :
-                                        <span>
-                                            <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
-                                                buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-
-                                            &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
-                                        </span>
-                                    }
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    }
-});
-
-
-// Class to render the extra evidence table in VCI in view-only, view-all mode
-var ExtraEvidenceTableViewAll = module.exports.ExtraEvidenceTableViewAll = React.createClass({
-    mixins: [RestMixin, FormMixin, CuratorHistory],
-
-    propTypes: {
-        tableName: React.PropTypes.object, // table name as HTML object
-        category: React.PropTypes.string, // category (usually the tab) the evidence is part of
-        subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
-        variant: React.PropTypes.object, // parent variant object
-    },
-
-    contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
-    },
-
-    getInitialState: function() {
-        return {
-            variant: this.props.variant // parent variant object
-        };
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-        // Update variant object when received
-        if (nextProps.variant) {
-            this.setState({variant: nextProps.variant});
-        }
-    },
-
-    renderInterpretationExtraEvidence: function(extra_evidence) {
-        // for rendering the evidence in tabular format
-        return (
-            <tr key={extra_evidence.uuid}>
-                <td className="col-md-5"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
-                <td className="col-md-5">{extra_evidence.evidenceDescription}</td>
-                <td className="col-md-2">{extra_evidence.submitted_by.title}</td>
-            </tr>
-        );
-    },
-
-    render: function() {
-        let relevantEvidenceList = [];
-        if (this.state.variant && this.state.variant.associatedInterpretations) {
-            this.state.variant.associatedInterpretations.map(interpretation => {
-                if (interpretation.extra_evidence_list) {
-                    interpretation.extra_evidence_list.map(extra_evidence => {
-                        if (extra_evidence.subcategory === this.props.subcategory) {
-                            relevantEvidenceList.push(extra_evidence);
-                        }
-                    });
-                }
-            });
-        }
-
-        return (
-            <div className="panel panel-info">
-                <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
-                <div className="panel-content-wrapper">
-                    <table className="table">
-                        {relevantEvidenceList.length > 0 ?
-                            <thead>
-                                <tr>
-                                    <th>Article</th>
-                                    <th>Evidence</th>
-                                    <th>Submitted by</th>
-                                </tr>
-                            </thead>
-                        : null}
-                        <tbody>
-                            {relevantEvidenceList.length > 0 ?
-                                relevantEvidenceList.map(evidence => {
-                                    return (this.renderInterpretationExtraEvidence(evidence));
-                                })
-                            : <tr><td colSpan="3"><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
+                            : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
                 </div>

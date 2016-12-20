@@ -34,13 +34,10 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-// Will be great to convert to 'const' when available
-var MAX_VARIANTS = 5;
+var ScoreExperimental = require('./score/experimental_score').ScoreExperimental;
+var ScoreViewer = require('./score/viewer').ScoreViewer;
 
-// Settings for this.state.varOption
-var VAR_NONE = 0; // No variants entered in a panel
-var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
-var VAR_OTHER = 2; // Other description entered in a panel
+const MAX_VARIANTS = 5;
 
 var initialCv = {
     assessmentTracker: null, // Tracking object for a single assessment
@@ -100,11 +97,17 @@ var ExperimentalCuration = React.createClass({
             rescuePRHPO: false,
             rescuePRFT: false,
             variantCount: 0, // Number of variants to display
-            variantOption: [], // One variant panel, and nothing entered
             variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            userScoreObj: {}, // Logged-in user's score object
+            formError: false
         };
+    },
+
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
     },
 
     // sets the description text below the experimental data type dropdown
@@ -304,37 +307,6 @@ var ExperimentalCuration = React.createClass({
             }
         } else if (ref === 'patientCellOrEngineeredEquivalent') {
             this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
-        } else if (ref.substring(0, 3) === 'VAR') {
-            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
-            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
-            var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var refSuffix = ref.match(/\d+$/);
-            refSuffix = refSuffix && refSuffix[0];
-            if (refSuffix && (lastVariantSuffix === refSuffix)) {
-                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
-                // the Add Another Variant button.
-                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
-            }
-
-            // Disable fields depending on what fields have values in them.
-            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
-            var currVariantOption = this.state.variantOption;
-            if (othervariant) {
-                // Something entered in Other; clear the ClinVar ID and set the variantOption state to disable it.
-                this.refs['VARclinvarid' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (clinvarid) {
-                // Something entered in ClinCar ID; clear the Other field and set the variantOption state to disable it.
-                this.refs['VARothervariant' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_SPEC;
-            } else {
-                // Nothing entered anywhere; enable everything.
-                currVariantOption[refSuffix] = VAR_NONE;
-            }
-            this.setState({variantOption: currVariantOption});
         }
     },
 
@@ -477,18 +449,17 @@ var ExperimentalCuration = React.createClass({
                         stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
 
-                        var currVariantOption = [];
                         for (var i = 0; i < variants.length; i++) {
-                            if (variants[i].clinvarVariantId) {
-                                currVariantOption[i] = VAR_SPEC;
-                                stateObj.variantInfo[i] = {'clinvarVariantId': variants[i].clinvarVariantId, 'clinvarVariantTitle': variants[i].clinvarVariantTitle};
-                            } else if (variants[i].otherDescription) {
-                                currVariantOption[i] = VAR_OTHER;
-                            } else {
-                                currVariantOption[i] = VAR_NONE;
+                            if (variants[i].clinvarVariantId || variants[i].carId) {
+                                stateObj.variantInfo[i] = {
+                                    'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
+                                    'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
+                                    'carId': variants[i].carId ? variants[i].carId : null,
+                                    'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                    'uuid': variants[i].uuid
+                                };
                             }
                         }
-                        stateObj.variantOption = currVariantOption;
                     }
                 }
 
@@ -625,8 +596,17 @@ var ExperimentalCuration = React.createClass({
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
+        // Make sure there is an explanation for the score selected differently from the default score
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+        if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
+            }
+        }
+
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault() && this.validateVariants()) {
+        if (this.validateDefault()) {
             var groupGenes;
             var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs, efoIDs;
             var formError = false;
@@ -970,6 +950,18 @@ var ExperimentalCuration = React.createClass({
                     }
                 }
 
+                // Get variant uuid's if they were added via the modals
+                for (var j = 0; j < this.state.variantCount; j++) {
+                    // Grab the values from the variant form panel
+                    var variantId = this.getFormValue('variantUuid' + j);
+
+                    // Build the search string depending on what the user entered
+                    if (variantId) {
+                        // Make a search string for these terms
+                        experimentalDataVariants.push('/variants/' + variantId);
+                    }
+                }
+
                 var searchStr = '';
                 this.setState({submitBusy: true});
                 // Begin with empty promise
@@ -1001,102 +993,38 @@ var ExperimentalCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
-                    // of those kinds of variants generates a new variant object). For any that already exist, push them onto
-                    // the array of the experimental data's variants. For any that don't, pass them to the next THEN to write them to the DB.
-                    var newVariants = [];
-
-                    // Build an array of search strings for each of the ClinVar IDs entered in the form.
-                    var searchStrs = [];
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var clinvarId = this.getFormValue('VARclinvarid' + i);
-
-                        // Build the search string depending on what the user entered
-                        if (clinvarId) {
-                            // Make a search string for these terms
-                            searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
-                        }
+                    let currExperimental = this.state.experimental;
+                    let currExperimentalUuid = currExperimental && currExperimental.uuid;
+                    let evidenceScores = []; // Holds new array of scores
+                    let experimentalScores = currExperimental && currExperimental.scores && currExperimental.scores.length ? currExperimental.scores : [];
+                    // Find any pre-existing score(s) and put their '@id' values into an array
+                    if (experimentalScores.length) {
+                        experimentalScores.forEach(score => {
+                            evidenceScores.push(score['@id']);
+                        });
                     }
-
-                    // If at least one variant search string built, perform the search
-                    if (searchStrs.length) {
-                        // Search DB for all matching terms for all variants entered
-                        return this.getRestDatas(
-                            searchStrs
-                        ).then(results => {
-                            // 'result' is an array of search results, one per search string. There should only be one result per array element --
-                            // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                            results.forEach(function(result, i) {
-                                if (result.total) {
-                                    // Search got a result. Add a string for experimentalData.variants for this existing variant
-                                    experimentalDataVariants.push(result['@graph'][0]['@id']);
-                                } else {
-                                    // Search got no result; make a new variant and save it in an array so we can write them.
-                                    // Look for the term in the filters to see what term failed to find a match
-                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
-                                    if (termResult) {
-                                        var newVariant = {};
-                                        newVariant.clinvarVariantId = termResult.term;
-                                        newVariants.push(newVariant);
-                                    }
+                    /*************************************************************/
+                    /* Either update or create the score status object in the DB */
+                    /*************************************************************/
+                    if (Object.keys(newUserScoreObj).length) {
+                        if (this.state.userScoreObj.uuid) {
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                // Only need to update the evidence score object
+                                return Promise.resolve(evidenceScores);
+                            });
+                        } else {
+                            return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                                if (newScoreObject) {
+                                    // Add the new score to array
+                                    evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
-                            }, this);
-
-                            // Pass new variant array to the next THEN to write them.
-                            return Promise.resolve(newVariants);
-                        });
-                    }
-
-                    // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(newVariants);
-                }).then(newVariants => {
-                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
-                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
-
-                        // Build the search string depending on what the user entered
-                        if (otherVariantText) {
-                            // Add this Other Description text to a new variant object
-                            var newVariant = {};
-                            newVariant.otherDescription = otherVariantText;
-                            newVariants.push(newVariant);
+                                return Promise.resolve(evidenceScores);
+                            });
                         }
+                    } else {
+                        return Promise.resolve(null);
                     }
-
-                    // Now write the new variants to the DB, and push their @ids to the experimental data variant
-                    if (newVariants && newVariants.length) {
-                        return this.postRestDatas(
-                            '/variants/', newVariants
-                        ).then(results => {
-                            if (results && results.length) {
-                                // Write the new variants to history
-                                results.forEach(function(result) {
-                                    this.recordHistory('add', result['@graph'][0]);
-                                }, this);
-
-                                // Add the newly written variants to the experimental data
-                                results.forEach(result => {
-                                    experimentalDataVariants.push(result['@graph'][0]['@id']);
-                                });
-                            }
-                            return Promise.resolve(results);
-                        });
-                    }
-
-                    // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(null);
-                }).then(data => {
-                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
-                    var experimentalUuid = this.state.experimental && this.state.experimental.uuid;
-
-                    // Write the assessment to the DB, if there was one. The assessment’s evidence_id won’t be set at this stage, and must be written after writing the experimental data object.
-                    return this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid).then(assessmentInfo => {
-                        return Promise.resolve({assessment: assessmentInfo.assessment, updatedAssessment: assessmentInfo.update});
-                    });
-                }).then(assessment => {
+                }).then(scoreArray => {
                     var promise;
 
                     // Add variants if they've been found
@@ -1104,23 +1032,20 @@ var ExperimentalCuration = React.createClass({
                         newExperimental.variants = experimentalDataVariants;
                     }
 
-                    // If we made a new assessment, add it to the experimental data's assessments
-                    if (assessment.assessment && !assessment.updatedAssessment) {
-                        if (!newExperimental.assessments) {
-                            newExperimental.assessments = [];
-                        }
-                        newExperimental.assessments.push(assessment.assessment['@id']);
+                    // If we add a new score, add it to the experimental object
+                    if (scoreArray && scoreArray.length) {
+                        newExperimental.scores = scoreArray;
                     }
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
                         promise = this.putRestData('/experimental/' + this.state.experimental.uuid, newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: false});
+                            return Promise.resolve({data: data['@graph'][0], experimentalAdded: false});
                         });
                     } else {
                         // We created an experimental data item; post it to the DB
                         promise = this.postRestData('/experimental/', newExperimental).then(data => {
-                            return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: data['@graph'][0], experimentalAdded: true});
+                            return Promise.resolve({data: data['@graph'][0], experimentalAdded: true});
                         }).then(newExperimental => {
                             savedExperimental = newExperimental.data;
                             if (!this.state.experimental) {
@@ -1135,29 +1060,16 @@ var ExperimentalCuration = React.createClass({
 
                                     // Post the modified annotation to the DB
                                     return this.putRestData('/evidence/' + this.state.annotation.uuid, annotation).then(data => {
-                                        return Promise.resolve({assessment: assessment.assessment, updatedAssessment: assessment.updatedAssessment, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                        return Promise.resolve({data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                                     });
                                 });
                             } else {
-                                return Promise.resolve({assessment: null, updatedAssessment: false, data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
+                                return Promise.resolve({data: newExperimental.data, experimentalAdded: newExperimental.experimentalAdded});
                             }
                         });
                     }
 
                     return promise;
-                }).then(data => {
-                    // If the assessment is missing its evidence_id; fill it in and update the assessment in the DB
-                    var newAssessment = data.assessment;
-                    var gdmUuid = this.state.gdm && this.state.gdm.uuid;
-                    var experimentalUuid = data.data ? data.data.uuid : this.state.experimental.uuid;
-                    if (newAssessment && !newAssessment.evidence_id) {
-                        // We saved a pathogenicity and assessment, and the assessment has no evidence_id. Fix that.
-                        // Nothing relies on this operation completing, so don't wait for a promise from it.
-                        this.saveAssessment(this.cv.assessmentTracker, gdmUuid, experimentalUuid, newAssessment);
-                    }
-
-                    // Next step relies on the pathogenicity, not the updated assessment
-                    return Promise.resolve(data);
                 }).then(data => {
                     // Record history of the group creation
                     var meta, historyPromise;
@@ -1174,14 +1086,6 @@ var ExperimentalCuration = React.createClass({
                         // Record the modification of an existing group
                         historyPromise = this.recordHistory('modify', data.data);
                     }
-
-                    // After writing the experimental data history, write the assessment if any
-                    historyPromise.then(() => {
-                        // If we're assessing a family segregation, write that to history
-                        if (data.data && data.assessment) {
-                            this.saveAssessmentHistory(data.assessment, this.state.gdm, data.data, data.updatedAssessment);
-                        }
-                    });
 
                     this.resetAllFormValues();
                     if (this.queryValues.editShortcut) {
@@ -1202,30 +1106,9 @@ var ExperimentalCuration = React.createClass({
         this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
     },
 
-    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
-    validateVariants: function() {
-        var valid;
-        var anyInvalid = false;
-
-        // Check Variant panel inputs for correct formats
-        for (var i = 0; i < this.state.variantCount; i++) {
-            var value = this.getFormValue('VARclinvarid' + i);
-            if (value) {
-                valid = value.match(/^\s*(\d{1,10})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
-                    anyInvalid = true;
-                }
-            }
-        }
-
-        return !anyInvalid;
-    },
-
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
-    updateClinvarVariantId: function(data, fieldNum) {
+    updateVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = this.state.variantOption;
         var addVariantDisabled;
         if (data) {
             // Enable/Disable Add Variant button as needed
@@ -1235,20 +1118,21 @@ var ExperimentalCuration = React.createClass({
                 addVariantDisabled = true;
             }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle};
-            // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+            this.refs['variantUuid' + fieldNum].setValue(data['uuid']);
+            newVariantInfo[fieldNum] = {
+                'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
+                'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
+                'carId': data.carId ? data.carId : null,
+                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'uuid': data.uuid
+            };
         } else {
             // Reset the form and display values
-            this.refs['VARclinvarid' + fieldNum].setValue('');
+            this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
-            // Reenable the 'Other description' textarea
-            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
         }
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled});
     },
 
     render: function() {
@@ -1256,20 +1140,16 @@ var ExperimentalCuration = React.createClass({
         var annotation = this.state.annotation;
         var pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         var experimental = this.state.experimental;
+        /****************************************/
+        /* Retain pre-existing assessments data */
+        /****************************************/
         var assessments = experimental && experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
-        //var is_assessed =false; // filter out Not Assessed
         var validAssessments = [];
         _.map(assessments, assessment => {
             if (assessment.value !== 'Not Assessed') {
                 validAssessments.push(assessment);
             }
         });
-        //for (var i in assessments) {
-        //    if (assessments[i].value !== 'Not Assessed') {
-        //        is_assessed = true;
-        //        break;
-        //    }
-        //}
         var submitErrClass = 'submit-err pull-right' + (this.anyFormErrors() ? '' : ' hidden');
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
 
@@ -1285,6 +1165,19 @@ var ExperimentalCuration = React.createClass({
             cancelUrl = (!this.queryValues.experimentalUuid || this.queryValues.editShortcut) ?
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/experimental-submit/?gdm=' + gdm.uuid + (experimental ? '&experimental=' + experimental.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
+        }
+
+        // Find any pre-existing scores associated with the evidence
+        let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        let experimentalEvidenceType;
+        if (this.state.experimentalType === 'Biochemical Function' || this.state.experimentalType === 'Protein Interactions' || this.state.experimentalType === 'Expression') {
+            experimentalEvidenceType = null;
+        } else if (this.state.experimentalType === 'Functional Alteration') {
+            experimentalEvidenceType = this.state.functionalAlterationPCEE;
+        } else if (this.state.experimentalType === 'Model Systems') {
+            experimentalEvidenceType = this.state.modelSystemsNHACCM;
+        } else if (this.state.experimentalType === 'Rescue') {
+            experimentalEvidenceType = this.state.rescuePCEE;
         }
 
         return (
@@ -1348,12 +1241,12 @@ var ExperimentalCuration = React.createClass({
                                         : null}
                                         {this.state.experimentalNameVisible ?
                                             <div>
-                                                <Panel panelClassName="panel-data">
-                                                    <dl className="dl-horizontal">
-                                                        <div>
-                                                            <dt>Assessments</dt>
-                                                            <dd>
-                                                                {validAssessments.length ?
+                                                {validAssessments.length ?
+                                                    <Panel panelClassName="panel-data">
+                                                        <dl className="dl-horizontal">
+                                                            <div>
+                                                                <dt>Assessments</dt>
+                                                                <dd>
                                                                     <div>
                                                                         {validAssessments.map(function(assessment, i) {
                                                                             return (
@@ -1364,15 +1257,16 @@ var ExperimentalCuration = React.createClass({
                                                                             );
                                                                         })}
                                                                     </div>
-                                                                : <div>None</div>}
-                                                            </dd>
-                                                        </div>
-                                                    </dl>
-                                                </Panel>
-
+                                                                </dd>
+                                                            </div>
+                                                        </dl>
+                                                    </Panel>
+                                                : null}
                                                 <PanelGroup accordion>
-                                                    <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} note={<NoteAssessment />}
-                                                        updateValue={this.updateAssessmentValue} disableDefault={this.cv.othersAssessed} accordion open />
+                                                    <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
+                                                        <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
+                                                            evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError} />
+                                                    </Panel>
                                                 </PanelGroup>
                                             </div>
                                         : null}
@@ -1407,7 +1301,7 @@ var ExperimentalNameType = function() {
     var experimental = this.state.experimental;
 
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             {!this.state.experimentalType || this.state.experimentalType == 'none' ?
                 <div className="col-sm-7 col-sm-offset-5">
                     <p>Select which experiment type you would like to curate:</p>
@@ -1487,7 +1381,7 @@ var TypeBiochemicalFunction = function() {
         biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for a GO ID (e.g. biological_process = GO:0008150)</p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
@@ -1640,7 +1534,7 @@ var TypeProteinInteractions = function() {
         proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="text" ref="interactingGenes" label={<LabelInteractingGenes />}
                 error={this.getFormError('interactingGenes')} clearError={this.clrFormErrors.bind(null, 'interactingGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1707,7 +1601,7 @@ var TypeExpression = function() {
         expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> for an organ type (e.g. heart = UBERON_0015228)</p>
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
@@ -1803,7 +1697,7 @@ var TypeFunctionalAlteration = function() {
         functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="select" ref="cellMutationOrEngineeredEquivalent" label="Patient cells with candidate mutation or engineered equivalent?:"
                 error={this.getFormError('cellMutationOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'cellMutationOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1890,7 +1784,7 @@ var TypeModelSystems = function() {
         modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="select" ref="animalOrCellCulture" label="Non-human animal or cell-culture model?:"
                 error={this.getFormError('animalOrCellCulture')} clearError={this.clrFormErrors.bind(null, 'animalOrCellCulture')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -2021,7 +1915,7 @@ var TypeRescue = function() {
         rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
     }
     return (
-        <div className="row experimental-data-form">
+        <div className="row form-row-helper">
             <Input type="select" ref="patientCellOrEngineeredEquivalent" label="Patient cells with or engineered equivalent?:"
                 error={this.getFormError('patientCellOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'patientCellOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -2181,26 +2075,55 @@ var ExperimentalDataVariant = function() {
                             </div>
                             {this.state.variantInfo[i] ?
                                 <div>
-                                    <div className="row">
-                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
-                                    </div>
-                                    <div className="row">
-                                       <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                        <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                    </div>
+                                    {this.state.variantInfo[i].clinvarVariantId ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                            <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                        </div>
+                                    : null}
+                                    {this.state.variantInfo[i].clinvarVariantTitle ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                            <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                        </div>
+                                    : null}
+                                    {this.state.variantInfo[i].carId ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelCARVariant />}</label></span>
+                                            <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
+                                        </div>
+                                    : null}
+                                    {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
+                                        <div className="row">
+                                            <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
+                                            <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
+                                        </div>
+                                    : null}
                                 </div>
                             : null}
-                            <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
-                                error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                            <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
+                                error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                            <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Experimental'], 'variantList': this.state.variantInfo}}
-                                buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
-                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                            <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} handleChange={this.handleChange} inputDisabled={this.state.variantOption[i] === VAR_SPEC || this.cv.othersAssessed}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                            {curator.renderMutalyzerLink()}
+                            <div className="row">
+                                <div className="form-group">
+                                    <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:{this.state.variantRequired ? ' *' : null}</label> : <label>Clear Variant Selection:</label>}</span>
+                                    <span className="col-sm-7">
+                                        {!this.state.variantInfo[i] || (this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId) ?
+                                            <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                                updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                        : null}
+                                        {!this.state.variantInfo[i] ? <span> - or - </span> : null}
+                                        {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
+                                            <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
+                                                buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                                initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
+                                                updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                        : null}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     );
                 })}
@@ -2218,13 +2141,25 @@ var ExperimentalDataVariant = function() {
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+    }
+});
+
+var LabelCARVariant = React.createClass({
+    render: function() {
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+    }
+});
+
+var LabelCARVariantTitle = React.createClass({
+    render: function() {
+        return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
@@ -2244,7 +2179,7 @@ var NoteAssessment = React.createClass({
 
 
 var ExperimentalViewer = React.createClass({
-    mixins: [RestMixin, AssessmentMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
         assessmentTracker: null, // Tracking object for a single assessment
@@ -2255,74 +2190,78 @@ var ExperimentalViewer = React.createClass({
         return {
             assessments: null, // Array of assessments for the experimental data
             updatedAssessment: '', // Updated assessment value
-            submitBusy: false // True while form is submitting
+            userScoreObj: {}, // Logged-in user's score object
+            submitBusy: false, // True while form is submitting
+            experimentalEvidenceType: null,
+            formError: false
         };
     },
 
-    // Handle the assessment submit button
-    assessmentSubmit: function(e) {
-        var updatedExperimental;
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
+    },
 
-        // GET the experimental object to have the most up-to-date version
-        this.getRestData('/experimental/' + this.props.context.uuid).then(data => {
-            this.setState({submitBusy: true});
-            var experimental = data;
+    // Redirect to Curation-Central page
+    handlePageRedirect: function() {
+        let tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+        let tempGdm = tempGdmPmid[0];
+        let tempPmid = tempGdmPmid[1];
+        window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+    },
 
-            // Write the assessment to the DB, if there was one.
-            return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
-                // Save assessment to history
-                this.saveAssessmentHistory(assessmentInfo.assessment, null, experimental, assessmentInfo.update);
-
-                // If we made a new assessment, add it to the experimental data's assessments
-                if (assessmentInfo.assessment && !assessmentInfo.update) {
-                    updatedExperimental = curator.flatten(experimental);
-                    if (!updatedExperimental.assessments) {
-                        updatedExperimental.assessments = [];
-                    }
-                    updatedExperimental.assessments.push(assessmentInfo.assessment['@id']);
-
-                    // Write the updated experimental data object to the DB
-                    return this.putRestData('/experimental/' + experimental.uuid, updatedExperimental).then(data => {
-                        return this.getRestData('/experimental/' + data['@graph'][0].uuid);
-                    });
-                }
-
-                // Didn't update the experimental data object; if updated the assessment, reload the experimental data
-                if (assessmentInfo.update) {
-                    return this.getRestData('/experimental/' + experimental.uuid);
-                }
-
-                // Not updating the experimental data
-                return Promise.resolve(experimental);
+    // Handle the score submit button
+    scoreSubmit: function(e) {
+        let experimental = this.props.context,
+            evidenceScores = [];
+        let experimentalScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        // Find any pre-existing score(s) and put their '@id' values into an array
+        if (experimentalScores.length) {
+            experimentalScores.forEach(score => {
+                evidenceScores.push(score['@id']);
             });
-        }).then(updatedExperimental => {
-            // update the assessmentTracker object so it accounts for any new assessments
-            var userAssessment;
-            var assessments = updatedExperimental.assessments;
-            var user = this.props.session && this.props.session.user_properties;
+        }
+        /*****************************************************/
+        /* Experimental score status data object             */
+        /*****************************************************/
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
-            // Find if any assessments for the segregation are owned by the currently logged-in user
-            if (assessments && assessments.length) {
-                // Find the assessment belonging to the logged-in curator, if any.
-                userAssessment = Assessments.userAssessment(assessments, user && user.uuid);
+        if (Object.keys(newUserScoreObj).length) {
+            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+                this.setState({formError: true});
+                return false;
             }
-            this.cv.assessmentTracker = new AssessmentTracker(userAssessment, user, updatedExperimental.evidenceType);
-
-            // Wrote the experimental data, so update the assessments state to the new assessment list
-            if (updatedExperimental && updatedExperimental.assessments && updatedExperimental.assessments.length) {
-                this.setState({assessments: updatedExperimental.assessments, updatedAssessment: this.cv.assessmentTracker.getCurrentVal()});
+            this.setState({submitBusy: true});
+            /***********************************************************/
+            /* Either update or create the user score object in the DB */
+            /***********************************************************/
+            if (this.state.userScoreObj.uuid) {
+                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                    this.setState({submitBusy: false});
+                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            } else {
+                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    if (newScoreObject) {
+                        // Add new score @id to array
+                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                    }
+                    return Promise.resolve(evidenceScores);
+                }).then(newScoresArray => {
+                    let newExperimental = curator.flatten(experimental);
+                    // Update individual's scores property
+                    newExperimental['scores'] = newScoresArray;
+                    this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                    });
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
             }
-
-            this.setState({submitBusy: false}); // done w/ form submission; turn the submit button back on
-            return Promise.resolve(null);
-        }).then(data => {
-            var tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
-            var tempGdm = tempGdmPmid[0];
-            var tempPmid = tempGdmPmid[1];
-            window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
-        }).catch(function(e) {
-            console.log('EXPERIMENTAL DATA VIEW UPDATE ERROR: %s', e);
-        });
+        }
     },
 
     componentWillMount: function() {
@@ -2337,6 +2276,16 @@ var ExperimentalViewer = React.createClass({
         if (typeof this.props.session.user_properties !== undefined) {
             var user = this.props.session && this.props.session.user_properties;
             this.loadAssessmentTracker(user);
+        }
+
+        if (experimental.evidenceType === 'Biochemical Function' || experimental.evidenceType === 'Protein Interactions' || experimental.evidenceType === 'Expression') {
+            this.setState({experimentalEvidenceType: null});
+        } else if (experimental.evidenceType === 'Functional Alteration') {
+            this.setState({experimentalEvidenceType: experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
+        } else if (experimental.evidenceType === 'Model Systems') {
+            this.setState({experimentalEvidenceType: experimental.modelSystems.animalOrCellCulture});
+        } else if (experimental.evidenceType === 'Rescue') {
+            this.setState({experimentalEvidenceType: experimental.rescue.patientCellOrEngineeredEquivalent});
         }
     },
 
@@ -2366,20 +2315,16 @@ var ExperimentalViewer = React.createClass({
 
     render: function() {
         var experimental = this.props.context;
+        /****************************************/
+        /* Retain pre-existing assessments data */
+        /****************************************/
         var assessments = this.state.assessments ? this.state.assessments : (experimental.assessments ? experimental.assessments : null);
-        //var is_assessed = false;
         var validAssessments = [];
         _.map(assessments, assessment => {
             if (assessment.value !== 'Not Assessed') {
                 validAssessments.push(assessment);
             }
         });
-        //for (var i in assessments) {
-        //    if (assessments[i].value !== 'Not Assessed') {
-        //        is_assessed = true;
-        //        break;
-        //    }
-        //}
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
@@ -2402,6 +2347,9 @@ var ExperimentalViewer = React.createClass({
         var tempGdmPmid = curator.findGdmPmidFromObj(experimental);
         var tempGdm = tempGdmPmid[0];
         var tempPmid = tempGdmPmid[1];
+
+        let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        let experimentalEvidenceType = this.state.experimentalEvidenceType;
 
         return (
             <div>
@@ -2753,7 +2701,7 @@ var ExperimentalViewer = React.createClass({
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar VariationID</dt>
-                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2762,6 +2710,22 @@ var ExperimentalViewer = React.createClass({
                                                 <dl className="dl-horizontal">
                                                     <dt>ClinVar Preferred Title</dt>
                                                     <dd>{variant.clinvarVariantTitle}</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {variant.carId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinGen Allele Registry ID</dt>
+                                                    <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Genomic HGVS Title</dt>
+                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2778,12 +2742,13 @@ var ExperimentalViewer = React.createClass({
                             })}
                         </Panel>
                         : null}
-                        <Panel panelClassName="panel-data">
-                            <dl className="dl-horizontal">
-                                <div>
-                                    <dt>Assessments</dt>
-                                    <dd>
-                                        {validAssessments.length ?
+                        {/* Retain pre-existing assessments data in display */}
+                        {validAssessments.length ?
+                            <Panel panelClassName="panel-data">
+                                <dl className="dl-horizontal">
+                                    <div>
+                                        <dt>Assessments</dt>
+                                        <dd>
                                             <div>
                                                 {validAssessments.map(function(assessment, i) {
                                                     return (
@@ -2794,15 +2759,21 @@ var ExperimentalViewer = React.createClass({
                                                     );
                                                 })}
                                             </div>
-                                        : <div>None</div>}
-                                    </dd>
-                                </div>
-                            </dl>
-                        </Panel>
-                        {this.cv.gdmUuid ?
-                            <AssessmentPanel panelTitle="Experimental Data Assessment" assessmentTracker={this.cv.assessmentTracker} updateValue={this.updateAssessmentValue}
-                                assessmentSubmit={this.assessmentSubmit} disableDefault={othersAssessed} submitBusy={this.state.submitBusy} updateMsg={updateMsg}
-                                ownerNotAssessed={!(experimentalUserAssessed || userExperimental)} noSeg={false} />
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </Panel>
+                        : null}
+                        {evidenceScores.length > 1 ?
+                            <Panel panelClassName="panel-data">
+                                <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
+                            </Panel>
+                        : null}
+                        {this.cv.gdmUuid && (evidenceScores.length > 0 || (evidenceScores.length < 1 && userExperimental)) ?
+                            <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
+                                <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
+                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
+                            </Panel>
                         : null}
                     </div>
                 </div>

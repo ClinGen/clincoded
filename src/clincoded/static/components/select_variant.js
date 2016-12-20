@@ -93,12 +93,12 @@ var SelectVariant = React.createClass({
                                     <div className="alert alert-info">
                                         Instructions (please follow this order to determine correct ID for variant)<br /><br />
                                         <ol className="instructions">
-                                            <li>Search <a href={external_url_map['ClinVar']} target="_blank">ClinVar <i className="icon icon-external-link"></i></a> for variant.</li>
+                                            <li>Search <a href={external_url_map['ClinVar']} target="_blank">ClinVar</a> for variant.</li>
                                             <li>If found in ClinVar, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                            <li>If not found in ClinVar, search the <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> with a valid HGVS term for that variant.
+                                            <li>If not found in ClinVar, search the <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> with a valid HGVS term for that variant.
                                             <ol type="a">
-                                                <li>If <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
-                                                <li>If <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID.</li>
+                                                <li>If <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> returns a ClinVar ID, select “ClinVar VariationID” from the pull-down to enter it.</li>
+                                                <li>If <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> does not find a ClinVar ID, register the variant to return a CA ID and then select "ClinGen Allele Registry ID (CA ID)" from the pull-down and enter the CA ID.</li>
                                             </ol>
                                             </li>
                                         </ol>

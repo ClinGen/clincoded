@@ -24,6 +24,9 @@ const PmidSummary = curator.PmidSummary;
 const DeleteButton = curator.DeleteButton;
 const PmidDoiButtons = curator.PmidDoiButtons;
 
+var ScoreCaseControl = require('./score/case_control_score').ScoreCaseControl;
+var ScoreViewer = require('./score/viewer').ScoreViewer;
+
 const CaseControlCuration = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
@@ -42,8 +45,6 @@ const CaseControlCuration = React.createClass({
             annotation: null, // Annotation object given in UUID
             caseControl: null,
             caseControlUuid: null,
-            evidenceScore: null,
-            evidenceScoreUuid: null,
             caseGroup: null,
             caseGroupUuid: null,
             controlGroup: null,
@@ -56,8 +57,14 @@ const CaseControlCuration = React.createClass({
             caseCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             controlCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             statisticOtherType: 'collapsed',
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            userScoreObj: {} // Logged-in user's score object
         };
+    },
+
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
     },
 
     // After the Group Curation page component mounts, grab the GDM and annotation UUIDs from the query
@@ -73,7 +80,6 @@ const CaseControlCuration = React.createClass({
     loadData() {
 
         let caseControlUuid = this.queryValues.caseControlUuid ? this.queryValues.caseControlUuid : queryKeyValue('casecontrol', this.props.href);
-        let evidenceScoreUuid = this.queryValues.evidenceScoreUuid ? this.queryValues.evidenceScoreUuid : queryKeyValue('evidencescore', this.props.href);
         let caseGroupUuid = this.queryValues.caseGroupUuid ? this.queryValues.caseGroupUuid : queryKeyValue('casecohort', this.props.href);
         let controlGroupUuid = this.queryValues.controlGroupUuid ? this.queryValues.controlGroupUuid : queryKeyValue('controlcohort', this.props.href);
         let gdmUuid = this.queryValues.gdmUuid;
@@ -86,8 +92,7 @@ const CaseControlCuration = React.createClass({
             caseGroupUuid ? '/groups/' + caseGroupUuid : '',
             controlGroupUuid ? '/groups/' + controlGroupUuid : '',
             annotationUuid ? '/evidence/' + annotationUuid : '',
-            caseControlUuid ? '/casecontrol/' + caseControlUuid : '',
-            evidenceScoreUuid ? '/evidencescore/' + evidenceScoreUuid : ''
+            caseControlUuid ? '/casecontrol/' + caseControlUuid : ''
         ]);
 
         // With all given query string variables, get the corresponding objects from the DB.
@@ -117,10 +122,6 @@ const CaseControlCuration = React.createClass({
 
                     case 'caseControl':
                         stateObj.caseControl = data;
-                        break;
-
-                    case 'evidenceScore':
-                        stateObj.evidenceScore = data;
                         break;
 
                     default:
@@ -197,7 +198,6 @@ const CaseControlCuration = React.createClass({
             let newCaseControl = this.state.caseControl ? curator.flatten(this.state.caseControl) : {};
             let newCaseGroup = this.state.caseGroup ? curator.flatten(this.state.caseGroup) : {};
             let newControlGroup = this.state.controlGroup ? curator.flatten(this.state.controlGroup) : {};
-            let newEvidenceScore = this.state.evidenceScore ? curator.flatten(this.state.evidenceScore) : {};
 
             // Parse comma-separated list fields
             /**********************************/
@@ -738,32 +738,42 @@ const CaseControlCuration = React.createClass({
                         });
                     }
                 }).then(newControlCohort => {
+                    let currCaseControl = this.state.caseControl;
+                    let evidenceScores = []; // Holds new array of scores
+                    let caseControlScores = currCaseControl && currCaseControl.scores && currCaseControl.scores.length ? currCaseControl.scores : [];
+                    // Find any pre-existing score(s) and put their '@id' values into an array
+                    if (caseControlScores.length) {
+                        caseControlScores.forEach(score => {
+                            evidenceScores.push(score['@id']);
+                        });
+                    }
                     /*****************************************************/
                     /* Evidence score data object                        */
                     /*****************************************************/
-                    let newScoreObj = CaseControlEvalScore.handleScoreObj.call(this);
-                    if (newScoreObj) {
-                        newEvidenceScore = newScoreObj;
-                        if (!newEvidenceScore.score) {
-                            delete newEvidenceScore['score'];
-                        }
-                    }
+                    let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
-                    /*************************************************************/
-                    /* Either update or create the case-control object in the DB */
-                    /*************************************************************/
-                    if (this.state.evidenceScore) {
-                        return this.putRestData('/evidencescore/' + this.state.evidenceScore.uuid, newEvidenceScore).then(data => {
-                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
-                            return Promise.resolve(data['@graph'][0]);
-                        });
+                    if (Object.keys(newUserScoreObj).length) {
+                        /*************************************************************/
+                        /* Either update or create the case-control object in the DB */
+                        /*************************************************************/
+                        if (this.state.userScoreObj.uuid) {
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                // Only need to update the evidence score object
+                                return Promise.resolve(evidenceScores);
+                            });
+                        } else {
+                            return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                                if (newScoreObject) {
+                                    // Add the new score to array
+                                    evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                                }
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
                     } else {
-                        return this.postRestData('/evidencescore/', newEvidenceScore).then(data => {
-                            this.setState({evidenceScoreUuid: data['@graph'][0]['@id']});
-                            return Promise.resolve(data['@graph'][0]);
-                        });
+                        return Promise.resolve(null);
                     }
-                }).then(newScore => {
+                }).then(scoreArray => {
                     /*****************************************************/
                     /* Get Case-Control object property values           */
                     /* and put/post the data object to 'casecontrol'     */
@@ -801,8 +811,8 @@ const CaseControlCuration = React.createClass({
                     if (this.state.controlGroupUuid) {
                         newCaseControl.controlCohort = this.state.controlGroupUuid;
                     }
-                    if (this.state.evidenceScoreUuid) {
-                        newCaseControl.scores = [this.state.evidenceScoreUuid];
+                    if (scoreArray && scoreArray.length) {
+                        newCaseControl.scores = scoreArray;
                     }
 
                     /*************************************************************/
@@ -912,7 +922,6 @@ const CaseControlCuration = React.createClass({
         let annotation = this.state.annotation;
         let pmid = (annotation && annotation.article && annotation.article.pmid) ? annotation.article.pmid : null;
         let caseControl = this.state.caseControl,
-            evidenceScore = this.state.evidenceScore,
             caseGroup = this.state.caseGroup,
             controlGroup = this.state.controlGroup;
         let caseGroupMethod = (caseGroup && caseGroup.method && Object.keys(caseGroup.method).length) ? caseGroup.method : {};
@@ -924,7 +933,6 @@ const CaseControlCuration = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         this.queryValues.caseControlUuid = queryKeyValue('casecontrol', this.props.href);
-        this.queryValues.evidenceScoreUuid = queryKeyValue('evidencescore', this.props.href);
         this.queryValues.caseGroupUuid = queryKeyValue('casecohort', this.props.href);
         this.queryValues.controlGroupUuid = queryKeyValue('controlcohort', this.props.href);
         this.queryValues.editShortcut = queryKeyValue('editsc', this.props.href) === '';
@@ -936,6 +944,9 @@ const CaseControlCuration = React.createClass({
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/case-control-submit/?gdm=' + gdm.uuid + (caseControl ? '&casecontrol=' + caseControl.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
+
+        // Find any pre-existing scores associated with the evidence
+        let evidenceScores = caseControl && caseControl.scores && caseControl.scores.length ? caseControl.scores : [];
 
         return (
             <div>
@@ -990,8 +1001,14 @@ const CaseControlCuration = React.createClass({
                                     </div>
                                     <div className="col-sm-12 case-control-curation">
                                         <PanelGroup accordion>
-                                            <Panel title="Case-Control Evaluation & Score" panelClassName="case-control-eval-score" open>
-                                                {CaseControlEvalScore.render.call(this, caseControl, evidenceScore)}
+                                            <Panel title="Case-Control Evaluation" panelClassName="case-control-eval-score" open>
+                                                {CaseControlEvalScore.render.call(this, caseControl)}
+                                            </Panel>
+                                        </PanelGroup>
+                                        <PanelGroup accordion>
+                                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
+                                                <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
+                                                session={session} handleUserScoreObj={this.handleUserScoreObj} />
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1359,13 +1376,88 @@ function GroupAdditional(groupType) {
 }
 
 var CaseControlViewer = React.createClass({
+    // Start:: Evidence score submission hanlding for viewer
+    mixins: [RestMixin],
+
+    getInitialState: function() {
+        return {
+            userScoreObj: {}, // Logged-in user's score object
+            submitBusy: false // True while form is submitting
+        };
+    },
+
+    // Called by child function props to update user score obj
+    handleUserScoreObj: function(newUserScoreObj) {
+        this.setState({userScoreObj: newUserScoreObj});
+    },
+
+    // Redirect to Curation-Central page
+    handlePageRedirect: function() {
+        let tempGdmPmid = curator.findGdmPmidFromObj(this.props.context);
+        let tempGdm = tempGdmPmid[0];
+        let tempPmid = tempGdmPmid[1];
+        window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
+    },
+
+    scoreSubmit: function(e) {
+        let caseControl = this.props.context,
+            evidenceScores = [];
+        let caseControlScores = caseControl && caseControl.scores ? caseControl.scores : [];
+        // Find any pre-existing score(s) and put their '@id' values into an array
+        if (caseControlScores.length) {
+            caseControlScores.forEach(score => {
+                evidenceScores.push(score['@id']);
+            });
+        }
+        /*****************************************************/
+        /* Evidence score data object                        */
+        /*****************************************************/
+        let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
+
+        if (Object.keys(newUserScoreObj).length) {
+            this.setState({submitBusy: true});
+            /***********************************************************/
+            /* Either update or create the user score object in the DB */
+            /***********************************************************/
+            if (this.state.userScoreObj.uuid) {
+                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                    this.setState({submitBusy: false});
+                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            } else {
+                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    if (newScoreObject) {
+                        // Add new score @id to array
+                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                    }
+                    return Promise.resolve(evidenceScores);
+                }).then(newScoresArray => {
+                    let newCaseControl = curator.flatten(caseControl);
+                    // Update individual's scores property
+                    newCaseControl['scores'] = newScoresArray;
+                    this.putRestData('/casecontrol/' + caseControl.uuid, newCaseControl).then(updatedCaseControlObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(updatedCaseControlObj['@graph'][0]);
+                    });
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            }
+        }
+    },
+    // End:: Evidence score submission hanlding for viewer
+
     render: function() {
         var context = this.props.context;
+        var user = this.props.session && this.props.session.user_properties;
+        var userCaseControl = user && context && context.submitted_by ? user.uuid === context.submitted_by.uuid : false;
         var caseCohort = context.caseCohort;
         var caseCohortMethod = context.caseCohort.method;
         var controlCohort = context.controlCohort;
         var controlCohortMethod = context.controlCohort.method;
-        var evidenceScore = context.scores;
+        var evidenceScores = context && context.scores ? context.scores : [];
 
         var tempGdmPmid = curator.findGdmPmidFromObj(context);
         var tempGdm = tempGdmPmid[0];
@@ -1811,13 +1903,19 @@ var CaseControlViewer = React.createClass({
                                         <dd>{context.comments}</dd>
                                     </div>
 
-                                    <div>
-                                        <dt>Score</dt>
-                                        <dd>{evidenceScore[0].score}</dd>
-                                    </div>
-
                                 </dl>
                             </Panel>
+                            {evidenceScores.length > 1 ?
+                                <Panel panelClassName="panel-data">
+                                    <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
+                                </Panel>
+                            : null}
+                            {evidenceScores.length > 0 || (evidenceScores.length < 1 && userCaseControl) ?
+                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                                    <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                                </Panel>
+                            : null}
                         </div>
                     </div>
                 </div>
