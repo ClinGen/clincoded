@@ -604,144 +604,117 @@ var NewCalculation = function() {
     var proband_variants = [];
 
     // scan gdm
-    var annotations = gdm.annotations ? gdm.annotations : [];
-    for (i in annotations) {
-        var this_assessment;
-        if (annotations[i].groups && annotations[i].groups.length > 0) {
-            var groups = annotations[i].groups;
-            for (j in groups) {
-                if (groups[j].familyIncluded && groups[j].familyIncluded.length > 0) {
-                    for (k in groups[j].familyIncluded) {
+    let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
 
-                        // collect individuals
-                        if (groups[j].familyIncluded[k].individualIncluded && groups[j].familyIncluded[k].individualIncluded.length > 0) {
-                            individualsCollected = filter(individualsCollected, groups[j].familyIncluded[k].individualIncluded, annotations[i].article, pathoVariantIdList);
-                        }
-
-                        // collection segregation assessments
-                        if (groups[j].familyIncluded[k].segregation) {
-                            userAssessments['segNot'] += 1;
-
-                            if (groups[j].familyIncluded[k].segregation.assessments && groups[j].familyIncluded[k].segregation.assessments.length > 0) {
-                                for (l in groups[j].familyIncluded[k].segregation.assessments) {
-                                    this_assessment = groups[j].familyIncluded[k].segregation.assessments[l];
-                                    if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
-                                        userAssessments['segSpt'] += 1;
-                                    }
-                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
-                                        userAssessments['segReview'] += 1;
-                                    }
-                                    else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
-                                        userAssessments['segCntdct'] += 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (groups[j].individualIncluded && groups[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, groups[j].individualIncluded, annotations[i].article, pathoVariantIdList);
-                }
-            }
-        }
-        if (annotations[i].families && annotations[i].families.length > 0) {
-            for (j in annotations[i].families) {
-                if (annotations[i].families[j].individualIncluded && annotations[i].families[j].individualIncluded.length > 0) {
-                    individualsCollected = filter(individualsCollected, annotations[i].families[j].individualIncluded, annotations[i].article, pathoVariantIdList);
+    annotations.forEach(annotation => {
+        let groups, families, individuals, assessments, experimentals;
+        groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
+        groups.forEach(group => {
+            families = groups.familyIncluded && groups.familyIncluded.length ? groups.familyIncluded : [];
+            families.forEach(family => {
+                // collect individuals
+                if (family.individualIncluded && family.individualIncluded.length) {
+                    individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
                 }
 
-                if (annotations[i].families[j].segregation) {
+                // collection segregation assessments
+                if (family.segregation) {
                     userAssessments['segNot'] += 1;
+                    assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
 
-                    if (annotations[i].families[j].segregation.assessments && annotations[i].families[j].segregation.assessments.length > 0) {
-                        for (l in annotations[i].families[j].segregation.assessments) {
-                            this_assessment = annotations[i].families[j].segregation.assessments[l];
-                            if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Supports') {
-                                userAssessments['segSpt'] += 1;
-                            }
-                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Review') {
-                                userAssessments['segReview'] += 1;
-                            }
-                            else if (this_assessment.submitted_by.uuid === this.state.user && this_assessment.value === 'Contradicts') {
-                                userAssessments['segCntdct'] += 1;
-                            }
-                        }
-                    }
                 }
+            });
+            if (group.individualIncluded && group.individualIncluded.length) {
+                individualsCollected = filter(individualsCollected, group.individualIncluded, annotation.article, pathoVariantIdList);
             }
-        }
-        if (annotations[i].individuals && annotations[i].individuals.length > 0) {
-            individualsCollected = filter(individualsCollected, annotations[i].individuals, annotations[i].article, pathoVariantIdList);
-        }
-
-        // collect experimental assessed support, check matrix
-        if (annotations[i].experimentalData && annotations[i].experimentalData.length > 0) {
-            for (h in annotations[i].experimentalData) {
-                var exp = annotations[i].experimentalData[h];
-                var subTypeKey = exp.evidenceType;
-
-                userAssessments['expNot'] += 1;
-
-                if (exp.assessments && exp.assessments.length > 0) {
-                    for (j in exp.assessments) {
-                        if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Supports') {
-                            if (exp.evidenceType === 'Expression') {
-                                expType[subTypeKey] += 1;
-                                exp_scores[0] += 0.5;
-                            }
-                            else if (exp.evidenceType === 'Protein Interactions') {
-                                expType[subTypeKey] += 1;
-                                exp_scores[0] += 0.5;
-
-                            }
-                            else if (exp.evidenceType === 'Biochemical Function') {
-                                expType[subTypeKey] += 1;
-                                exp_scores[0] += 0.5;
-                            }
-                            else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
-                                subTypeKey = subTypeKey + ' (Engineered equivalent)';
-                                expType[subTypeKey] += 1;
-                                exp_scores[1] += 0.5;
-                            }
-                            else if (exp.evidenceType === 'Functional Alteration' && exp.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
-                                subTypeKey = subTypeKey + ' (Patient cells)';
-                                expType[subTypeKey] += 1;
-                                exp_scores[1] += 1;
-                            }
-                            else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
-                                subTypeKey = subTypeKey + ' (Engineered equivalent)';
-                                expType[subTypeKey] += 1;
-                                exp_scores[2] += 1;
-                            }
-                            else if (exp.evidenceType === 'Model Systems' && exp.modelSystems.animalOrCellCulture === 'Animal model') {
-                                subTypeKey = subTypeKey + ' (Animal model)';
-                                expType[subTypeKey] += 1;
-                                exp_scores[2] += 2;
-                            }
-                            else if (exp.evidenceType === 'Rescue' && exp.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
-                                subTypeKey = subTypeKey + ' (Patient cells)';
-                                expType[subTypeKey] += 1;
-                                exp_scores[2] += 2;
-                            }
-                            else if (exp.evidenceType === 'Rescue' && exp.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
-                                subTypeKey = subTypeKey + ' (Engineered equivalent)';
-                                expType[subTypeKey] += 1;
-                                exp_scores[2] += 1;
-                            }
-
-                            userAssessments['expSpt'] += 1;
-                        }
-                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Review') {
-                            userAssessments['expReview'] += 1;
-                        }
-                        else if (exp.assessments[j].submitted_by.uuid === this.state.user && exp.assessments[j].value === 'Contradicts') {
-                            userAssessments['expCntdct'] += 1;
-                        }
+        });
+        families = annotation.families && annotation.families.length ? annotation.families : [];
+        families.forEach(family => {
+            if (family.individualIncluded && family.individualIncluded.length) {
+                individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
+            }
+            if (family.segregation) {
+                userAssessments['segNot'] += 1;
+                assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
+                assessments.forEach(assessment => {
+                    if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
+                        userAssessments['segSpt'] += 1;
                     }
-                }
+                    else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
+                        userAssessments['segReview'] += 1;
+                    }
+                    else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
+                        userAssessments['segCntdct'] += 1;
+                    }
+                });
             }
+        });
+        if (annotation.individuals && annotation.individuals.length) {
+            individualsCollected = filter(individualsCollected, annotation.individuals, annotation.article, pathoVariantIdList);
         }
-    }
+
+        experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
+        experimentals.forEach(experimental => {
+            let subTypeKey = experimental.evidenceType;
+            userAssessments['expNot'] += 1;
+            assessments = experimental.assessments && experimental.assessments.length ? experimental.assessments : [];
+            assessments.forEach(assessment => {
+                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
+                    if (experimental.evidenceType === 'Expression') {
+                        expType[subTypeKey] += 1;
+                        exp_scores[0] += 0.5;
+                    }
+                    else if (experimental.evidenceType === 'Protein Interactions') {
+                        expType[subTypeKey] += 1;
+                        exp_scores[0] += 0.5;
+
+                    }
+                    else if (experimental.evidenceType === 'Biochemical Function') {
+                        expType[subTypeKey] += 1;
+                        exp_scores[0] += 0.5;
+                    }
+                    else if (experimental.evidenceType === 'Functional Alteration' && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
+                        subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                        expType[subTypeKey] += 1;
+                        exp_scores[1] += 0.5;
+                    }
+                    else if (experimental.evidenceType === 'Functional Alteration' && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
+                        subTypeKey = subTypeKey + ' (Patient cells)';
+                        expType[subTypeKey] += 1;
+                        exp_scores[1] += 1;
+                    }
+                    else if (experimental.evidenceType === 'Model Systems' && experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
+                        subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                        expType[subTypeKey] += 1;
+                        exp_scores[2] += 1;
+                    }
+                    else if (experimental.evidenceType === 'Model Systems' && experimental.modelSystems.animalOrCellCulture === 'Animal model') {
+                        subTypeKey = subTypeKey + ' (Animal model)';
+                        expType[subTypeKey] += 1;
+                        exp_scores[2] += 2;
+                    }
+                    else if (experimental.evidenceType === 'Rescue' && experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
+                        subTypeKey = subTypeKey + ' (Patient cells)';
+                        expType[subTypeKey] += 1;
+                        exp_scores[2] += 2;
+                    }
+                    else if (experimental.evidenceType === 'Rescue' && experimental.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
+                        subTypeKey = subTypeKey + ' (Engineered equivalent)';
+                        expType[subTypeKey] += 1;
+                        exp_scores[2] += 1;
+                    }
+
+                    userAssessments['expSpt'] += 1;
+                }
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
+                    userAssessments['expReview'] += 1;
+                }
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
+                    userAssessments['expCntdct'] += 1;
+                }
+            });
+        });
+    });
 
     userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
     userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
@@ -765,15 +738,15 @@ var NewCalculation = function() {
     var articleCollected = [];
     var year = new Date();
     var earliest = year.getFullYear();
-    for (i in individualsCollected['probandInd']) {
-        if (individualsCollected['probandInd'][i].pmid && individualsCollected['probandInd'][i].pmid != '') {
+    individualsCollected['probandInd'].forEach(probandInd => {
+        if (probandInd.pmid && probandInd.pmid != '') {
             proband += 1;
-            if (!in_array(individualsCollected['probandInd'][i].pmid, articleCollected)) {
-                articleCollected.push(individualsCollected['probandInd'][i].pmid);
-                earliest = get_earliest_year(earliest, individualsCollected['probandInd'][i].date);
+            if (!in_array(probandInd.pmid, articleCollected)) {
+                articleCollected.push(probandInd.pmid);
+                earliest = get_earliest_year(earliest, probandInd.date);
             }
         }
-    }
+    });
 
     // calculate scores
     var currentYear = year.getFullYear();
@@ -1319,50 +1292,6 @@ var NewCalculation = function() {
 
     return (
         <div>
-            {/**** No longer needed for Score Summary. Will be deleted.
-            <PanelGroup accordion>
-                <Panel title="New Count of Assessments" open>
-                    <table className="assessment-counting">
-                        <tbody>
-                            <tr>
-                                <td>&nbsp;</td>
-                                <td><strong>Segregation</strong></td>
-                                <td><strong>Variant (proband only)</strong></td>
-                                <td><strong>Experimental</strong></td>
-                            </tr>
-                            <tr>
-                                <td className="values"><strong>Supports</strong></td>
-                                <td>{userAssessments.segSpt}</td>
-                                <td>{userAssessments.variantSpt}</td>
-                                <td>{userAssessments.expSpt}</td>
-                            </tr>
-                            <tr>
-                                <td className="values"><strong>Review</strong></td>
-                                <td>{userAssessments.segReview}</td>
-                                <td>{userAssessments.variantReview}</td>
-                                <td>{userAssessments.expReview}</td>
-                                <td>{userAssessments.v}</td>
-                            </tr>
-                            <tr>
-                                <td className="values"><strong>Contradicts</strong></td>
-                                <td >{userAssessments.segCntdct}</td>
-                                <td>{userAssessments.variantCntdct}</td>
-                                <td>{userAssessments.expCntdct}</td>
-                            </tr>
-                            <tr>
-                                <td className="values"><strong>Not Assessed</strong></td>
-                                <td >{userAssessments.segNot}</td>
-                                <td>{userAssessments.variantNot}</td>
-                                <td>{userAssessments.expNot}</td>
-                            </tr>
-                            <tr>
-                                <td colSpan="4">&nbsp;</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </Panel>
-            </PanelGroup>
-            */}
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <PanelGroup accordion>
                     <Panel title="New Summary & Provisional Classification" open>
