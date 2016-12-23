@@ -549,10 +549,10 @@ var SegregationUserAssessmentsCount = function(assessments, userAssessments) {
 };
 
 var SegregationLodScoresCount = function(segregation, segregationCount, segregationPoints) {
-    if (segregation.lodPublished && segregation.lodPublished === true && segregation.publishedLodScore) {
+    if ("lodPublished" in segregation && segregation.lodPublished === true && segregation.publishedLodScore) {
         segregationCount += 1;
         segregationPoints += segregation.publishedLodScore;
-    } else if (segregation.lodPublished && segregation.lodPublished === false && segregation.estimatedLodScore) {
+    } else if ("lodPublished" in segregation && segregation.lodPublished === false && segregation.estimatedLodScore) {
         segregationCount += 1;
         segregationPoints += segregation.estimatedLodScore;
     }
@@ -588,6 +588,7 @@ var NewCalculation = function() {
     let variantDenovoCount = 0, variantDenovoPoints = 0, variantDenovoPointsCounted = 0;
     let twoVariantsNotProvenCount = 0, twoVariantsNotProvenPoints = 0, twoVariantsNotProvenPointsCounted = 0;
     let twoVariantsProvenCount = 0, twoVariantsProvenPoints = 0, twoVariantsProvenPointsCounted = 0;
+    // segregationPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
     let segregationCount = 0, segregationPoints = 0, segregationPointsCounted = 0;
     let caseControlCount = 0, caseControlPoints = 0, caseControlPointsCounted = 0;
     let biochemicalFunctionCount = 0, biochemicalFunctionPoints = 0, biochemicalFunctionPointsCounted = 0;
@@ -704,11 +705,13 @@ var NewCalculation = function() {
             }
         });
         families = annotation.families && annotation.families.length ? annotation.families : [];
+        console.log(families);
         families.forEach(family => {
             if (family.individualIncluded && family.individualIncluded.length) {
                 individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
             }
             if (family.segregation) {
+                console.log(family.segregation);
                 // assessments
                 userAssessments['segNot'] += 1;
                 assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
@@ -789,9 +792,29 @@ var NewCalculation = function() {
     });
 
     // segregation score calculate
-    if (segregationPoints < MAX_SCORE_CONSTANTS.SEGREGATION) {
-        segregationPointsCounted = segregationPoints;
-    } else {
+    if (segregationPoints >= 0.75 && segregationPoints <= 0.99) {
+        segregationPointsCounted = 1;
+    } else if (segregationPoints >= 1 && segregationPoints <= 1.24) {
+        segregationPointsCounted = .5;
+    } else if (segregationPoints >= 1.25 && segregationPoints <= 1.49) {
+        segregationPointsCounted = 2.5;
+    } else if (segregationPoints >= 1.5 && segregationPoints <= 1.74) {
+        segregationPointsCounted = 3;
+    } else if (segregationPoints >= 1.75 && segregationPoints <= 1.99) {
+        segregationPointsCounted = 3.5;
+    } else if (segregationPoints >= 2 && segregationPoints <= 2.49) {
+        segregationPointsCounted = 4;
+    } else if (segregationPoints >= 2.5 && segregationPoints <= 2.99) {
+        segregationPointsCounted = 4.5;
+    } else if (segregationPoints >= 3 && segregationPoints <= 3.49) {
+        segregationPointsCounted = 5;
+    } else if (segregationPoints >= 3.5 && segregationPoints <= 3.99) {
+        segregationPointsCounted = 5.5;
+    } else if (segregationPoints >= 4 && segregationPoints <= 4.49) {
+        segregationPointsCounted = 6;
+    } else if (segregationPoints >= 4.5 && segregationPoints <= 4.99) {
+        segregationPointsCounted = 6.5;
+    } else if (segregationPoints >= 5) {
         segregationPointsCounted = MAX_SCORE_CONSTANTS.SEGREGATION;
     }
 
@@ -1415,7 +1438,7 @@ var NewCalculation = function() {
                                             <td className="left-padding"></td>
                                             <td colSpan="2" className="title row-header">Segregation</td>
                                             <td>{segregationCount}</td>
-                                            <td>{segregationPoints}</td>
+                                            <td>{segregationPointsCounted}</td>
                                             <td>{segregationPointsCounted}</td>
                                         </tr>
                                         <tr className="area-top-cells count-title-row">
