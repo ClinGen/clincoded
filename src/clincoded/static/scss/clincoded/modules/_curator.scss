@@ -796,7 +796,7 @@
     width: 90%;
 
     td {
-        padding: 2px 4px 2px 4px;
+        padding: 3px 4px 3px 4px;
         text-align: center;
         vertical-align: middle;
         border: solid 1px #000;
@@ -811,6 +811,11 @@
         font-weight: bold;
         line-height: 16px;
     }
+
+    .num-col {
+        width: 100px;
+    }
+
     .rotate-text {
         white-space: nowrap;
         display: inline-block;
@@ -819,7 +824,7 @@
 
     .rotate-text > div {
         display: inline-block;
-        padding-top: 5px;
+        padding-top: 6px;
         @include transform(rotate(-90deg) translateX(-55%));
         transform-origin: 0 0;
     }

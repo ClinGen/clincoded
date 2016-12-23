@@ -705,13 +705,11 @@ var NewCalculation = function() {
             }
         });
         families = annotation.families && annotation.families.length ? annotation.families : [];
-        console.log(families);
         families.forEach(family => {
             if (family.individualIncluded && family.individualIncluded.length) {
                 individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
             }
             if (family.segregation) {
-                console.log(family.segregation);
                 // assessments
                 userAssessments['segNot'] += 1;
                 assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
@@ -1370,9 +1368,9 @@ var NewCalculation = function() {
                                     <tbody>
                                         <tr>
                                             <td colSpan="5" className="header bg-color">Evidence Type</td>
-                                            <td className="header bg-color">Count</td>
-                                            <td className="header bg-color">Total Points</td>
-                                            <td className="header bg-color">Points Counted</td>
+                                            <td className="header num-col bg-color">Count</td>
+                                            <td className="header num-col bg-color">Total Points</td>
+                                            <td className="header num-col bg-color">Points Counted</td>
                                         </tr>
                                         <tr>
                                             <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
@@ -1416,7 +1414,7 @@ var NewCalculation = function() {
                                             <td>{segregationPointsCounted}</td>
                                         </tr>
                                         <tr>
-                                            <td colSpan="4" className="header">Segregation</td>
+                                            <td colSpan="4" className="header">Case-Control</td>
                                             <td>{caseControlCount}</td>
                                             <td>{caseControlPoints}</td>
                                             <td>{caseControlPointsCounted}</td>
