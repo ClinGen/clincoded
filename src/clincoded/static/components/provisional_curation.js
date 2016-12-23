@@ -533,10 +533,77 @@ var EditCurrent = function() {
     );
 };
 
+var SegregationUserAssessmentsCount = function(assessments, userAssessments) {
+    assessments.forEach(assessment => {
+        if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
+            userAssessments['segSpt'] += 1;
+        }
+        else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
+            userAssessments['segReview'] += 1;
+        }
+        else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
+            userAssessments['segCntdct'] += 1;
+        }
+    });
+    return userAssessments;
+};
+
+var SegregationLodScoresCount = function(segregation, segregationCount, segregationPoints) {
+    if (segregation.lodPublished && segregation.lodPublished === true && segregation.publishedLodScore) {
+        segregationCount += 1;
+        segregationPoints += segregation.publishedLodScore;
+    } else if (segregation.lodPublished && segregation.lodPublished === false && segregation.estimatedLodScore) {
+        segregationCount += 1;
+        segregationPoints += segregation.estimatedLodScore;
+    }
+    return {segregationCount: segregationCount, segregationPoints: segregationPoints};
+};
+
 // Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
 // Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
 var NewCalculation = function() {
     var gdm = this.state.gdm;
+
+    const MAX_SCORE_CONSTANTS = {
+        VARIANT_IS_DE_NOVO: 12,
+        PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
+        OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
+        TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO: 12,
+        TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS: 12,
+        SEGREGATION: 7,
+        CASE_CONTROL: 12,
+        BIOCHEMCAL_FUNCTION: 2,
+        PROTEIN_INTERACTIONS: 2,
+        EXPRESSION: 2,
+        FUNCTIONAL_ALTERATION: 2,
+        MODEL_SYSTEMS: 4,
+        RESCUE: 4
+    };
+
+    /*****************************************************/
+    /* VARIABLES FOR EVIDENCE SCORE TABLE                */
+    /*****************************************************/
+    let probandOtherVariantCount = 0, probandOtherVariantPoints = 0, probandOtherVariantPointsCounted = 0;
+    let probandNullVariantCount = 0, probandNullVariantPoints = 0, probandNullVariantPointsCounted = 0;
+    let variantDenovoCount = 0, variantDenovoPoints = 0, variantDenovoPointsCounted = 0;
+    let twoVariantsNotProvenCount = 0, twoVariantsNotProvenPoints = 0, twoVariantsNotProvenPointsCounted = 0;
+    let twoVariantsProvenCount = 0, twoVariantsProvenPoints = 0, twoVariantsProvenPointsCounted = 0;
+    let segregationCount = 0, segregationPoints = 0, segregationPointsCounted = 0;
+    let caseControlCount = 0, caseControlPoints = 0, caseControlPointsCounted = 0;
+    let biochemicalFunctionCount = 0, biochemicalFunctionPoints = 0, biochemicalFunctionPointsCounted = 0;
+    let proteinInteractionsCount = 0, proteinInteractionsPoints = 0, proteinInteractionsPointsCounted = 0;
+    let expressionCount = 0, expressionPoints = 0, expressionPointsCounted = 0;
+    let functionalAlterationCount = 0, functionalAlterationPoints = 0, functionalAlterationPointsCounted = 0;
+    let modelSystemsCount = 0, modelSystemsPoints = 0, modelSystemsPointsCounted = 0;
+    let rescueCount = 0, rescuePoints = 0, rescuePointsCounted = 0;
+    let totalPoints = 0;
+
+    /*****************************************************/
+    /* Find all proband individuals that had been scored */
+    /*****************************************************/
+    let probandTotal = []; // Total proband combined
+    let probandFamily = []; // Total probands associated with families from all annotations
+    let probandIndividual = []; // Total proband individuals from all annotations
 
     var h, i, j, k, l;
 
@@ -564,23 +631,23 @@ var NewCalculation = function() {
         "contradict": []
     };
 
-    for (i in gdmPathoList) {
-        var variantUuid = gdmPathoList[i].variant.uuid;
+    gdmPathoList.forEach(gdmPatho => {
+        let variantUuid = gdmPatho.variant.uuid;
         // Collect login user's variant assessments, separated as 3 different values.
-        if (gdmPathoList[i].assessments && gdmPathoList[i].assessments.length > 0) {
-            for (j in gdmPathoList[i].assessments) {
-                if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Supports') {
+        if (gdmPatho.assessments && gdmPatho.assessments.length > 0) {
+            gdmPatho.assessments.forEach(assessment => {
+                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
                     pathoVariantIdList['support'].push(variantUuid);
                 }
-                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Review') {
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
                     pathoVariantIdList['review'].push(variantUuid);
                 }
-                else if (gdmPathoList[i].assessments[j].submitted_by.uuid === this.state.user && gdmPathoList[i].assessments[j].value === 'Contradicts') {
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
                     pathoVariantIdList['contradict'].push(variantUuid);
                 }
-            }
+            });
         }
-    }
+    });
 
     var exp_scores = [0, 0, 0];
     var expType = {
@@ -602,6 +669,9 @@ var NewCalculation = function() {
         "cntdctVariants": []
     };
     var proband_variants = [];
+    let tempSegregationValues;
+
+
 
     // scan gdm
     let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
@@ -616,12 +686,17 @@ var NewCalculation = function() {
                 if (family.individualIncluded && family.individualIncluded.length) {
                     individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
                 }
-
                 // collection segregation assessments
                 if (family.segregation) {
                     userAssessments['segNot'] += 1;
                     assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
-
+                    userAssessments = SegregationUserAssessmentsCount(assessments, userAssessments);
+                    // lod scores
+                    if (family.segregation.includeLodScoreInAggregateCalculation) {
+                        tempSegregationValues = SegregationLodScoresCount(family.segregation, segregationCount, segregationPoints);
+                        segregationCount = tempSegregationValues.segregationCount;
+                        segregationPoints = tempSegregationValues.segregationPoints;
+                    }
                 }
             });
             if (group.individualIncluded && group.individualIncluded.length) {
@@ -634,19 +709,16 @@ var NewCalculation = function() {
                 individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
             }
             if (family.segregation) {
+                // assessments
                 userAssessments['segNot'] += 1;
                 assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
-                assessments.forEach(assessment => {
-                    if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
-                        userAssessments['segSpt'] += 1;
-                    }
-                    else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
-                        userAssessments['segReview'] += 1;
-                    }
-                    else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
-                        userAssessments['segCntdct'] += 1;
-                    }
-                });
+                userAssessments = SegregationUserAssessmentsCount(assessments, userAssessments);
+                // lod scores
+                if (family.segregation.includeLodScoreInAggregateCalculation) {
+                    tempSegregationValues = SegregationLodScoresCount(family.segregation, segregationCount, segregationPoints);
+                    segregationCount = tempSegregationValues.segregationCount;
+                    segregationPoints = tempSegregationValues.segregationPoints;
+                }
             }
         });
         if (annotation.individuals && annotation.individuals.length) {
@@ -715,6 +787,13 @@ var NewCalculation = function() {
             });
         });
     });
+
+    // segregation score calculate
+    if (segregationPoints < MAX_SCORE_CONSTANTS.SEGREGATION) {
+        segregationPointsCounted = segregationPoints;
+    } else {
+        segregationPointsCounted = MAX_SCORE_CONSTANTS.SEGREGATION;
+    }
 
     userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
     userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
@@ -849,31 +928,6 @@ var NewCalculation = function() {
             timeRow.push('');
         }
     }
-
-    /*****************************************************/
-    /* VARIABLES FOR EVIDENCE SCORE TABLE                */
-    /*****************************************************/
-    let probandOtherVariantCount = 0, probandOtherVariantPoints = 0, probandOtherVariantPointsCounted = 0;
-    let probandNullVariantCount = 0, probandNullVariantPoints = 0, probandNullVariantPointsCounted = 0;
-    let variantDenovoCount = 0, variantDenovoPoints = 0, variantDenovoPointsCounted = 0;
-    let twoVariantsNotProvenCount = 0, twoVariantsNotProvenPoints = 0, twoVariantsNotProvenPointsCounted = 0;
-    let twoVariantsProvenCount = 0, twoVariantsProvenPoints = 0, twoVariantsProvenPointsCounted = 0;
-    let segregationCount = 0, segregationPoints = 0, segregationPointsCounted = 0;
-    let caseControlCount = 0, caseControlPoints = 0, caseControlPointsCounted = 0;
-    let biochemicalFunctionCount = 0, biochemicalFunctionPoints = 0, biochemicalFunctionPointsCounted = 0;
-    let proteinInteractionsCount = 0, proteinInteractionsPoints = 0, proteinInteractionsPointsCounted = 0;
-    let expressionCount = 0, expressionPoints = 0, expressionPointsCounted = 0;
-    let functionalAlterationCount = 0, functionalAlterationPoints = 0, functionalAlterationPointsCounted = 0;
-    let modelSystemsCount = 0, modelSystemsPoints = 0, modelSystemsPointsCounted = 0;
-    let rescueCount = 0, rescuePoints = 0, rescuePointsCounted = 0;
-    let totalPoints = 0;
-
-    /*****************************************************/
-    /* Find all proband individuals that had been scored */
-    /*****************************************************/
-    let probandTotal = []; // Total proband combined
-    let probandFamily = []; // Total probands associated with families from all annotations
-    let probandIndividual = []; // Total proband individuals from all annotations
 
     // Get all (associated with families) probands that have scores
     annotations.forEach(annotation => {
@@ -1032,22 +1086,7 @@ var NewCalculation = function() {
             }
         });
     }
-    /****************************************************/
 
-    const MAX_SCORE_CONSTANTS = {
-        VARIANT_IS_DE_NOVO: 12,
-        PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
-        OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
-        TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO: 12,
-        TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS: 12,
-        CASE_CONTROL: 12,
-        BIOCHEMCAL_FUNCTION: 2,
-        PROTEIN_INTERACTIONS: 2,
-        EXPRESSION: 2,
-        FUNCTIONAL_ALTERATION: 2,
-        MODEL_SYSTEMS: 4,
-        RESCUE: 4
-    };
 
     /*****************************************************/
     /* Collect all proband scores into an array          */
@@ -1181,9 +1220,9 @@ var NewCalculation = function() {
     });
     caseControlCount = caseControlTotal.length ? caseControlTotal.length : 0;
     if (caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL) {
-        caseControlPointsCounted = MAX_SCORE_CONSTANTS.CASE_CONTROL;
+        caseControlPointsCounted = caseControlPoints;
     } else {
-        caseControlPointsCounted = 6;
+        caseControlPointsCounted = MAX_SCORE_CONSTANTS.CASE_CONTROL;
     }
     /*****************************************************/
 
