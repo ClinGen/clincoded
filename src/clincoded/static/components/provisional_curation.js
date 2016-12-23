@@ -1369,149 +1369,128 @@ var NewCalculation = function() {
                                 <table className="summary-matrix">
                                     <tbody>
                                         <tr>
-                                            <td className="title larger col-header area-bottom-cells"colSpan="3"></td>
-                                            <td className="title larger col-header score-cols area-bottom-cells">Count</td>
-                                            <td className="title larger col-header score-cols area-bottom-cells">Total Points</td>
-                                            <td className="title larger col-header score-cols area-bottom-cells">Points Counted</td>
+                                            <td colSpan="5" className="header bg-color">Evidence Type</td>
+                                            <td className="header bg-color">Count</td>
+                                            <td className="header bg-color">Total Points</td>
+                                            <td className="header bg-color">Points Counted</td>
                                         </tr>
-                                        <tr className="narrow-line"></tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td colSpan="3" className="title larger row-header">Genetic Evidence</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td colSpan="3" className="title row-header">Case Level</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td colSpan="2" className="title row-header">Variant</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="subtitle row-header">Proband with other variant type with some evidence of gene impact</td>
+                                        <tr>
+                                            <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
+                                            <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
+                                            <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
+                                            <td rowSpan="3" className="header">Autosomal Dominant Disease</td>
+                                            <td>Proband with other variant type with some evidence of gene impact</td>
                                             <td>{probandOtherVariantCount}</td>
                                             <td>{probandOtherVariantPoints}</td>
                                             <td>{probandOtherVariantPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="subtitle row-header">Proband with predicted or proven null variant</td>
+                                        <tr>
+                                            <td>Proband with predicted or proven null variant</td>
                                             <td>{probandNullVariantCount}</td>
                                             <td>{probandNullVariantPoints}</td>
                                             <td>{probandNullVariantPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="subtitle row-header">Variant is <i>de novo</i></td>
+                                        <tr>
+                                            <td>Variant is <i>de novo</i></td>
                                             <td>{variantDenovoCount}</td>
                                             <td>{variantDenovoPoints}</td>
                                             <td>{variantDenovoPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="subtitle row-header">Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                        <tr>
+                                            <td rowSpan="2" className="header">Autosomal Recessive Disease</td>
+                                            <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
                                             <td>{twoVariantsNotProvenCount}</td>
                                             <td>{twoVariantsNotProvenPoints}</td>
                                             <td>{twoVariantsNotProvenPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="subtitle row-header">Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
+                                        <tr>
+                                            <td>Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
                                             <td>{twoVariantsProvenCount}</td>
                                             <td>{twoVariantsProvenPoints}</td>
                                             <td>{twoVariantsProvenPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td colSpan="2" className="title row-header">Segregation</td>
+                                        <tr>
+                                            <td colSpan="3" className="header">Segregation</td>
                                             <td>{segregationCount}</td>
                                             <td>{segregationPointsCounted}</td>
                                             <td>{segregationPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td colSpan="3" className="title row-header area-bottom-cells">Case-Control</td>
-                                            <td className="area-bottom-cells">{caseControlCount}</td>
-                                            <td className="area-bottom-cells">{caseControlPoints}</td>
-                                            <td className="area-bottom-cells">{caseControlPointsCounted}</td>
+                                        <tr>
+                                            <td colSpan="4" className="header">Segregation</td>
+                                            <td>{caseControlCount}</td>
+                                            <td>{caseControlPoints}</td>
+                                            <td>{caseControlPointsCounted}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan="6" className="header">Total</td>
+                                            <td className="header">Tot</td>
                                         </tr>
                                         <tr className="narrow-line"></tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td colSpan="3" className="title larger row-header">Experimental Evidence</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td colSpan="2" className="title row-header">Function</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="title row-header">Biochemical Functions</td>
+                                        <tr>
+                                            <td rowSpan="10" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
+                                            <td colSpan="3" rowSpan="3" className="header">Functional</td>
+                                            <td>Biochemical Functions</td>
                                             <td>{biochemicalFunctionCount}</td>
                                             <td>{biochemicalFunctionPoints}</td>
                                             <td>{biochemicalFunctionPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="title row-header">Protein Interactions</td>
+                                        <tr>
+                                            <td>Protein Interactions</td>
                                             <td>{proteinInteractionsCount}</td>
                                             <td>{proteinInteractionsPoints}</td>
                                             <td>{proteinInteractionsPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td className="left-padding"></td>
-                                            <td className="title row-header">Expression</td>
+                                        <tr>
+                                            <td>Expression</td>
                                             <td>{expressionCount}</td>
                                             <td>{expressionPoints}</td>
                                             <td>{expressionPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td colSpan="2" className="title row-header">Functional Alteration</td>
+                                        <tr>
+                                            <td colSpan="3" rowSpan="2" className="header">Functional Alteration</td>
+                                            <td>Patient Cells</td>
                                             <td>{functionalAlterationCount}</td>
                                             <td>{functionalAlterationPoints}</td>
                                             <td>{functionalAlterationPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding"></td>
-                                            <td colSpan="2" className="title row-header">Model Systems</td>
+                                        <tr>
+                                            <td>Non-patient Cells</td>
+                                            <td>{functionalAlterationCount}</td>
+                                            <td>{functionalAlterationPoints}</td>
+                                            <td>{functionalAlterationPointsCounted}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan="3" rowSpan="4" className="header">Models & Rescue</td>
+                                            <td>Animal Model</td>
                                             <td>{modelSystemsCount}</td>
                                             <td>{modelSystemsPoints}</td>
                                             <td>{modelSystemsPointsCounted}</td>
                                         </tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td className="left-padding area-bottom-cells"></td>
-                                            <td colSpan="2" className="title row-header area-bottom-cells">Rescue</td>
-                                            <td className="area-bottom-cells">{rescueCount}</td>
-                                            <td className="area-bottom-cells">{rescuePoints}</td>
-                                            <td className="area-bottom-cells">{rescuePointsCounted}</td>
+                                        <tr>
+                                            <td>Cell Culture Model System</td>
+                                            <td>{modelSystemsCount}</td>
+                                            <td>{modelSystemsPoints}</td>
+                                            <td>{modelSystemsPointsCounted}</td>
                                         </tr>
-                                        <tr className="narrow-line"></tr>
-                                        <tr className="area-top-cells count-title-row">
-                                            <td colSpan="3" className="title larger row-header">Total Points</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td className="title larger">{totalPoints}</td>
+                                        <tr>
+                                            <td>Rescue in Animal Model</td>
+                                            <td>{modelSystemsCount}</td>
+                                            <td>{modelSystemsPoints}</td>
+                                            <td>{modelSystemsPointsCounted}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Rescue in Engineered Equivalent</td>
+                                            <td>{modelSystemsCount}</td>
+                                            <td>{modelSystemsPoints}</td>
+                                            <td>{modelSystemsPointsCounted}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan="6" className="header">Total</td>
+                                            <td className="header">Tot</td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan="7" className="header">Total Points</td>
+                                            <td className="header">{totalPoints}</td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -795,46 +795,33 @@
     position: relative;
     width: 90%;
 
-    tr:hover {
-        background-color: rgba(0,0,0, 0.1);
-    }
-
     td {
-        padding: 3px 5px 3px 5px;
+        padding: 2px 4px 2px 4px;
         text-align: center;
         vertical-align: middle;
         border: solid 1px #000;
     }
 
-    .score-cols {
-        width: 120px;
+    .bg-color {
+        background-color: #ccc;
     }
 
-    .left-padding {
+    .header {
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 16px;
+    }
+    .rotate-text {
+        white-space: nowrap;
+        display: inline-block;
         width: 30px;
     }
 
-    .count-title-row {
-        height: 30px;
-    }
-
-    .row-header {
-        text-align: left;
-    }
-
-    .area-top-cells {
-        border-top: solid 2px #000;
-    }
-    .area-bottom-cells {
-        border-bottom: solid 2px #000;
-    }
-
-    .title {
-        font-weight: bold;
-    }
-
-    .larger {
-        font-size: 16px;
+    .rotate-text > div {
+        display: inline-block;
+        padding-top: 5px;
+        @include transform(rotate(-90deg) translateX(-55%));
+        transform-origin: 0 0;
     }
 }
 
