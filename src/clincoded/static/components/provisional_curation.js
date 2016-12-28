@@ -581,7 +581,10 @@ var NewCalculation = function() {
         CASE_CONTROL: 12,
         FUNCTIONAL: 2,
         FUNCTIONAL_ALTERATION: 2,
-        MODELS_RESCUE: 4
+        MODELS_RESCUE: 4,
+        GENETIC_EVIDENCE: 12,
+        EXPERIMENTAL_EVIDENCE: 6,
+        TOTAL: 18
     };
 
     /*****************************************************/
@@ -1069,6 +1072,28 @@ var NewCalculation = function() {
         }
     });
 
+    /*****************************************************/
+    /* Collect all case-control scores into an array     */
+    /* Add all score values together                     */
+    /*****************************************************/
+    let caseControlScores = [], caseControlScoreSum = 0;
+    caseControlTotal.forEach(item => {
+        item.scores.forEach(score => {
+            caseControlScores.push(score);
+        });
+    });
+    caseControlScores.forEach(item => {
+        if (item.score && item.score !== 'none') {
+            caseControlPoints += parseFloat(item.score);
+        }
+    });
+    caseControlCount = caseControlTotal.length ? caseControlTotal.length : 0;
+    if (caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL) {
+        caseControlPointsCounted = caseControlPoints;
+    } else {
+        caseControlPointsCounted = MAX_SCORE_CONSTANTS.CASE_CONTROL;
+    }
+
     // calculate segregation counted points
     if (segregationPoints >= 0.75 && segregationPoints <= 0.99) {
         segregationPointsCounted = 1;
@@ -1110,27 +1135,13 @@ var NewCalculation = function() {
     tempPoints = animalModelPoints + cellCulturePoints + rescuePoints + rescueEngineeredPoints;
     modelsRescuePointsCounted = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
 
-    /*****************************************************/
-    /* Collect all case-control scores into an array     */
-    /* Add all score values together                     */
-    /*****************************************************/
-    let caseControlScores = [], caseControlScoreSum = 0;
-    caseControlTotal.forEach(item => {
-        item.scores.forEach(score => {
-            caseControlScores.push(score);
-        });
-    });
-    caseControlScores.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            caseControlPoints += parseFloat(item.score);
-        }
-    });
-    caseControlCount = caseControlTotal.length ? caseControlTotal.length : 0;
-    if (caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL) {
-        caseControlPointsCounted = caseControlPoints;
-    } else {
-        caseControlPointsCounted = MAX_SCORE_CONSTANTS.CASE_CONTROL;
-    }
+    tempPoints = probandOtherVariantPointsCounted + probandNullVariantPointsCounted + variantDenovoPointsCounted + autosomalRecessivePointsCounted + segregationPointsCounted + caseControlPointsCounted;
+    geneticEvidenceTotalPoints = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
+
+    tempPoints = functionalPointsCounted + functionalAlterationPointsCounted + modelsRescuePointsCounted;
+    experimentalEvidenceTotalPoints = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
+
+    totalPoints = geneticEvidenceTotalPoints + experimentalEvidenceTotalPoints;
 
     return (
         <div>
@@ -1148,11 +1159,11 @@ var NewCalculation = function() {
                             <div className="container">
                                 <table className="summary-matrix">
                                     <tbody>
-                                        <tr>
-                                            <td colSpan="5" className="header bg-color">Evidence Type</td>
-                                            <td className="header num-col bg-color">Count</td>
-                                            <td className="header num-col bg-color">Total Points</td>
-                                            <td className="header num-col bg-color">Points Counted</td>
+                                        <tr className="header large bg-color separator-below">
+                                            <td colSpan="5">Evidence Type</td>
+                                            <td>Count</td>
+                                            <td>Total Points</td>
+                                            <td>Points Counted</td>
                                         </tr>
                                         <tr>
                                             <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
@@ -1200,11 +1211,10 @@ var NewCalculation = function() {
                                             <td>{caseControlPoints}</td>
                                             <td>{caseControlPointsCounted}</td>
                                         </tr>
-                                        <tr>
-                                            <td colSpan="6" className="header">Genetic Evidence Total</td>
-                                            <td className="header">{geneticEvidenceTotalPoints}</td>
+                                        <tr className="header separator-below">
+                                            <td colSpan="6">Genetic Evidence Total</td>
+                                            <td>{geneticEvidenceTotalPoints}</td>
                                         </tr>
-                                        <tr className="narrow-line"></tr>
                                         <tr>
                                             <td rowSpan="10" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
                                             <td colSpan="3" rowSpan="3" className="header">Functional</td>
@@ -1257,13 +1267,13 @@ var NewCalculation = function() {
                                             <td>{rescueEngineeredCount}</td>
                                             <td>{rescueEngineeredPoints}</td>
                                         </tr>
-                                        <tr>
-                                            <td colSpan="6" className="header">Experimental Evidence Total</td>
-                                            <td className="header">{experimentalEvidenceTotalPoints}</td>
+                                        <tr className="header separator-below">
+                                            <td colSpan="6">Experimental Evidence Total</td>
+                                            <td>{experimentalEvidenceTotalPoints}</td>
                                         </tr>
-                                        <tr>
-                                            <td colSpan="7" className="header">Total Points</td>
-                                            <td className="header">{totalPoints}</td>
+                                        <tr className="total-row header">
+                                            <td colSpan="7">Total Points</td>
+                                            <td>{totalPoints}</td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -806,6 +806,10 @@
         background-color: #ccc;
     }
 
+    .large {
+        font-size: 16px;
+    }
+
     .header {
         font-size: 14px;
         font-weight: bold;
@@ -827,6 +831,15 @@
         padding-top: 6px;
         @include transform(rotate(-90deg) translateX(-55%));
         transform-origin: 0 0;
+    }
+
+    .separator-below {
+        border-bottom: solid 3px #000;
+    }
+
+    .total-row {
+        font-size: 18px;
+        line-height: 25px;
     }
 }
 
