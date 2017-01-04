@@ -726,7 +726,7 @@ var NewCalculation = function() {
         groups.forEach(group => {
             // loop through families using FamilyScraper
             families = groups.familyIncluded && groups.familyIncluded.length ? groups.familyIncluded : [];
-            tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints);
+            tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
             individualsCollected = tempFamilyScraperValues['individualsCollected'];
             userAssessments = tempFamilyScraperValues['userAssessments'];
             assessments = tempFamilyScraperValues['assessments'];
@@ -741,7 +741,7 @@ var NewCalculation = function() {
 
         // loop through families using FamilyScraper
         families = annotation.families && annotation.families.length ? annotation.families : [];
-        tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints);
+        tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
         individualsCollected = tempFamilyScraperValues['individualsCollected'];
         userAssessments = tempFamilyScraperValues['userAssessments'];
         assessments = tempFamilyScraperValues['assessments'];
@@ -776,16 +776,17 @@ var NewCalculation = function() {
         // loop through case-controls
         let caseControlMatched = [];
         if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
-            caseControlMatched = annotation.caseControlStudies.filter(caseControl => {
+            annotation.caseControlStudies.forEach(caseControl => {
                 if (caseControl.scores && caseControl.scores.length) {
-                    return true;
+                    caseControl.scores.forEach(score => {
+                        if (score.submitted_by.uuid === this.state.user && score.score && score.score !== 'none') {
+                            caseControlCount += 1;
+                            caseControlPoints += parseFloat(score.score);
+                        }
+                    });
                 }
             });
         }
-        // push all matched case-controls to caseControlTotal
-        caseControlMatched.forEach(item => {
-            caseControlTotal.push(item);
-        });
 
         // loop through experimentals
         experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
@@ -853,6 +854,38 @@ var NewCalculation = function() {
     // combine all probands
     probandTotal = probandFamily.concat(probandIndividual);
 
+    // scan probands
+    probandTotal.forEach(proband => {
+        proband.scores.forEach(score => {
+            if (score.submitted_by.uuid === this.state.user) {
+                // parse proband score
+                let probandScore = 0;
+                if (score.score && score.score !== 'none') {
+                    probandScore += parseFloat(score.score);
+                } else if (score.calculatedScore && score.calculatedScore !== 'none') {
+                    probandScore += parseFloat(score.calculatedScore);
+                }
+                // assign score to correct sub-type depending on score type
+                if (score.caseInfoType && score.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && score.scoreStatus === 'Score') {
+                    probandOtherVariantCount += 1;
+                    probandOtherVariantPoints += probandScore;
+                } else if (score.caseInfoType && score.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && score.scoreStatus === 'Score') {
+                    probandNullVariantCount += 1;
+                    probandNullVariantPoints += probandScore;
+                } else if (score.caseInfoType && score.caseInfoType === 'VARIANT_IS_DE_NOVO' && score.scoreStatus === 'Score') {
+                    variantDenovoCount += 1;
+                    variantDenovoPoints += probandScore;
+                } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && score.scoreStatus === 'Score') {
+                    twoVariantsNotProvenCount += 1;
+                    twoVariantsNotProvenPoints += probandScore;
+                } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
+                    twoVariantsProvenCount += 1;
+                    twoVariantsProvenPoints += probandScore;
+                }
+            }
+        });
+    });
+
     userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
     userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
     userAssessments['variantCntdct'] = individualsCollected['cntdctVariants'].length;
@@ -860,6 +893,10 @@ var NewCalculation = function() {
     userAssessments['expNot'] = userAssessments['expNot'] - userAssessments['expSpt'] - userAssessments['expReview'] - userAssessments['expCntdct'];
     userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
 
+    /**************************************************************************/
+    /* Comment block below may need to be removed/revised for new scoring matrix
+    /**************************************************************************/
+    /*
     // Collect articles and find the earliest publication year
     var proband = 0;
     var articleCollected = [];
@@ -969,132 +1006,7 @@ var NewCalculation = function() {
             timeRow.push('');
         }
     }
-
-    /*****************************************************/
-    /* Collect all proband scores into an array          */
-    /*****************************************************/
-    let probandScores = [];
-    probandTotal.forEach(proband => {
-        proband.scores.forEach(score => {
-            probandScores.push(score);
-        });
-    });
-
-    /*****************************************************/
-    /* Calculate count and total points for each         */
-    /* Case Information type occurance                   */
-    /*****************************************************/
-    // Case Information type === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT'
-    let probandOtherVariant = probandScores.filter(scoreObj => {
-        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && scoreObj.scoreStatus === 'Score') {
-            return true;
-        }
-    });
-    probandOtherVariantCount = probandOtherVariant.length ? probandOtherVariant.length : 0;
-    probandOtherVariant.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            probandOtherVariantPoints += parseFloat(item.score);
-        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
-            probandOtherVariantPoints += parseFloat(item.calculatedScore);
-        }
-    });
-    if (probandOtherVariantPoints < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT) {
-        probandOtherVariantPointsCounted = probandOtherVariantPoints;
-    } else {
-        probandOtherVariantPointsCounted = MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
-    }
-
-    // Case Information type === 'PREDICTED_OR_PROVEN_NULL_VARIANT'
-    let probandNullVariant = probandScores.filter(scoreObj => {
-        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && scoreObj.scoreStatus === 'Score') {
-            return true;
-        }
-    });
-    probandNullVariantCount = probandNullVariant.length ? probandNullVariant.length : 0;
-    probandNullVariant.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            probandNullVariantPoints += parseFloat(item.score);
-        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
-            probandNullVariantPoints += parseFloat(item.calculatedScore);
-        }
-    });
-    if (probandNullVariantPoints < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT) {
-        probandNullVariantPointsCounted = probandNullVariantPoints;
-    } else {
-        probandNullVariantPointsCounted = MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
-    }
-
-    // Case Information type === 'VARIANT_IS_DE_NOVO'
-    let variantDenovo = probandScores.filter(scoreObj => {
-        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'VARIANT_IS_DE_NOVO' && scoreObj.scoreStatus === 'Score') {
-            return true;
-        }
-    });
-    variantDenovoCount = variantDenovo.length ? variantDenovo.length : 0;
-    variantDenovo.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            variantDenovoPoints += parseFloat(item.score);
-        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
-            variantDenovoPoints += parseFloat(item.calculatedScore);
-        }
-    });
-    if (variantDenovoPoints < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO) {
-        variantDenovoPointsCounted = variantDenovoPoints;
-    } else {
-        variantDenovoPointsCounted = MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
-    }
-
-    // Case Information type === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS'
-    let twoVariantsNotProven = probandScores.filter(scoreObj => {
-        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && scoreObj.scoreStatus === 'Score') {
-            return true;
-        }
-    });
-    twoVariantsNotProvenCount = twoVariantsNotProven.length ? twoVariantsNotProven.length : 0;
-    twoVariantsNotProven.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            twoVariantsNotProvenPoints += parseFloat(item.score);
-        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
-            twoVariantsNotProvenPoints += parseFloat(item.calculatedScore);
-        }
-    });
-
-    // Case Information type === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO'
-    let twoVariantsProven = probandScores.filter(scoreObj => {
-        if (scoreObj.caseInfoType && scoreObj.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && scoreObj.scoreStatus === 'Score') {
-            return true;
-        }
-    });
-    twoVariantsProvenCount = twoVariantsProven.length ? twoVariantsProven.length : 0;
-    twoVariantsProven.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            twoVariantsProvenPoints += parseFloat(item.score);
-        } else if (item.calculatedScore && item.calculatedScore !== 'none') {
-            twoVariantsProvenPoints += parseFloat(item.calculatedScore);
-        }
-    });
-
-    /*****************************************************/
-    /* Collect all case-control scores into an array     */
-    /* Add all score values together                     */
-    /*****************************************************/
-    let caseControlScores = [], caseControlScoreSum = 0;
-    caseControlTotal.forEach(item => {
-        item.scores.forEach(score => {
-            caseControlScores.push(score);
-        });
-    });
-    caseControlScores.forEach(item => {
-        if (item.score && item.score !== 'none') {
-            caseControlPoints += parseFloat(item.score);
-        }
-    });
-    caseControlCount = caseControlTotal.length ? caseControlTotal.length : 0;
-    if (caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL) {
-        caseControlPointsCounted = caseControlPoints;
-    } else {
-        caseControlPointsCounted = MAX_SCORE_CONSTANTS.CASE_CONTROL;
-    }
+    */
 
     // calculate segregation counted points
     if (segregationPoints >= 0.75 && segregationPoints <= 0.99) {
@@ -1125,8 +1037,17 @@ var NewCalculation = function() {
 
     // calculate other counted points
     let tempPoints = 0;
+
+    probandOtherVariantPointsCounted = probandOtherVariantPoints < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT ? probandOtherVariantPoints : MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
+
+    probandNullVariantPointsCounted = probandNullVariantPoints < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT ? probandNullVariantPoints : MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
+
+    variantDenovoPointsCounted = variantDenovoPoints < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO ? variantDenovoPoints : MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
+
     tempPoints = twoVariantsProvenPoints + twoVariantsNotProvenPoints;
     autosomalRecessivePointsCounted = tempPoints < MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE ? tempPoints : MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE;
+
+    caseControlPointsCounted = caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL ? caseControlPoints : MAX_SCORE_CONSTANTS.CASE_CONTROL;
 
     tempPoints = biochemicalFunctionPoints + proteinInteractionsPoints + expressionPoints;
     functionalPointsCounted = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL;
