@@ -536,12 +536,13 @@ var EditCurrent = function() {
 // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
 // returns dictionary of relevant items that need to be updated within NewCalculation()
 var FamilyScraper = function(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched) {
-    let tempSegregationValues;
     families.forEach(family => {
-        // loop through individual within family
+        // loop through individual within family: old code??? - MC
+        /*
         if (family.individualIncluded && family.individualIncluded.length) {
             individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
         }
+        */
         // get segregation of family
         if (family.segregation) {
             userAssessments['segNot'] += 1;
@@ -567,17 +568,11 @@ var FamilyScraper = function(families, individualsCollected, annotation, pathoVa
                     segregationCount += 1;
                     segregationPoints += family.segregation.estimatedLodScore;
                 }
-                segregationCount = tempSegregationValues.segregationCount;
-                segregationPoints = tempSegregationValues.segregationPoints;
             }
         }
         // get proband individuals of family
-        if (family.individualIncluded.length) {
-            individualMatched = family.individualIncluded.filter(individual => {
-                if (individual.proband === true && (individual.scores && individual.scores.length)) {
-                    return true;
-                }
-            });
+        if (family.individualIncluded && family.individualIncluded.length) {
+            individualMatched = IndividualScraper(family.individualIncluded, individualMatched);
         }
     });
 
@@ -589,6 +584,17 @@ var FamilyScraper = function(families, individualsCollected, annotation, pathoVa
         segregationPoints: segregationPoints,
         individualMatched: individualMatched
     };
+};
+
+var IndividualScraper = function(individuals, individualMatched) {
+    if (individuals) {
+        individuals.forEach(individual => {
+            if (individual.proband === true && (individual.scores && individual.scores.length)) {
+                individualMatched.push(individual);
+            }
+        });
+    }
+    return individualMatched;
 };
 
 // Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
@@ -733,10 +739,15 @@ var NewCalculation = function() {
             segregationCount = tempFamilyScraperValues['segregationCount'];
             segregationPoints = tempFamilyScraperValues['segregationPoints'];
             individualMatched = tempFamilyScraperValues['individualMatched'];
-            // get individuals of group; no need to get individuals of family because that is included within FamilyScraper
+            // get proband individuals of group
+            if (group.individualIncluded && group.individualIncluded.length) {
+                individualMatched = IndividualScraper(group.individualIncluded, individualMatched);
+            }
+            /*
             if (group.individualIncluded && group.individualIncluded.length) {
                 individualsCollected = filter(individualsCollected, group.individualIncluded, annotation.article, pathoVariantIdList);
             }
+            */
         });
 
         // loop through families using FamilyScraper
@@ -756,21 +767,14 @@ var NewCalculation = function() {
 
         // loop through individuals
         if (annotation.individuals && annotation.individuals.length) {
-            individualsCollected = filter(individualsCollected, annotation.individuals, annotation.article, pathoVariantIdList);
-
             // get proband individuals
             individualMatched = [];
-            if (annotation.individuals.length) {
-                individualMatched = annotation.individuals.filter(individual => {
-                    if (individual.proband === true && (individual.scores && individual.scores.length)) {
-                        return true;
-                    }
-                });
-            }
+            individualMatched = IndividualScraper(annotation.individuals, individualMatched);
             // push all matched individuals to probandIndividual
             individualMatched.forEach(item => {
                 probandIndividual.push(item);
             });
+            //individualsCollected = filter(individualsCollected, annotation.individuals, annotation.article, pathoVariantIdList);
         }
 
         // loop through case-controls
@@ -853,7 +857,6 @@ var NewCalculation = function() {
 
     // combine all probands
     probandTotal = probandFamily.concat(probandIndividual);
-
     // scan probands
     probandTotal.forEach(proband => {
         proband.scores.forEach(score => {
@@ -886,6 +889,7 @@ var NewCalculation = function() {
         });
     });
 
+    // is the below few lines necessary? - MC
     userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
     userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
     userAssessments['variantCntdct'] = individualsCollected['cntdctVariants'].length;
@@ -894,7 +898,7 @@ var NewCalculation = function() {
     userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
 
     /**************************************************************************/
-    /* Comment block below may need to be removed/revised for new scoring matrix
+    /* Comment block below may need to be removed/revised for new scoring matrix - MC
     /**************************************************************************/
     /*
     // Collect articles and find the earliest publication year
