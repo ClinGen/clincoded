@@ -533,38 +533,62 @@ var EditCurrent = function() {
     );
 };
 
-var SegregationUserAssessmentsCount = function(assessments, userAssessments) {
-    assessments.forEach(assessment => {
-        if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
-            userAssessments['segSpt'] += 1;
+// function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
+// returns dictionary of relevant items that need to be updated within NewCalculation()
+var FamilyScraper = function(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched) {
+    let tempSegregationValues;
+    families.forEach(family => {
+        // loop through individual within family
+        if (family.individualIncluded && family.individualIncluded.length) {
+            individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
         }
-        else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
-            userAssessments['segReview'] += 1;
+        // get segregation of family
+        if (family.segregation) {
+            userAssessments['segNot'] += 1;
+            // loop through assessments and update relevant userAssessment counts
+            assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
+            assessments.forEach(assessment => {
+                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
+                    userAssessments['segSpt'] += 1;
+                }
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
+                    userAssessments['segReview'] += 1;
+                }
+                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
+                    userAssessments['segCntdct'] += 1;
+                }
+            });
+            // get lod score of segregation of family
+            if (family.segregation.includeLodScoreInAggregateCalculation) {
+                if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
+                    segregationCount += 1;
+                    segregationPoints += family.segregation.publishedLodScore;
+                } else if ("lodPublished" in family.segregation && family.segregation.lodPublished === false && family.segregation.estimatedLodScore) {
+                    segregationCount += 1;
+                    segregationPoints += family.segregation.estimatedLodScore;
+                }
+                segregationCount = tempSegregationValues.segregationCount;
+                segregationPoints = tempSegregationValues.segregationPoints;
+            }
         }
-        else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
-            userAssessments['segCntdct'] += 1;
+        // get proband individuals of family
+        if (family.individualIncluded.length) {
+            individualMatched = family.individualIncluded.filter(individual => {
+                if (individual.proband === true && (individual.scores && individual.scores.length)) {
+                    return true;
+                }
+            });
         }
     });
-    return userAssessments;
-};
 
-var SegregationLodScoresCount = function(segregation, segregationCount, segregationPoints) {
-    if ("lodPublished" in segregation && segregation.lodPublished === true && segregation.publishedLodScore) {
-        segregationCount += 1;
-        segregationPoints += segregation.publishedLodScore;
-    } else if ("lodPublished" in segregation && segregation.lodPublished === false && segregation.estimatedLodScore) {
-        segregationCount += 1;
-        segregationPoints += segregation.estimatedLodScore;
-    }
-    return {segregationCount: segregationCount, segregationPoints: segregationPoints};
-};
-
-var ExperimentalScoreReturn = function(score) {
-    if (score.score && score.score !== 'none') {
-        return parseFloat(score.score); // Use the score selected by curator (if any)
-    } else if (score.calculatedScore && score.calculatedScore !== 'none') {
-        return parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
-    }
+    return {
+        individualsCollected: individualsCollected,
+        userAssessments: userAssessments,
+        assessments: assessments,
+        segregationCount: segregationCount,
+        segregationPoints: segregationPoints,
+        individualMatched: individualMatched
+    };
 };
 
 // Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
@@ -688,7 +712,7 @@ var NewCalculation = function() {
         "cntdctVariants": []
     };
     var proband_variants = [];
-    let tempSegregationValues;
+    let tempFamilyScraperValues = {};
     let individualMatched = [];
     let caseControlTotal = [];
 
@@ -700,61 +724,32 @@ var NewCalculation = function() {
         // loop through groups
         groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
         groups.forEach(group => {
-            // loop through families within group
+            // loop through families using FamilyScraper
             families = groups.familyIncluded && groups.familyIncluded.length ? groups.familyIncluded : [];
-            families.forEach(family => {
-                // loop through individual within family within group
-                if (family.individualIncluded && family.individualIncluded.length) {
-                    individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
-                }
-                // get segregation of family within group
-                if (family.segregation) {
-                    userAssessments['segNot'] += 1;
-                    assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
-                    userAssessments = SegregationUserAssessmentsCount(assessments, userAssessments);
-                    // get lod score of segregation of family of group
-                    if (family.segregation.includeLodScoreInAggregateCalculation) {
-                        tempSegregationValues = SegregationLodScoresCount(family.segregation, segregationCount, segregationPoints);
-                        segregationCount = tempSegregationValues.segregationCount;
-                        segregationPoints = tempSegregationValues.segregationPoints;
-                    }
-                }
-            });
-            // get individuals of group
+            tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints);
+            individualsCollected = tempFamilyScraperValues['individualsCollected'];
+            userAssessments = tempFamilyScraperValues['userAssessments'];
+            assessments = tempFamilyScraperValues['assessments'];
+            segregationCount = tempFamilyScraperValues['segregationCount'];
+            segregationPoints = tempFamilyScraperValues['segregationPoints'];
+            individualMatched = tempFamilyScraperValues['individualMatched'];
+            // get individuals of group; no need to get individuals of family because that is included within FamilyScraper
             if (group.individualIncluded && group.individualIncluded.length) {
                 individualsCollected = filter(individualsCollected, group.individualIncluded, annotation.article, pathoVariantIdList);
             }
         });
 
-        // loop through families
+        // loop through families using FamilyScraper
         families = annotation.families && annotation.families.length ? annotation.families : [];
-        families.forEach(family => {
-            // get individuals of family
-            if (family.individualIncluded && family.individualIncluded.length) {
-                individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
-            }
-            // get segregation of family
-            if (family.segregation) {
-                userAssessments['segNot'] += 1;
-                assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
-                userAssessments = SegregationUserAssessmentsCount(assessments, userAssessments);
-                // get lod scores of segregation of family
-                if (family.segregation.includeLodScoreInAggregateCalculation) {
-                    tempSegregationValues = SegregationLodScoresCount(family.segregation, segregationCount, segregationPoints);
-                    segregationCount = tempSegregationValues.segregationCount;
-                    segregationPoints = tempSegregationValues.segregationPoints;
-                }
-            }
-            // get proband individuals of family
-            if (family.individualIncluded.length) {
-                individualMatched = family.individualIncluded.filter(individual => {
-                    if (individual.proband === true && (individual.scores && individual.scores.length)) {
-                        return true;
-                    }
-                });
-            }
-        });
-        // push all matched individuals from family to probandFamily
+        tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints);
+        individualsCollected = tempFamilyScraperValues['individualsCollected'];
+        userAssessments = tempFamilyScraperValues['userAssessments'];
+        assessments = tempFamilyScraperValues['assessments'];
+        segregationCount = tempFamilyScraperValues['segregationCount'];
+        segregationPoints = tempFamilyScraperValues['segregationPoints'];
+        individualMatched = tempFamilyScraperValues['individualMatched'];
+
+        // push all matched individuals from families and families of groups to probandFamily
         individualMatched.forEach(item => {
             probandFamily.push(item);
         });
@@ -800,8 +795,15 @@ var NewCalculation = function() {
                 experimental.scores.forEach(score => {
                     // only care about scores made by current user
                     if (score.submitted_by.uuid === this.state.user) {
-                        let experimentalScore = ExperimentalScoreReturn(score);
+                        // parse score of experimental
+                        let experimentalScore = 0;
+                        if (score.score && score.score !== 'none') {
+                            experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
+                        } else if (score.calculatedScore && score.calculatedScore !== 'none') {
+                            experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
+                        }
                         userAssessments['expNot'] += 1;
+                        // assign score to correct sub-type depending on experiment type and other variables
                         if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
                             biochemicalFunctionCount += 1;
                             biochemicalFunctionPoints += experimentalScore;
