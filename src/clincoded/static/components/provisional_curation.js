@@ -826,7 +826,7 @@ var NewCalculation = function() {
                             } else if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
                                 && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
                                 nonPatientCellsCount += 1;
-                                nonPatientCellsCount += experimentalScore;
+                                nonPatientCellsPoints += experimentalScore;
                             }
                         } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
                             if (experimental.modelSystems.animalOrCellCulture
@@ -1129,7 +1129,7 @@ var NewCalculation = function() {
                                         <tr>
                                             <td colSpan="3" className="header">Segregation</td>
                                             <td>{segregationCount}</td>
-                                            <td>{segregationPointsCounted}</td>
+                                            <td>{segregationPointsCounted} ({segregationPoints}<abbr title="Combined LOD Score"><strong>*</strong></abbr>)</td>
                                             <td>{segregationPointsCounted}</td>
                                         </tr>
                                         <tr>
@@ -1204,6 +1204,7 @@ var NewCalculation = function() {
                                         </tr>
                                     </tbody>
                                 </table>
+                                <strong>*</strong> &ndash; Combined LOD Score
                             </div>
                             <br />
                             <br />
