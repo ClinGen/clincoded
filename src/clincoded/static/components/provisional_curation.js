@@ -543,10 +543,12 @@ var FamilyScraper = function(families, individualsCollected, annotation, pathoVa
             individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
         }
         */
-        // get segregation of family
-        if (family.segregation) {
+        // get segregation of family, but only if it was made by user (may change later - MC)
+        if (family.segregation && family.submitted_by.uuid === this.state.user) {
             userAssessments['segNot'] += 1;
             // loop through assessments and update relevant userAssessment counts
+            // irrelevant at the moment as assessments for segregation do not exist - MC
+            /*
             assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
             assessments.forEach(assessment => {
                 if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
@@ -559,6 +561,7 @@ var FamilyScraper = function(families, individualsCollected, annotation, pathoVa
                     userAssessments['segCntdct'] += 1;
                 }
             });
+            */
             // get lod score of segregation of family
             if (family.segregation.includeLodScoreInAggregateCalculation) {
                 if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
