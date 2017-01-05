@@ -731,7 +731,7 @@ var NewCalculation = function() {
         groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
         groups.forEach(group => {
             // loop through families using FamilyScraper
-            families = groups.familyIncluded && groups.familyIncluded.length ? groups.familyIncluded : [];
+            families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
             tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
             individualsCollected = tempFamilyScraperValues['individualsCollected'];
             userAssessments = tempFamilyScraperValues['userAssessments'];
