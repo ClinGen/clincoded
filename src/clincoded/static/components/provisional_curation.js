@@ -535,33 +535,10 @@ var EditCurrent = function() {
 
 // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
 // returns dictionary of relevant items that need to be updated within NewCalculation()
-var FamilyScraper = function(user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched) {
+var FamilyScraper = function(user, families, annotation, pathoVariantIdList, assessments, segregationCount, segregationPoints, individualMatched) {
     families.forEach(family => {
-        // loop through individual within family: old code??? - MC
-        /*
-        if (family.individualIncluded && family.individualIncluded.length) {
-            individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
-        }
-        */
         // get segregation of family, but only if it was made by user (may change later - MC)
         if (family.segregation && family.submitted_by.uuid === user) {
-            userAssessments['segNot'] += 1;
-            // loop through assessments and update relevant userAssessment counts
-            // irrelevant at the moment as assessments for segregation do not exist - MC
-            /*
-            assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
-            assessments.forEach(assessment => {
-                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
-                    userAssessments['segSpt'] += 1;
-                }
-                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
-                    userAssessments['segReview'] += 1;
-                }
-                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
-                    userAssessments['segCntdct'] += 1;
-                }
-            });
-            */
             // get lod score of segregation of family
             if (family.segregation.includeLodScoreInAggregateCalculation) {
                 if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
@@ -580,8 +557,6 @@ var FamilyScraper = function(user, families, individualsCollected, annotation, p
     });
 
     return {
-        individualsCollected: individualsCollected,
-        userAssessments: userAssessments,
         assessments: assessments,
         segregationCount: segregationCount,
         segregationPoints: segregationPoints,
@@ -657,24 +632,6 @@ var NewCalculation = function() {
     let probandFamily = []; // Total probands associated with families from all annotations
     let probandIndividual = []; // Total proband individuals from all annotations
 
-    var h, i, j, k, l;
-
-    // initial values of assessments
-    var userAssessments = {
-        "variantSpt": 0,
-        "variantReview": 0,
-        "variantCntdct": 0,
-        "variantNot": 0,
-        "expSpt": 0,
-        "expReview": 0,
-        "expCntdct": 0,
-        "expNot": 0,
-        "segSpt": 0,
-        "segReview": 0,
-        "segCntdct": 0,
-        "segNot": 0
-    };
-
     // Collect variants from user's pathogenicity
     var gdmPathoList = gdm.variantPathogenicity;
     var pathoVariantIdList = {
@@ -700,26 +657,6 @@ var NewCalculation = function() {
             });
         }
     });
-
-    var exp_scores = [0, 0, 0];
-    var expType = {
-        "Expression": 0,
-        "Protein Interactions": 0,
-        "Biochemical Function": 0,
-        "Functional Alteration (Patient cells)": 0,
-        "Functional Alteration (Engineered equivalent)": 0,
-        "Model Systems (Animal model)": 0,
-        "Model Systems (Engineered equivalent)": 0,
-        "Rescue (Patient cells)": 0,
-        "Rescue (Engineered equivalent)": 0
-    };
-    var individualsCollected = {
-        "probandInd": [],
-        "allVariants": [],
-        "sptVariants": [],
-        "rvwVariants": [],
-        "cntdctVariants": []
-    };
     var proband_variants = [];
     let tempFamilyScraperValues = {};
     let individualMatched = [];
@@ -735,9 +672,7 @@ var NewCalculation = function() {
         groups.forEach(group => {
             // loop through families using FamilyScraper
             families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
-            tempFamilyScraperValues = FamilyScraper(this.state.user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
-            individualsCollected = tempFamilyScraperValues['individualsCollected'];
-            userAssessments = tempFamilyScraperValues['userAssessments'];
+            tempFamilyScraperValues = FamilyScraper(this.state.user, families, annotation, pathoVariantIdList, assessments, segregationCount, segregationPoints, individualMatched);
             assessments = tempFamilyScraperValues['assessments'];
             segregationCount = tempFamilyScraperValues['segregationCount'];
             segregationPoints = tempFamilyScraperValues['segregationPoints'];
@@ -746,18 +681,11 @@ var NewCalculation = function() {
             if (group.individualIncluded && group.individualIncluded.length) {
                 individualMatched = IndividualScraper(group.individualIncluded, individualMatched);
             }
-            /*
-            if (group.individualIncluded && group.individualIncluded.length) {
-                individualsCollected = filter(individualsCollected, group.individualIncluded, annotation.article, pathoVariantIdList);
-            }
-            */
         });
 
         // loop through families using FamilyScraper
         families = annotation.families && annotation.families.length ? annotation.families : [];
-        tempFamilyScraperValues = FamilyScraper(this.state.user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
-        individualsCollected = tempFamilyScraperValues['individualsCollected'];
-        userAssessments = tempFamilyScraperValues['userAssessments'];
+        tempFamilyScraperValues = FamilyScraper(this.state.user, families, annotation, pathoVariantIdList, assessments, segregationCount, segregationPoints, individualMatched);
         assessments = tempFamilyScraperValues['assessments'];
         segregationCount = tempFamilyScraperValues['segregationCount'];
         segregationPoints = tempFamilyScraperValues['segregationPoints'];
@@ -777,7 +705,6 @@ var NewCalculation = function() {
             individualMatched.forEach(item => {
                 probandIndividual.push(item);
             });
-            //individualsCollected = filter(individualsCollected, annotation.individuals, annotation.article, pathoVariantIdList);
         }
 
         // loop through case-controls
@@ -810,7 +737,6 @@ var NewCalculation = function() {
                         } else if (score.calculatedScore && score.calculatedScore !== 'none') {
                             experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
                         }
-                        userAssessments['expNot'] += 1;
                         // assign score to correct sub-type depending on experiment type and other variables
                         if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
                             biochemicalFunctionCount += 1;
@@ -891,129 +817,6 @@ var NewCalculation = function() {
             }
         });
     });
-
-    // is the below few lines necessary? - MC
-    userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
-    userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
-    userAssessments['variantCntdct'] = individualsCollected['cntdctVariants'].length;
-    userAssessments['variantNot'] = individualsCollected['allVariants'].length - userAssessments['variantSpt'] - userAssessments['variantReview'] - userAssessments['variantCntdct'];
-    userAssessments['expNot'] = userAssessments['expNot'] - userAssessments['expSpt'] - userAssessments['expReview'] - userAssessments['expCntdct'];
-    userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
-
-    /**************************************************************************/
-    /* Comment block below may need to be removed/revised for new scoring matrix - MC
-    /**************************************************************************/
-    /*
-    // Collect articles and find the earliest publication year
-    var proband = 0;
-    var articleCollected = [];
-    var year = new Date();
-    var earliest = year.getFullYear();
-    individualsCollected['probandInd'].forEach(probandInd => {
-        if (probandInd.pmid && probandInd.pmid != '') {
-            proband += 1;
-            if (!in_array(probandInd.pmid, articleCollected)) {
-                articleCollected.push(probandInd.pmid);
-                earliest = get_earliest_year(earliest, probandInd.date);
-            }
-        }
-    });
-
-    // calculate scores
-    var currentYear = year.getFullYear();
-    var time = currentYear.valueOf() - earliest.valueOf();
-    var timeScore = 0, probandScore = 0, pubScore = 0, expScore = 0; // initialize scores to 0
-    if (time >= 3) {
-        timeScore = 2;
-    }
-    else if (time >= 1) {
-        timeScore = 1;
-    }
-    else {
-        timeScore = 0;
-    }
-
-    if (proband > 18) {
-        probandScore = 7;
-    }
-    else if (proband >15) {
-        probandScore = 6;
-    }
-    else if (proband > 12) {
-        probandScore = 5;
-    }
-    else if (proband > 9) {
-        probandScore = 4;
-    }
-    else if (proband > 6) {
-        probandScore = 3;
-    }
-    else if (proband > 3) {
-        probandScore = 2;
-    }
-    else if (proband >= 1) {
-        probandScore = 1;
-    }
-    else {
-        probandScore = 0;
-    }
-
-    if (articleCollected.length >= 5) {
-        pubScore = 5;
-    }
-    else {
-        pubScore = articleCollected.length;
-    }
-    if (articleCollected.length <= 2 && timeScore > 1) {
-        timeScore = 1;
-    }
-
-    var totalScore = probandScore + pubScore + timeScore + expScore;
-
-    // set calculated classification
-    var autoClassification = 'No Reported Evidence';
-    if (Math.floor(totalScore) >= 17){
-        autoClassification = 'Definitive';
-    }
-    else if (Math.floor(totalScore) >= 13) {
-        autoClassification = 'Strong';
-    }
-    else if (Math.floor(totalScore) >= 9) {
-        autoClassification = 'Moderate';
-    }
-    else if (Math.floor(totalScore) >= 2) {
-        autoClassification = 'Limited';
-    }
-
-    // save total score and calculated classification to state
-    this.state.totalScore = totalScore;
-    this.state.autoClassification = autoClassification;
-
-    // set score positons in html table
-    var probandRow = [], pubRow = [], timeRow = [];
-    for(i=0; i<8; i++) {
-        if (i === probandScore) {
-            probandRow.push(proband);
-        }
-        else {
-            probandRow.push('');
-        }
-
-        if (i === pubScore) {
-            pubRow.push(articleCollected.length);
-        }
-        else if (i < 6) {
-            pubRow.push('');
-        }
-
-        if (i === timeScore) {
-            timeRow.push(time);
-        }
-        else if (i < 3) {
-            timeRow.push('');
-        }
-    }
-    */
 
     // calculate segregation counted points
     segregationPoints = Math.round((segregationPoints + 0.00001) * 100) / 100;
@@ -1222,15 +1025,6 @@ var NewCalculation = function() {
                                     {this.state.autoClassification}
                                 </div>
                             </div>
-                            { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
-                                <div className="row">
-                                    <div className="col-sm-5">&nbsp;</div>
-                                    <div className="col-sm-7">
-                                        <strong style={{'color':'#f00'}}>Note: One or more pieces of evidence in this record was assessed as "Contradicts".</strong>
-                                    </div>
-                                </div>
-                             : null
-                            }
                             <br />
                             <Input type="select" ref="alteredClassification"
                                 label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
@@ -1265,103 +1059,6 @@ var NewCalculation = function() {
         </div>
     );
 };
-
-// Method to return a list of experimental evidence scores
-// by score status
-function getExpScoreList(evidenceList) {
-    let newArray = [];
-    evidenceList.forEach(evidence => {
-        evidence.scores.forEach(item => {
-            if (item.scoreStatus === 'Score') {
-                newArray.push(item);
-            }
-        });
-    });
-    return newArray;
-}
-
-// Function to check if an itme exists in an array(list)
-var in_array = function(item, list) {
-    for(var i in list){
-        if (list[i] == item) {
-            return true;
-        }
-    }
-    return false;
-};
-
-// Function to get earliest year of selected publications
-var get_earliest_year = function(earliest, dateStr) {
-    var pattern = new RegExp(/^\d\d\d\d/);
-    var theYear = pattern.exec(dateStr);
-    if (theYear && theYear.valueOf() < earliest.valueOf()) {
-        return theYear;
-    }
-    return earliest;
-};
-
-// Funtion to separate proband individuals by assessment values
-// target: object containing separated proband individuals
-// branch: individual array in annotation/group/family
-// article: object containing publication info
-// idList: Assessment array
-var filter = function(target, branch, article, idList) {
-    var allVariants = target['allVariants'],
-        sptVariants = target['sptVariants'],
-        rvwVariants = target['rvwVariants'],
-        cntdctVariants = target['cntdctVariants'],
-        patho_spt = idList['support'],
-        patho_rvw = idList['review'],
-        patho_cntdct = idList['contradict'];
-
-    branch.forEach(function(obj) {
-        if (obj.proband && obj.variants && obj.variants.length > 0) {
-            // counting at probands only
-            var allSupported = true;
-            for (var j in obj.variants) {
-                // collect all distinct variants from proband individuals
-                if (!in_array(obj.variants[j].uuid, allVariants)) {
-                    allVariants.push(obj.variants[j].uuid);
-                }
-
-                // collect variant assessments, separated by 3 different values.
-                if (!in_array(obj.variants[j].uuid, patho_spt)) {
-                    allSupported = false;
-
-                    if (in_array(obj.variants[j].uuid, patho_rvw) && !in_array(obj.variants[j].uuid, rvwVariants)) {
-                        rvwVariants.push(obj.variants[j].uuid);
-                    }
-                    else if (in_array(obj.variants[j].uuid, patho_cntdct) && !in_array(obj.variants[j].uuid, cntdctVariants)) {
-                        cntdctVariants.push(obj.variants[j].uuid);
-                    }
-                }
-                else {
-                    if (!in_array(obj.variants[j].uuid, sptVariants)) {
-                        sptVariants.push(obj.variants[j].uuid);
-                    }
-                }
-            }
-
-            if (allSupported) {
-                target["probandInd"].push(
-                    {
-                        "evidence":obj.uuid,
-                        "pmid":article.pmid,
-                        "date": article.date
-                    }
-                );
-            }
-
-            target["allVariants"] = allVariants;
-            target["sptVariants"] = sptVariants;
-            target["rvwVariants"] = rvwVariants;
-            target["cntdctVariants"] = cntdctVariants;
-        }
-    });
-
-    return target;
-};
-
 
 // Display a history item for adding a family
 var ProvisionalAddModHistory = React.createClass({
