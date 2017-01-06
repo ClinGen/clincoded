@@ -122,4 +122,38 @@
         display: block;
         float: none;
     }
+
+     li.link .dropdown {
+        .dropdown-toggle {
+            position: relative;
+            display: block;
+            padding: 5px 15px;
+            line-height: 20px;
+
+            .caret {
+                margin-left: 6px;
+            }
+        }
+
+        .dropdown-menu {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 3px;
+            border-bottom-right-radius: 3px;
+            display: block;
+            left: 0;
+            right: auto;
+            margin-top: 0px;
+
+             li a {
+                color: #666;
+                background-color: transparent;
+            }
+
+            li a:hover {
+                color: #000;
+                background-color: #ECECEC;
+            }
+        }
+    }
 }
