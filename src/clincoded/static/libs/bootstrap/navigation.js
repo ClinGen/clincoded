@@ -112,11 +112,11 @@ var NavItem = module.exports.NavItem = React.createClass({
     },
 
     componentDidMount() {
-        window.addEventListener('click', this.toggleDropdown, false);
+        window.addEventListener('mouseup', this.toggleDropdown, false);
     },
 
     componentWillUnmount() {
-        window.removeEventListener('click', this.toggleDropdown, false);
+        window.removeEventListener('mouseup', this.toggleDropdown, false);
     },
 
     // Help dropdown menu UI behaviors
