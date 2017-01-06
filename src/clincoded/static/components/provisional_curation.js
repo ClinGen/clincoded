@@ -1016,6 +1016,7 @@ var NewCalculation = function() {
     */
 
     // calculate segregation counted points
+    segregationPoints = +parseFloat(segregationPoints).toFixed(2);
     if (segregationPoints >= 0.75 && segregationPoints <= 0.99) {
         segregationPointsCounted = 1;
     } else if (segregationPoints >= 1 && segregationPoints <= 1.24) {
