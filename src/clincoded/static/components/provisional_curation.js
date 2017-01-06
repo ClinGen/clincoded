@@ -535,7 +535,7 @@ var EditCurrent = function() {
 
 // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
 // returns dictionary of relevant items that need to be updated within NewCalculation()
-var FamilyScraper = function(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched) {
+var FamilyScraper = function(user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched) {
     families.forEach(family => {
         // loop through individual within family: old code??? - MC
         /*
@@ -544,7 +544,7 @@ var FamilyScraper = function(families, individualsCollected, annotation, pathoVa
         }
         */
         // get segregation of family, but only if it was made by user (may change later - MC)
-        if (family.segregation && family.submitted_by.uuid === this.state.user) {
+        if (family.segregation && family.submitted_by.uuid === user) {
             userAssessments['segNot'] += 1;
             // loop through assessments and update relevant userAssessment counts
             // irrelevant at the moment as assessments for segregation do not exist - MC
@@ -735,7 +735,7 @@ var NewCalculation = function() {
         groups.forEach(group => {
             // loop through families using FamilyScraper
             families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
-            tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
+            tempFamilyScraperValues = FamilyScraper(this.state.user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
             individualsCollected = tempFamilyScraperValues['individualsCollected'];
             userAssessments = tempFamilyScraperValues['userAssessments'];
             assessments = tempFamilyScraperValues['assessments'];
@@ -755,7 +755,7 @@ var NewCalculation = function() {
 
         // loop through families using FamilyScraper
         families = annotation.families && annotation.families.length ? annotation.families : [];
-        tempFamilyScraperValues = FamilyScraper(families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
+        tempFamilyScraperValues = FamilyScraper(this.state.user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
         individualsCollected = tempFamilyScraperValues['individualsCollected'];
         userAssessments = tempFamilyScraperValues['userAssessments'];
         assessments = tempFamilyScraperValues['assessments'];
@@ -1132,7 +1132,7 @@ var NewCalculation = function() {
                                         <tr>
                                             <td colSpan="3" className="header">Segregation</td>
                                             <td>{segregationCount}</td>
-                                            <td>{segregationPointsCounted} ({segregationPoints}<abbr title="Combined LOD Score"><strong>*</strong></abbr>)</td>
+                                            <td><span>{segregationPointsCounted}</span> (<abbr title="Combined LOD Score"><span>{segregationPoints}</span><strong>*</strong></abbr>)</td>
                                             <td>{segregationPointsCounted}</td>
                                         </tr>
                                         <tr>
