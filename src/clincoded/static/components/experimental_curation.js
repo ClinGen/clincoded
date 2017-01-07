@@ -31,6 +31,7 @@ var PmidDoiButtons = curator.PmidDoiButtons;
 var queryKeyValue = globals.queryKeyValue;
 var country_codes = globals.country_codes;
 var external_url_map = globals.external_url_map;
+var dbxref_prefix_map = globals.dbxref_prefix_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
@@ -101,6 +102,7 @@ var ExperimentalCuration = React.createClass({
             addVariantDisabled: false, // True if Add Another Variant button enabled
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
+            uniprotId: '',
             formError: false
         };
     },
@@ -353,8 +355,11 @@ var ExperimentalCuration = React.createClass({
             });
 
             // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
-            if (stateObj.gdm && stateObj.gdm.omimId) {
-                this.setOmimIdState(stateObj.gdm.omimId);
+            if (stateObj.gdm) {
+                this.getUniprotId(stateObj.gdm);
+                if (stateObj.gdm.omimId) {
+                    this.setOmimIdState(stateObj.gdm.omimId);
+                }
             }
 
             // Load data and set states as needed
@@ -1135,6 +1140,22 @@ var ExperimentalCuration = React.createClass({
         this.setState({variantInfo: newVariantInfo, addVariantDisabled: addVariantDisabled});
     },
 
+    // Method to fetch uniprot data from mygene.info
+    getUniprotId(gdm) {
+        if (gdm && gdm.gene && gdm.gene.entrezId) {
+            let geneId = gdm.gene.entrezId;
+            let fields = 'fields=uniprot.Swiss-Prot';
+            this.getRestData(this.props.href_url.protocol + external_url_map['MyGeneInfo'] + geneId + '&species=human&' + fields).then(result => {
+                let myGeneObj = result.hits[0];
+                if (myGeneObj.uniprot && myGeneObj.uniprot['Swiss-Prot']) {
+                    this.setState({uniprotId: myGeneObj.uniprot['Swiss-Prot']});
+                }
+            }).catch(err => {
+                console.log('Fetch Error for Uniprot ID from MyGeneInfo =: %o', err);
+            });
+        }
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var annotation = this.state.annotation;
@@ -1166,6 +1187,8 @@ var ExperimentalCuration = React.createClass({
                 '/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')
                 : '/experimental-submit/?gdm=' + gdm.uuid + (experimental ? '&experimental=' + experimental.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
+
+        let uniprotId = this.state.uniprotId;
 
         // Find any pre-existing scores associated with the evidence
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
@@ -1206,7 +1229,7 @@ var ExperimentalCuration = React.createClass({
                                         </Panel>
                                         {this.state.experimentalType == 'Biochemical Function' && this.state.experimentalNameVisible ?
                                             <PanelGroup accordion><Panel title={this.state.experimentalSubtype.charAt(0) + ". Biochemical Function"} open>
-                                                {TypeBiochemicalFunction.call(this)}
+                                                {TypeBiochemicalFunction.call(this, uniprotId)}
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalType == 'Protein Interactions' ?
@@ -1221,7 +1244,7 @@ var ExperimentalCuration = React.createClass({
                                         : null}
                                         {this.state.experimentalType == 'Functional Alteration' ?
                                             <PanelGroup accordion><Panel title="Functional Alteration" open>
-                                                {TypeFunctionalAlteration.call(this)}
+                                                {TypeFunctionalAlteration.call(this, uniprotId)}
                                             </Panel></PanelGroup>
                                         : null}
                                         {this.state.experimentalType == 'Model Systems' ?
@@ -1372,7 +1395,7 @@ var ExperimentalNameType = function() {
 
 // Biochemical Function type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeBiochemicalFunction = function() {
+var TypeBiochemicalFunction = function(uniprotId) {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
     if (biochemicalFunction) {
@@ -1382,7 +1405,9 @@ var TypeBiochemicalFunction = function() {
     }
     return (
         <div className="row form-row-helper">
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for a GO ID (e.g. biological_process = GO:0008150)</p>
+            <p className="col-sm-7 col-sm-offset-5">
+                Select a GO term for this gene (view <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt or search for a new term using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a>). The GO term must be from the GO aspect "Molecular Function" or "Biological Process."
+            </p>
             <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1408,7 +1433,7 @@ var TypeBiochemicalFunction = function() {
 // HTML labels for Biochemical Functions panel
 var LabelIdentifiedFunction = React.createClass({
     render: function() {
-        return <span>Identified function of gene in this record <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> ID)</span>:</span>;
+        return <span>Identified function of gene in this record <span style={{fontWeight: 'normal'}}>(GO ID)</span>:</span>;
     }
 });
 
@@ -1684,7 +1709,7 @@ var TypeExpressionB = function() {
 
 // Functional Alteration type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeFunctionalAlteration = function() {
+var TypeFunctionalAlteration = function(uniprotId) {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
     if (functionalAlteration) {
@@ -1728,7 +1753,9 @@ var TypeFunctionalAlteration = function() {
                     inputDisabled={this.cv.othersAssessed} required />
             </div>
             : null}
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> for gene function (e.g. DNA metabolic process = GO:0006259)</p>
+            <p className="col-sm-7 col-sm-offset-5">
+                Select a GO term for this gene (view <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt or search for a new term using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a>). The GO term must be from the GO aspect "Molecular Function" or "Biological Process."
+            </p>
             <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />}
                 error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
@@ -1762,7 +1789,7 @@ var LabelFAEngineeredEquivalent = React.createClass({
 });
 var LabelNormalFunctionOfGene = React.createClass({
     render: function() {
-        return <span>Normal function of gene/gene product <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['GO_Slim']} target="_blank" title="Open GO_Slim in a new tab">GO_Slim</a> ID)</span>:</span>;
+        return <span>Normal function of gene/gene product <span style={{fontWeight: 'normal'}}>(GO ID)</span>:</span>;
     }
 });
 
