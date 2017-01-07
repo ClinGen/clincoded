@@ -40,8 +40,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = React.createClass({
                 let loggedInUserScore = this.getUserScore(evidenceObj.scores);
                 if (loggedInUserScore) {
                     this.setState({userScoreUuid: loggedInUserScore.uuid});
-                    if (loggedInUserScore.score) {
-                        let modifiedScore = loggedInUserScore.score;
+                    if (loggedInUserScore.hasOwnProperty('score')) {
+                        let modifiedScore = loggedInUserScore.score.toString();
                         this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
                             this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                             this.updateUserScoreObj();
@@ -123,7 +123,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = React.createClass({
             <div>
                 <div className="row">
                     <Input type="select" ref="scoreRange" label="Score:"  handleChange={this.handleScoreRangeChange}
-                        defaultValue={modifiedScore.toString()} value={modifiedScore.toString()}
+                        defaultValue={modifiedScore} value={modifiedScore}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
