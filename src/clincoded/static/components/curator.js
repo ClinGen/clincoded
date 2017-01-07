@@ -2383,6 +2383,11 @@ var DeleteButtonModal = React.createClass({
         } else if (this.props.item['@type'][0] == 'family') {
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
+        } else if (this.props.item['@type'][0] == 'individual') {
+            let individual = this.props.item;
+            if (individual.variants.length && individual.associatedFamilies.length) {
+                message = <p><strong>Warning</strong>: Deleting this individual will remove the association between its variants and the Family with which the Individual is associated.</p>;
+            }
         } else if (this.props.item['@type'][0] == 'caseControl') {
             itemLabel = this.props.item.label;
         }
