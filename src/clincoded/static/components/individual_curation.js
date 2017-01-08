@@ -1428,13 +1428,15 @@ var IndividualVariantInfo = function() {
                                                 <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                             </div>
                                         : null}
-                                        <div className="row variant-assessment">
-                                            <span className="col-sm-5 control-label"><label></label></span>
-                                            <span className="col-sm-7 text-no-input">
-                                                <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                                <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
-                                            </span>
-                                        </div>
+                                        {this.state.proband_selected ?
+                                            <div className="row variant-assessment">
+                                                <span className="col-sm-5 control-label"><label></label></span>
+                                                <span className="col-sm-7 text-no-input">
+                                                    <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
+                                                    <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
+                                                </span>
+                                            </div>
+                                        : null}
                                         <div className="row variant-curation">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
