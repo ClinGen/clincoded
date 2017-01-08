@@ -21,8 +21,7 @@ var routes = {
 var portal = {
     portal_title: 'ClinGen',
     navUser: [
-        {id: 'help', title: 'Curation Help', icon: 'icon-question-circle',
-            url: '/static/help/clingen-variant-curation-help.pdf', target: '_blank'}, // link to Curation Help
+        {id: 'help', title: 'Help', url: '#'}, // dropdown Help menu button to both gene and variant help docs
         {id: 'variant', title: 'New Variant Curation', url: '/select-variant/'}, // link to VCI page /select-variant/
         {id: 'gene', title: 'New Gene Curation', url: '/create-gene-disease/'}, // link to GCI page /create-gene-disease/
         {id: 'space', title: 'space'}, // white space between
@@ -253,7 +252,7 @@ var NavbarUser = React.createClass({
                 {this.props.portal.navUser.map(menu => {
                     if (menu.url || menu.title === 'space') {
                         if (menu.id === 'help') {
-                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;
+                            return <NavItem key={menu.id} href={menu.url} title={menu.title}>{menu.title}</NavItem>;
                         }
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
