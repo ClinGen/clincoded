@@ -112,7 +112,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                             // If the score form fields are allowed, then proceed with the following
                             let caseInfoType = loggedInUserScore.caseInfoType,
                                 defaultScore = loggedInUserScore.calculatedScore,
-                                modifiedScore = loggedInUserScore.score.toString(),
+                                modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
                                 scoreExplanation = loggedInUserScore.scoreExplanation,
                                 calcScoreRange = [];
                             this.setState({caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
@@ -307,7 +307,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             }
         }
 
-        if (score) {
+        if (score && score !== 'none') {
             newUserScoreObj['score'] = parseFloat(score);
         } else {
             if ('score' in newUserScoreObj) {
