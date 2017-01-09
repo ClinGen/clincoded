@@ -558,6 +558,7 @@ var ProvisionalCuration = React.createClass({
         let edit = queryKeyValue('edit', this.props.href);
         let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         let gdm = this.state.gdm ? this.state.gdm : null;
+        let autoClassification = this.state.autoClassification;
         let provisional = this.state.provisional;
         let scoreTableValues = this.state.scoreTableValues;
 
@@ -733,18 +734,18 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr className="header large">
                                                                 <td colSpan="3" rowSpan="4">Calculated Classification</td>
-                                                                <td className={this.state.autoClassification === 'Limited' ? ' green' : null}>LIMITED</td>
-                                                                <td className={this.state.autoClassification === 'Limited' ? ' green' : null}>1-6</td>
+                                                                <td className={autoClassification === 'Limited' ? ' green' : null}>LIMITED</td>
+                                                                <td className={autoClassification === 'Limited' ? ' green' : null}>1-6</td>
                                                             </tr>
-                                                            <tr className={"header large" + (this.state.autoClassification === 'Moderate' ? ' green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Moderate' ? ' green' : null)}>
                                                                 <td>MODERATE</td>
                                                                 <td>7-11</td>
                                                             </tr>
-                                                            <tr className={"header large" + (this.state.autoClassification === 'Strong' ? ' green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Strong' ? ' green' : null)}>
                                                                 <td>STRONG</td>
                                                                 <td>12-18</td>
                                                             </tr>
-                                                            <tr className={"header large" + (this.state.autoClassification === 'Definitive' ? ' green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Definitive' ? ' green' : null)}>
                                                                 <td>DEFINITIVE</td>
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
@@ -775,7 +776,7 @@ var ProvisionalCuration = React.createClass({
                                                             <tr className="total-row header">
                                                                 <td colSpan="2">Final Classification</td>
                                                                 <td colSpan="4">
-                                                                    <span>{provisional.alteredClassification && provisional.alteredClassification !== 'No Selection' ? provisional.alteredClassification : provisional.autoClassification}</span><br />
+                                                                    <span>{provisional.alteredClassification && provisional.alteredClassification !== 'No Selection' ? provisional.alteredClassification : autoClassification}</span><br />
                                                                     {provisional.last_modified ?
                                                                         <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
                                                                     : null}
