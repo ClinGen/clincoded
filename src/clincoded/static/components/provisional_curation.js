@@ -686,39 +686,76 @@ var ProvisionalCuration = React.createClass({
                                                     <strong>*</strong> &ndash; Combined LOD Score
                                                 </div>
                                                 <br />
-                                                <br />
-                                                <div className="row">
-                                                    <div className="col-sm-5">
-                                                        <strong className="pull-right">Calculated&nbsp;
-                                                            <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:
-                                                        </strong>
-                                                    </div>
-                                                    <div className="col-sm-7">
-                                                        {this.state.autoClassification}
-                                                    </div>
-                                                </div>
-                                                <br />
-                                                <Input type="select" ref="alteredClassification"
-                                                    label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
-                                                    labelClassName="col-sm-5 control-label"
-                                                    wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification}
-                                                    groupClassName="form-group">
-                                                    <option value="Definitive">Definitive</option>
-                                                    <option value="Strong">Strong</option>
-                                                    <option value="Moderate">Moderate</option>
-                                                    <option value="Limited">Limited</option>
-                                                    <option value="No Evidence">No Reported Evidence</option>
-                                                    <option value="Disputed">Disputed</option>
-                                                    <option value="Refuted">Refuted</option>
-                                                </Input>
-                                                <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                                                    wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')}
-                                                    clearError={this.clrFormErrors.bind(null, 'reasons')} />
-                                                <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
-                                                <div className="col-sm-7">
-                                                    <span>
-                                                    Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
-                                                    </span>
+
+                                                <div className="container">
+                                                    <table className="summary-matrix">
+                                                        <tbody>
+                                                            <tr className="header large bg-color">
+                                                                <td colSpan="5">Gene/Disease Pair</td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td>Assertion Criteria</td>
+                                                                <td>Genetic Evidence (0-12 points)</td>
+                                                                <td>Experimental Evidence (0-6 points)</td>
+                                                                <td>Total Points (0-18 points)</td>
+                                                                <td>Replication Over Time (Yes/No)</td>
+                                                            </tr>
+                                                            <tr className="header large bg-color separator-below">
+                                                                <td>Assigned Points</td>
+                                                                <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
+                                                                <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
+                                                                <td>{scoreTableValues['totalPoints']}</td>
+                                                                <td>DROPDOWN</td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td colSpan="3" rowSpan="4">Calculated Classification</td>
+                                                                <td>LIMITED</td>
+                                                                <td>1-6</td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td>MODERATE</td>
+                                                                <td>7-11</td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td>STRONG</td>
+                                                                <td>12-18</td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td>DEFINITIVE</td>
+                                                                <td>12-18 & Replicated Over Time</td>
+                                                            </tr>
+                                                            <tr className="header large separator-below">
+                                                                <td>Valid Contradictory Evidence (Y/N)</td>
+                                                                <td colSpan="4">
+                                                                    <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
+                                                                        wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')}
+                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} />
+                                                                </td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td colSpan="2">Curator Classification</td>
+                                                                <td colSpan="3">
+                                                                    <Input type="select" ref="alteredClassification"
+                                                                        label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                        labelClassName="col-sm-5 control-label"
+                                                                        wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification}
+                                                                        groupClassName="form-group">
+                                                                        <option value="Definitive">Definitive</option>
+                                                                        <option value="Strong">Strong</option>
+                                                                        <option value="Moderate">Moderate</option>
+                                                                        <option value="Limited">Limited</option>
+                                                                        <option value="No Evidence">No Reported Evidence</option>
+                                                                        <option value="Disputed">Disputed</option>
+                                                                        <option value="Refuted">Refuted</option>
+                                                                    </Input>
+                                                                </td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td colSpan="2">Final Classification</td>
+                                                                <td colSpan="4">asfdafas</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </Panel>
@@ -728,7 +765,7 @@ var ProvisionalCuration = React.createClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
-                                {   /*
+                                {   /* Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
                                     (provisional && edit === 'yes') ?
                                     EditCurrent.call(this)
                                     :
