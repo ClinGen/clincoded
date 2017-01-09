@@ -224,7 +224,16 @@ var ProvisionalCuration = React.createClass({
         } else if (ref === 'reasons') {
             updatedProvisional[ref] = this.refs[ref].getValue();
         }
+        this.setState({provisional: updatedProvisional});
+    },
 
+    handleReplicatedOverTime: function() {
+        let updatedProvisional = _.clone(this.state.provisional);
+        if (!updatedProvisional.replicatedOverTime) {
+            updatedProvisional.replicatedOverTime = true;
+        } else {
+            updatedProvisional.replicatedOverTime = false;
+        }
         this.setState({provisional: updatedProvisional});
     },
 
@@ -741,7 +750,9 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
                                                                 <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
                                                                 <td>{this.state.totalScore}</td>
-                                                                <td>DROPDOWN</td>
+                                                                <td>
+                                                                    <input type="checkbox" onChange={this.handleReplicatedOverTime} checked={provisional && 'replicatedOverTime' in provisional ? provisional.replicatedOverTime : false} />
+                                                                </td>
                                                             </tr>
                                                             <tr className="header large">
                                                                 <td colSpan="3" rowSpan="4">Calculated Classification</td>
