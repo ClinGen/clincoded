@@ -241,7 +241,7 @@ var ProvisionalCuration = React.createClass({
         );
     },
 
-    familyScraper: function(user, families, annotation, pathoVariantIdList, segregationCount, segregationPoints, individualMatched) {
+    familyScraper: function(user, families, annotation, segregationCount, segregationPoints, individualMatched) {
         // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
         // returns dictionary of relevant items that need to be updated within NewCalculation()
         families.forEach(family => {
@@ -310,31 +310,6 @@ var ProvisionalCuration = React.createClass({
         let probandFamily = []; // Total probands associated with families from all annotations
         let probandIndividual = []; // Total proband individuals from all annotations
 
-        // Collect variants from user's pathogenicity
-        var gdmPathoList = gdm.variantPathogenicity;
-        var pathoVariantIdList = {
-            "support": [],
-            "review": [],
-            "contradict": []
-        };
-
-        gdmPathoList.forEach(gdmPatho => {
-            let variantUuid = gdmPatho.variant.uuid;
-            // Collect login user's variant assessments, separated as 3 different values.
-            if (gdmPatho.assessments && gdmPatho.assessments.length > 0) {
-                gdmPatho.assessments.forEach(assessment => {
-                    if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
-                        pathoVariantIdList['support'].push(variantUuid);
-                    }
-                    else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
-                        pathoVariantIdList['review'].push(variantUuid);
-                    }
-                    else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
-                        pathoVariantIdList['contradict'].push(variantUuid);
-                    }
-                });
-            }
-        });
         var proband_variants = [];
         let tempFamilyScraperValues = {};
         let individualMatched = [];
@@ -350,7 +325,7 @@ var ProvisionalCuration = React.createClass({
             groups.forEach(group => {
                 // loop through families using FamilyScraper
                 families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
-                tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, pathoVariantIdList, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
+                tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
                 scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
                 scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
                 individualMatched = tempFamilyScraperValues['individualMatched'];
@@ -362,7 +337,7 @@ var ProvisionalCuration = React.createClass({
 
             // loop through families using FamilyScraper
             families = annotation.families && annotation.families.length ? annotation.families : [];
-            tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, pathoVariantIdList, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
+            tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
             scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
             scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
             individualMatched = tempFamilyScraperValues['individualMatched'];
