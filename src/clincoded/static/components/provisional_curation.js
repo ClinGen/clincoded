@@ -540,13 +540,13 @@ var ProvisionalCuration = React.createClass({
 
     calculateClassifications: function(totalPoints, replicatedOverTime) {
         let autoClassification = "No Classification";
-        if (totalPoints >= 1 && totalPoints < 7) {
+        if (totalPoints >= 1 && totalPoints <= 6) {
             autoClassification = "Limited";
-        } else if (totalPoints >= 7 && totalPoints < 11) {
+        } else if (totalPoints > 6 && totalPoints <= 11) {
             autoClassification = "Moderate";
-        } else if (totalPoints >= 12 && totalPoints <= 18 && !replicatedOverTime) {
+        } else if (totalPoints > 11 && totalPoints <= 18 && !replicatedOverTime) {
             autoClassification = "Strong";
-        } else if (totalPoints >= 12 && totalPoints <= 18 && replicatedOverTime) {
+        } else if (totalPoints > 11 && totalPoints <= 18 && replicatedOverTime) {
             autoClassification = "Definitive";
         }
         this.setState({autoClassification: autoClassification});
