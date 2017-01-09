@@ -41,7 +41,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = React.createClass({
                 if (loggedInUserScore) {
                     this.setState({userScoreUuid: loggedInUserScore.uuid});
                     if (loggedInUserScore.hasOwnProperty('score')) {
-                        let modifiedScore = loggedInUserScore.score.toString();
+                        let modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null;
                         this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
                             this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                             this.updateUserScoreObj();
@@ -78,7 +78,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = React.createClass({
 
         let newUserScoreObj = {};
 
-        if (score) {
+        if (score && score !== 'none') {
             newUserScoreObj['score'] = parseFloat(score);
         } else {
             if ('score' in newUserScoreObj) {
