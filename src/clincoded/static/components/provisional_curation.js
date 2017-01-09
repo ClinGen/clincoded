@@ -69,7 +69,7 @@ var ProvisionalCuration = React.createClass({
                 rescueCount: 0, rescuePoints: 0,
                 rescueEngineeredCount: 0, rescueEngineeredPoints: 0,
                 // variables for total counts
-                geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0, totalPoints: 0
+                geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
         };
     },
@@ -108,6 +108,7 @@ var ProvisionalCuration = React.createClass({
                     var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
                     if (owner.uuid === stateObj.user) { // find
                         stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                        console.log(stateObj.provisional);
                         break;
                     }
                 }
@@ -141,7 +142,7 @@ var ProvisionalCuration = React.createClass({
         if (this.validateDefault()) {
             var calculate = queryKeyValue('calculate', this.props.href);
             var edit = queryKeyValue('edit', this.props.href);
-            var newProvisional = this.state.provisional ? curator.flatten(this.state.provisional) : {};
+            var newProvisional = this.state.provisional.uuid ? curator.flatten(this.state.provisional) : {};
             newProvisional.totalScore = Number(this.state.totalScore);
             newProvisional.autoClassification = this.state.autoClassification;
             newProvisional.alteredClassification = this.getFormValue('alteredClassification');
@@ -149,14 +150,14 @@ var ProvisionalCuration = React.createClass({
 
             // check required item (reasons)
             var formErr = false;
-            if (!newProvisional.reasons && newProvisional.autoClassification !== newProvisional.alteredClassification) {
+            if (!newProvisional.reasons && newProvisional.alteredClassification !== 'No Selection') {
                 formErr = true;
                 this.setFormErrors('reasons', 'Required when changing classification.');
             }
             if (!formErr) {
                 var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
                 backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
-                if (this.state.provisional) { // edit existing provisional
+                if (this.state.provisional.uuid) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
                         var provisionalClassification = data['@graph'][0];
 
@@ -174,8 +175,7 @@ var ProvisionalCuration = React.createClass({
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
                     });
-                }
-                else { // save a new calculation and provisional classification
+                } else { // save a new calculation and provisional classification
                     this.postRestData('/provisional/', newProvisional).then(data => {
                         return data['@graph'][0];
                     }).then(savedProvisional => {
@@ -538,14 +538,14 @@ var ProvisionalCuration = React.createClass({
         tempPoints = scoreTableValues['functionalPointsCounted'] + scoreTableValues['functionalAlterationPointsCounted'] + scoreTableValues['modelsRescuePointsCounted'];
         scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
 
-        scoreTableValues['totalPoints'] = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
+        let totalScore = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
 
         // set scoreTabValues state
-        this.setState({scoreTableValues: scoreTableValues});
+        this.setState({totalScore: totalScore, scoreTableValues: scoreTableValues});
 
         // set classification
         this.calculateClassifications(
-            scoreTableValues['totalPoints'],
+            totalScore,
             this.state.provisional && 'replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false,
             this.state.provisional && this.state.alteredClassification ? this.state.provisional.alteredClassification : null
         );
@@ -568,16 +568,16 @@ var ProvisionalCuration = React.createClass({
 
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        var calculate = queryKeyValue('calculate', this.props.href);
-        var edit = queryKeyValue('edit', this.props.href);
-        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
-        var gdm = this.state.gdm ? this.state.gdm : null;
-        var provisional = this.state.provisional ? this.state.provisional : null;
+        let calculate = queryKeyValue('calculate', this.props.href);
+        let edit = queryKeyValue('edit', this.props.href);
+        let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        let gdm = this.state.gdm ? this.state.gdm : null;
+        let provisional = this.state.provisional;
         let scoreTableValues = this.state.scoreTableValues;
 
-        var show_clsfctn = queryKeyValue('classification', this.props.href);
-        var summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
-        var expMatrix = queryKeyValue('expmatrix', this.props.href);
+        let show_clsfctn = queryKeyValue('classification', this.props.href);
+        let summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
+        let expMatrix = queryKeyValue('expmatrix', this.props.href);
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -715,7 +715,7 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr className="total-row header">
                                                                 <td colSpan="7">Total Points</td>
-                                                                <td>{scoreTableValues['totalPoints']}</td>
+                                                                <td>{this.state.totalScore}</td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
@@ -729,7 +729,7 @@ var ProvisionalCuration = React.createClass({
                                                             <tr className="header large bg-color">
                                                                 <td colSpan="5">Gene/Disease Pair</td>
                                                             </tr>
-                                                            <tr className="header large">
+                                                            <tr>
                                                                 <td>Assertion Criteria</td>
                                                                 <td>Genetic Evidence (0-12 points)</td>
                                                                 <td>Experimental Evidence (0-6 points)</td>
@@ -740,7 +740,7 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>Assigned Points</td>
                                                                 <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
                                                                 <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
-                                                                <td>{scoreTableValues['totalPoints']}</td>
+                                                                <td>{this.state.totalScore}</td>
                                                                 <td>DROPDOWN</td>
                                                             </tr>
                                                             <tr className="header large">
@@ -760,12 +760,12 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>DEFINITIVE</td>
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
-                                                            <tr className="header large">
+                                                            <tr>
                                                                 <td colSpan="5">
                                                                     <Input type="select" ref="alteredClassification"
                                                                         label={<strong>Change Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                                                         labelClassName="col-sm-3 control-label" handleChange={this.handleChange}
-                                                                        wrapperClassName="col-sm-9" defaultValue={this.state.provisional && this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'No Selection'}
+                                                                        wrapperClassName="col-sm-9" defaultValue={provisional && provisional.alteredClassification ? provisional.alteredClassification : 'No Selection'}
                                                                         groupClassName="form-group">
                                                                         <option value="No Selection">No Selection</option>
                                                                         <option value="Definitive">Definitive</option>
@@ -777,16 +777,21 @@ var ProvisionalCuration = React.createClass({
                                                                     </Input>
                                                                 </td>
                                                             </tr>
-                                                            <tr className="header large separator-below">
+                                                            <tr className="separator-below">
                                                                 <td colSpan="5">
                                                                     <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-3 control-label"
-                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} defaultValue={this.state.provisional && this.state.provisional.reasons ? this.state.provisional.reasons : null}
+                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={provisional && provisional.reasons ? provisional.reasons : null}
                                                                         clearError={this.clrFormErrors.bind(null, 'reasons')} />
                                                                 </td>
                                                             </tr>
                                                             <tr className="total-row header">
                                                                 <td colSpan="2">Final Classification</td>
-                                                                <td colSpan="4">{this.state.alteredClassification ? this.state.alteredClassification : this.state.autoClassification}</td>
+                                                                <td colSpan="4">
+                                                                    <span>{provisional.alteredClassification && provisional.alteredClassification !== 'No Selection' ? provisional.alteredClassification : provisional.autoClassification}</span><br />
+                                                                    {provisional.last_modified ?
+                                                                        <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                    : null}
+                                                                </td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
