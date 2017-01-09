@@ -301,7 +301,7 @@ var IndividualCuration = React.createClass({
         // Make sure there is an explanation for the score selected differently from the default score
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({formError: true});
                 return false;
             }
@@ -1638,7 +1638,7 @@ var IndividualViewer = React.createClass({
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({formError: true});
                 return false;
             }
