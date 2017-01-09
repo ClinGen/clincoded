@@ -39,10 +39,10 @@ var ProvisionalCuration = React.createClass({
         return {
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
-            provisional: null, // login user's existing provisional object, must be null initially.
+            provisional: {}, // login user's existing provisional object, must be null initially.
             //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
-            autoClassification: null,
+            autoClassification: 'No Classification',
             scoreTableValues: {
                 // variables for autosomal dominant data
                 probandOtherVariantCount: 0, probandOtherVariantPoints: 0, probandOtherVariantPointsCounted: 0,
@@ -120,9 +120,11 @@ var ProvisionalCuration = React.createClass({
         }).then(result => {
             // once we have the GDM info, calculate the values for the score table
             this.calculateScoreTable();
-        }).catch(function(e) {
+        });
+        /*.catch(function(e) {
             console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
+        */
     },
 
     componentDidMount: function() {
@@ -213,6 +215,17 @@ var ProvisionalCuration = React.createClass({
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
         window.history.go(-1);
+    },
+
+    handleChange: function(ref, e) {
+        let updatedProvisional = _.clone(this.state.provisional);
+        if (ref === 'alteredClassification') {
+            updatedProvisional[ref] = this.refs[ref].getValue();
+        } else if (ref === 'reasons') {
+            updatedProvisional[ref] = this.refs[ref].getValue();
+        }
+
+        this.setState({provisional: updatedProvisional});
     },
 
     familyScraper: function(user, families, annotation, pathoVariantIdList, segregationCount, segregationPoints, individualMatched) {
@@ -527,7 +540,30 @@ var ProvisionalCuration = React.createClass({
 
         scoreTableValues['totalPoints'] = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
 
+        // set scoreTabValues state
         this.setState({scoreTableValues: scoreTableValues});
+
+        // set classification
+        this.calculateClassifications(
+            scoreTableValues['totalPoints'],
+            this.state.provisional && 'replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false,
+            this.state.provisional && this.state.alteredClassification ? this.state.provisional.alteredClassification : null
+        );
+    },
+
+    calculateClassifications: function(totalPoints, replicatedOverTime) {
+        let autoClassification = "No Classification";
+        let alteredClassification = null;
+        if (totalPoints >= 1 && totalPoints < 7) {
+            autoClassification = "Limited";
+        } else if (totalPoints >= 7 && totalPoints < 11) {
+            autoClassification = "Moderate";
+        } else if (totalPoints >= 12 && totalPoints <= 18 && !replicatedOverTime) {
+            autoClassification = "Strong";
+        } else if (totalPoints >= 12 && totalPoints <= 18 && replicatedOverTime) {
+            autoClassification = "Definitive";
+        }
+        this.setState({autoClassification: autoClassification, alteredClassification: alteredClassification});
     },
 
     render: function() {
@@ -709,50 +745,48 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr className="header large">
                                                                 <td colSpan="3" rowSpan="4">Calculated Classification</td>
-                                                                <td>LIMITED</td>
-                                                                <td>1-6</td>
+                                                                <td className={this.state.autoClassification === 'Limited' ? ' green' : null}>LIMITED</td>
+                                                                <td className={this.state.autoClassification === 'Limited' ? ' green' : null}>1-6</td>
                                                             </tr>
-                                                            <tr className="header large">
+                                                            <tr className={"header large" + (this.state.autoClassification === 'Moderate' ? ' green' : null)}>
                                                                 <td>MODERATE</td>
                                                                 <td>7-11</td>
                                                             </tr>
-                                                            <tr className="header large">
+                                                            <tr className={"header large" + (this.state.autoClassification === 'Strong' ? ' green' : null)}>
                                                                 <td>STRONG</td>
                                                                 <td>12-18</td>
                                                             </tr>
-                                                            <tr className="header large">
+                                                            <tr className={"header large" + (this.state.autoClassification === 'Defintive' ? ' green' : null)}>
                                                                 <td>DEFINITIVE</td>
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
-                                                            <tr className="header large separator-below">
-                                                                <td>Valid Contradictory Evidence (Y/N)</td>
-                                                                <td colSpan="4">
-                                                                    <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                                                                        wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')}
-                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} />
-                                                                </td>
-                                                            </tr>
                                                             <tr className="header large">
-                                                                <td colSpan="2">Curator Classification</td>
-                                                                <td colSpan="3">
+                                                                <td colSpan="5">
                                                                     <Input type="select" ref="alteredClassification"
-                                                                        label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
-                                                                        labelClassName="col-sm-5 control-label"
-                                                                        wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification}
+                                                                        label={<strong>Change Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                        labelClassName="col-sm-3 control-label" handleChange={this.handleChange}
+                                                                        wrapperClassName="col-sm-9" defaultValue={this.state.provisional && this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'No Selection'}
                                                                         groupClassName="form-group">
+                                                                        <option value="No Selection">No Selection</option>
                                                                         <option value="Definitive">Definitive</option>
                                                                         <option value="Strong">Strong</option>
                                                                         <option value="Moderate">Moderate</option>
                                                                         <option value="Limited">Limited</option>
-                                                                        <option value="No Evidence">No Reported Evidence</option>
                                                                         <option value="Disputed">Disputed</option>
                                                                         <option value="Refuted">Refuted</option>
                                                                     </Input>
                                                                 </td>
                                                             </tr>
-                                                            <tr className="header large">
+                                                            <tr className="header large separator-below">
+                                                                <td colSpan="5">
+                                                                    <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-3 control-label"
+                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} defaultValue={this.state.provisional && this.state.provisional.reasons ? this.state.provisional.reasons : null}
+                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} />
+                                                                </td>
+                                                            </tr>
+                                                            <tr className="total-row header">
                                                                 <td colSpan="2">Final Classification</td>
-                                                                <td colSpan="4">asfdafas</td>
+                                                                <td colSpan="4">{this.state.alteredClassification ? this.state.alteredClassification : this.state.autoClassification}</td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
