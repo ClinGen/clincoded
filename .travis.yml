@@ -51,17 +51,17 @@ before_script:
     fi
 script:
   - if test -z "$BROWSER"; then npm test; fi
-  - if test -z "$BROWSER"; then bin/test -v -v --timeout=300 -m "not bdd"; fi
+  - if test -z "$BROWSER"; then bin/test -v -v --timeout=600 -m "not bdd"; fi
   - >
     if test -n "$BROWSER"; then
-      test -s "$SC_PIDFILE" && bin/test -v -v --timeout=300 -m "bdd" --tb=short \
-        --splinter-implicit-wait 10 \
+      test -s "$SC_PIDFILE" && sleep 10 && bin/test -v -v --timeout=600 -m "bdd" --tb=short \
+        --splinter-implicit-wait 60 \
         --splinter-webdriver remote \
         --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
-        --splinter-socket-timeout 300 \
+        --splinter-socket-timeout 600 \
         --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
         --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
-        --browser-arg-int idleTimeout 300 \
+        --browser-arg-int idleTimeout 600 \
         --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
         --browser-arg browser "$BROWSER"
     fi
