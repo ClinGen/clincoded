@@ -108,7 +108,6 @@ var ProvisionalCuration = React.createClass({
                     var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
                     if (owner.uuid === stateObj.user) { // find
                         stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
-                        console.log(stateObj.provisional);
                         break;
                     }
                 }
@@ -147,6 +146,7 @@ var ProvisionalCuration = React.createClass({
             newProvisional.autoClassification = this.state.autoClassification;
             newProvisional.alteredClassification = this.getFormValue('alteredClassification');
             newProvisional.reasons = this.getFormValue('reasons');
+            console.log(this.state.provisional.replicatedOverTime);
 
             // check required item (reasons)
             var formErr = false;
@@ -235,6 +235,10 @@ var ProvisionalCuration = React.createClass({
             updatedProvisional.replicatedOverTime = false;
         }
         this.setState({provisional: updatedProvisional});
+        this.calculateClassifications(
+            this.state.totalScore,
+            updatedProvisional.replicatedOverTime
+        );
     },
 
     familyScraper: function(user, families, annotation, pathoVariantIdList, segregationCount, segregationPoints, individualMatched) {
@@ -555,14 +559,12 @@ var ProvisionalCuration = React.createClass({
         // set classification
         this.calculateClassifications(
             totalScore,
-            this.state.provisional && 'replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false,
-            this.state.provisional && this.state.alteredClassification ? this.state.provisional.alteredClassification : null
+            this.state.provisional && 'replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false
         );
     },
 
     calculateClassifications: function(totalPoints, replicatedOverTime) {
         let autoClassification = "No Classification";
-        let alteredClassification = null;
         if (totalPoints >= 1 && totalPoints < 7) {
             autoClassification = "Limited";
         } else if (totalPoints >= 7 && totalPoints < 11) {
@@ -572,7 +574,7 @@ var ProvisionalCuration = React.createClass({
         } else if (totalPoints >= 12 && totalPoints <= 18 && replicatedOverTime) {
             autoClassification = "Definitive";
         }
-        this.setState({autoClassification: autoClassification, alteredClassification: alteredClassification});
+        this.setState({autoClassification: autoClassification});
     },
 
     render: function() {
@@ -767,7 +769,7 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>STRONG</td>
                                                                 <td>12-18</td>
                                                             </tr>
-                                                            <tr className={"header large" + (this.state.autoClassification === 'Defintive' ? ' green' : null)}>
+                                                            <tr className={"header large" + (this.state.autoClassification === 'Definitive' ? ' green' : null)}>
                                                                 <td>DEFINITIVE</td>
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
