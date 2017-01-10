@@ -146,7 +146,8 @@ var ProvisionalCuration = React.createClass({
             newProvisional.autoClassification = this.state.autoClassification;
             newProvisional.alteredClassification = this.getFormValue('alteredClassification');
             newProvisional.reasons = this.getFormValue('reasons');
-            console.log(this.state.provisional.replicatedOverTime);
+            console.log('replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false);
+            console.log(this.state.provisional.contradictingEvidence);
 
             // check required item (reasons)
             var formErr = false;
@@ -218,26 +219,26 @@ var ProvisionalCuration = React.createClass({
     },
 
     handleChange: function(ref, e) {
-        let updatedProvisional = _.clone(this.state.provisional);
+        let provisional = _.clone(this.state.provisional);
         if (ref === 'alteredClassification') {
-            updatedProvisional[ref] = this.refs[ref].getValue();
+            provisional[ref] = this.refs[ref].getValue();
         } else if (ref === 'reasons') {
-            updatedProvisional[ref] = this.refs[ref].getValue();
+            provisional[ref] = this.refs[ref].getValue();
         }
-        this.setState({provisional: updatedProvisional});
+        this.setState({provisional: provisional});
     },
 
     handleReplicatedOverTime: function() {
-        let updatedProvisional = _.clone(this.state.provisional);
-        if (!updatedProvisional.replicatedOverTime) {
-            updatedProvisional.replicatedOverTime = true;
+        let provisional = _.clone(this.state.provisional);
+        if (!provisional.replicatedOverTime) {
+            provisional.replicatedOverTime = true;
         } else {
-            updatedProvisional.replicatedOverTime = false;
+            provisional.replicatedOverTime = false;
         }
-        this.setState({provisional: updatedProvisional});
+        this.setState({provisional: provisional});
         this.calculateClassifications(
             this.state.totalScore,
-            updatedProvisional.replicatedOverTime
+            provisional.replicatedOverTime
         );
     },
 
@@ -287,6 +288,14 @@ var ProvisionalCuration = React.createClass({
         // Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
         let gdm = this.state.gdm;
         let scoreTableValues = this.state.scoreTableValues;
+
+        // clone provisional to update contradicting evidence status
+        let provisional = _.clone(this.state.provisional);
+        provisional.contradictingEvidence = {
+            proband: false,
+            caseControl: false,
+            experimental: false
+        };
 
         const MAX_SCORE_CONSTANTS = {
             VARIANT_IS_DE_NOVO: 12,
@@ -364,9 +373,14 @@ var ProvisionalCuration = React.createClass({
                 annotation.caseControlStudies.forEach(caseControl => {
                     if (caseControl.scores && caseControl.scores.length) {
                         caseControl.scores.forEach(score => {
-                            if (score.submitted_by.uuid === this.state.user && score.score && score.score !== 'none') {
-                                scoreTableValues['caseControlCount'] += 1;
-                                scoreTableValues['caseControlPoints'] += parseFloat(score.score);
+                            if (score.submitted_by.uuid === this.state.user) {
+                                if (score.score && score.score !== 'none') {
+                                    scoreTableValues['caseControlCount'] += 1;
+                                    scoreTableValues['caseControlPoints'] += parseFloat(score.score);
+                                } else if (score.scoreStatus === 'Contradicts') {
+                                    // set flag if a contradicting case-control evidence is found
+                                    provisional.contradictingEvidence.caseControl = true;
+                                }
                             }
                         });
                     }
@@ -387,6 +401,9 @@ var ProvisionalCuration = React.createClass({
                                 experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
                             } else if (score.calculatedScore && score.calculatedScore !== 'none') {
                                 experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
+                            } else if (score.scoreStatus === 'Contradicts') {
+                                // set flag if a contradicting experimental evidence is found
+                                provisional.contradictingEvidence.experimental = true;
                             }
                             // assign score to correct sub-type depending on experiment type and other variables
                             if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
@@ -464,6 +481,9 @@ var ProvisionalCuration = React.createClass({
                     } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
                         scoreTableValues['twoVariantsProvenCount'] += 1;
                         scoreTableValues['twoVariantsProvenPoints'] += probandScore;
+                    } else if (score.scoreStatus === 'Contradicts') {
+                        // set flag if a contradicting proband evidence is found
+                        provisional.contradictingEvidence.proband = true;
                     }
                 }
             });
@@ -529,7 +549,7 @@ var ProvisionalCuration = React.createClass({
         let totalScore = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
 
         // set scoreTabValues state
-        this.setState({totalScore: totalScore, scoreTableValues: scoreTableValues});
+        this.setState({provisional: provisional, totalScore: totalScore, scoreTableValues: scoreTableValues});
 
         // set classification
         this.calculateClassifications(
@@ -729,7 +749,7 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
                                                                 <td>{this.state.totalScore}</td>
                                                                 <td>
-                                                                    <input type="checkbox" onChange={this.handleReplicatedOverTime} checked={provisional && 'replicatedOverTime' in provisional ? provisional.replicatedOverTime : false} />
+                                                                    <input type="checkbox" onChange={this.handleReplicatedOverTime} checked={'replicatedOverTime' in provisional ? provisional.replicatedOverTime : false} />
                                                                 </td>
                                                             </tr>
                                                             <tr className="header large">
@@ -750,11 +770,19 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
                                                             <tr>
+                                                                <td colSpan="2" className="header large">Contradictory Evidence</td>
+                                                                <td colSpan="3">
+                                                                    Proband: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.proband ? 'Yes' : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                    Case-control: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.caseControl ? 'Yes' : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                    Experimental: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.experimental ? 'Yes' : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
                                                                 <td colSpan="5">
                                                                     <Input type="select" ref="alteredClassification"
                                                                         label={<strong>Change Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                                                         labelClassName="col-sm-3 control-label" handleChange={this.handleChange}
-                                                                        wrapperClassName="col-sm-9" defaultValue={provisional && provisional.alteredClassification ? provisional.alteredClassification : 'No Selection'}
+                                                                        wrapperClassName="col-sm-9" defaultValue={provisional.alteredClassification ? provisional.alteredClassification : 'No Selection'}
                                                                         groupClassName="form-group">
                                                                         <option value="No Selection">No Selection</option>
                                                                         <option value="Definitive">Definitive</option>
@@ -769,7 +797,7 @@ var ProvisionalCuration = React.createClass({
                                                             <tr className="separator-below">
                                                                 <td colSpan="5">
                                                                     <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-3 control-label"
-                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={provisional && provisional.reasons ? provisional.reasons : null}
+                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={provisional.reasons ? provisional.reasons : null}
                                                                         clearError={this.clrFormErrors.bind(null, 'reasons')} />
                                                                 </td>
                                                             </tr>
