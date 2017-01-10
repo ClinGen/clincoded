@@ -2036,7 +2036,11 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
             delete writerIndividual['recessiveZygosity'];
         }
         if (individual.scores && individual.scores.length) {
-            writerIndividual.scores = individual.scores;
+            let tempScores = [];
+            individual.scores.forEach(score => {
+                tempScores.push(score.uuid);
+            });
+            writerIndividual.scores = tempScores;
         }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
