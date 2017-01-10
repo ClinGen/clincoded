@@ -4,7 +4,7 @@
 
 apt_sources:
 - source: "ppa:webupd8team/java"
-- source: "deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main"
+- source: "deb http://packages.elasticsearch.org/elasticsearch/1.7/debian stable main"
   key: |
     -----BEGIN PGP PUBLIC KEY BLOCK-----
     Version: GnuPG v2.0.14 (GNU/Linux)
@@ -37,7 +37,7 @@ apt_sources:
     qPDlGRlOgVTd9xUfHFkzB52c70E=
     =92oX
     -----END PGP PUBLIC KEY BLOCK-----
-- source: "deb https://deb.nodesource.com/node_5.x trusty main"
+- source: "deb https://deb.nodesource.com/setup_6.x trusty main"
   key: |
     -----BEGIN PGP PUBLIC KEY BLOCK-----
     Version: GnuPG v1
