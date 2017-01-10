@@ -133,6 +133,9 @@ var NavItem = module.exports.NavItem = React.createClass({
         } else if (e.target === this.refs.menu_item_variant_curation) {
             this.setState({dropdownActive: false});
             window.open('/static/help/clingen-variant-curation-help.pdf');
+        } else if (e.target === this.refs.menu_item_contact_helpdesk) {
+            this.setState({dropdownActive: false});
+            location.href = 'mailto:clingen-helpdesk@lists.stanford.edu';
         } else {
             this.setState({dropdownActive: false});
         }
@@ -155,6 +158,7 @@ var NavItem = module.exports.NavItem = React.createClass({
                         <ul className="dropdown-menu">
                             <li><a href="#" ref="menu_item_gene_curation">Gene Curation</a></li>
                             <li><a href="#" ref="menu_item_variant_curation">Variant Curation</a></li>
+                            <li><a href="#" ref="menu_item_contact_helpdesk">Contact Helpdesk</a></li>
                         </ul>
                     : null}
                 </div>
