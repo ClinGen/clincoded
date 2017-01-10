@@ -780,7 +780,7 @@ var ProvisionalCuration = React.createClass({
                                                             <tr>
                                                                 <td colSpan="5">
                                                                     <Input type="select" ref="alteredClassification"
-                                                                        label={<strong>Change Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                        label={<strong>Modify Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                                                         labelClassName="col-sm-3 control-label" handleChange={this.handleChange}
                                                                         wrapperClassName="col-sm-9" defaultValue={provisional.alteredClassification ? provisional.alteredClassification : 'No Selection'}
                                                                         groupClassName="form-group">
@@ -802,7 +802,7 @@ var ProvisionalCuration = React.createClass({
                                                                 </td>
                                                             </tr>
                                                             <tr className="total-row header">
-                                                                <td colSpan="2">Final Classification</td>
+                                                                <td colSpan="2">Current Provisional Classification</td>
                                                                 <td colSpan="4">
                                                                     <span>{provisional.alteredClassification && provisional.alteredClassification !== 'No Selection' ? provisional.alteredClassification : autoClassification}</span><br />
                                                                     {provisional.last_modified ?
