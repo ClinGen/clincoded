@@ -759,18 +759,18 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr className="header large">
                                                                 <td colSpan="3" rowSpan="4">Calculated Classification</td>
-                                                                <td className={autoClassification === 'Limited' ? ' bg-green' : null}>LIMITED</td>
-                                                                <td className={autoClassification === 'Limited' ? ' bg-green' : null}>1-6</td>
+                                                                <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>LIMITED</td>
+                                                                <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>1-6</td>
                                                             </tr>
-                                                            <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-emphasis' : null)}>
                                                                 <td>MODERATE</td>
                                                                 <td>7-11</td>
                                                             </tr>
-                                                            <tr className={"header large" + (autoClassification === 'Strong' ? ' bg-green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Strong' ? ' bg-emphasis' : null)}>
                                                                 <td>STRONG</td>
                                                                 <td>12-18</td>
                                                             </tr>
-                                                            <tr className={"header large" + (autoClassification === 'Definitive' ? ' bg-green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Definitive' ? ' bg-emphasis' : null)}>
                                                                 <td>DEFINITIVE</td>
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
