@@ -86,7 +86,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
         var provisional;
         var provisionalExist = false;
-        var summaryButton = false;
+        var summaryButton = true;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
@@ -161,17 +161,71 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
+                            <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         <span>&nbsp;
-                                            {this.props.linkGdm && pmid ?
-                                                <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + pmid}><i className="icon icon-briefcase"></i></a>
+                                            {this.props.linkGdm ?
+                                                <a href={`/curation-central/?gdm=${gdm.uuid}` + (pmid ? `&pmid=${pmid}` : '')}><i className="icon icon-briefcase"></i></a>
                                                 : <i className="icon icon-briefcase"></i>
                                             }
                                         </span>
                                     </h1>
                                     <h2><i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></h2>
                                 </span>
+                            </div>
+                            <div className="provisional-info-panel">
+                                <table border="1" style={{'width':'100%'}}>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div className="provisional-title">
+                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   provisionalExist ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Last Saved Summary<br />
+                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Provisional Classification: {provisional.alteredClassification}
+                                                                    { summaryPage ?
+                                                                        null
+                                                                        :
+                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    :
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                }
+                                            </td>
+                                            <td className="button-box" rowSpan="2">
+                                                { summaryButton ?
+                                                    ( summaryPage ?
+                                                        <button type="button" className="btn btn-primary" disabled="disabled">
+                                                            Generate New Summary
+                                                        </button>
+                                                        :
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                        </a>
+                                                    )
+                                                    :
+                                                    null
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr style={{height:'10px'}}></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
@@ -2383,6 +2437,11 @@ var DeleteButtonModal = React.createClass({
         } else if (this.props.item['@type'][0] == 'family') {
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
+        } else if (this.props.item['@type'][0] == 'individual') {
+            let individual = this.props.item;
+            if (individual.variants.length && individual.associatedFamilies.length) {
+                message = <p><strong>Warning</strong>: Deleting this individual will remove the association between its variants and the Family with which the Individual is associated.</p>;
+            }
         } else if (this.props.item['@type'][0] == 'caseControl') {
             itemLabel = this.props.item.label;
         }

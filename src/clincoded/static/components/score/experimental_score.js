@@ -87,7 +87,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                             this.refs.scoreStatus.setValue(scoreStatus);
                             // If the score form fields are allowed, then proceed with the following
                             let defaultScore = loggedInUserScore.calculatedScore,
-                                modifiedScore = loggedInUserScore.score,
+                                modifiedScore = loggedInUserScore.score.toString(),
                                 scoreExplanation = loggedInUserScore.scoreExplanation,
                                 calcScoreRange = [];
                             this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null});
@@ -377,7 +377,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                                 <dd className="col-sm-7">{defaultScore}</dd>
                             </dl>
                             <Input type="select" ref="scoreRange" label={<span>Select a score different from default score:<i>(optional)</i></span>}
-                                defaultValue={modifiedScore.toString()} value={modifiedScore.toString()} handleChange={this.handleScoreRangeChange}
+                                defaultValue={modifiedScore} value={modifiedScore} handleChange={this.handleScoreRangeChange}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                                 inputDisabled={scoreRange && scoreRange.length ? false : true}>
                                 <option value="none">No Selection</option>
