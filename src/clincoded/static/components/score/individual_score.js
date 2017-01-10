@@ -112,7 +112,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                             // If the score form fields are allowed, then proceed with the following
                             let caseInfoType = loggedInUserScore.caseInfoType,
                                 defaultScore = loggedInUserScore.calculatedScore,
-                                modifiedScore = loggedInUserScore.score,
+                                modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
                                 scoreExplanation = loggedInUserScore.scoreExplanation,
                                 calcScoreRange = [];
                             this.setState({caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
@@ -307,7 +307,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             }
         }
 
-        if (score) {
+        if (score && score !== 'none') {
             newUserScoreObj['score'] = parseFloat(score);
         } else {
             if ('score' in newUserScoreObj) {
@@ -447,6 +447,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         return (
             <div>
                 <div className="row">
+                    <div><p className="alert alert-warning">The gene impact for each variant associated with this proband must be specified in order to score this proband (see variant(s) and links to curating their gene impact in variant section for this Individual, above).</p></div>
                     <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue={scoreStatus}
                         value={scoreStatus} handleChange={this.handleScoreStatusChange} inputDisabled={disableScoreStatus}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -480,7 +481,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                                         <dd className="col-sm-7">{defaultScore}</dd>
                                     </dl>
                                     <Input type="select" ref="scoreRange" label={<span>Select a score different from default score:<i>(optional)</i></span>}
-                                        defaultValue={modifiedScore.toString()} value={modifiedScore.toString()} handleChange={this.handleScoreRangeChange}
+                                        defaultValue={modifiedScore} value={modifiedScore} handleChange={this.handleScoreRangeChange}
                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                                         inputDisabled={scoreRange && scoreRange.length ? false : true}>
                                         <option value="none">No Selection</option>
