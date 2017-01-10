@@ -608,7 +608,7 @@ var ProvisionalCuration = React.createClass({
                                                 <div className="container">
                                                     <table className="summary-matrix">
                                                         <tbody>
-                                                            <tr className="header large bg-color separator-below">
+                                                            <tr className="header large bg-gray separator-below">
                                                                 <td colSpan="5">Evidence Type</td>
                                                                 <td>Count</td>
                                                                 <td>Total Points</td>
@@ -733,7 +733,7 @@ var ProvisionalCuration = React.createClass({
                                                 <div className="container">
                                                     <table className="summary-matrix">
                                                         <tbody>
-                                                            <tr className="header large bg-color">
+                                                            <tr className="header large bg-gray">
                                                                 <td colSpan="5">Gene/Disease Pair</td>
                                                             </tr>
                                                             <tr>
@@ -743,38 +743,38 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>Total Points (0-18 points)</td>
                                                                 <td>Replication Over Time (Yes/No)</td>
                                                             </tr>
-                                                            <tr className="header large bg-color separator-below">
+                                                            <tr className="header large bg-gray separator-below">
                                                                 <td>Assigned Points</td>
                                                                 <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
                                                                 <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
                                                                 <td>{this.state.totalScore}</td>
                                                                 <td>
-                                                                    <input type="checkbox" onChange={this.handleReplicatedOverTime} checked={'replicatedOverTime' in provisional ? provisional.replicatedOverTime : false} />
+                                                                    <input type="checkbox" className="checkbox" onChange={this.handleReplicatedOverTime} checked={'replicatedOverTime' in provisional ? provisional.replicatedOverTime : false} />
                                                                 </td>
                                                             </tr>
                                                             <tr className="header large">
                                                                 <td colSpan="3" rowSpan="4">Calculated Classification</td>
-                                                                <td className={autoClassification === 'Limited' ? ' green' : null}>LIMITED</td>
-                                                                <td className={autoClassification === 'Limited' ? ' green' : null}>1-6</td>
+                                                                <td className={autoClassification === 'Limited' ? ' bg-green' : null}>LIMITED</td>
+                                                                <td className={autoClassification === 'Limited' ? ' bg-green' : null}>1-6</td>
                                                             </tr>
-                                                            <tr className={"header large" + (autoClassification === 'Moderate' ? ' green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-green' : null)}>
                                                                 <td>MODERATE</td>
                                                                 <td>7-11</td>
                                                             </tr>
-                                                            <tr className={"header large" + (autoClassification === 'Strong' ? ' green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Strong' ? ' bg-green' : null)}>
                                                                 <td>STRONG</td>
                                                                 <td>12-18</td>
                                                             </tr>
-                                                            <tr className={"header large" + (autoClassification === 'Definitive' ? ' green' : null)}>
+                                                            <tr className={"header large" + (autoClassification === 'Definitive' ? ' bg-green' : null)}>
                                                                 <td>DEFINITIVE</td>
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="2" className="header large">Contradictory Evidence</td>
                                                                 <td colSpan="3">
-                                                                    Proband: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.proband ? 'Yes' : 'No'}</strong>&nbsp;&nbsp;&nbsp;
-                                                                    Case-control: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.caseControl ? 'Yes' : 'No'}</strong>&nbsp;&nbsp;&nbsp;
-                                                                    Experimental: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.experimental ? 'Yes' : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                    Proband: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                    Case-control: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.caseControl ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                    Experimental: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
                                                                 </td>
                                                             </tr>
                                                             <tr>

@@ -802,16 +802,20 @@
         border: solid 1px #000;
     }
 
-    .bg-color {
+    .bg-gray {
         background-color: #ccc;
     }
 
-    .green {
+    .bg-green {
         background-color: #5fb657;
     }
 
     .large {
         font-size: 16px;
+    }
+
+    .emphasis {
+        color: red;
     }
 
     .header {
@@ -822,6 +826,11 @@
 
     .num-col {
         width: 100px;
+    }
+
+    .checkbox {
+        margin: 0 auto;
+        font-size: 30px;
     }
 
     .rotate-text {
