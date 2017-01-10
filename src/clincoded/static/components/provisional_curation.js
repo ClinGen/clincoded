@@ -770,7 +770,7 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>12-18 & Replicated Over Time</td>
                                                             </tr>
                                                             <tr>
-                                                                <td colSpan="2" className="header large">Contradictory Evidence</td>
+                                                                <td colSpan="2" className="header large">Contradictory Evidence?</td>
                                                                 <td colSpan="3">
                                                                     Proband: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
                                                                     Case-control: <strong>{provisional.contradictingEvidence && provisional.contradictingEvidence.caseControl ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;

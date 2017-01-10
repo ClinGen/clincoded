@@ -1867,7 +1867,7 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "autoClassification", "alteredClassification", "reasons", "active"
+    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification", "reasons", "active"
 ];
 
 function flattenProvisional(provisional) {
