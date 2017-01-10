@@ -583,12 +583,14 @@ var ProvisionalCuration = React.createClass({
         let summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
         let expMatrix = queryKeyValue('expmatrix', this.props.href);
 
-        // set the 'Current Classification' appropriately
-        let currentClassification = 'No Classification';
-        if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
-            currentClassification = provisional.alteredClassification;
-        } else {
-            currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
+        // set the 'Current Classification' appropriately only if previous provisional exists
+        let currentClassification = 'None';
+        if (provisional.last_modified) {
+            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
+                currentClassification = provisional.alteredClassification;
+            } else {
+                currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
+            }
         }
         return (
             <div>
@@ -807,12 +809,16 @@ var ProvisionalCuration = React.createClass({
                                                                 </td>
                                                             </tr>
                                                             <tr className="total-row header">
-                                                                <td colSpan="2">Current Provisional Classification</td>
+                                                                <td colSpan="2">Current Saved Provisional Classification</td>
                                                                 <td colSpan="4">
-                                                                    <span>{currentClassification}</span><br />
-                                                                    {provisional.last_modified ?
-                                                                        <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
-                                                                    : null}
+                                                                    {currentClassification == 'None' ?
+                                                                        <span>{currentClassification}</span>
+                                                                    :
+                                                                        <div>{currentClassification}
+                                                                            <br />
+                                                                            <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                        </div>
+                                                                    }
                                                                 </td>
                                                             </tr>
                                                         </tbody>
