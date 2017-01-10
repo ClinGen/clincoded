@@ -2017,7 +2017,9 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
     /* Update individual's recessiveZygosity property if:      */
     /* The passed argument is different from the strored value */
     /***********************************************************/
-    if (zygosity !== individual.recessiveZygosity) {
+    let tempZygosity = zygosity ? zygosity : null;
+    let tempIndivZygosity = individual.recessiveZygosity ? individual.recessiveZygosity : null;
+    if (tempZygosity !== tempIndivZygosity) {
         updateNeeded = true;
     }
 
