@@ -112,7 +112,6 @@ var ProvisionalCuration = React.createClass({
                     }
                 }
             }
-
             stateObj.previousUrl = url;
             this.setState(stateObj);
 
@@ -120,11 +119,9 @@ var ProvisionalCuration = React.createClass({
         }).then(result => {
             // once we have the GDM info, calculate the values for the score table
             this.calculateScoreTable();
-        });
-        /*.catch(function(e) {
+        }).catch(function(e) {
             console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
-        */
     },
 
     componentDidMount: function() {
@@ -146,8 +143,8 @@ var ProvisionalCuration = React.createClass({
             newProvisional.autoClassification = this.state.autoClassification;
             newProvisional.alteredClassification = this.getFormValue('alteredClassification');
             newProvisional.reasons = this.getFormValue('reasons');
-            console.log('replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false);
-            console.log(this.state.provisional.contradictingEvidence);
+            newProvisional.replicatedOverTime = 'replicatedOverTime' in this.state.provisional ? this.state.provisional.replicatedOverTime : false;
+            newProvisional.contradictingEvidence = this.state.provisional.contradictingEvidence;
 
             // check required item (reasons)
             var formErr = false;
@@ -585,6 +582,14 @@ var ProvisionalCuration = React.createClass({
         let show_clsfctn = queryKeyValue('classification', this.props.href);
         let summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
         let expMatrix = queryKeyValue('expmatrix', this.props.href);
+
+        // set the 'Current Classification' appropriately
+        let currentClassification = 'No Classification';
+        if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
+            currentClassification = provisional.alteredClassification;
+        } else {
+            currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
+        }
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -804,7 +809,7 @@ var ProvisionalCuration = React.createClass({
                                                             <tr className="total-row header">
                                                                 <td colSpan="2">Current Provisional Classification</td>
                                                                 <td colSpan="4">
-                                                                    <span>{provisional.alteredClassification && provisional.alteredClassification !== 'No Selection' ? provisional.alteredClassification : autoClassification}</span><br />
+                                                                    <span>{currentClassification}</span><br />
                                                                     {provisional.last_modified ?
                                                                         <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
                                                                     : null}
