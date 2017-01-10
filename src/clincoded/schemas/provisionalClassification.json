@@ -52,17 +52,20 @@
                 "proband": {
                     "title": "Proband Individual Evidence",
                     "description": "Boolean value for Proband Individual Evidence",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "caseControl": {
                     "title": "Case-Control Evidence",
                     "description": "Boolean value for Case-Control Evidence",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "experimental": {
                     "title": "Experimental Evidence",
                     "description": "Boolean value for Experimental Evidence",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 }
             }
         },
