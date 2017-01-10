@@ -821,57 +821,6 @@ var ProvisionalCuration = React.createClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
-                                {   /* Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
-                                    (provisional && edit === 'yes') ?
-                                    EditCurrent.call(this)
-                                    :
-                                    (   calculate === 'yes' ?
-                                        <div>
-                                            <h1>Curation Summary & Provisional Classification</h1>
-                                            {
-                                                provisional ?
-                                                <PanelGroup accordion>
-                                                    <Panel title="Last Saved Summary & Provisional Classification" open>
-                                                        <div className="row">
-                                                                <div className="col-sm-5"><strong>Date Generated:</strong></div>
-                                                                <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Total Score:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Calculated Clinical Validity Classification:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Selected Clinical Validity Classification:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Reason(s):</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
-                                                            </div>
-                                                            <div className="row">&nbsp;</div>
-                                                        </Panel>
-                                                    </PanelGroup>
-                                                :
-                                                null
-                                            }
-                                            {NewCalculation.call(this)}
-                                        </div>
-                                        :
-                                        null
-                                    )*/
-                                }
                             </div>
                         </div>
                         :
@@ -1021,6 +970,9 @@ var Classification = function() {
 };
 
 // Description of 4 leves of classification in summary table
+// the below 4 functions are not being used anywhere. Commenting out for backup
+// purposes. Perhaps remove in the next re-visit of this page. - MC
+/*
 var LimitedClassification = function() {
     return (
         <div>
@@ -1079,6 +1031,7 @@ var DefinitiveClassification = function() {
         </div>
     );
 };
+*/
 
 // Display a history item for adding a family
 var ProvisionalAddModHistory = React.createClass({
