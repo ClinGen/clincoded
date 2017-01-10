@@ -301,7 +301,7 @@ var IndividualCuration = React.createClass({
         // Make sure there is an explanation for the score selected differently from the default score
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({formError: true});
                 return false;
             }
@@ -1308,6 +1308,25 @@ var IndividualVariantInfo = function() {
                                         </div>
                                     : null}
 
+                                    {variant.uuid && gdmUuid && pmidUuid ?
+                                        <div>
+                                            <dt className="no-label"></dt>
+                                            <dd>
+                                                <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
+                                                <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + variant.uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
+                                            </dd>
+                                        </div>
+                                    : null}
+
+                                    {variant.uuid ?
+                                        <div>
+                                            <dt className="no-label"></dt>
+                                            <dd>
+                                                <a href={'/variant-central/?variant=' + variant.uuid} target="_blank">View variant evidence in Variant Curation Interface</a>
+                                            </dd>
+                                        </div>
+                                    : null}
+
                                     {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
                                         <div>
                                             <dt>Genomic HGVS Title</dt>
@@ -1409,12 +1428,15 @@ var IndividualVariantInfo = function() {
                                                 <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                             </div>
                                         : null}
-                                        <div className="row variant-assessment">
-                                            <span className="col-sm-5 control-label"><label></label></span>
-                                            <span className="col-sm-7 text-no-input">
-                                                <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
-                                            </span>
-                                        </div>
+                                        {this.state.proband_selected ?
+                                            <div className="row variant-assessment">
+                                                <span className="col-sm-5 control-label"><label></label></span>
+                                                <span className="col-sm-7 text-no-input">
+                                                    <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
+                                                    <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
+                                                </span>
+                                            </div>
+                                        : null}
                                         <div className="row variant-curation">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1616,7 +1638,7 @@ var IndividualViewer = React.createClass({
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.score && !newUserScoreObj.scoreExplanation) {
+            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({formError: true});
                 return false;
             }
