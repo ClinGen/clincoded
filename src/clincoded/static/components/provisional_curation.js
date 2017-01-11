@@ -45,7 +45,7 @@ var ProvisionalCuration = React.createClass({
             autoClassification: 'No Classification',
             alteredClassification: 'No Selection',
             replicatedOverTime: false,
-            reasons: null,
+            reasons: "",
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
             },
