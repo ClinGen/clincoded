@@ -797,8 +797,8 @@ var ProvisionalCuration = React.createClass({
                                                             <tr className="separator-below">
                                                                 <td colSpan="5">
                                                                     <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-3 control-label"
-                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={provisional.reasons ? provisional.reasons : null}
-                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} />
+                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
+                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange} />
                                                                 </td>
                                                             </tr>
                                                             <tr className="total-row header">
