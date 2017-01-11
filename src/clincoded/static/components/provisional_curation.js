@@ -393,7 +393,7 @@ var ProvisionalCuration = React.createClass({
                                 let experimentalScore = 0;
                                 if ('score' in score && score.score !== 'none') {
                                     experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
-                                } else if (score.calculatedScore && score.calculatedScore !== 'none') {
+                                } else if ('calculatedScore' in score && score.calculatedScore !== 'none') {
                                     experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
                                 }
 
@@ -457,9 +457,9 @@ var ProvisionalCuration = React.createClass({
                     if (score.scoreStatus === 'Score') {
                         // parse proband score
                         let probandScore = 0;
-                        if (score.score && score.score !== 'none') {
+                        if ('score' in score && score.score !== 'none') {
                             probandScore += parseFloat(score.score);
-                        } else if (score.calculatedScore && score.calculatedScore !== 'none') {
+                        } else if ('calculatedScore' in score && score.calculatedScore !== 'none') {
                             probandScore += parseFloat(score.calculatedScore);
                         }
                         // assign score to correct sub-type depending on score type
