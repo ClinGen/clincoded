@@ -114,13 +114,13 @@ var ProvisionalCuration = React.createClass({
                     var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
                     if (owner.uuid === stateObj.user) { // find
                         stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                        stateObj.alteredClassification = stateObj.provisional.alteredClassification;
+                        stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
+                        stateObj.reasons = stateObj.provisional.reasons;
                         break;
                     }
                 }
             }
-            stateObj.alteredClassification = stateObj.provisional.alteredClassification;
-            stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
-            stateObj.reasons = stateObj.provisional.reasons;
             stateObj.previousUrl = url;
             this.setState(stateObj);
 
