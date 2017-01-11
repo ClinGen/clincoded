@@ -367,7 +367,7 @@ var ProvisionalCuration = React.createClass({
                     if (caseControl.scores && caseControl.scores.length) {
                         caseControl.scores.forEach(score => {
                             if (score.submitted_by.uuid === this.state.user) {
-                                if (score.score && score.score !== 'none') {
+                                if (score.scoreStatus === 'Score' && 'score' in score && score.score !== 'none') {
                                     scoreTableValues['caseControlCount'] += 1;
                                     scoreTableValues['caseControlPoints'] += parseFloat(score.score);
                                 } else if (score.scoreStatus === 'Contradicts') {
@@ -388,56 +388,59 @@ var ProvisionalCuration = React.createClass({
                     experimental.scores.forEach(score => {
                         // only care about scores made by current user
                         if (score.submitted_by.uuid === this.state.user) {
-                            // parse score of experimental
-                            let experimentalScore = 0;
-                            if (score.score && score.score !== 'none') {
-                                experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
-                            } else if (score.calculatedScore && score.calculatedScore !== 'none') {
-                                experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
+                            if (score.scoreStatus === 'Score') {
+                                // parse score of experimental
+                                let experimentalScore = 0;
+                                if ('score' in score && score.score !== 'none') {
+                                    experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
+                                } else if (score.calculatedScore && score.calculatedScore !== 'none') {
+                                    experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
+                                }
+
+                                // assign score to correct sub-type depending on experiment type and other variables
+                                if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
+                                    scoreTableValues['biochemicalFunctionCount'] += 1;
+                                    scoreTableValues['biochemicalFunctionPoints'] += experimentalScore;
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Protein Interactions') {
+                                    scoreTableValues['proteinInteractionsCount'] += 1;
+                                    scoreTableValues['proteinInteractionsPoints'] += experimentalScore;
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Expression') {
+                                    scoreTableValues['expressionCount'] += 1;
+                                    scoreTableValues['expressionPoints'] += experimentalScore;
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
+                                    if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
+                                        && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
+                                        scoreTableValues['patientCellsCount'] += 1;
+                                        scoreTableValues['patientCellsPoints'] += experimentalScore;
+                                    } else if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
+                                        && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
+                                        scoreTableValues['nonPatientCellsCount'] += 1;
+                                        scoreTableValues['nonPatientCellsPoints'] += experimentalScore;
+                                    }
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
+                                    if (experimental.modelSystems.animalOrCellCulture
+                                        && experimental.modelSystems.animalOrCellCulture === 'Animal model') {
+                                        scoreTableValues['animalModelCount'] += 1;
+                                        scoreTableValues['animalModelPoints'] += experimentalScore;
+                                    } else if (experimental.modelSystems.animalOrCellCulture
+                                        && experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
+                                        scoreTableValues['cellCultureCount'] += 1;
+                                        scoreTableValues['cellCulturePoints'] += experimentalScore;
+                                    }
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
+                                    if (experimental.rescue.patientCellOrEngineeredEquivalent
+                                        && experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
+                                        scoreTableValues['rescueCount'] += 1;
+                                        scoreTableValues['rescuePoints'] += experimentalScore;
+                                    } else if (experimental.rescue.patientCellOrEngineeredEquivalent
+                                        && experimental.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
+                                        scoreTableValues['rescueEngineeredCount'] += 1;
+                                        scoreTableValues['rescueEngineeredPoints'] += experimentalScore;
+                                    }
+                                }
                             } else if (score.scoreStatus === 'Contradicts') {
                                 // set flag if a contradicting experimental evidence is found
                                 contradictingEvidence.experimental = true;
-                            }
-                            // assign score to correct sub-type depending on experiment type and other variables
-                            if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
-                                scoreTableValues['biochemicalFunctionCount'] += 1;
-                                scoreTableValues['biochemicalFunctionPoints'] += experimentalScore;
-                            } else if (experimental.evidenceType && experimental.evidenceType === 'Protein Interactions') {
-                                scoreTableValues['proteinInteractionsCount'] += 1;
-                                scoreTableValues['proteinInteractionsPoints'] += experimentalScore;
-                            } else if (experimental.evidenceType && experimental.evidenceType === 'Expression') {
-                                scoreTableValues['expressionCount'] += 1;
-                                scoreTableValues['expressionPoints'] += experimentalScore;
-                            } else if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
-                                if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
-                                    && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
-                                    scoreTableValues['patientCellsCount'] += 1;
-                                    scoreTableValues['patientCellsPoints'] += experimentalScore;
-                                } else if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
-                                    && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
-                                    scoreTableValues['nonPatientCellsCount'] += 1;
-                                    scoreTableValues['nonPatientCellsPoints'] += experimentalScore;
-                                }
-                            } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
-                                if (experimental.modelSystems.animalOrCellCulture
-                                    && experimental.modelSystems.animalOrCellCulture === 'Animal model') {
-                                    scoreTableValues['animalModelCount'] += 1;
-                                    scoreTableValues['animalModelPoints'] += experimentalScore;
-                                } else if (experimental.modelSystems.animalOrCellCulture
-                                    && experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
-                                    scoreTableValues['cellCultureCount'] += 1;
-                                    scoreTableValues['cellCulturePoints'] += experimentalScore;
-                                }
-                            } else if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
-                                if (experimental.rescue.patientCellOrEngineeredEquivalent
-                                    && experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
-                                    scoreTableValues['rescueCount'] += 1;
-                                    scoreTableValues['rescuePoints'] += experimentalScore;
-                                } else if (experimental.rescue.patientCellOrEngineeredEquivalent
-                                    && experimental.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
-                                    scoreTableValues['rescueEngineeredCount'] += 1;
-                                    scoreTableValues['rescueEngineeredPoints'] += experimentalScore;
-                                }
                             }
                         }
                     });
@@ -451,29 +454,31 @@ var ProvisionalCuration = React.createClass({
         probandTotal.forEach(proband => {
             proband.scores.forEach(score => {
                 if (score.submitted_by.uuid === this.state.user) {
-                    // parse proband score
-                    let probandScore = 0;
-                    if (score.score && score.score !== 'none') {
-                        probandScore += parseFloat(score.score);
-                    } else if (score.calculatedScore && score.calculatedScore !== 'none') {
-                        probandScore += parseFloat(score.calculatedScore);
-                    }
-                    // assign score to correct sub-type depending on score type
-                    if (score.caseInfoType && score.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && score.scoreStatus === 'Score') {
-                        scoreTableValues['probandOtherVariantCount'] += 1;
-                        scoreTableValues['probandOtherVariantPoints'] += probandScore;
-                    } else if (score.caseInfoType && score.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && score.scoreStatus === 'Score') {
-                        scoreTableValues['probandNullVariantCount'] += 1;
-                        scoreTableValues['probandNullVariantPoints'] += probandScore;
-                    } else if (score.caseInfoType && score.caseInfoType === 'VARIANT_IS_DE_NOVO' && score.scoreStatus === 'Score') {
-                        scoreTableValues['variantDenovoCount'] += 1;
-                        scoreTableValues['variantDenovoPoints'] += probandScore;
-                    } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && score.scoreStatus === 'Score') {
-                        scoreTableValues['twoVariantsNotProvenCount'] += 1;
-                        scoreTableValues['twoVariantsNotProvenPoints'] += probandScore;
-                    } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
-                        scoreTableValues['twoVariantsProvenCount'] += 1;
-                        scoreTableValues['twoVariantsProvenPoints'] += probandScore;
+                    if (score.scoreStatus === 'Score') {
+                        // parse proband score
+                        let probandScore = 0;
+                        if (score.score && score.score !== 'none') {
+                            probandScore += parseFloat(score.score);
+                        } else if (score.calculatedScore && score.calculatedScore !== 'none') {
+                            probandScore += parseFloat(score.calculatedScore);
+                        }
+                        // assign score to correct sub-type depending on score type
+                        if (score.caseInfoType && score.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && score.scoreStatus === 'Score') {
+                            scoreTableValues['probandOtherVariantCount'] += 1;
+                            scoreTableValues['probandOtherVariantPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && score.scoreStatus === 'Score') {
+                            scoreTableValues['probandNullVariantCount'] += 1;
+                            scoreTableValues['probandNullVariantPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'VARIANT_IS_DE_NOVO' && score.scoreStatus === 'Score') {
+                            scoreTableValues['variantDenovoCount'] += 1;
+                            scoreTableValues['variantDenovoPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && score.scoreStatus === 'Score') {
+                            scoreTableValues['twoVariantsNotProvenCount'] += 1;
+                            scoreTableValues['twoVariantsNotProvenPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
+                            scoreTableValues['twoVariantsProvenCount'] += 1;
+                            scoreTableValues['twoVariantsProvenPoints'] += probandScore;
+                        }
                     } else if (score.scoreStatus === 'Contradicts') {
                         // set flag if a contradicting proband evidence is found
                         contradictingEvidence.proband = true;
