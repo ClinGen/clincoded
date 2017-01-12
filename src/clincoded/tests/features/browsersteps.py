@@ -262,6 +262,15 @@ def i_press(browser, name):
     element.first.click()
 
 
+@when(parse('I press the button "{name}"'))
+def i_press(browser, name):
+    element = browser.find_by_xpath(
+        ("//span[text()='%(name)s']|"
+        "//button[text()='%(name)s']") % {'name': name})
+    assert element, u'Element not found'
+    element.first.click()
+
+
 @when(parse('I press the element with xpath "{xpath}"'))
 def i_press_xpath(browser, xpath):
     button = browser.find_by_xpath(xpath)
