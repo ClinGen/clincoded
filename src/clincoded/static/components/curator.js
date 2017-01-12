@@ -192,8 +192,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                             </div>
                                                             <div className="provisional-data-center">
                                                                 <span>
-                                                                    Calculated Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                    Provisional Classification: {provisional.alteredClassification}
+                                                                    Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
                                                                     { summaryPage ?
                                                                         null
                                                                         :
