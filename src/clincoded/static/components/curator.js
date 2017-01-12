@@ -210,7 +210,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                 { summaryButton ?
                                                     ( summaryPage ?
                                                         <button type="button" className="btn btn-primary" disabled="disabled">
-                                                            Generate New Summary
+                                                            Generate Summary
                                                         </button>
                                                         :
                                                         <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
