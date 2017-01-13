@@ -80,7 +80,6 @@ setup(
         extract_test_data = clincoded.commands.extract_test_data:main
         es-index-data = clincoded.commands.es_index_data:main
         es-index-listener = clincoded.commands.es_index_listener:main
-        generate-ontology = clincoded.commands.generate_ontology:main
         import-data = clincoded.commands.import_data:main
         jsonld-rdf = clincoded.commands.jsonld_rdf:main
         migrate-files-aws = clincoded.commands.migrate_files_aws:main

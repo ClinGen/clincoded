@@ -5,6 +5,7 @@ http://pyramid.readthedocs.org/en/latest/narr/testing.html
 import pkg_resources
 import pytest
 from pytest import fixture
+import random
 
 pytest_plugins = [
     'clincoded.tests.datafixtures',
@@ -269,8 +270,13 @@ def embed_testapp(app, external_tx):
 
 @fixture(scope='session')
 def server_host_port():
-    from webtest.http import get_free_port
-    return get_free_port()
+    # we have specified a range of ports for login testing at Auth0 for clincoded (65525-65534)
+    port = random.randrange(65525, 65535)
+    # TODO: test if socket can be made
+
+    # the port will only be printed if errors occur
+    print("**** login port ***", port)
+    return ("127.0.0.1", port)
 
 
 @fixture(scope='session')
