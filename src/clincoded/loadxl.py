@@ -467,6 +467,7 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None
             'model_organism_age',
             'model_organism_sex',
             'mouse_life_stage',
+            'modeInheritance'
             # 'flowcell_details.machine',
         ),
         add_attachment(docsdir),
