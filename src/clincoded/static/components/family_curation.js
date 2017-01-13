@@ -42,14 +42,7 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
-// Will be great to convert to 'const' when available
-var MAX_VARIANTS = 2;
-
-// Settings for this.state.varOption
-var VAR_NONE = 0; // No variants entered in a panel
-var VAR_SPEC = 1; // A specific variant (dbSNP, ClinVar, HGVS) entered in a panel
-var VAR_OTHER = 2; // Other description entered in a panel
-
+const MAX_VARIANTS = 2;
 
 // Maps segregation field refs to schema properties
 var formMapSegregation = {
@@ -99,20 +92,21 @@ var FamilyCuration = React.createClass({
             annotation: null, // Annotation object given in query string
             extraFamilyCount: 0, // Number of extra families to create
             extraFamilyNames: [], // Names of extra families to create
-            variantCount: 0, // Number of variants to display
-            variantOption: [], // One variant panel, and nothing entered
+            variantCount: 0, // Number of variants loaded
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
-            addVariantDisabled: false, // True if Add Another Variant button enabled
             individualRequired: null, // Boolean for set up requirement of proband
-            variantRequired: null, // boolean for set up requirement of variant if proband individual data entered
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
             existedOrphanetId: null, // user-supplied value in Orphanet id input field
-            recessiveZygosity: null, // Determines whether to allow user to add 2nd variant
-            lodPublished: null // Switch to show either calculated or estimated LOD score
+            recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
+            lodPublished: null, // Switch to show either calculated or estimated LOD score
+            estimatedLodScore: null, // track estimated LOD value
+            publishedLodScore: null, // track published LOD value
+            lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
+            lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
         };
     },
 
@@ -130,70 +124,43 @@ var FamilyCuration = React.createClass({
             this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
-        } else if (ref === 'SEGlodPublished') {
-            if (this.refs[ref].getValue() === 'Yes') {
-                this.setState({lodPublished: 'Yes'});
-            } else if (this.refs[ref].getValue() === 'No') {
-                this.setState({lodPublished: 'No'});
-            } else {
-                this.setState({lodPublished: null});
-            }
-        } else if (ref === 'SEGrecessiveZygosity') {
-            //Only show option to add 2nd variant if user selects 'Heterozygous'
-            this.refs[ref].getValue() === 'Heterozygous' ? this.setState({recessiveZygosity: 'Heterozygous'}) : this.setState({recessiveZygosity: null}, () => {
-                if (this.state.variantCount > 1) {
-                    this.setState({variantCount: this.state.variantCount-1, addVariantDisabled: false});
-                }
-            });
-        } else if (ref.substring(0, 3) === 'VAR') {
-            // Disable Add Another Variant if no variant fields have a value (variant fields all start with 'VAR')
-            // First figure out the last variant panel’s ref suffix, then see if any values in that panel have changed
-            var lastVariantSuffix = (this.state.variantCount - 1) + '';
-            var refSuffix = ref.match(/\d+$/);
-            refSuffix = refSuffix && refSuffix[0];
-            if (refSuffix && (lastVariantSuffix === refSuffix)) {
-                // The changed item is in the last variant panel. If any fields in the last field have a value, disable
-                // the Add Another Variant button.
-                clinvarid = this.refs['VARclinvarid' + lastVariantSuffix].getValue();
-                othervariant = this.refs['VARothervariant' + lastVariantSuffix].getValue();
-                this.setState({addVariantDisabled: !(clinvarid || othervariant)});
-            }
-
-            // Disable fields depending on what fields have values in them.
-            clinvarid = this.refs['VARclinvarid' + refSuffix].getValue();
-            othervariant = this.refs['VARothervariant' + refSuffix].getValue();
-            var currVariantOption = this.state.variantOption;
-            if (othervariant) {
-                // Something entered in Other; clear the ClinVar ID and set the variantOption state to disable it.
-                this.refs['VARclinvarid' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_OTHER;
-            } else if (clinvarid) {
-                // Something entered in ClinCar ID; clear the Other field and set the variantOption state to disable it.
-                this.refs['VARothervariant' + refSuffix].resetValue();
-                currVariantOption[refSuffix] = VAR_SPEC;
-            } else {
-                // Nothing entered anywhere; enable everything.
-                currVariantOption[refSuffix] = VAR_NONE;
-            }
-            this.setState({variantOption: currVariantOption});
-
-            // if variant data entered, must enter proband individual name and orphanet
-            // First check if data entered in either ClinVar Variant ID or Other description at each variant
-            var noVariantData = true;
-            _.range(this.state.variantCount).map(i => {
-                if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
-                    noVariantData = false;
-                }
-            });
-            // If not entered at all, proband individua is not required and must be no error messages at individual fields.
-            if (noVariantData) {
-                this.setState({individualRequired: false});
-                var errors = this.state.formErrors;
-                errors['individualname'] = '';
-                errors['individualorphanetid'] = '';
-                this.setState({formErrors: errors});
-            } else {
+        } else if (ref === 'individualname' || ref === 'individualorphanetid') {
+            let individualName = this.refs['individualname'].getValue();
+            let individualOrphanetId = this.refs['individualorphanetid'].getValue();
+            if (individualName || individualOrphanetId) {
                 this.setState({individualRequired: true});
+            } else if (!individualName && !individualOrphanetId) {
+                this.setState({individualRequired: false});
+            }
+        } else if (ref === 'SEGlodPublished') {
+            let lodPublished = this.refs[ref].getValue();
+            if (lodPublished === 'Yes') {
+                this.setState({lodPublished: 'Yes'});
+                if (!this.state.publishedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            } else if (lodPublished === 'No') {
+                this.setState({lodPublished: 'No', publishedLodScore: null});
+                if (!this.state.estimatedLodScore) {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            } else {
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                this.setState({lodPublished: null, publishedLodScore: null});
+            }
+        } else if (ref === 'zygosityHomozygous') {
+            if (this.refs[ref].toggleValue()) {
+                this.setState({recessiveZygosity: 'Homozygous'});
+                this.refs['zygosityHemizygous'].resetValue();
+            } else {
+                this.setState({recessiveZygosity: null});
+            }
+        } else if (ref === 'zygosityHemizygous') {
+            if (this.refs[ref].toggleValue()) {
+                this.setState({recessiveZygosity: 'Hemizygous'});
+                this.refs['zygosityHomozygous'].resetValue();
+            } else {
+                this.setState({recessiveZygosity: null});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
@@ -209,6 +176,34 @@ var FamilyCuration = React.createClass({
                 if (this.cv.filledSegregations[ref]) {
                     delete this.cv.filledSegregations[ref];
                 }
+            }
+
+            // Update states for LOD scores; reset SEGincludeLodScoreInAggregateCalculation dropdown if blank
+            if (ref === 'SEGestimatedLodScore') {
+                let estimatedLodScore = this.refs[ref].getValue();
+                this.setState({estimatedLodScore: estimatedLodScore});
+                if (estimatedLodScore == '') {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            }
+            if (ref === 'SEGpublishedLodScore') {
+                let publishedLodScore = this.refs[ref].getValue();
+                this.setState({publishedLodScore: publishedLodScore});
+                if (publishedLodScore == '') {
+                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                }
+            }
+
+            // Update Estimated LOD if it should be automatically calculated
+            if (this.state.lodLocked && (ref === 'SEGnumberOfAffectedWithGenotype'
+                || ref === 'SEGnumberOfUnaffectedWithoutBiallelicGenotype'
+                || ref === 'SEGnumberOfSegregationsForThisFamily')) {
+                this.calculateEstimatedLOD(
+                    this.state.lodCalcMode,
+                    this.refs['SEGnumberOfAffectedWithGenotype'].getValue(),
+                    this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].getValue(),
+                    this.refs['SEGnumberOfSegregationsForThisFamily'].getValue()
+                );
             }
 
             // Now change the state of the assessment dropdown if needed
@@ -231,6 +226,7 @@ var FamilyCuration = React.createClass({
         var hpoIds = '';
         var hpoFreeText = '';
         if (fromTarget == 'group') {
+            this.setState({individualRequired: true});
             if (this.state.group) {
                 // We have a group, so get the disease array from it.
                 associatedGroups = [this.state.group];
@@ -275,11 +271,48 @@ var FamilyCuration = React.createClass({
                 }
             }
         } else if (fromTarget == 'family') {
+            this.setState({individualRequired: true});
             orphanetVal = this.refs['orphanetid'].getValue();
             this.refs['individualorphanetid'].setValue(orphanetVal);
             var errors = this.state.formErrors;
             errors['individualorphanetid'] = '';
             this.setState({formErrors: errors});
+        }
+    },
+
+    // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
+    calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
+        let estimatedLodScore = null;
+        if (lodCalcMode === 'AD') {
+            // LOD scoring if GDM is Autosomal dominant
+            if (numSegregation !== '') {
+                numSegregation = parseInt(numSegregation);
+                estimatedLodScore = Math.log(1 / Math.pow(0.5, numSegregation)) / Math.log(10);
+            }
+        } else if (lodCalcMode === 'AR') {
+            // LOD scoring if GDM is Autosomal recessive
+            if (numAffected !== '' && numUnaffected !== '') {
+                numAffected = parseInt(numAffected);
+                numUnaffected = parseInt(numUnaffected);
+                estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
+            }
+        }
+        if (isNaN(estimatedLodScore)) {
+            estimatedLodScore = null;
+        }
+        if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
+            if (estimatedLodScore) {
+                estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
+            }
+            // Update state and form field if relevant
+            this.setState({estimatedLodScore: estimatedLodScore});
+            if (this.refs['SEGestimatedLodScore']) {
+                this.refs['SEGestimatedLodScore'].setValue(estimatedLodScore);
+            }
+            // Reset the SEGincludeLodScoreInAggregateCalculation dropdown if there is no calculated estimated lod score
+            if (!estimatedLodScore && this.refs['SEGincludeLodScoreInAggregateCalculation']) {
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+            }
         }
     },
 
@@ -336,29 +369,60 @@ var FamilyCuration = React.createClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
+            // Update the LOD locked and calculation modes
+            if (stateObj.gdm && stateObj.gdm.modeInheritance) {
+                if (stateObj.gdm.modeInheritance.indexOf('Autosomal dominant') > -1) {
+                    stateObj.lodLocked = true;
+                    stateObj.lodCalcMode = 'AD';
+                } else if (stateObj.gdm.modeInheritance.indexOf('Autosomal recessive') > -1) {
+                    stateObj.lodLocked = true;
+                    stateObj.lodCalcMode = 'AR';
+                } else {
+                    stateObj.lodLocked = false;
+                }
+            }
+
             // Update the family name
             if (stateObj.family) {
                 this.setState({familyName: stateObj.family.label});
 
                 if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
+                    let tempOrphanetTerms = [];
+                    stateObj.family.commonDiagnosis.map(diagnosis => {
+                        tempOrphanetTerms.push('ORPHA' + diagnosis.orphaNumber);
+                    });
                     this.setState({orpha: true});
+                    this.setState({existedOrphanetId: tempOrphanetTerms.join(', ').toUpperCase()});
                 }
                 else {
                     this.setState({orpha: false});
+                }
+
+                // Load the previously stored 'Published Calculated LOD score' if any
+                stateObj.publishedLodScore = stateObj.family.segregation.publishedLodScore ? stateObj.family.segregation.publishedLodScore : null;
+                // Calculate LOD from stored values, if applicable...
+                if (stateObj.lodLocked) {
+                    this.calculateEstimatedLOD(
+                        stateObj.lodCalcMode,
+                        stateObj.family.segregation.numberOfAffectedWithGenotype ? stateObj.family.segregation.numberOfAffectedWithGenotype : null,
+                        stateObj.family.segregation.numberOfUnaffectedWithoutBiallelicGenotype ? stateObj.family.segregation.numberOfUnaffectedWithoutBiallelicGenotype : null,
+                        stateObj.family.segregation.numberOfSegregationsForThisFamily ? stateObj.family.segregation.numberOfSegregationsForThisFamily : null
+                    );
+                } else {
+                    // ... otherwise, show the stored LOD score, if available
+                    stateObj.estimatedLodScore = stateObj.family.segregation.estimatedLodScore ? stateObj.family.segregation.estimatedLodScore : null;
                 }
             }
 
             if (stateObj.family) {
                 // Based on the loaded data, see if the second genotyping method drop-down needs to be disabled.
                 stateObj.genotyping2Disabled = !(stateObj.family.method && stateObj.family.method.genotypingMethods && stateObj.family.method.genotypingMethods.length);
-
                 // See if any associated individual is a proband
                 if (stateObj.family.individualIncluded.length) {
                     stateObj.probandIndividual = _(stateObj.family.individualIncluded).find(function(individual) {
                         return individual.proband;
                     });
                 }
-
                 // See if we need to disable the Add Variant button based on the number of variants configured
                 var segregation = stateObj.family.segregation;
                 if (segregation) {
@@ -366,31 +430,20 @@ var FamilyCuration = React.createClass({
                     if (segregation.variants && segregation.variants.length) {
                         // We have variants
                         stateObj.variantCount = segregation.variants.length;
-                        stateObj.addVariantDisabled = false;
                         stateObj.variantInfo = {};
-
                         // For each incoming variant, set the form value
-                        var currVariantOption = [];
                         for (var i = 0; i < segregation.variants.length; i++) {
-                            if (segregation.variants[i].clinvarVariantId) {
-                                currVariantOption[i] = VAR_SPEC;
+                            if (segregation.variants[i].clinvarVariantId || segregation.variants[i].carId) {
                                 stateObj.variantInfo[i] = {
                                     'clinvarVariantId': segregation.variants[i].clinvarVariantId,
                                     'clinvarVariantTitle': segregation.variants[i].clinvarVariantTitle,
+                                    'carId': segregation.variants[i].carId ? segregation.variants[i].carId : null,
+                                    'grch38': segregation.variants[i].hgvsNames && segregation.variants[i].hgvsNames.GRCh38 ? segregation.variants[i].hgvsNames.GRCh38 : null,
                                     'uuid': segregation.variants[i].uuid // Needed for links to variant assessment/curation
                                 };
-                            } else if (segregation.variants[i].otherDescription) {
-                                currVariantOption[i] = VAR_OTHER;
-                            } else {
-                                currVariantOption[i] = VAR_NONE;
                             }
                         }
-                        stateObj.variantOption = currVariantOption;
-                    } else if (stateObj.probandIndividual) {
-                        // No variants in this family, but it does have a proband individual. Open one empty variant panel
-                        stateObj.variantCount = 1;
                     }
-
                     if (segregation.lodPublished === true) {
                         this.setState({lodPublished: 'Yes'});
                     } else if (segregation.lodPublished === false) {
@@ -403,7 +456,6 @@ var FamilyCuration = React.createClass({
                     if (segregation.assessments && segregation.assessments.length) {
                         // Find the assessment belonging to the logged-in curator, if any.
                         userAssessment = Assessments.userAssessment(segregation.assessments, user && user.uuid);
-
                         // See if any assessments are non-default
                         this.cv.segregationAssessed = _(segregation.assessments).find(function(assessment) {
                             return assessment.value !== Assessments.DEFAULT_VALUE;
@@ -414,7 +466,6 @@ var FamilyCuration = React.createClass({
                             this.cv.othersAssessed = Assessments.othersAssessed(segregation.assessments, user.uuid);
                         }
                     }
-
                     if (stateObj.probandIndividual) {
                         /*****************************************************/
                         /* Show "Add 2nd variant" button if "Heterozygous"   */
@@ -425,7 +476,6 @@ var FamilyCuration = React.createClass({
                             this.setState({recessiveZygosity: probandIndividual.recessiveZygosity});
                         }
                     }
-
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
                     Object.keys(formMapSegregation).forEach(formRef => {
                         if (segregation.hasOwnProperty(formMapSegregation[formRef])) {
@@ -492,26 +542,6 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Validate that all the variant panels have properly-formatted input. Return true if they all do.
-    validateVariants: function() {
-        var valid;
-        var anyInvalid = false;
-
-        // Check Variant panel inputs for correct formats
-        for (var i = 0; i < this.state.variantCount; i++) {
-            var value = this.getFormValue('VARclinvarid' + i);
-            if (value) {
-                valid = value.match(/^\s*(\d{1,10})\s*$/i);
-                if (!valid) {
-                    this.setFormErrors('VARclinvarid' + i, 'Use ClinVar VariationIDs (e.g. 177676)');
-                    anyInvalid = true;
-                }
-            }
-        }
-
-        return !anyInvalid;
-    },
-
     // Called when a form is submitted.
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
@@ -519,7 +549,7 @@ var FamilyCuration = React.createClass({
         this.saveAllFormValues();
 
         // Start with default validation; indicate errors on form if not, then bail
-        if (this.validateDefault() && this.validateVariants()) {
+        if (this.validateDefault()) {
             var currFamily = this.state.family;
             var newFamily = {}; // Holds the new group object;
             var familyDiseases = null, familyArticles, familyVariants = [], familyAssessments = [];
@@ -535,6 +565,7 @@ var FamilyCuration = React.createClass({
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            let recessiveZygosity = this.state.recessiveZygosity;
 
             // Check that all Orphanet IDs have the proper format (will check for existence later)
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
@@ -544,7 +575,7 @@ var FamilyCuration = React.createClass({
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.variantCount > 0 && !this.state.probandIndividual && this.state.individualRequired) {
+            if (this.state.individualRequired && !this.state.probandIndividual) {
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
@@ -571,6 +602,18 @@ var FamilyCuration = React.createClass({
                 // NOT HPOID list is bad
                 formError = true;
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            }
+
+            // Get variant uuid's if they were added via the modals
+            for (var i = 0; i < MAX_VARIANTS; i++) {
+                // Grab the values from the variant form panel
+                var variantId = this.getFormValue('variantUuid' + i);
+
+                // Build the search string depending on what the user entered
+                if (variantId) {
+                    // Make a search string for these terms
+                    familyVariants.push('/variants/' + variantId);
+                }
             }
 
             if (!formError) {
@@ -609,7 +652,7 @@ var FamilyCuration = React.createClass({
                     throw e;
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
-                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
+                    if (!this.state.probandIndividual && this.state.individualRequired) {
                         var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
@@ -692,101 +735,12 @@ var FamilyCuration = React.createClass({
                         return Promise.resolve(null);
                     }
                 }).then(data => {
-                    // See what variants from the form already exist in the DB (we don't search for "Other description"; each one
-                    // of those kinds of variants generates a new variant object). For any that already exist, push them onto
-                    // the array of the family's variants. For any that don't, pass them to the next THEN to write them to the DB.
-                    var newVariants = [];
-
-                    // Build an array of search strings for each of the ClinVar IDs entered in the form.
-                    var searchStrs = [];
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var clinvarId = this.getFormValue('VARclinvarid' + i);
-
-                        // Build the search string depending on what the user entered
-                        if (clinvarId) {
-                            // Make a search string for these terms
-                            searchStrs.push('/search/?type=variant&clinvarVariantId=' + clinvarId);
-                        }
-                    }
-
-                    // If at least one variant search string built, perform the search
-                    if (searchStrs.length) {
-                        // Search DB for all matching terms for all variants entered
-                        return this.getRestDatas(
-                            searchStrs
-                        ).then(results => {
-                            // 'result' is an array of search results, one per search string. There should only be one result per array element --
-                            // multiple results would show bad data, so just get the first if that happens. Should check that when the data is entered going forward.
-                            results.forEach(function(result, i) {
-                                if (result.total) {
-                                    // Search got a result. Add a string for family.variants for this existing variant
-                                    familyVariants.push(result['@graph'][0]['@id']);
-                                } else {
-                                    // Search got no result; make a new variant and save it in an array so we can write them.
-                                    // Look for the term in the filters to see what term failed to find a match
-                                    var termResult = _(result.filters).find(function(filter) { return filter.field === 'clinvarVariantId'; });
-                                    if (termResult) {
-                                        var newVariant = {};
-                                        newVariant.clinvarVariantId = termResult.term;
-                                        newVariants.push(newVariant);
-                                    }
-                                }
-                            }, this);
-
-                            // Pass new variant array to the next THEN to write them.
-                            return Promise.resolve(newVariants);
-                        });
-                    }
-
-                    // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(newVariants);
-                }).then(newVariants => {
-                    // We're passed in a list of new clinVarRCV variant objects that need to be written to the DB.
-                    // Now see if we need to add 'Other description' data. Search for any variants in the form with that field filled.
-                    for (var i = 0; i < this.state.variantCount; i++) {
-                        // Grab the values from the variant form panel
-                        var otherVariantText = this.getFormValue('VARothervariant' + i).trim();
-
-                        // Build the search string depending on what the user entered
-                        if (otherVariantText) {
-                            // Add this Other Description text to a new variant object
-                            var newVariant = {};
-                            newVariant.otherDescription = otherVariantText;
-                            newVariants.push(newVariant);
-                        }
-                    }
-
-                    // Now write the new variants to the DB, and push their @ids to the family variant
-                    if (newVariants && newVariants.length) {
-                        return this.postRestDatas(
-                            '/variants/', newVariants
-                        ).then(results => {
-                            if (results && results.length) {
-                                // Write the new variants to history
-                                results.forEach(function(result) {
-                                    this.recordHistory('add', result['@graph'][0]);
-                                }, this);
-
-                                // Add the newly written variants to the family
-                                results.forEach(result => {
-                                    familyVariants.push(result['@graph'][0]['@id']);
-                                });
-                            }
-                            return Promise.resolve(results);
-                        });
-                    }
-
-                    // No variant search strings. Go to next THEN indicating no new named variants
-                    return Promise.resolve(null);
-                }).then(data => {
                     var label, diseases;
                     /*****************************************/
                     /* Need to capture zygosity data and     */
                     /* pass into the individual object       */
                     /*****************************************/
-                    let zygosity = this.getFormValue('SEGrecessiveZygosity') && this.getFormValue('SEGrecessiveZygosity') !== 'none' ?
-                                    this.getFormValue('SEGrecessiveZygosity') : null;
+                    let zygosity = this.state.recessiveZygosity;
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -806,7 +760,7 @@ var FamilyCuration = React.createClass({
 
                     // Creating or editing a family, and the form has at least one variant. Create the starter individual and return a promise
                     // from its creation. Also remember we have new variants.
-                    if (this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired) {
+                    if (!this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
@@ -1139,48 +1093,43 @@ var FamilyCuration = React.createClass({
         return newFamily;
     },
 
-    // Add another variant section to the FamilyVariant panel
-    handleAddVariant: function() {
-        this.setState({variantCount: this.state.variantCount + 1, addVariantDisabled: true});
-    },
-
     // Update the ClinVar Variant ID fields upon interaction with the Add Resource modal
-    updateClinvarVariantId: function(data, fieldNum) {
-        var newVariantInfo = _.clone(this.state.variantInfo);
-        var currVariantOption = this.state.variantOption;
-        var addVariantDisabled;
+    updateVariantId: function(data, fieldNum) {
+        let newVariantInfo = _.clone(this.state.variantInfo);
+        let variantCount = this.state.variantCount;
         if (data) {
-            // Enable/Disable Add Variant button as needed
-            if (fieldNum == 0) {
-                addVariantDisabled = false;
-            } else {
-                addVariantDisabled = true;
-            }
             // Update the form and display values with new data
-            this.refs['VARclinvarid' + fieldNum].setValue(data.clinvarVariantId);
-            newVariantInfo[fieldNum] = {'clinvarVariantId': data.clinvarVariantId, 'clinvarVariantTitle': data.clinvarVariantTitle, 'uuid': data.uuid};
-            // Disable the 'Other description' textarea
-            this.refs['VARothervariant' + fieldNum].resetValue();
-            currVariantOption[parseInt(fieldNum)] = VAR_SPEC;
+            this.refs['variantUuid' + fieldNum].setValue(data.uuid);
+            newVariantInfo[fieldNum] = {
+                'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
+                'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
+                'carId': data.carId ? data.carId : null,
+                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'uuid': data.uuid
+            };
+            variantCount += 1;  // We have one more variant to show
         } else {
             // Reset the form and display values
-            this.refs['VARclinvarid' + fieldNum].setValue('');
+            this.refs['variantUuid' + fieldNum].setValue('');
             delete newVariantInfo[fieldNum];
-            // Reenable the 'Other description' textarea
-            currVariantOption[parseInt(fieldNum)] = VAR_NONE;
+            variantCount -= 1;  // we have one less variant to show
         }
 
         // if variant data entered, must enter proband individual name and orphanet
         // First check if data entered in either ClinVar Variant ID or Other description at each variant
         var noVariantData = true;
-        _.range(this.state.variantCount).map(i => {
-            if (this.refs['VARclinvarid' + i].getValue() || this.refs['VARothervariant' + i].getValue()) {
+        _.range(variantCount).map(i => {
+            if (this.refs['variantUuid' + i].getValue()) {
                 noVariantData = false;
             }
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
-        if (noVariantData) {
-            this.setState({individualRequired: false});
+        if (noVariantData && this.refs['individualname']) {
+            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
+                this.setState({individualRequired: true});
+            } else {
+                this.setState({individualRequired: false});
+            }
             var errors = this.state.formErrors;
             errors['individualname'] = '';
             errors['individualorphanetid'] = '';
@@ -1190,7 +1139,10 @@ var FamilyCuration = React.createClass({
         }
 
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantOption: currVariantOption, addVariantDisabled: addVariantDisabled});
+        this.setState({variantInfo: newVariantInfo, variantCount: variantCount});
+        this.clrFormErrors('individualorphanetid');
+        this.clrFormErrors('zygosityHemizygous');
+        this.clrFormErrors('zygosityHomozygous');
     },
 
     // Determine whether a Family is associated with a Group
@@ -1605,13 +1557,15 @@ var FamilySegregation = function() {
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
-            <Input type="number" yesInteger={true} ref="SEGnumberOfAffectedWithGenotype" label={<span><strong>For Dominant AND Recessive:</strong><br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
+            <Input type="number" yesInteger={true} ref="SEGnumberOfAffectedWithGenotype" label={<span>For Dominant AND Recessive inheritance:<br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
                 value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
-            <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" label={<span><strong>For Recessive Only:</strong><br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for recessive)</span>}
+            <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype"
+                label={<span>For Recessive inheritance only:<br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for Recessive inheritance)</span>}
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily" label="Number of segregations reported for this Family:"
+            <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily"
+                label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant inheritance)</span>}
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
@@ -1637,7 +1591,7 @@ var FamilySegregation = function() {
             <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3" value={segregation.pedigreeLocation} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
-            <Input type="select" ref="SEGlodPublished" label="Published Calculated LOD score?:"
+            <Input type="select" ref="SEGlodPublished" label="Published LOD score?:"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.lodPublished)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1651,13 +1605,16 @@ var FamilySegregation = function() {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
-                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published calculated LOD score)</i></span>} value={segregation.estimatedLodScore}
+                <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published LOD score)</i></span>}
+                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
-                    handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+                    handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                    placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                inputDisabled={(this.state.lodPublished === null) || (this.state.lodPublished === 'Yes' && !this.state.publishedLodScore) || (this.state.lodPublished === 'No' && !this.state.estimatedLodScore)}>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
@@ -1675,20 +1632,22 @@ var FamilySegregation = function() {
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
     var family = this.state.family;
+    var gdm = this.state.gdm;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
+    var annotation = this.state.annotation;
     let probandIndividual = this.state.probandIndividual ? this.state.probandIndividual : null;
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
 
     return (
-        <div className="row">
+        <div className="row form-row-helper">
             {!family || !family.segregation || !family.segregation.variants || family.segregation.variants.length === 0 ?
                 <div className="row">
                     <p className="col-sm-7 col-sm-offset-5">
-                        To create and have the option to count a proband associated with a variant(s) for this Family, you need to add variant information in this section.
-                        The proband (an Individual) will be created upon submission using the label you supply here. You will be able to add additional information about the proband
+                        If you would like to score the proband for this family in addition to the LOD score for segregation, you need to create the Individual proband,
+                        including adding their associated variant(s). Please follow the steps below -- you will be able to add additional information about the proband
                         following submission of Family information.
                     </p>
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1696,7 +1655,47 @@ var FamilyVariant = function() {
                     </p>
                 </div>
             : null}
-            {_.range(this.state.variantCount).map(i => {
+            {!this.state.probandIndividual ?
+                <div className="variant-panel">
+                    <div className="col-sm-7 col-sm-offset-5 proband-label-note">
+                        <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
+                    </div>
+                    <Input type="text" ref="individualname" label="Proband Label" handleChange={this.handleChange}
+                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.individualRequired} />
+                    <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
+                    {this.state.orpha ?
+                        <div className="form-group">
+                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
+                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
+                        </div>
+                        : null
+                    }
+                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15" handleChange={this.handleChange}
+                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
+                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
+                    { this.state.orpha ?
+                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
+                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
+                        :
+                        null
+                    }
+                </div>
+            :
+                <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
+            }
+            <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
+                error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
+                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            </Input>
+            <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
+                error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
+                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            </Input>
+            {_.range(MAX_VARIANTS).map(i => {
                 var variant;
 
                 if (variants && variants.length) {
@@ -1707,109 +1706,102 @@ var FamilyVariant = function() {
                     <div key={i} className="variant-panel">
                         {this.state.variantInfo[i] ?
                             <div className="variant-resources">
-                                <div className="row variant-data-source">
-                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
-                                    <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId} <i className="icon icon-external-link"></i></a></span>
-                                </div>
-                                <div className="row">
-                                    <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                    <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                </div>
+                                {this.state.variantInfo[i].clinvarVariantId ?
+                                    <div className="row variant-data-source">
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
+                                        <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
+                                    </div>
+                                : null}
+                                {this.state.variantInfo[i].clinvarVariantTitle ?
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
+                                        <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
+                                    </div>
+                                : null}
+                                {this.state.variantInfo[i].carId ?
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
+                                        <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
+                                    </div>
+                                : null}
+                                {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
+                                    <div className="row">
+                                        <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
+                                        <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
+                                    </div>
+                                : null}
                                 <div className="row variant-assessment">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
                                         <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact <i className="icon icon-external-link"></i></a>
+                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
                                     </span>
                                 </div>
                                 <div className="row variant-curation">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
-                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface <i className="icon icon-external-link"></i></a>
+                                        <a href={'/variant-central/?variant=' + this.state.variantInfo[i].uuid} target="_blank">View variant evidence in Variant Curation Interface</a>
                                     </span>
                                 </div>
                             </div>
                         : null}
-                        <Input type="text" ref={'VARclinvarid' + i} value={variant && variant.clinvarVariantId} handleChange={this.handleChange}
-                            error={this.getFormError('VARclinvarid' + i)} clearError={this.clrFormErrors.bind(null, 'VARclinvarid' + i)}
+                        <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
+                            error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
-                        <AddResourceId resourceType="clinvar" label={<LabelClinVarVariant />} labelVisible={!this.state.variantInfo[i]} parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
-                            buttonText={this.state.variantOption[i] === VAR_SPEC ? "Edit ClinVar ID" : "Add ClinVar ID" } protocol={this.props.href_url.protocol}
-                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                            updateParentForm={this.updateClinvarVariantId} disabled={this.state.variantOption[i] === VAR_OTHER} />
-                        <Input type="textarea" ref={'VARothervariant' + i} label={<LabelOtherVariant />} rows="5" value={variant && variant.otherDescription} inputDisabled={this.state.variantOption[i] === VAR_SPEC}
-                            handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-variant-desc" />
-                        {curator.renderMutalyzerLink()}
-                        {this.state.variantInfo[i] && i === 0 ?
-                            <Input type="select" ref="SEGrecessiveZygosity" label="If Recessive, select variant zygosity:" defaultValue="none"
-                                value={probandIndividual && probandIndividual.recessiveZygosity ? probandIndividual.recessiveZygosity : 'none'} handleChange={this.handleChange}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                                <option value="none">No Selection</option>
-                                <option disabled="disabled"></option>
-                                <option value="Homozygous">Homozygous</option>
-                                <option value="Hemizygous">Hemizygous</option>
-                                <option value="Heterozygous">Heterozygous</option>
-                            </Input>
-                        : null}
+                        <div className="row">
+                            <div className="form-group">
+                                <span className="col-sm-5 control-label">{!this.state.variantInfo[i] ? <label>Add Variant:</label> : <label>Clear Variant Selection:</label>}</span>
+                                <span className="col-sm-7">
+                                    {!this.state.variantInfo[i] || (this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId) ?
+                                        <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
+                                            buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
+                                            updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                    : null}
+                                    {!this.state.variantInfo[i] ? <span> - or - </span> : null}
+                                    {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
+                                        <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
+                                            buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
+                                            initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
+                                            updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                    : null}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 );
             })}
-            {this.state.variantCount === 0 || (this.state.variantCount === 1 && this.state.recessiveZygosity === 'Heterozygous') ?
-                <div className="row">
-                    <div className="col-sm-7 col-sm-offset-5 clearfix">
-                        <Input type="button" ref="addvariant" inputClassName="btn-default btn-last pull-right"
-                            title={this.state.variantCount ? "Add 2nd variant associated with Proband" : "Add variant associated with Proband"}
-                            clickHandler={this.handleAddVariant} inputDisabled={this.state.addVariantDisabled} />
-                    </div>
-                </div>
-            : null}
-            {this.state.variantCount && !this.state.probandIndividual && this.state.individualRequired ?
-                <div className="variant-panel">
-                    <div className="col-sm-7 col-sm-offset-5 proband-label-note">
-                        <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
-                    </div>
-                    <Input type="text" ref="individualname" label="Proband Label"
-                        error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
-                    <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
-                    {this.state.orpha ?
-                        <div className="form-group">
-                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
-                        </div>
-                        : null
-                    }
-                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15"
-                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
-                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                    { this.state.orpha ?
-                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
-                        :
-                        null
-                    }
-                </div>
-            : null }
         </div>
     );
 };
 
 var LabelClinVarVariant = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> VariationID:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
     }
 });
 
 var LabelClinVarVariantTitle = React.createClass({
     render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
+    }
+});
+
+var LabelCARVariant = React.createClass({
+    render: function() {
+        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
+    }
+});
+
+var LabelCARVariantTitle = React.createClass({
+    render: function() {
+        return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
 var LabelOtherVariant = React.createClass({
     render: function() {
-        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry <i className="icon icon-external-link"></i></a> whenever possible)</span>:</span>;
+        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
     }
 });
 
@@ -2000,7 +1992,7 @@ var FamilyViewer = React.createClass({
         //    }
         //}
 
-        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : [{}]) : [{}];
+        var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : []) : [];
         var user = this.props.session && this.props.session.user_properties;
         var userFamily = user && family && family.submitted_by ? user.uuid === family.submitted_by.uuid : false;
         var familyUserAssessed = false; // TRUE if logged-in user doesn't own the family, but the family's owner assessed its segregation
@@ -2170,6 +2162,20 @@ var FamilyViewer = React.createClass({
                         : null}
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
+                            {family.individualIncluded && family.individualIncluded.length ?
+                                <div>
+                                    {family.individualIncluded.map(function(ind, index) {
+                                        return (
+                                            <div key={index}>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Zygosity</dt>
+                                                    <dd>{ind.proband && ind.recessiveZygosity ? ind.recessiveZygosity : "None selected"}</dd>
+                                                </dl>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            : null }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
@@ -2177,8 +2183,8 @@ var FamilyViewer = React.createClass({
                                         {variant.clinvarVariantId ?
                                             <div>
                                                 <dl className="dl-horizontal">
-                                                    <dt>ClinVar VariationID</dt>
-                                                    <dd><a href={external_url_map['ClinVarSearch'] + variant.clinvarVariantId} title={"ClinVar entry for variant " + variant.clinvarVariantId + " in new tab"} target="_blank">{variant.clinvarVariantId}</a></dd>
+                                                    <dt>ClinVar Variation ID</dt>
+                                                    <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
                                         : null }
@@ -2190,28 +2196,28 @@ var FamilyViewer = React.createClass({
                                                 </dl>
                                             </div>
                                         : null }
+                                        {variant.carId ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>ClinGen Allele Registry ID</dt>
+                                                    <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
+                                                </dl>
+                                            </div>
+                                        : null }
+                                        {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
+                                            <div>
+                                                <dl className="dl-horizontal">
+                                                    <dt>Genomic HGVS Title</dt>
+                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
+                                                </dl>
+                                            </div>
+                                        : null }
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
                                                     <dt>Other description</dt>
                                                     <dd>{variant.otherDescription}</dd>
                                                 </dl>
-                                            </div>
-                                        : null }
-                                        {family.individualIncluded && family.individualIncluded.length && i === 0 ?
-                                            <div>
-                                                {family.individualIncluded.map(function(ind, index) {
-                                                    return (
-                                                        <div key={index}>
-                                                            {ind.proband && ind.recessiveZygosity ?
-                                                                <dl className="dl-horizontal">
-                                                                    <dt>If Recessive, select variant zygosity</dt>
-                                                                    <dd>{ind.recessiveZygosity}</dd>
-                                                                </dl>
-                                                            : null}
-                                                        </div>
-                                                    );
-                                                })}
                                             </div>
                                         : null }
                                     </div>

@@ -232,6 +232,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                 submittedCriteria.push(criterion);
             });
             // do hard-coded check for PM2 vs PS4
+            // UNCOMMENT BELOW TO RE-ENABLE PM2 vs PS4 CHECK - SEE #1195
+            /*
             if (interpretation.evaluations && interpretation.evaluations.length > 0) {
                 if (this.props.criteria.indexOf('PM2') > -1) {
                     if (criteriaEvalConflictValues.indexOf(this.refs['PM2-status'].getValue()) > -1) {
@@ -240,7 +242,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                     }
                 } else if (this.props.criteria.indexOf('PS4') > -1) {
                     if (criteriaEvalConflictValues.indexOf(this.refs['PS4-status'].getValue()) > -1) {
-                        manualCheck1 = 'PM4';
+                        manualCheck1 = 'PS4';
                         manualCheck2 = 'PM2';
                     }
                 }
@@ -255,7 +257,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = Rea
                         }
                     }
                 }
-            }
+            }*/
             // check existing evaluations and map their UUIDs if they match the criteria in this form
             if (freshInterpretation.evaluations) {
                 freshInterpretation.evaluations.map(freshEvaluation => {

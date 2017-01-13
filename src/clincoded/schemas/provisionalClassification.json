@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "totalScore": {
             "title": "Total Score",
@@ -37,6 +37,37 @@
             "description": "Reasons for changing the classification",
             "type": "string",
             "default": ""
+        },
+        "replicatedOverTime": {
+            "title": "Replication Over Time",
+            "description": "Boolean value for greater than 2 pubs with convincing evidence over time",
+            "type": "boolean",
+            "default": false
+        },
+        "contradictingEvidence": {
+            "title": "Contradictory Evidence",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "proband": {
+                    "title": "Proband Individual Evidence",
+                    "description": "Boolean value for Proband Individual Evidence",
+                    "type": "boolean",
+                    "default": false
+                },
+                "caseControl": {
+                    "title": "Case-Control Evidence",
+                    "description": "Boolean value for Case-Control Evidence",
+                    "type": "boolean",
+                    "default": false
+                },
+                "experimental": {
+                    "title": "Experimental Evidence",
+                    "description": "Boolean value for Experimental Evidence",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
         },
         "active": {
             "title": "Active",

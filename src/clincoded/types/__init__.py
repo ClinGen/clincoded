@@ -125,6 +125,10 @@ class Variant(Item):
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
         'associatedInterpretations.provisional_variant',
+        'associatedInterpretations.extra_evidence_list',
+        'associatedInterpretations.extra_evidence_list.submitted_by',
+        'associatedInterpretations.extra_evidence_list.articles',
+        'associatedInterpretations.extra_evidence_list.articles.submitted_by'
     ]
     rev = {
         'associatedPathogenicities': ('pathogenicity', 'variant'),
@@ -261,6 +265,8 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs',
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs.submitted_by',
+        'annotations.groups.familyIncluded.individualIncluded.scores',
+        'annotations.groups.familyIncluded.individualIncluded.scores.submitted_by',
         'annotations.groups.individualIncluded',
         'annotations.groups.individualIncluded.associatedGroups',
         'annotations.groups.individualIncluded.diagnosis',
@@ -272,6 +278,8 @@ class Gdm(Item):
         'annotations.groups.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.groups.individualIncluded.otherPMIDs',
         'annotations.groups.individualIncluded.otherPMIDs.submitted_by',
+        'annotations.groups.individualIncluded.scores',
+        'annotations.groups.individualIncluded.scores.submitted_by',
         # 'annotations.groups.control',
         'annotations.families',
         'annotations.families.associatedGroups',
@@ -299,6 +307,8 @@ class Gdm(Item):
         'annotations.families.individualIncluded.variants.associatedPathogenicities.submitted_by',
         'annotations.families.individualIncluded.otherPMIDs',
         'annotations.families.individualIncluded.otherPMIDs.submitted_by',
+        'annotations.families.individualIncluded.scores',
+        'annotations.families.individualIncluded.scores.submitted_by',
         'annotations.individuals',
         'annotations.individuals.associatedGroups',
         'annotations.individuals.associatedFamilies',
@@ -326,6 +336,8 @@ class Gdm(Item):
         'annotations.experimentalData.proteinInteractions.interactingGenes',
         'annotations.experimentalData.assessments',
         'annotations.experimentalData.assessments.submitted_by',
+        'annotations.experimentalData.scores',
+        'annotations.experimentalData.scores.submitted_by',
         'annotations.caseControlStudies',
         'annotations.caseControlStudies.submitted_by',
         'annotations.caseControlStudies.caseCohort',
@@ -423,6 +435,8 @@ class Annotation(Item):
         'groups.familyIncluded.individualIncluded.variants.submitted_by',
         'groups.familyIncluded.individualIncluded.otherPMIDs',
         'groups.familyIncluded.individualIncluded.otherPMIDs.submitted_by',
+        'groups.familyIncluded.individualIncluded.scores',
+        'groups.familyIncluded.individualIncluded.scores.submitted_by',
         'groups.individualIncluded',
         'groups.individualIncluded.diagnosis',
         'groups.individualIncluded.submitted_by',
@@ -430,6 +444,8 @@ class Annotation(Item):
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
+        'groups.individualIncluded.scores',
+        'groups.individualIncluded.scores.submitted_by',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
@@ -447,6 +463,8 @@ class Annotation(Item):
         'families.individualIncluded.variants.submitted_by',
         'families.individualIncluded.otherPMIDs',
         'families.individualIncluded.otherPMIDs.submitted_by',
+        'families.individualIncluded.scores',
+        'families.individualIncluded.scores.submitted_by',
         'individuals',
         'individuals.associatedGroups',
         'individuals.associatedFamilies',
@@ -467,6 +485,8 @@ class Annotation(Item):
         'associatedGdm',
         'experimentalData.assessments',
         'experimentalData.assessments.submitted_by',
+        'experimentalData.scores',
+        'experimentalData.scores.submitted_by',
         'caseControlStudies',
         'caseControlStudies.submitted_by',
         'caseControlStudies.caseCohort',
@@ -603,11 +623,15 @@ class Group(Item):
         'familyIncluded.individualIncluded.variants.submitted_by',
         'familyIncluded.individualIncluded.otherPMIDs',
         'familyIncluded.individualIncluded.otherPMIDs.submitted_by',
+        'familyIncluded.individualIncluded.scores',
+        'familyIncluded.individualIncluded.scores.submitted_by',
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.submitted_by',
         'individualIncluded.otherPMIDs',
         'individualIncluded.otherPMIDs.submitted_by',
+        'individualIncluded.scores',
+        'individualIncluded.scores.submitted_by',
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
         'associatedAnnotations',
@@ -661,6 +685,8 @@ class Family(Item):
         'individualIncluded.submitted_by',
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
+        'individualIncluded.scores',
+        'individualIncluded.scores.submitted_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -830,7 +856,9 @@ class Experimental(Item):
         'associatedAnnotations.associatedGdm.disease',
         'associatedAnnotations.associatedGdm.gene',
         'assessments',
-        'assessments.submitted_by'
+        'assessments.submitted_by',
+        'scores',
+        'scores.submitted_by'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'experimentalData')
@@ -962,11 +990,15 @@ class EvidenceScore(Item):
         'individual_scored.associatedAnnotations.associatedGdm',
         'individual_scored.associatedFamilies',
         'individual_scored.associatedFamilies.associatedAnnotations',
-        'individual_scored.associatedFamilies.associatedAnnotations.associatedGdm'
+        'individual_scored.associatedFamilies.associatedAnnotations.associatedGdm',
+        'experimental_scored',
+        'experimental_scored.associatedAnnotations',
+        'experimental_scored.associatedAnnotations.associatedGdm'
     ]
     rev = {
         'caseControl_scored': ('caseControl', 'scores'),
-        'individual_scored': ('individual', 'scores')
+        'individual_scored': ('individual', 'scores'),
+        'experimental_scored': ('experimental', 'scores')
     }
 
     @calculated_property(schema={
@@ -990,6 +1022,17 @@ class EvidenceScore(Item):
     })
     def individual_scored(self, request, individual_scored):
         return paths_filtered_by_status(request, individual_scored)
+
+    @calculated_property(schema={
+        "title": "Experimental Scored",
+        "type": "array",
+        "items": {
+            "type": ["string", "object"],
+            "linkFrom": "experimental.scores"
+        }
+    })
+    def experimental_scored(self, request, experimental_scored):
+        return paths_filtered_by_status(request, experimental_scored)
 
 
 @collection(

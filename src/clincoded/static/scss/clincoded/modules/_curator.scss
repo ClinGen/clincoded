@@ -508,12 +508,11 @@
     .variant-association-header {
         padding-left: 15px;
 
-        dt {
-            font-weight: normal;
-            padding-right: 5px;
+        .term-name {
+            font-weight: 400;
         }
 
-        dd {
+        .term-value {
             word-break: break-all;
             word-wrap: break-word;
         }
@@ -612,7 +611,7 @@
     }
 }
 
-.experimental-data-form {
+.form-row-helper {
     input[type=checkbox] {
         margin-top: 11px;
     }
@@ -712,6 +711,7 @@
 
     .button-box {
         width: 200px;
+        text-align: right;
         vertical-align: middle;
     }
 
@@ -796,161 +796,64 @@
     position: relative;
     width: 90%;
 
-    .count-title-row {
-        height: 30px;
-    }
-
     td {
-        padding: none;
+        padding: 3px 4px 3px 4px;
         text-align: center;
         vertical-align: middle;
         border: solid 1px #000;
     }
 
-    .most-left {
-        width: 110px;
+    .bg-gray {
+        background-color: #ccc;
     }
 
-    .area-top-cells {
-        border-top: solid 2px #000;
-    }
-    .area-bottom-cells {
-        border-bottom: solid 2px #000;
+    .bg-emphasis {
+        background-color: rgba(38, 151, 209, 0.5);
     }
 
-    .empty-cell {
-        background-size: 10px 10px;
-        background-image: linear-gradient(0deg, #ccc 50%, transparent 50%, transparent);
-    }
-
-    .title {
-        font-weight: bold;
-    }
-
-    .larger {
+    .large {
         font-size: 16px;
     }
 
-    .top-multiple-cell {
-        border-bottom: none;
+    .emphasis {
+        color: red;
     }
 
-    .top-number-cell {
-        border-top: none;
-        border-left: none;
-        border-right: none;
-        border-bottom: solid 2px #000;
-        width: 80px;
+    .header {
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 16px;
     }
 
-    .description {
-        width: 250px;
-        padding: 5px 10px 5px 10px;
-        text-align: left;
+    .num-col {
+        width: 100px;
     }
 
-    .classification-cell {
-        background-color: #fff;
+    .checkbox {
+        margin: 0 auto;
+        font-size: 30px;
     }
 
-    .classification-score-top {
-        padding: 20px 10px 10px 10px;
-        text-align: center;
-        vertical-align: top;
-        background-color: #ddd;
-        border-bottom: none;
-
-        table {
-            padding: 0;
-            margin: 0 auto;
-            border-collapse: collapse;
-            border-spacing: 5px;
-            width: 90%;
-
-            .high-light-row {
-                height: 28px;
-                background-color: #fff;
-            }
-
-            td {
-                line-height: 24px;
-                text-align: center;
-                border: none;
-            }
-
-            .non-high-light {
-                color: #c85;
-            }
-        }
-    }
-
-    .classification-score-bottom {
-        padding: 10px 10px 0px 10px;
-        text-align: left;
-        border-top: none;
-        background-color: #ddd;
-        vertical-align: bottom;
-    }
-
-    .total-score-cell {
-        padding: 5px 10px 5px 0px;
-        text-align: right;
-    }
-
-    .result-cells {
-        vertical-align: middle;
-        background-color: #fff;
-    }
-    .around-count-cells {
-        border: none;
-    }
-    .dark-cells {
-        background-color: #aaa;
-    }
-    .score-cells {
-        padding: 0px 10px 0px 10px;
-        font-style: italic;
-        color: #d96;
-    }
-
-    .vertical-title-most-left-cell {
-        height: 80px;
+    .rotate-text {
+        white-space: nowrap;
+        display: inline-block;
         width: 30px;
     }
 
-    .score-vertical-content {
+    .rotate-text > div {
         display: inline-block;
-        white-space: nowrap;
-        width: 22px;
-        text-align: center;
-        vertical-align: middle;
+        padding-top: 6px;
+        @include transform(rotate(-90deg) translateX(-55%));
+        transform-origin: 0 0;
     }
 
-    .vertical-transform-0 {
-        @include transform(rotate(90deg) translate(0px, -3px));
-    }
-    .vertical-transform-1 {
-        @include transform(rotate(90deg) translate(-10px, 0));
-    }
-    .vertical-transform-2 {
-        @include transform(rotate(90deg) translate(-18px, 0));
-    }
-    .vertical-transform-3 {
-        @include transform(rotate(90deg) translate(-30px, 0px));
+    .separator-below {
+        border-bottom: solid 3px #000;
     }
 
-    .underline-text {
-        text-decoration: underline;
-    }
-
-    .title-p {
-        text-align: center;
-    }
-
-    hr {
-        width: 80%;
-        border: none;
-        border-top: solid 1px #000;
+    .total-row {
+        font-size: 18px;
+        line-height: 25px;
     }
 }
 
@@ -1051,6 +954,11 @@
     .olContent {
         font-weight: normal;
     }
+}
+
+.word-break {
+    display: block;
+    word-wrap: break-word;
 }
 
 .p-break {
@@ -1324,9 +1232,7 @@
             .computational .datasource-clingen .table th,
             .computational .datasource-clingen .table td,
             .computational .datasource-other .table th,
-            .computational .datasource-other .table td,
-            .computational .datasource-splice .table th,
-            .computational .datasource-splice .table td {
+            .computational .datasource-other .table td {
                 width: 25%;
             }
 
@@ -1344,15 +1250,10 @@
                 margin-top: 20px;
             }
 
-            .computational .datasource-splice .table {
-                .row-span {
-                    border-left: 1px solid #ddd;
-                    border-right: 1px solid #ddd;
-                    font-weight: bold;
-                }
-
-                tfoot td {
-                    font-weight: bold;
+            .computational .datasource-splice {
+                .panel-body a {
+                    display: inline-block;
+                    margin-right: 20px;
                 }
             }
 
@@ -1571,8 +1472,8 @@
             display: inline-block;
 
             &:not(:last-child) {
-            margin-right: 20px;
-        }
+                margin-right: 20px;
+            }
         }
     }
 }
@@ -2576,6 +2477,86 @@ table.login-users-interpretations {
 
     .variant-panel .mutalyzer-link {
         margin-bottom: 10px;
+    }
+
+    dl.calculated-score {
+        width: 100%;
+        margin-bottom: 15px;
+        padding-left: 4px;
+
+        dt {
+            width: 41.66667%;
+        }
+
+        dd {
+            width: 58.33333%;
+            padding-left: 15px;
+        }
+    }
+
+    .evidence-score-list-viewer {
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+        h5 {
+            margin-top: 0;
+            padding-bottom: 5px;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #ddd;
+
+        }
+    }
+
+    .variant-view-panel-edit {
+        dt.no-label:after {
+            content: " ";
+        }
+
+        dd .alert {
+            display: block;
+            padding: 8px 15px;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+    }
+}
+
+.panel.case-control-evidence-score,
+.panel.experimental-evidence-score,
+.panel.proband-evidence-score,
+.panel.case-control-evidence-score-viewer,
+.panel.experimental-evidence-score-viewer,
+.panel.proband-evidence-score-viewer {
+    .panel-body.panel-std {
+        padding-top: 25px;
+
+        label i {
+            display: block;
+            font-weight: normal;
+        }
+
+        label>span {
+            position: relative;
+
+            &>span:last-child {
+                position: absolute;
+                top: -38px;
+                left: 4px;
+            }
+        }
+    }
+}
+
+.panel.case-control-evidence-score-viewer,
+.panel.experimental-evidence-score-viewer,
+.panel.proband-evidence-score-viewer {
+    .panel-body.panel-std {
+        dl.calculated-score {
+            dt {
+                padding-left: 10px;
+                text-align: left;
+            }
+        }
     }
 }
 

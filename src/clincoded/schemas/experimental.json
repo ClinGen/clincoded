@@ -474,6 +474,17 @@
                 "type": "string",
                 "linkTo": "assessment"
             }
+        },
+        "scores": {
+            "title": "Scores",
+            "description": "List of scores for this experimental evidence",
+            "type": "array",
+            "items": {
+                "title": "Score",
+                "description": "Score assigned by user. Limited to one per user",
+                "type": "string",
+                "linkTo": "evidenceScore"
+            }
         }
     },
     "columns": {

@@ -105,6 +105,73 @@ var NavItem = module.exports.NavItem = React.createClass({
         // Additional properties (data attributes) set on <a> for the item
     },
 
+    getInitialState() {
+        return {
+            dropdownActive: false
+        };
+    },
+
+    componentDidMount() {
+        window.addEventListener('mouseup', this.toggleDropdown, false);
+    },
+
+    componentWillUnmount() {
+        window.removeEventListener('mouseup', this.toggleDropdown, false);
+    },
+
+    // Help dropdown menu UI behaviors
+    toggleDropdown(e) {
+        e.preventDefault(); e.stopPropagation();
+        let targetBtn = this.refs.btn_item_help,
+            targetBtnTitle = this.refs.btn_item_help_title,
+            targetBtnIcon = this.refs.btn_item_help_icon;
+        if (e.target === targetBtn || e.target === targetBtnTitle || e.target === targetBtnIcon) {
+            this.setState({dropdownActive: !this.state.dropdownActive});
+        } else if (e.target === this.refs.menu_item_gene_curation) {
+            this.setState({dropdownActive: false});
+            window.open('/static/help/clingen-gene-curation-help.pdf');
+        } else if (e.target === this.refs.menu_item_variant_curation) {
+            this.setState({dropdownActive: false});
+            window.open('/static/help/clingen-variant-curation-help.pdf');
+        } else if (e.target === this.refs.menu_item_contact_helpdesk) {
+            this.setState({dropdownActive: false});
+            location.href = 'mailto:clingen-helpdesk@lists.stanford.edu';
+        } else {
+            this.setState({dropdownActive: false});
+        }
+    },
+
+    // Render standard link buttons or dropdown menu button if title === 'Help'
+    renderButton(title, url, iconClass, contentClass) {
+        if (title === 'space') {
+            return (
+                <span>&nbsp;</span>
+            );
+        } else if (title === 'Help') {
+            return (
+                <div className="dropdown help-doc">
+                    <a href={url} className="dropdown-toggle" ref="btn_item_help">
+                        <span className={contentClass} ref="btn_item_help_title">{this.props.children}</span>
+                        <span className="caret" ref="btn_item_help_icon"></span>
+                    </a>
+                    {this.state.dropdownActive ?
+                        <ul className="dropdown-menu">
+                            <li><a href="#" ref="menu_item_gene_curation">Gene Curation</a></li>
+                            <li><a href="#" ref="menu_item_variant_curation">Variant Curation</a></li>
+                            <li><a href="#" ref="menu_item_contact_helpdesk">Contact Helpdesk</a></li>
+                        </ul>
+                    : null}
+                </div>
+            );
+        } else {
+            return (
+                <a {...this.props} href={url} className={iconClass}>
+                    <span className={contentClass}>{this.props.children}</span>
+                </a>
+            );
+        }
+    },
+
     render: function() {
         var url = this.props.href ? this.props.href : '#';
         var iconClass = this.props.icon ? this.props.icon + ' icon icon-alt' : '';
@@ -113,13 +180,7 @@ var NavItem = module.exports.NavItem = React.createClass({
 
         return (
             <li className={title === 'space' ? 'white-space' : 'link'}>
-                {title === 'space' ?
-                    <span>&nbsp;</span>
-                    :
-                    <a {...this.props} href={url} className={iconClass}>
-                        <span className={contentClass}>{this.props.children}</span>
-                    </a>
-                }
+                {this.renderButton(title, url, iconClass, contentClass)}
             </li>
         );
     }

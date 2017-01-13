@@ -125,16 +125,38 @@
                 "type": "string",
                 "linkTo": "extra_evidence"
             }
+        },
+        "modeInheritanceAdjective": {
+            "title": "Adjective",
+            "description": "Adjective for Mode of Inheritance",
+            "type": "string",
+            "default": ""
         }
     },
     "columns": {
-        "variant.variant_identifier": {
-            "title": "Variant ID",
+        "uuid": {
+            "title": "Interpretation UUID",
             "type": "string"
         },
-        "variant.source": {
-            "title": "Variant Source",
+        "variant.uuid": {
+            "title": "Variant UUID",
             "type": "string"
+        },
+        "variant.clinvarVariantId": {
+            "title": "Variant ClinVar ID",
+            "type": "string"
+        },
+        "variant.clinvarVariantTitle": {
+            "title": "Variant ClinVar Title",
+            "type": "string"
+        },
+        "variant.carId": {
+            "title": "Variant CA ID",
+            "type": "string"
+        },
+        "variant.hgvsNames": {
+            "title": "Variant HGVS Names",
+            "type": "object"
         },
         "interpretation_status": {
             "title": "Interpretation Status",
@@ -144,8 +166,16 @@
             "title": "Genes",
             "type": "string"
         },
-        "interpretation_disease": {
-            "title": "Disease",
+        "disease.orphaNumber": {
+            "title": "Disease Orphanet Number",
+            "type": "string"
+        },
+        "disease.term": {
+            "title": "Disease Orphanet Term",
+            "type": "string"
+        },
+        "modeInheritance": {
+            "title": "Mode of Inheritance",
             "type": "string"
         },
         "evaluation_count": {
@@ -156,8 +186,24 @@
             "title": "# Provisional",
             "type": "number"
         },
+        "evaluations": {
+            "title": "Evaluations",
+            "type": "string"
+        },
+        "submitted_by.last_name": {
+            "title": "Creator Last Name",
+            "type": "string"
+        },
+        "submitted_by.first_name": {
+            "title": "Creator First Name",
+            "type": "string"
+        },
         "submitted_by.title": {
             "title": "Creator",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Creation Date",
             "type": "string"
         }
     }

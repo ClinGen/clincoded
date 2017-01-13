@@ -86,7 +86,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
         var provisional;
         var provisionalExist = false;
-        var summaryButton = false;
+        var summaryButton = true;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
@@ -94,6 +94,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+            // Display selected MOI adjective if any. Otherwise, display selected MOI.
+            var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective ? this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
@@ -159,17 +161,68 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
+                            <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         <span>&nbsp;
-                                            {this.props.linkGdm && pmid ?
-                                                <a href={"/curation-central/?gdm=" + gdm.uuid + "&pmid=" + pmid}><i className="icon icon-briefcase"></i></a>
+                                            {this.props.linkGdm ?
+                                                <a href={`/curation-central/?gdm=${gdm.uuid}` + (pmid ? `&pmid=${pmid}` : '')}><i className="icon icon-briefcase"></i></a>
                                                 : <i className="icon icon-briefcase"></i>
                                             }
                                         </span>
                                     </h1>
-                                    <h2><i>{mode}</i></h2>
+                                    <h2><i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></h2>
                                 </span>
+                            </div>
+                            <div className="provisional-info-panel">
+                                <table border="1" style={{'width':'100%'}}>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div className="provisional-title">
+                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                </div>
+                                                {   provisionalExist ?
+                                                        <div>
+                                                            <div className="provisional-data-left">
+                                                                <span>
+                                                                    Last Saved Summary<br />
+                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                                </span>
+                                                            </div>
+                                                            <div className="provisional-data-center">
+                                                                <span>
+                                                                    Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
+                                                                    { summaryPage ?
+                                                                        null
+                                                                        :
+                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    :
+                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                }
+                                            </td>
+                                            <td className="button-box" rowSpan="2">
+                                                { summaryButton ?
+                                                    ( !summaryPage ?
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
+                                                        </a>
+                                                        : null
+                                                    )
+                                                    :
+                                                    null
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr style={{height:'10px'}}></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
@@ -283,6 +336,15 @@ var searchProbandIndividual = function(individualList, variantList) {
     return false;
 };
 
+// function to get the preferred display title for variants. Current preferential order is clinvar variant title > clinvar variant ID
+// > grch38 hgvs term > CA ID
+var getVariantTitle = function(variant) {
+    let clinvarRepresentation = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : null);
+    let carRepresentation = variant.hgvsNames && variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.carId ? variant.carId : null);
+    let variantTitle = clinvarRepresentation ? clinvarRepresentation : carRepresentation;
+
+    return variantTitle;
+};
 
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = React.createClass({
@@ -306,8 +368,7 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
                         <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
-                            var variantName = variant.clinvarVariantTitle ? variant.clinvarVariantTitle :
-                                (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+                            var variantName = getVariantTitle(variant);
                             var userPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -432,7 +493,7 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
                     {article.title + ' '}
                     {this.props.displayJournal ? <i>{article.journal + '. '}</i> : null}
                     <strong>{date[1]}</strong>{date[2]}
-                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID: {article.pmid} <i className="icon icon-external-link"></i></a></span> : null}
+                    {this.props.pmidLinkout ? <span>&nbsp;<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID: {article.pmid}</a></span> : null}
                 </p>
             );
         } else {
@@ -718,7 +779,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                     </span>
                 </div>
             : null}
-            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View</a>
+            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
         </div>
     );
@@ -735,12 +796,11 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
                 : null}
                 <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View</a>
+            <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
-                '&evidencescore=' + caseControl.scores[0].uuid +
                 '&casecohort=' + caseControl.caseCohort.uuid +
                 '&controlcohort=' + caseControl.controlCohort.uuid
             } title="Edit this case-control">Edit</a></span> : null}
@@ -784,7 +844,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                     </span>
                 </div>
             : null}
-            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Assess</a>
+            <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Score</a>
             {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
         </div>
     );
@@ -809,7 +869,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
-    var variantTitle = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : variant.otherDescription);
+    let variantTitle = getVariantTitle(variant);
 
     return (
         <div className="panel-evidence-group">
@@ -1726,7 +1786,7 @@ function flattenExperimental(experimental) {
 
 
 var gdmSimpleProps = [
-    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active"
+    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active", "modeInheritanceAdjective"
 ];
 
 function flattenGdm(gdm) {
@@ -1804,7 +1864,7 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "autoClassification", "alteredClassification", "reasons", "active"
+    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification", "reasons", "active"
 ];
 
 function flattenProvisional(provisional) {
@@ -1826,7 +1886,8 @@ function flattenProvisionalVariant(provisional_variant) {
 
 
 var evidenceScoreSimpleProps = [
-    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore"
+    "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore",
+    "caseInfoType", "scoreExplanation"
 ];
 
 function flattenEvidenceScore(evidencescore) {
@@ -1864,7 +1925,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
@@ -2037,7 +2098,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
     return (
         <p className="col-sm-7 col-sm-offset-5 mutalyzer-link">
-            (e.g. CA ID whenever possible; otherwise RCV, rs ID, or HGVS)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer <i className="icon icon-external-link"></i></a>
+            (e.g. CA ID whenever possible; otherwise RCV, rs ID, or HGVS)<br />For help in verifying, generating or converting to HGVS nomenclature, please visit <a href='https://mutalyzer.nl/' target='_blank'>Mutalyzer</a>
         </p>
     );
 };
@@ -2373,6 +2434,11 @@ var DeleteButtonModal = React.createClass({
         } else if (this.props.item['@type'][0] == 'family') {
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
+        } else if (this.props.item['@type'][0] == 'individual') {
+            let individual = this.props.item;
+            if (individual.variants.length && individual.associatedFamilies.length) {
+                message = <p><strong>Warning</strong>: Deleting this individual will remove the association between its variants and the Family with which the Individual is associated.</p>;
+            }
         } else if (this.props.item['@type'][0] == 'caseControl') {
             itemLabel = this.props.item.label;
         }

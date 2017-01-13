@@ -1,0 +1,9 @@
+'use strict';
+
+export const AUTOSOMAL_DOMINANT = 'AUTOSOMAL_DOMINANT';
+export const AUTOSOMAL_RECESSIVE = 'AUTOSOMAL_RECESSIVE';
+export const X_LINKED = 'X_LINKED';
+export const FUNCTION = 'FUNCTION';
+export const FUNCTIONAL_ALTERATION = 'FUNCTIONAL_ALTERATION';
+export const MODEL_SYSTEMS = 'MODEL_SYSTEMS';
+export const RESCUE = 'RESCUE';

@@ -366,10 +366,6 @@
         "submitted_by.title": {
             "title": "Submitted by",
             "type": "string"
-        },
-        "date_created": {
-            "title": "Creation Date",
-            "type": "string"
         }
     }
 }
