@@ -32,17 +32,17 @@ Note: For Mac < 10.9, the system python doesn't work. You should install Python 
 
     $ brew install python3
 
-Install Node v6 (v6 is the current LTS version https://github.com/nodejs/LTS#lts-schedule )
+Install Node v6 (v6 is the current LTS version https://github.com/nodejs/LTS#lts-schedule ):
 
-  * check node version
+  * check node version::
 
     $ node --version
 
-  * via homebrew (homebrew will indicate if you need to unlink a prior version of node)::
+  * install via homebrew (homebrew will indicate if you need to unlink a prior version of node)::
 
     $ brew install node@6
 
-  * or via nvm::
+  * or install via nvm::
 
     $ npm install -g nvm
     $ nvm install 6
