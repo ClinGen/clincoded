@@ -333,7 +333,8 @@ def search(context, request, search_type=None):
         if request.params.get('mode') == 'picker':
             doc_types = []
         else:
-            doc_types = ['gene', 'orphaPhenotype', 'article', 'variant', 'gdm', 'annotation', 'group', 'family', 'individual', 'experimental', 'assessment']
+            doc_types = ['gene', 'orphaPhenotype', 'article', 'variant', 'gdm', 'annotation',
+                         'group', 'family', 'individual', 'experimental', 'assessment']
     else:
         for item_type in doc_types:
             qs = urlencode([
@@ -386,6 +387,9 @@ def search(context, request, search_type=None):
             facets.append(audit_facet)
 
     set_facets(facets, used_filters, query, principals)
+
+    if 'gdm' in doc_types or 'interpretation' in doc_types:
+        size = 99999
 
     # Execute the query
     es_results = es.search(body=query, index=es_index,
