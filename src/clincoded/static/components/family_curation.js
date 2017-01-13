@@ -398,6 +398,8 @@ var FamilyCuration = React.createClass({
                     this.setState({orpha: false});
                 }
 
+                // Load the previously stored 'Published Calculated LOD score' if any
+                stateObj.publishedLodScore = stateObj.family.segregation.publishedLodScore ? stateObj.family.segregation.publishedLodScore : null;
                 // Calculate LOD from stored values, if applicable...
                 if (stateObj.lodLocked) {
                     this.calculateEstimatedLOD(
@@ -409,7 +411,6 @@ var FamilyCuration = React.createClass({
                 } else {
                     // ... otherwise, show the stored LOD score, if available
                     stateObj.estimatedLodScore = stateObj.family.segregation.estimatedLodScore ? stateObj.family.segregation.estimatedLodScore : null;
-                    stateObj.publishedLodScore = stateObj.family.segregation.publishedLodScore ? stateObj.family.segregation.publishedLodScore : null;
                 }
             }
 
