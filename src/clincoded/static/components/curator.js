@@ -192,8 +192,8 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                             </div>
                                                             <div className="provisional-data-center">
                                                                 <span>
-                                                                    Total Score: {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                    Provisional Classification: {provisional.alteredClassification}
+                                                                    Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                    Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
                                                                     { summaryPage ?
                                                                         null
                                                                         :
@@ -208,14 +208,11 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                             </td>
                                             <td className="button-box" rowSpan="2">
                                                 { summaryButton ?
-                                                    ( summaryPage ?
-                                                        <button type="button" className="btn btn-primary" disabled="disabled">
-                                                            Generate New Summary
-                                                        </button>
-                                                        :
+                                                    ( !summaryPage ?
                                                         <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                             { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                         </a>
+                                                        : null
                                                     )
                                                     :
                                                     null
@@ -1867,7 +1864,7 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "autoClassification", "alteredClassification", "reasons", "active"
+    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification", "reasons", "active"
 ];
 
 function flattenProvisional(provisional) {

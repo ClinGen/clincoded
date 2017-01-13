@@ -711,6 +711,7 @@
 
     .button-box {
         width: 200px;
+        text-align: right;
         vertical-align: middle;
     }
 
@@ -802,12 +803,20 @@
         border: solid 1px #000;
     }
 
-    .bg-color {
+    .bg-gray {
         background-color: #ccc;
+    }
+
+    .bg-emphasis {
+        background-color: rgba(38, 151, 209, 0.5);
     }
 
     .large {
         font-size: 16px;
+    }
+
+    .emphasis {
+        color: red;
     }
 
     .header {
@@ -818,6 +827,11 @@
 
     .num-col {
         width: 100px;
+    }
+
+    .checkbox {
+        margin: 0 auto;
+        font-size: 30px;
     }
 
     .rotate-text {
