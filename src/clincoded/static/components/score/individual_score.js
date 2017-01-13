@@ -307,7 +307,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             }
         }
 
-        if (score && score !== 'none') {
+        if (!isNaN(parseFloat(score))) {
             newUserScoreObj['score'] = parseFloat(score);
         } else {
             if ('score' in newUserScoreObj) {

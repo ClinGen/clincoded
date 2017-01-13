@@ -87,7 +87,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                             this.refs.scoreStatus.setValue(scoreStatus);
                             // If the score form fields are allowed, then proceed with the following
                             let defaultScore = loggedInUserScore.calculatedScore,
-                                modifiedScore = loggedInUserScore.score.toString(),
+                                modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
                                 scoreExplanation = loggedInUserScore.scoreExplanation,
                                 calcScoreRange = [];
                             this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null});
