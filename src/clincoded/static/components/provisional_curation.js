@@ -39,10 +39,44 @@ var ProvisionalCuration = React.createClass({
         return {
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
-            provisional: null, // login user's existing provisional object, must be null initially.
+            provisional: {}, // login user's existing provisional object, must be null initially.
             //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
-            autoClassification: null
+            autoClassification: 'No Classification',
+            alteredClassification: 'No Selection',
+            replicatedOverTime: false,
+            reasons: "",
+            contradictingEvidence: {
+                proband: false, caseControl: false, experimental: false
+            },
+            scoreTableValues: {
+                // variables for autosomal dominant data
+                probandOtherVariantCount: 0, probandOtherVariantPoints: 0, probandOtherVariantPointsCounted: 0,
+                probandNullVariantCount: 0, probandNullVariantPoints: 0, probandNullVariantPointsCounted: 0,
+                variantDenovoCount: 0, variantDenovoPoints: 0, variantDenovoPointsCounted: 0,
+                // variables for autosomal recessive data
+                autosomalRecessivePointsCounted: 0,
+                twoVariantsProvenCount: 0, twoVariantsProvenPoints: 0,
+                twoVariantsNotProvenCount: 0, twoVariantsNotProvenPoints: 0,
+                // variables for segregation data
+                // segregationPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
+                segregationCount: 0, segregationPoints: 0, segregationPointsCounted: 0,
+                // variables for case-control data
+                caseControlCount: 0, caseControlPoints: 0, caseControlPointsCounted: 0,
+                // variables for Experimental data
+                functionalPointsCounted: 0, functionalAlterationPointsCounted: 0, modelsRescuePointsCounted: 0,
+                biochemicalFunctionCount: 0, biochemicalFunctionPoints: 0,
+                proteinInteractionsCount: 0, proteinInteractionsPoints: 0,
+                expressionCount: 0, expressionPoints: 0,
+                patientCellsCount: 0, patientCellsPoints: 0,
+                nonPatientCellsCount: 0, nonPatientCellsPoints: 0,
+                animalModelCount: 0, animalModelPoints: 0,
+                cellCultureCount: 0, cellCulturePoints: 0,
+                rescueCount: 0, rescuePoints: 0,
+                rescueEngineeredCount: 0, rescueEngineeredPoints: 0,
+                // variables for total counts
+                geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
+            }
         };
     },
 
@@ -80,15 +114,20 @@ var ProvisionalCuration = React.createClass({
                     var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
                     if (owner.uuid === stateObj.user) { // find
                         stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                        stateObj.alteredClassification = stateObj.provisional.alteredClassification;
+                        stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
+                        stateObj.reasons = stateObj.provisional.reasons;
                         break;
                     }
                 }
             }
-
             stateObj.previousUrl = url;
             this.setState(stateObj);
 
             return Promise.resolve();
+        }).then(result => {
+            // once we have the GDM info, calculate the values for the score table
+            this.calculateScoreTable();
         }).catch(function(e) {
             console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
@@ -108,22 +147,24 @@ var ProvisionalCuration = React.createClass({
         if (this.validateDefault()) {
             var calculate = queryKeyValue('calculate', this.props.href);
             var edit = queryKeyValue('edit', this.props.href);
-            var newProvisional = this.state.provisional ? curator.flatten(this.state.provisional) : {};
+            var newProvisional = this.state.provisional.uuid ? curator.flatten(this.state.provisional) : {};
             newProvisional.totalScore = Number(this.state.totalScore);
             newProvisional.autoClassification = this.state.autoClassification;
-            newProvisional.alteredClassification = this.getFormValue('alteredClassification');
-            newProvisional.reasons = this.getFormValue('reasons');
+            newProvisional.alteredClassification = this.state.alteredClassification;
+            newProvisional.reasons = this.state.reasons;
+            newProvisional.replicatedOverTime = this.state.replicatedOverTime;
+            newProvisional.contradictingEvidence = this.state.contradictingEvidence;
 
             // check required item (reasons)
             var formErr = false;
-            if (!newProvisional.reasons && newProvisional.autoClassification !== newProvisional.alteredClassification) {
+            if (!newProvisional.reasons && newProvisional.alteredClassification !== 'No Selection') {
                 formErr = true;
                 this.setFormErrors('reasons', 'Required when changing classification.');
             }
             if (!formErr) {
                 var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
                 backUrl += this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '';
-                if (this.state.provisional) { // edit existing provisional
+                if (this.state.provisional.uuid) { // edit existing provisional
                     this.putRestData('/provisional/' + this.state.provisional.uuid, newProvisional).then(data => {
                         var provisionalClassification = data['@graph'][0];
 
@@ -141,8 +182,7 @@ var ProvisionalCuration = React.createClass({
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
                     });
-                }
-                else { // save a new calculation and provisional classification
+                } else { // save a new calculation and provisional classification
                     this.postRestData('/provisional/', newProvisional).then(data => {
                         return data['@graph'][0];
                     }).then(savedProvisional => {
@@ -184,17 +224,372 @@ var ProvisionalCuration = React.createClass({
         window.history.go(-1);
     },
 
+    handleChange: function(ref, e) {
+        if (ref === 'alteredClassification') {
+            this.setState({alteredClassification: this.refs[ref].getValue()});
+        } else if (ref === 'reasons') {
+            this.setState({reasons: this.refs[ref].getValue()});
+        }
+    },
+
+    handleReplicatedOverTime: function() {
+        let replicatedOverTime = this.state.replicatedOverTime;
+        if (!replicatedOverTime) {
+            replicatedOverTime = true;
+        } else {
+            replicatedOverTime = false;
+        }
+        this.setState({replicatedOverTime: replicatedOverTime}, this.calculateClassifications(this.state.totalScore, replicatedOverTime));
+    },
+
+    familyScraper: function(user, families, annotation, segregationCount, segregationPoints, individualMatched) {
+        // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
+        // returns dictionary of relevant items that need to be updated within NewCalculation()
+        families.forEach(family => {
+            // get segregation of family, but only if it was made by user (may change later - MC)
+            if (family.segregation && family.submitted_by.uuid === user) {
+                // get lod score of segregation of family
+                if (family.segregation.includeLodScoreInAggregateCalculation) {
+                    if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
+                        segregationCount += 1;
+                        segregationPoints += family.segregation.publishedLodScore;
+                    } else if ("lodPublished" in family.segregation && family.segregation.lodPublished === false && family.segregation.estimatedLodScore) {
+                        segregationCount += 1;
+                        segregationPoints += family.segregation.estimatedLodScore;
+                    }
+                }
+            }
+            // get proband individuals of family
+            if (family.individualIncluded && family.individualIncluded.length) {
+                individualMatched = this.individualScraper(family.individualIncluded, individualMatched);
+            }
+        });
+
+        return {
+            segregationCount: segregationCount,
+            segregationPoints: segregationPoints,
+            individualMatched: individualMatched
+        };
+    },
+
+    individualScraper: function(individuals, individualMatched) {
+        if (individuals) {
+            individuals.forEach(individual => {
+                if (individual.proband === true && (individual.scores && individual.scores.length)) {
+                    individualMatched.push(individual);
+                }
+            });
+        }
+        return individualMatched;
+    },
+
+    calculateScoreTable: function() {
+        // Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
+        // Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
+        let gdm = this.state.gdm;
+        let scoreTableValues = this.state.scoreTableValues;
+        let contradictingEvidence = this.state.contradictingEvidence;
+
+        const MAX_SCORE_CONSTANTS = {
+            VARIANT_IS_DE_NOVO: 12,
+            PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
+            OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
+            AUTOSOMAL_RECESSIVE: 12,
+            SEGREGATION: 7,
+            CASE_CONTROL: 12,
+            FUNCTIONAL: 2,
+            FUNCTIONAL_ALTERATION: 2,
+            MODELS_RESCUE: 4,
+            GENETIC_EVIDENCE: 12,
+            EXPERIMENTAL_EVIDENCE: 6,
+            TOTAL: 18
+        };
+
+        /*****************************************************/
+        /* Find all proband individuals that had been scored */
+        /*****************************************************/
+        let probandTotal = []; // Total proband combined
+        let probandFamily = []; // Total probands associated with families from all annotations
+        let probandIndividual = []; // Total proband individuals from all annotations
+
+        var proband_variants = [];
+        let tempFamilyScraperValues = {};
+        let individualMatched = [];
+        let caseControlTotal = [];
+
+        // scan gdm
+        let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
+        annotations.forEach(annotation => {
+            let groups, families, individuals, experimentals;
+
+            // loop through groups
+            groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
+            groups.forEach(group => {
+                // loop through families using FamilyScraper
+                families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
+                tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
+                scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
+                scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
+                individualMatched = tempFamilyScraperValues['individualMatched'];
+                // get proband individuals of group
+                if (group.individualIncluded && group.individualIncluded.length) {
+                    individualMatched = this.individualScraper(group.individualIncluded, individualMatched);
+                }
+            });
+
+            // loop through families using FamilyScraper
+            families = annotation.families && annotation.families.length ? annotation.families : [];
+            tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
+            scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
+            scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
+            individualMatched = tempFamilyScraperValues['individualMatched'];
+
+            // push all matched individuals from families and families of groups to probandFamily
+            individualMatched.forEach(item => {
+                probandFamily.push(item);
+            });
+
+            // loop through individuals
+            if (annotation.individuals && annotation.individuals.length) {
+                // get proband individuals
+                individualMatched = [];
+                individualMatched = this.individualScraper(annotation.individuals, individualMatched);
+                // push all matched individuals to probandIndividual
+                individualMatched.forEach(item => {
+                    probandIndividual.push(item);
+                });
+            }
+
+            // loop through case-controls
+            let caseControlMatched = [];
+            if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
+                annotation.caseControlStudies.forEach(caseControl => {
+                    if (caseControl.scores && caseControl.scores.length) {
+                        caseControl.scores.forEach(score => {
+                            if (score.submitted_by.uuid === this.state.user) {
+                                if (score.scoreStatus === 'Score' && 'score' in score && score.score !== 'none') {
+                                    scoreTableValues['caseControlCount'] += 1;
+                                    scoreTableValues['caseControlPoints'] += parseFloat(score.score);
+                                } else if (score.scoreStatus === 'Contradicts') {
+                                    // set flag if a contradicting case-control evidence is found
+                                    contradictingEvidence.caseControl = true;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // loop through experimentals
+            experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
+            experimentals.forEach(experimental => {
+                // loop through scores, if any
+                if (experimental.scores && experimental.scores.length) {
+                    experimental.scores.forEach(score => {
+                        // only care about scores made by current user
+                        if (score.submitted_by.uuid === this.state.user) {
+                            if (score.scoreStatus === 'Score') {
+                                // parse score of experimental
+                                let experimentalScore = 0;
+                                if ('score' in score && score.score !== 'none') {
+                                    experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
+                                } else if ('calculatedScore' in score && score.calculatedScore !== 'none') {
+                                    experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
+                                }
+
+                                // assign score to correct sub-type depending on experiment type and other variables
+                                if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
+                                    scoreTableValues['biochemicalFunctionCount'] += 1;
+                                    scoreTableValues['biochemicalFunctionPoints'] += experimentalScore;
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Protein Interactions') {
+                                    scoreTableValues['proteinInteractionsCount'] += 1;
+                                    scoreTableValues['proteinInteractionsPoints'] += experimentalScore;
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Expression') {
+                                    scoreTableValues['expressionCount'] += 1;
+                                    scoreTableValues['expressionPoints'] += experimentalScore;
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
+                                    if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
+                                        && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
+                                        scoreTableValues['patientCellsCount'] += 1;
+                                        scoreTableValues['patientCellsPoints'] += experimentalScore;
+                                    } else if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
+                                        && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
+                                        scoreTableValues['nonPatientCellsCount'] += 1;
+                                        scoreTableValues['nonPatientCellsPoints'] += experimentalScore;
+                                    }
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
+                                    if (experimental.modelSystems.animalOrCellCulture
+                                        && experimental.modelSystems.animalOrCellCulture === 'Animal model') {
+                                        scoreTableValues['animalModelCount'] += 1;
+                                        scoreTableValues['animalModelPoints'] += experimentalScore;
+                                    } else if (experimental.modelSystems.animalOrCellCulture
+                                        && experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
+                                        scoreTableValues['cellCultureCount'] += 1;
+                                        scoreTableValues['cellCulturePoints'] += experimentalScore;
+                                    }
+                                } else if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
+                                    if (experimental.rescue.patientCellOrEngineeredEquivalent
+                                        && experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
+                                        scoreTableValues['rescueCount'] += 1;
+                                        scoreTableValues['rescuePoints'] += experimentalScore;
+                                    } else if (experimental.rescue.patientCellOrEngineeredEquivalent
+                                        && experimental.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
+                                        scoreTableValues['rescueEngineeredCount'] += 1;
+                                        scoreTableValues['rescueEngineeredPoints'] += experimentalScore;
+                                    }
+                                }
+                            } else if (score.scoreStatus === 'Contradicts') {
+                                // set flag if a contradicting experimental evidence is found
+                                contradictingEvidence.experimental = true;
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // combine all probands
+        probandTotal = probandFamily.concat(probandIndividual);
+        // scan probands
+        probandTotal.forEach(proband => {
+            proband.scores.forEach(score => {
+                if (score.submitted_by.uuid === this.state.user) {
+                    if (score.scoreStatus === 'Score') {
+                        // parse proband score
+                        let probandScore = 0;
+                        if ('score' in score && score.score !== 'none') {
+                            probandScore += parseFloat(score.score);
+                        } else if ('calculatedScore' in score && score.calculatedScore !== 'none') {
+                            probandScore += parseFloat(score.calculatedScore);
+                        }
+                        // assign score to correct sub-type depending on score type
+                        if (score.caseInfoType && score.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && score.scoreStatus === 'Score') {
+                            scoreTableValues['probandOtherVariantCount'] += 1;
+                            scoreTableValues['probandOtherVariantPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && score.scoreStatus === 'Score') {
+                            scoreTableValues['probandNullVariantCount'] += 1;
+                            scoreTableValues['probandNullVariantPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'VARIANT_IS_DE_NOVO' && score.scoreStatus === 'Score') {
+                            scoreTableValues['variantDenovoCount'] += 1;
+                            scoreTableValues['variantDenovoPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && score.scoreStatus === 'Score') {
+                            scoreTableValues['twoVariantsNotProvenCount'] += 1;
+                            scoreTableValues['twoVariantsNotProvenPoints'] += probandScore;
+                        } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
+                            scoreTableValues['twoVariantsProvenCount'] += 1;
+                            scoreTableValues['twoVariantsProvenPoints'] += probandScore;
+                        }
+                    } else if (score.scoreStatus === 'Contradicts') {
+                        // set flag if a contradicting proband evidence is found
+                        contradictingEvidence.proband = true;
+                    }
+                }
+            });
+        });
+
+        // calculate segregation counted points
+        scoreTableValues['segregationPoints'] = Math.round((scoreTableValues['segregationPoints'] + 0.00001) * 100) / 100;
+        if (scoreTableValues['segregationPoints'] >= 0.75 && scoreTableValues['segregationPoints'] <= 0.99) {
+            scoreTableValues['segregationPointsCounted'] = 1;
+        } else if (scoreTableValues['segregationPoints'] >= 1 && scoreTableValues['segregationPoints'] <= 1.24) {
+            scoreTableValues['segregationPointsCounted'] = .5;
+        } else if (scoreTableValues['segregationPoints'] >= 1.25 && scoreTableValues['segregationPoints'] <= 1.49) {
+            scoreTableValues['segregationPointsCounted'] = 2.5;
+        } else if (scoreTableValues['segregationPoints'] >= 1.5 && scoreTableValues['segregationPoints'] <= 1.74) {
+            scoreTableValues['segregationPointsCounted'] = 3;
+        } else if (scoreTableValues['segregationPoints'] >= 1.75 && scoreTableValues['segregationPoints'] <= 1.99) {
+            scoreTableValues['segregationPointsCounted'] = 3.5;
+        } else if (scoreTableValues['segregationPoints'] >= 2 && scoreTableValues['segregationPoints'] <= 2.49) {
+            scoreTableValues['segregationPointsCounted'] = 4;
+        } else if (scoreTableValues['segregationPoints'] >= 2.5 && scoreTableValues['segregationPoints'] <= 2.99) {
+            scoreTableValues['segregationPointsCounted'] = 4.5;
+        } else if (scoreTableValues['segregationPoints'] >= 3 && scoreTableValues['segregationPoints'] <= 3.49) {
+            scoreTableValues['segregationPointsCounted'] = 5;
+        } else if (scoreTableValues['segregationPoints'] >= 3.5 && scoreTableValues['segregationPoints'] <= 3.99) {
+            scoreTableValues['segregationPointsCounted'] = 5.5;
+        } else if (scoreTableValues['segregationPoints'] >= 4 && scoreTableValues['segregationPoints'] <= 4.49) {
+            scoreTableValues['segregationPointsCounted'] = 6;
+        } else if (scoreTableValues['segregationPoints'] >= 4.5 && scoreTableValues['segregationPoints'] <= 4.99) {
+            scoreTableValues['segregationPointsCounted'] = 6.5;
+        } else if (scoreTableValues['segregationPoints'] >= 5) {
+            scoreTableValues['segregationPointsCounted'] = MAX_SCORE_CONSTANTS.SEGREGATION;
+        }
+
+        // calculate other counted points
+        let tempPoints = 0;
+
+        scoreTableValues['probandOtherVariantPointsCounted'] = scoreTableValues['probandOtherVariantPoints'] < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT ? scoreTableValues['probandOtherVariantPoints'] : MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
+
+        scoreTableValues['probandNullVariantPointsCounted'] = scoreTableValues['probandNullVariantPoints'] < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT ? scoreTableValues['probandNullVariantPoints'] : MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
+
+        scoreTableValues['variantDenovoPointsCounted'] = scoreTableValues['variantDenovoPoints'] < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO ? scoreTableValues['variantDenovoPoints'] : MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
+
+        tempPoints = scoreTableValues['twoVariantsProvenPoints'] + scoreTableValues['twoVariantsNotProvenPoints'];
+        scoreTableValues['autosomalRecessivePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE ? tempPoints : MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE;
+
+        scoreTableValues['caseControlPointsCounted'] = scoreTableValues['caseControlPoints'] < MAX_SCORE_CONSTANTS.CASE_CONTROL ? scoreTableValues['caseControlPoints'] : MAX_SCORE_CONSTANTS.CASE_CONTROL;
+
+        tempPoints = scoreTableValues['biochemicalFunctionPoints'] + scoreTableValues['proteinInteractionsPoints'] + scoreTableValues['expressionPoints'];
+        scoreTableValues['functionalPointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL;
+
+        tempPoints = scoreTableValues['patientCellsPoints'] + scoreTableValues['nonPatientCellsPoints'];
+        scoreTableValues['functionalAlterationPointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION;
+
+        tempPoints = scoreTableValues['animalModelPoints'] + scoreTableValues['cellCulturePoints'] + scoreTableValues['rescuePoints'] + scoreTableValues['rescueEngineeredPoints'];
+        scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
+
+        tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
+        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
+
+        tempPoints = scoreTableValues['functionalPointsCounted'] + scoreTableValues['functionalAlterationPointsCounted'] + scoreTableValues['modelsRescuePointsCounted'];
+        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
+
+        let totalScore = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
+
+        // set scoreTabValues state
+        this.setState({totalScore: totalScore, contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
+
+        // set classification
+        this.calculateClassifications(totalScore, this.state.replicatedOverTime);
+    },
+
+    calculateClassifications: function(totalPoints, replicatedOverTime) {
+        let autoClassification = "No Classification";
+        if (totalPoints >= 1 && totalPoints <= 6) {
+            autoClassification = "Limited";
+        } else if (totalPoints > 6 && totalPoints <= 11) {
+            autoClassification = "Moderate";
+        } else if (totalPoints > 11 && totalPoints <= 18 && !replicatedOverTime) {
+            autoClassification = "Strong";
+        } else if (totalPoints > 11 && totalPoints <= 18 && replicatedOverTime) {
+            autoClassification = "Definitive";
+        }
+        this.setState({autoClassification: autoClassification});
+    },
+
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
-        var calculate = queryKeyValue('calculate', this.props.href);
-        var edit = queryKeyValue('edit', this.props.href);
-        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
-        var gdm = this.state.gdm ? this.state.gdm : null;
-        var provisional = this.state.provisional ? this.state.provisional : null;
+        let calculate = queryKeyValue('calculate', this.props.href);
+        let edit = queryKeyValue('edit', this.props.href);
+        let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        let gdm = this.state.gdm ? this.state.gdm : null;
+        let autoClassification = this.state.autoClassification;
+        let scoreTableValues = this.state.scoreTableValues;
 
-        var show_clsfctn = queryKeyValue('classification', this.props.href);
-        var summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
-        var expMatrix = queryKeyValue('expmatrix', this.props.href);
+        let show_clsfctn = queryKeyValue('classification', this.props.href);
+        let summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
+        let expMatrix = queryKeyValue('expmatrix', this.props.href);
+
+        // set the 'Current Classification' appropriately only if previous provisional exists
+        let provisional = this.state.provisional;
+        let currentClassification = 'None';
+        if (provisional.last_modified) {
+            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
+                currentClassification = provisional.alteredClassification;
+            } else {
+                currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
+            }
+        }
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -204,57 +599,237 @@ var ProvisionalCuration = React.createClass({
                         <div>
                             <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
                             <div className="container">
-                                {
-                                    (provisional && edit === 'yes') ?
-                                    EditCurrent.call(this)
-                                    :
-                                    (   calculate === 'yes' ?
-                                        <div>
-                                            <h1>Curation Summary & Provisional Classification</h1>
-                                            {
-                                                provisional ?
-                                                <PanelGroup accordion>
-                                                    <Panel title="Last Saved Summary & Provisional Classification" open>
-                                                        <div className="row">
-                                                                <div className="col-sm-5"><strong>Date Generated:</strong></div>
-                                                                <div className="col-sm-7"><span>{moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Total Score:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.totalScore}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Calculated Clinical Validity Classification:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.autoClassification}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Selected Clinical Validity Classification:</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{provisional.alteredClassification}</span></div>
-                                                            </div>
-                                                            <div className="row">
-                                                                <div className="col-sm-5">
-                                                                    <strong>Reason(s):</strong>
-                                                                </div>
-                                                                <div className="col-sm-7"><span>{this.state.provisional.reasons}</span></div>
-                                                            </div>
-                                                            <div className="row">&nbsp;</div>
-                                                        </Panel>
-                                                    </PanelGroup>
-                                                :
-                                                null
-                                            }
-                                            {NewCalculation.call(this)}
-                                        </div>
-                                        :
-                                        null
-                                    )
-                                }
+                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                    <PanelGroup accordion>
+                                        <Panel title="New Summary & Provisional Classification" open>
+                                            <div className="form-group">
+                                                <div>
+                                                    The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
+                                                    button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
+                                                    will then represent the new "Last Saved Summary & Provisional Classification".
+                                                </div>
+                                                <div><span>&nbsp;</span></div>
+                                                <br />
+                                                <div className="container">
+                                                    <table className="summary-matrix">
+                                                        <tbody>
+                                                            <tr className="header large bg-gray separator-below">
+                                                                <td colSpan="5">Evidence Type</td>
+                                                                <td>Count</td>
+                                                                <td>Total Points</td>
+                                                                <td>Points Counted</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
+                                                                <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
+                                                                <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
+                                                                <td rowSpan="3" className="header">Autosomal Dominant Disease</td>
+                                                                <td>Proband with other variant type with some evidence of gene impact</td>
+                                                                <td>{scoreTableValues['probandOtherVariantCount']}</td>
+                                                                <td>{scoreTableValues['probandOtherVariantPoints']}</td>
+                                                                <td>{scoreTableValues['probandOtherVariantPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Proband with predicted or proven null variant</td>
+                                                                <td>{scoreTableValues['probandNullVariantCount']}</td>
+                                                                <td>{scoreTableValues['probandNullVariantPoints']}</td>
+                                                                <td>{scoreTableValues['probandNullVariantPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Variant is <i>de novo</i></td>
+                                                                <td>{scoreTableValues['variantDenovoCount']}</td>
+                                                                <td>{scoreTableValues['variantDenovoPoints']}</td>
+                                                                <td>{scoreTableValues['variantDenovoPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td rowSpan="2" className="header">Autosomal Recessive Disease</td>
+                                                                <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                                                <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
+                                                                <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
+                                                                <td rowSpan="2">{scoreTableValues['autosomalRecessivePointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
+                                                                <td>{scoreTableValues['twoVariantsProvenCount']}</td>
+                                                                <td>{scoreTableValues['twoVariantsProvenPoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="3" className="header">Segregation</td>
+                                                                <td>{scoreTableValues['segregationCount']}</td>
+                                                                <td><span>{scoreTableValues['segregationPointsCounted']}</span> (<abbr title="Combined LOD Score"><span>{scoreTableValues['segregationPoints']}</span><strong>*</strong></abbr>)</td>
+                                                                <td>{scoreTableValues['segregationPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="4" className="header">Case-Control</td>
+                                                                <td>{scoreTableValues['caseControlCount']}</td>
+                                                                <td>{scoreTableValues['caseControlPoints']}</td>
+                                                                <td>{scoreTableValues['caseControlPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr className="header separator-below">
+                                                                <td colSpan="6">Genetic Evidence Total</td>
+                                                                <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td rowSpan="10" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
+                                                                <td colSpan="3" rowSpan="3" className="header">Functional</td>
+                                                                <td>Biochemical Functions</td>
+                                                                <td>{scoreTableValues['biochemicalFunctionCount']}</td>
+                                                                <td>{scoreTableValues['biochemicalFunctionPoints']}</td>
+                                                                <td rowSpan="3">{scoreTableValues['functionalPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Protein Interactions</td>
+                                                                <td>{scoreTableValues['proteinInteractionsCount']}</td>
+                                                                <td>{scoreTableValues['proteinInteractionsPoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Expression</td>
+                                                                <td>{scoreTableValues['expressionCount']}</td>
+                                                                <td>{scoreTableValues['expressionPoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="3" rowSpan="2" className="header">Functional Alteration</td>
+                                                                <td>Patient Cells</td>
+                                                                <td>{scoreTableValues['patientCellsCount']}</td>
+                                                                <td>{scoreTableValues['patientCellsPoints']}</td>
+                                                                <td rowSpan="2">{scoreTableValues['functionalAlterationPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Non-patient Cells</td>
+                                                                <td>{scoreTableValues['nonPatientCellsCount']}</td>
+                                                                <td>{scoreTableValues['nonPatientCellsPoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="3" rowSpan="4" className="header">Models & Rescue</td>
+                                                                <td>Animal Model</td>
+                                                                <td>{scoreTableValues['animalModelCount']}</td>
+                                                                <td>{scoreTableValues['animalModelPoints']}</td>
+                                                                <td rowSpan="4">{scoreTableValues['modelsRescuePointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Cell Culture Model System</td>
+                                                                <td>{scoreTableValues['cellCultureCount']}</td>
+                                                                <td>{scoreTableValues['cellCulturePoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Rescue in Animal Model</td>
+                                                                <td>{scoreTableValues['rescueCount']}</td>
+                                                                <td>{scoreTableValues['rescuePoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Rescue in Engineered Equivalent</td>
+                                                                <td>{scoreTableValues['rescueEngineeredCount']}</td>
+                                                                <td>{scoreTableValues['rescueEngineeredPoints']}</td>
+                                                            </tr>
+                                                            <tr className="header separator-below">
+                                                                <td colSpan="6">Experimental Evidence Total</td>
+                                                                <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
+                                                            </tr>
+                                                            <tr className="total-row header">
+                                                                <td colSpan="7">Total Points</td>
+                                                                <td>{this.state.totalScore}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <strong>*</strong> &ndash; Combined LOD Score
+                                                </div>
+                                                <br />
+
+                                                <div className="container">
+                                                    <table className="summary-matrix">
+                                                        <tbody>
+                                                            <tr className="header large bg-gray">
+                                                                <td colSpan="5">Gene/Disease Pair</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Assertion Criteria</td>
+                                                                <td>Genetic Evidence (0-12 points)</td>
+                                                                <td>Experimental Evidence (0-6 points)</td>
+                                                                <td>Total Points (0-18 points)</td>
+                                                                <td>Replication Over Time (Yes/No)</td>
+                                                            </tr>
+                                                            <tr className="header large bg-gray separator-below">
+                                                                <td>Assigned Points</td>
+                                                                <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
+                                                                <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
+                                                                <td>{this.state.totalScore}</td>
+                                                                <td>
+                                                                    <input type="checkbox" className="checkbox" onChange={this.handleReplicatedOverTime} checked={this.state.replicatedOverTime} />
+                                                                </td>
+                                                            </tr>
+                                                            <tr className="header large">
+                                                                <td colSpan="3" rowSpan="4">Calculated Classification</td>
+                                                                <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>LIMITED</td>
+                                                                <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>1-6</td>
+                                                            </tr>
+                                                            <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-emphasis' : null)}>
+                                                                <td>MODERATE</td>
+                                                                <td>7-11</td>
+                                                            </tr>
+                                                            <tr className={"header large" + (autoClassification === 'Strong' ? ' bg-emphasis' : null)}>
+                                                                <td>STRONG</td>
+                                                                <td>12-18</td>
+                                                            </tr>
+                                                            <tr className={"header large" + (autoClassification === 'Definitive' ? ' bg-emphasis' : null)}>
+                                                                <td>DEFINITIVE</td>
+                                                                <td>12-18 & Replicated Over Time</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="2" className="header large">Contradictory Evidence?</td>
+                                                                <td colSpan="3">
+                                                                    Proband: <strong>{this.state.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                    {/*Case-control: <strong>{this.state.contradictingEvidence.caseControl ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;*/}
+                                                                    Experimental: <strong>{this.state.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="5">
+                                                                    <Input type="select" ref="alteredClassification"
+                                                                        label={<strong>Modify Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                        labelClassName="col-sm-3 control-label" handleChange={this.handleChange}
+                                                                        wrapperClassName="col-sm-9" defaultValue={this.state.alteredClassification}
+                                                                        groupClassName="form-group">
+                                                                        <option value="No Selection">No Selection</option>
+                                                                        <option value="Definitive">Definitive</option>
+                                                                        <option value="Strong">Strong</option>
+                                                                        <option value="Moderate">Moderate</option>
+                                                                        <option value="Limited">Limited</option>
+                                                                        <option value="Disputed">Disputed</option>
+                                                                        <option value="Refuted">Refuted</option>
+                                                                    </Input>
+                                                                </td>
+                                                            </tr>
+                                                            <tr className="separator-below">
+                                                                <td colSpan="5">
+                                                                    <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-3 control-label"
+                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
+                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange} />
+                                                                </td>
+                                                            </tr>
+                                                            <tr className="total-row header">
+                                                                <td colSpan="2">Current Saved Provisional Classification</td>
+                                                                <td colSpan="4">
+                                                                    {currentClassification == 'None' ?
+                                                                        <span>{currentClassification}</span>
+                                                                    :
+                                                                        <div>{currentClassification}
+                                                                            <br />
+                                                                            <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                        </div>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </Panel>
+                                    </PanelGroup>
+                                    <div className='modal-footer'>
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
+                                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
+                                    </div>
+                                </Form>
                             </div>
                         </div>
                         :
@@ -404,6 +979,9 @@ var Classification = function() {
 };
 
 // Description of 4 leves of classification in summary table
+// the below 4 functions are not being used anywhere. Commenting out for backup
+// purposes. Perhaps remove in the next re-visit of this page. - MC
+/*
 var LimitedClassification = function() {
     return (
         <div>
@@ -462,906 +1040,7 @@ var DefinitiveClassification = function() {
         </div>
     );
 };
-
-// Edit page for url ../provisional-curation/?gdm=GDMId&edit=yes
-var EditCurrent = function() {
-    var alteredClassification = this.state.provisional.alteredClassification ? this.state.provisional.alteredClassification : 'none';
-    this.state.totalScore = this.state.provisional.totalScore;
-    this.state.autoClassification = this.state.provisional.autoClassification;
-
-    return (
-        <div>
-            <h1>Edit Summary and Provisional Classification</h1>
-            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                <PanelGroup accordion>
-                    <Panel title="Currently Saved Calculation and Classification" open>
-                        <div className="row">
-                            <div className="col-sm-5"><strong className="pull-right">Total Score:</strong></div>
-                            <div className="col-sm-7"><span>{this.state.totalScore}</span></div>
-                        </div>
-                        <br />
-                        <div className="row">
-                            <div className="col-sm-5">
-                                <strong className="pull-right">Calculated&nbsp;
-                                    <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>
-                                    :
-                                </strong>
-                            </div>
-                            <div className="col-sm-7"><span>{this.state.autoClassification}</span></div>
-                        </div>
-                        <br />
-                        <div className="row">
-                            <Input type="select" ref="alteredClassification" value={alteredClassification} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
-                                label={<strong>Select Provisional <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
-                                groupClassName="form-group" handleChange={this.handleChange}>
-                                <option value="Definitive">Definitive</option>
-                                <option value="Strong">Strong</option>
-                                <option value="Moderate">Moderate</option>
-                                <option value="Limited">Limited</option>
-                                <option value="No Reported Evidence">No Evidence</option>
-                                <option value="Disputed">Disputed</option>
-                                <option value="Refuted">Refuted</option>
-                            </Input>
-                        </div>
-                        <div className="row">
-                            <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                                value={this.state.provisional && this.state.provisional.reasons} wrapperClassName="col-sm-7" groupClassName="form-group"
-                                error={this.getFormError('reasons')} clearError={this.clrFormErrors.bind(null, 'reasons')}/>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-5"><strong>Date Created:</strong></div>
-                            <div className="col-sm-7">
-                                <span>{moment(this.state.provisional.date_created).format("YYYY MMM DD, h:mm a")}</span>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-5"><strong>Last Modified:</strong></div>
-                            <div className="col-sm-7">
-                                <span>{moment(this.state.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                            </div>
-                        </div>
-                        <div><span>&nbsp;</span></div>
-                        <br />
-                    </Panel>
-                </PanelGroup>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                </div>
-            </Form>
-        </div>
-    );
-};
-
-// function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
-// returns dictionary of relevant items that need to be updated within NewCalculation()
-var FamilyScraper = function(user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched) {
-    families.forEach(family => {
-        // loop through individual within family: old code??? - MC
-        /*
-        if (family.individualIncluded && family.individualIncluded.length) {
-            individualsCollected = filter(individualsCollected, family.individualIncluded, annotation.article, pathoVariantIdList);
-        }
-        */
-        // get segregation of family, but only if it was made by user (may change later - MC)
-        if (family.segregation && family.submitted_by.uuid === user) {
-            userAssessments['segNot'] += 1;
-            // loop through assessments and update relevant userAssessment counts
-            // irrelevant at the moment as assessments for segregation do not exist - MC
-            /*
-            assessments = family.segregation.assessments && family.segregation.assessments.length ? family.segregation.assessments : [];
-            assessments.forEach(assessment => {
-                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
-                    userAssessments['segSpt'] += 1;
-                }
-                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
-                    userAssessments['segReview'] += 1;
-                }
-                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
-                    userAssessments['segCntdct'] += 1;
-                }
-            });
-            */
-            // get lod score of segregation of family
-            if (family.segregation.includeLodScoreInAggregateCalculation) {
-                if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
-                    segregationCount += 1;
-                    segregationPoints += family.segregation.publishedLodScore;
-                } else if ("lodPublished" in family.segregation && family.segregation.lodPublished === false && family.segregation.estimatedLodScore) {
-                    segregationCount += 1;
-                    segregationPoints += family.segregation.estimatedLodScore;
-                }
-            }
-        }
-        // get proband individuals of family
-        if (family.individualIncluded && family.individualIncluded.length) {
-            individualMatched = IndividualScraper(family.individualIncluded, individualMatched);
-        }
-    });
-
-    return {
-        individualsCollected: individualsCollected,
-        userAssessments: userAssessments,
-        assessments: assessments,
-        segregationCount: segregationCount,
-        segregationPoints: segregationPoints,
-        individualMatched: individualMatched
-    };
-};
-
-var IndividualScraper = function(individuals, individualMatched) {
-    if (individuals) {
-        individuals.forEach(individual => {
-            if (individual.proband === true && (individual.scores && individual.scores.length)) {
-                individualMatched.push(individual);
-            }
-        });
-    }
-    return individualMatched;
-};
-
-// Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
-// Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
-var NewCalculation = function() {
-    var gdm = this.state.gdm;
-
-    const MAX_SCORE_CONSTANTS = {
-        VARIANT_IS_DE_NOVO: 12,
-        PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
-        OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
-        AUTOSOMAL_RECESSIVE: 12,
-        SEGREGATION: 7,
-        CASE_CONTROL: 12,
-        FUNCTIONAL: 2,
-        FUNCTIONAL_ALTERATION: 2,
-        MODELS_RESCUE: 4,
-        GENETIC_EVIDENCE: 12,
-        EXPERIMENTAL_EVIDENCE: 6,
-        TOTAL: 18
-    };
-
-    /*****************************************************/
-    /* VARIABLES FOR EVIDENCE SCORE TABLE                */
-    /*****************************************************/
-    // variables for autosomal dominant data
-    let probandOtherVariantCount = 0, probandOtherVariantPoints = 0, probandOtherVariantPointsCounted = 0;
-    let probandNullVariantCount = 0, probandNullVariantPoints = 0, probandNullVariantPointsCounted = 0;
-    let variantDenovoCount = 0, variantDenovoPoints = 0, variantDenovoPointsCounted = 0;
-    // variables for autosomal recessive data
-    let autosomalRecessivePointsCounted = 0;
-    let twoVariantsProvenCount = 0, twoVariantsProvenPoints = 0;
-    let twoVariantsNotProvenCount = 0, twoVariantsNotProvenPoints = 0;
-    // variables for segregation data
-    // segregationPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
-    let segregationCount = 0, segregationPoints = 0, segregationPointsCounted = 0;
-    // variables for case-control data
-    let caseControlCount = 0, caseControlPoints = 0, caseControlPointsCounted;
-    // variables for Experimental data
-    let functionalPointsCounted = 0, functionalAlterationPointsCounted = 0, modelsRescuePointsCounted = 0;
-    let biochemicalFunctionCount = 0, biochemicalFunctionPoints = 0;
-    let proteinInteractionsCount = 0, proteinInteractionsPoints = 0;
-    let expressionCount = 0, expressionPoints = 0;
-    let patientCellsCount = 0, patientCellsPoints = 0;
-    let nonPatientCellsCount = 0, nonPatientCellsPoints = 0;
-    let animalModelCount = 0, animalModelPoints = 0;
-    let cellCultureCount = 0, cellCulturePoints = 0;
-    let rescueCount = 0, rescuePoints = 0;
-    let rescueEngineeredCount = 0, rescueEngineeredPoints = 0;
-    // variables for total counts
-    let geneticEvidenceTotalPoints = 0, experimentalEvidenceTotalPoints = 0, totalPoints = 0;
-
-    /*****************************************************/
-    /* Find all proband individuals that had been scored */
-    /*****************************************************/
-    let probandTotal = []; // Total proband combined
-    let probandFamily = []; // Total probands associated with families from all annotations
-    let probandIndividual = []; // Total proband individuals from all annotations
-
-    var h, i, j, k, l;
-
-    // initial values of assessments
-    var userAssessments = {
-        "variantSpt": 0,
-        "variantReview": 0,
-        "variantCntdct": 0,
-        "variantNot": 0,
-        "expSpt": 0,
-        "expReview": 0,
-        "expCntdct": 0,
-        "expNot": 0,
-        "segSpt": 0,
-        "segReview": 0,
-        "segCntdct": 0,
-        "segNot": 0
-    };
-
-    // Collect variants from user's pathogenicity
-    var gdmPathoList = gdm.variantPathogenicity;
-    var pathoVariantIdList = {
-        "support": [],
-        "review": [],
-        "contradict": []
-    };
-
-    gdmPathoList.forEach(gdmPatho => {
-        let variantUuid = gdmPatho.variant.uuid;
-        // Collect login user's variant assessments, separated as 3 different values.
-        if (gdmPatho.assessments && gdmPatho.assessments.length > 0) {
-            gdmPatho.assessments.forEach(assessment => {
-                if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Supports') {
-                    pathoVariantIdList['support'].push(variantUuid);
-                }
-                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Review') {
-                    pathoVariantIdList['review'].push(variantUuid);
-                }
-                else if (assessment.submitted_by.uuid === this.state.user && assessment.value === 'Contradicts') {
-                    pathoVariantIdList['contradict'].push(variantUuid);
-                }
-            });
-        }
-    });
-
-    var exp_scores = [0, 0, 0];
-    var expType = {
-        "Expression": 0,
-        "Protein Interactions": 0,
-        "Biochemical Function": 0,
-        "Functional Alteration (Patient cells)": 0,
-        "Functional Alteration (Engineered equivalent)": 0,
-        "Model Systems (Animal model)": 0,
-        "Model Systems (Engineered equivalent)": 0,
-        "Rescue (Patient cells)": 0,
-        "Rescue (Engineered equivalent)": 0
-    };
-    var individualsCollected = {
-        "probandInd": [],
-        "allVariants": [],
-        "sptVariants": [],
-        "rvwVariants": [],
-        "cntdctVariants": []
-    };
-    var proband_variants = [];
-    let tempFamilyScraperValues = {};
-    let individualMatched = [];
-    let caseControlTotal = [];
-
-    // scan gdm
-    let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
-    annotations.forEach(annotation => {
-        let groups, families, individuals, assessments, experimentals;
-
-        // loop through groups
-        groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
-        groups.forEach(group => {
-            // loop through families using FamilyScraper
-            families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
-            tempFamilyScraperValues = FamilyScraper(this.state.user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
-            individualsCollected = tempFamilyScraperValues['individualsCollected'];
-            userAssessments = tempFamilyScraperValues['userAssessments'];
-            assessments = tempFamilyScraperValues['assessments'];
-            segregationCount = tempFamilyScraperValues['segregationCount'];
-            segregationPoints = tempFamilyScraperValues['segregationPoints'];
-            individualMatched = tempFamilyScraperValues['individualMatched'];
-            // get proband individuals of group
-            if (group.individualIncluded && group.individualIncluded.length) {
-                individualMatched = IndividualScraper(group.individualIncluded, individualMatched);
-            }
-            /*
-            if (group.individualIncluded && group.individualIncluded.length) {
-                individualsCollected = filter(individualsCollected, group.individualIncluded, annotation.article, pathoVariantIdList);
-            }
-            */
-        });
-
-        // loop through families using FamilyScraper
-        families = annotation.families && annotation.families.length ? annotation.families : [];
-        tempFamilyScraperValues = FamilyScraper(this.state.user, families, individualsCollected, annotation, pathoVariantIdList, userAssessments, assessments, segregationCount, segregationPoints, individualMatched);
-        individualsCollected = tempFamilyScraperValues['individualsCollected'];
-        userAssessments = tempFamilyScraperValues['userAssessments'];
-        assessments = tempFamilyScraperValues['assessments'];
-        segregationCount = tempFamilyScraperValues['segregationCount'];
-        segregationPoints = tempFamilyScraperValues['segregationPoints'];
-        individualMatched = tempFamilyScraperValues['individualMatched'];
-
-        // push all matched individuals from families and families of groups to probandFamily
-        individualMatched.forEach(item => {
-            probandFamily.push(item);
-        });
-
-        // loop through individuals
-        if (annotation.individuals && annotation.individuals.length) {
-            // get proband individuals
-            individualMatched = [];
-            individualMatched = IndividualScraper(annotation.individuals, individualMatched);
-            // push all matched individuals to probandIndividual
-            individualMatched.forEach(item => {
-                probandIndividual.push(item);
-            });
-            //individualsCollected = filter(individualsCollected, annotation.individuals, annotation.article, pathoVariantIdList);
-        }
-
-        // loop through case-controls
-        let caseControlMatched = [];
-        if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
-            annotation.caseControlStudies.forEach(caseControl => {
-                if (caseControl.scores && caseControl.scores.length) {
-                    caseControl.scores.forEach(score => {
-                        if (score.submitted_by.uuid === this.state.user && score.score && score.score !== 'none') {
-                            caseControlCount += 1;
-                            caseControlPoints += parseFloat(score.score);
-                        }
-                    });
-                }
-            });
-        }
-
-        // loop through experimentals
-        experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
-        experimentals.forEach(experimental => {
-            // loop through scores, if any
-            if (experimental.scores && experimental.scores.length) {
-                experimental.scores.forEach(score => {
-                    // only care about scores made by current user
-                    if (score.submitted_by.uuid === this.state.user) {
-                        // parse score of experimental
-                        let experimentalScore = 0;
-                        if (score.score && score.score !== 'none') {
-                            experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
-                        } else if (score.calculatedScore && score.calculatedScore !== 'none') {
-                            experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
-                        }
-                        userAssessments['expNot'] += 1;
-                        // assign score to correct sub-type depending on experiment type and other variables
-                        if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
-                            biochemicalFunctionCount += 1;
-                            biochemicalFunctionPoints += experimentalScore;
-                        } else if (experimental.evidenceType && experimental.evidenceType === 'Protein Interactions') {
-                            proteinInteractionsCount += 1;
-                            proteinInteractionsPoints += experimentalScore;
-                        } else if (experimental.evidenceType && experimental.evidenceType === 'Expression') {
-                            expressionCount += 1;
-                            expressionPoints += experimentalScore;
-                        } else if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
-                            if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
-                                && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
-                                patientCellsCount += 1;
-                                patientCellsPoints += experimentalScore;
-                            } else if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
-                                && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
-                                nonPatientCellsCount += 1;
-                                nonPatientCellsPoints += experimentalScore;
-                            }
-                        } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
-                            if (experimental.modelSystems.animalOrCellCulture
-                                && experimental.modelSystems.animalOrCellCulture === 'Animal model') {
-                                animalModelCount += 1;
-                                animalModelPoints += experimentalScore;
-                            } else if (experimental.modelSystems.animalOrCellCulture
-                                && experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
-                                cellCultureCount += 1;
-                                cellCulturePoints += experimentalScore;
-                            }
-                        } else if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
-                            if (experimental.rescue.patientCellOrEngineeredEquivalent
-                                && experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
-                                rescueCount += 1;
-                                rescuePoints += experimentalScore;
-                            } else if (experimental.rescue.patientCellOrEngineeredEquivalent
-                                && experimental.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
-                                rescueEngineeredCount += 1;
-                                rescueEngineeredPoints += experimentalScore;
-                            }
-                        }
-                    }
-                });
-            }
-        });
-    });
-
-    // combine all probands
-    probandTotal = probandFamily.concat(probandIndividual);
-    // scan probands
-    probandTotal.forEach(proband => {
-        proband.scores.forEach(score => {
-            if (score.submitted_by.uuid === this.state.user) {
-                // parse proband score
-                let probandScore = 0;
-                if (score.score && score.score !== 'none') {
-                    probandScore += parseFloat(score.score);
-                } else if (score.calculatedScore && score.calculatedScore !== 'none') {
-                    probandScore += parseFloat(score.calculatedScore);
-                }
-                // assign score to correct sub-type depending on score type
-                if (score.caseInfoType && score.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && score.scoreStatus === 'Score') {
-                    probandOtherVariantCount += 1;
-                    probandOtherVariantPoints += probandScore;
-                } else if (score.caseInfoType && score.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && score.scoreStatus === 'Score') {
-                    probandNullVariantCount += 1;
-                    probandNullVariantPoints += probandScore;
-                } else if (score.caseInfoType && score.caseInfoType === 'VARIANT_IS_DE_NOVO' && score.scoreStatus === 'Score') {
-                    variantDenovoCount += 1;
-                    variantDenovoPoints += probandScore;
-                } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && score.scoreStatus === 'Score') {
-                    twoVariantsNotProvenCount += 1;
-                    twoVariantsNotProvenPoints += probandScore;
-                } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
-                    twoVariantsProvenCount += 1;
-                    twoVariantsProvenPoints += probandScore;
-                }
-            }
-        });
-    });
-
-    // is the below few lines necessary? - MC
-    userAssessments['variantSpt'] = individualsCollected['sptVariants'].length;
-    userAssessments['variantReview'] = individualsCollected['rvwVariants'].length;
-    userAssessments['variantCntdct'] = individualsCollected['cntdctVariants'].length;
-    userAssessments['variantNot'] = individualsCollected['allVariants'].length - userAssessments['variantSpt'] - userAssessments['variantReview'] - userAssessments['variantCntdct'];
-    userAssessments['expNot'] = userAssessments['expNot'] - userAssessments['expSpt'] - userAssessments['expReview'] - userAssessments['expCntdct'];
-    userAssessments['segNot'] = userAssessments['segNot'] - userAssessments['segSpt'] - userAssessments['segReview'] - userAssessments['segCntdct'];
-
-    /**************************************************************************/
-    /* Comment block below may need to be removed/revised for new scoring matrix - MC
-    /**************************************************************************/
-    /*
-    // Collect articles and find the earliest publication year
-    var proband = 0;
-    var articleCollected = [];
-    var year = new Date();
-    var earliest = year.getFullYear();
-    individualsCollected['probandInd'].forEach(probandInd => {
-        if (probandInd.pmid && probandInd.pmid != '') {
-            proband += 1;
-            if (!in_array(probandInd.pmid, articleCollected)) {
-                articleCollected.push(probandInd.pmid);
-                earliest = get_earliest_year(earliest, probandInd.date);
-            }
-        }
-    });
-
-    // calculate scores
-    var currentYear = year.getFullYear();
-    var time = currentYear.valueOf() - earliest.valueOf();
-    var timeScore = 0, probandScore = 0, pubScore = 0, expScore = 0; // initialize scores to 0
-    if (time >= 3) {
-        timeScore = 2;
-    }
-    else if (time >= 1) {
-        timeScore = 1;
-    }
-    else {
-        timeScore = 0;
-    }
-
-    if (proband > 18) {
-        probandScore = 7;
-    }
-    else if (proband >15) {
-        probandScore = 6;
-    }
-    else if (proband > 12) {
-        probandScore = 5;
-    }
-    else if (proband > 9) {
-        probandScore = 4;
-    }
-    else if (proband > 6) {
-        probandScore = 3;
-    }
-    else if (proband > 3) {
-        probandScore = 2;
-    }
-    else if (proband >= 1) {
-        probandScore = 1;
-    }
-    else {
-        probandScore = 0;
-    }
-
-    if (articleCollected.length >= 5) {
-        pubScore = 5;
-    }
-    else {
-        pubScore = articleCollected.length;
-    }
-    if (articleCollected.length <= 2 && timeScore > 1) {
-        timeScore = 1;
-    }
-
-    var totalScore = probandScore + pubScore + timeScore + expScore;
-
-    // set calculated classification
-    var autoClassification = 'No Reported Evidence';
-    if (Math.floor(totalScore) >= 17){
-        autoClassification = 'Definitive';
-    }
-    else if (Math.floor(totalScore) >= 13) {
-        autoClassification = 'Strong';
-    }
-    else if (Math.floor(totalScore) >= 9) {
-        autoClassification = 'Moderate';
-    }
-    else if (Math.floor(totalScore) >= 2) {
-        autoClassification = 'Limited';
-    }
-
-    // save total score and calculated classification to state
-    this.state.totalScore = totalScore;
-    this.state.autoClassification = autoClassification;
-
-    // set score positons in html table
-    var probandRow = [], pubRow = [], timeRow = [];
-    for(i=0; i<8; i++) {
-        if (i === probandScore) {
-            probandRow.push(proband);
-        }
-        else {
-            probandRow.push('');
-        }
-
-        if (i === pubScore) {
-            pubRow.push(articleCollected.length);
-        }
-        else if (i < 6) {
-            pubRow.push('');
-        }
-
-        if (i === timeScore) {
-            timeRow.push(time);
-        }
-        else if (i < 3) {
-            timeRow.push('');
-        }
-    }
-    */
-
-    // calculate segregation counted points
-    segregationPoints = Math.round((segregationPoints + 0.00001) * 100) / 100;
-    if (segregationPoints >= 0.75 && segregationPoints <= 0.99) {
-        segregationPointsCounted = 1;
-    } else if (segregationPoints >= 1 && segregationPoints <= 1.24) {
-        segregationPointsCounted = .5;
-    } else if (segregationPoints >= 1.25 && segregationPoints <= 1.49) {
-        segregationPointsCounted = 2.5;
-    } else if (segregationPoints >= 1.5 && segregationPoints <= 1.74) {
-        segregationPointsCounted = 3;
-    } else if (segregationPoints >= 1.75 && segregationPoints <= 1.99) {
-        segregationPointsCounted = 3.5;
-    } else if (segregationPoints >= 2 && segregationPoints <= 2.49) {
-        segregationPointsCounted = 4;
-    } else if (segregationPoints >= 2.5 && segregationPoints <= 2.99) {
-        segregationPointsCounted = 4.5;
-    } else if (segregationPoints >= 3 && segregationPoints <= 3.49) {
-        segregationPointsCounted = 5;
-    } else if (segregationPoints >= 3.5 && segregationPoints <= 3.99) {
-        segregationPointsCounted = 5.5;
-    } else if (segregationPoints >= 4 && segregationPoints <= 4.49) {
-        segregationPointsCounted = 6;
-    } else if (segregationPoints >= 4.5 && segregationPoints <= 4.99) {
-        segregationPointsCounted = 6.5;
-    } else if (segregationPoints >= 5) {
-        segregationPointsCounted = MAX_SCORE_CONSTANTS.SEGREGATION;
-    }
-
-    // calculate other counted points
-    let tempPoints = 0;
-
-    probandOtherVariantPointsCounted = probandOtherVariantPoints < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT ? probandOtherVariantPoints : MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
-
-    probandNullVariantPointsCounted = probandNullVariantPoints < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT ? probandNullVariantPoints : MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
-
-    variantDenovoPointsCounted = variantDenovoPoints < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO ? variantDenovoPoints : MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
-
-    tempPoints = twoVariantsProvenPoints + twoVariantsNotProvenPoints;
-    autosomalRecessivePointsCounted = tempPoints < MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE ? tempPoints : MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE;
-
-    caseControlPointsCounted = caseControlPoints < MAX_SCORE_CONSTANTS.CASE_CONTROL ? caseControlPoints : MAX_SCORE_CONSTANTS.CASE_CONTROL;
-
-    tempPoints = biochemicalFunctionPoints + proteinInteractionsPoints + expressionPoints;
-    functionalPointsCounted = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL;
-
-    tempPoints = patientCellsPoints + nonPatientCellsPoints;
-    functionalAlterationPointsCounted = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION;
-
-    tempPoints = animalModelPoints + cellCulturePoints + rescuePoints + rescueEngineeredPoints;
-    modelsRescuePointsCounted = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
-
-    tempPoints = probandOtherVariantPointsCounted + probandNullVariantPointsCounted + variantDenovoPointsCounted + autosomalRecessivePointsCounted + segregationPointsCounted + caseControlPointsCounted;
-    geneticEvidenceTotalPoints = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
-
-    tempPoints = functionalPointsCounted + functionalAlterationPointsCounted + modelsRescuePointsCounted;
-    experimentalEvidenceTotalPoints = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
-
-    totalPoints = geneticEvidenceTotalPoints + experimentalEvidenceTotalPoints;
-
-    return (
-        <div>
-            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                <PanelGroup accordion>
-                    <Panel title="New Summary & Provisional Classification" open>
-                        <div className="form-group">
-                            <div>
-                                The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
-                                button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
-                                will then represent the new "Last Saved Summary & Provisional Classification".
-                            </div>
-                            <div><span>&nbsp;</span></div>
-                            <br />
-                            <div className="container">
-                                <table className="summary-matrix">
-                                    <tbody>
-                                        <tr className="header large bg-color separator-below">
-                                            <td colSpan="5">Evidence Type</td>
-                                            <td>Count</td>
-                                            <td>Total Points</td>
-                                            <td>Points Counted</td>
-                                        </tr>
-                                        <tr>
-                                            <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
-                                            <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
-                                            <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
-                                            <td rowSpan="3" className="header">Autosomal Dominant Disease</td>
-                                            <td>Proband with other variant type with some evidence of gene impact</td>
-                                            <td>{probandOtherVariantCount}</td>
-                                            <td>{probandOtherVariantPoints}</td>
-                                            <td>{probandOtherVariantPointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Proband with predicted or proven null variant</td>
-                                            <td>{probandNullVariantCount}</td>
-                                            <td>{probandNullVariantPoints}</td>
-                                            <td>{probandNullVariantPointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Variant is <i>de novo</i></td>
-                                            <td>{variantDenovoCount}</td>
-                                            <td>{variantDenovoPoints}</td>
-                                            <td>{variantDenovoPointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td rowSpan="2" className="header">Autosomal Recessive Disease</td>
-                                            <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
-                                            <td>{twoVariantsNotProvenCount}</td>
-                                            <td>{twoVariantsNotProvenPoints}</td>
-                                            <td rowSpan="2">{autosomalRecessivePointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
-                                            <td>{twoVariantsProvenCount}</td>
-                                            <td>{twoVariantsProvenPoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="3" className="header">Segregation</td>
-                                            <td>{segregationCount}</td>
-                                            <td><span>{segregationPointsCounted}</span> (<abbr title="Combined LOD Score"><span>{segregationPoints}</span><strong>*</strong></abbr>)</td>
-                                            <td>{segregationPointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="4" className="header">Case-Control</td>
-                                            <td>{caseControlCount}</td>
-                                            <td>{caseControlPoints}</td>
-                                            <td>{caseControlPointsCounted}</td>
-                                        </tr>
-                                        <tr className="header separator-below">
-                                            <td colSpan="6">Genetic Evidence Total</td>
-                                            <td>{geneticEvidenceTotalPoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td rowSpan="10" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
-                                            <td colSpan="3" rowSpan="3" className="header">Functional</td>
-                                            <td>Biochemical Functions</td>
-                                            <td>{biochemicalFunctionCount}</td>
-                                            <td>{biochemicalFunctionPoints}</td>
-                                            <td rowSpan="3">{functionalPointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Protein Interactions</td>
-                                            <td>{proteinInteractionsCount}</td>
-                                            <td>{proteinInteractionsPoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Expression</td>
-                                            <td>{expressionCount}</td>
-                                            <td>{expressionPoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="3" rowSpan="2" className="header">Functional Alteration</td>
-                                            <td>Patient Cells</td>
-                                            <td>{patientCellsCount}</td>
-                                            <td>{patientCellsPoints}</td>
-                                            <td rowSpan="2">{functionalAlterationPointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Non-patient Cells</td>
-                                            <td>{nonPatientCellsCount}</td>
-                                            <td>{nonPatientCellsPoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="3" rowSpan="4" className="header">Models & Rescue</td>
-                                            <td>Animal Model</td>
-                                            <td>{animalModelCount}</td>
-                                            <td>{animalModelPoints}</td>
-                                            <td rowSpan="4">{modelsRescuePointsCounted}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Cell Culture Model System</td>
-                                            <td>{cellCultureCount}</td>
-                                            <td>{cellCulturePoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Rescue in Animal Model</td>
-                                            <td>{rescueCount}</td>
-                                            <td>{rescuePoints}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Rescue in Engineered Equivalent</td>
-                                            <td>{rescueEngineeredCount}</td>
-                                            <td>{rescueEngineeredPoints}</td>
-                                        </tr>
-                                        <tr className="header separator-below">
-                                            <td colSpan="6">Experimental Evidence Total</td>
-                                            <td>{experimentalEvidenceTotalPoints}</td>
-                                        </tr>
-                                        <tr className="total-row header">
-                                            <td colSpan="7">Total Points</td>
-                                            <td>{totalPoints}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <strong>*</strong> &ndash; Combined LOD Score
-                            </div>
-                            <br />
-                            <br />
-                            <div className="row">
-                                <div className="col-sm-5">
-                                    <strong className="pull-right">Calculated&nbsp;
-                                        <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:
-                                    </strong>
-                                </div>
-                                <div className="col-sm-7">
-                                    {this.state.autoClassification}
-                                </div>
-                            </div>
-                            { userAssessments.segCntdct>0 || userAssessments.variantCntdct || userAssessments.expCntdct ?
-                                <div className="row">
-                                    <div className="col-sm-5">&nbsp;</div>
-                                    <div className="col-sm-7">
-                                        <strong style={{'color':'#f00'}}>Note: One or more pieces of evidence in this record was assessed as "Contradicts".</strong>
-                                    </div>
-                                </div>
-                             : null
-                            }
-                            <br />
-                            <Input type="select" ref="alteredClassification"
-                                label={<strong>Select Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
-                                labelClassName="col-sm-5 control-label"
-                                wrapperClassName="col-sm-7" defaultValue={this.state.autoClassification}
-                                groupClassName="form-group">
-                                <option value="Definitive">Definitive</option>
-                                <option value="Strong">Strong</option>
-                                <option value="Moderate">Moderate</option>
-                                <option value="Limited">Limited</option>
-                                <option value="No Evidence">No Reported Evidence</option>
-                                <option value="Disputed">Disputed</option>
-                                <option value="Refuted">Refuted</option>
-                            </Input>
-                            <Input type="textarea" ref="reasons" label="Explain Reason(s) for Change:" rows="5" labelClassName="col-sm-5 control-label"
-                                wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')}
-                                clearError={this.clrFormErrors.bind(null, 'reasons')} />
-                            <div className="col-sm-5"><span className="pull-right">&nbsp;</span></div>
-                            <div className="col-sm-7">
-                                <span>
-                                Note: If your selected Clinical Validity Classification is different from the Calculated value, provide a reason to expain why you changed it.
-                                </span>
-                            </div>
-                        </div>
-                    </Panel>
-                </PanelGroup>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
-                </div>
-            </Form>
-        </div>
-    );
-};
-
-// Method to return a list of experimental evidence scores
-// by score status
-function getExpScoreList(evidenceList) {
-    let newArray = [];
-    evidenceList.forEach(evidence => {
-        evidence.scores.forEach(item => {
-            if (item.scoreStatus === 'Score') {
-                newArray.push(item);
-            }
-        });
-    });
-    return newArray;
-}
-
-// Function to check if an itme exists in an array(list)
-var in_array = function(item, list) {
-    for(var i in list){
-        if (list[i] == item) {
-            return true;
-        }
-    }
-    return false;
-};
-
-// Function to get earliest year of selected publications
-var get_earliest_year = function(earliest, dateStr) {
-    var pattern = new RegExp(/^\d\d\d\d/);
-    var theYear = pattern.exec(dateStr);
-    if (theYear && theYear.valueOf() < earliest.valueOf()) {
-        return theYear;
-    }
-    return earliest;
-};
-
-// Funtion to separate proband individuals by assessment values
-// target: object containing separated proband individuals
-// branch: individual array in annotation/group/family
-// article: object containing publication info
-// idList: Assessment array
-var filter = function(target, branch, article, idList) {
-    var allVariants = target['allVariants'],
-        sptVariants = target['sptVariants'],
-        rvwVariants = target['rvwVariants'],
-        cntdctVariants = target['cntdctVariants'],
-        patho_spt = idList['support'],
-        patho_rvw = idList['review'],
-        patho_cntdct = idList['contradict'];
-
-    branch.forEach(function(obj) {
-        if (obj.proband && obj.variants && obj.variants.length > 0) {
-            // counting at probands only
-            var allSupported = true;
-            for (var j in obj.variants) {
-                // collect all distinct variants from proband individuals
-                if (!in_array(obj.variants[j].uuid, allVariants)) {
-                    allVariants.push(obj.variants[j].uuid);
-                }
-
-                // collect variant assessments, separated by 3 different values.
-                if (!in_array(obj.variants[j].uuid, patho_spt)) {
-                    allSupported = false;
-
-                    if (in_array(obj.variants[j].uuid, patho_rvw) && !in_array(obj.variants[j].uuid, rvwVariants)) {
-                        rvwVariants.push(obj.variants[j].uuid);
-                    }
-                    else if (in_array(obj.variants[j].uuid, patho_cntdct) && !in_array(obj.variants[j].uuid, cntdctVariants)) {
-                        cntdctVariants.push(obj.variants[j].uuid);
-                    }
-                }
-                else {
-                    if (!in_array(obj.variants[j].uuid, sptVariants)) {
-                        sptVariants.push(obj.variants[j].uuid);
-                    }
-                }
-            }
-
-            if (allSupported) {
-                target["probandInd"].push(
-                    {
-                        "evidence":obj.uuid,
-                        "pmid":article.pmid,
-                        "date": article.date
-                    }
-                );
-            }
-
-            target["allVariants"] = allVariants;
-            target["sptVariants"] = sptVariants;
-            target["rvwVariants"] = rvwVariants;
-            target["cntdctVariants"] = cntdctVariants;
-        }
-    });
-
-    return target;
-};
-
+*/
 
 // Display a history item for adding a family
 var ProvisionalAddModHistory = React.createClass({
