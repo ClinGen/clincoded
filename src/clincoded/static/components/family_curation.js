@@ -134,11 +134,17 @@ var FamilyCuration = React.createClass({
             }
         } else if (ref === 'SEGlodPublished') {
             let lodPublished = this.refs[ref].getValue();
+            // Find out whether there is pre-existing score in db
+            let publishedLodScore;
+            if (this.state.family && this.state.family.segregation && this.state.family.segregation.publishedLodScore) {
+                publishedLodScore = this.state.family.segregation.publishedLodScore;
+            }
             if (lodPublished === 'Yes') {
-                this.setState({lodPublished: 'Yes'});
-                if (!this.state.publishedLodScore) {
-                    this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
-                }
+                this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null}, () => {
+                    if (!this.state.publishedLodScore) {
+                        this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
+                    }
+                });
             } else if (lodPublished === 'No') {
                 this.setState({lodPublished: 'No', publishedLodScore: null});
                 if (!this.state.estimatedLodScore) {
