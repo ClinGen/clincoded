@@ -623,7 +623,7 @@ var ProvisionalCuration = React.createClass({
                                                                 <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
                                                                 <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
                                                                 <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
-                                                                <td rowSpan="3" className="header">Autosomal Dominant Disease</td>
+                                                                <td rowSpan="3" className="header">Autosomal Dominant OR X-linked Disorder</td>
                                                                 <td>Proband with other variant type with some evidence of gene impact</td>
                                                                 <td>{scoreTableValues['probandOtherVariantCount']}</td>
                                                                 <td>{scoreTableValues['probandOtherVariantPoints']}</td>
@@ -642,7 +642,7 @@ var ProvisionalCuration = React.createClass({
                                                                 <td>{scoreTableValues['variantDenovoPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td rowSpan="2" className="header">Autosomal Recessive Disease</td>
+                                                                <td rowSpan="2" className="header">Autosomal Recessive Disorder</td>
                                                                 <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
