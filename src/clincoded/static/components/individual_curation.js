@@ -2046,10 +2046,15 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
     }
 
     if (updateNeeded) {
+        console.log('update needed');
         var writerIndividual = curator.flatten(individual);
+        console.log(variants);
         // manage variants variable in individual object
-        if (!variants) {
+        if (!variants || (variants && variants.length === 0)) {
+            console.log('no variants');
             delete writerIndividual['variants'];
+            // clear any scores, too, if the variants are cleared
+            delete writerIndividual['scores'];
         } else {
             writerIndividual.variants = variants;
         }
