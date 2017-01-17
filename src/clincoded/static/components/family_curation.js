@@ -1571,7 +1571,7 @@ var FamilySegregation = function() {
                 value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily"
-                label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant and X-linked inheritances)</span>}
+                label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant or X-linked inheritance)</span>}
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
