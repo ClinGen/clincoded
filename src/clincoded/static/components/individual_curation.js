@@ -2046,14 +2046,21 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
     }
 
     if (updateNeeded) {
-        console.log('update needed');
-        var writerIndividual = curator.flatten(individual);
-        console.log(variants);
+        let writerIndividual = curator.flatten(individual);
+        let updatedScores = [];
         // manage variants variable in individual object
         if (!variants || (variants && variants.length === 0)) {
-            console.log('no variants');
+            // if all variants are removed, prepare evidenceScore objects so their
+            // status can be set to 'deleted'
+            if (individual.scores && individual.scores.length) {
+                individual.scores.map(score => {
+                    let flatScore = curator.flatten(score);
+                    flatScore.status = 'deleted';
+                    updatedScores.push(context.putRestData(score['@id'] + '?render=false', flatScore));
+                });
+            }
+            // delete relevant fields from updated individual object
             delete writerIndividual['variants'];
-            // clear any scores, too, if the variants are cleared
             delete writerIndividual['scores'];
         } else {
             writerIndividual.variants = variants;
@@ -2064,16 +2071,9 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         } else {
             delete writerIndividual['recessiveZygosity'];
         }
-        if (individual.scores && individual.scores.length) {
-            let tempScores = [];
-            individual.scores.forEach(score => {
-                tempScores.push(score.uuid);
-            });
-            writerIndividual.scores = tempScores;
-        }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
-            return Promise.resolve(data['@graph'][0]);
+            return Promise.all(updatedScores);
         });
     }
     return Promise.resolve(null);
