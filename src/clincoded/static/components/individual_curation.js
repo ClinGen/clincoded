@@ -2073,6 +2073,7 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
+            // update any evidenceScore objects, if any
             return Promise.all(updatedScores);
         });
     }
