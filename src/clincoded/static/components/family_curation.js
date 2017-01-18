@@ -289,8 +289,8 @@ var FamilyCuration = React.createClass({
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
     calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
         let estimatedLodScore = null;
-        if (lodCalcMode === 'AD') {
-            // LOD scoring if GDM is Autosomal dominant
+        if (lodCalcMode === 'ADX') {
+            // LOD scoring if GDM is Autosomal dominant or X-Linked
             if (numSegregation !== '') {
                 numSegregation = parseInt(numSegregation);
                 estimatedLodScore = Math.log(1 / Math.pow(0.5, numSegregation)) / Math.log(10);
@@ -306,7 +306,7 @@ var FamilyCuration = React.createClass({
         if (isNaN(estimatedLodScore)) {
             estimatedLodScore = null;
         }
-        if (lodCalcMode === 'AD' || lodCalcMode === 'AR') {
+        if (lodCalcMode === 'ADX' || lodCalcMode === 'AR') {
             if (estimatedLodScore) {
                 estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
             }
@@ -377,9 +377,9 @@ var FamilyCuration = React.createClass({
 
             // Update the LOD locked and calculation modes
             if (stateObj.gdm && stateObj.gdm.modeInheritance) {
-                if (stateObj.gdm.modeInheritance.indexOf('Autosomal dominant') > -1) {
+                if (stateObj.gdm.modeInheritance.indexOf('Autosomal dominant') > -1 || stateObj.gdm.modeInheritance.indexOf('X-linked inheritance') > -1) {
                     stateObj.lodLocked = true;
-                    stateObj.lodCalcMode = 'AD';
+                    stateObj.lodCalcMode = 'ADX';
                 } else if (stateObj.gdm.modeInheritance.indexOf('Autosomal recessive') > -1) {
                     stateObj.lodLocked = true;
                     stateObj.lodCalcMode = 'AR';
@@ -1568,10 +1568,10 @@ var FamilySegregation = function() {
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
             <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype"
                 label={<span>For Recessive inheritance only:<br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for Recessive inheritance)</span>}
-                value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} minVal={2} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
+                value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily"
-                label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant inheritance)</span>}
+                label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant or X-linked inheritance)</span>}
                 value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
                 error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
