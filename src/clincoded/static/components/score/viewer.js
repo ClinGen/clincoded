@@ -69,7 +69,7 @@ var ScoreViewer = module.exports.ScoreViewer = React.createClass({
                 {scores.map((item, i) => {
                     return (
                         <div key={i} className="evidence-score-list-viewer">
-                            <h5>{item.submitted_by.title}</h5>
+                            <h5>Curator: {item.submitted_by.title}</h5>
                             <div>
                                 {item.scoreStatus && item.scoreStatus !== 'none' && this.props.evidence['@type'][0] !== 'caseControl' ?
                                     <dl className="dl-horizontal">

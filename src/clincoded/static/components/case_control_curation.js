@@ -1905,8 +1905,8 @@ var CaseControlViewer = React.createClass({
 
                                 </dl>
                             </Panel>
-                            {evidenceScores.length > 1 ?
-                                <Panel panelClassName="panel-data">
+                            {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userCaseControl) ?
+                                <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data">
                                     <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
                                 </Panel>
                             : null}
