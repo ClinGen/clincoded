@@ -1956,8 +1956,8 @@ var IndividualViewer = React.createClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                {evidenceScores.length > 1 ?
-                                    <Panel panelClassName="panel-data">
+                                {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userIndividual) ?
+                                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Other Curator Scores" />} panelClassName="panel-data">
                                         <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
                                     </Panel>
                                 : null}
