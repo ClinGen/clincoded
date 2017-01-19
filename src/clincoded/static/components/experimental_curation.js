@@ -2476,7 +2476,7 @@ var ExperimentalViewer = React.createClass({
                                 <div>
                                     <dt>Interacting Gene(s)</dt>
                                     <dd>{experimental.proteinInteractions.interactingGenes && experimental.proteinInteractions.interactingGenes.map(function(gene, i) {
-                                        return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                        return <span key={gene.symbol + '-' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
                                     })}</dd>
                                 </div>
 
@@ -2791,8 +2791,8 @@ var ExperimentalViewer = React.createClass({
                                 </dl>
                             </Panel>
                         : null}
-                        {evidenceScores.length > 1 ?
-                            <Panel panelClassName="panel-data">
+                        {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userExperimental)?
+                            <Panel title="Experimental Data - Other Curator Scores" panelClassName="panel-data">
                                 <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
                             </Panel>
                         : null}
