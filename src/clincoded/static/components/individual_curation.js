@@ -2046,10 +2046,22 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
     }
 
     if (updateNeeded) {
-        var writerIndividual = curator.flatten(individual);
+        let writerIndividual = curator.flatten(individual);
+        let updatedScores = [];
         // manage variants variable in individual object
-        if (!variants) {
+        if (!variants || (variants && variants.length === 0)) {
+            // if all variants are removed, prepare evidenceScore objects so their
+            // status can be set to 'deleted'
+            if (individual.scores && individual.scores.length) {
+                individual.scores.map(score => {
+                    let flatScore = curator.flatten(score);
+                    flatScore.status = 'deleted';
+                    updatedScores.push(context.putRestData(score['@id'] + '?render=false', flatScore));
+                });
+            }
+            // delete relevant fields from updated individual object
             delete writerIndividual['variants'];
+            delete writerIndividual['scores'];
         } else {
             writerIndividual.variants = variants;
         }
@@ -2059,16 +2071,10 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         } else {
             delete writerIndividual['recessiveZygosity'];
         }
-        if (individual.scores && individual.scores.length) {
-            let tempScores = [];
-            individual.scores.forEach(score => {
-                tempScores.push(score.uuid);
-            });
-            writerIndividual.scores = tempScores;
-        }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
-            return Promise.resolve(data['@graph'][0]);
+            // update any evidenceScore objects, if any
+            return Promise.all(updatedScores);
         });
     }
     return Promise.resolve(null);
