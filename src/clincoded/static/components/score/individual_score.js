@@ -72,9 +72,9 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
     loadData() {
         // Prep the following when the component is loaded
         let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
-        this.setState({modeInheritanceType: modeInheritanceType}, () => {
-            let caseInfoTypeGroup = this.getCaseInfoTypeGroup(modeInheritanceType);
-            this.setState({caseInfoTypeGroup: caseInfoTypeGroup});
+        this.setState({
+            modeInheritanceType: modeInheritanceType,
+            caseInfoTypeGroup: this.getCaseInfoTypeGroup(modeInheritanceType)
         });
 
         let evidenceObj = this.props.evidence;
@@ -99,54 +99,56 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                 if (loggedInUserScore) {
                     this.setState({userScoreUuid: loggedInUserScore.uuid});
                     // Render or remove the default score, score range, and explanation fields
-                    let scoreStatus = loggedInUserScore.scoreStatus;
+                    let scoreStatus = loggedInUserScore.scoreStatus,
+                        caseInfoType = loggedInUserScore.caseInfoType,
+                        defaultScore = loggedInUserScore.calculatedScore,
+                        modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
+                        scoreExplanation = loggedInUserScore.scoreExplanation,
+                        calcScoreRange = this.getScoreRange(modeInheritanceType, caseInfoType, parseFloat(defaultScore));
                     /**************************************************************************************/
                     /* Curators are allowed to access the score form fields when the 'Score' is selected, */
                     /* or when 'Review' is selected given the matched Mode of Inheritance types           */
                     /* (although its score won't be counted from the summary).                            */
                     /**************************************************************************************/
                     if (scoreStatus && (scoreStatus === 'Score' || (scoreStatus === 'Review' && modeInheritanceType.length))) {
-                        this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
+                        // Setting UI and score object property states
+                        this.setState({
+                            showScoreInput: true,
+                            willNotCountScore: scoreStatus === 'Review' ? true : false,
+                            scoreRange: calcScoreRange,
+                            requiredScoreExplanation: !isNaN(parseFloat(modifiedScore)) && scoreExplanation.length ? true : false,
+                            scoreStatus: scoreStatus,
+                            caseInfoType: caseInfoType && caseInfoType !== 'none' ? caseInfoType : null,
+                            defaultScore: parseFloat(defaultScore) ? defaultScore : null,
+                            modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null,
+                            scoreExplanation: scoreExplanation ? scoreExplanation : null
+                        }, () => {
+                            // Populate input and select option values
                             this.refs.scoreStatus.setValue(scoreStatus);
-                            scoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
-                            // If the score form fields are allowed, then proceed with the following
-                            let caseInfoType = loggedInUserScore.caseInfoType,
-                                defaultScore = loggedInUserScore.calculatedScore,
-                                modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
-                                scoreExplanation = loggedInUserScore.scoreExplanation,
-                                calcScoreRange = [];
-                            this.setState({caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
-                                this.refs.caseInfoType.setValue(caseInfoType);
-                            });
-                            this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null});
-                            this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
-                                calcScoreRange = this.getScoreRange(modeInheritanceType, caseInfoType, defaultScore);
-                                this.setState({scoreRange: calcScoreRange}, () => {
-                                    this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
-                                });
-                            });
-                            if (!isNaN(parseFloat(modifiedScore)) && scoreExplanation.length) {
-                                this.setState({scoreExplanation: scoreExplanation, requiredScoreExplanation: true}, () => {
-                                    this.refs.scoreExplanation.setValue(scoreExplanation);
-                                });
-                            }
+                            this.refs.caseInfoType.setValue(caseInfoType ? caseInfoType : 'none');
+                            this.refs.scoreRange.setValue(modifiedScore && calcScoreRange ? modifiedScore : 'none');
+                            this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
                             this.updateUserScoreObj();
                         });
-                    } else if (scoreStatus === 'Supports' || (scoreStatus === 'Review' && modeInheritanceType.length < 1)) {
-                        this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
+                    } else if (scoreStatus && (scoreStatus === 'Supports' || (scoreStatus === 'Review' && modeInheritanceType.length < 1))) {
+                        this.setState({
+                            showScoreInput: true,
+                            showCaseInfoTypeOnly: true,
+                            scoreStatus: scoreStatus,
+                            caseInfoType: caseInfoType && caseInfoType !== 'none' ? caseInfoType : null
+                        }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
-                            let caseInfoType = loggedInUserScore.caseInfoType;
-                            this.setState({showCaseInfoTypeOnly: true, caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
-                                this.refs.caseInfoType.setValue(caseInfoType);
-                                this.updateUserScoreObj();
-                            });
+                            this.refs.caseInfoType.setValue(caseInfoType ? caseInfoType : 'none');
+                            this.updateUserScoreObj();
                         });
                     } else {
-                        this.setState({scoreStatus: scoreStatus ? scoreStatus : null}, () => {
+                        this.setState({
+                            showScoreInput: false,
+                            scoreStatus: scoreStatus ? scoreStatus : null
+                        }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
                             this.updateUserScoreObj();
                         });
-                        this.setState({showScoreInput: false});
                     }
                 }
             });
