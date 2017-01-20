@@ -108,7 +108,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                             showScoreInput: false,
                             scoreStatus: scoreStatus ? scoreStatus : null
                         }, () => {
-                            this.refs.scoreStatus.setValue(scoreStatus);
+                            this.refs.scoreStatus.setValue(scoreStatus ? scoreStatus : 'none');
                             this.updateUserScoreObj();
                         });
                     }
