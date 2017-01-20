@@ -1401,15 +1401,6 @@ var CaseControlViewer = React.createClass({
 
     scoreSubmit: function(e) {
         let caseControl = this.props.context;
-        /*,
-            evidenceScores = [];
-        let caseControlScores = caseControl && caseControl.scores ? caseControl.scores : [];
-        // Find any pre-existing score(s) and put their '@id' values into an array
-        if (caseControlScores.length) {
-            caseControlScores.forEach(score => {
-                evidenceScores.push(score['@id']);
-            });
-        }*/
         /*****************************************************/
         /* Evidence score data object                        */
         /*****************************************************/
@@ -1436,11 +1427,13 @@ var CaseControlViewer = React.createClass({
                     return Promise.resolve(newScoreObjectUuid);
                 }).then(newScoreObjectUuid => {
                     return this.getRestData('/casecontrol/' + caseControl.uuid, null, true).then(freshCaseControl => {
-                        let newCaseControl = curator.flatten(freshCaseControl);
-                        // Update individual's scores property
-                        if (!newCaseControl.scores) {
-                            newCaseControl.scores = [];
-                        }
+                        // flatten both context and fresh case-control
+                        let newCaseControl = curator.flatten(caseControl);
+                        let freshFlatCaseControl = curator.flatten(freshCaseControl);
+                        // take only the scores from the fresh case-control to not overwrite changes
+                        // in newCaseControl
+                        newCaseControl.scores = freshFlatCaseControl.scores ? freshFlatCaseControl.scores : [];
+                        // push new score uuid to newIndividual's scores list
                         newCaseControl.scores.push(newScoreObjectUuid);
 
                         return this.putRestData('/casecontrol/' + caseControl.uuid, newCaseControl).then(updatedCaseControlObj => {

@@ -1654,11 +1654,13 @@ var IndividualViewer = React.createClass({
                     return Promise.resolve(newScoreObjectUuid);
                 }).then(newScoreObjectUuid => {
                     return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
-                        let newIndividual = curator.flatten(freshIndividual);
-                        // Update individual's scores property
-                        if (!newIndividual.scores) {
-                            newIndividual.scores = [];
-                        }
+                        // flatten both context and fresh individual
+                        let newIndividual = curator.flatten(individual);
+                        let freshFlatIndividual = curator.flatten(freshIndividual);
+                        // take only the scores from the fresh individual to not overwrite changes
+                        // in newIndividual
+                        newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                        // push new score uuid to newIndividual's scores list
                         newIndividual.scores.push(newScoreObjectUuid);
 
                         return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
