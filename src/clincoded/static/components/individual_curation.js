@@ -1624,17 +1624,6 @@ var IndividualViewer = React.createClass({
 
     scoreSubmit: function(e) {
         let individual = this.props.context;
-        /*,
-            evidenceScores = [];
-        /*
-        let individualScores = [individual && individual.scores ? individual.scores : [];
-        // Find any pre-existing score(s) and put their '@id' values into an array
-        if (individualScores.length) {
-            individualScores.forEach(score => {
-                evidenceScores.push(score['@id']);
-            });
-        }]
-        */
         /*****************************************************/
         /* Proband score status data object                  */
         /*****************************************************/
