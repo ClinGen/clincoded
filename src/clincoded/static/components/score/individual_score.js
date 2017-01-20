@@ -69,12 +69,6 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         }
     },
 
-    /* componentWillUpdate(nextProps, nextState) {
-        if (nextState.caseInfoType) {
-            this.updateUserScoreObj();
-        }
-    }, */
-
     loadData() {
         // Prep the following when the component is loaded
         let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
