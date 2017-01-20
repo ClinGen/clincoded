@@ -1781,6 +1781,13 @@ function flattenExperimental(experimental) {
         });
     }
 
+    // Flatten evidence scores
+    if (experimental.scores && experimental.scores.length) {
+        flat.scores = experimental.scores.map(function(score) {
+            return score['@id'];
+        });
+    }
+
     return flat;
 }
 

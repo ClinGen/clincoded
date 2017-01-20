@@ -1623,15 +1623,7 @@ var IndividualViewer = React.createClass({
     },
 
     scoreSubmit: function(e) {
-        let individual = this.props.context,
-            evidenceScores = [];
-        let individualScores = individual && individual.scores ? individual.scores : [];
-        // Find any pre-existing score(s) and put their '@id' values into an array
-        if (individualScores.length) {
-            individualScores.forEach(score => {
-                evidenceScores.push(score['@id']);
-            });
-        }
+        let individual = this.props.context;
         /*****************************************************/
         /* Proband score status data object                  */
         /*****************************************************/
@@ -1655,18 +1647,26 @@ var IndividualViewer = React.createClass({
                 });
             } else {
                 return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    let newScoreObjectUuid = null;
                     if (newScoreObject) {
-                        // Add new score @id to array
-                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
                     }
-                    return Promise.resolve(evidenceScores);
-                }).then(newScoresArray => {
-                    let newIndividual = curator.flatten(individual);
-                    // Update individual's scores property
-                    newIndividual['scores'] = newScoresArray;
-                    this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
-                        this.setState({submitBusy: false});
-                        return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                    return Promise.resolve(newScoreObjectUuid);
+                }).then(newScoreObjectUuid => {
+                    return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                        // flatten both context and fresh individual
+                        let newIndividual = curator.flatten(individual);
+                        let freshFlatIndividual = curator.flatten(freshIndividual);
+                        // take only the scores from the fresh individual to not overwrite changes
+                        // in newIndividual
+                        newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                        // push new score uuid to newIndividual's scores list
+                        newIndividual.scores.push(newScoreObjectUuid);
+
+                        return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                            this.setState({submitBusy: false});
+                            return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                        });
                     });
                 }).then(data => {
                     this.handlePageRedirect();
