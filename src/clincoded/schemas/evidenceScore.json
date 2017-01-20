@@ -20,7 +20,6 @@
         "scoreStatus": {
             "title": "Score Status",
             "description": "Score, Review or Contradicts",
-            "default": "Score",
             "type": "string"
         },
         "calculatedScore": {
