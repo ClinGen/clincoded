@@ -2239,15 +2239,7 @@ var ExperimentalViewer = React.createClass({
 
     // Handle the score submit button
     scoreSubmit: function(e) {
-        let experimental = this.props.context,
-            evidenceScores = [];
-        let experimentalScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
-        // Find any pre-existing score(s) and put their '@id' values into an array
-        if (experimentalScores.length) {
-            experimentalScores.forEach(score => {
-                evidenceScores.push(score['@id']);
-            });
-        }
+        let experimental = this.props.context;
         /*****************************************************/
         /* Experimental score status data object             */
         /*****************************************************/
@@ -2271,18 +2263,31 @@ var ExperimentalViewer = React.createClass({
                 });
             } else {
                 return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    let newScoreObjectUuid = null;
                     if (newScoreObject) {
-                        // Add new score @id to array
-                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
                     }
-                    return Promise.resolve(evidenceScores);
-                }).then(newScoresArray => {
-                    let newExperimental = curator.flatten(experimental);
-                    // Update individual's scores property
-                    newExperimental['scores'] = newScoresArray;
-                    this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
-                        this.setState({submitBusy: false});
-                        return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                    return Promise.resolve(newScoreObjectUuid);
+                }).then(newScoreObjectUuid => {
+                    return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
+                        // flatten both context and fresh experimental
+                        let newExperimental = curator.flatten(experimental);
+                        console.log('curr');
+                        console.log(newExperimental.scores);
+                        let freshFlatExperimental = curator.flatten(freshExperimental);
+                        console.log('curr');
+                        console.log(freshFlatExperimental.scores);
+                        // take only the scores from the fresh experimental to not overwrite changes
+                        // in newExperimental
+                        newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
+                        // push new score uuid to newExperimental's scores list
+                        newExperimental.scores.push(newScoreObjectUuid);
+                        console.log(newExperimental.scores);
+
+                        return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                            this.setState({submitBusy: false});
+                            return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                        });
                     });
                 }).then(data => {
                     this.handlePageRedirect();
