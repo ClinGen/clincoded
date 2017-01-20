@@ -90,16 +90,18 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                                 modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
                                 scoreExplanation = loggedInUserScore.scoreExplanation,
                                 calcScoreRange = [];
-                            this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null});
+                            this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null}, this.updateUserScoreObj());
                             this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
                                 calcScoreRange = this.getScoreRange(experimentalEvidenceType, defaultScore);
                                 this.setState({scoreRange: calcScoreRange}, () => {
                                     this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                                 });
+                                this.updateUserScoreObj();
                             });
                             if (!isNaN(parseFloat(modifiedScore)) && scoreExplanation.length) {
                                 this.setState({scoreExplanation: scoreExplanation, requiredScoreExplanation: true}, () => {
                                     this.refs.scoreExplanation.setValue(scoreExplanation);
+                                    this.updateUserScoreObj();
                                 });
                             }
                             this.updateUserScoreObj();
