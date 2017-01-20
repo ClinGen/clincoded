@@ -69,6 +69,12 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         }
     },
 
+    /* componentWillUpdate(nextProps, nextState) {
+        if (nextState.caseInfoType) {
+            this.updateUserScoreObj();
+        }
+    }, */
+
     loadData() {
         // Prep the following when the component is loaded
         let modeInheritanceType = this.getModeInheritanceType(this.props.modeInheritance);
@@ -117,17 +123,20 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                                 calcScoreRange = [];
                             this.setState({caseInfoType: (caseInfoType && caseInfoType !== 'none') ? caseInfoType : null}, () => {
                                 this.refs.caseInfoType.setValue(caseInfoType);
+                                this.updateUserScoreObj();
                             });
-                            this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null});
+                            this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null}, this.updateUserScoreObj());
                             this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
                                 calcScoreRange = this.getScoreRange(modeInheritanceType, caseInfoType, defaultScore);
                                 this.setState({scoreRange: calcScoreRange}, () => {
                                     this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                                 });
+                                this.updateUserScoreObj();
                             });
                             if (!isNaN(parseFloat(modifiedScore)) && scoreExplanation.length) {
                                 this.setState({scoreExplanation: scoreExplanation, requiredScoreExplanation: true}, () => {
                                     this.refs.scoreExplanation.setValue(scoreExplanation);
+                                    this.updateUserScoreObj();
                                 });
                             }
                             this.updateUserScoreObj();
