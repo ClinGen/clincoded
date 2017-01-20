@@ -106,11 +106,10 @@ var CaseControlSubmit = module.exports.CaseControlSubmit = React.createClass({
         this.queryValues.annotationUuid = queryKeyValue('evidence', this.props.href);
 
         // Build the link to go back and edit the newly created group page
-        var editCaseControlLink = (gdm && caseControl && annotation) ? 
+        var editCaseControlLink = (gdm && caseControl && annotation) ?
                                     '/case-control-curation/?gdm=' + gdm.uuid +
-                                    '&evidence=' + annotation.uuid + 
+                                    '&evidence=' + annotation.uuid +
                                     '&casecontrol=' + caseControl.uuid +
-                                    '&evidencescore=' + caseControl.scores[0].uuid +
                                     '&casecohort=' + caseControl.caseCohort.uuid +
                                     '&controlcohort=' + caseControl.controlCohort.uuid
                                     : '';
