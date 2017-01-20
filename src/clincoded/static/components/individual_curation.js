@@ -1653,8 +1653,8 @@ var IndividualViewer = React.createClass({
                     }
                     return Promise.resolve(newScoreObjectUuid);
                 }).then(newScoreObjectUuid => {
-                    return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndivdiual => {
-                        let newIndividual = curator.flatten(individual);
+                    return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                        let newIndividual = curator.flatten(freshIndividual);
                         // Update individual's scores property
                         if (!newIndividual.scores) {
                             newIndividual.scores = [];
