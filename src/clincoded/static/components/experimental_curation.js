@@ -2272,17 +2272,12 @@ var ExperimentalViewer = React.createClass({
                     return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
                         // flatten both context and fresh experimental
                         let newExperimental = curator.flatten(experimental);
-                        console.log('curr');
-                        console.log(newExperimental.scores);
                         let freshFlatExperimental = curator.flatten(freshExperimental);
-                        console.log('curr');
-                        console.log(freshFlatExperimental.scores);
                         // take only the scores from the fresh experimental to not overwrite changes
                         // in newExperimental
                         newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
                         // push new score uuid to newExperimental's scores list
                         newExperimental.scores.push(newScoreObjectUuid);
-                        console.log(newExperimental.scores);
 
                         return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
                             this.setState({submitBusy: false});
