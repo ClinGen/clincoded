@@ -75,43 +75,42 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                 if (loggedInUserScore) {
                     this.setState({userScoreUuid: loggedInUserScore.uuid});
                     // Render or remove the default score, score range, and explanation fields
-                    let scoreStatus = loggedInUserScore.scoreStatus;
+                    let scoreStatus = loggedInUserScore.scoreStatus,
+                        defaultScore = loggedInUserScore.calculatedScore,
+                        modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
+                        scoreExplanation = loggedInUserScore.scoreExplanation,
+                        calcScoreRange = this.getScoreRange(experimentalEvidenceType, parseFloat(defaultScore));
                     /**************************************************************************************/
                     /* Curators are allowed to access the score form fields when the 'Score' is selected, */
                     /* or when 'Review' is selected given the matched Mode of Inheritance types           */
                     /* (although its score won't be counted from the summary).                            */
                     /**************************************************************************************/
                     if (scoreStatus && (scoreStatus === 'Score' || scoreStatus === 'Review')) {
-                        scoreStatus === 'Review' ? this.setState({willNotCountScore: true}) : this.setState({willNotCountScore: false});
-                        this.setState({scoreStatus: scoreStatus, showScoreInput: true}, () => {
+                        // Setting UI and score object property states
+                        this.setState({
+                            showScoreInput: true,
+                            willNotCountScore: scoreStatus === 'Review' ? true : false,
+                            scoreRange: calcScoreRange,
+                            requiredScoreExplanation: !isNaN(parseFloat(modifiedScore)) && scoreExplanation.length ? true : false,
+                            scoreStatus: scoreStatus,
+                            defaultScore: parseFloat(defaultScore) ? defaultScore : null,
+                            modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null,
+                            scoreExplanation: scoreExplanation ? scoreExplanation : null
+                        }, () => {
+                            // Populate input and select option values
                             this.refs.scoreStatus.setValue(scoreStatus);
-                            // If the score form fields are allowed, then proceed with the following
-                            let defaultScore = loggedInUserScore.calculatedScore,
-                                modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
-                                scoreExplanation = loggedInUserScore.scoreExplanation,
-                                calcScoreRange = [];
-                            this.setState({defaultScore: !isNaN(parseFloat(defaultScore)) ? defaultScore : null}, this.updateUserScoreObj());
-                            this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
-                                calcScoreRange = this.getScoreRange(experimentalEvidenceType, defaultScore);
-                                this.setState({scoreRange: calcScoreRange}, () => {
-                                    this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
-                                });
-                                this.updateUserScoreObj();
-                            });
-                            if (!isNaN(parseFloat(modifiedScore)) && scoreExplanation.length) {
-                                this.setState({scoreExplanation: scoreExplanation, requiredScoreExplanation: true}, () => {
-                                    this.refs.scoreExplanation.setValue(scoreExplanation);
-                                    this.updateUserScoreObj();
-                                });
-                            }
+                            this.refs.scoreRange.setValue(modifiedScore && calcScoreRange ? modifiedScore : 'none');
+                            this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
                             this.updateUserScoreObj();
                         });
                     } else {
-                        this.setState({scoreStatus: scoreStatus ? scoreStatus : null}, () => {
+                        this.setState({
+                            showScoreInput: false,
+                            scoreStatus: scoreStatus ? scoreStatus : null
+                        }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus);
                             this.updateUserScoreObj();
                         });
-                        this.setState({showScoreInput: false});
                     }
                 }
             });
