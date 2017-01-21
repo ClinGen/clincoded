@@ -367,12 +367,9 @@ var ProvisionalCuration = React.createClass({
                     if (caseControl.scores && caseControl.scores.length) {
                         caseControl.scores.forEach(score => {
                             if (score.submitted_by.uuid === this.state.user) {
-                                if (score.scoreStatus === 'Score' && 'score' in score && score.score !== 'none') {
+                                if ('score' in score && score.score !== 'none') {
                                     scoreTableValues['caseControlCount'] += 1;
                                     scoreTableValues['caseControlPoints'] += parseFloat(score.score);
-                                } else if (score.scoreStatus === 'Contradicts') {
-                                    // set flag if a contradicting case-control evidence is found
-                                    contradictingEvidence.caseControl = true;
                                 }
                             }
                         });
