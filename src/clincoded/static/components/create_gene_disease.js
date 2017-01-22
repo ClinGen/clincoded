@@ -195,12 +195,13 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue="none"
                                     error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')} inputDisabled={adjectiveDisabled}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
-                                    <option value="none" disabled="disabled">Select</option>
+                                    <option value="none">Select</option>
                                     <option disabled="disabled"></option>
                                     {adjectives.map(function(adjective, i) {
                                         return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
                                     })}
                                 </Input>
+                                <div><p className="alert alert-warning">Currently, the above options (gene, disease, mode of inheritance, or adjective) cannot be altered for a Gene:Disease record once the record has been created. This includes adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>

@@ -1623,15 +1623,7 @@ var IndividualViewer = React.createClass({
     },
 
     scoreSubmit: function(e) {
-        let individual = this.props.context,
-            evidenceScores = [];
-        let individualScores = individual && individual.scores ? individual.scores : [];
-        // Find any pre-existing score(s) and put their '@id' values into an array
-        if (individualScores.length) {
-            individualScores.forEach(score => {
-                evidenceScores.push(score['@id']);
-            });
-        }
+        let individual = this.props.context;
         /*****************************************************/
         /* Proband score status data object                  */
         /*****************************************************/
@@ -1655,18 +1647,26 @@ var IndividualViewer = React.createClass({
                 });
             } else {
                 return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                    let newScoreObjectUuid = null;
                     if (newScoreObject) {
-                        // Add new score @id to array
-                        evidenceScores.push(newScoreObject['@graph'][0]['@id']);
+                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
                     }
-                    return Promise.resolve(evidenceScores);
-                }).then(newScoresArray => {
-                    let newIndividual = curator.flatten(individual);
-                    // Update individual's scores property
-                    newIndividual['scores'] = newScoresArray;
-                    this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
-                        this.setState({submitBusy: false});
-                        return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                    return Promise.resolve(newScoreObjectUuid);
+                }).then(newScoreObjectUuid => {
+                    return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                        // flatten both context and fresh individual
+                        let newIndividual = curator.flatten(individual);
+                        let freshFlatIndividual = curator.flatten(freshIndividual);
+                        // take only the scores from the fresh individual to not overwrite changes
+                        // in newIndividual
+                        newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                        // push new score uuid to newIndividual's scores list
+                        newIndividual.scores.push(newScoreObjectUuid);
+
+                        return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                            this.setState({submitBusy: false});
+                            return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                        });
                     });
                 }).then(data => {
                     this.handlePageRedirect();
@@ -1956,8 +1956,8 @@ var IndividualViewer = React.createClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                {evidenceScores.length > 1 ?
-                                    <Panel panelClassName="panel-data">
+                                {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userIndividual) ?
+                                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Other Curator Scores" />} panelClassName="panel-data">
                                         <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
                                     </Panel>
                                 : null}
@@ -2046,10 +2046,22 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
     }
 
     if (updateNeeded) {
-        var writerIndividual = curator.flatten(individual);
+        let writerIndividual = curator.flatten(individual);
+        let updatedScores = [];
         // manage variants variable in individual object
-        if (!variants) {
+        if (!variants || (variants && variants.length === 0)) {
+            // if all variants are removed, prepare evidenceScore objects so their
+            // status can be set to 'deleted'
+            if (individual.scores && individual.scores.length) {
+                individual.scores.map(score => {
+                    let flatScore = curator.flatten(score);
+                    flatScore.status = 'deleted';
+                    updatedScores.push(context.putRestData(score['@id'] + '?render=false', flatScore));
+                });
+            }
+            // delete relevant fields from updated individual object
             delete writerIndividual['variants'];
+            delete writerIndividual['scores'];
         } else {
             writerIndividual.variants = variants;
         }
@@ -2059,16 +2071,10 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         } else {
             delete writerIndividual['recessiveZygosity'];
         }
-        if (individual.scores && individual.scores.length) {
-            let tempScores = [];
-            individual.scores.forEach(score => {
-                tempScores.push(score.uuid);
-            });
-            writerIndividual.scores = tempScores;
-        }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
-            return Promise.resolve(data['@graph'][0]);
+            // update any evidenceScore objects, if any
+            return Promise.all(updatedScores);
         });
     }
     return Promise.resolve(null);
