@@ -52,6 +52,7 @@ Feature: Select Variant
         When I press the button "Save and View Evidence"
         And I wait for 10 seconds
         Then I should see "Evidence View"
+        Then I should see " rs566967979"
         When I press "Logout ClinGen Test Curator"
         And I wait for 10 seconds
         Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
