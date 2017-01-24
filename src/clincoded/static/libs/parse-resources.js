@@ -204,7 +204,7 @@ function parseCAR(json) {
         if (json.externalRecords.dbSNP && json.externalRecords.dbSNP.length > 0) {
             variant.dbSNPIds = [];
             json.externalRecords.dbSNP.map(function(dbSNPentry, i) {
-                variant.dbSNPIds.push(dbSNPentry.rs);
+                variant.dbSNPIds.push(dbSNPentry.rs.toString());
             });
         }
     }
