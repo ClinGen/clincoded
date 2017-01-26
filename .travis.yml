@@ -45,6 +45,7 @@ before_script:
       mkdir sc
       tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc
       sc/bin/sc --readyfile $SC_READYFILE \
+        --verbose \
         --logfile $SC_LOGFILE \
         --pidfile $SC_PIDFILE \
         --tunnel-identifier $TRAVIS_JOB_NUMBER \
@@ -83,8 +84,10 @@ after_script:
       cat $SC_LOGFILE
       echo "===SC_PIDFILE"
       cat $SC_PIDFILE
-      echo "HOME dir"
+      echo "===HOME dir"
       ls $HOME
+      echo "===SC_READYFILE"
+      cat $SC_READYFILE
       echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
       # Wait for Sauce Connect to shut down its tunnel.
       echo "Closing Sauce Connect tunnel."
