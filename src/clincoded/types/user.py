@@ -8,15 +8,32 @@ from pyramid.security import (
     effective_principals,
 )
 from .base import Item
-from snovault.schema_utils import (
-    load_schema,
-)
 from snovault import (
     Root,
+    CONNECTION,
     calculated_property,
-    item_view_object,
     collection,
+    load_schema,
 )
+from snovault.calculated import calculate_properties
+from snovault.resource_views import item_view_object
+from snovault.util import expand_path
+
+ONLY_ADMIN_VIEW_DETAILS = [
+    (Allow, 'group.admin', ['view', 'view_details', 'edit']),
+    (Allow, 'group.read-only-admin', ['view', 'view_details']),
+    (Allow, 'remoteuser.INDEXER', ['view']),
+    (Allow, 'remoteuser.EMBED', ['view']),
+    (Deny, Everyone, ['view', 'view_details', 'edit']),
+]
+
+USER_ALLOW_CURRENT = [
+    (Allow, Everyone, 'view'),
+] + ONLY_ADMIN_VIEW_DETAILS
+
+USER_DELETED = [
+    (Deny, Everyone, 'visible_for_edit')
+] + ONLY_ADMIN_VIEW_DETAILS
 
 
 @collection(
