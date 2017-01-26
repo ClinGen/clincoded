@@ -83,6 +83,8 @@ after_script:
       cat $SC_LOGFILE
       echo "===SC_PIDFILE"
       cat $SC_PIDFILE
+      echo "HOME dir"
+      ls 
       echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
       # Wait for Sauce Connect to shut down its tunnel.
       echo "Closing Sauce Connect tunnel."
