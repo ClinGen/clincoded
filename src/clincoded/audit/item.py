@@ -1,9 +1,12 @@
-from contentbase.auditor import (
+from snovault import (
     AuditFailure,
     audit_checker,
 )
-from contentbase import simple_path_ids
-from contentbase.schema_utils import validate
+from snovault import (
+    UPGRADER,
+)
+from snovault.schema_utils import validate
+from snovault.util import simple_path_ids
 
 
 @audit_checker('item', frame='object')
