@@ -154,7 +154,7 @@ def registry(app):
 
 @fixture
 def elasticsearch(registry):
-    from contentbase.elasticsearch import ELASTIC_SEARCH
+    from snovault.elasticsearch import ELASTIC_SEARCH
     return registry[ELASTIC_SEARCH]
 
 
@@ -329,11 +329,11 @@ def server(_server, external_tx):
 # By binding the SQLAlchemy Session to an external transaction multiple testapp
 # requests can be rolled back at the end of the test.
 
-@pytest.mark.fixture_lock('contentbase.storage.DBSession')
+@pytest.mark.fixture_lock('snovault.storage.DBSession')
 @pytest.yield_fixture(scope='session')
 def connection(request, engine_url):
     from clincoded import configure_engine
-    from contentbase.storage import Base, DBSession
+    from snovault.storage import Base, DBSession
     from sqlalchemy.orm.scoping import ScopedRegistry
 
     # ``server`` thread must be in same scope
@@ -364,7 +364,7 @@ def external_tx(request, connection):
     tx = connection.begin_nested()
     request.addfinalizer(tx.rollback)
     # # The database should be empty unless a data fixture was loaded
-    # from contentbase.storage import Base
+    # from snovault.storage import Base
     # for table in Base.metadata.sorted_tables:
     #     assert connection.execute(table.count()).scalar() == 0
     return tx
@@ -438,7 +438,7 @@ def session(transaction):
 
     Depends on transaction as storage relies on some interaction there.
     """
-    from contentbase.storage import DBSession
+    from snovault.storage import DBSession
     return DBSession()
 
 
@@ -450,7 +450,7 @@ def check_constraints(request, connection):
     boundary, not at a savepoint. With the Pyramid transaction bound to a
     subtransaction check them manually.
     '''
-    from contentbase.storage import DBSession
+    from snovault.storage import DBSession
     from transaction.interfaces import ISynchronizer
     from zope.interface import implementer
 
@@ -537,7 +537,7 @@ def execute_counter(request, connection, zsa_savepoints, check_constraints):
 
 @fixture
 def no_deps(request, connection):
-    from contentbase.storage import DBSession
+    from snovault.storage import DBSession
     from sqlalchemy import event
 
     session = DBSession()

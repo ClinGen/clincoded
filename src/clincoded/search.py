@@ -1,11 +1,11 @@
 import re
 from pyramid.view import view_config
-from contentbase import (
+from snovault import (
     Collection,
     TYPES,
     collection_view_listing_db,
 )
-from contentbase.elasticsearch import ELASTIC_SEARCH
+from snovault.elasticsearch import ELASTIC_SEARCH
 from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict
@@ -289,7 +289,7 @@ def search(context, request, search_type=None):
 
     principals = effective_principals(request)
     es = request.registry[ELASTIC_SEARCH]
-    es_index = request.registry.settings['contentbase.elasticsearch.index']
+    es_index = request.registry.settings['snovault.elasticsearch.index']
     search_audit = request.has_permission('search_audit')
 
     # handling limit

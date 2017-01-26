@@ -1,8 +1,8 @@
-from contentbase.attachment import ItemWithAttachment
-from contentbase.schema_utils import (
+from snovault.attachment import ItemWithAttachment
+from snovault.schema_utils import (
     load_schema,
 )
-from contentbase import (
+from snovault import (
     calculated_property,
     collection,
 )

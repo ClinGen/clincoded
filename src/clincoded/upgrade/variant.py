@@ -1,4 +1,4 @@
-from contentbase.upgrader import upgrade_step
+from snovault.upgrader import upgrade_step
 import urllib.request
 import json
 

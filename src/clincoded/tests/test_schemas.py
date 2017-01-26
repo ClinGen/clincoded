@@ -9,7 +9,7 @@ SCHEMA_FILES = [
 
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
 def test_load_schema(schema):
-    from contentbase.schema_utils import load_schema
+    from snovault.schema_utils import load_schema
     assert load_schema('clincoded:schemas/%s' % schema)
 
 
@@ -19,7 +19,7 @@ def test_load_schema(schema):
 
 
 def test_mixinProperties():
-    from contentbase.schema_utils import load_schema
+    from snovault.schema_utils import load_schema
     schema = load_schema('clincoded:schemas/access_key.json')
     assert schema['properties']['uuid']['type'] == 'string'
 
@@ -39,7 +39,7 @@ def test_dependencies(testapp):
 
 
 # def test_changelogs(testapp, registry):
-#     from contentbase import TYPES
+#     from snovault import TYPES
 #     for name, typeinfo in registry[TYPES].types.items():
 #         changelog = typeinfo.schema.get('changelog')
 #         if changelog is not None:

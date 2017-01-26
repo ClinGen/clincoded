@@ -17,7 +17,7 @@ from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
 from webob.cookies import JSONSerializer
-from contentbase.storage import (
+from snovault.storage import (
     Base,
     DBSession,
 )
@@ -58,7 +58,7 @@ def changelogs(config):
 
 
 def configure_engine(settings, test_setup=False):
-    from contentbase.json_renderer import json_renderer
+    from snovault.json_renderer import json_renderer
     engine_url = settings.get('sqlalchemy.url')
     if not engine_url:
         # Already setup by test fixture
@@ -159,10 +159,10 @@ def main(global_config, **local_config):
     settings = global_config
     settings.update(local_config)
 
-    settings['contentbase.jsonld.namespaces'] = json_asset('clincoded:schemas/namespaces.json')
-    settings['contentbase.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
-    settings['contentbase.jsonld.terms_prefix'] = 'encode'
-    settings['contentbase.elasticsearch.index'] = 'clincoded'
+    settings['snovault.jsonld.namespaces'] = json_asset('clincoded:schemas/namespaces.json')
+    settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
+    settings['snovault.jsonld.terms_prefix'] = 'encode'
+    settings['snovault.elasticsearch.index'] = 'clincoded'
 
     config = Configurator(settings=settings)
     config.registry['app_factory'] = main  # used by mp_indexer
@@ -175,7 +175,7 @@ def main(global_config, **local_config):
     config.include('.auth0')
 
     configure_engine(settings)
-    config.include('contentbase')
+    config.include('snovault')
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
@@ -188,7 +188,7 @@ def main(global_config, **local_config):
     config.include('.visualization')
 
     if 'elasticsearch.server' in config.registry.settings:
-        config.include('contentbase.elasticsearch')
+        config.include('snovault.elasticsearch')
         config.include('.search')
 
     config.include(static_resources)

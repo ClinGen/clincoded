@@ -1,8 +1,8 @@
-from contentbase.schema_utils import (
+from snovault.schema_utils import (
     load_schema,
     VALIDATOR_REGISTRY,
 )
-from contentbase import (
+from snovault import (
     COLLECTIONS,
     CONNECTION,
     ROOT,

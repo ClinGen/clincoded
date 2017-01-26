@@ -12,7 +12,7 @@ from pyramid.traversal import (
     find_root,
     traverse,
 )
-import contentbase
+import snovault
 from ..schema_formats import is_accession
 
 
@@ -81,7 +81,7 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
         ]
 
 
-class Collection(contentbase.Collection):
+class Collection(snovault.Collection):
     def __init__(self, *args, **kw):
         super(Item.Collection, self).__init__(*args, **kw)
         if hasattr(self, '__acl__'):
@@ -110,7 +110,7 @@ class Collection(contentbase.Collection):
         return default
 
 
-class Item(contentbase.Item):
+class Item(snovault.Item):
     Collection = Collection
     STATUS_ACL = {
         # standard_status
@@ -176,7 +176,7 @@ def contextless_has_permission(permission):
     return request.has_permission('forms', request.root)
 
 
-@contentbase.calculated_property(context=Item.Collection, category='action')
+@snovault.calculated_property(context=Item.Collection, category='action')
 def add(item_uri, item_type, has_permission):
     if has_permission('add') and contextless_has_permission('forms'):
         return {
@@ -187,7 +187,7 @@ def add(item_uri, item_type, has_permission):
         }
 
 
-@contentbase.calculated_property(context=Item, category='action')
+@snovault.calculated_property(context=Item, category='action')
 def edit(item_uri, item_type, has_permission):
     if has_permission('edit') and contextless_has_permission('forms'):
         return {
@@ -198,7 +198,7 @@ def edit(item_uri, item_type, has_permission):
         }
 
 
-@contentbase.calculated_property(context=Item, category='action')
+@snovault.calculated_property(context=Item, category='action')
 def edit_json(item_uri, item_type, has_permission):
     if has_permission('edit'):
         return {

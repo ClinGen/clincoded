@@ -1,5 +1,5 @@
 from pyramid.decorator import reify
-from contentbase import (
+from snovault import (
     Root,
     root,
 )

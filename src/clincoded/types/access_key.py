@@ -16,10 +16,10 @@ from ..authentication import (
     generate_user,
     CRYPT_CONTEXT,
 )
-from contentbase.schema_utils import (
+from snovault.schema_utils import (
     load_schema,
 )
-from contentbase import (
+from snovault import (
     collection_add,
     item_edit,
     collection,

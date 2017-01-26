@@ -1,4 +1,4 @@
-from contentbase.upgrader import upgrade_step
+from snovault.upgrader import upgrade_step
 
 
 @upgrade_step('gdm', '1', '2')
