@@ -21,7 +21,7 @@
             "title": "Variant",
             "description": "Variant to be interpreted",
             "type": "string",
-            "linkTo": "variant"
+            "linkTo": "Variant"
         },
         "genes": {
             "title": "Genes",
@@ -31,7 +31,7 @@
                 "title": "Gene",
                 "description": "uuid of a single gene.",
                 "type": "string",
-                "linkTo": "gene"
+                "linkTo": "Gene"
             }
         },
         "disease": {
@@ -39,7 +39,7 @@
             "description": "Disease associated to the variant.",
             "comment": "Not more than one disease, can be none.",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "linkTo": "OrphaPhenotype"
         },
         "modeInheritance": {
             "title": "Mode",
@@ -69,7 +69,7 @@
             "items": {
                 "title": "Transcript",
                 "type": "string",
-                "linkTo": "transcript"
+                "linkTo": "Transcript"
             }
         },
         "proteins": {
@@ -79,7 +79,7 @@
             "items": {
                 "title": "Protein",
                 "type": "string",
-                "linkTo": "protein"
+                "linkTo": "Protein"
             }
         },
         "evaluations": {
@@ -89,7 +89,7 @@
             "items": {
                 "title": "Evaluation",
                 "type": "string",
-                "linkTo": "evaluation"
+                "linkTo": "Evaluation"
             }
         },
         "provisional_variant": {
@@ -99,7 +99,7 @@
             "items": {
                 "title": "Provisional",
                 "type": "string",
-                "linkTo": "provisional_variant"
+                "linkTo": "Provisional_variant"
             }
         },
         "completed_sections": {

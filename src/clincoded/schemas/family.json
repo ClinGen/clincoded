@@ -30,7 +30,7 @@
             "items": {
                 "title": "Orphanet ID",
                 "type": "string",
-                "linkTo": "orphaPhenotype"
+                "linkTo": "OrphaPhenotype"
             }
         },
         "hpoIdInDiagnosis": {
@@ -388,7 +388,7 @@
                     "default": [],
                     "items": {
                         "type": "string",
-                        "linkTo": "variant"
+                        "linkTo": "Variant"
                     }
                 },
                 "assessments": {
@@ -399,7 +399,7 @@
                     "items": {
                         "description": "Assessment from one curator",
                         "type": "string",
-                        "linkTo": "assessment"
+                        "linkTo": "Assessment"
                     }
                 }
             }
@@ -419,7 +419,7 @@
                 "title": "PMID",
                 "description": "PMID",
                 "type": "string",
-                "linkTo": "article"
+                "linkTo": "Article"
             }
         },
         "individualIncluded": {
@@ -431,7 +431,7 @@
                 "title": "Individual",
                 "description": "Individual id",
                 "type": "string",
-                "linkTo": "individual"
+                "linkTo": "Individual"
             }
         },
         "active": {

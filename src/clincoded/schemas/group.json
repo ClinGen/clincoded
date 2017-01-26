@@ -31,7 +31,7 @@
             "items": {
                 "title": "Orphanet ID",
                 "type": "string",
-                "linkTo": "orphaPhenotype"
+                "linkTo": "OrphaPhenotype"
             }
         },
         "hpoIdInDiagnosis": {
@@ -199,7 +199,7 @@
                 "title": "Gene Symbol",
                 "description": "HGNC symbol of other gene",
                 "type": "string",
-                "linkTo": "gene"
+                "linkTo": "Gene"
             }
         },
         "method": {
@@ -292,7 +292,7 @@
                 "title": "PMID",
                 "description": "PMID",
                 "type": "string",
-                "linkTo": "article"
+                "linkTo": "Article"
             }
         },
         "familyIncluded": {
@@ -304,7 +304,7 @@
                 "title": "Family",
                 "description": "Family id",
                 "type": "string",
-                "linkTo": "family"
+                "linkTo": "Family"
             }
         },
         "individualIncluded": {
@@ -316,7 +316,7 @@
                 "title": "Individual",
                 "description": "Individual id",
                 "type": "string",
-                "linkTo": "individual"
+                "linkTo": "Individual"
             }
         },
         "groupType": {

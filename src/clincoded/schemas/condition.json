@@ -40,7 +40,7 @@
                 "title": "Alleles",
                 "description": "Alleles associated with this condition",
                 "type":  "string",
-                "linkTo": "allele"
+                "linkTo": "Allele"
             }
         },
         "label": {

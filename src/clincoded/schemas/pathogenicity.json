@@ -19,7 +19,7 @@
         "variant": {
             "title": "Variant uuid",
             "type": "string",
-            "linkTo": "variant"
+            "linkTo": "Variant"
         },
         "consistentWithDiseaseMechanism": {
             "title": "Is Variant Consistent with Disease Mechanism?",
@@ -90,7 +90,7 @@
             "items": {
                 "description": "Assessment uuid",
                 "type": "string",
-                "linkTo": "assessment"
+                "linkTo": "Assessment"
             }
         }
     },

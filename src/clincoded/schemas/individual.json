@@ -30,7 +30,7 @@
             "items": {
                 "title": "Orphanet ID",
                 "type": "string",
-                "linkTo": "orphaPhenotype"
+                "linkTo": "OrphaPhenotype"
             }
         },
         "sex": {
@@ -223,7 +223,7 @@
                 "title": "PMID",
                 "description": "PMID",
                 "type": "string",
-                "linkTo": "article"
+                "linkTo": "Article"
             }
         },
         "variants": {
@@ -235,7 +235,7 @@
                 "title": "Variant",
                 "description": "List of variant ids, see variant.json for detials",
                 "type": "string",
-                "linkTo": "variant"
+                "linkTo": "Variant"
             }
         },
         "assessments": {
@@ -245,7 +245,7 @@
             "items": {
                 "description": "Assessment from one curator",
                 "type": "string",
-                "linkTo": "assessment"
+                "linkTo": "Assessment"
             }
         },
         "proband": {
@@ -280,7 +280,7 @@
                 "title": "Score",
                 "description": "Score assigned by user. Limited to one per user",
                 "type": "string",
-                "linkTo": "evidenceScore"
+                "linkTo": "EvidenceScore"
             }
         },
         "active": {

@@ -1,12 +1,10 @@
-from snovault.upgrader import upgrade_step
+from snovault import upgrade_step
 
-@upgrade_step('user', '', '2')
-def user_1_2(value, system):
+
+@upgrade_step('user', '', '3')
+def user_0_3(value, system):
     pass
 
-@upgrade_step('user', '2', '3')
-def user_2_3(value, system):
-    pass
 
 @upgrade_step('user', '3', '4')
 def user_3_4(value, system):

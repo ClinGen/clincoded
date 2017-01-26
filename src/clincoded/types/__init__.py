@@ -6,12 +6,10 @@ from snovault import (
     calculated_property,
     collection,
 )
-from pyramid.traversal import find_root
 from .base import (
     Item,
     paths_filtered_by_status,
 )
-import json
 
 
 def includeme(config):

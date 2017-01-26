@@ -1,6 +1,5 @@
-from snovault.upgrader import upgrade_step
-import urllib.request
-import json
+from snovault import upgrade_step
+
 
 @upgrade_step('variant', '1', '2')
 def variant_1_2(value, system):
@@ -78,6 +77,7 @@ def variant_1_2(value, system):
 
         else:
             value['clinvarVariantTitle'] = ''
+
 
 @upgrade_step('variant', '2', '3')
 def variant_2_3(value, system):

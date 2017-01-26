@@ -16,9 +16,6 @@ from ..authentication import (
     generate_user,
     CRYPT_CONTEXT,
 )
-from snovault.schema_utils import (
-    load_schema,
-)
 from snovault import (
     collection,
     load_schema,

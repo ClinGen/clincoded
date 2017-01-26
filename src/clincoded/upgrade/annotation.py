@@ -1,4 +1,4 @@
-from snovault.upgrader import upgrade_step
+from snovault import upgrade_step
 
 
 @upgrade_step('annotation', '1', '2')

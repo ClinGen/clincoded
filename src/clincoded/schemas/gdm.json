@@ -21,13 +21,13 @@
             "title": "HGNC Symbol",
             "description": "HGNC Symbol of gene.",
             "type": "string",
-            "linkTo": "gene"
+            "linkTo": "Gene"
         },
         "disease": {
             "title": "Orpha ID",
             "description": "Unique id for Orphanet phenotypes.",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "linkTo": "OrphaPhenotype"
         },
         "modeInheritance": {
             "title": "Mode",
@@ -67,7 +67,7 @@
                 "description": "ID of an evidence added to the gdm",
                 "comment": "See annotation.json for details",
                 "type": "string",
-                "linkTo": "annotation"
+                "linkTo": "Annotation"
             }
         },
         "variantPathogenicity": {
@@ -78,7 +78,7 @@
             "items": {
                 "description": "uuid",
                 "type": "string",
-                "linkTo": "pathogenicity"
+                "linkTo": "Pathogenicity"
             }
         },
         "provisionalClassifications": {

@@ -130,7 +130,7 @@
             "title": "Submitted by",
             "comment": "Do not submit, value is assigned by the server. The user that created the object.",
             "type": "string",
-            "linkTo": "user",
+            "linkTo": "User",
             "serverDefault": "userid",
             "permission": "import_items"
         }
@@ -145,7 +145,7 @@
                 "title": "Reference",
                 "description": "A publication that provide smore information about the object.",
                 "type": "string",
-                "linkTo": "publication"
+                "linkTo": "Publication"
             }
         }
     },
@@ -163,7 +163,7 @@
             "description": "Grant associated with the submission.",
             "comment": "See award.json for list of available identifiers.",
             "type": "string",
-            "linkTo": "award"
+            "linkTo": "Award"
         }
      },
      "attachment": {
@@ -266,7 +266,7 @@
        "description": "The originating lab or vendor.",
        "comment": "See source.json for available identifiers.",
        "type": "string",
-       "linkTo": "source"
+       "linkTo": "Source"
             }
     },
     "notes": {
@@ -321,7 +321,7 @@
                 "description": "An expression or targeting vector stably or transiently transfected (not RNAi).",
                 "comment": "See contstruct.json for available identifiers.",
                 "type":  "string",
-                "linkTo": "construct"
+                "linkTo": "Construct"
             }
         },
         "mutated_gene": {
@@ -329,7 +329,7 @@
             "description": "The gene that was altered/disrupted resulting in a loss of function.",
             "comment": "See target.json for available identifiers.",
             "type": "string",
-            "linkTo": "target"
+            "linkTo": "Target"
         }
     },
     "assay": {

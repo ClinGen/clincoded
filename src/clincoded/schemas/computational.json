@@ -20,12 +20,12 @@
         "variant": {
             "title": "Variant",
             "type": "string",
-            "linkTo": "variant"
+            "linkTo": "Variant"
         },
         "disease": {
             "title": "Disease",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "linkTo": "OrphaPhenotype"
         },
         "computationalData": {
             "title": "Computational Data",

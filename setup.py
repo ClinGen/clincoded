@@ -103,5 +103,3 @@ setup(
         memlimit = clincoded.memlimit:filter_app
         ''',
 )
-
-# dev-servers = clincoded.commands.dev_servers:main

@@ -11,9 +11,9 @@ logger.setLevel(logging.INFO)  # doesn't work to shut off sqla INFO
 
 ORDER = [
     'user',
-    #'award',
-    #'lab',
-    #'organism',
+    'award',
+    'lab',
+    'organism',
     #'source',
     #'document',
     #'image',
@@ -24,7 +24,7 @@ ORDER = [
     'assessment',
     'evidenceScore',
     'variant',
-    #'protein',
+    'protein',
     'transcript',
     'individual',
     'family',
@@ -561,6 +561,7 @@ def load_all(testapp, filename, docsdir, test=False):
         try:
             source = read_single_sheet(filename, item_type)
         except ValueError:
+            logger.error('Opening %s %s failed.', filename, item_type)
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=1)
         process(combine(source, pipeline))
@@ -574,6 +575,7 @@ def load_all(testapp, filename, docsdir, test=False):
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
+
 
 def load_test_data(app):
     from webtest import TestApp
