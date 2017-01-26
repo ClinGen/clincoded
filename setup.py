@@ -7,17 +7,23 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
+    'snovault',
     'Pillow',
     'PyBrowserID',
     'SQLAlchemy>=1.0.0b1',
     'WSGIProxy2',
     'WebTest',
     'boto',
+    'botocore',
+    'jmespath',
+    'boto3',
     'elasticsearch',
+    'lucenequery',
     'future',
     'humanfriendly',
-    'jsonschema',
+    'jsonschema_serialize_fork',
     'loremipsum',
+    'netaddr',
     'passlib',
     'psutil',
     'pyramid',
@@ -69,8 +75,8 @@ setup(
     },
     entry_points='''
         [console_scripts]
-        batchupgrade = contentbase.batchupgrade:main
-        create-mapping = contentbase.elasticsearch.create_mapping:main
+        batchupgrade = snovault.batchupgrade:main
+        create-mapping = snovault.elasticsearch.create_mapping:main
 
         add-date-created = clincoded.commands.add_date_created:main
         check-files = clincoded.commands.check_files:main
