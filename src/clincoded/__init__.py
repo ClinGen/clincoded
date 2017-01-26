@@ -17,10 +17,12 @@ from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
 from webob.cookies import JSONSerializer
-from snovault.storage import (
-    Base,
-    DBSession,
+from snovault.elasticsearch import (
+    PyramidJSONSerializer,
+    TimedUrllib3HttpConnection,
 )
+from snovault.json_renderer import json_renderer
+from elasticsearch import Elasticsearch
 STATIC_MAX_AGE = 0
 
 
@@ -162,7 +164,7 @@ def main(global_config, **local_config):
     settings['snovault.jsonld.namespaces'] = json_asset('clincoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
-    settings['snovault.elasticsearch.index'] = 'clincoded'
+    settings['snovault.elasticsearch.index'] = 'snovault'
 
     config = Configurator(settings=settings)
     config.registry['app_factory'] = main  # used by mp_indexer
