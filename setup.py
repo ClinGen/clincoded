@@ -77,13 +77,13 @@ setup(
         [console_scripts]
         batchupgrade = snovault.batchupgrade:main
         create-mapping = snovault.elasticsearch.create_mapping:main
+        dev-servers = snovault.dev_servers:main
         es-index-listener = snovault.elasticsearch.es_index_listener:main
 
         add-date-created = clincoded.commands.add_date_created:main
         check-files = clincoded.commands.check_files:main
         check-rendering = clincoded.commands.check_rendering:main
         deploy = clincoded.commands.deploy:main
-        dev-servers = clincoded.commands.dev_servers:main
         extract_test_data = clincoded.commands.extract_test_data:main
         es-index-data = clincoded.commands.es_index_data:main
         import-data = clincoded.commands.import_data:main
@@ -103,3 +103,5 @@ setup(
         memlimit = clincoded.memlimit:filter_app
         ''',
 )
+
+# dev-servers = clincoded.commands.dev_servers:main

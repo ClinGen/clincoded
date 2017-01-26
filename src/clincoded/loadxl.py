@@ -574,3 +574,16 @@ def load_all(testapp, filename, docsdir, test=False):
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
+
+def load_test_data(app):
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    from pkg_resources import resource_filename
+    inserts = resource_filename('clincoded', 'tests/data/inserts/')
+    docsdir = [resource_filename('clincoded', 'tests/data/documents/')]
+    load_all(testapp, inserts, docsdir)
