@@ -8,15 +8,16 @@ from pyramid.security import (
     effective_principals,
 )
 from .base import Item
-from snovault.schema_utils import (
-    load_schema,
-)
 from snovault import (
     Root,
+    CONNECTION,
     calculated_property,
-    item_view_object,
     collection,
+    load_schema,
 )
+from snovault.calculated import calculate_properties
+from snovault.resource_views import item_view_object
+from snovault.util import expand_path
 
 
 @collection(

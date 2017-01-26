@@ -1,5 +1,5 @@
 from datetime import datetime
-from jsonschema import NO_DEFAULT
+from jsonschema_serialize_fork import NO_DEFAULT
 from pyramid.security import effective_principals
 from pyramid.threadlocal import get_current_request
 from string import (

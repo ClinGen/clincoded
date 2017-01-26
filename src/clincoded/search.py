@@ -2,10 +2,11 @@ import re
 from pyramid.view import view_config
 from snovault import (
     Collection,
+    AbstractCollection,
     TYPES,
-    collection_view_listing_db,
 )
 from snovault.elasticsearch import ELASTIC_SEARCH
+from snovault.resource_views import collection_view_listing_db
 from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict

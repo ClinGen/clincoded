@@ -59,12 +59,8 @@ def changelogs(config):
         'profiles/changelogs', 'schemas/changelogs', cache_max_age=STATIC_MAX_AGE)
 
 
-def configure_engine(settings, test_setup=False):
-    from snovault.json_renderer import json_renderer
-    engine_url = settings.get('sqlalchemy.url')
-    if not engine_url:
-        # Already setup by test fixture
-        return None
+def configure_engine(settings):
+    engine_url = settings['sqlalchemy.url']
     engine_opts = {}
     if engine_url.startswith('postgresql'):
         if settings.get('indexer_worker'):
@@ -84,11 +80,6 @@ def configure_engine(settings, test_setup=False):
         if timeout:
             timeout = int(timeout) * 1000
             set_postgresql_statement_timeout(engine, timeout)
-    if test_setup:
-        return engine
-    if asbool(settings.get('create_tables', False)):
-        Base.metadata.create_all(engine)
-    DBSession.configure(bind=engine)
     return engine
 
 
@@ -108,6 +99,28 @@ def set_postgresql_statement_timeout(engine, timeout=20 * 1000):
         finally:
             cursor.close()
             dbapi_connection.commit()
+
+
+def configure_dbsession(config):
+    from snovault import DBSESSION
+    settings = config.registry.settings
+    DBSession = settings.pop(DBSESSION, None)
+    if DBSession is None:
+        engine = configure_engine(settings)
+
+        if asbool(settings.get('create_tables', False)):
+            from snovault.storage import Base
+            Base.metadata.create_all(engine)
+
+        import snovault.storage
+        import zope.sqlalchemy
+        from sqlalchemy import orm
+
+        DBSession = orm.scoped_session(orm.sessionmaker(bind=engine))
+        zope.sqlalchemy.register(DBSession)
+        snovault.storage.register(DBSession)
+
+    config.registry[DBSESSION] = DBSession
 
 
 def load_workbook(app, workbook_filename, docsdir, test=False):
@@ -164,7 +177,7 @@ def main(global_config, **local_config):
     settings['snovault.jsonld.namespaces'] = json_asset('clincoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
-    settings['snovault.elasticsearch.index'] = 'snovault'
+    settings['snovault.elasticsearch.index'] = 'clincoded'
 
     config = Configurator(settings=settings)
     config.registry['app_factory'] = main  # used by mp_indexer
@@ -176,7 +189,7 @@ def main(global_config, **local_config):
     config.include(session)
     config.include('.auth0')
 
-    configure_engine(settings)
+    config.include(configure_dbsession)
     config.include('snovault')
     config.commit()  # commit so search can override listing
 

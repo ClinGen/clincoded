@@ -20,11 +20,15 @@ from snovault.schema_utils import (
     load_schema,
 )
 from snovault import (
+    collection,
+    load_schema,
+)
+from snovault.crud_views import (
     collection_add,
     item_edit,
-    collection,
+)
+from snovault.validators import (
     validate_item_content_post,
-    validate_item_content_put,
 )
 
 
@@ -124,18 +128,9 @@ def access_key_disable_secret(context, request):
     return result
 
 
-@view_config(context=AccessKey, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put])
-def access_key_edit(context, request):
-    new_properties = context.properties.copy()
-    new_properties.update(request.validated)
-    request.validated = new_properties
-    return item_edit(context, request)
-
-
 @view_config(context=AccessKey, permission='view_raw', request_method='GET',
              name='raw')
-def item_view_raw(context, request):
+def access_key_view_raw(context, request):
     if asbool(request.params.get('upgrade', True)):
         properties = context.upgrade_properties()
     else:

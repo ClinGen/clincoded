@@ -8,7 +8,6 @@ from snovault import (
     ROOT,
     calculated_property,
     collection,
-    item_view_page,
 )
 from .base import (
     ALLOW_EVERYONE_VIEW,
