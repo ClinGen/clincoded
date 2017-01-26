@@ -1040,7 +1040,7 @@ class EvidenceScore(Item):
         'title': 'Provisional Classifications',
         'description': 'List of provisional classifications',
     })
-class Provisional(Item):
+class ProvisionalClassification(Item):
     item_type = 'provisionalClassification'
     schema = load_schema('clincoded:schemas/provisionalClassification.json')
     name_key = 'uuid'

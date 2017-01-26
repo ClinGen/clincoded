@@ -40,10 +40,10 @@
                 "Group",
                 "Individual",
                 "Pathogenicity",
-                "provisionalClassification",
+                "ProvisionalClassification",
                 "Variant",
                 "Interpretation",
-                "extra_evidence"
+                "ExtraEvidence"
             ]
         },
         "hidden": {

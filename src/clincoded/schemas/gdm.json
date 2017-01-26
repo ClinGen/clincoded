@@ -89,7 +89,7 @@
             "items": {
                 "title": "Provisional Assertion",
                 "type": "string",
-                "linkTo": "provisionalClassification"
+                "linkTo": "ProvisionalClassification"
             }
         },
         "draftClassification": {

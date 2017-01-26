@@ -8,32 +8,15 @@ from pyramid.security import (
     effective_principals,
 )
 from .base import Item
-from snovault import (
-    Root,
-    CONNECTION,
-    calculated_property,
-    collection,
+from snovault.schema_utils import (
     load_schema,
 )
-from snovault.calculated import calculate_properties
-from snovault.resource_views import item_view_object
-from snovault.util import expand_path
-
-ONLY_ADMIN_VIEW_DETAILS = [
-    (Allow, 'group.admin', ['view', 'view_details', 'edit']),
-    (Allow, 'group.read-only-admin', ['view', 'view_details']),
-    (Allow, 'remoteuser.INDEXER', ['view']),
-    (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'view_details', 'edit']),
-]
-
-USER_ALLOW_CURRENT = [
-    (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW_DETAILS
-
-USER_DELETED = [
-    (Deny, Everyone, 'visible_for_edit')
-] + ONLY_ADMIN_VIEW_DETAILS
+from snovault import (
+    Root,
+    calculated_property,
+    item_view_object,
+    collection,
+)
 
 
 @collection(
@@ -86,37 +69,6 @@ def user_basic_view(context, request):
         except KeyError:
             pass
     return filtered
-
-
-@calculated_property(context=User, category='user_action')
-def impersonate(request):
-    # This is assuming the user_action calculated properties
-    # will only be fetched from the current_user view,
-    # which ensures that the user represented by 'context' is also an effective principal
-    if request.has_permission('impersonate'):
-        return {
-            'id': 'impersonate',
-            'title': 'Impersonate User…',
-            'href': '/#!impersonate-user',
-        }
-
-
-@calculated_property(context=User, category='user_action')
-def profile(context, request):
-    return {
-        'id': 'profile',
-        'title': 'Profile',
-        'href': request.resource_path(context),
-    }
-
-
-@calculated_property(context=User, category='user_action')
-def signout(context, request):
-    return {
-        'id': 'signout',
-        'title': 'Sign out',
-        'trigger': 'logout',
-}
 
 
 @view_config(context=Root, name='current-user', request_method='GET')
