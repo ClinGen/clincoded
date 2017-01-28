@@ -186,7 +186,7 @@ var FormMixin = module.exports.FormMixin = {
                 // Validate that type="number" fields have a valid number in them
                 var numVal = this.getFormValueNumber(ref);
                 if (numVal === null) {
-                    if (props.yesInteger) {
+                    if (props.inputClassName && props.inputClassName === 'integer-only') {
                         this.setFormErrors(ref, 'Non-decimal values only');
                         valid = false;
                     } else if (!this.getFormValue(ref).match(/^\d+\.\d+$/)) {
@@ -214,7 +214,6 @@ var FormMixin = module.exports.FormMixin = {
 // inputs can be handled through the labelClassName, groupClassName, and wrapperClassName properties.
 var Input = module.exports.Input = React.createClass({
     propTypes: {
-        yesInteger: React.PropTypes.bool,
         type: React.PropTypes.string.isRequired, // Type of input
         label: React.PropTypes.oneOfType([ // <label> for input; string or another React component
             React.PropTypes.string,
@@ -356,7 +355,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} yesInteger={this.props.yesInteger} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );
