@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var ReactDOMServer = require('react-dom/server');
 var doctype = '<!DOCTYPE html>\n';
 var transformResponse = require('subprocess-middleware').transformResponse;
 var fs = require('fs');
@@ -15,7 +16,7 @@ var render = function (Component, body, res) {
     };
     var markup;
     try {
-        markup = React.renderToString(<Component {...props} />);
+        markup = ReactDOMServer.renderToString(<Component {...props} />);
     } catch (err) {
         props.context = {
             '@type': ['RenderingError', 'error'],
@@ -31,7 +32,7 @@ var render = function (Component, body, res) {
         // To debug in browser, pause on caught exceptions:
         //   app.setProps({context: app.props.context.context})
         res.statusCode = 500;
-        markup = React.renderToString(<Component {...props} />);
+        markup = ReactDOMServer.renderToString(<Component {...props} />);
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     //var duration = process.hrtime(start);
