@@ -198,7 +198,7 @@ function parseCAR(json) {
         // extract ClinVar data if available
         if (json.externalRecords.ClinVarVariations && json.externalRecords.ClinVarVariations.length > 0) {
             // only need the ClinVar Variation data, since we'll re-ping ClinVar with it, if available
-            variant.clinvarVariantId = json.externalRecords.ClinVarVariations[0].variationId;
+            variant.clinvarVariantId = json.externalRecords.ClinVarVariations[0].variationId.toString();
         }
         // extract dbSNPId data if available
         if (json.externalRecords.dbSNP && json.externalRecords.dbSNP.length > 0) {
