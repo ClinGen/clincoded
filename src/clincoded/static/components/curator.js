@@ -175,14 +175,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 </span>
                             </div>
                             <div className="provisional-info-panel">
-                                <table border="1" style={{'width':'100%'}}>
+                                <table>
                                     <tbody>
                                         <tr>
                                             <td>
                                                 <div className="provisional-title">
                                                     <strong>Last Saved Summary & Provisional Classification</strong>
                                                 </div>
-                                                {   provisionalExist ?
+                                                { provisionalExist ?
                                                         <div>
                                                             <div className="provisional-data-left">
                                                                 <span>
