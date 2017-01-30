@@ -17,11 +17,13 @@ Feature: Generics
         When I visit "/gdm/"
         Then I should see "AGTR2"
         When I fill in "q" with "CD3E"
+        And I wait for 1 seconds
         Then I should not see "AGTR2"
         And I should see "Severe combined"
         When I visit "/interpretations/"
         Then I should see "NM_000111"
         When I fill in "q" with "79452"
+        And I wait for 1 seconds
         Then I should not see "May 10"
         And I should see "Milroy disease"
 
