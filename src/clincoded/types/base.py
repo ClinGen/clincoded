@@ -177,33 +177,33 @@ def contextless_has_permission(permission):
 
 
 @snovault.calculated_property(context=Item.Collection, category='action')
-def add(item_uri, item_type, has_permission):
-    if has_permission('add') and contextless_has_permission('forms'):
+def add(context, request):
+    if request.has_permission('add'):
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': '{item_uri}#!add'.format(item_uri=item_uri),
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
         }
 
 
 @snovault.calculated_property(context=Item, category='action')
-def edit(item_uri, item_type, has_permission):
-    if has_permission('edit') and contextless_has_permission('forms'):
+def edit(context, request):
+    if request.has_permission('edit'):
         return {
             'name': 'edit',
             'title': 'Edit',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': item_uri + '#!edit',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
         }
 
 
 @snovault.calculated_property(context=Item, category='action')
-def edit_json(item_uri, item_type, has_permission):
-    if has_permission('edit'):
+def edit_json(context, request):
+    if request.has_permission('edit'):
         return {
             'name': 'edit-json',
             'title': 'Edit JSON',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': item_uri + '#!edit-json',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!edit-json'.format(item_uri=request.resource_path(context)),
         }

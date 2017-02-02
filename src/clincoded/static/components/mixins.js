@@ -79,12 +79,16 @@ class Timeout {
 module.exports.Auth0 = {
     // Mixin for providing Auth0 Authentication functionality. Call in app.js
     childContextTypes: {
-        fetch: React.PropTypes.func
+        fetch: React.PropTypes.func,
+        session: React.PropTypes.object,
+        session_properties: React.PropTypes.object
     },
 
     getChildContext: function() {
         return {
-            fetch: this.fetch
+            fetch: this.fetch,
+            session: this.state.session,
+            session_properties: this.state.session_properties
         };
     },
 
@@ -92,40 +96,53 @@ module.exports.Auth0 = {
         // Define loadingComplete and session here so they are available to mixin, as well as main app
         return {
             loadingComplete: false,
-            session: {}
+            session: null,
+            session_properties: {}
         };
     },
 
     componentDidMount: function() {
-        this.extractSessionCookie();
-        this.setState({loadingComplete: true});
+        // Login / logout actions must be deferred until Auth0 is ready.
+        var session_cookie = this.extractSessionCookie();
+        var session = this.parseSessionCookie(session_cookie);
+        if (session['auth.userid']) {
+            this.fetchSessionProperties();
+        }
+        this.setProps({
+            href: window.location.href,
+            session_cookie: session_cookie
+        });
+
+
+        const logoUrl = '/static/img/clingen-logo-only.svg';
+
+        //var lock_ = require('auth0-lock');
         if (window.Auth0Lock !== undefined) {
-            // CHANGEME
-            this.lock = new window.Auth0Lock(
-                'fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs', // AUTH0: CLIENT ID
-                'clingen.auth0.com', // AUTH0: LOGIN DOMAIN
-                {
-                    additionalSignUpFields: [
-                        {
-                            name: "name",
-                            placeholder: "Your full name"
-                        }
-                    ],
-                    auth: {
-                        redirect: false
-                    },
-                    avatar: null,
-                    socialButtonStyle: 'big',
-                    theme: {
-                        logo: '/static/img/clingen-logo-only.svg',
-                        primaryColor: '#294297'
-                    },
-                    languageDictionary: {
-                        title: "ClinGen Curator Interface"
+            this.lock = new window.Auth0Lock('fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs', 'clingen.auth0.com', {
+                additionalSignUpFields: [
+                    {
+                        name: "name",
+                        placeholder: "Your full name"
                     }
+                ],
+                auth: {
+                    redirect: false
+                },
+                avatar: null,
+                socialButtonStyle: 'big',
+                theme: {
+                    logo: logoUrl,
+                    primaryColor: '#294297'
+                },
+                languageDictionary: {
+                    title: "ClinGen Curator Interface"
                 }
-            );
-            this.lock.on('authenticated', this.handleAuth0Login);
+            });
+            this.lock.on("authenticated", this.handleAuth0Login.bind(this));
+        }
+
+
+            /*
         } else {
             // Auth0Lock is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
             // A custom error cannot be set, otherwise jest tests will fail due to the error page returning
@@ -140,38 +157,209 @@ module.exports.Auth0 = {
             };
             this.setState({context: auth0_not_found});
         }
+    */
+
     },
 
-    ajaxPrefilter: function (options, original, xhr) {
-        // Function to specify request headers of all ajax requests
-        var http_method = options.type;
-        if (http_method === 'GET' || http_method === 'HEAD') return;
-        var session = this.state.session;
-        var userid = session['auth.userid'];
-        if (userid) {
-            xhr.setRequestHeader('X-Session-Userid', userid);
+
+    fetch: function (url, options) {
+        options = _.extend({credentials: 'same-origin'}, options);
+        var http_method = options.method || 'GET';
+        if (!(http_method === 'GET' || http_method === 'HEAD')) {
+            var headers = options.headers = _.extend({}, options.headers);
+            var session = this.state.session;
+            //var userid = session['auth.userid'];
+            //if (userid) {
+            //    // Server uses this to check user is logged in
+            //    headers['X-If-Match-User'] = userid;
+            //}
+            if (session && session._csrft_) {
+                headers['X-CSRF-Token'] = session._csrft_;
+            }
         }
-        if (session._csrft_) {
-            xhr.setRequestHeader('X-CSRF-Token', session._csrft_);
+        // Strip url fragment.
+        var url_hash = url.indexOf('#');
+        if (url_hash > -1) {
+            url = url.slice(0, url_hash);
+        }
+        var request = fetch(url, options);
+        request.xhr_begin = 1 * new Date();
+        request.then(response => {
+            request.xhr_end = 1 * new Date();
+            var stats_header = response.headers.get('X-Stats') || '';
+            request.server_stats = require('querystring').parse(stats_header);
+            request.etag = response.headers.get('ETag');
+            var session_cookie = this.extractSessionCookie();
+            if (this.props.session_cookie !== session_cookie) {
+                this.setProps({session_cookie: session_cookie});
+            }
+        });
+        return request;
+    },
+
+    extractSessionCookie: function () {
+        var cookie = require('cookie-monster');
+        return cookie(document).get('session');
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
+            var nextState = {};
+            nextState.session = this.parseSessionCookie(nextProps.session_cookie);
+            if (!nextState.session['auth.userid']) {
+                nextState.session_properties = {};
+            } else if (nextState.session['auth.userid'] !== (this.state.session && this.state.session['auth.userid'])) {
+                this.fetchSessionProperties();
+            }
+            this.setState(nextState);
         }
     },
 
-    triggerLogin: function(e, retrying) {
-        // pressing the Login button shows the Auth0 Lock modal
-        var $script = require('scriptjs');
+    componentDidUpdate: function (prevProps, prevState) {
+        var key;
+        if (this.props) {
+            for (key in this.props) {
+                if (this.props[key] !== prevProps[key]) {
+                    console.log('changed props: %s', key);
+                }
+            }
+        }
+        if (this.state) {
+            for (key in this.state) {
+                if (this.state[key] !== prevState[key]) {
+                    console.log('changed state: %s', key);
+                }
+            }
+        }
+    },
+
+    parseSessionCookie: function (session_cookie) {
+        var Buffer = require('buffer').Buffer;
+        var session;
+        if (session_cookie) {
+            // URL-safe base64
+            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
+            // First 64 chars is the sha-512 server signature
+            // Payload is [accessed, created, data]
+            try {
+                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
+            } catch (e) {
+            }
+        }
+        return session || {};
+    },
+
+    fetchSessionProperties: function() {
+        if (this.sessionPropertiesRequest) {
+            return;
+        }
+        this.sessionPropertiesRequest = true;
+        this.fetch('/session-properties', {
+            headers: {'Accept': 'application/json'}
+        })
+        .then(response => {
+            this.sessionPropertiesRequest = null;
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(session_properties => {
+            this.setState({session_properties: session_properties});
+        });
+    },
+
+    handleAuth0Login: function (authResult, retrying) {
+        var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
+        console.log(accessToken);
+        if (!accessToken) return;
+        this.sessionPropertiesRequest = true;
+        this.fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({accessToken: accessToken})
+        })
+        .then(response => {
+            this.lock.hide();
+            console.log('what1');
+            console.log(response);
+            if (!response.ok) throw response;
+            console.log('what2');
+            return response.json();
+        })
+        .then(session_properties => {
+            console.log(session_properties);
+            /*
+            this.setState({session_properties: session_properties});
+            this.sessionPropertiesRequest = null;
+            var next_url = window.location.href;
+            console.log('what');
+            if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
+                this.navigate(next_url, {replace: true}).then(() => {
+                    this.setState({loadingComplete: true});
+                });
+            } else {
+                this.setState({loadingComplete: true});
+            }
+            */
+        }, err => {
+            this.sessionPropertiesRequest = null;
+            parseError(err).then(data => {
+                // Server session creds might have changed.
+                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
+                    console.log('session');
+                    if (!retrying) {
+                        window.setTimeout(this.handleAuth0Login);
+                        return;
+                    }
+                }
+                // If there is an error, show the error messages
+                this.setProps({context: data});
+            });
+        });
+    },
+
+    triggerLogin: function (event) {
         if (this.state.session && !this.state.session._csrft_) {
             this.fetch('/session');
         }
         this.lock.show();
     },
 
+    triggerLogout: function (event) {
+        console.log('Logging out (Auth0)');
+        var session = this.state.session;
+        if (!(session && session['auth.userid'])) return;
+        this.fetch('/logout?redirect=false', {
+            headers: {'Accept': 'application/json'}
+        })
+        .then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(data => {
+            this.DISABLE_POPSTATE = true;
+            var old_path = window.location.pathname + window.location.search;
+            window.location.assign('/#logged-out');
+            if (old_path == '/') {
+                window.location.reload();
+            }
+        }, err => {
+            parseError(err).then(data => {
+                data.title = 'Logout failure: ' + data.title;
+                this.setProps({context: data});
+            });
+        });
+    },
+
     triggerAutoLogin: function(e, retrying) {
         // pressing the Demo Login button automatically logs in the user to the test curator
         // account. Only enabled on non-production/curation instances
-        var $script = require('scriptjs');
         if (this.state.session && !this.state.session._csrft_) {
             this.fetch('/session');
         }
+        console.log('triggerauto');
 
         this.fetch(
             'https://clingen.auth0.com/oauth/ro', // AUTH0: LOGIN DOMAIN
@@ -201,6 +389,18 @@ module.exports.Auth0 = {
         });
     },
 
+    /*
+    triggerLogin: function(e, retrying) {
+        // pressing the Login button shows the Auth0 Lock modal
+        var $script = require('scriptjs');
+        if (this.state.session && !this.state.session._csrft_) {
+            this.fetch('/session');
+        }
+        this.lock.show();
+    },
+
+
+
     triggerLoginFail: function() {
         // Login failed (not sure when this ever happens)
         let login_failure = {};
@@ -214,6 +414,8 @@ module.exports.Auth0 = {
         var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
         if (!accessToken) return;
         this.sessionPropertiesRequest = true;
+        console.log('access');
+        console.log(accessToken);
         this.fetch('/login', {
             method: 'POST',
             headers: {
@@ -223,6 +425,7 @@ module.exports.Auth0 = {
             body: JSON.stringify({accessToken: accessToken})
         })
         .then(response => {
+            console.log(response);
             this.lock.hide();
             if (!response.ok) throw response;
             return response.json();
@@ -283,17 +486,6 @@ module.exports.Auth0 = {
         });
     },
 
-    extractSessionCookie: function () {
-        // Function for extracting data out of the session cookie and save the info to the reactjs state
-        var cookie = require('cookie-monster');
-        var session_cookie = cookie(document).get('session');
-        if (this.state.session_cookie !== session_cookie) {
-            this.setState({
-                session_cookie: session_cookie,
-                session: this.parseSessionCookie(session_cookie)
-            });
-        }
-    },
 
     parseSessionCookie: function (session_cookie) {
         // Helper function for extractSessionCookie()
@@ -340,6 +532,7 @@ module.exports.Auth0 = {
         });
         return request;
     }
+    */
 };
 
 

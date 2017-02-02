@@ -1,5 +1,10 @@
-import requests
+from snovault import COLLECTIONS
+from snovault.calculated import calculate_properties
+from snovault.validation import ValidationFailure
+from snovault.validators import no_validate_item_content_post
+from operator import itemgetter
 from pyramid.authentication import CallbackAuthenticationPolicy
+import requests
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPFound,
@@ -25,14 +30,12 @@ def includeme(config):
     config.add_route('login', 'login')
     config.add_route('logout', 'logout')
     config.add_route('session', 'session')
+    config.add_route('session-properties', 'session-properties')
+    config.add_route('impersonate-user', 'impersonate-user')
 
 
 class LoginDenied(HTTPForbidden):
     title = 'Login failure'
-
-
-class LoginNotVerified(HTTPForbidden):
-    title = 'Account not verified'
 
 
 class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
@@ -63,7 +66,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
         try:
             user_url = "https://{domain}/userinfo?access_token={access_token}" \
-                .format(domain='clingen.auth0.com', access_token=access_token)  # AUTH0: LOGIN DOMAIN
+                .format(domain='clingen.auth0.com', access_token=access_token)
 
             user_info = requests.get(user_url).json()
         except Exception as e:
@@ -79,7 +82,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             email = request._auth0_authenticated = user_info['email'].lower()
             return email
         else:
-            raise LoginNotVerified()
+            return None
 
     def remember(self, request, principal, **kw):
         return []
@@ -95,23 +98,31 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
     """View to check the auth0 assertion and remember the user"""
+    print('login-login')
     login = request.authenticated_userid
+    print(login)
     if login is None:
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
-
+    print('login-namespace')
+    print(namespace)
     if namespace != 'auth0':
         request.session.invalidate()
-        request.session['user_properties'] = {}
         request.response.headerlist.extend(forget(request))
+        print('login denied')
         raise LoginDenied()
 
     request.session.invalidate()
     request.session.get_csrf_token()
-    request.session['user_properties'] = request.embed('/current-user', as_user=userid)
     request.response.headerlist.extend(remember(request, 'mailto.' + userid))
-    return request.session
+
+    print('pre-requestembed')
+    properties = request.embed('/session-properties', as_user=userid)
+    if 'auth.userid' in request.session:
+        properties['auth.userid'] = request.session['auth.userid']
+    print('post-requestembed')
+    return properties
 
 
 @view_config(route_name='logout',
@@ -120,28 +131,74 @@ def logout(request):
     """View to forget the user"""
     request.session.invalidate()
     request.session.get_csrf_token()
-    request.session['user_properties'] = {}
     request.response.headerlist.extend(forget(request))
     if asbool(request.params.get('redirect', True)):
         raise HTTPFound(location=request.resource_path(request.root))
-    return request.session
+    return {}
+
+
+@view_config(route_name='session-properties', request_method='GET',
+             permission=NO_PERMISSION_REQUIRED)
+def session_properties(request):
+    print(request)
+    for principal in request.effective_principals:
+        if principal.startswith('userid.'):
+            break
+    else:
+        return {}
+
+    namespace, userid = principal.split('.', 1)
+    print(namespace)
+    print(userid)
+    print('what')
+
+    user = request.registry[COLLECTIONS]['user'][userid]
+    user_actions = calculate_properties(user, request, category='user_action')
+
+    print(user)
+    print(user_actions)
+    print(request.resource_path(user))
+
+    properties = {
+        'user_properties': request.embed(request.resource_path(user), as_user=True),
+    }
+    print('what2')
+    print(properties)
+    if 'auth.userid' in request.session:
+        properties['auth.userid'] = request.session['auth.userid']
+    print('what3')
+    return properties
+    # return request.embed(request.resource_path(user), as_user=True)
 
 
 @view_config(route_name='session', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)
 def session(request):
-    """ Possibly refresh the user's session cookie
-    """
     request.session.get_csrf_token()
-    if not request.params.get('reload'):
-        return request.session
-    # Reload the user's session cookie
-    login = request.authenticated_userid
-    if login is None:
-        namespace = userid = None
-    else:
-        namespace, userid = login.split('.', 1)
-    if namespace != 'mailto':
-        return request.session
-    request.session['user_properties'] = request.embed('/current-user', as_user=userid)
     return request.session
+
+
+@view_config(route_name='impersonate-user', request_method='POST',
+             validators=[no_validate_item_content_post],
+             permission='impersonate')
+def impersonate_user(request):
+    """As an admin, impersonate a different user."""
+    userid = request.validated['userid']
+    users = request.registry[COLLECTIONS]['user']
+
+    try:
+        user = users[userid]
+    except KeyError:
+        raise ValidationFailure('body', ['userid'], 'User not found.')
+
+    if user.properties.get('status') != 'current':
+        raise ValidationFailure('body', ['userid'], 'User is not enabled.')
+
+    request.session.invalidate()
+    request.session.get_csrf_token()
+    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
+    user_properties = request.embed('/session-properties', as_user=userid)
+    if 'auth.userid' in request.session:
+        user_properties['auth.userid'] = request.session['auth.userid']
+
+    return user_properties
