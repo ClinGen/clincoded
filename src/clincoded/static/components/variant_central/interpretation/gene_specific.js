@@ -61,15 +61,21 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                 nonTcga = myGeneInfo.exac.nontcga;
             return (
                 <tbody>
-                    <tr>
-                        <td>All ExAC</td><td>{this.parseFloatShort(allExac.p_li)}</td><td>{this.parseFloatShort(allExac.p_rec)}</td><td>{this.parseFloatShort(allExac.p_null)}</td>
-                    </tr>
-                    <tr>
-                        <td>Non-psych</td><td>{this.parseFloatShort(nonPsych.p_li)}</td><td>{this.parseFloatShort(nonPsych.p_rec)}</td><td>{this.parseFloatShort(nonPsych.p_null)}</td>
-                    </tr>
-                    <tr>
-                        <td>Non-TCGA</td><td>{this.parseFloatShort(nonTcga.p_li)}</td><td>{this.parseFloatShort(nonTcga.p_rec)}</td><td>{this.parseFloatShort(nonTcga.p_null)}</td>
-                    </tr>
+                    {allExac ?
+                        <tr>
+                            <td>All ExAC</td><td>{this.parseFloatShort(allExac.p_li)}</td><td>{this.parseFloatShort(allExac.p_rec)}</td><td>{this.parseFloatShort(allExac.p_null)}</td>
+                        </tr>
+                    : null}
+                    {nonPsych ?
+                        <tr>
+                            <td>Non-psych</td><td>{this.parseFloatShort(nonPsych.p_li)}</td><td>{this.parseFloatShort(nonPsych.p_rec)}</td><td>{this.parseFloatShort(nonPsych.p_null)}</td>
+                        </tr>
+                    : null}
+                    {nonTcga ?
+                        <tr>
+                            <td>Non-TCGA</td><td>{this.parseFloatShort(nonTcga.p_li)}</td><td>{this.parseFloatShort(nonTcga.p_rec)}</td><td>{this.parseFloatShort(nonTcga.p_null)}</td>
+                        </tr>
+                    : null}
                 </tbody>
             );
         }
