@@ -2,7 +2,7 @@
 var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
-var modal = require('../libs/bootstrap/modal');
+import ModalComponent from '../libs/bootstrap/modal';
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
@@ -10,8 +10,6 @@ var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var Panel = panel.Panel;
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var RestMixin = require('./rest').RestMixin;
@@ -954,8 +952,6 @@ var GeneRecordHeader = React.createClass({
 
 // Display the disease section of the curation data
 var DiseaseRecordHeader = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         gdm: React.PropTypes.object, // Object to display
         omimId: React.PropTypes.string, // OMIM ID to display
@@ -981,9 +977,7 @@ var DiseaseRecordHeader = React.createClass({
                                     </a>
                                 : null}&nbsp;
                                 {this.props.updateOmimId ?
-                                    <Modal title="Add/Change OMIM ID" wrapperClassName="edit-omim-modal">
-                                        <span>[</span><a modal={<AddOmimIdModal gdm={gdm} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
-                                    </Modal>
+                                    <AddOmimIdModal gdm={gdm} updateOmimId={this.props.updateOmimId} addEdit={addEdit} />
                                 : null}
                             </dd>
                         </dl>
@@ -1001,8 +995,14 @@ var AddOmimIdModal = React.createClass({
 
     propTypes: {
         gdm: React.PropTypes.object.isRequired, // GDM being affected
-        closeModal: React.PropTypes.func.isRequired, // Function to call to close the modal
-        updateOmimId: React.PropTypes.func.isRequired // Function to call when we have a new OMIM ID
+        updateOmimId: React.PropTypes.func.isRequired, // Function to call when we have a new OMIM ID
+        addEdit: React.PropTypes.string.isRequired
+    },
+
+    getInitialState: function() {
+        return {
+            showModal: false
+        };
     },
 
     // Form content validation
@@ -1026,7 +1026,7 @@ var AddOmimIdModal = React.createClass({
         this.saveFormValue('omimid', this.refs.omimid.getValue());
         if (this.validateForm()) {
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
-            this.props.closeModal();
+            this.child.closeModal();
             var enteredOmimId = this.getFormValue('omimid');
             this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
@@ -1038,22 +1038,28 @@ var AddOmimIdModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        this.props.closeModal();
+        var errors = this.state.formErrors;
+        errors['omimid'] = '';
+        this.setState({formErrors: errors});
+        this.child.closeModal();
     },
 
     render: function() {
         return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-body">
-                    <Input type="text" ref="omimid" label="Enter an OMIM ID"
-                        error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omim')}
-                        labelClassName="control-label" groupClassName="form-group" required />
-                </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add/Change OMIM ID" />
-                </div>
-            </Form>
+            <ModalComponent modalTitle="Add/Change OMIM ID" modalClass="modal-default" modalWrapperClass="edit-omim-modal"
+                actuatorClass="" actuatorTitle={this.props.addEdit} onRef={ref => (this.child = ref)}>
+                <Form submitHandler={this.submitForm} formClassName="form-std">
+                    <div className="modal-body">
+                        <Input type="text" ref="omimid" label="Enter an OMIM ID"
+                            error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omimid')}
+                            labelClassName="control-label" groupClassName="form-group" required />
+                    </div>
+                    <div className='modal-footer'>
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add/Change OMIM ID" />
+                    </div>
+                </Form>
+            </ModalComponent>
         );
     }
 });
@@ -2144,7 +2150,6 @@ var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
 var DeleteButton = module.exports.DeleteButton = React.createClass({
-    mixins: [ModalMixin],
     propTypes: {
         gdm: React.PropTypes.object,
         parent: React.PropTypes.object,
@@ -2177,11 +2182,14 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                     </a>
                 </div>
                 :
-                <div className="inline-button-wrapper delete-button-push pull-right"><Modal title="Delete Item" modalClass="modal-danger">
-                    <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
-                        Delete
-                    </a>
-                </Modal></div>
+                <div className="inline-button-wrapper delete-button-push pull-right">
+                <Modal actuator={<a className="btn btn-danger">Delete</a>}>
+                    <ModalHeader title="Delete Item" />
+                    <ModalBody>
+                        <DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />
+                    </ModalBody>
+                </Modal>
+                </div>
                 }
                 {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
             </span>
