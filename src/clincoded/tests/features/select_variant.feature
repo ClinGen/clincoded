@@ -23,7 +23,7 @@ Feature: Select Variant
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NC_000015"
         When I press the button "Save and View Evidence"
-        And I wait for 5 seconds
+        And I wait for 2 seconds
         Then I should see "RCV000359576"
         When I press the button "Interpretation "
         And I wait for 1 seconds
