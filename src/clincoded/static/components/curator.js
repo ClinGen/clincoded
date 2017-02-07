@@ -2,7 +2,6 @@
 var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
-import ModalComponent from '../libs/bootstrap/modal';
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
@@ -17,6 +16,8 @@ var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
+
+import ModalComponent from '../libs/bootstrap/modal';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -999,12 +1000,6 @@ var AddOmimIdModal = React.createClass({
         addEdit: React.PropTypes.string.isRequired
     },
 
-    getInitialState: function() {
-        return {
-            showModal: false
-        };
-    },
-
     // Form content validation
     validateForm: function() {
         // Start with default validation
@@ -1026,7 +1021,7 @@ var AddOmimIdModal = React.createClass({
         this.saveFormValue('omimid', this.refs.omimid.getValue());
         if (this.validateForm()) {
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
-            this.child.closeModal();
+            this.handleModalClose();
             var enteredOmimId = this.getFormValue('omimid');
             this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
@@ -1038,7 +1033,24 @@ var AddOmimIdModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        var errors = this.state.formErrors;
+        this.handleModalClose();
+    },
+
+    /************************************************************************************************/
+    /* Resetting the formErrors for selected input and other states was not needed previously       */
+    /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
+    /* to be defined outside of this component and closing the modal would delete this component    */
+    /* from virtual DOM, along with the states.                                                     */
+    /* The updated/converted implementation (without MixIn) wraps the actuator in the modal         */
+    /* component and thus this component always exists in the virtual DOM as long as the actuator   */
+    /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
+    /* and the modified states are retained.                                                        */
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose() {
+        let errors = this.state.formErrors;
         errors['omimid'] = '';
         this.setState({formErrors: errors});
         this.child.closeModal();
@@ -2183,12 +2195,7 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                 </div>
                 :
                 <div className="inline-button-wrapper delete-button-push pull-right">
-                <Modal actuator={<a className="btn btn-danger">Delete</a>}>
-                    <ModalHeader title="Delete Item" />
-                    <ModalBody>
-                        <DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />
-                    </ModalBody>
-                </Modal>
+                    <DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} />
                 </div>
                 }
                 {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
@@ -2206,8 +2213,7 @@ var DeleteButtonModal = React.createClass({
         gdm: React.PropTypes.object,
         parent: React.PropTypes.object,
         item: React.PropTypes.object,
-        pmid: React.PropTypes.string,
-        closeModal: React.PropTypes.func // Function to call to close the modal
+        pmid: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -2428,13 +2434,24 @@ var DeleteButtonModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        this.props.closeModal();
+        this.handleModalClose();
     },
 
     // Called when user clicks a link in the delete confirmation modal to view another object.
     // Allows for scrolling in subsequent pages, as the initial modal rendering disabled scrolling.
     linkout: function(e) {
-        this.props.closeModal();
+        this.handleModalClose();
+    },
+
+    /************************************************************************************************/
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose() {
+        if (!this.state.submitBusy) {
+            this.child.closeModal();
+        }
     },
 
     render: function() {
@@ -2458,7 +2475,8 @@ var DeleteButtonModal = React.createClass({
             itemLabel = this.props.item.label;
         }
         return (
-            <div>
+            <ModalComponent modalTitle="Delete Item" modalClass="modal-danger" modalWrapperClass="delete-modal"
+                actuatorClass="btn-danger" actuatorTitle="Delete" onRef={ref => (this.child = ref)}>
                 <div className="modal-body">
                     {message}
                     <p>Are you sure you want to delete {itemLabel ? <span>Case-Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
@@ -2474,7 +2492,7 @@ var DeleteButtonModal = React.createClass({
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="button-button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
                 </div>
-            </div>
+            </ModalComponent>
         );
     }
 });
