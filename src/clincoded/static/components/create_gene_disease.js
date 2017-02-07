@@ -5,7 +5,6 @@ var moment = require('moment');
 var globals = require('./globals');
 var fetched = require('./fetched');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
@@ -15,12 +14,12 @@ var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
-var Alert = modal.Alert;
-var ModalMixin = modal.ModalMixin;
 var Panel = panel.Panel;
 
+import ModalComponent from '../libs/bootstrap/modal';
+
 var CreateGeneDisease = React.createClass({
-    mixins: [FormMixin, RestMixin, ModalMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CuratorHistory],
 
     contextTypes: {
         fetch: React.PropTypes.func,
@@ -155,7 +154,7 @@ var CreateGeneDisease = React.createClass({
                     } else {
                         // Found matching GDM. See of the user wants to curate it.
                         this.setState({gdm: gdmSearch['@graph'][0]});
-                        this.openAlert('confirm-edit-gdm');
+                        this.child.openModal();
                     }
                 });
             }).catch(e => {
@@ -165,10 +164,20 @@ var CreateGeneDisease = React.createClass({
         }
     },
 
+    // Called when any of the alert's buttons is clicked. Confirm is true if the 'Create' button was clicked;
+    // false if the 'Cancel' button was clicked.
+    handleAlertClick: function(confirm, e) {
+        if (confirm) {
+            this.editGdm();
+        }
+        this.child.closeModal();
+    },
+
     render: function() {
         let adjectives = this.state.adjectives;
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
+        let gdm = this.state.gdm;
 
         return (
             <div className="container">
@@ -205,7 +214,19 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>
-                        <Alert id="confirm-edit-gdm" content={<ConfirmEditGdm gdm={this.state.gdm} editGdm={this.editGdm} closeAlert={this.closeAlert} />} />
+                        {gdm && gdm.gene && gdm.disease && gdm.modeInheritance ?
+                            <ModalComponent modalClass="modal-default" modalWrapperClass="confirm-edit-gdm-modal" onRef={ref => (this.child = ref)}>
+                                <div>
+                                    <div className="modal-body">
+                                        <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene — disease — mode.</p>
+                                    </div>
+                                    <div className='modal-footer'>
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, false)} title="Cancel" />
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, true)} title="Curate" />
+                                    </div>
+                                </div>
+                            </ModalComponent>
+                        : null}
                     </Panel>
                 </div>
             </div>
@@ -228,41 +249,6 @@ var LabelOrphanetId = React.createClass({
         return <span>Enter <a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> ID</span>;
     }
 });
-
-
-var ConfirmEditGdm = React.createClass({
-    propTypes: {
-        gdm: React.PropTypes.object, // GDM object under consideration
-        editGdm: React.PropTypes.func, // Function to call to edit the GDM
-        closeAlert: React.PropTypes.func // Function to call to close the alert
-    },
-
-    // Called when any of the alert's buttons is clicked. Confirm is true if the 'Create' button was clicked;
-    // false if the 'Cancel' button was clicked.
-    handleClick: function(confirm, e) {
-        if (confirm) {
-            this.props.editGdm();
-        }
-        this.props.closeAlert('confirm-edit-gdm');
-    },
-
-    render: function() {
-        var gdm = this.props.gdm;
-
-        return (
-            <div>
-                <div className="modal-body">
-                    <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene — disease — mode.</p>
-                </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, false)} title="Cancel" />
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, true)} title="Curate" />
-                </div>
-            </div>
-        );
-    }
-});
-
 
 // Display a history item for adding a PMID to a GDM
 var GdmAddHistory = React.createClass({
