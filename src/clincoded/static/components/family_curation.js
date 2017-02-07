@@ -5,7 +5,6 @@ var _ = require('underscore');
 var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
@@ -16,8 +15,6 @@ var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 var add_external_resource = require('./add_external_resource');
 var CuratorHistory = require('./curator_history');
 
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var ViewRecordHeader = curator.ViewRecordHeader;
@@ -70,7 +67,7 @@ var initialCv = {
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, ModalMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
