@@ -289,8 +289,7 @@ module.exports.Auth0 = {
             return response.json();
         })
         .then(session_properties => {
-            console.log(session_properties);
-            /*
+            console.log(session_properties.user_properties.title);
             this.setState({session_properties: session_properties});
             this.sessionPropertiesRequest = null;
             var next_url = window.location.href;
@@ -302,7 +301,6 @@ module.exports.Auth0 = {
             } else {
                 this.setState({loadingComplete: true});
             }
-            */
         }, err => {
             this.sessionPropertiesRequest = null;
             parseError(err).then(data => {
