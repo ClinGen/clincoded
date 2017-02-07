@@ -413,6 +413,28 @@
 
 .edit-omim-modal {
     display: inline;
+
+    a.btn.btn-default {
+        border: none;
+        background: transparent;
+        color: #337ab7;
+        padding: 0;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+
+        &:before {
+            color: #000;
+            content: '[';
+        }
+
+        &:after {
+            color: #000;
+            content: ']';
+        }
+    }
 }
 
 .curation-pmid-summary {
