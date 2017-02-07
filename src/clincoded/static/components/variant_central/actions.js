@@ -6,7 +6,6 @@ var fetched = require('../fetched');
 var RestMixin = require('../rest').RestMixin;
 var parseAndLogError = require('../mixins').parseAndLogError;
 var form = require('../../libs/bootstrap/form');
-var modal = require('../../libs/bootstrap/modal');
 var CuratorHistory = require('../curator_history');
 var curator = require('../curator');
 var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
@@ -14,9 +13,9 @@ var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
 var Input = form.Input;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var queryKeyValue = globals.queryKeyValue;
+
+import ModalComponent from '../../libs/bootstrap/modal';
 
 // Display the variant curation action bar above the criteria and tabs
 var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
@@ -143,8 +142,6 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
 
 // class to contain the Disease button and its modal
 var DiseaseModalButton = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         variantData: React.PropTypes.object,
         hasAssociatedDisease: React.PropTypes.bool,
@@ -165,19 +162,24 @@ var DiseaseModalButton = React.createClass({
         }
 
         return (
-            <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
-                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
-                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj}
-                    calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} />}>{associateDiseaseButtonTitle}</button>
-            </Modal>
+            <AssociateDisease
+                data={this.props.variantData}
+                session={this.props.session}
+                interpretation={this.props.interpretation}
+                editKey={this.props.editkey}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                calculatedAssertion={this.props.calculatedAssertion}
+                provisionalPathogenicity={this.props.provisionalPathogenicity}
+                title={associateDiseaseModalTitle}
+                buttonText={associateDiseaseButtonTitle}
+                buttonClass='btn-primary pull-right'
+            />
         );
     }
 });
 
 // class to contain the Inheritance button and its modal
 var InheritanceModalButton = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         variantData: React.PropTypes.object,
         hasAssociatedInheritance: React.PropTypes.bool,
@@ -196,10 +198,16 @@ var InheritanceModalButton = React.createClass({
         }
 
         return (
-            <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-inheritance">
-                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
-                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
-            </Modal>
+            <AssociateInheritance
+                data={this.props.variantData}
+                session={this.props.session}
+                interpretation={this.props.interpretation}
+                editKey={this.props.editkey}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                title={associateInheritanceModalTitle}
+                buttonText={associateInheritanceButtonTitle}
+                buttonClass='btn-primary pull-right btn-inline-spacer'
+            />
         );
     }
 });
@@ -215,12 +223,14 @@ var AssociateDisease = React.createClass({
     propTypes: {
         data: React.PropTypes.object, // variant object
         session: React.PropTypes.object, // session object
-        closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object, // interpretation object
         editKey: React.PropTypes.bool, // edit flag
         updateInterpretationObj: React.PropTypes.func,
         calculatedAssertion: React.PropTypes.string,
-        provisionalPathogenicity: React.PropTypes.string
+        provisionalPathogenicity: React.PropTypes.string,
+        title: React.PropTypes.string, // Text appearing in the modal header
+        buttonText: React.PropTypes.string, // Text of the link/button invoking the modal
+        buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
     },
 
     getInitialState: function() {
@@ -321,7 +331,7 @@ var AssociateDisease = React.createClass({
                             }).then(submitState => {
                                 // Close modal after 'submitResourceBusy' is completed
                                 if (submitState !== true) {
-                                    this.props.closeModal();
+                                    this.handleModalClose();
                                 }
                             });
                         }
@@ -362,14 +372,14 @@ var AssociateDisease = React.createClass({
                                 this.setState({submitResourceBusy: false}, () => {
                                     // Need 'submitResourceBusy' state to proceed closing modal
                                     this.props.updateInterpretationObj();
-                                    this.props.closeModal();
+                                    this.handleModalClose();
                                 });
                             });
                         });
                     } else {
                         this.setState({submitResourceBusy: false}, () => {
                             // Need 'submitResourceBusy' state to proceed closing modal
-                            this.props.closeModal();
+                            this.handleModalClose();
                         });
                     }
                 }).catch(e => {
@@ -383,8 +393,31 @@ var AssociateDisease = React.createClass({
 
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
-        this.setState({submitResourceBusy: false});
-        this.props.closeModal();
+        this.setState({submitResourceBusy: false}, () => {
+            this.handleModalClose();
+        });
+    },
+
+    /************************************************************************************************/
+    /* Resetting the formErrors for selected input and other states was not needed previously       */
+    /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
+    /* to be defined outside of this component and closing the modal would delete this component    */
+    /* from virtual DOM, along with the states.                                                     */
+    /* The updated/converted implementation (without MixIn) wraps the actuator in the modal         */
+    /* component and thus this component always exists in the virtual DOM as long as the actuator   */
+    /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
+    /* and the modified states are retained.                                                        */
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose() {
+        let errors = this.state.formErrors;
+        errors['orphanetid'] = '';
+        if (!this.state.submitResourceBusy) {
+            this.setState({formErrors: errors, shouldShowWarning: false});
+            this.child.closeModal();
+        }
     },
 
     render: function() {
@@ -396,27 +429,30 @@ var AssociateDisease = React.createClass({
         }
 
         return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-box">
-                    <div className="modal-body clearfix">
-                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
-                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                    </div>
-                    {this.state.shouldShowWarning ?
-                        <div className="alert alert-warning">
-                            Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
-                            or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
-                            <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
-                            - otherwise, deleting the disease will automatically remove the "Provisional" status.
+            <ModalComponent modalTitle={this.props.title} modalClass="modal-default" modalWrapperClass="modal-associate-inheritance"
+                actuatorClass={this.props.buttonClass} actuatorTitle={this.props.buttonText} onRef={ref => (this.child = ref)}>
+                <Form submitHandler={this.submitForm} formClassName="form-std">
+                    <div className="modal-box">
+                        <div className="modal-body clearfix">
+                            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
+                                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
+                                labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         </div>
-                    : null}
-                    <div className='modal-footer'>
-                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
-                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
+                        {this.state.shouldShowWarning ?
+                            <div className="alert alert-warning">
+                                Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
+                                or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
+                                <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
+                                - otherwise, deleting the disease will automatically remove the "Provisional" status.
+                            </div>
+                        : null}
+                        <div className='modal-footer'>
+                            <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
+                            <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
+                        </div>
                     </div>
-                </div>
-            </Form>
+                </Form>
+            </ModalComponent>
         );
     }
 });
@@ -438,10 +474,12 @@ var AssociateInheritance = React.createClass({
     propTypes: {
         data: React.PropTypes.object, // variant object
         session: React.PropTypes.object, // session object
-        closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object, // interpretation object
         editKey: React.PropTypes.bool, // edit flag
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        title: React.PropTypes.string, // Text appearing in the modal header
+        buttonText: React.PropTypes.string, // Text of the link/button invoking the modal
+        buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
     },
 
     getInitialState: function() {
@@ -569,7 +607,7 @@ var AssociateInheritance = React.createClass({
         }).then(result => {
             this.setState({submitResourceBusy: false}, () => {
                 this.props.updateInterpretationObj();
-                this.props.closeModal();
+                this.handleModalClose();
             });
         }).catch(e => {
             // Some unexpected error happened
@@ -580,8 +618,31 @@ var AssociateInheritance = React.createClass({
 
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
-        this.setState({submitResourceBusy: false});
-        this.props.closeModal();
+        this.setState({submitResourceBusy: false}, () => {
+            this.handleModalClose();
+        });
+    },
+
+    /************************************************************************************************/
+    /* Resetting the formErrors for selected input and other states was not needed previously       */
+    /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
+    /* to be defined outside of this component and closing the modal would delete this component    */
+    /* from virtual DOM, along with the states.                                                     */
+    /* The updated/converted implementation (without MixIn) wraps the actuator in the modal         */
+    /* component and thus this component always exists in the virtual DOM as long as the actuator   */
+    /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
+    /* and the modified states are retained.                                                        */
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose() {
+        let errors = this.state.formErrors;
+        errors['inheritance'] = '', errors['moiAdjective'] = '';
+        if (!this.state.submitResourceBusy) {
+            this.setState({formErrors: errors, adjectives: [], adjectiveDisabled: true});
+            this.child.closeModal();
+        }
     },
 
     render: function() {
@@ -597,34 +658,37 @@ var AssociateInheritance = React.createClass({
         }
 
         return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-box">
-                    <div className="modal-body clearfix">
-                        <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance} handleChange={this.handleChange}
-                            error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
-                            <option value="no-moi">No mode of inheritance</option>
-                            <option value="" disabled="disabled"></option>
-                            {moiKeys.map(function(modeOfInheritance, i) {
-                                return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
-                            })}
-                        </Input>
-                         <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none' inputDisabled={adjectiveDisabled}
-                            error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
-                            <option value="none">Select</option>
-                            <option disabled="disabled"></option>
-                            {adjectives.map(function(adjective, i) {
-                                return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
-                            })}
-                        </Input>
+            <ModalComponent modalTitle={this.props.title} modalClass="modal-default" modalWrapperClass="modal-associate-disease"
+                actuatorClass={this.props.buttonClass} actuatorTitle={this.props.buttonText} onRef={ref => (this.child = ref)}>
+                <Form submitHandler={this.submitForm} formClassName="form-std">
+                    <div className="modal-box">
+                        <div className="modal-body clearfix">
+                            <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance} handleChange={this.handleChange}
+                                error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
+                                labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
+                                <option value="no-moi">No mode of inheritance</option>
+                                <option value="" disabled="disabled"></option>
+                                {moiKeys.map(function(modeOfInheritance, i) {
+                                    return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
+                                })}
+                            </Input>
+                             <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none' inputDisabled={adjectiveDisabled}
+                                error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
+                                labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
+                                <option value="none">Select</option>
+                                <option disabled="disabled"></option>
+                                {adjectives.map(function(adjective, i) {
+                                    return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
+                                })}
+                            </Input>
+                        </div>
+                        <div className='modal-footer'>
+                            <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
+                            <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
+                        </div>
                     </div>
-                    <div className='modal-footer'>
-                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
-                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
-                    </div>
-                </div>
-            </Form>
+                </Form>
+            </ModalComponent>
         );
     }
 });
