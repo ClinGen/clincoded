@@ -74,7 +74,10 @@ ModalComponent.propTypes = {
     modalClass: React.PropTypes.string, // CSS class for modal header
     modalWrapperClass: React.PropTypes.string, // CSS class for modal DOM wrapper
     actuatorClass: React.PropTypes.string, // CSS class for link/button to invoke modal
-    actuatorTitle: React.PropTypes.string, // Text for link/button to invoke modal
+    actuatorTitle: React.PropTypes.oneOfType([ // Text for link/button to invoke modal
+        React.PropTypes.object,
+        React.PropTypes.string
+    ]),
     children: React.PropTypes.node // JSX such as input field(s), dropdown(s), buttons
 };
 
