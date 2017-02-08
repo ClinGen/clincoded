@@ -229,7 +229,10 @@ var AssociateDisease = React.createClass({
         calculatedAssertion: React.PropTypes.string,
         provisionalPathogenicity: React.PropTypes.string,
         title: React.PropTypes.string, // Text appearing in the modal header
-        buttonText: React.PropTypes.string, // Text of the link/button invoking the modal
+        buttonText: React.PropTypes.oneOfType([ // Text of the link/button invoking the modal
+            React.PropTypes.object,
+            React.PropTypes.string
+        ]),
         buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
     },
 
@@ -434,7 +437,7 @@ var AssociateDisease = React.createClass({
                 <Form submitHandler={this.submitForm} formClassName="form-std">
                     <div className="modal-box">
                         <div className="modal-body clearfix">
-                            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
+                            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : ''}
                                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                                 labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                         </div>
@@ -478,7 +481,10 @@ var AssociateInheritance = React.createClass({
         editKey: React.PropTypes.bool, // edit flag
         updateInterpretationObj: React.PropTypes.func,
         title: React.PropTypes.string, // Text appearing in the modal header
-        buttonText: React.PropTypes.string, // Text of the link/button invoking the modal
+        buttonText: React.PropTypes.oneOfType([ // Text of the link/button invoking the modal
+            React.PropTypes.object,
+            React.PropTypes.string
+        ]),
         buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
     },
 
