@@ -29,6 +29,8 @@ var CreateGeneDisease = React.createClass({
     getInitialState: function() {
         return {
             gdm: {},
+            hgncgene: '',
+            orphanetid: '',
             adjectives: [],
             adjectiveDisabled: true
         };
@@ -174,6 +176,8 @@ var CreateGeneDisease = React.createClass({
     },
 
     render: function() {
+        let hgncgene = this.state.hgncgene;
+        let orphanetid = this.state.orphanetid;
         let adjectives = this.state.adjectives;
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
@@ -186,10 +190,10 @@ var CreateGeneDisease = React.createClass({
                     <Panel panelClassName="panel-create-gene-disease">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
-                                <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1"
+                                <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
+                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={orphanetid}
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                                 <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
