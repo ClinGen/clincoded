@@ -1000,6 +1000,12 @@ var AddOmimIdModal = React.createClass({
         addEdit: React.PropTypes.string.isRequired
     },
 
+    getInitialState() {
+        return {
+            omimid: ''
+        };
+    },
+
     // Form content validation
     validateForm: function() {
         // Start with default validation
@@ -1057,12 +1063,14 @@ var AddOmimIdModal = React.createClass({
     },
 
     render: function() {
+        let omimid = this.state.omimid;
+
         return (
             <ModalComponent modalTitle="Add/Change OMIM ID" modalClass="modal-default" modalWrapperClass="edit-omim-modal"
                 actuatorClass="" actuatorTitle={this.props.addEdit} onRef={ref => (this.child = ref)}>
                 <Form submitHandler={this.submitForm} formClassName="form-std">
                     <div className="modal-body">
-                        <Input type="text" ref="omimid" label="Enter an OMIM ID"
+                        <Input type="text" ref="omimid" label="Enter an OMIM ID" value={omimid}
                             error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omimid')}
                             labelClassName="control-label" groupClassName="form-group" required />
                     </div>
