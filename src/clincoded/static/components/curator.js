@@ -2183,7 +2183,7 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                     </a>
                 </Modal></div>
                 }
-                {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
+                {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been either scored or assessed by another user.</span> : <span></span>}
             </span>
         );
     }
