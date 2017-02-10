@@ -63,7 +63,8 @@ var IndividualCuration = React.createClass({
             proband: null, // If we have an associated family that has a proband, this points at it
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
-            userScoreObj: {} // Logged-in user's score object
+            userScoreObj: {}, // Logged-in user's score object
+            evidenceLocked: false // True if 2nd curator scored the evidence. Applicable to evidence owner/creator.
         };
     },
 
@@ -151,6 +152,7 @@ var IndividualCuration = React.createClass({
         this.getRestDatas(
             uris
         ).then(datas => {
+            let user = this.props.session && this.props.session.user_properties;
             // See what we got back so we can build an object to copy in this React object's state to rerender the page.
             var stateObj = {};
             datas.forEach(function(data) {
@@ -191,7 +193,14 @@ var IndividualCuration = React.createClass({
 
                 if (stateObj.individual.proband) {
                     // proband individual
-                    this.setState({proband_selected: true});
+                    this.setState({proband_selected: true}, () => {
+                        let probandIndividual = stateObj.individual;
+                        if (probandIndividual.scores && probandIndividual.scores.length > 1) {
+                            if (probandIndividual.submitted_by && probandIndividual.submitted_by.uuid === user.uuid) {
+                                this.setState({evidenceLocked: true});
+                            }
+                        }
+                    });
                 }
                 else {
                     this.setState({proband_selected: false});
@@ -937,7 +946,8 @@ var IndividualCuration = React.createClass({
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {individual ?
-                                                <DeleteButton gdm={gdm} parent={families.length > 0 ? families[0] : (groups.length > 0 ? groups[0] : annotation)} item={individual} pmid={pmid} />
+                                                <DeleteButton gdm={gdm} parent={families.length > 0 ? families[0] : (groups.length > 0 ? groups[0] : annotation)} item={individual} pmid={pmid}
+                                                    disabled={this.state.evidenceLocked} />
                                             : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
@@ -1355,7 +1365,7 @@ var IndividualVariantInfo = function() {
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Yes">Yes</option>
@@ -1364,7 +1374,7 @@ var IndividualVariantInfo = function() {
                             </Input>
                             <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
                                 defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Yes">Yes</option>
@@ -1372,7 +1382,7 @@ var IndividualVariantInfo = function() {
                             </Input>
                             <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
                                 defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Yes">Yes</option>
@@ -1386,12 +1396,12 @@ var IndividualVariantInfo = function() {
                     <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
                         error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
                         handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                     </Input>
                     <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
                         error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
                         handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                     </Input>
                     {_.range(MAX_VARIANTS).map(i => {
                         var variant;
@@ -1456,14 +1466,14 @@ var IndividualVariantInfo = function() {
                                                 <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
                                                     buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                                    updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                                    updateParentForm={this.updateVariantId} buttonOnly={true} disabled={this.state.evidenceLocked} />
                                             : null}
                                             {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                             {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
                                                 <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
                                                     buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
-                                                    updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                                    updateParentForm={this.updateVariantId} buttonOnly={true} disabled={this.state.evidenceLocked} />
                                             : null}
                                         </span>
                                     </div>
@@ -1475,7 +1485,7 @@ var IndividualVariantInfo = function() {
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked} >
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Yes">Yes</option>
@@ -1484,7 +1494,7 @@ var IndividualVariantInfo = function() {
                             </Input>
                             <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
                                 defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Yes">Yes</option>
@@ -1492,7 +1502,7 @@ var IndividualVariantInfo = function() {
                             </Input>
                             <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
                                 defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Yes">Yes</option>
