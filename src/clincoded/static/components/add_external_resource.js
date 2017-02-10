@@ -97,7 +97,9 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     // renders the main Clear button
     clearButtonRender: function() {
         return (
-            <Input type="button" title={this.props.clearButtonText ? this.props.clearButtonText : "Clear"} inputClassName={"btn-default" + (this.props.clearButtonClass ? " " + this.props.clearButtonClass : "")} clickHandler={this.resetForm} />
+            <Input type="button" title={this.props.clearButtonText ? this.props.clearButtonText : "Clear"}
+                inputClassName={"btn-default" + (this.props.clearButtonClass ? " " + this.props.clearButtonClass : "") + (this.props.disabled ? " disabled" : "")}
+                clickHandler={this.resetForm} />
         );
     },
 
