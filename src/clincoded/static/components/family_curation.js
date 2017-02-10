@@ -106,7 +106,8 @@ var FamilyCuration = React.createClass({
             estimatedLodScore: null, // track estimated LOD value
             publishedLodScore: null, // track published LOD value
             lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
-            lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
+            lodCalcMode: null, // track which type of calculation we should do for LOD score, if applicable
+            evidenceLocked: false // True if 2nd curator scored the evidence. Applicable to evidence owner/creator.
         };
     },
 
@@ -480,6 +481,11 @@ var FamilyCuration = React.createClass({
                         let probandIndividual = stateObj.probandIndividual;
                         if (probandIndividual.recessiveZygosity && probandIndividual.recessiveZygosity.length) {
                             this.setState({recessiveZygosity: probandIndividual.recessiveZygosity});
+                        }
+                        if (probandIndividual.scores && probandIndividual.scores.length > 1) {
+                            if (probandIndividual.submitted_by && probandIndividual.submitted_by.uuid === user.uuid) {
+                                this.setState({evidenceLocked: true});
+                            }
                         }
                     }
                     // Fill in the segregation filled object so we know whether to enable or disable the assessment dropdown
@@ -1346,7 +1352,7 @@ var FamilyCuration = React.createClass({
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {family ?
-                                                <DeleteButton gdm={gdm} parent={groups.length > 0 ? groups[0] : annotation} item={family} pmid={pmid} disabled={this.cv.othersAssessed} />
+                                                <DeleteButton gdm={gdm} parent={groups.length > 0 ? groups[0] : annotation} item={family} pmid={pmid} disabled={this.cv.othersAssessed || this.state.evidenceLocked} />
                                             : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
@@ -1694,12 +1700,12 @@ var FamilyVariant = function() {
             <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
                 error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
                 handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
             </Input>
             <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
                 error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
                 handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={this.state.evidenceLocked}>
             </Input>
             {_.range(MAX_VARIANTS).map(i => {
                 var variant;
@@ -1762,14 +1768,14 @@ var FamilyVariant = function() {
                                         <AddResourceId resourceType="clinvar" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                                             buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
-                                            updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                            updateParentForm={this.updateVariantId} buttonOnly={true} disabled={this.state.evidenceLocked} />
                                     : null}
                                     {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                     {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
                                         <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                                             buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
-                                            updateParentForm={this.updateVariantId} buttonOnly={true} />
+                                            updateParentForm={this.updateVariantId} buttonOnly={true} disabled={this.state.evidenceLocked} />
                                     : null}
                                 </span>
                             </div>
