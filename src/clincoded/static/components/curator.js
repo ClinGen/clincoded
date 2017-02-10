@@ -56,7 +56,6 @@ var CurationMixin = module.exports.CurationMixin = {
 
 var CuratorPage = module.exports.CuratorPage = React.createClass({
     render: function() {
-        console.log('hey');
         var context = this.props.context;
 
         var CuratorPageView = globals.curator_page.lookup(context, context.name);

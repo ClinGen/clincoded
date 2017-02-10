@@ -1,8 +1,4 @@
-from snovault.schema_utils import (
-    load_schema,
-    VALIDATOR_REGISTRY,
-)
-from snovault.resource_views import item_view_page
+from snovault.schema_utils import load_schema
 from snovault import (
     COLLECTIONS,
     CONNECTION,
@@ -10,17 +6,8 @@ from snovault import (
     calculated_property,
     collection,
 )
-from .base import (
-    ALLOW_EVERYONE_VIEW,
-    Item,
-    ONLY_ADMIN_VIEW,
-)
+from .base import Item
 from pyramid.location import lineage
-from pyramid.threadlocal import get_current_request
-from pyramid.traversal import (
-    find_resource,
-)
-from pyramid.view import view_config
 
 
 @collection(
@@ -30,13 +17,13 @@ from pyramid.view import view_config
         'title': 'Curator pages',
         'description': 'Pages for the curator action flow',
     })
-class CuratorPage(Item):
+class curator_page(Item):
     item_type = 'curator_page'
     schema = load_schema('clincoded:schemas/curator_page.json')
     name_key = 'name'
 
     def unique_keys(self, properties):
-        keys = super(CuratorPage, self).unique_keys(properties)
+        keys = super(curator_page, self).unique_keys(properties)
         parent = properties.get('parent')
         name = properties['name']
         value = name if parent is None else u'{}:{}'.format(parent, name)
@@ -102,4 +89,3 @@ class CuratorPage(Item):
             if uuid is not None:
                 request._linked_uuids.add(str(uuid))
         return None
-

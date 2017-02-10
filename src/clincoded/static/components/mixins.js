@@ -115,7 +115,7 @@ module.exports.Auth0 = {
 
 
         const logoUrl = '/static/img/clingen-logo-only.svg';
-
+        // switch this out once we've upgraded to react15'
         //var lock_ = require('auth0-lock');
         if (window.Auth0Lock !== undefined) {
             this.lock = new window.Auth0Lock('fucNqQ1x5rSFOjXNqtm0NWzzxG1g1xVs', 'clingen.auth0.com', {
@@ -161,19 +161,13 @@ module.exports.Auth0 = {
 
     },
 
-
     fetch: function (url, options) {
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
         if (!(http_method === 'GET' || http_method === 'HEAD')) {
             var headers = options.headers = _.extend({}, options.headers);
             var session = this.state.session;
-            //var userid = session['auth.userid'];
-            //if (userid) {
-            //    // Server uses this to check user is logged in
-            //    headers['X-If-Match-User'] = userid;
-            //}
-            if (session && session._csrft_) {
+            if (session && session._csrft_ && !options.xcsrf_disable) {
                 headers['X-CSRF-Token'] = session._csrft_;
             }
         }
@@ -269,7 +263,6 @@ module.exports.Auth0 = {
 
     handleAuth0Login: function (authResult, retrying) {
         var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
-        console.log(accessToken);
         if (!accessToken) return;
         this.sessionPropertiesRequest = true;
         this.fetch('/login', {
@@ -282,18 +275,13 @@ module.exports.Auth0 = {
         })
         .then(response => {
             this.lock.hide();
-            console.log('what1');
-            console.log(response);
             if (!response.ok) throw response;
-            console.log('what2');
             return response.json();
         })
         .then(session_properties => {
-            console.log(session_properties.user_properties.title);
-            this.setState({session_properties: session_properties});
+            this.setState({session: session_properties});
             this.sessionPropertiesRequest = null;
             var next_url = window.location.href;
-            console.log('what');
             if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
                 this.navigate(next_url, {replace: true}).then(() => {
                     this.setState({loadingComplete: true});
@@ -306,7 +294,6 @@ module.exports.Auth0 = {
             parseError(err).then(data => {
                 // Server session creds might have changed.
                 if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
-                    console.log('session');
                     if (!retrying) {
                         window.setTimeout(this.handleAuth0Login);
                         return;
@@ -326,7 +313,6 @@ module.exports.Auth0 = {
     },
 
     triggerLogout: function (event) {
-        console.log('Logging out (Auth0)');
         var session = this.state.session;
         if (!(session && session['auth.userid'])) return;
         this.fetch('/logout?redirect=false', {
@@ -357,7 +343,6 @@ module.exports.Auth0 = {
         if (this.state.session && !this.state.session._csrft_) {
             this.fetch('/session');
         }
-        console.log('triggerauto');
 
         this.fetch(
             'https://clingen.auth0.com/oauth/ro', // AUTH0: LOGIN DOMAIN
@@ -386,151 +371,6 @@ module.exports.Auth0 = {
             this.handleAuth0Login(session);
         });
     },
-
-    /*
-    triggerLogin: function(e, retrying) {
-        // pressing the Login button shows the Auth0 Lock modal
-        var $script = require('scriptjs');
-        if (this.state.session && !this.state.session._csrft_) {
-            this.fetch('/session');
-        }
-        this.lock.show();
-    },
-
-
-
-    triggerLoginFail: function() {
-        // Login failed (not sure when this ever happens)
-        let login_failure = {};
-        login_failure['@type'] = ['LoginDenied', 'error'];
-        this.setState({context: login_failure, loadingComplete: true});
-    },
-
-    handleAuth0Login: function (authResult, retrying) {
-        // method that handles what happens after Auth0 Lock modal interaction.
-        // most of this logic was in triggerLogin previously
-        var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
-        if (!accessToken) return;
-        this.sessionPropertiesRequest = true;
-        console.log('access');
-        console.log(accessToken);
-        this.fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({accessToken: accessToken})
-        })
-        .then(response => {
-            console.log(response);
-            this.lock.hide();
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(session => {
-            this.setState({session: session});
-            // Login was successful, so forward user to dashboard or target URI as necessary
-            var next_url = window.location.href;
-            if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
-                this.navigate(next_url, {replace: true}).then(() => {
-                    this.setState({loadingComplete: true});
-                });
-            } else {
-                this.setState({loadingComplete: true});
-            }
-        }, err => {
-            this.sessionPropertiesRequest = null;
-            parseError(err).then(data => {
-                // Server session creds might have changed.
-                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
-                    if (!retrying) {
-                        window.setTimeout(this.handleAuth0Login);
-                        return;
-                    }
-                }
-                // If there is an error, show the error messages
-                this.setState({context: data});
-            });
-        });
-    },
-
-    triggerLogout: function() {
-        // Called when the user presses the logout button. Log the user out of Google and forward them to the proper page
-        var session = this.state.session;
-        if (!(session && session['auth.userid'])) {
-            return;
-        }
-
-        this.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(data => {
-            this.DISABLE_POPSTATE = true;
-            var old_path = window.location.pathname + window.location.search;
-            window.location.assign('/#logged-out');
-            if (old_path == '/') {
-                window.location.reload();
-            }
-        }, err => {
-            parseError(err).then(data => {
-                data.title = 'Logout failure: ' + data.title;
-                this.setState({context: data});
-            });
-        });
-    },
-
-
-    parseSessionCookie: function (session_cookie) {
-        // Helper function for extractSessionCookie()
-        var Buffer = require('buffer').Buffer;
-        var session;
-        if (session_cookie) {
-            // URL-safe base64
-            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
-            // First 64 chars is the sha-512 server signature
-            // Payload is [accessed, created, data]
-            try {
-                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
-            } catch (e) {
-                console.log('Error while parsing session cookie');
-                // error'ed
-            }
-        }
-        return session || {};
-    },
-
-    fetch: function (url, options) {
-        options = _.extend({credentials: 'same-origin'}, options);
-        var http_method = options.method || 'GET';
-        if (!(http_method === 'GET' || http_method === 'HEAD')) {
-            var headers = options.headers = _.extend({}, options.headers);
-            var session = this.state.session;
-            if (session._csrft_ && !options.xcsrf_disable) {
-                headers['X-CSRF-Token'] = session._csrft_;
-            }
-        }
-        // Strip url fragment.
-        var url_hash = url.indexOf('#');
-        if (url_hash > -1) {
-            url = url.slice(0, url_hash);
-        }
-        var request = fetch(url, options);
-        request.xhr_begin = 1 * new Date();
-        request.then(response => {
-            request.xhr_end = 1 * new Date();
-            var stats_header = response.headers.get('X-Stats') || '';
-            request.server_stats = require('querystring').parse(stats_header);
-            request.etag = response.headers.get('ETag');
-            this.extractSessionCookie();
-        });
-        return request;
-    }
-    */
 };
 
 
