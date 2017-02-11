@@ -78,7 +78,7 @@ var CreateGeneDisease = React.createClass({
 
         // Check if orphanetid
         if (valid) {
-            valid = this.getFormValue('orphanetid').match(/^ORPHA[0-9]{1,6}$/i);
+            valid = this.getFormValue('orphanetid').match(/^(ORPHA|ORPHA:)?[0-9]{1,6}$/i);
             if (!valid) {
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15)');
             }
@@ -104,7 +104,7 @@ var CreateGeneDisease = React.createClass({
         }
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
+            var orphaId = this.getFormValue('orphanetid').match(/^(ORPHA|ORPHA:)?([0-9]{1,6})$/i)[2];
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('hpo');
             let adjective = this.getFormValue('moiAdjective');
