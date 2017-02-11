@@ -80,15 +80,13 @@ module.exports.Auth0 = {
     // Mixin for providing Auth0 Authentication functionality. Call in app.js
     childContextTypes: {
         fetch: React.PropTypes.func,
-        session: React.PropTypes.object,
-        session_properties: React.PropTypes.object
+        session: React.PropTypes.object
     },
 
     getChildContext: function() {
         return {
             fetch: this.fetch,
-            session: this.state.session,
-            session_properties: this.state.session_properties
+            session: this.state.session
         };
     },
 
@@ -96,8 +94,7 @@ module.exports.Auth0 = {
         // Define loadingComplete and session here so they are available to mixin, as well as main app
         return {
             loadingComplete: false,
-            session: null,
-            session_properties: {}
+            session: {}
         };
     },
 
@@ -200,9 +197,7 @@ module.exports.Auth0 = {
         if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
             var nextState = {};
             nextState.session = this.parseSessionCookie(nextProps.session_cookie);
-            if (!nextState.session['auth.userid']) {
-                nextState.session_properties = {};
-            } else if (nextState.session['auth.userid'] !== (this.state.session && this.state.session['auth.userid'])) {
+            if (nextState.session['auth.userid'] !== (this.state.session && this.state.session['auth.userid'])) {
                 this.fetchSessionProperties();
             }
             this.setState(nextState);
@@ -256,8 +251,8 @@ module.exports.Auth0 = {
             if (!response.ok) throw response;
             return response.json();
         })
-        .then(session_properties => {
-            this.setState({session_properties: session_properties});
+        .then(session => {
+            this.setState({session: session});
         });
     },
 
@@ -278,8 +273,8 @@ module.exports.Auth0 = {
             if (!response.ok) throw response;
             return response.json();
         })
-        .then(session_properties => {
-            this.setState({session: session_properties});
+        .then(session => {
+            this.setState({session: session});
             this.sessionPropertiesRequest = null;
             var next_url = window.location.href;
             if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {

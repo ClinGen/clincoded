@@ -98,30 +98,23 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
     """View to check the auth0 assertion and remember the user"""
-    print('login-login')
     login = request.authenticated_userid
-    print(login)
     if login is None:
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
-    print('login-namespace')
-    print(namespace)
     if namespace != 'auth0':
         request.session.invalidate()
         request.response.headerlist.extend(forget(request))
-        print('login denied')
         raise LoginDenied()
 
     request.session.invalidate()
     request.session.get_csrf_token()
     request.response.headerlist.extend(remember(request, 'mailto.' + userid))
 
-    print('pre-requestembed')
     properties = request.embed('/session-properties', as_user=userid)
     if 'auth.userid' in request.session:
         properties['auth.userid'] = request.session['auth.userid']
-    print('post-requestembed')
     return properties
 
 
@@ -140,7 +133,6 @@ def logout(request):
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)
 def session_properties(request):
-    print(request)
     for principal in request.effective_principals:
         if principal.startswith('userid.'):
             break
@@ -148,25 +140,15 @@ def session_properties(request):
         return {}
 
     namespace, userid = principal.split('.', 1)
-    print(namespace)
-    print(userid)
-    print('what')
 
     user = request.registry[COLLECTIONS]['user'][userid]
     user_actions = calculate_properties(user, request, category='user_action')
 
-    print(user)
-    print(user_actions)
-    print(request.resource_path(user))
-
     properties = {
         'user_properties': request.embed(request.resource_path(user), as_user=True),
     }
-    print('what2')
-    print(properties)
     if 'auth.userid' in request.session:
         properties['auth.userid'] = request.session['auth.userid']
-    print('what3')
     return properties
     # return request.embed(request.resource_path(user), as_user=True)
 
