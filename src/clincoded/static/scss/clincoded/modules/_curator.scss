@@ -1222,6 +1222,19 @@
                 width: 20%;
             }
 
+            .population .datasource-gnomAD {
+                .panel-body {
+                    .description {
+                        margin-bottom: 5px;
+                    }
+
+                    a {
+                        display: inline-block;
+                        margin-right: 20px;
+                    }
+                }
+            }
+
             .population .datasource-1000G .table tbody td,
             .population .datasource-1000G .table tfoot td,
             .population .datasource-ESP .table tbody td,
