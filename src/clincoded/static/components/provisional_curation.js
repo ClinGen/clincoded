@@ -782,10 +782,10 @@ var ProvisionalCuration = React.createClass({
                                                                         wrapperClassName="col-sm-9" defaultValue={this.state.alteredClassification}
                                                                         groupClassName="form-group">
                                                                         <option value="No Selection">No Selection</option>
-                                                                        <option value="Definitive">Definitive</option>
-                                                                        <option value="Strong">Strong</option>
-                                                                        <option value="Moderate">Moderate</option>
-                                                                        <option value="Limited">Limited</option>
+                                                                        <option value="Definitive" disabled={autoClassification === 'Definitive' ? 'disabled' : false}>Definitive</option>
+                                                                        <option value="Strong" disabled={autoClassification === 'Strong' ? 'disabled' : false}>Strong</option>
+                                                                        <option value="Moderate" disabled={autoClassification === 'Moderate' ? 'disabled' : false}>Moderate</option>
+                                                                        <option value="Limited" disabled={autoClassification === 'Limited' ? 'disabled' : false}>Limited</option>
                                                                         <option value="Disputed">Disputed</option>
                                                                         <option value="Refuted">Refuted</option>
                                                                     </Input>
