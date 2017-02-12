@@ -635,7 +635,7 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr>
                                                                 <td rowSpan="2" className="header">Autosomal Recessive Disorder</td>
-                                                                <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                                                <td>Two variants (not predicted/proven null) with some evidence of gene impact in <i>trans</i></td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
                                                                 <td rowSpan="2">{scoreTableValues['autosomalRecessivePointsCounted']}</td>
