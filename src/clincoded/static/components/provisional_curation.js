@@ -782,10 +782,10 @@ var ProvisionalCuration = React.createClass({
                                                                         wrapperClassName="col-sm-9" defaultValue={this.state.alteredClassification}
                                                                         groupClassName="form-group">
                                                                         <option value="No Selection">No Selection</option>
-                                                                        <option value="Definitive" disabled={autoClassification === 'Definitive' ? 'disabled' : false}>Definitive</option>
-                                                                        <option value="Strong" disabled={autoClassification === 'Strong' ? 'disabled' : false}>Strong</option>
-                                                                        <option value="Moderate" disabled={autoClassification === 'Moderate' ? 'disabled' : false}>Moderate</option>
-                                                                        <option value="Limited" disabled={autoClassification === 'Limited' ? 'disabled' : false}>Limited</option>
+                                                                        {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
+                                                                        {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
+                                                                        {autoClassification === 'Moderate' ? null : <option value="Moderate">Moderate</option>}
+                                                                        {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
                                                                         <option value="Disputed">Disputed</option>
                                                                         <option value="Refuted">Refuted</option>
                                                                         <option value="No Reported Evidence">No Reported Evidence</option>
