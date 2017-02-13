@@ -841,9 +841,14 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </div>
                         :
                             <div className="panel-body">
-                                <div className="description"><span>gnomAD data is not currently available via API or download -- however, provided below are 2 links:</span></div>
-                                <a href={this.rendergnomADLinkout(this.props.ext_myVariantInfo)} target="_blank">Link to data for this variant in gnomAD</a>
-                                <a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD for this variant</a>
+                                <div className="description">
+                                    <span>gnomAD data is not currently available via API or download &mdash; however, provided below are 2 links:
+                                        1) direct link to URL for variant in gnomAD and 2) link to gnomAD's home page.</span>
+                                </div>
+                                <ul>
+                                    <li><a href={this.rendergnomADLinkout(this.props.ext_myVariantInfo)} target="_blank">Link to data for this variant in gnomAD</a> (note: not all variants are present in gnomAD)</li>
+                                    <li><a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD for this variant</a></li>
+                                </ul>
                             </div>
                         }
                     </div>
