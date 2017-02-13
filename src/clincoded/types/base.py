@@ -41,12 +41,13 @@ ALLOW_LAB_SUBMITTER_EDIT = [
 ]
 
 ALLOW_CURRENT = [
-    (Allow, 'group.curator', ALL_PERMISSIONS),
+    (Allow, 'group.curator', ['view', 'edit']),
+    (Deny, 'group.curator', 'direct_edit'),
     (Allow, 'group.admin', ALL_PERMISSIONS)
 ]
 
 ALLOW_CURRENT_NOVIEW = [
-    (Deny, 'group.curator', ['view', 'edit']),
+    (Deny, 'group.curator', ['view', 'edit', 'direct_edit']),
     (Allow, 'group.admin', ALL_PERMISSIONS),
     # Avoid schema validation errors during audit
     (Allow, 'remoteuser.EMBED', ['view', 'expand', 'audit', 'import_items']),
@@ -187,20 +188,20 @@ def add(item_uri, item_type, has_permission):
         }
 
 
-@contentbase.calculated_property(context=Item, category='action')
-def edit(item_uri, item_type, has_permission):
-    if has_permission('edit') and contextless_has_permission('forms'):
-        return {
-            'name': 'edit',
-            'title': 'Edit',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': item_uri + '#!edit',
-        }
+# @contentbase.calculated_property(context=Item, category='action')
+# def edit(item_uri, item_type, has_permission):
+#     if has_permission('edit') and contextless_has_permission('forms'):
+#         return {
+#             'name': 'edit',
+#             'title': 'Edit',
+#             'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
+#             'href': item_uri + '#!edit',
+#         }
 
 
 @contentbase.calculated_property(context=Item, category='action')
 def edit_json(item_uri, item_type, has_permission):
-    if has_permission('edit'):
+    if has_permission('direct_edit'):
         return {
             'name': 'edit-json',
             'title': 'Edit JSON',
