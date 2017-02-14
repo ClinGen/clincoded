@@ -1224,8 +1224,13 @@
 
             .population .datasource-gnomAD {
                 .panel-body {
-                    .description, li {
-                        margin-bottom: 5px;
+                    .description {
+                        font-style: italic;
+                        margin-bottom: 8px;
+                    }
+
+                    li {
+                        margin-top: 5px;
                     }
                 }
             }
