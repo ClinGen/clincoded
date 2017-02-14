@@ -1510,7 +1510,7 @@ var TypeBiochemicalFunctionB = function() {
     return (
         <div>
             {curator.renderPhenotype(null, 'Experimental')}
-            <Input type="text" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />}
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} rows="1"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
@@ -1518,7 +1518,7 @@ var TypeBiochemicalFunctionB = function() {
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label={<LabelPhenotypesFT />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange}
+                rows="2" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange}
                 inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionHPO} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
@@ -1866,7 +1866,7 @@ var TypeModelSystems = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={modelSystems.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
             {curator.renderPhenotype(null, 'Experimental')}
-            <Input type="text" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />}
+            <Input type="textarea" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />} rows="1"
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={modelSystems.phenotypeHPOObserved} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
@@ -1874,9 +1874,9 @@ var TypeModelSystems = function() {
             <Input type="textarea" ref="phenotypeFreetextObserved" label={<LabelPhenotypeObservedFT />}
                 error={this.getFormError('phenotypeFreetextObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreetextObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.phenotypeFreetextObserved} handleChange={this.handleChange}
+                rows="2" value={modelSystems.phenotypeFreetextObserved} handleChange={this.handleChange}
                 inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPOMSHPO} />
-            <Input type="text" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />}
+            <Input type="textarea" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />} rows="1"
                 error={this.getFormError('model.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={modelSystems.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
@@ -1884,7 +1884,7 @@ var TypeModelSystems = function() {
             <Input type="textarea" ref="model.phenotypeFreeText" label={<LabelPatientPhenotypeFT />}
                 error={this.getFormError('model.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={modelSystems.phenotypeFreeText} handleChange={this.handleChange}
+                rows="2" value={modelSystems.phenotypeFreeText} handleChange={this.handleChange}
                 inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPPHPO} />
             <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in humans:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
@@ -1976,7 +1976,7 @@ var TypeRescue = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={rescue.descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
             {curator.renderPhenotype(null, 'Experimental')}
-            <Input type="text" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />}
+            <Input type="textarea" ref="rescue.phenotypearea" label={<LabelPhenotypeRescue />} rows="1"
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={rescue.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
@@ -1984,7 +1984,7 @@ var TypeRescue = function() {
             <Input type="textarea" ref="rescue.phenotypeFreeText" label={<LabelPhenotypeRescueFT />}
                 error={this.getFormError('rescue.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={rescue.phenotypeFreeText} handleChange={this.handleChange}
+                rows="2" value={rescue.phenotypeFreeText} handleChange={this.handleChange}
                 inputDisabled={this.cv.othersAssessed} required={!this.state.rescuePRHPO} />
             <Input type="textarea" ref="rescueMethod" label="Description of method used to rescue:"
                 error={this.getFormError('rescueMethod')} clearError={this.clrFormErrors.bind(null, 'rescueMethod')}
