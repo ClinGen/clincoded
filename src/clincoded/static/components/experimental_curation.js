@@ -676,12 +676,12 @@ var ExperimentalCuration = React.createClass({
                 // check hpoIDs
                 if (this.getFormValue('model.phenotypeHPO') !== '') {
                     hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
-                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO', 1);
+                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO');
                 }
                 // check hpoIDs part 2
                 if (this.getFormValue('model.phenotypeHPOObserved') !== '') {
                     hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPOObserved'));
-                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPOObserved', 1);
+                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPOObserved');
                 }
             }
             else if (this.state.experimentalType == 'Rescue') {
@@ -701,7 +701,7 @@ var ExperimentalCuration = React.createClass({
                 // check hpoIDs
                 if (this.getFormValue('rescue.phenotypeHPO') !== '') {
                     hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
-                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO', 1);
+                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO');
                 }
             }
 
