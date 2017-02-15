@@ -337,10 +337,10 @@ var IndividualCuration = React.createClass({
                 // ORPHA is not required for non-proband individual
                 // ORPHA list is bad
                 formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
             } else if (!this.state.proband_selected && (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; }))) {
                 formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -1094,11 +1094,11 @@ var IndividualCommonDiseases = function() {
             {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderOrphanets(associatedGroups, 'Group') : null}
             {associatedFamilies && associatedFamilies[0].commonDiagnosis && associatedFamilies[0].commonDiagnosis.length > 0 ? curator.renderOrphanets(associatedFamilies, 'Family') : null}
             { this.state.proband_selected ?
-                <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
+                <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                 :
-                <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA15"
+                <Input type="text" ref="orphanetid" label={<LabelOrphanetId probandLabel={probandLabel} />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             }
