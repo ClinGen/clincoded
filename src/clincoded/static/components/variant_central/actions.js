@@ -242,7 +242,7 @@ var AssociateDisease = React.createClass({
         if (valid) {
             valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
             if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15)');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
             }
         }
         return valid;
@@ -399,7 +399,7 @@ var AssociateDisease = React.createClass({
             <Form submitHandler={this.submitForm} formClassName="form-std">
                 <div className="modal-box">
                     <div className="modal-body clearfix">
-                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={(disease_id) ? disease_id : null}
+                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA:15 or ORPHA15" value={(disease_id) ? disease_id : null}
                             error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
                     </div>
