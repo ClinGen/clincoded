@@ -203,7 +203,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                             </div>
                                                         </div>
                                                     :
-                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                        <div className="provisional-data-left"><span>None</span></div>
                                                 }
                                             </td>
                                             <td className="button-box" rowSpan="2">
