@@ -215,7 +215,7 @@ const CaseControlCuration = React.createClass({
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
                 formError = true;
-                this.setFormErrors('caseCohort_orphanetId', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+                this.setFormErrors('caseCohort_orphanetId', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
             } else if (orphaIds && orphaIds.length && !_(orphaIds).any(function(id) { return id === null; })) {
                 valid_orphaId = true;
             }
@@ -1109,7 +1109,7 @@ function GroupCommonDiseases(groupType) {
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">Please enter an Orphanet ID(s) and/or HPO ID(s) and/or Phenotype free text (required).</p>
             </div>
-            <Input type="text" ref={orphanetId} label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15" inputDisabled={inputDisabled}
+            <Input type="text" ref={orphanetId} label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15" inputDisabled={inputDisabled}
                 error={this.getFormError(orphanetId)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref={hpoId} label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
