@@ -4,7 +4,7 @@ from contentbase.upgrader import upgrade_step
 # for use in computational_1_2 step
 # converts value to to float or int based on presence of decimal
 def cast_to_intfloat(value):
-    if '.' in str(value):
+    if '.' in str(value) or 'e' in str(value):
         return float(value)
     else:
         return int(value)
@@ -23,4 +23,5 @@ def computational_1_2(value, system):
             for predictor in predictors:
                 if predictor in value['computationalData']['other_predictors']:
                     if 'score' in value['computationalData']['other_predictors'][predictor]:
-                        value['computationalData']['other_predictors'][predictor]['score'] = [cast_to_intfloat(x) for x in str(value['computationalData']['other_predictors'][predictor]['score']).split(', ')]
+                        if value['computationalData']['other_predictors'][predictor]['score'] is not None:
+                            value['computationalData']['other_predictors'][predictor]['score'] = [cast_to_intfloat(x) for x in str(value['computationalData']['other_predictors'][predictor]['score']).split(', ')]
