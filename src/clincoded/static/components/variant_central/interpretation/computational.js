@@ -341,7 +341,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             <tr key={key}>
                 <td>{rowName}</td>
                 <td>{otherPred[key].score_range}</td>
-                <td>{otherPred[key].score ? otherPred[key].score : '--'}</td>
+                <td>{otherPred[key].score ? (Array.isArray(otherPred[key].score) ? otherPred[key].score.join(', ') : otherPred[key].score) : '--'}</td>
                 <td>{otherPred[key].prediction ? otherPred[key].prediction : '--'}</td>
             </tr>
         );
