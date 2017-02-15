@@ -18,12 +18,9 @@ def computational_1_2(value, system):
                   'mutationtaster', 'mutationassessor', 'fathmm', 'provean',
                   'metasvm', 'metalr', 'fathmm_mkl', 'fitcons']
     if 'computationalData' in value:
-        print('computational')
         if 'other_predictors' in value['computationalData']:
-            print('other_predictors')
             # other_predictors is present, so loop through predictors to check
             for predictor in predictors:
                 if predictor in value['computationalData']['other_predictors']:
-                    print(predictor)
                     if 'score' in value['computationalData']['other_predictors'][predictor]:
                         value['computationalData']['other_predictors'][predictor]['score'] = [cast_to_intfloat(x) for x in str(value['computationalData']['other_predictors'][predictor]['score']).split(', ')]
