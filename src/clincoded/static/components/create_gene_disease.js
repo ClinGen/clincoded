@@ -80,7 +80,7 @@ var CreateGeneDisease = React.createClass({
         if (valid) {
             valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
             if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15)');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
             }
         }
         return valid;
@@ -180,7 +180,7 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1"
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
+                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA:15 or ORPHA15"
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                                 <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
