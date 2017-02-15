@@ -272,20 +272,21 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         return newStr;
     },
 
-    // Method to convert score array to string
+    // Method to convert score value to array of numbers
     handleScoreObj: function(obj) {
-        var newArr = [], newStr = '';
+        let newArr = [];
         if (Array.isArray(obj)) {
             for (let value of obj.values()) {
                 if (!isNaN(value) && value !== null) {
-                    newArr.push(value);
+                    newArr.push(Number(value));
                 }
             }
-            newStr = newArr.join(', ');
         } else {
-            newStr = obj;
+            if (!isNaN(obj) && obj !== null) {
+                newArr = [Number(obj)];
+            }
         }
-        return newStr;
+        return newArr;
     },
 
     // Method to assign conservation scores data to global computation object
