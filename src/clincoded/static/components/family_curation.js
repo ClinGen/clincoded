@@ -577,7 +577,7 @@ var FamilyCuration = React.createClass({
             if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
                 // ORPHA list is bad
                 formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
             }
 
             // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
@@ -585,7 +585,7 @@ var FamilyCuration = React.createClass({
                 if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
                     // Individual’s ORPHA list is bad
                     formError = true;
-                    this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA15) separated by commas');
+                    this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
                 }
             }
 
@@ -1441,7 +1441,7 @@ var FamilyCommonDiseases = function() {
     return (
         <div className="row">
             {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderOrphanets(associatedGroups, 'Group') : null}
-            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
+            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ?
@@ -1451,13 +1451,13 @@ var FamilyCommonDiseases = function() {
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'hpo') : curator.renderPhenotype(null, 'Family', 'hpo')
             }
-            <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'ft') : curator.renderPhenotype(null, 'Family', 'ft')
             }
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={family && family.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={family && family.termsInDiagnosis}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
             <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
@@ -1465,10 +1465,10 @@ var FamilyCommonDiseases = function() {
             : null
             }
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
-            <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={family && family.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={family && family.termsInElimination}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -1677,7 +1677,7 @@ var FamilyVariant = function() {
                         </div>
                         : null
                     }
-                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA15" handleChange={this.handleChange}
+                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA:15 or ORPHA15" handleChange={this.handleChange}
                         error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
