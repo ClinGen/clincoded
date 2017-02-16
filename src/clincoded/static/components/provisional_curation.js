@@ -788,7 +788,7 @@ var ProvisionalCuration = React.createClass({
                                                                         {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
                                                                         <option value="Disputed">Disputed</option>
                                                                         <option value="Refuted">Refuted</option>
-                                                                        <option value="No Reported Evidence">No Reported Evidence (score is based on Experimental evidence only)</option>
+                                                                        <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
                                                                     </Input>
                                                                 </td>
                                                             </tr>
