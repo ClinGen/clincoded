@@ -24,10 +24,11 @@ var AuditMixin = audit.AuditMixin;
         gdm: {title: 'GDMs'},
         annotation: {title: 'Evidences'},
         group: {title: 'Groups'},
-        family: {title: 'Famlies'},
+        family: {title: 'Families'},
         individual: {title: 'Individuals'},
         experimental: {title: 'Experimental Data'},
         assessment: {title: 'Assessments'},
+        interpretation: {title: 'Interpretations'},
     };
 
     var Listing = module.exports.Listing = function (props) {
