@@ -635,7 +635,7 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr>
                                                                 <td rowSpan="2" className="header">Autosomal Recessive Disorder</td>
-                                                                <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                                                <td>Two variants (not predicted/proven null) with some evidence of gene impact in <i>trans</i></td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
                                                                 <td rowSpan="2">{scoreTableValues['autosomalRecessivePointsCounted']}</td>
@@ -782,12 +782,13 @@ var ProvisionalCuration = React.createClass({
                                                                         wrapperClassName="col-sm-9" defaultValue={this.state.alteredClassification}
                                                                         groupClassName="form-group">
                                                                         <option value="No Selection">No Selection</option>
-                                                                        <option value="Definitive">Definitive</option>
-                                                                        <option value="Strong">Strong</option>
-                                                                        <option value="Moderate">Moderate</option>
-                                                                        <option value="Limited">Limited</option>
+                                                                        {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
+                                                                        {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
+                                                                        {autoClassification === 'Moderate' ? null : <option value="Moderate">Moderate</option>}
+                                                                        {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
                                                                         <option value="Disputed">Disputed</option>
                                                                         <option value="Refuted">Refuted</option>
+                                                                        <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
                                                                     </Input>
                                                                 </td>
                                                             </tr>
