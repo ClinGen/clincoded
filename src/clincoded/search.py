@@ -389,8 +389,6 @@ def search(context, request, search_type=None):
 
     set_facets(facets, used_filters, query, principals)
 
-    # if ('gdm' in doc_types or 'interpretation' in doc_types) and not (
-    #    'gene' in doc_types or 'disease' in doc_types):
     if doc_types == ['gdm'] or doc_types == ['interpretation']:
         size = 99999
 
