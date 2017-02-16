@@ -275,11 +275,14 @@ def search(context, request, search_type=None):
     """
     Search view connects to ElasticSearch and returns the results
     """
-    root = request.root
+    #root = request.root
     types = request.registry[TYPES]
+    print('\nSEARCH')
+    print(request.query_string)
+    print(search_type)
     result = {
         '@id': '/search/' + ('?' + request.query_string if request.query_string else ''),
-        '@type': ['search'],
+        '@type': ['Search'],
         'title': 'Search',
         'facets': [],
         '@graph': [],
@@ -322,12 +325,14 @@ def search(context, request, search_type=None):
             doc_types = []
 
         # handling invalid item types
+        '''
         bad_types = [t for t in doc_types if t not in root.by_item_type]
         if bad_types:
             result['notification'] = "Invalid type: %s" ', '.join(bad_types)
             return result
+        '''
     else:
-        doc_types = [search_type]
+        doc_types = [search_type.lower()]
 
     # Building query for filters
     if not doc_types:
@@ -335,7 +340,7 @@ def search(context, request, search_type=None):
             doc_types = []
         else:
             doc_types = ['gene', 'orphaPhenotype', 'article', 'variant', 'gdm', 'annotation',
-                         'group', 'family', 'individual', 'experimental', 'assessment']
+                         'group', 'family', 'individual', 'experimental', 'assessment', 'curatorHistory']
     else:
         for item_type in doc_types:
             qs = urlencode([
@@ -439,18 +444,25 @@ def search(context, request, search_type=None):
     return result
 
 
-@view_config(context=Collection, permission='list', request_method='GET',
+@view_config(context=AbstractCollection, permission='list', request_method='GET',
              name='listing')
 def collection_view_listing_es(context, request):
     # Switch to change summary page loading options
     if request.datastore != 'elasticsearch':
         return collection_view_listing_db(context, request)
 
-    result = search(context, request, context.item_type)
+    print('\nCOLLECTION_VIEW_LISTING_ES')
+    print(context)
+    print(request)
+    print(context.type_info.name)
 
+    result = search(context, request, context.type_info.name)
+    print(result)
+    '''
     if len(result['@graph']) < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
         result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
+    '''
 
     return result
