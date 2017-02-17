@@ -187,7 +187,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     }
 });
 
-globals.content_views.register(GdmCollection, 'gdm_collection');
+globals.content_views.register(GdmCollection, 'gdmcollection');
 
 
 // Render the GDM status legend
