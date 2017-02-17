@@ -28,6 +28,7 @@ var types = {
     individual: {title: 'Individuals'},
     experimental: {title: 'Experimental Data'},
     assessment: {title: 'Assessments'},
+    interpretation: {title: 'Interpretations'},
 };
 
 var Listing = module.exports.Listing = function (props) {
@@ -519,8 +520,8 @@ var Term = search.Term = React.createClass({
         var title = this.props.title || term;
         var field = this.props.facet['field'];
         var em = field === 'target.organism.scientific_name' ||
-                    field === 'organism.scientific_name' ||
-                    field === 'replicates.library.biosample.donor.organism.scientific_name';
+                 field === 'organism.scientific_name' ||
+                 field === 'replicates.library.biosample.donor.organism.scientific_name';
         var barStyle = {
             width:  Math.ceil( (count/this.props.total) * 100) + "%"
         };
@@ -628,9 +629,9 @@ var TextFilter = React.createClass({
         return (
             <div className="facet">
                 <input ref="input" type="search" className="form-control search-query"
-                        placeholder="Enter search term(s)"
-                        defaultValue={this.getValue(this.props)}
-                        onChange={this.onChange} onBlur={this.onBlur} onKeyDown={this.onKeyDown} />
+                       placeholder="Enter search term(s)"
+                       defaultValue={this.getValue(this.props)}
+                       onChange={this.onChange} onBlur={this.onBlur} onKeyDown={this.onKeyDown} />
             </div>
         );
     },
@@ -743,7 +744,7 @@ var ResultTable = search.ResultTable = React.createClass({
                     <div className="row">
                         <div className="col-sm-5 col-md-4 col-lg-3">
                             <FacetList {...this.props} facets={facets} filters={filters}
-                                        searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
+                                       searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
                         </div>
                         <div className="col-sm-7 col-md-8 col-lg-9">
                             {context['notification'] === 'Success' ?
@@ -752,16 +753,16 @@ var ResultTable = search.ResultTable = React.createClass({
                                     {total > results.length && searchBase.indexOf('limit=all') === -1 ?
                                         <span className="pull-right">
                                             <a rel="nofollow" className="btn btn-info btn-sm"
-                                                    href={searchBase ? searchBase + '&limit=all' : '?limit=all'}
-                                                    onClick={this.onFilter}>View All</a>
+                                                 href={searchBase ? searchBase + '&limit=all' : '?limit=all'}
+                                                 onClick={this.onFilter}>View All</a>
                                         </span>
                                     :
                                         <span>
                                             {results.length > 25 ?
                                                 <span className="pull-right">
                                                     <a className="btn btn-info btn-sm"
-                                                        href={trimmedSearchBase ? trimmedSearchBase : "/search/"}
-                                                        onClick={this.onFilter}>View 25</a>
+                                                       href={trimmedSearchBase ? trimmedSearchBase : "/search/"}
+                                                       onClick={this.onFilter}>View 25</a>
                                                 </span>
                                             : null}
                                         </span>
@@ -770,7 +771,7 @@ var ResultTable = search.ResultTable = React.createClass({
                                     {context['batch_hub'] ?
                                         <span className="pull-right">
                                             <a disabled={batch_hub_disabled} data-bypass="true" target="_blank" private-browsing="true" className="btn btn-info btn-sm"
-                                                href={context['batch_hub']}>{batch_hub_disabled ? 'Filter to 500 to visualize' :'Visualize'}</a>&nbsp;
+                                               href={context['batch_hub']}>{batch_hub_disabled ? 'Filter to 500 to visualize' :'Visualize'}</a>&nbsp;
                                         </span>
                                     :null}
                                 </h4>

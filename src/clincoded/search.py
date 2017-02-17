@@ -343,7 +343,8 @@ def search(context, request, search_type=None):
             doc_types = []
         else:
             doc_types = ['gene', 'orphaPhenotype', 'article', 'variant', 'gdm', 'annotation',
-                         'group', 'family', 'individual', 'experimental', 'assessment', 'curatorHistory']
+                         'group', 'family', 'individual', 'experimental', 'assessment',
+                         'interpretation']
     else:
         for item_type in doc_types:
             qs = urlencode([
@@ -397,7 +398,7 @@ def search(context, request, search_type=None):
 
     set_facets(facets, used_filters, query, principals)
 
-    if 'gdm' in doc_types or 'interpretation' in doc_types:
+    if doc_types == ['gdm'] or doc_types == ['interpretation']:
         size = 99999
 
     # Execute the query
