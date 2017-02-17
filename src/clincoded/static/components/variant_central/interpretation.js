@@ -514,7 +514,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
     }
 });
 
-globals.content_views.register(InterpretationCollection, 'interpretation_collection');
+globals.content_views.register(InterpretationCollection, 'interpretationcollection');
 
 
 // Render the Interpretation status legend
