@@ -101,7 +101,7 @@
                             "title": "GDM",
                             "description": "GDM that's the object of the PMID",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         }
                     }
                 },
@@ -130,13 +130,13 @@
                             "title": "HGNC Symbol",
                             "description": "HGNC Symbol of gene.",
                             "type": "string",
-                            "linkTo": "gene"
+                            "linkTo": "Gene"
                         },
                         "disease": {
                             "title": "Orpha ID",
                             "description": "Unique id for Orphanet phenotypes.",
                             "type": "string",
-                            "linkTo": "orphaPhenotype"
+                            "linkTo": "OrphaPhenotype"
                         }
                     }
                 },
@@ -159,13 +159,13 @@
                             "title": "GDM",
                             "description": "GDM that's the object of the case control",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "article": {
                             "title": "Article",
                             "description": "GDM article the case control provides evidence for",
                             "type": "string",
-                            "linkTo": "article"
+                            "linkTo": "Article"
                         }
                     }
                 },
@@ -188,13 +188,13 @@
                             "title": "GDM",
                             "description": "GDM that's the object of the group",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "article": {
                             "title": "Article",
                             "description": "GDM article the group provides evidence for",
                             "type": "string",
-                            "linkTo": "article"
+                            "linkTo": "Article"
                         }
                     }
                 },
@@ -217,19 +217,19 @@
                             "title": "GDM",
                             "description": "GDM that's the object of the family",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "group": {
                             "title": "Group",
                             "description": "Group that's the object of the family",
                             "type": "string",
-                            "linkTo": "group"
+                            "linkTo": "Group"
                         },
                         "article": {
                             "title": "Article",
                             "description": "GDM article the family provides evidence for",
                             "type": "string",
-                            "linkTo": "article"
+                            "linkTo": "Article"
                         }
                     }
                 },
@@ -252,25 +252,25 @@
                             "title": "GDM",
                             "description": "GDM that's the object of the individual",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "group": {
                             "title": "Group",
                             "description": "Group that's the object of the individual",
                             "type": "string",
-                            "linkTo": "group"
+                            "linkTo": "Group"
                         },
                         "family": {
                             "title": "Family",
                             "description": "Family that's the object of the individual",
                             "type": "string",
-                            "linkTo": "family"
+                            "linkTo": "Family"
                         },
                         "article": {
                             "title": "Article",
                             "description": "GDM article the individual provides evidence for",
                             "type": "string",
-                            "linkTo": "article"
+                            "linkTo": "Article"
                         }
                     }
                 },
@@ -293,13 +293,13 @@
                             "title": "GDM",
                             "description": "GDM that's the object of the experimental data",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "article": {
                             "title": "Article",
                             "description": "GDM article the experimental data provides evidence for",
                             "type": "string",
-                            "linkTo": "article"
+                            "linkTo": "Article"
                         }
                     }
                 },
@@ -322,7 +322,7 @@
                             "title": "GDM",
                             "description": "GDM for the provisional classification",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "alteredClassification": {
                             "title": "Classification",
@@ -355,13 +355,13 @@
                             "title": "Assessed variant",
                             "description": "Variant object for the pathogenicity",
                             "type": "string",
-                            "linkTo": "variant"
+                            "linkTo": "Variant"
                         },
                         "gdm": {
                             "title": "GDM",
                             "description": "GDM that's the object of the pathogenicity",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         }
                     }
                 },
@@ -396,31 +396,31 @@
                             "title": "GDM",
                             "description": "GDM for the object being assessed",
                             "type": "string",
-                            "linkTo": "gdm"
+                            "linkTo": "Gdm"
                         },
                         "experimental": {
                             "title": "Assessed experimental data",
                             "description": "Experimental data object being assessed",
                             "type": "string",
-                            "linkTo": "experimental"
+                            "linkTo": "Experimental"
                         },
                         "family": {
                             "title": "Assessed family segregation",
                             "description": "Family of segregation object being assessed",
                             "type": "string",
-                            "linkTo": "family"
+                            "linkTo": "Family"
                         },
                         "pathogenicity": {
                             "title": "Assessed pathogenicity",
                             "description": "Pathogenicity object being assessed",
                             "type": "string",
-                            "linkTo": "pathogenicity"
+                            "linkTo": "Pathogenicity"
                         },
                         "variant": {
                             "title": "Variant",
                             "description": "Variant associated with the given pathogenicity",
                             "type": "string",
-                            "linkTo": "variant"
+                            "linkTo": "Variant"
                         }
                     }
                 },
@@ -434,13 +434,13 @@
                             "title": "Variant",
                             "description": "Variant for the interpretation",
                             "type": "string",
-                            "linkTo": "variant"
+                            "linkTo": "Variant"
                         },
                         "disease": {
                             "title": "Disease",
                             "description": "Disease associated with the interpretation",
                             "type": "string",
-                            "linkTo": "orphaPhenotype"
+                            "linkTo": "OrphaPhenotype"
                         },
                         "modeInheritance": {
                             "title": "Mode of Inheritance",

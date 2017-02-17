@@ -247,6 +247,9 @@ def load_results(request, es_results, result):
     """
     Loads results to pass onto UI
     """
+    print('\nLOAD_RESULTS')
+    print(es_results)
+    print(result)
     hits = es_results['hits']['hits']
     frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
@@ -398,8 +401,11 @@ def search(context, request, search_type=None):
         size = 99999
 
     # Execute the query
+    print('search')
     es_results = es.search(body=query, index=es_index,
                            doc_type=doc_types or None, size=size)
+    print(es_results)
+    print('post-search')
 
     # Loading facets in to the results
     if 'aggregations' in es_results:
