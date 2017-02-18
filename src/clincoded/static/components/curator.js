@@ -1456,55 +1456,55 @@ var flatten = module.exports.flatten = function(obj, type) {
 
     if (obj) {
         switch(type) {
-            case 'gdm':
+            case 'Gdm':
                 flat = flattenGdm(obj);
                 break;
 
-            case 'annotation':
+            case 'Annotation':
                 flat = flattenAnnotation(obj);
                 break;
 
-            case 'group':
+            case 'Group':
                 flat = flattenGroup(obj);
                 break;
 
-            case 'family':
+            case 'Family':
                 flat = flattenFamily(obj);
                 break;
 
-            case 'individual':
+            case 'Individual':
                 flat = flattenIndividual(obj);
                 break;
 
-            case 'pathogenicity':
+            case 'Pathogenicity':
                 flat = flattenPathogenicity(obj);
                 break;
 
-            case 'experimental':
+            case 'Experimental':
                 flat = flattenExperimental(obj);
                 break;
 
-            case 'assessment':
+            case 'Assessment':
                 flat = flattenAssessment(obj);
                 break;
 
-            case 'provisionalClassification':
+            case 'ProvisionalClassification':
                 flat = flattenProvisional(obj);
                 break;
 
-            case 'provisional_variant':
+            case 'Provisional_variant':
                 flat = flattenProvisionalVariant(obj);
                 break;
 
-            case 'evidenceScore':
+            case 'EvidenceScore':
                 flat = flattenEvidenceScore(obj);
                 break;
 
-            case 'caseControl':
+            case 'CaseControl':
                 flat = flattenCaseControl(obj);
                 break;
 
-            case 'interpretation':
+            case 'Interpretation':
                 flat = flattenInterpretation(obj);
                 break;
 
