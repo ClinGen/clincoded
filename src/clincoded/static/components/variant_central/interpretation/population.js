@@ -22,6 +22,7 @@ var form = require('../../../libs/bootstrap/form');
 
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
+import { parseKeyValue } from '../helpers/parse_key_value';
 
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -679,22 +680,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     parseAlleleMyVariant(response) {
         let alleleData = {};
+        let chrom = parseKeyValue(response, 'chrom'),
+            hg19 = parseKeyValue(response, 'hg19'),
+            ref = parseKeyValue(response, 'ref'),
+            alt = parseKeyValue(response, 'alt');
         if (response) {
-            let chrom = response.chrom,
-                pos = response.hg19.start;
-            if (response.clinvar) {
-                // Try 'clinvar' as primary data object
-                let clinvar = response.clinvar;
-                alleleData = {chrom: chrom, pos: pos, ref: clinvar.ref, alt: clinvar.alt};
-            } else if (response.cadd) {
-                // Fallback to 'cadd' as alternative data object
-                let cadd = response.cadd;
-                alleleData = {chrom: chrom, pos: cadd.pos, ref: cadd.ref, alt: cadd.alt};
-            } else if (response.vcf) {
-                // Fallback to 'cadd' as alternative data object
-                let vcf = response.vcf;
-                alleleData = {chrom: chrom, pos: vcf.pos, ref: vcf.ref, alt: vcf.alt};
-            }
+            alleleData = {
+                chrom: (chrom && typeof chrom === 'string') ? chrom : null,
+                pos: (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null,
+                ref: (ref && typeof ref === 'string') ? ref : null,
+                alt: (alt && typeof alt === 'string') ? alt : null
+            };
         }
         return alleleData;
     },
@@ -837,7 +833,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         </div>
                         {!singleNucleotide ?
                             <div className="panel-body">
-                                <span>Data is currently only returned for single nucleotide variants. <a href={this.rendergnomADLinkout(this.props.ext_myVariantInfo)} target="_blank">Search gnomAD</a></span>
+                                <span>Data is currently only returned for single nucleotide variants. <a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD</a> for this variant.</span>
                             </div>
                         :
                             <div className="panel-body">

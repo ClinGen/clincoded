@@ -15,6 +15,7 @@ var queryKeyValue = globals.queryKeyValue;
 var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
+import { parseKeyValue } from './helpers/parse_key_value';
 import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
@@ -188,8 +189,10 @@ var VariantCurationHub = React.createClass({
                     this.parseMyVariantInfo(response);
                     // check dbsnfp data for bustamante query
                     let hgvsObj = {};
-                    hgvsObj.chrom = (response.chrom) ? response.chrom : null;
-                    hgvsObj.pos = (response.hg19.start) ? response.hg19.start : null;
+                    let chrom = parseKeyValue(response, 'chrom'),
+                        hg19 = parseKeyValue(response, 'hg19');
+                    hgvsObj.chrom = (chrom && typeof chrom === 'string') ? chrom : null;
+                    hgvsObj.pos = (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null;
                     if (response.dbnsfp) {
                         hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
                         return Promise.resolve(hgvsObj);
