@@ -61,15 +61,36 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                 nonTcga = myGeneInfo.exac.nontcga;
             return (
                 <tbody>
-                    <tr>
-                        <td>All ExAC</td><td>{this.parseFloatShort(allExac.p_li)}</td><td>{this.parseFloatShort(allExac.p_rec)}</td><td>{this.parseFloatShort(allExac.p_null)}</td>
-                    </tr>
-                    <tr>
-                        <td>Non-psych</td><td>{this.parseFloatShort(nonPsych.p_li)}</td><td>{this.parseFloatShort(nonPsych.p_rec)}</td><td>{this.parseFloatShort(nonPsych.p_null)}</td>
-                    </tr>
-                    <tr>
-                        <td>Non-TCGA</td><td>{this.parseFloatShort(nonTcga.p_li)}</td><td>{this.parseFloatShort(nonTcga.p_rec)}</td><td>{this.parseFloatShort(nonTcga.p_null)}</td>
-                    </tr>
+                    {allExac ?
+                        <tr>
+                            <td>All ExAC</td>
+                            <td>{this.parseFloatShort(allExac.p_li)}</td>
+                            <td>{this.parseFloatShort(allExac.p_rec)}</td>
+                            <td>{this.parseFloatShort(allExac.p_null)}</td>
+                            <td>{this.parseFloatShort(allExac.syn_z)}</td>
+                            <td>{this.parseFloatShort(allExac.mis_z)}</td>
+                        </tr>
+                    : null}
+                    {nonPsych ?
+                        <tr>
+                            <td>Non-psych</td>
+                            <td>{this.parseFloatShort(nonPsych.p_li)}</td>
+                            <td>{this.parseFloatShort(nonPsych.p_rec)}</td>
+                            <td>{this.parseFloatShort(nonPsych.p_null)}</td>
+                            <td>{this.parseFloatShort(nonPsych.syn_z)}</td>
+                            <td>{this.parseFloatShort(nonPsych.mis_z)}</td>
+                        </tr>
+                    : null}
+                    {nonTcga ?
+                        <tr>
+                            <td>Non-TCGA</td>
+                            <td>{this.parseFloatShort(nonTcga.p_li)}</td>
+                            <td>{this.parseFloatShort(nonTcga.p_rec)}</td>
+                            <td>{this.parseFloatShort(nonTcga.p_null)}</td>
+                            <td>{this.parseFloatShort(nonTcga.syn_z)}</td>
+                            <td>{this.parseFloatShort(nonTcga.mis_z)}</td>
+                        </tr>
+                    : null}
                 </tbody>
             );
         }
@@ -110,6 +131,8 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                         <th>pLI</th>
                                         <th>pRec</th>
                                         <th>pNull</th>
+                                        <th>syn Z</th>
+                                        <th>mis Z</th>
                                     </tr>
                                 </thead>
 
@@ -117,7 +140,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
 
                                 <tfoot>
                                     <tr className="footnote">
-                                        <td colSpan="4">
+                                        <td colSpan="6">
                                             <dl className="inline-dl clearfix">
                                                 <dt>pLI:</dt><dd>the probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous LOF variants)</dd>
                                             </dl>
@@ -126,6 +149,12 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>pNull:</dt><dd>the probability of being tolerant of both heterozygous and homozygous LOF variants</dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix">
+                                                <dt>syn Z:</dt><dd>corrected synonymous Z score</dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix">
+                                                <dt>mis Z:</dt><dd>corrected missense Z score</dd>
                                             </dl>
                                         </td>
                                     </tr>

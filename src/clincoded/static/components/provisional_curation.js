@@ -308,19 +308,16 @@ var ProvisionalCuration = React.createClass({
         /*****************************************************/
         /* Find all proband individuals that had been scored */
         /*****************************************************/
-        let probandTotal = []; // Total proband combined
-        let probandFamily = []; // Total probands associated with families from all annotations
-        let probandIndividual = []; // Total proband individuals from all annotations
-
+        let probandTotal = []; // all probands
         var proband_variants = [];
         let tempFamilyScraperValues = {};
-        let individualMatched = [];
         let caseControlTotal = [];
 
         // scan gdm
         let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
         annotations.forEach(annotation => {
             let groups, families, individuals, experimentals;
+            let individualMatched = [];
 
             // loop through groups
             groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
@@ -344,9 +341,9 @@ var ProvisionalCuration = React.createClass({
             scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
             individualMatched = tempFamilyScraperValues['individualMatched'];
 
-            // push all matched individuals from families and families of groups to probandFamily
+            // push all matched individuals from families and families of groups to probandTotal
             individualMatched.forEach(item => {
-                probandFamily.push(item);
+                probandTotal.push(item);
             });
 
             // loop through individuals
@@ -354,9 +351,9 @@ var ProvisionalCuration = React.createClass({
                 // get proband individuals
                 individualMatched = [];
                 individualMatched = this.individualScraper(annotation.individuals, individualMatched);
-                // push all matched individuals to probandIndividual
+                // push all matched individuals to probandTotal
                 individualMatched.forEach(item => {
-                    probandIndividual.push(item);
+                    probandTotal.push(item);
                 });
             }
 
@@ -445,8 +442,6 @@ var ProvisionalCuration = React.createClass({
             });
         });
 
-        // combine all probands
-        probandTotal = probandFamily.concat(probandIndividual);
         // scan probands
         probandTotal.forEach(proband => {
             proband.scores.forEach(score => {
@@ -640,7 +635,7 @@ var ProvisionalCuration = React.createClass({
                                                             </tr>
                                                             <tr>
                                                                 <td rowSpan="2" className="header">Autosomal Recessive Disorder</td>
-                                                                <td>Two variants (not prediced/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                                                <td>Two variants (not predicted/proven null) with some evidence of gene impact in <i>trans</i></td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
                                                                 <td rowSpan="2">{scoreTableValues['autosomalRecessivePointsCounted']}</td>
@@ -787,12 +782,13 @@ var ProvisionalCuration = React.createClass({
                                                                         wrapperClassName="col-sm-9" defaultValue={this.state.alteredClassification}
                                                                         groupClassName="form-group">
                                                                         <option value="No Selection">No Selection</option>
-                                                                        <option value="Definitive">Definitive</option>
-                                                                        <option value="Strong">Strong</option>
-                                                                        <option value="Moderate">Moderate</option>
-                                                                        <option value="Limited">Limited</option>
+                                                                        {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
+                                                                        {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
+                                                                        {autoClassification === 'Moderate' ? null : <option value="Moderate">Moderate</option>}
+                                                                        {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
                                                                         <option value="Disputed">Disputed</option>
                                                                         <option value="Refuted">Refuted</option>
+                                                                        <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
                                                                     </Input>
                                                                 </td>
                                                             </tr>
