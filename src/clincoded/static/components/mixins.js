@@ -102,6 +102,7 @@ module.exports.Auth0 = {
         // Login / logout actions must be deferred until Auth0 is ready.
         var session_cookie = this.extractSessionCookie();
         var session = this.parseSessionCookie(session_cookie);
+        this.setState({loadingComplete: true});
         if (session['auth.userid']) {
             this.fetchSessionProperties();
         }
