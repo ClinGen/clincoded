@@ -2833,7 +2833,7 @@ var ExperimentalAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ExperimentalAddHistory, 'experimental', 'add');
+globals.history_views.register(ExperimentalAddHistory, 'Experimental', 'add');
 
 
 // Display a history item for modifying experimental data
@@ -2852,7 +2852,7 @@ var ExperimentModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
+globals.history_views.register(ExperimentModifyHistory, 'Experimental', 'modify');
 
 
 // Display a history item for deleting experimental data
@@ -2870,4 +2870,4 @@ var ExperimentDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ExperimentDeleteHistory, 'experimental', 'delete');
+globals.history_views.register(ExperimentDeleteHistory, 'Experimental', 'delete');

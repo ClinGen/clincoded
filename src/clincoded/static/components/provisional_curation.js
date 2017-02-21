@@ -1053,7 +1053,7 @@ var ProvisionalAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ProvisionalAddModHistory, 'provisionalClassification', 'add');
+globals.history_views.register(ProvisionalAddModHistory, 'ProvisionalClassification', 'add');
 
 
 // Display a history item for modifying a family
@@ -1074,7 +1074,7 @@ var ProvisionalModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ProvisionalModifyHistory, 'provisionalClassification', 'modify');
+globals.history_views.register(ProvisionalModifyHistory, 'ProvisionalClassification', 'modify');
 
 
 // Display a history item for deleting a family
@@ -1084,4 +1084,4 @@ var ProvisionalDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ProvisionalDeleteHistory, 'provisionalClassification', 'delete');
+globals.history_views.register(ProvisionalDeleteHistory, 'ProvisionalClassification', 'delete');

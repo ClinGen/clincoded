@@ -281,7 +281,7 @@ var PmidGdmAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PmidGdmAddHistory, 'article', 'add');
+globals.history_views.register(PmidGdmAddHistory, 'Article', 'add');
 
 
 // Display a history item for deleting a PMID from a GDM
@@ -291,4 +291,4 @@ var PmidGdmDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
+globals.history_views.register(PmidGdmDeleteHistory, 'Article', 'delete');

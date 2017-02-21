@@ -2363,7 +2363,7 @@ var FamilyAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(FamilyAddHistory, 'family', 'add');
+globals.history_views.register(FamilyAddHistory, 'Family', 'add');
 
 
 // Display a history item for modifying a family
@@ -2382,7 +2382,7 @@ var FamilyModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(FamilyModifyHistory, 'family', 'modify');
+globals.history_views.register(FamilyModifyHistory, 'Family', 'modify');
 
 
 // Display a history item for deleting a family
@@ -2405,4 +2405,4 @@ var FamilyDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(FamilyDeleteHistory, 'family', 'delete');
+globals.history_views.register(FamilyDeleteHistory, 'Family', 'delete');

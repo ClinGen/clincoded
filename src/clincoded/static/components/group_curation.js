@@ -1043,7 +1043,7 @@ var GroupAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GroupAddHistory, 'group', 'add');
+globals.history_views.register(GroupAddHistory, 'Group', 'add');
 
 
 // Display a history item for modifying a group
@@ -1062,7 +1062,7 @@ var GroupModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GroupModifyHistory, 'group', 'modify');
+globals.history_views.register(GroupModifyHistory, 'Group', 'modify');
 
 
 // Display a history item for deleting a group
@@ -1085,4 +1085,4 @@ var GroupDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GroupDeleteHistory, 'group', 'delete');
+globals.history_views.register(GroupDeleteHistory, 'Group', 'delete');

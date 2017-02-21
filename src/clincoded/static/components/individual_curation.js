@@ -2161,7 +2161,7 @@ var IndividualAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(IndividualAddHistory, 'individual', 'add');
+globals.history_views.register(IndividualAddHistory, 'Individual', 'add');
 
 
 // Display a history item for modifying an individual
@@ -2180,7 +2180,7 @@ var IndividualModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(IndividualModifyHistory, 'individual', 'modify');
+globals.history_views.register(IndividualModifyHistory, 'Individual', 'modify');
 
 
 // Display a history item for deleting an individual
@@ -2198,4 +2198,4 @@ var IndividualDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(IndividualDeleteHistory, 'individual', 'delete');
+globals.history_views.register(IndividualDeleteHistory, 'Individual', 'delete');

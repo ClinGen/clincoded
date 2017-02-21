@@ -285,4 +285,4 @@ var GdmAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GdmAddHistory, 'gdm', 'add');
+globals.history_views.register(GdmAddHistory, 'Gdm', 'add');

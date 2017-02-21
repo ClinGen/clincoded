@@ -585,8 +585,8 @@ var PathogenicityAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
-globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
+globals.history_views.register(PathogenicityAddModHistory, 'Pathogenicity', 'add');
+globals.history_views.register(PathogenicityAddModHistory, 'Pathogenicity', 'modify');
 
 
 // Display a history item for deleting variant pathogenicities
@@ -596,7 +596,7 @@ var PathogenicityDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');
+globals.history_views.register(PathogenicityDeleteHistory, 'Pathogenicity', 'delete');
 
 
 // Display a history item for adding a variant
