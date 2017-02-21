@@ -258,7 +258,7 @@ var InterpretationAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
+globals.history_views.register(InterpretationAddHistory, 'Interpretation', 'add');
 
 // Display a history item for adding an individual
 var InterpretationModifyHistory = React.createClass({
@@ -290,7 +290,7 @@ var InterpretationModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
+globals.history_views.register(InterpretationModifyHistory, 'Interpretation', 'modify');
 
 
 // Map Interpretation statuses from

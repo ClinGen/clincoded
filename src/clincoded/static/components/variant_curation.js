@@ -614,7 +614,7 @@ var VariantAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(VariantAddHistory, 'variant', 'add');
+globals.history_views.register(VariantAddHistory, 'Variant', 'add');
 
 
 // Display a history item for adding a variant
@@ -624,4 +624,4 @@ var VariantDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(VariantDeleteHistory, 'variant', 'delete');
+globals.history_views.register(VariantDeleteHistory, 'Variant', 'delete');

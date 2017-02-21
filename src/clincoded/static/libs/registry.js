@@ -37,7 +37,7 @@ class Registry {
 
         var provided = this.providedBy(obj);
         for (var i = 0, len = provided.length; i < len; i++) {
-            var view = views[provided[i].toLowerCase()];
+            var view = views[provided[i]];
             if (view) {
                 return view;
             }

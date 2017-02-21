@@ -164,6 +164,7 @@ module.exports.Auth0 = {
         if (!(http_method === 'GET' || http_method === 'HEAD')) {
             var headers = options.headers = _.extend({}, options.headers);
             var session = this.state.session;
+            console.log('trigger');
             if (session && session._csrft_ && !options.xcsrf_disable) {
                 headers['X-CSRF-Token'] = session._csrft_;
             }
@@ -173,9 +174,14 @@ module.exports.Auth0 = {
         if (url_hash > -1) {
             url = url.slice(0, url_hash);
         }
+        console.log(url);
+        console.log(options);
         var request = fetch(url, options);
+        console.log('post request');
         request.xhr_begin = 1 * new Date();
         request.then(response => {
+            console.log('request then');
+            console.log(response);
             request.xhr_end = 1 * new Date();
             var stats_header = response.headers.get('X-Stats') || '';
             request.server_stats = require('querystring').parse(stats_header);

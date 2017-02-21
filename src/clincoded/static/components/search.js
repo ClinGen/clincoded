@@ -85,7 +85,7 @@ var Item = module.exports.Item = React.createClass({
         );
     }
 });
-globals.listing_views.register(Item, 'item');
+globals.listing_views.register(Item, 'Item');
 
 // Display one antibody status indicator
 var StatusIndicator = React.createClass({
