@@ -978,7 +978,7 @@ var DiseaseRecordHeader = React.createClass({
                                     </a>
                                 : null}&nbsp;
                                 {this.props.updateOmimId ?
-                                    <AddOmimIdModal gdm={gdm} updateOmimId={this.props.updateOmimId} addEdit={addEdit} />
+                                    <AddOmimIdModal gdm={gdm} updateOmimId={this.props.updateOmimId} addEdit={addEdit} omimid={this.props.omimId ? this.props.omimId : ''} />
                                 : null}
                             </dd>
                         </dl>
@@ -997,13 +997,20 @@ var AddOmimIdModal = React.createClass({
     propTypes: {
         gdm: React.PropTypes.object.isRequired, // GDM being affected
         updateOmimId: React.PropTypes.func.isRequired, // Function to call when we have a new OMIM ID
-        addEdit: React.PropTypes.string.isRequired
+        addEdit: React.PropTypes.string.isRequired,
+        omimid: React.PropTypes.string
     },
 
     getInitialState() {
         return {
-            omimid: ''
+            omimid: this.props.omimid
         };
+    },
+
+    componentWillReceiveProps(nextProps)  {
+        if (nextProps.omimid) {
+            this.setState({omimid: nextProps.omimid});
+        }
     },
 
     // Form content validation
