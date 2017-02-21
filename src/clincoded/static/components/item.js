@@ -71,7 +71,7 @@ var Item = module.exports.Item = React.createClass({
     }
 });
 
-globals.content_views.register(Item, 'item');
+globals.content_views.register(Item, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -94,7 +94,7 @@ var Panel = module.exports.Panel = React.createClass({
     }
 });
 
-globals.panel_views.register(Panel, 'item');
+globals.panel_views.register(Panel, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -108,7 +108,7 @@ var title = module.exports.title = function (props) {
     return context.title || context.name || context.accession || context['@id'];
 };
 
-globals.listing_titles.register(title, 'item');
+globals.listing_titles.register(title, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -275,5 +275,5 @@ var ItemEdit = module.exports.ItemEdit = React.createClass({
     }
 });
 
-globals.content_views.register(ItemEdit, 'item', 'edit');
-globals.content_views.register(ItemEdit, 'collection', 'add');
+globals.content_views.register(ItemEdit, 'Item', 'edit');
+globals.content_views.register(ItemEdit, 'Collection', 'add');

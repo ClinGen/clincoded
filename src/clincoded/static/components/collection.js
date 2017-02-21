@@ -36,7 +36,7 @@ var Collection = module.exports.Collection = React.createClass({
     }
 });
 
-globals.content_views.register(Collection, 'collection');
+globals.content_views.register(Collection, 'Collection');
 
 
 class Cell {
