@@ -593,27 +593,27 @@ var GroupName = function() {
 // Common diseases group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var GroupCommonDiseases = function() {
-    var group = this.state.group;
+    let group = this.state.group;
+    let orphanetidVal = group && group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : '';
+    let hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : '';
+    let nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : '';
 
     return (
         <div className="row">
             <div className="col-sm-7 col-sm-offset-5">
                 <p className="alert alert-warning">Please enter an Orphanet ID(s) and/or HPO ID(s) and/or Phenotype free text (required).</p>
             </div>
-            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15"
-                value={group && group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : ''}
+            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA15"
                 error={this.getFormError('orphanetid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="text" ref="hpoid" label={<LabelHpoId />} placeholder="e.g. HP:0010704, HP:0030300"
-                value={group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : ''}
+            <Input type="text" ref="hpoid" label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
                 error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['orphanetid', 'hpoid', 'phenoterms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
-            <Input type="text" ref="nothpoid" label={<LabelHpoId not />} placeholder="e.g. HP:0010704, HP:0030300"
-                value={group && group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : ''}
+            <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={group && group.termsInElimination ? group.termsInElimination : ''}
@@ -746,6 +746,7 @@ var GroupDemographics = function() {
 // as the calling component.
 var GroupProbandInfo = function() {
     var group = this.state.group;
+    var othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : '';
 
     return(
         <div className="row">
@@ -773,8 +774,8 @@ var GroupProbandInfo = function() {
                 value={group && group.numberOfIndividualsWithVariantInOtherGene ? group.numberOfIndividualsWithVariantInOtherGene : ''}
                 error={this.getFormError('indvariantothercount')} clearError={this.clrFormErrors.bind(null, 'indvariantothercount')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
-            <Input type="text" ref="othergenevariants" label={<LabelOtherGenes />} inputClassName="uppercase-input" placeholder="e.g. DICER1, SMAD3"
-                value={group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : ''}
+            <Input type="text" ref="othergenevariants" label={<LabelOtherGenes />} inputClassName="uppercase-input"
+                value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
                 error={this.getFormError('othergenevariants')} clearError={this.clrFormErrors.bind(null, 'othergenevariants')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
         </div>
@@ -792,12 +793,8 @@ var LabelOtherGenes = React.createClass({
 // Additional Information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var GroupAdditional = function() {
-    var otherpmidsVal;
     var group = this.state.group;
-    if (group) {
-        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
-    }
-
+    var otherpmidsVal = group && group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
     return (
         <div className="row">
