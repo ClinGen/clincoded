@@ -149,6 +149,7 @@ def session_properties(request):
     }
     if 'auth.userid' in request.session:
         properties['auth.userid'] = request.session['auth.userid']
+        properties['_csrft_'] = request.session.get_csrf_token()
     return properties
     # return request.embed(request.resource_path(user), as_user=True)
 

@@ -615,8 +615,12 @@ function clinvarSubmitResource() {
                 });
             } else {
                 // variation is new to our db
+                console.log('POSTING TO VARIANTS');
+                console.log(this.state.session);
                 this.postRestData('/variants/', this.state.tempResource).then(result => {
                     // record the user adding a new variant entry
+                    console.log(result);
+                    console.log(this.state.session);
                     this.recordHistory('add', result['@graph'][0]).then(history => {
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
                     });
