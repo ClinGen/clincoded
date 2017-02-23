@@ -173,9 +173,6 @@ module.exports.Auth0 = {
         if (url_hash > -1) {
             url = url.slice(0, url_hash);
         }
-        console.log('PRE FETCH');
-        //console.log(this.state.session);
-        //console.log(this.props.session_cookie);
         var request = fetch(url, options);
         request.xhr_begin = 1 * new Date();
         request.then(response => {
@@ -184,15 +181,9 @@ module.exports.Auth0 = {
             request.server_stats = require('querystring').parse(stats_header);
             request.etag = response.headers.get('ETag');
             var session_cookie = this.extractSessionCookie();
-
-            console.log('PRE EXTRACT');
-            //console.log(session_cookie);
             if (this.props.session_cookie !== session_cookie) {
                 this.setProps({session_cookie: session_cookie});
             }
-            console.log('POST FETCH');
-            //console.log(this.state.session);
-            //console.log(this.props.session_cookie);
         });
         return request;
     },
@@ -205,19 +196,13 @@ module.exports.Auth0 = {
     componentWillReceiveProps: function (nextProps) {
         if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
             var nextState = {};
-            console.log('=THIS STATE');
-            console.log(this.state.session);
             nextState.session = this.parseSessionCookie(nextProps.session_cookie);
-            console.log('=NEXT STATE');
-            console.log(nextState.session);
             if (nextState.session['auth.userid'] !== (this.state.session && this.state.session['auth.userid'])) {
-                console.log('firing fetchSessionProperties');
                 this.fetchSessionProperties();
             }
-            console.log('componentWillReceiveProps session change');
-            if ('edits' in nextState.session) {
-                console.log('edits found');
-            } else {
+            if (!('edits' in nextState.session)) {
+                // sometimes the parseSessionCookie returns a weird object with no user_properties
+                // but an edits list. Only update the state if's the former type of object
                 this.setState(nextState);
             }
         }
@@ -236,12 +221,6 @@ module.exports.Auth0 = {
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
                     console.log('changed state: %s', key);
-                    if (key === 'session') {
-                        console.log('==SESSION==');
-                        console.log(prevState['session']);
-                        console.log(this.state.session);
-                        console.log('/==SESSION==');
-                    }
                 }
             }
         }
@@ -280,7 +259,6 @@ module.exports.Auth0 = {
             return response.json();
         })
         .then(session => {
-            console.log('fetchSessionProperties session change');
             this.setState({session: session});
         });
     },
@@ -303,7 +281,6 @@ module.exports.Auth0 = {
             return response.json();
         })
         .then(session => {
-            console.log('handleAuth0login session change');
             this.setState({session: session});
             this.sessionPropertiesRequest = null;
             var next_url = window.location.href;
