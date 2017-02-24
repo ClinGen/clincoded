@@ -337,15 +337,15 @@ var ExperimentalCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'experimental':
+                    case 'Experimental':
                         stateObj.experimental = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 

@@ -95,7 +95,7 @@ var ProvisionalCuration = React.createClass({
 
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
                     default:

@@ -81,15 +81,15 @@ var GroupCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'group':
+                    case 'Group':
                         stateObj.group = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 

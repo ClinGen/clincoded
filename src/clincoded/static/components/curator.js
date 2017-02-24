@@ -90,7 +90,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
-        if (gdm && gdm['@type'][0] === 'gdm') {
+        if (gdm && gdm['@type'][0] === 'Gdm') {
             var gene = this.props.gdm.gene;
             var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
