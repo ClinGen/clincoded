@@ -57,15 +57,15 @@ var CaseControlSubmit = module.exports.CaseControlSubmit = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'caseControl':
+                    case 'CaseControl':
                         stateObj.caseControl = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 

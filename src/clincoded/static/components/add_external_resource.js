@@ -375,7 +375,7 @@ function pubmedValidateForm() {
         this.setState({submitBusy: false});
     }
     // valid if parent object is GDM and input isn't already associated with it
-    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'gdm') {
+    if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'Gdm') {
         for (var i = 0; i < this.props.parentObj.annotations.length; i++) {
             if (this.props.parentObj.annotations[i].article.pmid == formInput) {
                 valid = false;

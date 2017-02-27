@@ -429,7 +429,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
                 if (associations) {
                     // Sort by probands first
                     var sortedAssociations = _(associations).sortBy(function(association) {
-                        if (association['@type'][0] === 'individual') {
+                        if (association['@type'][0] === 'Individual') {
                             return association.proband ? 0 : 1;
                         }
                         return 1;
@@ -2294,7 +2294,7 @@ var DeleteButtonModal = React.createClass({
             deletedItem.status = 'deleted';
 
             // When delete case control
-            if (item['@type'][0] === 'caseControl') {
+            if (item['@type'][0] === 'CaseControl') {
                 // Set status 'deleted' to case cohort
                 let uuid = item.caseCohort['@id'];
                 let deletedItem = flatten(item.caseCohort, 'group');
@@ -2378,24 +2378,24 @@ var DeleteButtonModal = React.createClass({
             return this.getRestData(parentUuid, null, true).then(parent => {
                 // flatten parent object and remove link to deleted item as appropriate
                 deletedParent = flatten(parent);
-                if (parent['@type'][0] == 'annotation') {
-                    if (deletedItemType == 'group') {
+                if (parent['@type'][0] == 'Annotation') {
+                    if (deletedItemType == 'Group') {
                         deletedParent.groups = _.without(deletedParent.groups, itemUuid);
-                    } else if (deletedItemType == 'family') {
+                    } else if (deletedItemType == 'Family') {
                         deletedParent.families = _.without(deletedParent.families, itemUuid);
-                    } else if (deletedItemType == 'individual') {
+                    } else if (deletedItemType == 'Individual') {
                         deletedParent.individuals = _.without(deletedParent.individuals, itemUuid);
-                    } else if (deletedItemType == 'experimental') {
+                    } else if (deletedItemType == 'Experimental') {
                         deletedParent.experimentalData = _.without(deletedParent.experimentalData, itemUuid);
-                    } else if (deletedItemType == 'caseControl') {
+                    } else if (deletedItemType == 'CaseControl') {
                         deletedParent.caseControlStudies = _.without(deletedParent.caseControlStudies, itemUuid);
                     }
                 } else {
-                    if (deletedItemType == 'family') {
+                    if (deletedItemType == 'Family') {
                         deletedParent.familyIncluded = _.without(deletedParent.familyIncluded, itemUuid);
-                    } else if (deletedItemType == 'individual') {
+                    } else if (deletedItemType == 'Individual') {
                         deletedParent.individualIncluded = _.without(deletedParent.individualIncluded, itemUuid);
-                        if (parent['@type'][0] == 'family') {
+                        if (parent['@type'][0] == 'Family') {
                             // Empty variants of parent object if target item is individual and parent is family
                             deletedParent.segregation.variants = [];
                         }
@@ -2435,18 +2435,18 @@ var DeleteButtonModal = React.createClass({
         var itemLabel;
         // generate custom messages and generate display tree for group and family delete confirm modals.
         // generic message for everything else.
-        if (this.props.item['@type'][0] == 'group') {
+        if (this.props.item['@type'][0] == 'Group') {
             message = <p><strong>Warning</strong>: Deleting this Group will also delete any associated families and individuals (see any Families or Individuals associated with the Group under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
-        } else if (this.props.item['@type'][0] == 'family') {
+        } else if (this.props.item['@type'][0] == 'Family') {
             message = <p><strong>Warning</strong>: Deleting this Family will also delete any associated individuals (see any Individuals associated with the Family under its name, bolded below).</p>;
             tree = this.recurseItem(this.props.item, 0, 'display');
-        } else if (this.props.item['@type'][0] == 'individual') {
+        } else if (this.props.item['@type'][0] == 'Individual') {
             let individual = this.props.item;
             if (individual.variants.length && individual.associatedFamilies.length) {
                 message = <p><strong>Warning</strong>: Deleting this individual will remove the association between its variants and the Family with which the Individual is associated.</p>;
             }
-        } else if (this.props.item['@type'][0] == 'caseControl') {
+        } else if (this.props.item['@type'][0] == 'CaseControl') {
             itemLabel = this.props.item.label;
         }
         return (
