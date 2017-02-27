@@ -9,7 +9,10 @@ import random
 
 pytest_plugins = [
     'clincoded.tests.datafixtures',
-    'clincoded.tests.layers',
+    'snovault.tests.serverfixtures',
+    'snovault.tests.testappfixtures',
+    'snovault.tests.toolfixtures',
+    'snovault.tests.pyramidfixtures',
 ]
 
 _app_settings = {
@@ -64,10 +67,20 @@ def engine_url(request):
 
 
 @fixture(scope='session')
-def app_settings(request, server_host_port, connection):
+def app_settings(request, wsgi_server_host_port, conn, DBSession):
+    from snovault import DBSESSION
     settings = _app_settings.copy()
-    settings['persona.audiences'] = 'http://%s:%s' % server_host_port
+    settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    settings[DBSESSION] = DBSession
     return settings
+
+
+@fixture(scope='session')
+def app(app_settings):
+    '''WSGI application level functional testing.
+    '''
+    from clincoded import main
+    return main({}, **app_settings)
 
 
 def pytest_configure():
