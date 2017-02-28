@@ -2565,7 +2565,7 @@ table.login-users-interpretations {
         label>span {
             position: relative;
 
-            &>span:last-child {
+            .required-field {
                 position: absolute;
                 top: -38px;
                 left: 4px;
