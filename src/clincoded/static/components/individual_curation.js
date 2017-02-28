@@ -991,7 +991,8 @@ var IndividualName = function(displayNote) {
             {!this.getAssociation('individual') && !this.getAssociation('associatedFamilies') && !this.getAssociation('associatedGroups') ?
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Individual is part of a Family or a Group, please curate that Group or Family first and then add the Individual as a member.</p></div>
             : null}
-            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} value={individual && individual.label} handleChange={this.handleChange}
+            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} handleChange={this.handleChange}
+                value={individual && individual.label ? individual.label : ''}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
@@ -1059,15 +1060,13 @@ var IndividualCommonDiseases = function() {
     var individual = this.state.individual;
     var family = this.state.family;
     var group = this.state.group;
-    var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups, associatedFamilies;
+    var associatedGroups, associatedFamilies;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If we're editing an individual, make editable values of the complex properties
-    if (individual) {
-        orphanetidVal = individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
-        hpoidVal = individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join(', ') : null;
-        nothpoidVal = individual.hpoIdInElimination ? individual.hpoIdInElimination.join(', ') : null;
-    }
+    let orphanetidVal = individual && individual.diagnosis ? individual.diagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : '';
+    let hpoidVal = individual && individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join(', ') : '';
+    let nothpoidVal = individual && individual.hpoIdInElimination ? individual.hpoIdInElimination.join(', ') : '';
 
     // Make a list of diseases from the group, either from the given group,
     // or the individual if we're editing one that has associated groups.
@@ -1127,7 +1126,8 @@ var IndividualCommonDiseases = function() {
                     curator.renderPhenotype(associatedFamilies, 'Individual', 'ft') : curator.renderPhenotype(null, 'Individual', 'ft')
                 )
             }
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5" value={individual && individual.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="5"
+                value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
             <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
@@ -1143,7 +1143,8 @@ var IndividualCommonDiseases = function() {
             <Input type="text" ref="nothpoid" label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5" value={individual && individual.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="5"
+                value={individual && individual.termsInElimination ? individual.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -1195,7 +1196,8 @@ var IndividualDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="sex" label="Sex:" defaultValue="none" value={individual && individual.sex}
+            <Input type="select" ref="sex" label="Sex:" defaultValue="none"
+                value={individual && individual.sex ? individual.sex : 'none'}
                 error={this.getFormError('sex')} clearError={this.clrFormErrors.bind(null, 'sex')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                 <option value="none">No Selection</option>
@@ -1209,7 +1211,8 @@ var IndividualDemographics = function() {
                 <option value="Unknown">Unknown</option>
                 <option value="Other">Other</option>
             </Input>
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={individual && individual.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none"
+                value={individual && individual.countryOfOrigin ? individual.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1217,7 +1220,8 @@ var IndividualDemographics = function() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={individual && individual.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none"
+                value={individual && individual.ethnicity ? individual.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1225,7 +1229,8 @@ var IndividualDemographics = function() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={individual && individual.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none"
+                value={individual && individual.race ? individual.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1239,7 +1244,8 @@ var IndividualDemographics = function() {
             </Input>
             <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
             <div className="demographics-age-range">
-                <Input type="select" ref="agetype" label="Type:" defaultValue="none" value={individual && individual.ageType}
+                <Input type="select" ref="agetype" label="Type:" defaultValue="none"
+                    value={individual && individual.ageType ? individual.ageType : 'none'}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -1248,10 +1254,12 @@ var IndividualDemographics = function() {
                     <option value="Diagnosis">Diagnosis</option>
                     <option value="Death">Death</option>
                 </Input>
-                <Input type="number" ref="agevalue" label="Value:" value={individual && individual.ageValue} maxVal={150}
+                <Input type="number" ref="agevalue" label="Value:" maxVal={150}
+                    value={individual && individual.ageValue ? individual.ageValue : ''}
                     error={this.getFormError('agevalue')} clearError={this.clrFormErrors.bind(null, 'agevalue')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none" value={individual && individual.ageUnit}
+                <Input type="select" ref="ageunit" label="Unit:" defaultValue="none"
+                    value={individual && individual.ageUnit ? individual.ageUnit : 'none'}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -1445,7 +1453,7 @@ var IndividualVariantInfo = function() {
                                         </div>
                                     </div>
                                 : null}
-                                <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
+                                <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''}
                                     error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                                 <div className="row">
@@ -1541,18 +1549,16 @@ var LabelOtherVariant = React.createClass({
 // Additional Information family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var IndividualAdditional = function() {
-    var otherpmidsVal;
     var individual = this.state.individual;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If editing an individual, get its existing articles
-    if (individual) {
-        otherpmidsVal = individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
-    }
+    let otherpmidsVal = individual && individual.otherPMIDs ? individual.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfoindividual" label={<LabelAdditional probandLabel={probandLabel} />} rows="5" value={individual && individual.additionalInformation}
+            <Input type="textarea" ref="additionalinfoindividual" label={<LabelAdditional probandLabel={probandLabel} />} rows="5"
+                value={individual && individual.additionalInformation ? individual.additionalInformation : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="otherpmids" label={<LabelOtherPmids probandLabel={probandLabel} />} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
