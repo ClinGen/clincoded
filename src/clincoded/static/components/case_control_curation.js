@@ -1642,7 +1642,7 @@ var CaseControlViewer = React.createClass({
                                     <div>
                                         <dt>Other genes found to have variants in them</dt>
                                         <dd>{caseCohort.otherGenes && caseCohort.otherGenes.map(function(gene, i) {
-                                            return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                            return <span key={gene.symbol + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
                                         })}</dd>
                                     </div>
 
@@ -1653,7 +1653,7 @@ var CaseControlViewer = React.createClass({
 
                                     <dt>Other PMID(s) that report evidence about this same group</dt>
                                     <dd>{caseCohort.otherPMIDs && caseCohort.otherPMIDs.map(function(article, i) {
-                                        return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                        return <span key={article.pmid + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                                     })}</dd>
                                 </dl>
                             </Panel>
@@ -1721,6 +1721,8 @@ var CaseControlViewer = React.createClass({
                                         <dt>Race</dt>
                                         <dd>{controlCohort.race}</dd>
                                     </div>
+
+                                    <div><dd>&nbsp;</dd></div>
 
                                     <div>
                                         <dt>Age Range</dt>
@@ -1807,7 +1809,7 @@ var CaseControlViewer = React.createClass({
                                     <div className="other-genes">
                                         <dt>Other genes found to have variants in them</dt>
                                         <dd>{controlCohort.otherGenes && controlCohort.otherGenes.map(function(gene, i) {
-                                            return <span key={gene.symbol}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                            return <span key={gene.symbol + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
                                         })}</dd>
                                     </div>
 
@@ -1818,7 +1820,7 @@ var CaseControlViewer = React.createClass({
 
                                     <dt>Other PMID(s) that report evidence about this same group</dt>
                                     <dd>{controlCohort.otherPMIDs && controlCohort.otherPMIDs.map(function(article, i) {
-                                        return <span key={article.pmid}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                        return <span key={article.pmid + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
                                     })}</dd>
                                 </dl>
                             </Panel>
