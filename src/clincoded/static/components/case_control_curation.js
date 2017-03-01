@@ -1039,7 +1039,8 @@ function CaseControlName() {
 
     return (
         <div className="row section section-label">
-            <Input type="text" ref="caseControlName" label="Case-Control Label" value={caseControl && caseControl.label} maxLength="60" handleChange={this.handleChange}
+            <Input type="text" ref="caseControlName" label="Case-Control Label" maxLength="60" handleChange={this.handleChange}
+                value={caseControl && caseControl.label ? caseControl.label : ''}
                 error={this.getFormError('caseControlName')} clearError={this.clrFormErrors.bind(null, 'caseControlName')}
                 labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" required />
         </div>
@@ -1065,7 +1066,8 @@ function GroupName(groupType) {
 
     return (
         <div className="row section section-label">
-            <Input type="text" ref={groupName} label={label} value={group && group.label} maxLength="60" handleChange={this.handleChange}
+            <Input type="text" ref={groupName} label={label} maxLength="60" handleChange={this.handleChange}
+                value={group && group.label ? group.label : ''}
                 error={this.getFormError(groupName)} clearError={this.clrFormErrors.bind(null, groupName)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote(type)}</p>
@@ -1076,7 +1078,6 @@ function GroupName(groupType) {
 // Common diseases group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupCommonDiseases(groupType) {
-    let orphanetidVal, hpoidVal, nothpoidVal;
     let inputDisabled = (groupType === 'control-cohort') ? true : false;
     let orphanetId, hpoId, phenoTerms, nothpoId, notphenoTerms, group, cohortLabel;
     if (groupType === 'case-cohort') {
@@ -1097,11 +1098,10 @@ function GroupCommonDiseases(groupType) {
         cohortLabel = 'Control Cohort';
         group = this.state.controlGroup;
     }
-    if (group) {
-        orphanetidVal = group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
-        hpoidVal = group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : null;
-        nothpoidVal = group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : null;
-    }
+
+    let orphanetidVal = group && group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : '';
+    let hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : '';
+    let nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : '';
 
     return (
         <div className="row section section-disease">
@@ -1115,14 +1115,16 @@ function GroupCommonDiseases(groupType) {
             <Input type="text" ref={hpoId} label={<LabelHpoId />} value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
                 error={this.getFormError(hpoId)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref={phenoTerms} label={<LabelPhenoTerms />} rows="5" value={group && group.termsInDiagnosis} inputDisabled={inputDisabled}
+            <Input type="textarea" ref={phenoTerms} label={<LabelPhenoTerms />} rows="5" inputDisabled={inputDisabled}
+                value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
                 error={this.getFormError(phenoTerms)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in {cohortLabel}</em> if they are specifically noted in the paper.</p>
             <Input type="text" ref={nothpoId} label={<LabelHpoId not />} value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
                 error={this.getFormError(nothpoId)} clearError={this.clrFormErrors.bind(null, nothpoId)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref={notphenoTerms} label={<LabelPhenoTerms not />} rows="5" value={group && group.termsInElimination} inputDisabled={inputDisabled}
+            <Input type="textarea" ref={notphenoTerms} label={<LabelPhenoTerms not />} rows="5" inputDisabled={inputDisabled}
+                value={group && group.termsInElimination ? group.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -1200,13 +1202,16 @@ function GroupDemographics(groupType) {
     return (
         <div className="row section section-demographics">
             <h3><i className="icon icon-chevron-right"></i> Demographics <span className="label label-group">{headerLabel}</span></h3>
-            <Input type="number" inputClassName="integer-only" ref={maleCount} label="Number of males:" value={group && group.numberOfMale}
+            <Input type="number" inputClassName="integer-only" ref={maleCount} label="Number of males:"
+                value={group && group.numberOfMale ? group.numberOfMale : ''}
                 error={this.getFormError(maleCount)} clearError={this.clrFormErrors.bind(null, maleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" inputClassName="integer-only" ref={femaleCount} label="Number of females:" value={group && group.numberOfFemale}
+            <Input type="number" inputClassName="integer-only" ref={femaleCount} label="Number of females:"
+                value={group && group.numberOfFemale ? group.numberOfFemale : ''}
                 error={this.getFormError(femaleCount)} clearError={this.clrFormErrors.bind(null, femaleCount)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref={country} label="Country of Origin:" defaultValue="none" value={group && group.countryOfOrigin}
+            <Input type="select" ref={country} label="Country of Origin:" defaultValue="none"
+                value={group && group.countryOfOrigin ? group.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1214,7 +1219,8 @@ function GroupDemographics(groupType) {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref={ethnicity} label="Ethnicity:" defaultValue="none" value={group && group.ethnicity}
+            <Input type="select" ref={ethnicity} label="Ethnicity:" defaultValue="none"
+                value={group && group.ethnicity ? group.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1222,7 +1228,8 @@ function GroupDemographics(groupType) {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            <Input type="select" ref={race} label="Race:" defaultValue="none" value={group && group.race}
+            <Input type="select" ref={race} label="Race:" defaultValue="none"
+                value={group && group.race ? group.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1237,7 +1244,8 @@ function GroupDemographics(groupType) {
             <h4 className="col-sm-7 col-sm-offset-5">Age Range</h4>
             <div className="demographics-age-range">
                 {groupType === 'case-cohort' ?
-                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
+                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none"
+                        value={group && group.ageRangeType ? group.ageRangeType : 'none'}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -1247,18 +1255,22 @@ function GroupDemographics(groupType) {
                         <option value="Death">Death</option>
                     </Input>
                     :
-                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" value={group && group.ageRangeType}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group invisible-placeholder" inputDisabled={true}>
+                    <Input type="select" ref={ageRangeType} label="Type:" defaultValue="none" inputDisabled={true}
+                        value={group && group.ageRangeType ? group.ageRangeType : 'none'}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group invisible-placeholder">
                     </Input>
                 }
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
                     <Input type="number" ref={ageFrom} inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
-                        error={this.getFormError(ageFrom)} clearError={this.clrFormErrors.bind(null, ageFrom)} value={group && group.ageRangeFrom} />
+                        value={group && group.ageRangeFrom ? group.ageRangeFrom : ''}
+                        error={this.getFormError(ageFrom)} clearError={this.clrFormErrors.bind(null, ageFrom)} />
                     <span className="group-age-inter">to</span>
                     <Input type="number" ref={ageTo} inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
-                        error={this.getFormError(ageTo)} clearError={this.clrFormErrors.bind(null, ageTo)} value={group && group.ageRangeTo} />
+                        value={group && group.ageRangeTo ? group.ageRangeTo : ''}
+                        error={this.getFormError(ageTo)} clearError={this.clrFormErrors.bind(null, ageTo)} />
                 </Input>
-                <Input type="select" ref={ageUnit} label="Unit:" defaultValue="none" value={group && group.ageRangeUnit}
+                <Input type="select" ref={ageUnit} label="Unit:" defaultValue="none"
+                    value={group && group.ageRangeUnit ? group.ageRangeUnit : 'none'}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -1314,13 +1326,16 @@ function GroupPower(groupType) {
                 </Input>
             }
             ****/}
-            <Input type="number" inputClassName="integer-only" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'} value={group && group.numberWithVariant}
+            <Input type="number" inputClassName="integer-only" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'}
+                value={group && group.numberWithVariant ? group.numberWithVariant : ''}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" inputClassName="integer-only" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'} value={group && group.numberAllGenotypedSequenced}
+            <Input type="number" inputClassName="integer-only" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'}
+                value={group && group.numberAllGenotypedSequenced ? group.numberAllGenotypedSequenced : ''}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} value={group && group.alleleFrequency} handleChange={this.handleChange}
+            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} handleChange={this.handleChange}
+                value={group && group.alleleFrequency ? group.alleleFrequency : ''}
                 error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
         </div>
@@ -1337,7 +1352,6 @@ var LabelOtherGenes = React.createClass({
 // Additional Information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupAdditional(groupType) {
-    let otherpmidsVal, othergenevariantsVal;
     let inputDisabled = (groupType === 'control-cohort') ? true : false;
     let type, indFamilyCount, indVariantOtherCount, otherGeneVariants, additionalInfoGroup, otherPmids, headerLabel, group;
     if (groupType === 'case-cohort') {
@@ -1355,10 +1369,9 @@ function GroupAdditional(groupType) {
         headerLabel = 'CONTROL';
         group = this.state.controlGroup;
     }
-    othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : null;
-    if (group) {
-        otherpmidsVal = group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
-    }
+
+    let othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : '';
+    let otherpmidsVal = group && group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
     return (
         <div className="row section section-additional-info">
@@ -1366,7 +1379,8 @@ function GroupAdditional(groupType) {
             <Input type="text" ref={otherGeneVariants} label={<LabelOtherGenes />} inputClassName="uppercase-input" value={othergenevariantsVal} placeholder="e.g. DICER1, SMAD3"
                 error={this.getFormError(otherGeneVariants)} clearError={this.clrFormErrors.bind(null, otherGeneVariants)} inputDisabled={inputDisabled}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group other-genes" />
-            <Input type="textarea" ref={additionalInfoGroup} label={'Additional Information about this ' + type + ':'} rows="5" value={group && group.additionalInformation}
+            <Input type="textarea" ref={additionalInfoGroup} label={'Additional Information about this ' + type + ':'} rows="5"
+                value={group && group.additionalInformation ? group.additionalInformation : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref={otherPmids} label={'Enter PMID(s) that report evidence about this ' + type + ':'} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError(otherPmids)} clearError={this.clrFormErrors.bind(null, otherPmids)}
