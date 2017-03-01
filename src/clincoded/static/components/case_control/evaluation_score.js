@@ -82,28 +82,28 @@ module.exports = {
                                     <option value="Relative Risk">Relative Risk</option>
                                     <option value="Other">Other</option>
                                 </Input>
-                                <Input type="text" ref="statisticOtherType" label="Other test statistic:" value={entry.otherType ? entry.otherType : null}
+                                <Input type="text" ref="statisticOtherType" label="Other test statistic:" value={entry.otherType ? entry.otherType : ''}
                                     error={this.getFormError('statisticOtherType')} clearError={this.clrFormErrors.bind(null, 'statisticOtherType')}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6"
                                     groupClassName={'form-group statistic-other-type ' + statisticOtherType} />
-                                <Input type="number" ref="statisticValue" label="Value:" value={entry.value ? entry.value : null} handleChange={this.handleChange}
+                                <Input type="number" ref="statisticValue" label="Value:" value={entry.value ? entry.value : ''} handleChange={this.handleChange}
                                     error={this.getFormError("statisticValue")} clearError={this.clrFormErrors.bind(null, "statisticValue")}
                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="Number only" />
                             </div>
                         );
                     })}
                     <h4 className="col-sm-7 col-sm-offset-5">Confidence/Significance</h4>
-                    <Input type="number" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : null} handleChange={this.handleChange}
+                    <Input type="number" ref="pValue" label="p-value:" value={caseControl.pValue ? caseControl.pValue : ''} handleChange={this.handleChange}
                         error={this.getFormError("pValue")} clearError={this.clrFormErrors.bind(null, "pValue")}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" placeholder="Number only" />
                     <Input type="text-range" labelClassName="col-sm-6 control-label" label="Confidence interval (%):" wrapperClassName="col-sm-6">
                         <Input type="number" ref="confidenceIntervalFrom" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
                             error={this.getFormError("confidenceIntervalFrom")} clearError={this.clrFormErrors.bind(null, "confidenceIntervalFrom")}
-                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null} handleChange={this.handleChange} placeholder="Number only" />
+                            value={caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : ''} handleChange={this.handleChange} placeholder="Number only" />
                         <span className="group-age-inter">to</span>
                         <Input type="number" ref="confidenceIntervalTo" inputClassName="input-inline" groupClassName="form-group-inline confidence-interval-input"
                             error={this.getFormError("confidenceIntervalTo")} clearError={this.clrFormErrors.bind(null, "confidenceIntervalTo")}
-                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null} handleChange={this.handleChange} placeholder="Number only" />
+                            value={caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : ''} handleChange={this.handleChange} placeholder="Number only" />
                     </Input>
                 </div>
                 <div className="row section section-bias-category">
@@ -127,7 +127,7 @@ module.exports = {
                         <option value="Location of recruitment">Location of recruitment</option>
                     </Input>
                     <Input type="textarea" ref="explanationForDemographicMatched" label="Explanation:" rows="5"
-                        value={caseControl.explanationForDemographicMatched ? caseControl.explanationForDemographicMatched : null}
+                        value={caseControl.explanationForDemographicMatched ? caseControl.explanationForDemographicMatched : ''}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                     <Input type="select" ref="geneticAncestryMatched" label="2. Are case and control cohorts matched for genetic ancestry?"
                         defaultValue="none" value={caseControl.geneticAncestryMatched ? caseControl.geneticAncestryMatched : 'none'}
@@ -146,7 +146,7 @@ module.exports = {
                         <option value="No, investigators did NOT account for genetic ancestry in analysis">No, investigators did NOT account for genetic ancestry in analysis</option>
                     </Input>
                     <Input type="textarea" ref="explanationForGeneticAncestryNotMatched" label="Explanation:" rows="5"
-                        value={caseControl.explanationForGeneticAncestryNotMatched ? caseControl.explanationForGeneticAncestryNotMatched : null}
+                        value={caseControl.explanationForGeneticAncestryNotMatched ? caseControl.explanationForGeneticAncestryNotMatched : ''}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                     <Input type="select" ref="diseaseHistoryEvaluated" label="3. Are case and control cohorts equivalently evaluated for primary disease outcome and/or family history of disease?"
                         defaultValue="none" value={caseControl.diseaseHistoryEvaluated ? caseControl.diseaseHistoryEvaluated : 'none'}
@@ -159,7 +159,7 @@ module.exports = {
                         <option value="No to both presence/absence of phenotype and family history">No to both presence/absence of phenotype and family history</option>
                     </Input>
                     <Input type="textarea" ref="explanationForDiseaseHistoryEvaluation" label="Explanation:" rows="5"
-                        value={caseControl.explanationForDiseaseHistoryEvaluation ? caseControl.explanationForDiseaseHistoryEvaluation : null}
+                        value={caseControl.explanationForDiseaseHistoryEvaluation ? caseControl.explanationForDiseaseHistoryEvaluation : ''}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                     <Input type="select" ref="differInVariables" label="4. Do case and control cohorts differ in any other variables?"
                         defaultValue="none" value={caseControl.differInVariables ? caseControl.differInVariables : 'none'}
@@ -170,13 +170,13 @@ module.exports = {
                         <option value="No">No</option>
                     </Input>
                     <Input type="textarea" ref="explanationForDifference" label="If yes, explain:" rows="5"
-                        value={caseControl.explanationForDifference ? caseControl.explanationForDifference : null}
+                        value={caseControl.explanationForDifference ? caseControl.explanationForDifference : ''}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                 </div>
                 <div className="row section section-comments">
                     <h3><i className="icon icon-chevron-right"></i> Comments</h3>
                     <Input type="textarea" ref="comments" label="Please provide any comments regarding case-control evaluation:" rows="5"
-                        value={caseControl.comments ? caseControl.comments : null}
+                        value={caseControl.comments ? caseControl.comments : ''}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                 </div>
                 {/*** Replaced with new score implementation ***
