@@ -2447,9 +2447,47 @@ table.login-users-interpretations {
     }
 }
 
-.control-cohort-view .panel.diseases,
-.control-cohort-view .additional-information .other-genes {
-    visibility: hidden;
+.case-cohort-view,
+.control-cohort-view {
+    .panel-std {
+        dt {
+            min-width: 300px;
+            text-align: left;
+            white-space: normal;
+            width: auto;
+            vertical-align: top;
+        }
+
+        dd {
+            width: 35%;
+            vertical-align: top;
+        }
+    }
+}
+
+.case-control-evaluation {
+    .panel-std {
+        dt {
+            min-width: 400px;
+            text-align: left;
+            white-space: normal;
+            width: auto;
+            vertical-align: top;
+        }
+
+        dd {
+            width: 40%;
+            vertical-align: top;
+        }
+    }
+}
+
+.case-cohort-view {
+    padding-left: 0;
+}
+
+.control-cohort-view {
+    padding-right: 0;
 }
 
 .panel-body.panel-std {
