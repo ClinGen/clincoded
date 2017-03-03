@@ -1331,8 +1331,8 @@ var ExperimentalNameType = function() {
                 </div>
             : null}
             <Input type="select" ref="experimentalType" label="Experiment type:"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={experimental && experimental.evidenceType} handleChange={this.handleChange}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" handleChange={this.handleChange}
+                defaultValue="none" value={experimental && experimental.evidenceType ? experimental.evidenceType : 'none'}
                 inputDisabled={this.state.experimental!=null || this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1387,7 +1387,9 @@ var ExperimentalNameType = function() {
             {this.state.experimentalNameVisible ?
                 <Input type="text" ref="experimentalName" label="Experiment name:"
                     error={this.getFormError('experimentalName')} clearError={this.clrFormErrors.bind(null, 'experimentalName')} maxLength="60"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" value={experimental && experimental.label} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                    value={experimental && experimental.label ? experimental.label : ''}
+                    handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
             : null}
         </div>
     );
@@ -1399,9 +1401,9 @@ var TypeBiochemicalFunction = function(uniprotId) {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
     if (biochemicalFunction) {
-        biochemicalFunction.identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction : null;
-        biochemicalFunction.evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction : null;
-        biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : null;
+        biochemicalFunction.identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction : '';
+        biochemicalFunction.evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction : '';
+        biochemicalFunction.evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : '';
     }
     return (
         <div className="row form-row-helper">
@@ -1443,10 +1445,10 @@ var TypeBiochemicalFunctionA = function() {
     if (biochemicalFunction) {
         biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
         if (biochemicalFunction.geneWithSameFunctionSameDisease) {
-            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? joinGenes(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : null;
-            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : null;
+            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? joinGenes(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : '';
+            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : '';
+            biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : '';
+            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : '';
         }
     }
     return (
@@ -1501,10 +1503,10 @@ var TypeBiochemicalFunctionB = function() {
     if (biochemicalFunction) {
         biochemicalFunction.geneFunctionConsistentWithPhenotype = biochemicalFunction.geneFunctionConsistentWithPhenotype ? biochemicalFunction.geneFunctionConsistentWithPhenotype : {};
         if (biochemicalFunction.geneFunctionConsistentWithPhenotype) {
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : null;
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : null;
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO : '';
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : '';
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : '';
+            biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : '';
         }
     }
     return (
@@ -1552,11 +1554,11 @@ var TypeProteinInteractions = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
     if (proteinInteractions) {
-        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? joinGenes(proteinInteractions.interactingGenes) : null;
-        proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType : null;
-        proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : null;
-        proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : null;
-        proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper : null;
+        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? joinGenes(proteinInteractions.interactingGenes) : '';
+        proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType : 'none';
+        proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : 'none';
+        proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : '';
+        proteinInteractions.evidenceInPaper = proteinInteractions.evidenceInPaper ? proteinInteractions.evidenceInPaper : '';
     }
     return (
         <div className="row form-row-helper">
@@ -1623,7 +1625,7 @@ var TypeExpression = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var expression = experimental.expression ? experimental.expression : {};
     if (expression) {
-        expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue : null;
+        expression.organOfTissue = expression.organOfTissue ? expression.organOfTissue : '';
     }
     return (
         <div className="row form-row-helper">
@@ -1655,8 +1657,8 @@ var TypeExpressionA = function() {
     if (expression) {
         expression.normalExpression = expression.normalExpression ? expression.normalExpression : {};
         if (expression.normalExpression) {
-            expression.normalExpression.evidence = expression.normalExpression.evidence ? expression.normalExpression.evidence : null;
-            expression.normalExpression.evidenceInPaper = expression.normalExpression.evidenceInPaper ? expression.normalExpression.evidenceInPaper : null;
+            expression.normalExpression.evidence = expression.normalExpression.evidence ? expression.normalExpression.evidence : '';
+            expression.normalExpression.evidenceInPaper = expression.normalExpression.evidenceInPaper ? expression.normalExpression.evidenceInPaper : '';
         }
     }
     return (
@@ -1684,8 +1686,8 @@ var TypeExpressionB = function() {
     if (expression) {
         expression.alteredExpression = expression.alteredExpression ? expression.alteredExpression : {};
         if (expression.alteredExpression) {
-            expression.alteredExpression.evidence = expression.alteredExpression.evidence ? expression.alteredExpression.evidence : null;
-            expression.alteredExpression.evidenceInPaper = expression.alteredExpression.evidenceInPaper ? expression.alteredExpression.evidenceInPaper : null;
+            expression.alteredExpression.evidence = expression.alteredExpression.evidence ? expression.alteredExpression.evidence : '';
+            expression.alteredExpression.evidenceInPaper = expression.alteredExpression.evidenceInPaper ? expression.alteredExpression.evidenceInPaper : '';
         }
     }
     return (
@@ -1713,13 +1715,13 @@ var TypeFunctionalAlteration = function(uniprotId) {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
     if (functionalAlteration) {
-        functionalAlteration.cellMutationOrEngineeredEquivalent = functionalAlteration.cellMutationOrEngineeredEquivalent ? functionalAlteration.cellMutationOrEngineeredEquivalent : null;
-        functionalAlteration.patientCellType = functionalAlteration.patientCellType ? functionalAlteration.patientCellType : null;
-        functionalAlteration.engineeredEquivalentCellType = functionalAlteration.engineeredEquivalentCellType ? functionalAlteration.engineeredEquivalentCellType : null;
-        functionalAlteration.descriptionOfGeneAlteration = functionalAlteration.descriptionOfGeneAlteration ? functionalAlteration.descriptionOfGeneAlteration : null;
-        functionalAlteration.normalFunctionOfGene = functionalAlteration.normalFunctionOfGene ? functionalAlteration.normalFunctionOfGene : null;
-        functionalAlteration.evidenceForNormalFunction = functionalAlteration.evidenceForNormalFunction ? functionalAlteration.evidenceForNormalFunction : null;
-        functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : null;
+        functionalAlteration.cellMutationOrEngineeredEquivalent = functionalAlteration.cellMutationOrEngineeredEquivalent ? functionalAlteration.cellMutationOrEngineeredEquivalent : 'none';
+        functionalAlteration.patientCellType = functionalAlteration.patientCellType ? functionalAlteration.patientCellType : '';
+        functionalAlteration.engineeredEquivalentCellType = functionalAlteration.engineeredEquivalentCellType ? functionalAlteration.engineeredEquivalentCellType : '';
+        functionalAlteration.descriptionOfGeneAlteration = functionalAlteration.descriptionOfGeneAlteration ? functionalAlteration.descriptionOfGeneAlteration : '';
+        functionalAlteration.normalFunctionOfGene = functionalAlteration.normalFunctionOfGene ? functionalAlteration.normalFunctionOfGene : '';
+        functionalAlteration.evidenceForNormalFunction = functionalAlteration.evidenceForNormalFunction ? functionalAlteration.evidenceForNormalFunction : '';
+        functionalAlteration.evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : '';
     }
     return (
         <div className="row form-row-helper">
@@ -1799,16 +1801,16 @@ var TypeModelSystems = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var modelSystems = experimental.modelSystems ? experimental.modelSystems : {};
     if (modelSystems) {
-        modelSystems.animalOrCellCulture = modelSystems.animalOrCellCulture ? modelSystems.animalOrCellCulture : null;
-        modelSystems.animalModel = modelSystems.animalModel ? modelSystems.animalModel : null;
-        modelSystems.cellCulture = modelSystems.cellCulture ? modelSystems.cellCulture : null;
-        modelSystems.descriptionOfGeneAlteration = modelSystems.descriptionOfGeneAlteration ? modelSystems.descriptionOfGeneAlteration : null;
-        modelSystems.phenotypeHPO = modelSystems.phenotypeHPO ? modelSystems.phenotypeHPO : null;
-        modelSystems.phenotypeFreeText = modelSystems.phenotypeFreeText ? modelSystems.phenotypeFreeText : null;
-        modelSystems.phenotypeHPOObserved = modelSystems.phenotypeHPOObserved ? modelSystems.phenotypeHPOObserved : null;
-        modelSystems.phenotypeFreetextObserved = modelSystems.phenotypeFreetextObserved ? modelSystems.phenotypeFreetextObserved : null;
-        modelSystems.explanation = modelSystems.explanation ? modelSystems.explanation : null;
-        modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper : null;
+        modelSystems.animalOrCellCulture = modelSystems.animalOrCellCulture ? modelSystems.animalOrCellCulture : 'none';
+        modelSystems.animalModel = modelSystems.animalModel ? modelSystems.animalModel : 'none';
+        modelSystems.cellCulture = modelSystems.cellCulture ? modelSystems.cellCulture : '';
+        modelSystems.descriptionOfGeneAlteration = modelSystems.descriptionOfGeneAlteration ? modelSystems.descriptionOfGeneAlteration : '';
+        modelSystems.phenotypeHPO = modelSystems.phenotypeHPO ? modelSystems.phenotypeHPO : '';
+        modelSystems.phenotypeFreeText = modelSystems.phenotypeFreeText ? modelSystems.phenotypeFreeText : '';
+        modelSystems.phenotypeHPOObserved = modelSystems.phenotypeHPOObserved ? modelSystems.phenotypeHPOObserved : '';
+        modelSystems.phenotypeFreetextObserved = modelSystems.phenotypeFreetextObserved ? modelSystems.phenotypeFreetextObserved : '';
+        modelSystems.explanation = modelSystems.explanation ? modelSystems.explanation : '';
+        modelSystems.evidenceInPaper = modelSystems.evidenceInPaper ? modelSystems.evidenceInPaper : '';
     }
     return (
         <div className="row form-row-helper">
@@ -1931,15 +1933,15 @@ var TypeRescue = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var rescue = experimental.rescue ? experimental.rescue : {};
     if (rescue) {
-        rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : null;
-        rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType : null;
-        rescue.engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType : null;
-        rescue.descriptionOfGeneAlteration = rescue.descriptionOfGeneAlteration ? rescue.descriptionOfGeneAlteration : null;
-        rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : null;
-        rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : null;
-        rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : null;
-        rescue.explanation = rescue.explanation ? rescue.explanation : null;
-        rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : null;
+        rescue.patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : 'none';
+        rescue.patientCellType = rescue.patientCellType ? rescue.patientCellType : '';
+        rescue.engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType : '';
+        rescue.descriptionOfGeneAlteration = rescue.descriptionOfGeneAlteration ? rescue.descriptionOfGeneAlteration : '';
+        rescue.phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : '';
+        rescue.phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : '';
+        rescue.rescueMethod = rescue.rescueMethod ? rescue.rescueMethod : '';
+        rescue.explanation = rescue.explanation ? rescue.explanation : '';
+        rescue.evidenceInPaper = rescue.evidenceInPaper ? rescue.evidenceInPaper : '';
     }
     return (
         <div className="row form-row-helper">
@@ -2128,7 +2130,7 @@ var ExperimentalDataVariant = function() {
                                     : null}
                                 </div>
                             : null}
-                            <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid} handleChange={this.handleChange}
+                            <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''} handleChange={this.handleChange}
                                 error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                             <div className="row">
