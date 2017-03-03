@@ -7,9 +7,9 @@ pytest_plugins = [
 
 
 @pytest.fixture(scope='session')
-def app_settings(server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
     from .. import test_indexing
-    return test_indexing.app_settings(server_host_port, elasticsearch_server, postgresql_server)
+    return test_indexing.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
 
 
 @pytest.yield_fixture(scope='session')
