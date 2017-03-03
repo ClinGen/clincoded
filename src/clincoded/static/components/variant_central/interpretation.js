@@ -418,7 +418,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                     <div className="col-sm-12 col-md-3">
                         <Form formClassName="form-std gdm-filter-form">
                             <Input type="text" ref="q" placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
-                                labelClassName="control-label" groupClassName="form-group" />
+                                value={this.state.searchTerm} labelClassName="control-label" groupClassName="form-group" />
                         </Form>
                     </div>
                 </div>
