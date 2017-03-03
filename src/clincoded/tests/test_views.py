@@ -6,8 +6,8 @@ def _type_length():
     #from ..loadxl import ORDER
     ORDER = [
         'user',
-        'Gene',
-        'OrphaPhenotype',
+        'gene',
+        'orphaPhenotype',
         'curator_page',
     ]
     from pkg_resources import resource_stream
