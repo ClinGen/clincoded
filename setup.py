@@ -52,7 +52,9 @@ if sys.version_info.major == 2:
 tests_require = [
     'pytest>=2.4.0',
     'pytest-bdd',
+    'pytest-mock',
     'pytest-splinter',
+    'pytest_exact_fixtures',
 ]
 
 setup(
