@@ -6,6 +6,11 @@ pytest_plugins = [
 ]
 
 
+@pytest.fixture
+def external_tx():
+    pass
+
+
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
     from .. import test_indexing
