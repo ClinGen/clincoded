@@ -1,4 +1,5 @@
 """ Test full indexing setup
+
 The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
@@ -8,12 +9,12 @@ import pytest
 pytestmark = [pytest.mark.indexing]
 
 
-@pytest.mark.fixture_lock('snovault.storage.DBSession')
 @pytest.fixture(scope='session')
-def app_settings(server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
     from .conftest import _app_settings
     settings = _app_settings.copy()
     settings['create_tables'] = True
+    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
     settings['elasticsearch.server'] = elasticsearch_server
     settings['sqlalchemy.url'] = postgresql_server
     settings['collection_datastore'] = 'elasticsearch'
@@ -25,23 +26,25 @@ def app_settings(server_host_port, elasticsearch_server, postgresql_server):
 
 @pytest.yield_fixture(scope='session')
 def app(app_settings):
-    from snovault.storage import DBSession
-
-    DBSession.remove()
-    DBSession.configure(bind=None)
-
     from clincoded import main
     app = main({}, **app_settings)
 
     yield app
 
     # Shutdown multiprocessing pool to close db conns.
-    app.registry['indexer'].shutdown()
+    from snovault.elasticsearch import INDEXER
+    app.registry[INDEXER].shutdown()
 
+    from snovault import DBSESSION
+    DBSession = app.registry[DBSESSION]
     # Dispose connections so postgres can tear down.
     DBSession.bind.pool.dispose()
-    DBSession.remove()
-    DBSession.configure(bind=None)
+
+
+@pytest.fixture(scope='session')
+def DBSession(app):
+    from snovault import DBSESSION
+    return app.registry[DBSESSION]
 
 
 @pytest.fixture(autouse=True)
@@ -59,8 +62,7 @@ def external_tx():
 
 
 @pytest.yield_fixture
-def dbapi_conn(app):
-    from snovault.storage import DBSession
+def dbapi_conn(DBSession):
     connection = DBSession.bind.pool.unique_connection()
     connection.detach()
     conn = connection.connection
@@ -93,7 +95,7 @@ def test_indexing_workbook(testapp, indexer_testapp):
     assert res.json['updated']
     assert res.json['indexed']
 
-    res = testapp.get('/search/?type=gdm')
+    res = testapp.get('/search/?type=Biosample')
     assert res.json['total'] > 5
 
 
@@ -110,7 +112,7 @@ def test_indexing_simple(testapp, indexer_testapp):
     assert res.json['indexed'] == 1
     assert res.json['txn_count'] == 1
     assert res.json['updated'] == [uuid]
-    res = testapp.get('/search/?type=testing_post_put_patch')
+    res = testapp.get('/search/?type=TestingPostPutPatch')
     assert res.json['total'] == 2
 
 

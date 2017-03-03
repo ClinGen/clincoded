@@ -6,10 +6,15 @@ pytest_plugins = [
 ]
 
 
+@pytest.fixture
+def external_tx():
+    pass
+
+
 @pytest.fixture(scope='session')
-def app_settings(server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
     from .. import test_indexing
-    return test_indexing.app_settings(server_host_port, elasticsearch_server, postgresql_server)
+    return test_indexing.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
 
 
 @pytest.yield_fixture(scope='session')
@@ -43,8 +48,25 @@ def workbook(app):
 
 
 @pytest.fixture(scope='session')
-def base_url(_server):
-    return _server
+def wsgi_server_app(app):
+    from http.cookies import SimpleCookie
+
+    def wsgi_filter(environ, start_response):
+        # set REMOTE_USER from cookie
+        cookies = SimpleCookie()
+        cookies.load(environ.get('HTTP_COOKIE', ''))
+        if 'REMOTE_USER' in cookies:
+            user = cookies['REMOTE_USER'].value
+        else:
+            user = 'TEST_AUTHENTICATED'
+        environ['REMOTE_USER'] = user
+        return app(environ, start_response)
+    return wsgi_filter
+
+
+@pytest.fixture(scope='session')
+def base_url(wsgi_server):
+    return wsgi_server
 
 
 @pytest.fixture(scope='session')
@@ -70,6 +92,16 @@ def admin_user(browser, base_url):
     browser.cookies.add({'REMOTE_USER': 'TEST'})
     yield
     browser.cookies.delete('REMOTE_USER')
+
+
+@pytest.yield_fixture(scope='session')
+def submitter_user(browser, base_url, admin_user):
+    browser.visit(base_url + '/#!impersonate-user')
+    browser.find_by_name('userid').first.fill('massa.porta@varius.mauris')
+    browser.find_by_text('Submit').first.click()
+    browser.is_text_present('J. Michael Cherry', wait_time=5)
+    yield
+    browser.visit(base_url + '/logout')
 
 
 @pytest.fixture
