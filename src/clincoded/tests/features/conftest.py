@@ -43,8 +43,25 @@ def workbook(app):
 
 
 @pytest.fixture(scope='session')
-def base_url(_server):
-    return _server
+def wsgi_server_app(app):
+    from http.cookies import SimpleCookie
+
+    def wsgi_filter(environ, start_response):
+        # set REMOTE_USER from cookie
+        cookies = SimpleCookie()
+        cookies.load(environ.get('HTTP_COOKIE', ''))
+        if 'REMOTE_USER' in cookies:
+            user = cookies['REMOTE_USER'].value
+        else:
+            user = 'TEST_AUTHENTICATED'
+        environ['REMOTE_USER'] = user
+        return app(environ, start_response)
+    return wsgi_filter
+
+
+@pytest.fixture(scope='session')
+def base_url(wsgi_server):
+    return wsgi_server
 
 
 @pytest.fixture(scope='session')
