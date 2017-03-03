@@ -290,7 +290,7 @@ var AddResourceIdModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        this.handleModalClose();
+        this.handleModalClose('cancel');
     },
 
     /************************************************************************************************/
@@ -303,15 +303,29 @@ var AddResourceIdModal = React.createClass({
     /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
     /* and the modified states are retained.                                                        */
     /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
-    /* which is way to call a function defined in the child component from the parent component.    */
+    /* which is a way to call a function defined in the child component from the parent component.  */
     /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
     /************************************************************************************************/
-    handleModalClose() {
+    handleModalClose(trigger) {
         let errors = this.state.formErrors;
         errors['resourceId'] = '';
         if (!this.state.submitResourceBusy) {
-            this.setState({formErrors: errors, inputValue: '', queryResourceDisabled: true, resourceFetched: false, tempResource: {}});
+            if (this.props.resourceType === 'pubmed' || (trigger && trigger === 'cancel')) {
+                this.setState({formErrors: errors, inputValue: '', queryResourceDisabled: true, resourceFetched: false, tempResource: {}});
+            }
             this.child.closeModal();
+        }
+    },
+
+    // This lifecycle method is used to address the button UI behaviors
+    // in Family curation, Individual curation and Experimental curation
+    // in which this component is unmounted upon submitting the queried
+    // resource of either ClinVar or CAR
+    componentWillUnmount() {
+        let errors = this.state.formErrors;
+        errors['resourceId'] = '';
+        if (this.props.resourceType === 'clinvar' || this.props.resourceType === 'car') {
+            this.setState({formErrors: errors, inputValue: '', queryResourceDisabled: true, resourceFetched: false, tempResource: {}});
         }
     },
 
