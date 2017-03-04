@@ -492,24 +492,28 @@ var AssociateInheritance = React.createClass({
         return {
             submitResourceBusy: false,
             adjectives: [],
-            adjectiveDisabled: true
+            adjectiveDisabled: true,
+            tempAdjectives: [] // Temp storage for adjectives. Used for reverting to previous list if user cancels.
         };
     },
 
     componentDidMount: function() {
-        if (this.props.interpretation) {
-            if (this.props.interpretation.modeInheritance) {
-                let moi = this.props.interpretation.modeInheritance;
-                let adjective = this.props.interpretation.modeInheritanceAdjective;
-                this.parseModeInheritance(moi, adjective ? adjective : 'none');
-            }
+        let interpretation = this.props.interpretation;
+        if (interpretation && interpretation.modeInheritance) {
+            let moi = interpretation.modeInheritance;
+            let adjective = interpretation.modeInheritanceAdjective ? interpretation.modeInheritanceAdjective : 'none';
+            this.parseModeInheritance(moi, adjective);
         }
     },
 
     // Handle value changes in modeInheritance dropdown selection
     handleChange: function(ref, e) {
         if (ref === 'inheritance') {
-            this.parseModeInheritance(this.refs[ref].getValue(), 'none');
+            // Copy existing adjective array into temp storage when user changes the selected MOI,
+            // which triggers the re-rendering of a different adjective list
+            this.setState({tempAdjectives: this.state.adjectives}, () => {
+                this.parseModeInheritance(this.refs[ref].getValue(), 'none');
+            });
         }
     },
 
@@ -544,7 +548,11 @@ var AssociateInheritance = React.createClass({
         this.setState({
             adjectiveDisabled: adjectiveDisabled,
             adjectives: adjectives
-        }, () => {this.refs.moiAdjective.setValue(defaultValue);});
+        }, () => {
+            if (this.refs.moiAdjective) {
+                this.refs.moiAdjective.setValue(defaultValue);
+            }
+        });
     },
 
     // When the form is submitted...
@@ -625,12 +633,16 @@ var AssociateInheritance = React.createClass({
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
         this.setState({submitResourceBusy: false}, () => {
-            this.handleModalClose();
+            this.handleModalClose('cancel');
         });
     },
 
     /************************************************************************************************/
-    /* Resetting the formErrors for selected input and other states was not needed previously       */
+    /* Form error checking for the 2 'Select' inputs in this Inheritance modal had been removed     */
+    /* because neither one of the selections are required. And the user is given a set of           */
+    /* pre-defined values to choose from.                                                           */
+    /************************************************************************************************/
+    /* Resetting the adjectives array for selected MOI adjective input was not needed previously    */
     /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
     /* to be defined outside of this component and closing the modal would delete this component    */
     /* from virtual DOM, along with the states.                                                     */
@@ -642,26 +654,38 @@ var AssociateInheritance = React.createClass({
     /* which is way to call a function defined in the child component from the parent component.    */
     /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
     /************************************************************************************************/
-    handleModalClose() {
-        let errors = this.state.formErrors;
-        errors['inheritance'] = '', errors['moiAdjective'] = '';
+    handleModalClose(trigger) {
+        let interpretation = this.props.interpretation;
         if (!this.state.submitResourceBusy) {
-            this.setState({formErrors: errors, adjectives: [], adjectiveDisabled: true});
+            if (trigger === 'cancel') {
+                if (interpretation && interpretation.modeInheritanceAdjective) {
+                    // User cancels the modal and there is a pre-existing MOI adjective stored,
+                    // set the adjectives array to the last loaded state whether the user had
+                    // changed it or not.
+                    if (this.state.adjectives && this.state.adjectives.length) {
+                        this.setState({adjectives: this.state.tempAdjectives, adjectiveDisabled: false});
+                    }
+                } else {
+                    // User cancels the modal and there is no pre-existing MOI adjective stored,
+                    // reset all states.
+                    this.setState({adjectives: [], adjectiveDisabled: true, tempAdjectives: []});
+                }
+            } else {
+                // User saves the selected adjective and so we retain the associated adjectives array
+                this.setState({tempAdjectives: this.state.adjectives, adjectiveDisabled: false});
+            }
             this.child.closeModal();
         }
     },
 
     render: function() {
+        let interpretation = this.props.interpretation;
         let adjectives = this.state.adjectives;
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
 
-        let defaultModeInheritance = 'select';
-        if (this.props.interpretation) {
-            if (this.props.interpretation.modeInheritance) {
-                defaultModeInheritance = this.props.interpretation.modeInheritance;
-            }
-        }
+        let defaultModeInheritance = interpretation && interpretation.modeInheritance ? interpretation.modeInheritance : 'no-moi';
+        let defaultModeInheritanceAdjective = interpretation && interpretation.modeInheritanceAdjective ? interpretation.modeInheritanceAdjective : 'none';
 
         return (
             <ModalComponent modalTitle={this.props.title} modalClass="modal-default" modalWrapperClass="modal-associate-disease"
@@ -669,8 +693,7 @@ var AssociateInheritance = React.createClass({
                 <Form submitHandler={this.submitForm} formClassName="form-std">
                     <div className="modal-box">
                         <div className="modal-body clearfix">
-                            <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance} handleChange={this.handleChange}
-                                error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
+                            <Input type="select" ref="inheritance" label="Mode of Inheritance" value={defaultModeInheritance} handleChange={this.handleChange}
                                 labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
                                 <option value="no-moi">No mode of inheritance</option>
                                 <option value="" disabled="disabled"></option>
@@ -678,8 +701,7 @@ var AssociateInheritance = React.createClass({
                                     return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
                                 })}
                             </Input>
-                             <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none' inputDisabled={adjectiveDisabled}
-                                error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
+                             <Input type="select" ref="moiAdjective" label="Select an adjective" value={defaultModeInheritanceAdjective} inputDisabled={adjectiveDisabled}
                                 labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
                                 <option value="none">Select</option>
                                 <option disabled="disabled"></option>
