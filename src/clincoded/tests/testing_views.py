@@ -112,7 +112,7 @@ class TestingLinkSource(Item):
             },
             'target': {
                 'type': 'string',
-                'linkTo': 'testing_link_target',
+                'linkTo': 'TestingLinkTarget',
             },
             'status': {
                 'type': 'string',
@@ -144,7 +144,7 @@ class TestingLinkTarget(Item):
         'additionalProperties': False,
     }
     rev = {
-        'reverse': ('testing_link_source', 'target'),
+        'reverse': ('TestingLinkSource', 'target'),
     }
     embedded = [
         'reverse',
@@ -155,7 +155,7 @@ class TestingLinkTarget(Item):
         "type": "array",
         "items": {
             "type": ['string', 'object'],
-            "linkFrom": "testing_link_source.target",
+            "linkFrom": "TestingLinkSource.target",
         },
     })
     def reverse(self, request, reverse):
@@ -209,7 +209,7 @@ class TestingPostPutPatch(Item):
                 # This should be allowed on PUT so long as the linked uuid is
                 # the same
                 'type': 'string',
-                'linkTo': 'testing_link_target',
+                'linkTo': 'TestingLinkTarget',
                 'permission': 'import_items',
             },
         }
@@ -228,7 +228,7 @@ class TestingServerDefault(Item):
             },
             'user': {
                 'serverDefault': 'userid',
-                'linkTo': 'user',
+                'linkTo': 'User',
                 'type': 'string',
             },
             'now': {
