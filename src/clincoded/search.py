@@ -247,9 +247,6 @@ def load_results(request, es_results, result):
     """
     Loads results to pass onto UI
     """
-    print('\nLOAD_RESULTS')
-    print(es_results)
-    print(result)
     hits = es_results['hits']['hits']
     frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
@@ -280,9 +277,6 @@ def search(context, request, search_type=None):
     """
     #root = request.root
     types = request.registry[TYPES]
-    print('\nSEARCH')
-    print(request.query_string)
-    print(search_type)
     result = {
         '@id': '/search/' + ('?' + request.query_string if request.query_string else ''),
         '@type': ['Search'],
@@ -402,11 +396,8 @@ def search(context, request, search_type=None):
         size = 99999
 
     # Execute the query
-    print('search')
     es_results = es.search(body=query, index=es_index,
                            doc_type=doc_types or None, size=size)
-    print(es_results)
-    print('post-search')
 
     # Loading facets in to the results
     if 'aggregations' in es_results:
@@ -458,13 +449,7 @@ def collection_view_listing_es(context, request):
     if request.datastore != 'elasticsearch':
         return collection_view_listing_db(context, request)
 
-    print('\nCOLLECTION_VIEW_LISTING_ES')
-    print(context)
-    print(request)
-    print(context.type_info.name)
-
     result = search(context, request, context.type_info.name)
-    print(result)
     '''
     if len(result['@graph']) < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
