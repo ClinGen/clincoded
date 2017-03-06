@@ -131,7 +131,7 @@ function pubmedDatePublished($PubmedArticle, $Journal){
                 day = $ArticleDate.getElementsByTagName('Day')[0] ? $ArticleDate.getElementsByTagName('Day')[0].textContent.trim() : null;
                 month = $ArticleDate.getElementsByTagName('Month')[0] ? $ArticleDate.getElementsByTagName('Month')[0].textContent.trim() : null;
                 year = $ArticleDate.getElementsByTagName('Year')[0] ? $ArticleDate.getElementsByTagName('Year')[0].textContent.trim() : null;
-                pubdate = pubdate.length < parseDate(day, month, year).length ? parseDate(day, month, year) : pubdate;
+                pubdate = pubdate && pubdate.length < parseDate(day, month, year).length ? parseDate(day, month, year) : pubdate;
             }
         }
         if (!pubdate) {
