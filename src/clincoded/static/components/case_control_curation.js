@@ -691,7 +691,7 @@ const CaseControlCuration = React.createClass({
 
                     value = this.getFormValue(prefix + 'additionalInfoGroup');
                     if (value) {
-                        newCaseGroup.additionalInformation = value;
+                        newControlGroup.additionalInformation = value;
                     }
 
                     /*****************************************************/
