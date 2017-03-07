@@ -88,5 +88,4 @@ class ClinGenCurationRoot(Root):
         "type": "string",
     })
     def app_version(self, registry):
-        print(registry.settings)
         return registry.settings['snovault.app_version']
