@@ -1,6 +1,7 @@
 from pyramid.decorator import reify
 from snovault import (
     Root,
+    calculated_property,
     root,
 )
 from .schema_formats import is_accession
@@ -81,3 +82,11 @@ class ClinGenCurationRoot(Root):
             if resource is not None:
                 return resource
         return default
+
+    @calculated_property(schema={
+        "title": "Application version",
+        "type": "string",
+    })
+    def app_version(self, registry):
+        print(registry.settings)
+        return registry.settings['snovault.app_version']

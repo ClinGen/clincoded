@@ -8,9 +8,12 @@ var FileInput = require('./inputs').FileInput;
 var audit = require('./audit');
 var _ = require('underscore');
 
+var collection = require('./collection');
+
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
+var Table = collection.Table;
 
 
 var Fallback = module.exports.Fallback = React.createClass({
@@ -277,3 +280,42 @@ var ItemEdit = module.exports.ItemEdit = React.createClass({
 
 globals.content_views.register(ItemEdit, 'Item', 'edit');
 globals.content_views.register(ItemEdit, 'Collection', 'add');
+
+
+
+var FetchedRelatedItems = React.createClass({
+    getDefaultProps: function() {
+        return {Component: Table};
+    },
+
+    render: function() {
+        var {Component, context, title, url, props} = this.props;
+        if (context === undefined) return null;
+        var items = context['@graph'];
+        if (!items || !items.length) return null;
+
+        return (
+            <Component {...props} title={title} context={context} total={context.total} items={items} url={url} showControls={false} />
+        );
+    },
+
+});
+
+
+var RelatedItems = module.exports.RelatedItems = React.createClass({
+    getDefaultProps: function() {
+        return {limit: 5};
+    },
+
+    render: function() {
+        var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
+        var limited_url = url + '&limit=' + this.props.limit;
+        var unlimited_url = url + '&limit=all';
+        return (
+            <fetched.FetchedData ignoreErrors={this.props.ignoreErrors}>
+                <fetched.Param name="context" url={limited_url} />
+                <FetchedRelatedItems {...this.props} url={unlimited_url} />
+            </fetched.FetchedData>
+        );
+    },
+});
