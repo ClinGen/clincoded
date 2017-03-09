@@ -546,13 +546,13 @@ class Annotation(Item):
 
 @collection(
     name='casecontrol',
-    unique_key='caseControl:uuid',
+    unique_key='casecontrol:uuid',
     properties={
         'title': 'Case Control',
         'description': 'List of case-control objects in all GDM(s)',
     })
 class CaseControl(Item):
-    item_type = 'caseControl'
+    item_type = 'casecontrol'
     schema = load_schema('clincoded:schemas/caseControl.json')
     name_key = 'uuid'
     embedded = [
@@ -969,13 +969,13 @@ class Assessment(Item):
 
 @collection(
     name='evidencescore',
-    unique_key='evidenceScore:uuid',
+    unique_key='evidencescore:uuid',
     properties={
         'title': 'Evidence Score',
         'description': 'List of score assigned to evidence',
     })
 class EvidenceScore(Item):
-    item_type = 'evidenceScore'
+    item_type = 'evidencescore'
     schema = load_schema('clincoded:schemas/evidenceScore.json')
     name_key = 'uuid'
     embedded = [
@@ -994,7 +994,7 @@ class EvidenceScore(Item):
         'experimental_scored.associatedAnnotations.associatedGdm'
     ]
     rev = {
-        'caseControl_scored': ('caseControl', 'scores'),
+        'caseControl_scored': ('casecontrol', 'scores'),
         'individual_scored': ('individual', 'scores'),
         'experimental_scored': ('experimental', 'scores')
     }
@@ -1004,7 +1004,7 @@ class EvidenceScore(Item):
         "type": "array",
         "items": {
             "type": ["string", "object"],
-            "linkFrom": "caseControl.scores"
+            "linkFrom": "casecontrol.scores"
         }
     })
     def caseControl_scored(self, request, caseControl_scored):
@@ -1035,13 +1035,13 @@ class EvidenceScore(Item):
 
 @collection(
     name='provisional',
-    unique_key='provisionalClassification:uuid',
+    unique_key='provisionalclassification:uuid',
     properties={
         'title': 'Provisional Classifications',
         'description': 'List of provisional classifications',
     })
 class ProvisionalClassification(Item):
-    item_type = 'provisionalClassification'
+    item_type = 'provisionalclassification'
     schema = load_schema('clincoded:schemas/provisionalClassification.json')
     name_key = 'uuid'
     embedded = [
