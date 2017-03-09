@@ -79,9 +79,9 @@ var CreateGeneDisease = React.createClass({
 
         // Check if orphanetid
         if (valid) {
-            valid = this.getFormValue('orphanetid').match(/^ORPHA[0-9]{1,6}$/i);
+            valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
             if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15)');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
             }
         }
         return valid;
@@ -105,7 +105,7 @@ var CreateGeneDisease = React.createClass({
         }
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA([0-9]{1,6})$/i)[1];
+            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('hpo');
             let adjective = this.getFormValue('moiAdjective');
@@ -193,7 +193,7 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA15" value={orphanetid}
+                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA:15 or ORPHA15" value={orphanetid}
                                     error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
                                 <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}

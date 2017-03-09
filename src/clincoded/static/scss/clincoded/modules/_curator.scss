@@ -1249,6 +1249,19 @@
                 width: 20%;
             }
 
+            .population .datasource-gnomAD {
+                .panel-body {
+                    .description {
+                        font-style: italic;
+                        margin-bottom: 8px;
+                    }
+
+                    li {
+                        margin-top: 5px;
+                    }
+                }
+            }
+
             .population .datasource-1000G .table tbody td,
             .population .datasource-1000G .table tfoot td,
             .population .datasource-ESP .table tbody td,
@@ -1286,7 +1299,7 @@
 
             .gene-specific .datasource-constraint-scores .table thead td,
             .gene-specific .datasource-constraint-scores .table tbody td {
-                width: 25%;
+                width: 16.665%;
             }
 
             .gene-specific .datasource-constraint-scores .table tfoot td {

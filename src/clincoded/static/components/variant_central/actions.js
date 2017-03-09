@@ -253,9 +253,9 @@ var AssociateDisease = React.createClass({
         }
         // Check if orphanetid
         if (valid) {
-            valid = this.getFormValue('orphanetid').match(/^ORPHA[0-9]{1,6}$/i);
+            valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
             if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA15)');
+                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
             }
         }
         return valid;
@@ -288,7 +288,7 @@ var AssociateDisease = React.createClass({
             var interpretationDisease, currInterpretation, flatInterpretation;
 
             if (orphaId !== '') {
-                orphaId = orphaId.match(/^ORPHA([0-9]{1,6})$/i)[1];
+                orphaId = orphaId.match(/^ORPHA:?([0-9]{1,6})$/i)[1];
                 // Get the disease orresponding to the given Orphanet ID.
                 // If either error out, set the form error fields
                 this.getRestDatas([

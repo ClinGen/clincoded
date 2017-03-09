@@ -202,7 +202,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                                             </div>
                                                         </div>
                                                     :
-                                                        <div className="provisional-data-left"><span>No Reported Evidence</span></div>
+                                                        <div className="provisional-data-left"><span>None</span></div>
                                                 }
                                             </td>
                                             <td className="button-box" rowSpan="2">
@@ -1428,7 +1428,7 @@ function captureBase(s, re, uppercase) {
 module.exports.capture = {
     // Find all the comma-separated 'orphaXX' occurrences. Return all valid orpha IDs in an array.
     orphas: function(s) {
-        return captureBase(s, /^\s*orpha(\d+)\s*$/i);
+        return captureBase(s, /^\s*orpha:?(\d+)\s*$/i);
     },
 
     // Find all the comma-separated gene-symbol occurrences. Return all valid symbols in an array.

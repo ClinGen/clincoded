@@ -22,6 +22,7 @@ var form = require('../../../libs/bootstrap/form');
 
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
+import { parseKeyValue } from '../helpers/parse_key_value';
 
 var PanelGroup = panel.PanelGroup;
 var Panel = panel.Panel;
@@ -677,6 +678,51 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
+    parseAlleleMyVariant(response) {
+        let alleleData = {};
+        let chrom = parseKeyValue(response, 'chrom'),
+            hg19 = parseKeyValue(response, 'hg19'),
+            ref = parseKeyValue(response, 'ref'),
+            alt = parseKeyValue(response, 'alt');
+        if (response) {
+            alleleData = {
+                chrom: (chrom && typeof chrom === 'string') ? chrom : null,
+                pos: (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null,
+                ref: (ref && typeof ref === 'string') ? ref : null,
+                alt: (alt && typeof alt === 'string') ? alt : null
+            };
+        }
+        return alleleData;
+    },
+
+    // Method to render gnomAD population table header content
+    rendergnomADHeader(data) {
+        let variantgnomAD = '';
+        if (data) {
+            let alleleData = this.parseAlleleMyVariant(data);
+            if (Object.keys(alleleData).length) {
+                variantgnomAD = alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt;
+            }
+        }
+        return (
+            <h3 className="panel-title">{variantgnomAD.length ? 'gnomAD ' + variantgnomAD : 'gnomAD'}</h3>
+        );
+    },
+
+    // Method to render external gnomAD linkouts
+    rendergnomADLinkout(data) {
+        let gnomADLink = external_url_map['gnomADHome'];
+        // 1) clinvar/cadd/vcf data found in myvariant.info
+        // 2) no data returned by myvariant.info
+        if (data) {
+            let alleleData = this.parseAlleleMyVariant(data);
+            if (Object.keys(alleleData).length) {
+                gnomADLink = 'http:' + external_url_map['gnomAD'] + alleleData.chrom + '-' + alleleData.pos + '-' + alleleData.ref + '-' + alleleData.alt;
+            }
+        }
+        return gnomADLink;
+    },
+
     render: function() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
@@ -780,6 +826,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </div>
                             }
                         </div>
+                    </div>
+                    <div className="panel panel-info datasource-gnomAD">
+                        <div className="panel-heading">
+                            {this.rendergnomADHeader(this.props.ext_myVariantInfo)}
+                        </div>
+                        {!singleNucleotide ?
+                            <div className="panel-body">
+                                <span>Data is currently only returned for single nucleotide variants. <a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD</a> for this variant.</span>
+                            </div>
+                        :
+                            <div className="panel-body">
+                                <div className="description">
+                                    <span>gnomAD data is not currently available via API or download; however, a direct link to gnomAD is provided whenever possible in addition to a link to gnomAD's home page.</span>
+                                </div>
+                                <ul>
+                                    <li><a href={this.rendergnomADLinkout(this.props.ext_myVariantInfo)} target="_blank">Link to this variant in gnomAD</a></li>
+                                    <li><a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD</a></li>
+                                </ul>
+                            </div>
+                        }
                     </div>
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
