@@ -336,7 +336,7 @@ def search(context, request, search_type=None):
         if request.params.get('mode') == 'picker':
             doc_types = []
         else:
-            doc_types = ['gene', 'orphaPhenotype', 'article', 'variant', 'gdm', 'annotation',
+            doc_types = ['gene', 'orphaphenotype', 'article', 'variant', 'gdm', 'annotation',
                          'group', 'family', 'individual', 'experimental', 'assessment',
                          'interpretation']
     else:

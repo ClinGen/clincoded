@@ -18,7 +18,7 @@ var AuditMixin = audit.AuditMixin;
 // Should really be singular...
 var types = {
     gene: {title: 'Genes'},
-    orphaPhenotype: {title: 'Diseases'},
+    orphaphenotype: {title: 'Diseases'},
     article: {title: 'References'},
     variant: {title: 'Variants'},
     gdm: {title: 'GDMs'},
@@ -821,4 +821,4 @@ var Search = search.Search = React.createClass({
     }
 });
 
-globals.content_views.register(Search, 'search');
+globals.content_views.register(Search, 'Search');
