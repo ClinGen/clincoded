@@ -2809,7 +2809,7 @@ var ExperimentalViewer = React.createClass({
     }
 });
 
-globals.content_views.register(ExperimentalViewer, 'experimental');
+globals.content_views.register(ExperimentalViewer, 'Experimental');
 
 
 // Display a history item for adding experimental data

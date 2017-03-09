@@ -7,7 +7,7 @@ def _type_length():
     ORDER = [
         'user',
         'gene',
-        'orphaPhenotype',
+        'orphaphenotype',
         'curator_page',
     ]
     from pkg_resources import resource_stream
@@ -129,32 +129,32 @@ def test_collection_post(testapp):
         'orphaNumber': '9999',
         'type': 'Disease',
     }
-    return testapp.post_json('/orphaPhenotype', item, status=201)
+    return testapp.post_json('/orphaphenotype', item, status=201)
 
 
 def test_collection_post_bad_json(testapp):
     item = {'foo': 'bar'}
-    res = testapp.post_json('/orphaPhenotype', item, status=422)
+    res = testapp.post_json('/orphaphenotype', item, status=422)
     assert res.json['errors']
 
 
 def test_collection_post_malformed_json(testapp):
     item = '{'
     headers = {'Content-Type': 'application/json'}
-    res = testapp.post('/orphaPhenotype', item, status=400, headers=headers)
+    res = testapp.post('/orphaphenotype', item, status=400, headers=headers)
     assert res.json['detail'].startswith('Expecting')
 
 
 def test_collection_post_missing_content_type(testapp):
     item = '{}'
-    testapp.post('/orphaPhenotype', item, status=415)
+    testapp.post('/orphaphenotype', item, status=415)
 
 
 def test_collection_post_bad_(anontestapp):
     from base64 import b64encode
     from pyramid.compat import ascii_native_
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
-    anontestapp.post_json('/orphaPhenotype', {}, headers={'Authorization': value}, status=401)
+    anontestapp.post_json('/orphaphenotype', {}, headers={'Authorization': value}, status=401)
 
 
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
@@ -181,7 +181,7 @@ def test_collection_put(testapp, execute_counter):
         'orphaNumber': '9999',
         'type': 'Disease',
     }
-    item_url = testapp.post_json('/orphaPhenotype', initial).location
+    item_url = testapp.post_json('/orphaphenotype', initial).location
 
     with execute_counter.expect(1):
         item = testapp.get(item_url).json
@@ -209,7 +209,7 @@ def test_post_duplicate_uuid(testapp, disease):
         'orphaNumber': '9999',
         'type': 'Disease',
     }
-    testapp.post_json('/orphaPhenotype', item, status=409)
+    testapp.post_json('/orphaphenotype', item, status=409)
 
 
 # def test_user_effective_principals(submitter, lab, anontestapp, execute_counter):

@@ -18,7 +18,7 @@ ORDER = [
     #'document',
     #'image',
     'gene',
-    'orphaPhenotype',
+    'orphaphenotype',
     #'disease',
     'article',
     'assessment',

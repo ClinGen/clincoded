@@ -32,13 +32,13 @@ class Gene(Item):
 
 @collection(
     name='diseases',
-    unique_key='orphaPhenotype:orphaNumber',
+    unique_key='orphaphenotype:orphaNumber',
     properties={
         'title': 'Orphanet Diseases',
         'description': 'List of Orphanet diseases (phenotypes)',
     })
 class OrphaPhenotype(Item):
-    item_type = 'orphaPhenotype'
+    item_type = 'orphaphenotype'
     schema = load_schema('clincoded:schemas/orphaPhenotype.json')
     name_key = 'orphaNumber'
 
