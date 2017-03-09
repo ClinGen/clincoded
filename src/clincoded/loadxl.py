@@ -40,6 +40,7 @@ ORDER = [
     'evaluation', # VCI
     'provisional_variant', # VCI
     'interpretation', # VCI
+    'extra_evidence', # VCI
     'curatorhistory',
     'curator_page', # keep at bottom so it can load other type data
 ]

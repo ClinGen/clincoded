@@ -1,10 +1,8 @@
 from snovault.attachment import ItemWithAttachment
-from snovault.schema_utils import (
-    load_schema,
-)
 from snovault import (
     calculated_property,
     collection,
+    load_schema
 )
 from .base import (
     Item,
@@ -1212,13 +1210,15 @@ class Interpretation(Item):
 
 @collection(
     name='extra-evidence',
+    unique_key='extra_evidence:uuid',
     properties={
         'title': "Extra evidence for VCI",
         'description': 'Extra evidence for VCI',
     })
-class ExtraEvidence(Item):
+class Extra_evidence(Item):
     item_type = 'extra_evidence'
     schema = load_schema('clincoded:schemas/extra_evidence.json')
+    name_key = 'uuid'
     embedded = [
         'variant',
         'articles',
