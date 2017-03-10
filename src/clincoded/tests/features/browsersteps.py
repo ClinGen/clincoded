@@ -261,6 +261,12 @@ def i_press(browser, name):
     assert element, u'Element not found'
     element.first.click()
 
+@when(parse('I press the tab "{name}"'))
+def i_press(browser, name):
+    element = browser.find_by_xpath(
+        ("//li[@role='tab'][@aria-selected='false'][contains(text(), '%(name)s')]")  % {'name': name}).first
+    assert element, u'Element not found'
+    element.click()
 
 @when(parse('I press the button "{name}"'))
 def i_press(browser, name):
