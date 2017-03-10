@@ -272,6 +272,7 @@ def i_press(browser, name):
 def i_press(browser, name):
     element = browser.find_by_xpath(
         ("//span[text()='%(name)s']|"
+        "//input[@type='button'][@value='%(name)s']|"
         "//button[text()='%(name)s']") % {'name': name})
     assert element, u'Element not found'
     element.first.click()
