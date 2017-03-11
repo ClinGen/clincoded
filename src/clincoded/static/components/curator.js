@@ -1074,7 +1074,7 @@ var AddOmimIdModal = React.createClass({
 
         return (
             <ModalComponent modalTitle="Add/Change OMIM ID" modalClass="modal-default" modalWrapperClass="edit-omim-modal"
-                actuatorClass="" actuatorTitle={this.props.addEdit} onRef={ref => (this.child = ref)}>
+                actuatorClass="omimid-add-edit-btn" actuatorTitle={this.props.addEdit} onRef={ref => (this.child = ref)}>
                 <Form submitHandler={this.submitForm} formClassName="form-std">
                     <div className="modal-body">
                         <Input type="text" ref="omimid" label="Enter an OMIM ID" value={omimid}
