@@ -17,13 +17,12 @@ Feature: Generics
         When I visit "/gdm/"
         Then I should see "AGTR2"
         When I fill in "q" with "CD3E"
-        And I wait for 30 seconds
-        Then I should not see "AGTR2"
+        Then I should not see "AGTR2" within 10 seconds
         And I should see "Severe combined"
         When I visit "/interpretations/"
         Then I should see "NM_000111"
         When I fill in "q" with "79452"
-        Then I should not see "May 10"
+        Then I should not see "May 10" within 10 seconds
         And I should see "Milroy disease"
 
 # couldn't get Collections loop to work properly...

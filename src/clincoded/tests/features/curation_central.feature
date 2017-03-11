@@ -2,20 +2,17 @@
 Feature: Curation Central
 
     Scenario: Test Curation-central
-        When I visit "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a&pmid=7913883"
-        And I wait for 10 seconds
-        And I reload
-        And I wait for 30 seconds
-        Then I should see "Shiang R. "
+        When I go to "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a/"
+        And I wait for an element with the css selector ".pmid-selection-list" to load
+        Then I should see an element with the css selector ".curr-pmid" within 30 seconds
         When I click the element with the css selector ".pmid-selection-list-item:first-child"
-        Then I should see "Abstract"
+        Then I should see "Abstract" within 10 seconds
 
 
     Scenario: Test OMIM modal in Curation-central
-        When I visit "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a&pmid=7913883"
-        And I wait for 10 seconds
-        And I reload
-        And I wait for 30 seconds
+        When I go to "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a/"
+        And I wait for an element with the css selector ".curation-data" to load
+        Then I should see an element with the css selector ".omimid-add-edit-btn" within 30 seconds
         When I click the element with the css selector ".omimid-add-edit-btn"
         Then I should see an element with the css selector ".modal-dialog" within 5 seconds
         Then I should see "Enter an OMIM ID"
@@ -25,7 +22,7 @@ Feature: Curation Central
 
 
     Scenario: Test PMID modal in Curation-central
-        When I visit "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a/"
+        When I go to "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a/"
         Then I should see an element with the css selector ".pmid-selection-add-btn" within 5 seconds
         When I press "Add New PMID"
         Then I should see an element with the css selector ".modal-dialog" within 5 seconds
