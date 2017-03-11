@@ -17,6 +17,7 @@ Feature: Generics
         When I visit "/gdm/"
         Then I should see "AGTR2"
         When I fill in "q" with "CD3E"
+        And I wait for 30 seconds
         Then I should not see "AGTR2"
         And I should see "Severe combined"
         When I visit "/interpretations/"

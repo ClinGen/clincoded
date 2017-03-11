@@ -39,6 +39,7 @@ Feature: Create Gene Disease
         When I visit "/gdm/"
         Then I should see "DICER1"
         When I fill in "q" with "blastoma"
+        And I wait for 30 seconds
         Then I should not see "FANCM"
         When I visit "/create-gene-disease/"
         And I fill in "hgncgene" with "DICER1"
