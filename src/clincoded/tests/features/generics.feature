@@ -21,12 +21,14 @@ Feature: Generics
         Then I should see "Showing"
         When I visit "/gdm/"
         Then I should see "AGTR2"
-        When I fill in the css element field "input.form-control" with "CD3E"
+        When I fill in the css element field "input.form-control" with "cd3e"
+        And I wait for 30 seconds
         Then I should see 1 elements with the css selector ".table-row-gdm"
         And I should see "Severe combined"
         When I visit "/interpretations/"
         Then I should see "NM_000111"
         When I fill in the css element field "input.form-control" with "79452"
+        And I wait for 30 seconds
         Then I should not see "May 10" within 10 seconds
         Then I should see "Milroy disease"
         When I press "Logout ClinGen Test Curator"

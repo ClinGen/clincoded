@@ -11,7 +11,7 @@ Feature: Curation Central
         And I wait for an element with the css selector ".pmid-selection-list" to load
         Then I should see an element with the css selector ".curr-pmid" within 30 seconds
         When I click the element with the css selector ".pmid-selection-list-item:first-child"
-        Then I should see "Abstract" within 30 seconds
+        Then I should see an element with the css selector ".pmid-overview-abstract" within 10 seconds
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
