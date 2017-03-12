@@ -2,12 +2,14 @@
 Feature: Variant Curation Tabs
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Duplication)
-        When I visit "/select-variant/"
-        And I wait for 1 seconds
-        Then I should see "Search and Select Variant"
+        When I visit "/logout"
+        Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
+        When I visit "/select-variant/"
+        And I wait for 1 seconds
+        Then I should see "Search and Select Variant"
         When I select "ClinVar Variation ID" from dropdown "form-control"
         And I wait for 1 seconds
         And I press "Add ClinVar ID"
@@ -44,12 +46,14 @@ Feature: Variant Curation Tabs
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Deletion)
-        When I visit "/select-variant/"
-        And I wait for 1 seconds
-        Then I should see "Search and Select Variant"
+        When I visit "/logout"
+        Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
+        When I visit "/select-variant/"
+        And I wait for 1 seconds
+        Then I should see "Search and Select Variant"
         When I select "ClinVar Variation ID" from dropdown "form-control"
         And I wait for 1 seconds
         And I press "Add ClinVar ID"
@@ -86,12 +90,14 @@ Feature: Variant Curation Tabs
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Insertion)
-        When I visit "/select-variant/"
-        And I wait for 1 seconds
-        Then I should see "Search and Select Variant"
+        When I visit "/logout"
+        Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
+        When I visit "/select-variant/"
+        And I wait for 1 seconds
+        Then I should see "Search and Select Variant"
         When I select "ClinVar Variation ID" from dropdown "form-control"
         And I wait for 1 seconds
         And I press "Add ClinVar ID"
@@ -128,12 +134,14 @@ Feature: Variant Curation Tabs
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Indel)
-        When I visit "/select-variant/"
-        And I wait for 1 seconds
-        Then I should see "Search and Select Variant"
+        When I visit "/logout"
+        Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
+        When I visit "/select-variant/"
+        And I wait for 1 seconds
+        Then I should see "Search and Select Variant"
         When I select "ClinVar Variation ID" from dropdown "form-control"
         And I wait for 1 seconds
         And I press "Add ClinVar ID"
