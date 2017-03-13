@@ -1,8 +1,6 @@
 from snovault import COLLECTIONS
-from snovault.calculated import calculate_properties
 from snovault.validation import ValidationFailure
 from snovault.validators import no_validate_item_content_post
-from operator import itemgetter
 from pyramid.authentication import CallbackAuthenticationPolicy
 import requests
 from pyramid.httpexceptions import (
@@ -14,10 +12,7 @@ from pyramid.security import (
     remember,
     forget,
 )
-from pyramid.settings import (
-    asbool,
-    aslist,
-)
+from pyramid.settings import asbool
 from pyramid.view import (
     view_config,
 )
@@ -115,6 +110,7 @@ def login(request):
     properties = request.embed('/session-properties', as_user=userid)
     if 'auth.userid' in request.session:
         properties['auth.userid'] = request.session['auth.userid']
+        properties['_csrft_'] = request.session.get_csrf_token()
     return properties
 
 
@@ -142,7 +138,6 @@ def session_properties(request):
     namespace, userid = principal.split('.', 1)
 
     user = request.registry[COLLECTIONS]['user'][userid]
-    user_actions = calculate_properties(user, request, category='user_action')
 
     properties = {
         'user_properties': request.embed(request.resource_path(user), as_user=True),
