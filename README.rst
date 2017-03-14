@@ -77,7 +77,7 @@ Note: These will all be installed locally for the application and should never c
 
 Step 1b: Run buildout::
 
-    $ python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
+    $ python3 bootstrap.py -v 2.4.1 --setuptools-version 18.5
     $ bin/buildout -c buildout-dev.cfg
 
 If you see a clang error like this::
@@ -132,7 +132,7 @@ Run the Pyramid tests with::
 
 Run the Browser tests with::
 
-    $ bin/test -m bdd -v -v
+    $ bin/test -m bdd -v -v --wsgi-arg port_range.min 65525 --wsgi-arg port_range.max 65535
 
 Run the Javascript tests with::
 
