@@ -1924,7 +1924,7 @@ var CaseControlViewer = React.createClass({
     }
 });
 
-content_views.register(CaseControlViewer, 'caseControl');
+content_views.register(CaseControlViewer, 'CaseControl');
 
 // Display a history item for adding a case-control
 var CaseControlAddHistory = React.createClass({
@@ -1947,7 +1947,7 @@ var CaseControlAddHistory = React.createClass({
     }
 });
 
-history_views.register(CaseControlAddHistory, 'caseControl', 'add');
+history_views.register(CaseControlAddHistory, 'CaseControl', 'add');
 
 // Display a history item for modifying a case-control
 var CaseControlModifyHistory = React.createClass({
@@ -1965,7 +1965,7 @@ var CaseControlModifyHistory = React.createClass({
     }
 });
 
-history_views.register(CaseControlModifyHistory, 'caseControl', 'modify');
+history_views.register(CaseControlModifyHistory, 'CaseControl', 'modify');
 
 
 // Display a history item for deleting a case-control
@@ -1988,5 +1988,5 @@ var CaseControlDeleteHistory = React.createClass({
     }
 });
 
-history_views.register(CaseControlDeleteHistory, 'caseControl', 'delete');
+history_views.register(CaseControlDeleteHistory, 'CaseControl', 'delete');
 
