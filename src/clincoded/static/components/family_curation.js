@@ -659,7 +659,7 @@ var FamilyCuration = React.createClass({
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
                     if (!this.state.probandIndividual && this.state.individualRequired) {
-                        var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                        var searchStr = '/search/?type=orphaphenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
                         return this.getRestData(searchStr).then(diseases => {
