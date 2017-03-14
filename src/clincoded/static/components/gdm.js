@@ -74,15 +74,15 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange: function(ref, e) {
-        var searchVal = this.refs[ref].getValue().toLowerCase();
+    searchChange: function(e) {
+        var searchVal = this.q.getValue().toLowerCase();
         this.setState({searchTerm: searchVal});
     },
 
     render: function () {
         var context = this.props.context;
         var gdms = context['@graph'];
-        var searchTerm = this.state.searchTerm;
+        var searchTerm = this.state.searchTerm ? this.state.searchTerm : '';
         var filteredGdms;
         var sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
@@ -105,7 +105,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <Form formClassName="form-std gdm-filter-form">
-                            <Input type="text" ref="q" placeholder="Filter by Gene or Disease" handleChange={this.searchChange}
+                            <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Gene or Disease" handleChange={this.searchChange}
                                 value={searchTerm} labelClassName="control-label" groupClassName="form-group" />
                         </Form>
                     </div>
