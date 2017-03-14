@@ -1977,7 +1977,7 @@ var IndividualViewer = React.createClass({
     }
 });
 
-globals.content_views.register(IndividualViewer, 'individual');
+globals.content_views.register(IndividualViewer, 'Individual');
 
 
 // HTML labels for inputs follow.

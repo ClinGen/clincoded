@@ -1019,7 +1019,7 @@ var GroupViewer = React.createClass({
     }
 });
 
-globals.content_views.register(GroupViewer, 'group');
+globals.content_views.register(GroupViewer, 'Group');
 
 
 // Display a history item for adding a group

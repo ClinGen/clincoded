@@ -2251,7 +2251,7 @@ var FamilyViewer = React.createClass({
     }
 });
 
-globals.content_views.register(FamilyViewer, 'family');
+globals.content_views.register(FamilyViewer, 'Family');
 
 
 // Display a segregation in a read-only panel. If the assessments can change while the page

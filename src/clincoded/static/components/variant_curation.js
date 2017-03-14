@@ -558,7 +558,7 @@ var VariantViewer = React.createClass({
     }
 });
 
-globals.content_views.register(VariantViewer, 'pathogenicity');
+globals.content_views.register(VariantViewer, 'Pathogenicity');
 
 
 // Display a history item for adding variant pathogenicities
