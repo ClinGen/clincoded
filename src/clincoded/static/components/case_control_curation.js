@@ -282,7 +282,7 @@ const CaseControlCuration = React.createClass({
                 // Build search string from given ORPHA IDs
                 var searchStr;
                 if (valid_orphaId) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    searchStr = '/search/?type=orphaphenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
                     searchStr = '';

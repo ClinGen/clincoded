@@ -380,7 +380,7 @@ var IndividualCuration = React.createClass({
                 // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
                 if (orphaIds && orphaIds.length > 0) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    searchStr = '/search/?type=orphaphenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
                     searchStr = '';
