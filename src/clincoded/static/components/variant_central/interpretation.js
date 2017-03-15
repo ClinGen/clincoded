@@ -393,7 +393,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         // Filter Interpretations
-        if (searchTerm) {
+        if (searchTerm && searchTerm.length) {
             filteredInterpretations = interpretations.filter(function(interpretation) {
                 return (
                     (interpretation.variant.clinvarVariantId && interpretation.variant.clinvarVariantId.toLowerCase().indexOf(searchTerm) !== -1) ||
@@ -412,13 +412,13 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
             <div className="container">
                 <div className="row gdm-header">
                     <div className="col-sm-12 col-md-8">
-                        <h1>All Interpretations</h1>
+                        <h1>All Interpretations {searchTerm}</h1>
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <Form formClassName="form-std gdm-filter-form">
                             <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
-                                labelClassName="control-label" groupClassName="form-group" />
+                                value={searchTerm} labelClassName="control-label" groupClassName="form-group" />
                         </Form>
                     </div>
                 </div>
