@@ -307,8 +307,13 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         return {
             sortCol: 'variant',
             reversed: false,
-            searchTerm: ''
+            searchTerm: '',
+            filteredInterpretations: []
         };
+    },
+
+    componentWillMount() {
+        this.setState({filteredInterpretations: this.props.context['@graph']});
     },
 
     // Handle clicks in the table header for sorting
@@ -359,9 +364,29 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange: function(e) {
-        var searchVal = this.q.getValue().toLowerCase();
-        this.setState({searchTerm: searchVal});
+    searchChange(e) {
+        let searchVal = this.q.getValue().toLowerCase();
+        this.setState({searchTerm: searchVal}, () => {
+            // Filter Interpretations
+            let context = this.props.context;
+            let interpretations = context['@graph'];
+            let searchTerm = this.state.searchTerm;
+            if (searchTerm && searchTerm.length) {
+                let filteredInterpretations = interpretations.filter(function(interpretation) {
+                    return (
+                        (interpretation.variant.clinvarVariantId && interpretation.variant.clinvarVariantId.toLowerCase().indexOf(searchTerm) !== -1) ||
+                        (interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm) !== -1) ||
+                        (interpretation.variant.carId && interpretation.variant.carId.toLowerCase().indexOf(searchTerm) !== -1) ||
+                        (interpretation.variant.hvgsNames && interpretation.variant.hgvsNames.GRCh38 && interpretation.variant.hgvsNames.GRCh38.toLowerCase().indexOf(searchTerm) !== -1) ||
+                        (interpretation.disease && interpretation.disease.orphaNumber && interpretation.disease.orphaNumber.indexOf(searchTerm) !== -1) ||
+                        (interpretation.disease && interpretation.disease.term && interpretation.disease.term.toLowerCase().indexOf(searchTerm) !== -1)
+                    );
+                });
+                this.setState({filteredInterpretations: filteredInterpretations});
+            } else {
+                this.setState({filteredInterpretations: interpretations});
+            }
+        });
     },
 
     findLatestEvaluations: function(interpretation) {
@@ -381,44 +406,25 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         return latestEvaluation;
     },
 
-    render: function () {
-        var context = this.props.context;
-        var interpretations = context['@graph'];
-        var searchTerm = this.state.searchTerm ? this.state.searchTerm : '';
-        var filteredInterpretations;
-        var sortIconClass = {
+    render() {
+        let filteredInterpretations = this.state.filteredInterpretations;
+        let sortIconClass = {
             status: 'tcell-sort', variant: 'tcell-sort', disease: 'tcell-sort', moi: 'tcell-sort',
             last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'
         };
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
-        // Filter Interpretations
-        if (searchTerm && searchTerm.length) {
-            filteredInterpretations = interpretations.filter(function(interpretation) {
-                return (
-                    (interpretation.variant.clinvarVariantId && interpretation.variant.clinvarVariantId.toLowerCase().indexOf(searchTerm) !== -1) ||
-                    (interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm) !== -1) ||
-                    (interpretation.variant.carId && interpretation.variant.carId.toLowerCase().indexOf(searchTerm) !== -1) ||
-                    (interpretation.variant.hvgsNames && interpretation.variant.hgvsNames.GRCh38 && interpretation.variant.hgvsNames.GRCh38.toLowerCase().indexOf(searchTerm) !== -1) ||
-                    (interpretation.disease && interpretation.disease.orphaNumber && interpretation.disease.orphaNumber.indexOf(searchTerm) !== -1) ||
-                    (interpretation.disease && interpretation.disease.term && interpretation.disease.term.toLowerCase().indexOf(searchTerm) !== -1)
-                );
-            });
-        } else {
-            filteredInterpretations = interpretations;
-        }
-
         return (
             <div className="container">
                 <div className="row gdm-header">
                     <div className="col-sm-12 col-md-8">
-                        <h1>All Interpretations {searchTerm}</h1>
+                        <h1>All Interpretations</h1>
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <Form formClassName="form-std gdm-filter-form">
                             <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
-                                value={searchTerm} labelClassName="control-label" groupClassName="form-group" />
+                                value={this.state.searchTerm} labelClassName="control-label" groupClassName="form-group" />
                         </Form>
                     </div>
                 </div>
