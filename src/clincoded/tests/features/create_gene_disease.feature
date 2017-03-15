@@ -36,6 +36,11 @@ Feature: Create Gene Disease
 
 
     Scenario: Test GDM alert modal
+        When I visit "/logout"
+        Then I should see "Demo Login"
+        When I press "Demo Login"
+        And I wait for 10 seconds
+        Then I should see "Logout ClinGen Test Curator"
         When I visit "/gdm/"
         Then I should see "DICER1"
         When I fill in the css element field "input.form-control" with "FANCM"
@@ -49,3 +54,6 @@ Feature: Create Gene Disease
         Then I should see "A curation record already exists for "
         When I press the button "Curate"
         Then I should see an element with the css selector ".pmid-selection-add-btn" within 5 seconds
+        When I press "Logout ClinGen Test Curator"
+        And I wait for 5 seconds
+        Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
