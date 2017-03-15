@@ -37,7 +37,7 @@ class Gene(Item):
     })
 class OrphaPhenotype(Item):
     item_type = 'orphaphenotype'
-    schema = load_schema('clincoded:schemas/orphaPhenotype.json')
+    schema = load_schema('clincoded:schemas/orphaphenotype.json')
     name_key = 'orphaNumber'
 
 '''
