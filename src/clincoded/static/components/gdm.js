@@ -28,8 +28,13 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return {
             sortCol: 'gdm',
             reversed: false,
-            searchTerm: ''
+            searchTerm: '',
+            filteredGdms: []
         };
+    },
+
+    componentWillMount() {
+        this.setState({filteredGdms: this.props.context['@graph']});
     },
 
     // Handle clicks in the table header for sorting
@@ -74,39 +79,40 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange: function(e) {
-        var searchVal = this.q.getValue().toLowerCase();
-        this.setState({searchTerm: searchVal});
+    searchChange(e) {
+        let searchVal = this.q.getValue().toLowerCase();
+        this.setState({searchTerm: searchVal}, () => {
+            // Filter GDMs
+            let context = this.props.context;
+            let gdms = context['@graph'];
+            let searchTerm = this.state.searchTerm;
+            if (searchTerm && searchTerm.length) {
+                let filteredGdms = gdms.filter(function(gdm) {
+                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
+                });
+                this.setState({filteredGdms: filteredGdms});
+            } else {
+                this.setState({filteredGdms: gdms});
+            }
+        });
     },
 
-    render: function () {
-        var context = this.props.context;
-        var gdms = context['@graph'];
-        var searchTerm = this.state.searchTerm ? this.state.searchTerm : '';
-        var filteredGdms;
+    render() {
+        let filteredGdms = this.state.filteredGdms;
         var sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
-
-        // Filter GDMs
-        if (searchTerm && searchTerm.length) {
-            filteredGdms = gdms.filter(function(gdm) {
-                return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
-            });
-        } else {
-            filteredGdms = gdms;
-        }
 
         return (
             <div className="container">
                 <div className="row gdm-header">
                     <div className="col-sm-12 col-md-8">
-                        <h1>All Gene-Disease Records {searchTerm}</h1>
+                        <h1>All Gene-Disease Records</h1>
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <Form formClassName="form-std gdm-filter-form">
                             <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Gene or Disease" handleChange={this.searchChange}
-                                value={searchTerm} labelClassName="control-label" groupClassName="form-group" />
+                                value={this.state.searchTerm} labelClassName="control-label" groupClassName="form-group" />
                         </Form>
                     </div>
                 </div>
