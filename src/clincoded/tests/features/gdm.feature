@@ -2,10 +2,12 @@
 Feature: All GDMs
 
     Scenario: Test All GDMs
-        When I visit "/gdm/"
+        When I visit "/logout"
         Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
+        Then I should see "Logout ClinGen Test Curator"
+        When I visit "/gdm/"
         Then I should see "AGTR2"
         When I fill in the css element field "input.form-control" with "FANCM"
         Then I should not see "DICER1"
