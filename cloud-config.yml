@@ -143,8 +143,8 @@ runcmd:
 -   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_9.4
 -   sudo -u clincoded psql -c 'update transactions set xid = NULL'
 - fi
-- sudo -u clincoded python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
-- sudo -u clincoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
+- sudo -u clincoded python3.4 bootstrap.py -v 2.4.1 --setuptools-version 18.5
+555udo -u clincoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
 - until sudo -u postgres psql postgres -c ""; do sleep 10; done
 - sudo -u clincoded sh -c 'cat /dev/urandom | head -c 256 | base64 > session-secret.b64'
 - sudo -u clincoded bin/create-mapping production.ini --app-name app
