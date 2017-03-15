@@ -26,7 +26,7 @@ Feature: Generics
         And I should see "Severe combined"
         When I visit "/interpretations/"
         Then I should see "NM_000111"
-        When I fill in the css element field "input.form-control" with with "79452"
+        When I fill in the css element field "input.form-control" with "79452"
         Then I should not see "May 10" within 5 seconds
         Then I should see "Milroy disease"
         When I press "Logout ClinGen Test Curator"
