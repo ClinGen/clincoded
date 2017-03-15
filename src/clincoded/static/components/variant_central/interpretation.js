@@ -359,8 +359,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange: function(ref, e) {
-        var searchVal = this.refs[ref].getValue().toLowerCase();
+    searchChange: function(e) {
+        var searchVal = this.q.getValue().toLowerCase();
         this.setState({searchTerm: searchVal});
     },
 
@@ -384,7 +384,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
     render: function () {
         var context = this.props.context;
         var interpretations = context['@graph'];
-        var searchTerm = this.state.searchTerm;
+        var searchTerm = this.state.searchTerm ? this.state.searchTerm : '';
         var filteredInterpretations;
         var sortIconClass = {
             status: 'tcell-sort', variant: 'tcell-sort', disease: 'tcell-sort', moi: 'tcell-sort',
@@ -417,8 +417,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <Form formClassName="form-std gdm-filter-form">
-                            <Input type="text" ref="q" placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
-                                value={this.state.searchTerm} labelClassName="control-label" groupClassName="form-group" />
+                            <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
+                                value={searchTerm} labelClassName="control-label" groupClassName="form-group" />
                         </Form>
                     </div>
                 </div>
