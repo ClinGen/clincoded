@@ -38,7 +38,7 @@ Feature: Create Gene Disease
     Scenario: Test GDM alert modal
         When I visit "/gdm/"
         Then I should see "DICER1"
-        When I fill in "q" with "FANCM"
+        When I fill in the css element field "input.form-control" with "FANCM"
         Then I should not see "DICER1"
         When I visit "/create-gene-disease/"
         And I fill in "hgncgene" with "DICER1"
