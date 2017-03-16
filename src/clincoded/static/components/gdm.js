@@ -80,13 +80,13 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     handleChange(e) {
-        this.setState({searchTerm: e.target.value.toLowerCase()}, () => {
+        this.setState({searchTerm: e.target.value}, () => {
             // Filter GDMs
             let gdms = this.props.context['@graph'];
             let searchTerm = this.state.searchTerm;
             if (searchTerm && searchTerm.length) {
                 let filteredGdms = gdms.filter(function(gdm) {
-                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
+                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
                 });
                 this.setState({filteredGdms: filteredGdms});
             } else {
@@ -97,7 +97,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 
     render() {
         let filteredGdms = this.state.filteredGdms;
-        var sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
+        let sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         return (
