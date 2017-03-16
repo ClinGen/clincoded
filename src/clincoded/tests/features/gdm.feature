@@ -5,4 +5,5 @@ Feature: All GDMs
         When I visit "/gdm/"
         Then I should see "AGTR2"
         When I fill in "filterTerm" with "FANCM"
+        And I click the element with the css selector "div.notice-bar"
         Then I should not see "DICER1"
