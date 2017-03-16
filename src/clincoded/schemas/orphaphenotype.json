@@ -20,13 +20,13 @@
             "description": "Digital Orphanet ID.",
             "type": "string",
             "pattern": "^[0-9]{1,6}$",
-            "uniqueKey": "orphaphenotype:orphaNumber"
+            "uniqueKey": "OrphaPhenotype:orphaNumber"
         },
         "term": {
             "title": "Orphanet Term.",
             "description": "Ontology term describing Orphanet diseases.",
             "type":  "string",
-            "uniqueKey": "orphaphenotype:orphaNumber"
+            "uniqueKey": "OrphaPhenotype:orphaNumber"
         },
         "type": {
             "title": "Type.",

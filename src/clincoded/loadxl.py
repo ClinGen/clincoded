@@ -513,7 +513,7 @@ PHASE1_PIPELINES = {
     'publication': [
         remove_keys('datasets'),
     ],
-    'orphaPhenotype': [
+    'orphaphenotype': [
         remove_keys('active', "schema_version"),
     ],
     'annotation': [
