@@ -34,16 +34,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     componentWillMount() {
-        let gdms = this.props.context['@graph'];
-        let searchTerm = this.state.searchTerm;
-        if (searchTerm && searchTerm.length) {
-            let filteredGdms = gdms.filter(function(gdm) {
-                return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
-            });
-            this.setState({filteredGdms: filteredGdms});
-        } else {
-            this.setState({filteredGdms: gdms});
-        }
+        this.setState({filteredGdms: this.props.context['@graph']});
     },
 
     // Handle clicks in the table header for sorting
@@ -88,8 +79,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
-    handleChange(e) {
-        this.setState({searchTerm: e.target.value.toLowerCase()}, () => {
+    handleChange() {
+        this.setState({searchTerm: this.filterTerm.value.toLowerCase()}, () => {
             // Filter GDMs
             let gdms = this.props.context['@graph'];
             let searchTerm = this.state.searchTerm;
@@ -101,7 +92,6 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             } else {
                 this.setState({filteredGdms: gdms});
             }
-            alert("A filter term is entered: " + this.state.searchTerm);
         });
     },
 
@@ -118,8 +108,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
-                            value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
+                        <input type="text" name="filterTerm" placeholder="Filter by Gene or Disease" ref={(input) => this.filterTerm = input}
+                            defaultValue='' onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
                 <GdmStatusLegend />
