@@ -1030,7 +1030,7 @@ const CaseControlCuration = React.createClass({
     }
 });
 
-curator_page.register(CaseControlCuration, 'curator_page', 'case-control-curation');
+curator_page.register(CaseControlCuration, 'CuratorPage', 'case-control-curation');
 
 // Case-Control Name above other group curation panels.
 // Call with .call(this) to run in the same context as the calling component.

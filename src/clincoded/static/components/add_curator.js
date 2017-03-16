@@ -22,7 +22,7 @@ var AddCurator = React.createClass({
 
     getInitialState: function() {
         return {
-            errorMsg: '', // Error message to display 
+            errorMsg: '', // Error message to display
             submitBusy: false // REST operation in progress
         };
     },
@@ -35,7 +35,7 @@ var AddCurator = React.createClass({
         return valid;
     },
 
-    // Called 
+    // Called
     handleChange: function(e) {
         this.setState({errorMsg: ''});
     },
@@ -131,4 +131,4 @@ var AddCurator = React.createClass({
     }
 });
 
-globals.curator_page.register(AddCurator, 'curator_page', 'add-curator');
+globals.curator_page.register(AddCurator, 'CuratorPage', 'add-curator');

@@ -151,4 +151,4 @@ var ExperimentalSubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentalSubmit, 'curator_page', 'experimental-submit');
+globals.curator_page.register(ExperimentalSubmit, 'CuratorPage', 'experimental-submit');

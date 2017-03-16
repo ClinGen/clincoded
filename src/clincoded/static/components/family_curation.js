@@ -1361,7 +1361,7 @@ var FamilyCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
+globals.curator_page.register(FamilyCuration, 'CuratorPage', 'family-curation');
 
 
 // Family Name group curation panel. Call with .call(this) to run in the same context

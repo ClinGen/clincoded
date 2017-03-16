@@ -162,4 +162,4 @@ var CaseControlSubmit = module.exports.CaseControlSubmit = React.createClass({
     }
 });
 
-curator_page.register(CaseControlSubmit, 'curator_page', 'case-control-submit');
+curator_page.register(CaseControlSubmit, 'CuratorPage', 'case-control-submit');

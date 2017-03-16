@@ -834,7 +834,7 @@ var ProvisionalCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
+globals.curator_page.register(ProvisionalCuration,  'CuratorPage', 'provisional-curation');
 
 // Generate Classification Description page for url ../provisional-curation/?gdm=GDMId&classification=display
 var Classification = function() {

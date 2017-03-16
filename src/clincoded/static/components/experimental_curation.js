@@ -1315,7 +1315,7 @@ var ExperimentalCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
+globals.curator_page.register(ExperimentalCuration, 'CuratorPage', 'experimental-curation');
 
 
 // Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context

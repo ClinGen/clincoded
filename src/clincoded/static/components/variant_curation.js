@@ -466,7 +466,7 @@ var VariantCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(VariantCuration, 'curator_page', 'variant-curation');
+globals.curator_page.register(VariantCuration, 'CuratorPage', 'variant-curation');
 
 
 // Display a single variant curation viewer panel

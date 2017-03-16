@@ -167,4 +167,4 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(IndividualSubmit, 'curator_page', 'individual-submit');
+globals.curator_page.register(IndividualSubmit, 'CuratorPage', 'individual-submit');

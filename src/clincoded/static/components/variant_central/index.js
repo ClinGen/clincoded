@@ -498,4 +498,4 @@ var VariantCurationHub = React.createClass({
     }
 });
 
-globals.curator_page.register(VariantCurationHub, 'curator_page', 'variant-central');
+globals.curator_page.register(VariantCurationHub, 'CuratorPage', 'variant-central');

@@ -234,4 +234,4 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(FamilySubmit, 'curator_page', 'family-submit');
+globals.curator_page.register(FamilySubmit, 'CuratorPage', 'family-submit');

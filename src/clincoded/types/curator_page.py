@@ -17,13 +17,13 @@ from pyramid.location import lineage
         'title': 'Curator pages',
         'description': 'Pages for the curator action flow',
     })
-class curator_page(Item):
+class CuratorPage(Item):
     item_type = 'curator_page'
     schema = load_schema('clincoded:schemas/curator_page.json')
     name_key = 'name'
 
     def unique_keys(self, properties):
-        keys = super(curator_page, self).unique_keys(properties)
+        keys = super(CuratorPage, self).unique_keys(properties)
         parent = properties.get('parent')
         name = properties['name']
         value = name if parent is None else u'{}:{}'.format(parent, name)

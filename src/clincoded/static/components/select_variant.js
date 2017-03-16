@@ -114,4 +114,4 @@ var SelectVariant = React.createClass({
     }
 });
 
-globals.curator_page.register(SelectVariant, 'curator_page', 'select-variant');
+globals.curator_page.register(SelectVariant, 'CuratorPage', 'select-variant');

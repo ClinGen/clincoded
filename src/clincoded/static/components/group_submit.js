@@ -185,4 +185,4 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(GroupSubmit, 'curator_page', 'group-submit');
+globals.curator_page.register(GroupSubmit, 'CuratorPage', 'group-submit');

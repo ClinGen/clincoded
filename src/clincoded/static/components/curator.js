@@ -66,7 +66,7 @@ var CuratorPage = module.exports.CuratorPage = React.createClass({
     }
 });
 
-globals.content_views.register(CuratorPage, 'curator_page');
+globals.content_views.register(CuratorPage, 'CuratorPage');
 
 
 // Curation data header for Gene:Disease

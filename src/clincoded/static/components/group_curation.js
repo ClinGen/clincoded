@@ -571,7 +571,7 @@ var GroupCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
+globals.curator_page.register(GroupCuration, 'CuratorPage', 'group-curation');
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context

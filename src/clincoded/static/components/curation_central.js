@@ -188,7 +188,7 @@ var CurationCentral = React.createClass({
     }
 });
 
-globals.curator_page.register(CurationCentral, 'curator_page', 'curation-central');
+globals.curator_page.register(CurationCentral, 'CuratorPage', 'curation-central');
 
 
 var BetaNote = React.createClass({

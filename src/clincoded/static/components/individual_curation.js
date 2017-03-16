@@ -952,7 +952,7 @@ var IndividualCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
+globals.curator_page.register(IndividualCuration, 'CuratorPage', 'individual-curation');
 
 // HTML labels for inputs follow.
 var LabelPanelTitle = React.createClass({
