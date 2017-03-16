@@ -4,5 +4,5 @@ Feature: All GDMs
     Scenario: Test All GDMs
         When I visit "/gdm/"
         Then I should see "AGTR2"
-        When I fill in "filterTerm" with "FANCM"
+        When I fill in "filterTerm" with "fancm"
         Then I should not see "DICER1"
