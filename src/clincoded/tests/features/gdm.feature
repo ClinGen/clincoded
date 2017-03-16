@@ -9,7 +9,7 @@ Feature: All GDMs
         Then I should see "Logout ClinGen Test Curator"
         When I visit "/gdm/"
         Then I should see "AGTR2"
-        When I fill in the css element field "input.form-control" with "FANCM"
+        When I type "FANCM" to "filterResults"
         Then I should not see "DICER1"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
