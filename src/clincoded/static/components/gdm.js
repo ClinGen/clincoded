@@ -28,28 +28,22 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return {
             sortCol: 'gdm',
             reversed: false,
-            searchTerm: '',
+            searchTerm: 'dicer1',
             filteredGdms: []
         };
     },
 
     componentWillMount() {
-        this.setState({filteredGdms: this.props.context['@graph']});
-    },
-
-    componentDidMount() {
-        this.setState({searchTerm: 'dicer1'}, () => {
-            let gdms = this.state.filteredGdms;
-            let searchTerm = this.state.searchTerm;
-            if (searchTerm && searchTerm.length) {
-                let filteredGdms = gdms.filter(function(gdm) {
-                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
-                });
-                this.setState({filteredGdms: filteredGdms});
-            } else {
-                this.setState({filteredGdms: gdms});
-            }
-        });
+        let gdms = this.props.context['@graph'];
+        let searchTerm = this.state.searchTerm;
+        if (searchTerm && searchTerm.length) {
+            let filteredGdms = gdms.filter(function(gdm) {
+                return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
+            });
+            this.setState({filteredGdms: filteredGdms});
+        } else {
+            this.setState({filteredGdms: gdms});
+        }
     },
 
     // Handle clicks in the table header for sorting
