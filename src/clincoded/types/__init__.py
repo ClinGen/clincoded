@@ -551,7 +551,7 @@ class Annotation(Item):
     })
 class CaseControl(Item):
     item_type = 'casecontrol'
-    schema = load_schema('clincoded:schemas/caseControl.json')
+    schema = load_schema('clincoded:schemas/casecontrol.json')
     name_key = 'uuid'
     embedded = [
         'submitted_by',
@@ -974,7 +974,7 @@ class Assessment(Item):
     })
 class EvidenceScore(Item):
     item_type = 'evidencescore'
-    schema = load_schema('clincoded:schemas/evidenceScore.json')
+    schema = load_schema('clincoded:schemas/evidencescore.json')
     name_key = 'uuid'
     embedded = [
         'submitted_by',
@@ -1040,7 +1040,7 @@ class EvidenceScore(Item):
     })
 class ProvisionalClassification(Item):
     item_type = 'provisionalclassification'
-    schema = load_schema('clincoded:schemas/provisionalClassification.json')
+    schema = load_schema('clincoded:schemas/provisionalclassification.json')
     name_key = 'uuid'
     embedded = [
         'submitted_by',
@@ -1500,7 +1500,7 @@ class Document(ItemWithAttachment, Item):
     })
 class History(Item):
     item_type = 'history'
-    schema = load_schema('clincoded:schemas/curatorHistory.json')
+    schema = load_schema('clincoded:schemas/curatorhistory.json')
     embedded = [
         'primary',
         'meta.gdm.gene',
