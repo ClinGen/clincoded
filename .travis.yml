@@ -19,7 +19,7 @@ env:
 matrix:
   include:
     - python: "3.4"
-      env: BROWSER=Chrome
+      env: BROWSER=Firefox
     - python: "3.4"
       env: BROWSER=
 before_install:
