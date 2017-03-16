@@ -80,8 +80,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     searchChange(e) {
-        let searchVal = this.q.getValue().toLowerCase();
-        this.setState({searchTerm: searchVal}, () => {
+        // let searchVal = this.q.getValue().toLowerCase();
+        this.setState({searchTerm: e.target.value.toLowerCase()}, () => {
             // Filter GDMs
             let context = this.props.context;
             let gdms = context['@graph'];
@@ -110,10 +110,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <Form formClassName="form-std gdm-filter-form">
-                            <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Gene or Disease" handleChange={this.searchChange}
-                                value={this.state.searchTerm} labelClassName="control-label" groupClassName="form-group" />
-                        </Form>
+                        <input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Gene or Disease" onChange={this.searchChange}
+                            value={this.state.searchTerm} className="form-group" />
                     </div>
                 </div>
                 <GdmStatusLegend />
