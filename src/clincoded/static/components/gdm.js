@@ -80,6 +80,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     handleChange() {
+        alert("Changed!");
         this.setState({searchTerm: this.filterTerm.value.toLowerCase()}, () => {
             // Filter GDMs
             let gdms = this.props.context['@graph'];
