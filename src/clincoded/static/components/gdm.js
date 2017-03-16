@@ -28,7 +28,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return {
             sortCol: 'gdm',
             reversed: false,
-            searchTerm: 'agtr2',
+            searchTerm: '',
             filteredGdms: []
         };
     },
@@ -88,8 +88,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange(e) {
-        // let searchVal = this.q.getValue().toLowerCase();
+    handleChange(e) {
         this.setState({searchTerm: e.target.value.toLowerCase()}, () => {
             // Filter GDMs
             let gdms = this.props.context['@graph'];
@@ -102,6 +101,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             } else {
                 this.setState({filteredGdms: gdms});
             }
+            alert("A filter term is entered: " + this.state.searchTerm);
         });
     },
 
@@ -119,7 +119,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
-                            value={this.state.searchTerm} onChange={this.searchChange} className="form-control" />
+                            value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
                 <GdmStatusLegend />
