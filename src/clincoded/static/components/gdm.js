@@ -125,8 +125,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Gene or Disease" onChange={this.searchChange}
-                            value={this.state.searchTerm} className="form-control" name="filterResults" />
+                        <h2>{this.state.searchTerm}</h2>
                     </div>
                 </div>
                 <GdmStatusLegend />
