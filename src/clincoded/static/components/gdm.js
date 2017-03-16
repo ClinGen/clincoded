@@ -95,6 +95,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         });
     },
 
+    updateChange() {
+        alert("Input value is " + this.state.searchTerm);
+    },
+
     render() {
         let filteredGdms = this.state.filteredGdms;
         var sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
@@ -109,7 +113,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
                         <input type="text" name="filterTerm" placeholder="Filter by Gene or Disease" ref={(input) => this.filterTerm = input}
-                            defaultValue='' onChange={this.handleChange} className="form-control" />
+                            defaultValue='' onBlur={this.updateChange} className="form-control" />
                     </div>
                 </div>
                 <GdmStatusLegend />
