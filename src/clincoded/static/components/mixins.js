@@ -297,7 +297,7 @@ module.exports.Auth0 = {
                 // Server session creds might have changed.
                 if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
                     if (!retrying) {
-                        window.setTimeout(this.handleAuth0Login);
+                        window.setTimeout(this.handleAuth0Login, authResult, true);
                         return;
                     }
                 }
