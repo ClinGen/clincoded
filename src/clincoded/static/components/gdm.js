@@ -5,9 +5,6 @@ var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
 
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
 var truncateString = globals.truncateString;
 
 
@@ -22,7 +19,6 @@ var statusMappings = {
 };
 
 var GdmCollection = module.exports.GdmCollection = React.createClass({
-    mixins: [FormMixin],
 
     getInitialState: function() {
         return {
@@ -110,7 +106,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     <div className="col-sm-12 col-md-8">
                         <h1>All Gene-Disease Records {this.state.searchTerm}</h1>
                     </div>
-                    <div className="col-md-1"><button name="clickButton" onClick={this.showText}>Click Me</button></div>
+                    <div className="col-md-1"><a className="btn btn-primary" onClick={this.showText}>Click Me</a></div>
                     <div className="col-sm-12 col-md-3">
                         <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
                             value='' onChange={this.handleChange} className="form-control" />
