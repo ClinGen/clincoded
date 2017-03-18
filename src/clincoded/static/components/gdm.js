@@ -108,12 +108,12 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             <div className="container">
                 <div className="row gdm-header">
                     <div className="col-sm-12 col-md-8">
-                        <h1>All Gene-Disease Records</h1>
+                        <h1>All Gene-Disease Records {this.state.searchTerm}</h1>
                     </div>
                     <div className="col-md-1"><button name="clickButton" onClick={this.showText}>Click Me</button></div>
                     <div className="col-sm-12 col-md-3">
                         <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
-                            value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
+                            value='' onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
                 <GdmStatusLegend />
