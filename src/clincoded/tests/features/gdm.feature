@@ -6,4 +6,4 @@ Feature: All GDMs
         Then I should see "This is a demo version of the site"
         When I press "Click Me"
         And I wait for 1 seconds
-        Then I should see "I am clicked."
+        Then I should see "I am clicked"
