@@ -95,6 +95,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         });
     },
 
+    showText() {
+        this.setState({searchTerm: 'I am clicked'});
+    },
+
     render() {
         let filteredGdms = this.state.filteredGdms;
         let sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
@@ -106,7 +110,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     <div className="col-sm-12 col-md-8">
                         <h1>All Gene-Disease Records</h1>
                     </div>
-                    <div className="col-md-1"></div>
+                    <div className="col-md-1"><button name="clickButton" onClick={this.showText}>Click Me</button></div>
                     <div className="col-sm-12 col-md-3">
                         <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
