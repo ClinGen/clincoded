@@ -136,14 +136,14 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {filteredGdms.sort(this.sortCol).map(gdm => {
+                        {filteredGdms.map(gdm => {
                             var annotationOwners = curator.getAnnotationOwners(gdm);
                             var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                             var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
                             var term = truncateString(gdm.disease.term, 30);
                             var createdTime = moment(gdm.date_created);
                             var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                            var participants = annotationOwners.map(function(owner) { return owner.title; }).join(', ');
+                            var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
                             var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                             var iconClass = 'icon gdm-status-icon-' + statusString;
 
