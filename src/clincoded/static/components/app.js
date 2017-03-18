@@ -191,13 +191,10 @@ var Header = React.createClass({
 // Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo, production (clingen customs)
 var Notice = React.createClass({
     getInitialState: function () {
-        return { noticeVisible: true, searchTerm: '' };
+        return { noticeVisible: true };
     },
     onClick: function() {
         this.setState({ noticeVisible: false });
-    },
-    showText() {
-        this.setState({searchTerm: ' I am clicked. '});
     },
     render: function() {
         var noticeClass = 'notice-bar alert alert-' + this.props.noticeType;
@@ -206,8 +203,6 @@ var Notice = React.createClass({
                 <div className={noticeClass} role="alert">
                     <div className="container">
                         {this.props.noticeMessage}
-                        {this.state.searchTerm}
-                        <a className="btn btn-primary pull-right" onClick={this.showText}>Click Me</a>
                         {this.props.noticeClosable ?
                         <button type="button" className="close" onClick={this.onClick}>&times;</button>
                         : null}
