@@ -116,23 +116,23 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
-                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
+                            <div className="table-cell-gdm-status tcell-sortable">
                                 <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
                             </div>
-                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
+                            <div className="table-cell-gdm-main tcell-sortable">
                                 <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
                                 <div>Mode</div>
                             </div>
                             <div className="table-cell-gdm">
                                 Participants
                             </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
+                            <div className="table-cell-gdm tcell-sortable">
                                 Last Edited<span className={sortIconClass.last}></span>
                             </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'creator')}>
+                            <div className="table-cell-gdm tcell-sortable">
                                 Creator<span className={sortIconClass.creator}></span>
                             </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'created')}>
+                            <div className="table-cell-gdm tcell-sortable">
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
