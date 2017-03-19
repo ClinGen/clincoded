@@ -182,9 +182,11 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {filteredGdms.sort(this.sortCol).map(gdm => {
-                            return (this.renderGdmRow(gdm));
-                        })}
+                        <div>
+                            {filteredGdms.sort(this.sortCol).map(gdm => {
+                                return (this.renderGdmRow(gdm));
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
