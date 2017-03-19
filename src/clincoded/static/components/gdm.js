@@ -99,29 +99,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 
         return (
             <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
-                <div className="table-cell-gdm-status">
-                    text
-                </div>
-
-                <div className="table-cell-gdm-main">
-                    text
-                </div>
-
-                <div className="table-cell-gdm">
-                    text
-                </div>
-
-                <div className="table-cell-gdm">
-                    text
-                </div>
-
-                <div className="table-cell-gdm">
-                    text
-                </div>
-
-                <div className="table-cell-gdm">
-                    text
-                </div>
+                text
             </a>
         );
     },
