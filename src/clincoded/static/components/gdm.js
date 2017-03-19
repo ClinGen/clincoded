@@ -98,6 +98,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     renderGdmRow(gdm) {
         var annotationOwners = curator.getAnnotationOwners(gdm);
         var latestAnnotation = curator.findLatestAnnotation(gdm);
+        var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+        var participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
         var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
         var iconClass = 'icon gdm-status-icon-' + statusString;
 
@@ -109,10 +111,11 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 
                 <div className="table-cell-gdm-main">
                     <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
+                    <div>{mode}</div>
                 </div>
 
                 <div className="table-cell-gdm">
-                    participants
+                    {participants}
                 </div>
 
                 <div className="table-cell-gdm">
