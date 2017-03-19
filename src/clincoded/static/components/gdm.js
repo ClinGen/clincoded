@@ -96,10 +96,31 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     renderGdmRow(gdm) {
-
         return (
-            <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
-                text
+            <a className="table-row-gdm">
+                <div className="table-cell-gdm-status">
+                    text
+                </div>
+
+                <div className="table-cell-gdm-main">
+                    text
+                </div>
+
+                <div className="table-cell-gdm">
+                    text
+                </div>
+
+                <div className="table-cell-gdm">
+                    text
+                </div>
+
+                <div className="table-cell-gdm">
+                    text
+                </div>
+
+                <div className="table-cell-gdm">
+                    text
+                </div>
             </a>
         );
     },
@@ -145,9 +166,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {filteredGdms.sort(this.sortCol).map(gdm => {
-                            return (this.renderGdmRow(gdm));
-                        })}
+                        {this.renderGdmRow()}
                     </div>
                 </div>
             </div>
