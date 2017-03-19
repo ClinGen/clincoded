@@ -52,7 +52,7 @@
     "html5shiv": "^3.7.3",
     "jquery": "^3.1.1",
     "minifyify": "^7.3.2",
-    "moment": "^2.10.3",
+    "moment": "^2.18.0",
     "node-ckeditor": "^4.3.2",
     "react": "^15.4.0",
     "react-dom": "^15.4.0",
