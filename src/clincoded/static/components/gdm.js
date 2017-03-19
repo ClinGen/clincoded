@@ -138,17 +138,16 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                         </div>
                         {filteredGdms.sort(this.sortCol).map(gdm => {
                             var annotationOwners = curator.getAnnotationOwners(gdm);
-                            var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
+                            var latestAnnotation = gdm && curator.findLatestAnnotation(gdm) ? curator.findLatestAnnotation(gdm) : null;
                             var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-                            var term = truncateString(gdm.disease.term, 30);
                             var createdTime = moment(gdm.date_created);
                             var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                            var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
+                            var participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
                             var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                             var iconClass = 'icon gdm-status-icon-' + statusString;
 
                             return (
-                                <div className="table-row-gdm" key={gdm.uuid}>
+                                <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
                                     <div className="table-cell-gdm-status">
                                         <span className={iconClass} title={gdm.gdm_status}></span>
                                     </div>
@@ -179,7 +178,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                         <div>{createdTime.format("YYYY MMM DD")}</div>
                                         <div>{createdTime.format("h:mm a")}</div>
                                     </div>
-                                </div>
+                                </a>
                             );
                         })}
                     </div>
