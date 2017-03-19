@@ -99,7 +99,6 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         var annotationOwners = curator.getAnnotationOwners(gdm);
         var latestAnnotation = curator.findLatestAnnotation(gdm);
         var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-        var createdTime = moment(gdm.date_created);
         var participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
         var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
         var iconClass = 'icon gdm-status-icon-' + statusString;
@@ -128,8 +127,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 </div>
 
                 <div className="table-cell-gdm">
-                    <div>{createdTime.format("YYYY MMM DD")}</div>
-                    <div>{createdTime.format("h:mm a")}</div>
+                    <div>{moment(gdm.date_created).utc().format("YYYY MMM DD")}</div>
+                    <div>{moment(gdm.date_created).utc().format("h:mm a")}</div>
                 </div>
             </a>
         );
