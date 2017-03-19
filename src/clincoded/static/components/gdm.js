@@ -96,31 +96,35 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     renderGdmRow(gdm) {
+        var annotationOwners = curator.getAnnotationOwners(gdm);
+        var latestAnnotation = curator.findLatestAnnotation(gdm);
+        var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
+        var iconClass = 'icon gdm-status-icon-' + statusString;
 
         return (
             <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
                 <div className="table-cell-gdm-status">
-                    text
+                    <span className={iconClass} title={gdm.gdm_status}></span>
                 </div>
 
                 <div className="table-cell-gdm-main">
-                    text
+                    <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
                 </div>
 
                 <div className="table-cell-gdm">
-                    text
+                    participants
                 </div>
 
                 <div className="table-cell-gdm">
-                    text
+                    latestTime
                 </div>
 
                 <div className="table-cell-gdm">
-                    text
+                    <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
                 </div>
 
                 <div className="table-cell-gdm">
-                    text
+                    createdTime
                 </div>
             </a>
         );
