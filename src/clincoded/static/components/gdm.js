@@ -119,7 +119,12 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 </div>
 
                 <div className="table-cell-gdm">
-                    latestTime
+                    {latestAnnotation && latestAnnotation.date_created ?
+                        <div>
+                            <div>{moment(latestAnnotation.date_created).format("YYYY MMM DD")}</div>
+                            <div>{moment(latestAnnotation.date_created).format("h:mm a")}</div>
+                        </div>
+                    : null}
                 </div>
 
                 <div className="table-cell-gdm">
@@ -127,8 +132,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 </div>
 
                 <div className="table-cell-gdm">
-                    <div>{moment(gdm.date_created).utc().format("YYYY MMM DD")}</div>
-                    <div>{moment(gdm.date_created).utc().format("h:mm a")}</div>
+                    <div>{moment(gdm.date_created).format("YYYY MMM DD")}</div>
+                    <div>{moment(gdm.date_created).format("h:mm a")}</div>
                 </div>
             </a>
         );
