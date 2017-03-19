@@ -136,7 +136,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {filteredGdms.map(gdm => {
+                        {filteredGdms.sort(this.sortCol).map(gdm => {
                             var annotationOwners = curator.getAnnotationOwners(gdm);
                             var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                             var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
@@ -148,7 +148,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             var iconClass = 'icon gdm-status-icon-' + statusString;
 
                             return (
-                                <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
+                                <div className="table-row-gdm" key={gdm.uuid}>
                                     <div className="table-cell-gdm-status">
                                         <span className={iconClass} title={gdm.gdm_status}></span>
                                     </div>
@@ -179,7 +179,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                         <div>{createdTime.format("YYYY MMM DD")}</div>
                                         <div>{createdTime.format("h:mm a")}</div>
                                     </div>
-                                </a>
+                                </div>
                             );
                         })}
                     </div>
