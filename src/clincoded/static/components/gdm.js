@@ -96,46 +96,31 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     renderGdmRow(gdm) {
-        var annotationOwners = curator.getAnnotationOwners(gdm);
-        var latestAnnotation = gdm && curator.findLatestAnnotation(gdm) ? curator.findLatestAnnotation(gdm) : null;
-        var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-        var createdTime = moment(gdm.date_created);
-        var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-        var participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
-        var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
-        var iconClass = 'icon gdm-status-icon-' + statusString;
 
         return (
             <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
                 <div className="table-cell-gdm-status">
-                    <span className={iconClass} title={gdm.gdm_status}></span>
+                    text
                 </div>
 
                 <div className="table-cell-gdm-main">
-                    <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
-                    <div>{mode}</div>
+                    text
                 </div>
 
                 <div className="table-cell-gdm">
-                    {participants}
+                    text
                 </div>
 
                 <div className="table-cell-gdm">
-                    {latestTime ?
-                        <div>
-                            <div>{latestTime.format("YYYY MMM DD")}</div>
-                            <div>{latestTime.format("h:mm a")}</div>
-                        </div>
-                    : null}
+                    text
                 </div>
 
                 <div className="table-cell-gdm">
-                    <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
+                    text
                 </div>
 
                 <div className="table-cell-gdm">
-                    <div>{createdTime.format("YYYY MMM DD")}</div>
-                    <div>{createdTime.format("h:mm a")}</div>
+                    text
                 </div>
             </a>
         );
@@ -182,11 +167,9 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        <div>
-                            {filteredGdms.sort(this.sortCol).map(gdm => {
-                                return (this.renderGdmRow(gdm));
-                            })}
-                        </div>
+                        {filteredGdms.sort(this.sortCol).map(gdm => {
+                            return (this.renderGdmRow(gdm));
+                        })}
                     </div>
                 </div>
             </div>
