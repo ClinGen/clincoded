@@ -116,33 +116,31 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
-                            <div className="table-cell-gdm-status tcell-sortable">
+                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
                                 <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
                             </div>
-                            <div className="table-cell-gdm-main tcell-sortable">
+                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
                                 <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
                                 <div>Mode</div>
                             </div>
                             <div className="table-cell-gdm">
                                 Participants
                             </div>
-                            <div className="table-cell-gdm tcell-sortable">
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
                                 Last Edited<span className={sortIconClass.last}></span>
                             </div>
-                            <div className="table-cell-gdm tcell-sortable">
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'creator')}>
                                 Creator<span className={sortIconClass.creator}></span>
                             </div>
-                            <div className="table-cell-gdm tcell-sortable">
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'created')}>
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
                         {filteredGdms.sort(this.sortCol).map(gdm => {
                             var annotationOwners = curator.getAnnotationOwners(gdm);
-                            var latestAnnotation = gdm && curator.findLatestAnnotation(gdm) ? curator.findLatestAnnotation(gdm) : null;
-                            var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+                            var latestAnnotation = gdm ? curator.findLatestAnnotation(gdm) : null;
                             var createdTime = moment(gdm.date_created);
                             var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                            var participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
                             var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                             var iconClass = 'icon gdm-status-icon-' + statusString;
 
@@ -154,11 +152,11 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 
                                     <div className="table-cell-gdm-main">
                                         <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
-                                        <div>{mode}</div>
+                                        <div>mode</div>
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        {participants}
+                                        participant
                                     </div>
 
                                     <div className="table-cell-gdm">
