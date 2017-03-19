@@ -95,6 +95,52 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         this.setState({searchTerm: 'I am clicked'});
     },
 
+    renderGdmRow(gdm) {
+        var annotationOwners = curator.getAnnotationOwners(gdm);
+        var latestAnnotation = gdm && curator.findLatestAnnotation(gdm) ? curator.findLatestAnnotation(gdm) : null;
+        var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+        var createdTime = moment(gdm.date_created);
+        var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
+        var participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
+        var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
+        var iconClass = 'icon gdm-status-icon-' + statusString;
+
+        return (
+            <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
+                <div className="table-cell-gdm-status">
+                    <span className={iconClass} title={gdm.gdm_status}></span>
+                </div>
+
+                <div className="table-cell-gdm-main">
+                    <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
+                    <div>{mode}</div>
+                </div>
+
+                <div className="table-cell-gdm">
+                    {participants}
+                </div>
+
+                <div className="table-cell-gdm">
+                    {latestTime ?
+                        <div>
+                            <div>{latestTime.format("YYYY MMM DD")}</div>
+                            <div>{latestTime.format("h:mm a")}</div>
+                        </div>
+                    : null}
+                </div>
+
+                <div className="table-cell-gdm">
+                    <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
+                </div>
+
+                <div className="table-cell-gdm">
+                    <div>{createdTime.format("YYYY MMM DD")}</div>
+                    <div>{createdTime.format("h:mm a")}</div>
+                </div>
+            </a>
+        );
+    },
+
     render() {
         let filteredGdms = this.state.filteredGdms;
         let sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
@@ -137,47 +183,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             </div>
                         </div>
                         {filteredGdms.sort(this.sortCol).map(gdm => {
-                            var annotationOwners = curator.getAnnotationOwners(gdm);
-                            var latestAnnotation = gdm ? curator.findLatestAnnotation(gdm) : null;
-                            var createdTime = moment(gdm.date_created);
-                            var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                            var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
-                            var iconClass = 'icon gdm-status-icon-' + statusString;
-
-                            return (
-                                <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
-                                    <div className="table-cell-gdm-status">
-                                        <span className={iconClass} title={gdm.gdm_status}></span>
-                                    </div>
-
-                                    <div className="table-cell-gdm-main">
-                                        <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
-                                        <div>mode</div>
-                                    </div>
-
-                                    <div className="table-cell-gdm">
-                                        participant
-                                    </div>
-
-                                    <div className="table-cell-gdm">
-                                        {latestTime ?
-                                            <div>
-                                                <div>{latestTime.format("YYYY MMM DD")}</div>
-                                                <div>{latestTime.format("h:mm a")}</div>
-                                            </div>
-                                        : null}
-                                    </div>
-
-                                    <div className="table-cell-gdm">
-                                        <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
-                                    </div>
-
-                                    <div className="table-cell-gdm">
-                                        <div>{createdTime.format("YYYY MMM DD")}</div>
-                                        <div>{createdTime.format("h:mm a")}</div>
-                                    </div>
-                                </a>
-                            );
+                            return (this.renderGdmRow(gdm));
                         })}
                     </div>
                 </div>
