@@ -12,6 +12,8 @@ pytestmark = [
 ]
 
 scenarios(
+    'generics.feature',
+    'create_gene_disease.feature',
     'gdm.feature',
 )
 

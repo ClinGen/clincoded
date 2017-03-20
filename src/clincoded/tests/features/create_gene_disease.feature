@@ -43,7 +43,7 @@ Feature: Create Gene Disease
         Then I should see "Logout ClinGen Test Curator"
         When I visit "/gdm/"
         Then I should see "DICER1"
-        When I fill in the css element field "input.form-control" with "FANCM"
+        When I fill in "filterTerm" with "FANCM"
         Then I should not see "DICER1"
         When I visit "/create-gene-disease/"
         And I fill in "hgncgene" with "DICER1"
