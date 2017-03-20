@@ -159,8 +159,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                     <div className="table-cell-gdm">
                                         {latestAnnotation ?
                                             <div>
-                                                <div>{moment(latestAnnotation.date_created, moment.ISO_8601, true).format("YYYY MMM DD")}</div>
-                                                <div>{moment(latestAnnotation.date_created, moment.ISO_8601, true).format("h:mm a")}</div>
+                                                <div>{moment.parseZone(latestAnnotation.date_created).local().format("YYYY MMM DD")}</div>
+                                                <div>{moment.parseZone(latestAnnotation.date_created).local().format("h:mm a")}</div>
                                             </div>
                                         : null}
                                     </div>
@@ -170,8 +170,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        <div>{moment(gdm.date_created, moment.ISO_8601, true).format("YYYY MMM DD")}</div>
-                                        <div>{moment(gdm.date_created, moment.ISO_8601, true).format("h:mm a")}</div>
+                                        <div>{moment.parseZone(gdm.date_created).local().format("YYYY MMM DD")}</div>
+                                        <div>{moment.parseZone(gdm.date_created).local().format("h:mm a")}</div>
                                     </div>
                                 </a>
                             );
