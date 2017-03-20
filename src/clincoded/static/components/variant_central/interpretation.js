@@ -491,8 +491,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     <div className="table-cell-gdm">
                                         {latestEvaluation ?
                                             <div>
-                                                <div>{moment(latestEvaluation.date_created, moment.ISO_8601, true).format("YYYY MMM DD")}</div>
-                                                <div>{moment(latestEvaluation.date_created, moment.ISO_8601, true).format("h:mm a")}</div>
+                                                <div>{moment.parseZone(latestEvaluation.date_created).local().format("YYYY MMM DD")}</div>
+                                                <div>{moment.parseZone(latestEvaluation.date_created).local().format("h:mm a")}</div>
                                             </div>
                                         : null}
                                     </div>
@@ -502,8 +502,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        <div>{moment(interpretation.date_created, moment.ISO_8601, true).format("YYYY MMM DD")}</div>
-                                        <div>{moment(interpretation.date_created, moment.ISO_8601, true).format("h:mm a")}</div>
+                                        <div>{moment.parseZone(interpretation.date_created).local().format("YYYY MMM DD")}</div>
+                                        <div>{moment.parseZone(interpretation.date_created).local().format("h:mm a")}</div>
                                     </div>
                                 </a>
                             );
