@@ -301,8 +301,6 @@ var statusMappings = {
 };
 
 var InterpretationCollection = module.exports.InterpretationCollection = React.createClass({
-    mixins: [FormMixin],
-
     getInitialState: function() {
         return {
             sortCol: 'variant',
@@ -364,9 +362,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange(e) {
-        let searchVal = this.q.getValue().toLowerCase();
-        this.setState({searchTerm: searchVal}, () => {
+    handleChange(e) {
+        this.setState({searchTerm: e.target.value}, () => {
             // Filter Interpretations
             let context = this.props.context;
             let interpretations = context['@graph'];
@@ -374,12 +371,12 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
             if (searchTerm && searchTerm.length) {
                 let filteredInterpretations = interpretations.filter(function(interpretation) {
                     return (
-                        (interpretation.variant.clinvarVariantId && interpretation.variant.clinvarVariantId.toLowerCase().indexOf(searchTerm) !== -1) ||
-                        (interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm) !== -1) ||
-                        (interpretation.variant.carId && interpretation.variant.carId.toLowerCase().indexOf(searchTerm) !== -1) ||
-                        (interpretation.variant.hvgsNames && interpretation.variant.hgvsNames.GRCh38 && interpretation.variant.hgvsNames.GRCh38.toLowerCase().indexOf(searchTerm) !== -1) ||
-                        (interpretation.disease && interpretation.disease.orphaNumber && interpretation.disease.orphaNumber.indexOf(searchTerm) !== -1) ||
-                        (interpretation.disease && interpretation.disease.term && interpretation.disease.term.toLowerCase().indexOf(searchTerm) !== -1)
+                        (interpretation.variant.clinvarVariantId && interpretation.variant.clinvarVariantId.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (interpretation.variant.carId && interpretation.variant.carId.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (interpretation.variant.hvgsNames && interpretation.variant.hgvsNames.GRCh38 && interpretation.variant.hgvsNames.GRCh38.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (interpretation.disease && interpretation.disease.orphaNumber && interpretation.disease.orphaNumber.indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (interpretation.disease && interpretation.disease.term && interpretation.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)
                     );
                 });
                 this.setState({filteredInterpretations: filteredInterpretations});
@@ -422,10 +419,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <Form formClassName="form-std gdm-filter-form">
-                            <Input type="text" ref={(input) => { this.q = input; }} placeholder="Filter by Variant or Disease" handleChange={this.searchChange}
-                                value={this.state.searchTerm} labelClassName="control-label" groupClassName="form-group" />
-                        </Form>
+                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Variant or Disease"
+                            value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
                 <InterpretationStatusLegend />
@@ -496,8 +491,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     <div className="table-cell-gdm">
                                         {latestTime ?
                                             <div>
-                                                <div>{latestTime.format("YYYY MMM DD")}</div>
-                                                <div>{latestTime.format("h:mm a")}</div>
+                                                <div>{latestTime.utc().format("YYYY MMM DD")}</div>
+                                                <div>{latestTime.utc().format("h:mm a")}</div>
                                             </div>
                                         : null}
                                     </div>
@@ -507,8 +502,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        <div>{createdTime.format("YYYY MMM DD")}</div>
-                                        <div>{createdTime.format("h:mm a")}</div>
+                                        <div>{createdTime.utc().format("YYYY MMM DD")}</div>
+                                        <div>{createdTime.utc().format("h:mm a")}</div>
                                     </div>
                                 </a>
                             );
