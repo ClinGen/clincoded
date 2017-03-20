@@ -19,7 +19,6 @@ var statusMappings = {
 };
 
 var GdmCollection = module.exports.GdmCollection = React.createClass({
-
     getInitialState: function() {
         return {
             sortCol: 'gdm',
