@@ -24,7 +24,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             sortCol: 'gdm',
             reversed: false,
             searchTerm: '',
-            filteredGdms: []
+            filteredGdms: [],
+            errors: null
         };
     },
 
@@ -75,19 +76,23 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     handleChange(e) {
-        this.setState({searchTerm: e.target.value}, () => {
-            // Filter GDMs
-            let gdms = this.props.context['@graph'];
-            let searchTerm = this.state.searchTerm;
-            if (searchTerm && searchTerm.length) {
-                let filteredGdms = gdms.filter(function(gdm) {
-                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
-                });
-                this.setState({filteredGdms: filteredGdms});
-            } else {
-                this.setState({filteredGdms: gdms});
-            }
-        });
+        try {
+            this.setState({searchTerm: e.target.value}, () => {
+                // Filter GDMs
+                let gdms = this.props.context['@graph'];
+                let searchTerm = this.state.searchTerm;
+                if (searchTerm && searchTerm.length) {
+                    let filteredGdms = gdms.filter(function(gdm) {
+                        return gdm.gene.symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                    });
+                    this.setState({filteredGdms: filteredGdms});
+                } else {
+                    this.setState({filteredGdms: gdms});
+                }
+            });
+        } catch (err) {
+            this.setState({errors: err});
+        }
     },
 
     render() {
@@ -108,33 +113,15 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
-                <GdmStatusLegend />
-                <div className="table-responsive">
-                    <div className="table-gdm">
-                        <div className="table-header-gdm">
-                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
-                                <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
-                            </div>
-                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
-                                <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
-                                <div>Mode</div>
-                            </div>
-                            <div className="table-cell-gdm">
-                                Participants
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
-                                Last Edited<span className={sortIconClass.last}></span>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'creator')}>
-                                Creator<span className={sortIconClass.creator}></span>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'created')}>
-                                Created<span className={sortIconClass.created}></span>
-                            </div>
-                        </div>
-                        <GdmCollectionRenderer gdms={sortedGdms} />
+                {this.state.errors ?
+                    <div className="alert alert-warning">
+                        <ul>
+                            <li>{this.state.errors}</li>
+                        </ul>
                     </div>
-                </div>
+                : null}
+                <GdmStatusLegend />
+                <GdmCollectionRenderer gdms={sortedGdms} sortIconClass={sortIconClass} sortDir={this.sortDir} />
             </div>
         );
     }
@@ -145,59 +132,85 @@ globals.content_views.register(GdmCollection, 'gdm_collection');
 
 var GdmCollectionRenderer = React.createClass({
     propTypes: {
-        gdms: React.PropTypes.array
+        gdms: React.PropTypes.array,
+        sortDir: React.PropTypes.func,
+        sortIconClass: React.PropTypes.object
     },
 
     render() {
-        var gdms = this.props.gdms;
+        let gdms = this.props.gdms;
+        let sortIconClass = this.props.sortIconClass;
 
         return (
-            <div className="table-row-gdm">
-                {gdms.map(gdm => {
-                    var annotationOwners = curator.getAnnotationOwners(gdm);
-                    var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
-                    var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-                    var createdTime = moment(gdm.date_created);
-                    var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                    var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
-                    var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
-                    var iconClass = 'icon gdm-status-icon-' + statusString;
+            <div className="table-responsive">
+                <div className="table-gdm">
+                    <div className="table-header-gdm">
+                        <div className="table-cell-gdm-status tcell-sortable" onClick={this.props.sortDir.bind(null, 'status')}>
+                            <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
+                        </div>
+                        <div className="table-cell-gdm-main tcell-sortable" onClick={this.props.sortDir.bind(null, 'gdm')}>
+                            <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
+                            <div>Mode</div>
+                        </div>
+                        <div className="table-cell-gdm">
+                            Participants
+                        </div>
+                        <div className="table-cell-gdm tcell-sortable" onClick={this.props.sortDir.bind(null, 'last')}>
+                            Last Edited<span className={sortIconClass.last}></span>
+                        </div>
+                        <div className="table-cell-gdm tcell-sortable" onClick={this.props.sortDir.bind(null, 'creator')}>
+                            Creator<span className={sortIconClass.creator}></span>
+                        </div>
+                        <div className="table-cell-gdm tcell-sortable" onClick={this.props.sortDir.bind(null, 'created')}>
+                            Created<span className={sortIconClass.created}></span>
+                        </div>
+                    </div>
+                    {gdms.map(gdm => {
+                        var annotationOwners = curator.getAnnotationOwners(gdm);
+                        var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
+                        var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+                        var createdTime = moment(gdm.date_created);
+                        var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
+                        var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
+                        var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
+                        var iconClass = 'icon gdm-status-icon-' + statusString;
 
-                    return (
-                        <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
-                            <div className="table-cell-gdm-status">
-                                <span className={iconClass} title={gdm.gdm_status}></span>
-                            </div>
+                        return (
+                            <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
+                                <div className="table-cell-gdm-status">
+                                    <span className={iconClass} title={gdm.gdm_status}></span>
+                                </div>
 
-                            <div className="table-cell-gdm-main">
-                                <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
-                                <div>{mode}</div>
-                            </div>
+                                <div className="table-cell-gdm-main">
+                                    <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
+                                    <div>{mode}</div>
+                                </div>
 
-                            <div className="table-cell-gdm">
-                                {participants}
-                            </div>
+                                <div className="table-cell-gdm">
+                                    {participants}
+                                </div>
 
-                            <div className="table-cell-gdm">
-                                {latestTime ?
-                                    <div>
-                                        <div>{latestTime.format("YYYY MMM DD")}</div>
-                                        <div>{latestTime.format("h:mm a")}</div>
-                                    </div>
-                                : null}
-                            </div>
+                                <div className="table-cell-gdm">
+                                    {latestTime ?
+                                        <div>
+                                            <div>{latestTime.format("YYYY MMM DD")}</div>
+                                            <div>{latestTime.format("h:mm a")}</div>
+                                        </div>
+                                    : null}
+                                </div>
 
-                            <div className="table-cell-gdm">
-                                <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
-                            </div>
+                                <div className="table-cell-gdm">
+                                    <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
+                                </div>
 
-                            <div className="table-cell-gdm">
-                                <div>{createdTime.format("YYYY MMM DD")}</div>
-                                <div>{createdTime.format("h:mm a")}</div>
-                            </div>
-                        </a>
-                    );
-                })}
+                                <div className="table-cell-gdm">
+                                    <div>{createdTime.format("YYYY MMM DD")}</div>
+                                    <div>{createdTime.format("h:mm a")}</div>
+                                </div>
+                            </a>
+                        );
+                    })}
+                </div>
             </div>
         );
     }
