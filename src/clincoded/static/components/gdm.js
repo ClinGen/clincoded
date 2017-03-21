@@ -34,7 +34,26 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     componentDidMount() {
-        this.logErrors();
+        window.addEventListener('error', this.printErrors, false);
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            let message = [
+                'Message: ' + msg,
+                'URL: ' + url,
+                'Line: ' + lineNo,
+                'Column: ' + columnNo,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            alert(message);
+        };
+    },
+
+    printErrors(e) {
+        var stack = e.error.stack;
+        let errMsg = e.error.toString();
+        if (stack) {
+            errMsg += '\n' + stack;
+        }
+        this.setState({errors: errMsg});
     },
 
     // Handle clicks in the table header for sorting
@@ -95,28 +114,6 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         });
     },
 
-    logErrors() {
-        window.onerror = function (msg, url, lineNo, columnNo, error) {
-            var string = msg.toLowerCase();
-            var substring = "script error";
-            if (string.indexOf(substring) > -1){
-                alert('Script Error: See Browser Console for Detail');
-            } else {
-                var message = [
-                    'Message: ' + msg,
-                    'URL: ' + url,
-                    'Line: ' + lineNo,
-                    'Column: ' + columnNo,
-                    'Error object: ' + JSON.stringify(error)
-                ].join(' - ');
-
-                this.setState({errors: message});
-            }
-
-            return false;
-        };
-    },
-
     render() {
         let filteredGdms = this.state.filteredGdms;
         let sortedGdms = filteredGdms.sort(this.sortCol);
@@ -136,7 +133,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                 </div>
                 <div className="alert alert-danger">
-                    {this.state.errors}
+                    <div id="onerror"></div>
+                    <div id="errorlistener">{this.state.errors}</div>
                 </div>
                 <GdmStatusLegend />
                 <GdmCollectionRenderer gdms={sortedGdms} sortIconClass={sortIconClass} sortDir={this.sortDir} />
