@@ -491,8 +491,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     <div className="table-cell-gdm">
                                         {latestEvaluation ?
                                             <div>
-                                                <div>{moment(latestEvaluation.date_created).local().format("YYYY MMM DD")}</div>
-                                                <div>{moment(latestEvaluation.date_created).local().format("h:mm a")}</div>
+                                                <div>{latestTime.utc().format("YYYY MMM DD")}</div>
+                                                <div>{latestTime.utc().format("h:mm a")}</div>
                                             </div>
                                         : null}
                                     </div>
@@ -502,8 +502,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                     </div>
 
                                     <div className="table-cell-gdm">
-                                        <div>{moment(interpretation.date_created).local().format("YYYY MMM DD")}</div>
-                                        <div>{moment(interpretation.date_created).local().format("h:mm a")}</div>
+                                        <div>{createdTime.utc().format("YYYY MMM DD")}</div>
+                                        <div>{createdTime.utc().format("h:mm a")}</div>
                                     </div>
                                 </a>
                             );
