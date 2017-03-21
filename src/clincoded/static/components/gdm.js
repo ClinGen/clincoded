@@ -33,6 +33,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         this.setState({filteredGdms: this.props.context['@graph']});
     },
 
+    componentDidMount() {
+        this.logErrors();
+    },
+
     // Handle clicks in the table header for sorting
     sortDir: function(colName) {
         var reversed = colName === this.state.sortCol ? !this.state.reversed : false;
@@ -76,23 +80,41 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     handleChange(e) {
-        try {
-            this.setState({searchTerm: e.target.value}, () => {
-                // Filter GDMs
-                let gdms = this.props.context['@graph'];
-                let searchTerm = this.state.searchTerm;
-                if (searchTerm && searchTerm.length) {
-                    let filteredGdms = gdms.filter(function(gdm) {
-                        return gdm.gene.symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
-                    });
-                    this.setState({filteredGdms: filteredGdms});
-                } else {
-                    this.setState({filteredGdms: gdms});
-                }
-            });
-        } catch (err) {
-            this.setState({errors: err});
-        }
+        this.setState({searchTerm: e.target.value}, () => {
+            // Filter GDMs
+            let gdms = this.props.context['@graph'];
+            let searchTerm = this.state.searchTerm;
+            if (searchTerm && searchTerm.length) {
+                let filteredGdms = gdms.filter(function(gdm) {
+                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                });
+                this.setState({filteredGdms: filteredGdms});
+            } else {
+                this.setState({filteredGdms: gdms});
+            }
+        });
+    },
+
+    logErrors() {
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            var string = msg.toLowerCase();
+            var substring = "script error";
+            if (string.indexOf(substring) > -1){
+                alert('Script Error: See Browser Console for Detail');
+            } else {
+                var message = [
+                    'Message: ' + msg,
+                    'URL: ' + url,
+                    'Line: ' + lineNo,
+                    'Column: ' + columnNo,
+                    'Error object: ' + JSON.stringify(error)
+                ].join(' - ');
+
+                this.setState({errors: message});
+            }
+
+            return false;
+        };
     },
 
     render() {
@@ -113,13 +135,9 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
-                {this.state.errors ?
-                    <div className="alert alert-warning">
-                        <ul>
-                            <li>{this.state.errors}</li>
-                        </ul>
-                    </div>
-                : null}
+                <div className="alert alert-danger">
+                    {this.state.errors}
+                </div>
                 <GdmStatusLegend />
                 <GdmCollectionRenderer gdms={sortedGdms} sortIconClass={sortIconClass} sortDir={this.sortDir} />
             </div>
