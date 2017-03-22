@@ -28,7 +28,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         };
     },
 
-    componentWillMount() {
+    componentDidMount() {
         this.parseGdms();
     },
 
@@ -43,6 +43,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 let latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                 let statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                 let iconClass = 'icon gdm-status-icon-' + statusString;
+                let gdmCreatedDate = new Date(gdm.date_created);
+                let latestAnnotationDate = latestAnnotation ? new Date(latestAnnotation.date_created) : '';
 
                 gdmObj = {
                     gdm_uuid:   gdm.uuid,
@@ -53,10 +55,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     participants: participants,
                     submitter_last_name: gdm.submitted_by.last_name,
                     submitter_first_name: gdm.submitted_by.first_name,
-                    created_date: moment(gdm.date_created).format('YYYY MMM DD'),
-                    created_time: moment(gdm.date_created).format('h:mm a'),
-                    latest_date: latestAnnotation ? moment(latestAnnotation.date_created).format('YYYY MMM DD') : '',
-                    latest_time: latestAnnotation ? moment(latestAnnotation.date_created).format('h:mm a') : '',
+                    created_date: moment(gdmCreatedDate).format('YYYY MMM DD'),
+                    created_time: moment(gdmCreatedDate).format('h:mm a'),
+                    latest_date: latestAnnotation ? moment(latestAnnotationDate).format('YYYY MMM DD') : '',
+                    latest_time: latestAnnotation ? moment(latestAnnotationDate).format('h:mm a') : '',
                     iconClass: iconClass,
                     latestAnnotation: latestAnnotation,
                     date_created: gdm.date_created
@@ -112,11 +114,11 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     handleChange(e) {
         this.setState({searchTerm: e.target.value}, () => {
             // Filter GDMs
-            let gdms = this.props.context['@graph'];
+            let gdms = this.state.filteredGdms;
             let searchTerm = this.state.searchTerm;
             if (searchTerm && searchTerm.length) {
                 let filteredGdms = gdms.filter(function(gdm) {
-                    return gdm.gene.symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                    return gdm.gene_symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
                 });
                 this.setState({filteredGdms: filteredGdms});
             } else {
@@ -127,7 +129,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 
     render() {
         let filteredGdms = this.state.filteredGdms;
-        let sortedGdms = filteredGdms.sort(this.sortCol);
+        let sortedGdms = filteredGdms && filteredGdms.length ? filteredGdms.sort(this.sortCol) : [];
         let sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
