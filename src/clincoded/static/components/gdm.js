@@ -25,7 +25,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             reversed: false,
             searchTerm: '',
             filteredGdms: [],
-            errors: null
+            errors: null,
+            momentDateString: null
         };
     },
 
@@ -34,6 +35,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     },
 
     componentDidMount() {
+        this.printDate();
         window.addEventListener('error', this.printErrors, false);
         window.onerror = function (msg, url, lineNo, columnNo, error) {
             let message = [
@@ -54,6 +56,17 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
             errMsg += '\n' + stack;
         }
         this.setState({errors: errMsg});
+    },
+
+    printDate() {
+        let gdms = this.props.context['@graph'];
+        if (gdms && gdms.length) {
+            let dateString = gdms[0].date_created;
+            let creationDate = new Date(dateString);
+            let momentObj = moment(creationDate);
+            let momentDate = momentObj.format('YYYY MMM DD');
+            this.setState({momentDateString: momentDate});
+        }
     },
 
     // Handle clicks in the table header for sorting
@@ -132,8 +145,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
+                <div className="alert alert-warning">
+                    <div id="dateparser">{this.state.momentDateString}</div>
+                </div>
                 <div className="alert alert-danger">
-                    <div id="onerror"></div>
                     <div id="errorlistener">{this.state.errors}</div>
                 </div>
                 <GdmStatusLegend />
@@ -185,8 +200,10 @@ var GdmCollectionRenderer = React.createClass({
                         var annotationOwners = curator.getAnnotationOwners(gdm);
                         var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                         var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-                        var createdTime = moment(gdm.date_created);
-                        var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
+                        let createdTimeString = new Date(gdm.date_created);
+                        var createdTime = JSON.stringify(moment(createdTimeString));
+                        let latestTimeString = latestAnnotation ? new Date(latestAnnotation.date_created) : null;
+                        var latestTime = latestTimeString ? JSON.stringify(moment(latestTimeString)) : '';
                         var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
                         var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                         var iconClass = 'icon gdm-status-icon-' + statusString;
@@ -207,10 +224,9 @@ var GdmCollectionRenderer = React.createClass({
                                 </div>
 
                                 <div className="table-cell-gdm">
-                                    {latestTime ?
+                                    {latestTime && latestTime.length ?
                                         <div>
-                                            <div>{latestTime.format("YYYY MMM DD")}</div>
-                                            <div>{latestTime.format("h:mm a")}</div>
+                                            <div>{latestTime}</div>
                                         </div>
                                     : null}
                                 </div>
@@ -220,8 +236,7 @@ var GdmCollectionRenderer = React.createClass({
                                 </div>
 
                                 <div className="table-cell-gdm">
-                                    <div>{createdTime.format("YYYY MMM DD")}</div>
-                                    <div>{createdTime.format("h:mm a")}</div>
+                                    <div>{createdTime}</div>
                                 </div>
                             </a>
                         );
