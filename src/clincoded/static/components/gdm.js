@@ -158,11 +158,11 @@ var GdmCollectionRenderer = React.createClass({
                         var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                         var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
                         let createdTimeStamp = new Date(gdm.date_created);
-                        let createdDate = moment(createdTimeStamp).format("YYYY MMM DD").toString();
-                        let createdTime = moment(createdTimeStamp).format("h:mm a").toString();
+                        let createdDate = moment().format("YYYY MMM DD");
+                        let createdTime = moment().format("h:mm a");
                         let latestTimeStamp = latestAnnotation ? new Date(latestAnnotation.date_created) : null;
-                        let latestDate = latestTimeStamp ? moment(latestTimeStamp).format("YYYY MMM DD").toString() : '';
-                        let latestTime = latestTimeStamp ? moment(latestTimeStamp).format("h:mm a").toString() : '';
+                        let latestDate = latestTimeStamp ? moment().format("YYYY MMM DD") : '';
+                        let latestTime = latestTimeStamp ? moment().format("h:mm a") : '';
                         var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
                         var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                         var iconClass = 'icon gdm-status-icon-' + statusString;
