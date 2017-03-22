@@ -109,7 +109,9 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                 </div>
                 <GdmStatusLegend />
-                <GdmCollectionRenderer gdms={sortedGdms} sortIconClass={sortIconClass} sortDir={this.sortDir} />
+                {sortedGdms && sortedGdms.length ?
+                    <GdmCollectionRenderer gdms={sortedGdms} sortIconClass={sortIconClass} sortDir={this.sortDir} />
+                : null}
             </div>
         );
     }
