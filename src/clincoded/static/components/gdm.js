@@ -1,7 +1,6 @@
 'use strict';
 var React = require('react');
 var moment = require('moment');
-var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
 
@@ -55,7 +54,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 let latestAnnotationDate = latestAnnotation ? new Date(latestAnnotation.date_created) : '';
 
                 gdmObj = {
-                    gdm_uuid:   gdm.uuid,
+                    gdm_uuid: gdm.uuid,
                     gdm_status: gdm.gdm_status,
                     gene_symbol: gdm.gene.symbol,
                     disease_term: gdm.disease.term,
@@ -185,25 +184,20 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                     <div className="table-cell-gdm-status">
                                         <span className={gdm.iconClass} title={gdm.gdm_status}></span>
                                     </div>
-
                                     <div className="table-cell-gdm-main">
                                         <div>{gdm.gene_symbol} – {gdm.disease_term}</div>
                                         <div>{gdm.modeInheritance}</div>
                                     </div>
-
                                     <div className="table-cell-gdm">
                                         {gdm.participants}
                                     </div>
-
                                     <div className="table-cell-gdm">
                                         <div>{gdm.latest_date}</div>
                                         <div>{gdm.latest_time}</div>
                                     </div>
-
                                     <div className="table-cell-gdm">
                                         <div>{gdm.submitter_last_name}, {gdm.submitter_first_name}</div>
                                     </div>
-
                                     <div className="table-cell-gdm">
                                         <div>{gdm.created_date}</div>
                                         <div>{gdm.created_time}</div>
