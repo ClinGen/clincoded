@@ -12,8 +12,12 @@ pytestmark = [
 ]
 
 scenarios(
+    'title.feature',
+    'select_variant.feature',
+    'variant_curation_tabs.feature',
     'generics.feature',
     'create_gene_disease.feature',
+    'curation_central.feature',
     'gdm.feature',
 )
 
