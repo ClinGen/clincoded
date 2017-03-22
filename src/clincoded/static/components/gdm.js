@@ -7,7 +7,6 @@ var curator = require('./curator');
 
 var truncateString = globals.truncateString;
 
-
 // Map GDM statuses from
 var statusMappings = {
 //  Status from GDM                         CSS class                Short name for screen display
@@ -19,12 +18,13 @@ var statusMappings = {
 };
 
 var GdmCollection = module.exports.GdmCollection = React.createClass({
-    getInitialState: function() {
+    getInitialState() {
         return {
             sortCol: 'gdm',
             reversed: false,
-            searchTerm: '',
-            filteredGdms: []
+            searchTerm: '', // User input to filter GDMs
+            allGdms: [], // Source of complete list of parsed and unfiltered GDMs
+            filteredGdms: [] // List of parsed and filtered/unfiltered GDMs
         };
     },
 
@@ -32,8 +32,12 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         this.parseGdms();
     },
 
+    // Method to parse GDM and form the shape of the data object containing only the properties needed to
+    // render each GDM item in the table. Also as a workaround fix for the failing pytest_bdd assertion on
+    // Travis CI, since having the 'moment' date parsing logic in the render() method would still cause
+    // the python test to fail in the build.
     parseGdms() {
-        let gdmArray = [];
+        let gdmObjList = [];
         let gdmObj = {};
         let gdms = this.props.context['@graph'];
         if (gdms && gdms.length) {
@@ -43,6 +47,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 let latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                 let statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                 let iconClass = 'icon gdm-status-icon-' + statusString;
+                // Directly passing the date string into the moment() method still cause the test to fail.
+                // The workaround of passing the date string into the 'new Date()' constructor first appears
+                // to be able to fix the failing pytest_bdd assertion on Travis CI.
+                // http://stackoverflow.com/questions/38251763/moment-js-to-convert-date-string-into-date#answers
                 let gdmCreatedDate = new Date(gdm.date_created);
                 let latestAnnotationDate = latestAnnotation ? new Date(latestAnnotation.date_created) : '';
 
@@ -63,22 +71,40 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     latestAnnotation: latestAnnotation,
                     date_created: gdm.date_created
                 };
-                gdmArray.push(gdmObj);
+                gdmObjList.push(gdmObj);
             });
-            this.setState({filteredGdms: gdmArray});
+            // Set the initial states upon component mounted
+            this.setState({allGdms: gdmObjList, filteredGdms: gdmObjList});
         }
     },
 
+    // Method to handle user input to filter/unfilter GDMs
+    handleChange(e) {
+        this.setState({searchTerm: e.target.value}, () => {
+            // Filter GDMs
+            let gdms = this.state.allGdms; // Get the complete list of GDMs
+            let searchTerm = this.state.searchTerm;
+            if (searchTerm && searchTerm.length) {
+                let filteredGdms = gdms.filter(function(gdm) {
+                    return gdm.gene_symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                });
+                this.setState({filteredGdms: filteredGdms});
+            } else {
+                this.setState({filteredGdms: this.state.allGdms});
+            }
+        });
+    },
+
     // Handle clicks in the table header for sorting
-    sortDir: function(colName) {
-        var reversed = colName === this.state.sortCol ? !this.state.reversed : false;
-        var sortCol = colName;
+    sortDir(colName) {
+        let reversed = colName === this.state.sortCol ? !this.state.reversed : false;
+        let sortCol = colName;
         this.setState({sortCol: sortCol, reversed: reversed});
     },
 
-    // Call-back for the JS sorting function. Expects GDMs to compare in a and b. Depending on the column currently selected
-    // for sorting, this function sorts on the relevant parts of the GDM.
-    sortCol: function(a, b) {
+    // Call-back for the JS sorting function. Expects GDMs (the parsed GDM state objects) to compare in a and b.
+    // Depending on the column currently selected for sorting, this function sorts on the relevant parts of the GDM.
+    sortCol(a, b) {
         var diff;
 
         switch (this.state.sortCol) {
@@ -111,25 +137,9 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
-    handleChange(e) {
-        this.setState({searchTerm: e.target.value}, () => {
-            // Filter GDMs
-            let gdms = this.state.filteredGdms;
-            let searchTerm = this.state.searchTerm;
-            if (searchTerm && searchTerm.length) {
-                let filteredGdms = gdms.filter(function(gdm) {
-                    return gdm.gene_symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
-                });
-                this.setState({filteredGdms: filteredGdms});
-            } else {
-                this.setState({filteredGdms: gdms});
-            }
-        });
-    },
-
     render() {
         let filteredGdms = this.state.filteredGdms;
-        let sortedGdms = filteredGdms && filteredGdms.length ? filteredGdms.sort(this.sortCol) : [];
+        let gdms = filteredGdms && filteredGdms.length ? filteredGdms.sort(this.sortCol) : []; // Pre-sort the GDM list
         let sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
@@ -146,90 +156,69 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                 </div>
                 <GdmStatusLegend />
-                {sortedGdms && sortedGdms.length ?
-                    <GdmCollectionRenderer gdms={sortedGdms} sortIconClass={sortIconClass} sortDir={this.sortDir} />
-                : null}
-            </div>
-        );
-    }
-});
+                <div className="table-responsive">
+                    <div className="table-gdm">
+                        <div className="table-header-gdm">
+                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
+                                <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
+                            </div>
+                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
+                                <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
+                                <div>Mode</div>
+                            </div>
+                            <div className="table-cell-gdm">
+                                Participants
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
+                                Last Edited<span className={sortIconClass.last}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'creator')}>
+                                Creator<span className={sortIconClass.creator}></span>
+                            </div>
+                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'created')}>
+                                Created<span className={sortIconClass.created}></span>
+                            </div>
+                        </div>
+                        {gdms && gdms.length ? gdms.map(gdm => {
+                            return (
+                                <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.gdm_uuid} key={gdm.gdm_uuid}>
+                                    <div className="table-cell-gdm-status">
+                                        <span className={gdm.iconClass} title={gdm.gdm_status}></span>
+                                    </div>
 
-globals.content_views.register(GdmCollection, 'gdm_collection');
+                                    <div className="table-cell-gdm-main">
+                                        <div>{gdm.gene_symbol} – {gdm.disease_term}</div>
+                                        <div>{gdm.modeInheritance}</div>
+                                    </div>
 
+                                    <div className="table-cell-gdm">
+                                        {gdm.participants}
+                                    </div>
 
-var GdmCollectionRenderer = React.createClass({
-    propTypes: {
-        gdms: React.PropTypes.array,
-        sortDir: React.PropTypes.func,
-        sortIconClass: React.PropTypes.object
-    },
+                                    <div className="table-cell-gdm">
+                                        <div>{gdm.latest_date}</div>
+                                        <div>{gdm.latest_time}</div>
+                                    </div>
 
-    render() {
-        let gdms = this.props.gdms;
-        let sortIconClass = this.props.sortIconClass;
+                                    <div className="table-cell-gdm">
+                                        <div>{gdm.submitter_last_name}, {gdm.submitter_first_name}</div>
+                                    </div>
 
-        return (
-            <div className="table-responsive">
-                <div className="table-gdm">
-                    <div className="table-header-gdm">
-                        <div className="table-cell-gdm-status tcell-sortable" onClick={this.props.sortDir.bind(null, 'status')}>
-                            <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
-                        </div>
-                        <div className="table-cell-gdm-main tcell-sortable" onClick={this.props.sortDir.bind(null, 'gdm')}>
-                            <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
-                            <div>Mode</div>
-                        </div>
-                        <div className="table-cell-gdm">
-                            Participants
-                        </div>
-                        <div className="table-cell-gdm tcell-sortable" onClick={this.props.sortDir.bind(null, 'last')}>
-                            Last Edited<span className={sortIconClass.last}></span>
-                        </div>
-                        <div className="table-cell-gdm tcell-sortable" onClick={this.props.sortDir.bind(null, 'creator')}>
-                            Creator<span className={sortIconClass.creator}></span>
-                        </div>
-                        <div className="table-cell-gdm tcell-sortable" onClick={this.props.sortDir.bind(null, 'created')}>
-                            Created<span className={sortIconClass.created}></span>
-                        </div>
+                                    <div className="table-cell-gdm">
+                                        <div>{gdm.created_date}</div>
+                                        <div>{gdm.created_time}</div>
+                                    </div>
+                                </a>
+                            );
+                        }) : null}
                     </div>
-                    {gdms.map(gdm => {
-                        return (
-                            <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.gdm_uuid} key={gdm.gdm_uuid}>
-                                <div className="table-cell-gdm-status">
-                                    <span className={gdm.iconClass} title={gdm.gdm_status}></span>
-                                </div>
-
-                                <div className="table-cell-gdm-main">
-                                    <div>{gdm.gene_symbol} – {gdm.disease_term}</div>
-                                    <div>{gdm.modeInheritance}</div>
-                                </div>
-
-                                <div className="table-cell-gdm">
-                                    {gdm.participants}
-                                </div>
-
-                                <div className="table-cell-gdm">
-                                    <div>{gdm.latest_date}</div>
-                                    <div>{gdm.latest_time}</div>
-                                </div>
-
-                                <div className="table-cell-gdm">
-                                    <div>{gdm.submitter_last_name}, {gdm.submitter_first_name}</div>
-                                </div>
-
-                                <div className="table-cell-gdm">
-                                    <div>{gdm.created_date}</div>
-                                    <div>{gdm.created_time}</div>
-                                </div>
-                            </a>
-                        );
-                    })}
                 </div>
             </div>
         );
     }
 });
 
+globals.content_views.register(GdmCollection, 'gdm_collection');
 
 // Render the GDM status legend
 var GdmStatusLegend = React.createClass({
