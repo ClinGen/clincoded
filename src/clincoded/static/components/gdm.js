@@ -157,10 +157,12 @@ var GdmCollectionRenderer = React.createClass({
                         var annotationOwners = curator.getAnnotationOwners(gdm);
                         var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
                         var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-                        let createdTimeString = new Date(gdm.date_created);
-                        var createdTime = moment(createdTimeString);
-                        let latestTimeString = latestAnnotation ? new Date(latestAnnotation.date_created) : null;
-                        var latestTime = latestTimeString ? moment(latestTimeString) : null;
+                        let createdTimeStamp = new Date(gdm.date_created);
+                        let createdDate = moment(createdTimeStamp).format("YYYY MMM DD");
+                        let createdTime = moment(createdTimeStamp).format("h:mm a");
+                        let latestTimeStamp = latestAnnotation ? new Date(latestAnnotation.date_created) : null;
+                        let latestDate = latestTimeStamp ? moment(latestTimeStamp).format("YYYY MMM DD") : '';
+                        let latestTime = latestTimeStamp ? moment(latestTimeStamp).format("h:mm a") : '';
                         var participants = annotationOwners.map(owner => { return owner.title; }).join(', ');
                         var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                         var iconClass = 'icon gdm-status-icon-' + statusString;
@@ -181,12 +183,8 @@ var GdmCollectionRenderer = React.createClass({
                                 </div>
 
                                 <div className="table-cell-gdm">
-                                    {latestTime ?
-                                        <div>
-                                            <div>{latestTime.format("YYYY MMM DD")}</div>
-                                            <div>{latestTime.format("h:mm a")}</div>
-                                        </div>
-                                    : null}
+                                    <div>{latestDate}</div>
+                                    <div>{latestTime}</div>
                                 </div>
 
                                 <div className="table-cell-gdm">
@@ -194,8 +192,8 @@ var GdmCollectionRenderer = React.createClass({
                                 </div>
 
                                 <div className="table-cell-gdm">
-                                    <div>{createdTime.format("YYYY MMM DD")}</div>
-                                    <div>{createdTime.format("h:mm a")}</div>
+                                    <div>{createdDate}</div>
+                                    <div>{createdTime}</div>
                                 </div>
                             </a>
                         );
