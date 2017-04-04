@@ -46,15 +46,6 @@ var initialCv = {
     othersAssessed: false // TRUE if other curators have assessed the experimental data
 };
 
-// for joining gene symbols w/ commas
-function joinGenes(input) {
-    var outputArray = [];
-    for (var i = 0; i < input.length; i++) {
-        outputArray.push(input[i].symbol);
-    }
-    return outputArray.join(', ');
-}
-
 var ExperimentalCuration = React.createClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
@@ -1442,27 +1433,26 @@ var LabelIdentifiedFunction = React.createClass({
 var TypeBiochemicalFunctionA = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
+    let BF_genes, BF_evidenceForOtherGenesWithSameFunction, BF_explanationOfOtherGenes, BF_evidenceInPaper;
     if (biochemicalFunction) {
         biochemicalFunction.geneWithSameFunctionSameDisease = biochemicalFunction.geneWithSameFunctionSameDisease ? biochemicalFunction.geneWithSameFunctionSameDisease : {};
         if (biochemicalFunction.geneWithSameFunctionSameDisease) {
-            biochemicalFunction.geneWithSameFunctionSameDisease.genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? joinGenes(biochemicalFunction.geneWithSameFunctionSameDisease.genes) : '';
-            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : '';
-            biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : '';
-            biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : '';
+            BF_genes = biochemicalFunction.geneWithSameFunctionSameDisease.genes ? biochemicalFunction.geneWithSameFunctionSameDisease.genes.map(gene => { return gene.symbol; }).join(', ') : '';
+            BF_evidenceForOtherGenesWithSameFunction = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction : '';
+            BF_explanationOfOtherGenes = biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes ? biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes : '';
+            BF_evidenceInPaper = biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper ? biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper : '';
         }
     }
     return (
         <div>
             <Input type="text" ref="geneWithSameFunctionSameDisease.genes" label={<LabelGenesWithSameFunction />}
                 error={this.getFormError('geneWithSameFunctionSameDisease.genes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.genes')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                value={biochemicalFunction.geneWithSameFunctionSameDisease.genes} placeholder="e.g. DICER1" handleChange={this.handleChange}
-                inputDisabled={this.cv.othersAssessed} required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. DICER1"
+                value={BF_genes} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction" label="Evidence that above gene(s) share same function with gene in record:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction}
-                inputDisabled={this.cv.othersAssessed} required />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5"
+                value={BF_evidenceForOtherGenesWithSameFunction} inputDisabled={this.cv.othersAssessed} required />
             <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label={<LabelSharedDisease />}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={"ORPHA" + this.state.gdm.disease.orphaNumber} inputDisabled={true} />
@@ -1473,14 +1463,12 @@ var TypeBiochemicalFunctionA = function() {
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene(s) entered above in this section have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this other gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.explanationOfOtherGenes}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5" value={BF_explanationOfOtherGenes}
                 inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} required={this.state.geneImplicatedWithDisease} />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Additional comments:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneWithSameFunctionSameDisease.evidenceInPaper}
-                inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5"
+                value={BF_evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
         </div>
     );
 };
@@ -1498,15 +1486,16 @@ var LabelSharedDisease = React.createClass({
 });
 
 var TypeBiochemicalFunctionB = function() {
-    var experimental = this.state.experimental ? this.state.experimental : {};
-    var biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
+    let experimental = this.state.experimental ? this.state.experimental : {};
+    let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
+    let BF_phenotypeHPO, BF_phenotypeFreeText, BF_explanation, BF_evidenceInPaper;
     if (biochemicalFunction) {
         biochemicalFunction.geneFunctionConsistentWithPhenotype = biochemicalFunction.geneFunctionConsistentWithPhenotype ? biochemicalFunction.geneFunctionConsistentWithPhenotype : {};
         if (biochemicalFunction.geneFunctionConsistentWithPhenotype) {
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO : '';
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : '';
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : '';
-            biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : '';
+            BF_phenotypeHPO = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO.join(', ') : '';
+            BF_phenotypeFreeText = biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText ? biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText : '';
+            BF_explanation = biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation ? biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation : '';
+            BF_evidenceInPaper = biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper ? biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper : '';
         }
     }
     return (
@@ -1514,23 +1503,19 @@ var TypeBiochemicalFunctionB = function() {
             {curator.renderPhenotype(null, 'Experimental')}
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} rows="1"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
-                inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionFT} />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" placeholder="e.g. HP:0010704"
+                value={BF_phenotypeHPO} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionFT} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeFreeText" label={<LabelPhenotypesFT />}
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeFreeText')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="2" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeFreeText} handleChange={this.handleChange}
-                inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionHPO} />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="2"
+                value={BF_phenotypeFreeText} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionHPO} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.explanation" label="Explanation of how phenotype is consistent with disease:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.explanation')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.explanation')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.explanation}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5" value={BF_explanation}
                 inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} required={this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT} />
             <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.evidenceInPaper" label="Notes on where evidence found in paper:"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.evidenceInPaper')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={biochemicalFunction.geneFunctionConsistentWithPhenotype.evidenceInPaper}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5" value={BF_evidenceInPaper}
                 inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} />
         </div>
     );
@@ -1554,7 +1539,7 @@ var TypeProteinInteractions = function() {
     var experimental = this.state.experimental ? this.state.experimental : {};
     var proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
     if (proteinInteractions) {
-        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? joinGenes(proteinInteractions.interactingGenes) : '';
+        proteinInteractions.interactingGenes = proteinInteractions.interactingGenes ? proteinInteractions.interactingGenes.map(gene => { return gene.symbol; }).join(', ') : '';
         proteinInteractions.interactionType = proteinInteractions.interactionType ? proteinInteractions.interactionType : 'none';
         proteinInteractions.experimentalInteractionDetection = proteinInteractions.experimentalInteractionDetection ? proteinInteractions.experimentalInteractionDetection : 'none';
         proteinInteractions.relationshipOfOtherGenesToDisese = proteinInteractions.relationshipOfOtherGenesToDisese ? proteinInteractions.relationshipOfOtherGenesToDisese : '';
