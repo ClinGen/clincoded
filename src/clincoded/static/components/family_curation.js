@@ -1618,7 +1618,7 @@ var FamilySegregation = function() {
             : null}
             {this.state.lodPublished === 'No' ?
                 <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published LOD score)</i></span>}
-                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore}
+                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore ? this.state.estimatedLodScore : ''}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
