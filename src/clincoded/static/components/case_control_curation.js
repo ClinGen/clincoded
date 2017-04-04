@@ -1370,7 +1370,7 @@ function GroupAdditional(groupType) {
         group = this.state.controlGroup;
     }
 
-    let othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : '';
+    let othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join(', ') : '';
     let otherpmidsVal = group && group.otherPMIDs ? group.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
     return (
