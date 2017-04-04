@@ -746,7 +746,7 @@ var GroupDemographics = function() {
 // as the calling component.
 var GroupProbandInfo = function() {
     var group = this.state.group;
-    var othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join() : '';
+    var othergenevariantsVal = group && group.otherGenes ? group.otherGenes.map(function(gene) { return gene.symbol; }).join(', ') : '';
 
     return(
         <div className="row">
