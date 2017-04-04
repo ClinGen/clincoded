@@ -1059,7 +1059,7 @@ var FamilyCuration = React.createClass({
         // Fill in the group fields from the Common Diseases & Phenotypes panel
         var hpoTerms = this.getFormValue('hpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(', '));
         }
         else if (newFamily.hpoIdInDiagnosis) {
             // allow to delete HPO ids
@@ -1075,7 +1075,7 @@ var FamilyCuration = React.createClass({
         }
         hpoTerms = this.getFormValue('nothpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(', '));
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
