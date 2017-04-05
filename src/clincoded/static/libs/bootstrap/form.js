@@ -186,7 +186,7 @@ var FormMixin = module.exports.FormMixin = {
                 // Validate that type="number" fields have a valid number in them
                 var numVal = this.getFormValueNumber(ref);
                 if (numVal === null) {
-                    if (props.inputClassName && props.inputClassName === 'integer-only') {
+                    if (props.inputClassName && props.inputClassName.indexOf('integer-only') > -1) {
                         this.setFormErrors(ref, 'Non-decimal values only');
                         valid = false;
                     } else if (!this.getFormValue(ref).match(/^\d+\.\d+$/)) {
