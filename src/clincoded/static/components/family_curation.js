@@ -291,33 +291,11 @@ var FamilyCuration = React.createClass({
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
     calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
         let estimatedLodScore = null;
-
-        // Inner function to handle the UI for Estimated LOD Score
-        const handleEstimatedLodScore = () => {
-            if (estimatedLodScore && !isNaN(estimatedLodScore)) {
-                this.setState({estimatedLodScore: parseFloat(estimatedLodScore.toFixed(2))}, () => {
-                    // Update state and form field if relevant
-                    if (this.refs['SEGestimatedLodScore']) {
-                        this.refs['SEGestimatedLodScore'].setValue(this.state.estimatedLodScore);
-                    }
-                });
-            } else {
-                this.setState({estimatedLodScore: ''}, () => {
-                    // Reset the SEGincludeLodScoreInAggregateCalculation dropdown if there is no calculated estimated lod score
-                    if (this.refs['SEGincludeLodScoreInAggregateCalculation']) {
-                        this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
-                    }
-                });
-            }
-        };
-
         if (lodCalcMode === 'ADX') {
             // LOD scoring if GDM is Autosomal dominant or X-Linked
             if (numSegregation !== '') {
                 numSegregation = parseInt(numSegregation);
                 estimatedLodScore = Math.log(1 / Math.pow(0.5, numSegregation)) / Math.log(10);
-                // Calling the inner function
-                return handleEstimatedLodScore();
             }
         } else if (lodCalcMode === 'AR') {
             // LOD scoring if GDM is Autosomal recessive
@@ -325,8 +303,22 @@ var FamilyCuration = React.createClass({
                 numAffected = parseInt(numAffected);
                 numUnaffected = parseInt(numUnaffected);
                 estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
-                // Calling the inner function
-                return handleEstimatedLodScore();
+            }
+        }
+        if (lodCalcMode === 'ADX' || lodCalcMode === 'AR') {
+            if (estimatedLodScore && !isNaN(estimatedLodScore)) {
+                estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
+            } else {
+                estimatedLodScore = '';
+            }
+            // Update state and form field if relevant
+            this.setState({estimatedLodScore: estimatedLodScore});
+            if (this.refs['SEGestimatedLodScore']) {
+                this.refs['SEGestimatedLodScore'].setValue(estimatedLodScore);
+            }
+            // Reset the SEGincludeLodScoreInAggregateCalculation dropdown if there is no calculated estimated lod score
+            if (!estimatedLodScore && this.refs['SEGincludeLodScoreInAggregateCalculation']) {
+                this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
             }
         }
     },
