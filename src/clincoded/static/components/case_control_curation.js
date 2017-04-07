@@ -1261,11 +1261,11 @@ function GroupDemographics(groupType) {
                     </Input>
                 }
                 <Input type="text-range" labelClassName="col-sm-5 control-label" label="Value:" wrapperClassName="col-sm-7 group-age-fromto">
-                    <Input type="number" ref={ageFrom} inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
+                    <Input type="number" ref={ageFrom} inputClassName="input-inline integer-only" groupClassName="form-group-inline group-age-input"
                         value={group && group.ageRangeFrom ? group.ageRangeFrom : ''}
                         error={this.getFormError(ageFrom)} clearError={this.clrFormErrors.bind(null, ageFrom)} />
                     <span className="group-age-inter">to</span>
-                    <Input type="number" ref={ageTo} inputClassName="input-inline" groupClassName="form-group-inline group-age-input"
+                    <Input type="number" ref={ageTo} inputClassName="input-inline integer-only" groupClassName="form-group-inline group-age-input"
                         value={group && group.ageRangeTo ? group.ageRangeTo : ''}
                         error={this.getFormError(ageTo)} clearError={this.clrFormErrors.bind(null, ageTo)} />
                 </Input>
