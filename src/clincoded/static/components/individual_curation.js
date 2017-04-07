@@ -1254,7 +1254,7 @@ var IndividualDemographics = function() {
                     <option value="Diagnosis">Diagnosis</option>
                     <option value="Death">Death</option>
                 </Input>
-                <Input type="number" ref="agevalue" label="Value:" maxVal={150}
+                <Input type="number" inputClassName="integer-only" ref="agevalue" label="Value:" maxVal={150}
                     value={individual && individual.ageValue ? individual.ageValue : ''}
                     error={this.getFormError('agevalue')} clearError={this.clrFormErrors.bind(null, 'agevalue')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
