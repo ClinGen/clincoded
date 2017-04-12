@@ -21,7 +21,7 @@
             "title": "Variant",
             "description": "Variant associated with external evidence",
             "type": "string",
-            "linkTo": "variant"
+            "linkTo": "Variant"
         },
         "category": {
             "title": "Category",
@@ -42,7 +42,7 @@
                 "title": "Article",
                 "description": "Article",
                 "type": "string",
-                "linkTo": "article"
+                "linkTo": "Article"
             }
         },
         "evidenceDescription": {

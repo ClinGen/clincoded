@@ -60,15 +60,15 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'family':
+                    case 'Family':
                         stateObj.family = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -234,4 +234,4 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(FamilySubmit, 'curator_page', 'family-submit');
+globals.curator_page.register(FamilySubmit, 'CuratorPage', 'family-submit');

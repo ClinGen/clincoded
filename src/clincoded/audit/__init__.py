@@ -1,2 +1,3 @@
 def includeme(config):
-    config.scan()
+    pass
+    #config.scan()

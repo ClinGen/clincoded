@@ -47,7 +47,7 @@ var ScoreViewer = module.exports.ScoreViewer = React.createClass({
                 filteredScores = evidenceScores;
             }
         }
-        // Insanity check for erroneous score objects with Score Status value as 'none' 
+        // Insanity check for erroneous score objects with Score Status value as 'none'
         _.map(filteredScores, score => {
             if (score.scoreStatus !== 'none') {
                 validScores.push(score);

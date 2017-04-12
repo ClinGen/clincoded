@@ -21,7 +21,7 @@
             "title": "Article",
             "description": "PMID of article from where evidence is picked",
             "type": "string",
-            "linkTo": "article"
+            "linkTo": "Article"
         },
         "groups": {
             "title": "Group",
@@ -32,7 +32,7 @@
                 "title": "Group ID",
                 "description": "Group id",
                 "type": "string",
-                "linkTo": "group"
+                "linkTo": "Group"
             }
         },
         "families": {
@@ -44,7 +44,7 @@
                 "title": "Family ID",
                 "description": "Family id",
                 "type": "string",
-                "linkTo": "family"
+                "linkTo": "Family"
             }
         },
         "individuals": {
@@ -56,7 +56,7 @@
                 "title": "Individual ID",
                 "description": "Individual id",
                 "type": "string",
-                "linkTo": "individual"
+                "linkTo": "Individual"
             }
         },
         "experimentalData": {
@@ -68,7 +68,7 @@
                 "title": "ExperimentalData ID",
                 "description": "ExperimentalData id",
                 "type": "string",
-                "linkTo": "experimental"
+                "linkTo": "Experimental"
             }
         },
         "caseControlStudies": {
@@ -78,7 +78,7 @@
             "items": {
                 "title": "Case Control",
                 "type": "string",
-                "linkTo": "caseControl"
+                "linkTo": "CaseControl"
             }
         },
         "active": {

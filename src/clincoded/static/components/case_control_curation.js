@@ -103,11 +103,11 @@ const CaseControlCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'group':
+                    case 'Group':
                         if (data['groupType'][0] === 'Case cohort') {
                             stateObj.caseGroup = data;
                         }
@@ -116,11 +116,11 @@ const CaseControlCuration = React.createClass({
                         }
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
-                    case 'caseControl':
+                    case 'CaseControl':
                         stateObj.caseControl = data;
                         break;
 
@@ -282,7 +282,7 @@ const CaseControlCuration = React.createClass({
                 // Build search string from given ORPHA IDs
                 var searchStr;
                 if (valid_orphaId) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    searchStr = '/search/?type=orphaphenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
                     searchStr = '';
@@ -1030,7 +1030,7 @@ const CaseControlCuration = React.createClass({
     }
 });
 
-curator_page.register(CaseControlCuration, 'curator_page', 'case-control-curation');
+curator_page.register(CaseControlCuration, 'CuratorPage', 'case-control-curation');
 
 // Case-Control Name above other group curation panels.
 // Call with .call(this) to run in the same context as the calling component.
@@ -1914,7 +1914,7 @@ var CaseControlViewer = React.createClass({
     }
 });
 
-content_views.register(CaseControlViewer, 'caseControl');
+content_views.register(CaseControlViewer, 'CaseControl');
 
 // Display a history item for adding a case-control
 var CaseControlAddHistory = React.createClass({
@@ -1937,7 +1937,7 @@ var CaseControlAddHistory = React.createClass({
     }
 });
 
-history_views.register(CaseControlAddHistory, 'caseControl', 'add');
+history_views.register(CaseControlAddHistory, 'CaseControl', 'add');
 
 // Display a history item for modifying a case-control
 var CaseControlModifyHistory = React.createClass({
@@ -1955,7 +1955,7 @@ var CaseControlModifyHistory = React.createClass({
     }
 });
 
-history_views.register(CaseControlModifyHistory, 'caseControl', 'modify');
+history_views.register(CaseControlModifyHistory, 'CaseControl', 'modify');
 
 
 // Display a history item for deleting a case-control
@@ -1978,5 +1978,5 @@ var CaseControlDeleteHistory = React.createClass({
     }
 });
 
-history_views.register(CaseControlDeleteHistory, 'caseControl', 'delete');
+history_views.register(CaseControlDeleteHistory, 'CaseControl', 'delete');
 

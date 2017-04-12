@@ -1,18 +1,18 @@
-from contentbase.schema_utils import (
-    load_schema,
-    VALIDATOR_REGISTRY,
-)
-from contentbase import (
+from snovault.schema_utils import VALIDATOR_REGISTRY
+from snovault import (
     COLLECTIONS,
     CONNECTION,
+    Collection,
     ROOT,
+    Root,
     calculated_property,
     collection,
-    item_view_page,
+    load_schema,
 )
+from snovault.resource_views import item_view_page
 from .base import (
     ALLOW_EVERYONE_VIEW,
-    Item,
+    SharedItem,
     ONLY_ADMIN_VIEW,
 )
 from pyramid.location import lineage
@@ -30,7 +30,7 @@ from pyramid.view import view_config
         'title': 'Pages',
         'description': 'Portal pages',
     })
-class Page(Item):
+class Page(SharedItem):
     item_type = 'page'
     schema = load_schema('clincoded:schemas/page.json')
     name_key = 'name'

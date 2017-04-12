@@ -52,15 +52,15 @@ var ExperimentalSubmit = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'experimental':
+                    case 'Experimental':
                         stateObj.experimental = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -151,4 +151,4 @@ var ExperimentalSubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentalSubmit, 'curator_page', 'experimental-submit');
+globals.curator_page.register(ExperimentalSubmit, 'CuratorPage', 'experimental-submit');

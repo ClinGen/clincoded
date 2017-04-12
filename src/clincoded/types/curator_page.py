@@ -1,26 +1,13 @@
-from contentbase.schema_utils import (
-    load_schema,
-    VALIDATOR_REGISTRY,
-)
-from contentbase import (
+from snovault.schema_utils import load_schema
+from snovault import (
     COLLECTIONS,
     CONNECTION,
     ROOT,
     calculated_property,
     collection,
-    item_view_page,
 )
-from .base import (
-    ALLOW_EVERYONE_VIEW,
-    Item,
-    ONLY_ADMIN_VIEW,
-)
+from .base import Item
 from pyramid.location import lineage
-from pyramid.threadlocal import get_current_request
-from pyramid.traversal import (
-    find_resource,
-)
-from pyramid.view import view_config
 
 
 @collection(
@@ -67,3 +54,38 @@ class CuratorPage(Item):
             return self.collection
         else:  # top level
             return self.registry[ROOT]
+
+    def is_default_page(self):
+        name = self.__name__
+        collections = self.registry[COLLECTIONS]
+        if self.properties.get('parent'):
+            return False
+        return name in collections or name == 'homepage'
+
+    # Handle traversal to nested pages
+
+    def __getitem__(self, name):
+        resource = self.get(name)
+        if resource is None:
+            raise KeyError(name)
+        return resource
+
+    def __contains__(self, name):
+        return self.get(name, None) is not None
+
+    def get(self, name, default=None):
+        location = str(self.uuid) + ':' + name
+        connection = self.registry[CONNECTION]
+        resource = connection.get_by_unique_key('curator_page:location', location)
+        if resource is not None:
+            return resource
+        return default
+
+    def __resource_url__(self, request, info):
+        # Record ancestor uuids in linked_uuids so renames of ancestors
+        # invalidate linking objects.
+        for obj in lineage(self):
+            uuid = getattr(obj, 'uuid', None)
+            if uuid is not None:
+                request._linked_uuids.add(str(uuid))
+        return None

@@ -213,7 +213,7 @@ var CreateGeneDisease = React.createClass({
     }
 });
 
-globals.curator_page.register(CreateGeneDisease, 'curator_page', 'create-gene-disease');
+globals.curator_page.register(CreateGeneDisease, 'CuratorPage', 'create-gene-disease');
 
 
 // HTML labels for inputs follow.
@@ -285,4 +285,4 @@ var GdmAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GdmAddHistory, 'gdm', 'add');
+globals.history_views.register(GdmAddHistory, 'Gdm', 'add');

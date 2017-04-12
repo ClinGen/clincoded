@@ -89,15 +89,15 @@ var VariantCuration = React.createClass({
             stateObj.user = user;
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'variant':
+                    case 'Variant':
                         stateObj.variant = data;
                         break;
 
-                    case 'pathogenicity':
+                    case 'Pathogenicity':
                         stateObj.pathogenicity = data;
                         break;
 
@@ -466,7 +466,7 @@ var VariantCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(VariantCuration, 'curator_page', 'variant-curation');
+globals.curator_page.register(VariantCuration, 'CuratorPage', 'variant-curation');
 
 
 // Display a single variant curation viewer panel
@@ -558,7 +558,7 @@ var VariantViewer = React.createClass({
     }
 });
 
-globals.content_views.register(VariantViewer, 'pathogenicity');
+globals.content_views.register(VariantViewer, 'Pathogenicity');
 
 
 // Display a history item for adding variant pathogenicities
@@ -585,8 +585,8 @@ var PathogenicityAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
-globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
+globals.history_views.register(PathogenicityAddModHistory, 'Pathogenicity', 'add');
+globals.history_views.register(PathogenicityAddModHistory, 'Pathogenicity', 'modify');
 
 
 // Display a history item for deleting variant pathogenicities
@@ -596,7 +596,7 @@ var PathogenicityDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');
+globals.history_views.register(PathogenicityDeleteHistory, 'Pathogenicity', 'delete');
 
 
 // Display a history item for adding a variant
@@ -614,7 +614,7 @@ var VariantAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(VariantAddHistory, 'variant', 'add');
+globals.history_views.register(VariantAddHistory, 'Variant', 'add');
 
 
 // Display a history item for adding a variant
@@ -624,4 +624,4 @@ var VariantDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(VariantDeleteHistory, 'variant', 'delete');
+globals.history_views.register(VariantDeleteHistory, 'Variant', 'delete');

@@ -1,17 +1,13 @@
-from contentbase.attachment import ItemWithAttachment
-from contentbase.schema_utils import (
-    load_schema,
-)
-from contentbase import (
+from snovault.attachment import ItemWithAttachment
+from snovault import (
     calculated_property,
     collection,
+    load_schema
 )
-from pyramid.traversal import find_root
 from .base import (
     Item,
     paths_filtered_by_status,
 )
-import json
 
 
 def includeme(config):
@@ -34,14 +30,14 @@ class Gene(Item):
 
 @collection(
     name='diseases',
-    unique_key='orphaPhenotype:orphaNumber',
+    unique_key='orphaphenotype:orphaNumber',
     properties={
         'title': 'Orphanet Diseases',
         'description': 'List of Orphanet diseases (phenotypes)',
     })
 class OrphaPhenotype(Item):
-    item_type = 'orphaPhenotype'
-    schema = load_schema('clincoded:schemas/orphaPhenotype.json')
+    item_type = 'orphaphenotype'
+    schema = load_schema('clincoded:schemas/orphaphenotype.json')
     name_key = 'orphaNumber'
 
 '''
@@ -548,14 +544,14 @@ class Annotation(Item):
 
 @collection(
     name='casecontrol',
-    unique_key='caseControl:uuid',
+    unique_key='casecontrol:uuid',
     properties={
         'title': 'Case Control',
         'description': 'List of case-control objects in all GDM(s)',
     })
 class CaseControl(Item):
-    item_type = 'caseControl'
-    schema = load_schema('clincoded:schemas/caseControl.json')
+    item_type = 'casecontrol'
+    schema = load_schema('clincoded:schemas/casecontrol.json')
     name_key = 'uuid'
     embedded = [
         'submitted_by',
@@ -977,14 +973,14 @@ class Assessment(Item):
 
 @collection(
     name='evidencescore',
-    unique_key='evidenceScore:uuid',
+    unique_key='evidencescore:uuid',
     properties={
         'title': 'Evidence Score',
         'description': 'List of score assigned to evidence',
     })
 class EvidenceScore(Item):
-    item_type = 'evidenceScore'
-    schema = load_schema('clincoded:schemas/evidenceScore.json')
+    item_type = 'evidencescore'
+    schema = load_schema('clincoded:schemas/evidencescore.json')
     name_key = 'uuid'
     embedded = [
         'submitted_by',
@@ -1002,7 +998,7 @@ class EvidenceScore(Item):
         'experimental_scored.associatedAnnotations.associatedGdm'
     ]
     rev = {
-        'caseControl_scored': ('caseControl', 'scores'),
+        'caseControl_scored': ('casecontrol', 'scores'),
         'individual_scored': ('individual', 'scores'),
         'experimental_scored': ('experimental', 'scores')
     }
@@ -1012,7 +1008,7 @@ class EvidenceScore(Item):
         "type": "array",
         "items": {
             "type": ["string", "object"],
-            "linkFrom": "caseControl.scores"
+            "linkFrom": "casecontrol.scores"
         }
     })
     def caseControl_scored(self, request, caseControl_scored):
@@ -1043,14 +1039,14 @@ class EvidenceScore(Item):
 
 @collection(
     name='provisional',
-    unique_key='provisionalClassification:uuid',
+    unique_key='provisionalclassification:uuid',
     properties={
         'title': 'Provisional Classifications',
         'description': 'List of provisional classifications',
     })
-class Provisional(Item):
-    item_type = 'provisionalClassification'
-    schema = load_schema('clincoded:schemas/provisionalClassification.json')
+class ProvisionalClassification(Item):
+    item_type = 'provisionalclassification'
+    schema = load_schema('clincoded:schemas/provisionalclassification.json')
     name_key = 'uuid'
     embedded = [
         'submitted_by',
@@ -1220,13 +1216,15 @@ class Interpretation(Item):
 
 @collection(
     name='extra-evidence',
+    unique_key='extra_evidence:uuid',
     properties={
         'title': "Extra evidence for VCI",
         'description': 'Extra evidence for VCI',
     })
-class ExtraEvidence(Item):
+class Extra_evidence(Item):
     item_type = 'extra_evidence'
     schema = load_schema('clincoded:schemas/extra_evidence.json')
+    name_key = 'uuid'
     embedded = [
         'variant',
         'articles',
@@ -1508,7 +1506,7 @@ class Document(ItemWithAttachment, Item):
     })
 class History(Item):
     item_type = 'history'
-    schema = load_schema('clincoded:schemas/curatorHistory.json')
+    schema = load_schema('clincoded:schemas/curatorhistory.json')
     embedded = [
         'primary',
         'meta.gdm.gene',

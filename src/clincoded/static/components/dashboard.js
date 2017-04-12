@@ -235,4 +235,4 @@ var Dashboard = React.createClass({
     }
 });
 
-globals.curator_page.register(Dashboard, 'curator_page', 'dashboard');
+globals.curator_page.register(Dashboard, 'CuratorPage', 'dashboard');

@@ -1,5 +1,5 @@
 from datetime import datetime
-from jsonschema import NO_DEFAULT
+from jsonschema_serialize_fork import NO_DEFAULT
 from pyramid.security import effective_principals
 from pyramid.threadlocal import get_current_request
 from string import (
@@ -9,7 +9,7 @@ from string import (
 import random
 import uuid
 
-from contentbase.schema_utils import server_default
+from snovault.schema_utils import server_default
 
 
 ACCESSION_FACTORY = __name__ + ':accession_factory'

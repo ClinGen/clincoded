@@ -1,13 +1,13 @@
-from contentbase.schema_utils import (
+from snovault.schema_utils import (
     load_schema,
 )
-from contentbase import (
+from snovault import (
     collection,
 )
 from .base import (
     Item,
 )
-from contentbase.attachment import ItemWithAttachment
+from snovault.attachment import ItemWithAttachment
 
 
 @collection(

@@ -14,33 +14,34 @@ ORDER = [
     'award',
     'lab',
     'organism',
-    'source',
-    'document',
-    'image',
+    #'source',
+    #'document',
+    #'image',
     'gene',
-    'orphaPhenotype',
+    'orphaphenotype',
     #'disease',
     'article',
     'assessment',
-    'evidenceScore',
+    'evidencescore',
     'variant',
     'protein',
     'transcript',
     'individual',
     'family',
     'group',
-    'caseControl',
+    'casecontrol',
     'experimental',
     'annotation',
     'pathogenicity',
-    'provisionalClassification',
+    'provisionalclassification',
     'gdm',
     'population', # VCI
     'computational', # VCI
     'evaluation', # VCI
     'provisional_variant', # VCI
     'interpretation', # VCI
-    'curatorHistory',
+    'extra_evidence', # VCI
+    'curatorhistory',
     'curator_page', # keep at bottom so it can load other type data
 ]
 
@@ -512,7 +513,7 @@ PHASE1_PIPELINES = {
     'publication': [
         remove_keys('datasets'),
     ],
-    'orphaPhenotype': [
+    'orphaphenotype': [
         remove_keys('active', "schema_version"),
     ],
     'annotation': [
@@ -561,6 +562,7 @@ def load_all(testapp, filename, docsdir, test=False):
         try:
             source = read_single_sheet(filename, item_type)
         except ValueError:
+            logger.error('Opening %s %s failed.', filename, item_type)
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=1)
         process(combine(source, pipeline))
@@ -574,3 +576,17 @@ def load_all(testapp, filename, docsdir, test=False):
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
+
+
+def load_test_data(app):
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    from pkg_resources import resource_filename
+    inserts = resource_filename('clincoded', 'tests/data/inserts/')
+    docsdir = [resource_filename('clincoded', 'tests/data/documents/')]
+    load_all(testapp, inserts, docsdir)

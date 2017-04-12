@@ -155,23 +155,23 @@ var IndividualCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'group':
+                    case 'Group':
                         stateObj.group = data;
                         break;
 
-                    case 'family':
+                    case 'Family':
                         stateObj.family = data;
                         break;
 
-                    case 'individual':
+                    case 'Individual':
                         stateObj.individual = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -380,7 +380,7 @@ var IndividualCuration = React.createClass({
                 // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
                 if (orphaIds && orphaIds.length > 0) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    searchStr = '/search/?type=orphaphenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
                     searchStr = '';
@@ -952,7 +952,7 @@ var IndividualCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
+globals.curator_page.register(IndividualCuration, 'CuratorPage', 'individual-curation');
 
 // HTML labels for inputs follow.
 var LabelPanelTitle = React.createClass({
@@ -1977,7 +1977,7 @@ var IndividualViewer = React.createClass({
     }
 });
 
-globals.content_views.register(IndividualViewer, 'individual');
+globals.content_views.register(IndividualViewer, 'Individual');
 
 
 // HTML labels for inputs follow.
@@ -2161,7 +2161,7 @@ var IndividualAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(IndividualAddHistory, 'individual', 'add');
+globals.history_views.register(IndividualAddHistory, 'Individual', 'add');
 
 
 // Display a history item for modifying an individual
@@ -2180,7 +2180,7 @@ var IndividualModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(IndividualModifyHistory, 'individual', 'modify');
+globals.history_views.register(IndividualModifyHistory, 'Individual', 'modify');
 
 
 // Display a history item for deleting an individual
@@ -2198,4 +2198,4 @@ var IndividualDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(IndividualDeleteHistory, 'individual', 'delete');
+globals.history_views.register(IndividualDeleteHistory, 'Individual', 'delete');

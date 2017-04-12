@@ -47,7 +47,7 @@ def disease(testapp):
         'orphaNumber': '15',
         'term': 'Achondroplasia',
     }
-    res = testapp.post_json('/orphaPhenotype', item)
+    res = testapp.post_json('/orphaphenotype', item)
     return testapp.get(res.location).json
 
 @pytest.fixture

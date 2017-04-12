@@ -40,7 +40,7 @@
                 "title": "Conditions",
                 "description": "Conditions associated with this phenotype",
                 "type":  "string",
-                "linkTo": "condition"
+                "linkTo": "Condition"
             }
         },
         "label": {

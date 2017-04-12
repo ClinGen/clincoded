@@ -1,4 +1,4 @@
-from contentbase.upgrader import upgrade_step
+from snovault import upgrade_step
 
 
 # for use in computational_1_2 step

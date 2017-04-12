@@ -337,15 +337,15 @@ var ExperimentalCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'experimental':
+                    case 'Experimental':
                         stateObj.experimental = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -1315,7 +1315,7 @@ var ExperimentalCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
+globals.curator_page.register(ExperimentalCuration, 'CuratorPage', 'experimental-curation');
 
 
 // Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context
@@ -2809,7 +2809,7 @@ var ExperimentalViewer = React.createClass({
     }
 });
 
-globals.content_views.register(ExperimentalViewer, 'experimental');
+globals.content_views.register(ExperimentalViewer, 'Experimental');
 
 
 // Display a history item for adding experimental data
@@ -2833,7 +2833,7 @@ var ExperimentalAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ExperimentalAddHistory, 'experimental', 'add');
+globals.history_views.register(ExperimentalAddHistory, 'Experimental', 'add');
 
 
 // Display a history item for modifying experimental data
@@ -2852,7 +2852,7 @@ var ExperimentModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
+globals.history_views.register(ExperimentModifyHistory, 'Experimental', 'modify');
 
 
 // Display a history item for deleting experimental data
@@ -2870,4 +2870,4 @@ var ExperimentDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ExperimentDeleteHistory, 'experimental', 'delete');
+globals.history_views.register(ExperimentDeleteHistory, 'Experimental', 'delete');

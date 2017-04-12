@@ -26,7 +26,7 @@
         "variant": {
             "title": "Variant",
             "type": "string",
-            "linkTo": "variant"
+            "linkTo": "Variant"
         }
     },
     "columns": {

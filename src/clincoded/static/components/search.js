@@ -18,13 +18,13 @@ var AuditMixin = audit.AuditMixin;
 // Should really be singular...
 var types = {
     gene: {title: 'Genes'},
-    orphaPhenotype: {title: 'Diseases'},
+    orphaphenotype: {title: 'Diseases'},
     article: {title: 'References'},
     variant: {title: 'Variants'},
     gdm: {title: 'GDMs'},
     annotation: {title: 'Evidences'},
     group: {title: 'Groups'},
-    family: {title: 'Families'},
+    family: {title: 'Famlies'},
     individual: {title: 'Individuals'},
     experimental: {title: 'Experimental Data'},
     assessment: {title: 'Assessments'},
@@ -85,7 +85,7 @@ var Item = module.exports.Item = React.createClass({
         );
     }
 });
-globals.listing_views.register(Item, 'item');
+globals.listing_views.register(Item, 'Item');
 
 // Display one antibody status indicator
 var StatusIndicator = React.createClass({
@@ -821,4 +821,4 @@ var Search = search.Search = React.createClass({
     }
 });
 
-globals.content_views.register(Search, 'search');
+globals.content_views.register(Search, 'Search');

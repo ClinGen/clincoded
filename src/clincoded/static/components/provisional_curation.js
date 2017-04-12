@@ -95,7 +95,7 @@ var ProvisionalCuration = React.createClass({
 
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
                     default:
@@ -834,7 +834,7 @@ var ProvisionalCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
+globals.curator_page.register(ProvisionalCuration,  'CuratorPage', 'provisional-curation');
 
 // Generate Classification Description page for url ../provisional-curation/?gdm=GDMId&classification=display
 var Classification = function() {
@@ -1053,7 +1053,7 @@ var ProvisionalAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ProvisionalAddModHistory, 'provisionalClassification', 'add');
+globals.history_views.register(ProvisionalAddModHistory, 'ProvisionalClassification', 'add');
 
 
 // Display a history item for modifying a family
@@ -1074,7 +1074,7 @@ var ProvisionalModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ProvisionalModifyHistory, 'provisionalClassification', 'modify');
+globals.history_views.register(ProvisionalModifyHistory, 'ProvisionalClassification', 'modify');
 
 
 // Display a history item for deleting a family
@@ -1084,4 +1084,4 @@ var ProvisionalDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(ProvisionalDeleteHistory, 'provisionalClassification', 'delete');
+globals.history_views.register(ProvisionalDeleteHistory, 'ProvisionalClassification', 'delete');

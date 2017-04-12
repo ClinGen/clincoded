@@ -49,7 +49,7 @@ var Publication = module.exports.Panel = React.createClass({
     }
 });
 
-globals.content_views.register(Publication, 'publication');
+globals.content_views.register(Publication, 'Publication');
 
 
 var Citation = module.exports.Citation = React.createClass({

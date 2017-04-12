@@ -59,4 +59,4 @@ var Gene = module.exports.Gene = React.createClass({
     }
 });
 
-globals.content_views.register(Gene, 'gene');
+globals.content_views.register(Gene, 'Gene');

@@ -60,15 +60,15 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'group':
+                    case 'Group':
                         stateObj.group = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -185,4 +185,4 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(GroupSubmit, 'curator_page', 'group-submit');
+globals.curator_page.register(GroupSubmit, 'CuratorPage', 'group-submit');

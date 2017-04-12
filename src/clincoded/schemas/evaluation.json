@@ -20,19 +20,19 @@
         "variant": {
             "title": "Variant",
             "type": "string",
-            "linkTo": "variant"
+            "linkTo": "Variant"
         },
         "population": {
             "title": "Population",
             "description": "Population data used as evidence to evaluate the criteria.",
             "type": "string",
-            "linkTo": "population"
+            "linkTo": "Population"
         },
         "computational": {
             "title": "Computational",
             "description": "Computational data used as evidnece to evaluate the criteria.",
             "type": "string",
-            "linkTo": "computational"
+            "linkTo": "Computational"
         },
         "functional": {
             "title": "Functional",
@@ -50,7 +50,7 @@
             "title": "Disease",
             "description": "Disease associated to the evidence",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "linkTo": "OrphaPhenotype"
         },
         "criteria": {
             "title": "Criteria",

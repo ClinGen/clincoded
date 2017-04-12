@@ -1,11 +1,12 @@
 import re
 from pyramid.view import view_config
-from contentbase import (
+from snovault import (
     Collection,
+    AbstractCollection,
     TYPES,
-    collection_view_listing_db,
 )
-from contentbase.elasticsearch import ELASTIC_SEARCH
+from snovault.elasticsearch import ELASTIC_SEARCH
+from snovault.resource_views import collection_view_listing_db
 from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict
@@ -274,11 +275,11 @@ def search(context, request, search_type=None):
     """
     Search view connects to ElasticSearch and returns the results
     """
-    root = request.root
+    #root = request.root
     types = request.registry[TYPES]
     result = {
         '@id': '/search/' + ('?' + request.query_string if request.query_string else ''),
-        '@type': ['search'],
+        '@type': ['Search'],
         'title': 'Search',
         'facets': [],
         '@graph': [],
@@ -289,7 +290,7 @@ def search(context, request, search_type=None):
 
     principals = effective_principals(request)
     es = request.registry[ELASTIC_SEARCH]
-    es_index = request.registry.settings['contentbase.elasticsearch.index']
+    es_index = request.registry.settings['snovault.elasticsearch.index']
     search_audit = request.has_permission('search_audit')
 
     # handling limit
@@ -321,19 +322,21 @@ def search(context, request, search_type=None):
             doc_types = []
 
         # handling invalid item types
+        '''
         bad_types = [t for t in doc_types if t not in root.by_item_type]
         if bad_types:
             result['notification'] = "Invalid type: %s" ', '.join(bad_types)
             return result
+        '''
     else:
-        doc_types = [search_type]
+        doc_types = [search_type.lower()]
 
     # Building query for filters
     if not doc_types:
         if request.params.get('mode') == 'picker':
             doc_types = []
         else:
-            doc_types = ['gene', 'orphaPhenotype', 'article', 'variant', 'gdm', 'annotation',
+            doc_types = ['gene', 'orphaphenotype', 'article', 'variant', 'gdm', 'annotation',
                          'group', 'family', 'individual', 'experimental', 'assessment',
                          'interpretation']
     else:
@@ -439,18 +442,19 @@ def search(context, request, search_type=None):
     return result
 
 
-@view_config(context=Collection, permission='list', request_method='GET',
+@view_config(context=AbstractCollection, permission='list', request_method='GET',
              name='listing')
 def collection_view_listing_es(context, request):
     # Switch to change summary page loading options
     if request.datastore != 'elasticsearch':
         return collection_view_listing_db(context, request)
 
-    result = search(context, request, context.item_type)
-
+    result = search(context, request, context.type_info.name)
+    '''
     if len(result['@graph']) < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
         result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
+    '''
 
     return result

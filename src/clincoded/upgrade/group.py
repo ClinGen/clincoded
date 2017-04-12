@@ -1,10 +1,11 @@
-from contentbase.upgrader import upgrade_step
+from snovault import upgrade_step
 
 
 @upgrade_step('group', '1', '2')
 def group_1_2(value, system):
     # https://github.com/ClinGen/clincoded/issues/453
     value['status'] = 'in progress'
+
 
 @upgrade_step('group', '2', '3')
 def group_2_3(value, system):

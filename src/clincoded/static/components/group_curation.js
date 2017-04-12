@@ -81,15 +81,15 @@ var GroupCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'group':
+                    case 'Group':
                         stateObj.group = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -203,7 +203,7 @@ var GroupCuration = React.createClass({
                 // Build search string from given ORPHA IDs
                 var searchStr;
                 if (valid_orphaId) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    searchStr = '/search/?type=orphaphenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
                     searchStr = '';
@@ -571,7 +571,7 @@ var GroupCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
+globals.curator_page.register(GroupCuration, 'CuratorPage', 'group-curation');
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context
@@ -1019,7 +1019,7 @@ var GroupViewer = React.createClass({
     }
 });
 
-globals.content_views.register(GroupViewer, 'group');
+globals.content_views.register(GroupViewer, 'Group');
 
 
 // Display a history item for adding a group
@@ -1043,7 +1043,7 @@ var GroupAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GroupAddHistory, 'group', 'add');
+globals.history_views.register(GroupAddHistory, 'Group', 'add');
 
 
 // Display a history item for modifying a group
@@ -1062,7 +1062,7 @@ var GroupModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GroupModifyHistory, 'group', 'modify');
+globals.history_views.register(GroupModifyHistory, 'Group', 'modify');
 
 
 // Display a history item for deleting a group
@@ -1085,4 +1085,4 @@ var GroupDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(GroupDeleteHistory, 'group', 'delete');
+globals.history_views.register(GroupDeleteHistory, 'Group', 'delete');

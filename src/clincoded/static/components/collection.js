@@ -36,7 +36,7 @@ var Collection = module.exports.Collection = React.createClass({
     }
 });
 
-globals.content_views.register(Collection, 'collection');
+globals.content_views.register(Collection, 'Collection');
 
 
 class Cell {
@@ -66,7 +66,7 @@ class Data {
         reverse = !!reverse;
         if (this.sortedOn === sortColumn && this.reversed === reverse) return;
         this.sortedOn = sortColumn;
-        this.reversed = reverse;            
+        this.reversed = reverse;
         this.rows.sort(function (rowA, rowB) {
             var a = '' + rowA.cells[sortColumn].sortable;
             var b = '' + rowB.cells[sortColumn].sortable;
@@ -301,13 +301,13 @@ var Table = module.exports.Table = React.createClass({
                             <div className="col-sm-6 table-count">
                                 {loading_or_total}
                             </div>
-                            <form ref="form" className="form-inline col-sm-6 table-filter" onKeyUp={this.handleKeyUp} 
+                            <form ref="form" className="form-inline col-sm-6 table-filter" onKeyUp={this.handleKeyUp}
                                 data-skiprequest="true" data-removeempty="true">
                                 <div className="form-group table-filter-input">
                                     <label htmlFor="table-filter">Filter table by:</label>
-                                    <input ref="q" disabled={this.state.communicating || undefined} 
-                                        name="q" type="search" defaultValue={searchTerm} 
-                                        className="form-control" id="table-filter" /> 
+                                    <input ref="q" disabled={this.state.communicating || undefined}
+                                        name="q" type="search" defaultValue={searchTerm}
+                                        className="form-control" id="table-filter" />
                                     <i className="icon icon-times-circle clear-input-icon" hidden={!searchTerm} onClick={this.clearFilter}></i>
                                 </div>
                                 <input ref="sorton" type="hidden" name="sorton" defaultValue={sortOn !== defaultSortOn ? sortOn : ''} />
@@ -390,11 +390,11 @@ var Table = module.exports.Table = React.createClass({
         var event = new Event('submit', {bubbles: true, cancelable: true});
         target.dispatchEvent(event);
     },
-    
+
     clearFilter: function (event) {
         this.refs.q.value = '';
         this.submitTimer = setTimeout(this.submit);
-    }, 
+    },
 
     componentWillUnmount: function () {
         if (typeof this.submitTimer != 'undefined') {

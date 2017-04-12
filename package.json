@@ -23,6 +23,7 @@
     "jest-cli": "^18.0.0"
   },
   "dependencies": {
+    "auth0-lock": "^10.4.0",
     "babel-core": "^6.18.2",
     "babel-jest": "^18.0.0",
     "babel-plugin-transform-runtime": "^6.6.0",

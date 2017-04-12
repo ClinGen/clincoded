@@ -12,7 +12,7 @@ from pyramid.traversal import (
     find_root,
     traverse,
 )
-import contentbase
+import snovault
 from ..schema_formats import is_accession
 
 
@@ -81,7 +81,7 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
         ]
 
 
-class Collection(contentbase.Collection):
+class Collection(snovault.Collection):
     def __init__(self, *args, **kw):
         super(Item.Collection, self).__init__(*args, **kw)
         if hasattr(self, '__acl__'):
@@ -110,7 +110,7 @@ class Collection(contentbase.Collection):
         return default
 
 
-class Item(contentbase.Item):
+class Item(snovault.Item):
     Collection = Collection
     STATUS_ACL = {
         # standard_status
@@ -176,34 +176,34 @@ def contextless_has_permission(permission):
     return request.has_permission('forms', request.root)
 
 
-@contentbase.calculated_property(context=Item.Collection, category='action')
-def add(item_uri, item_type, has_permission):
-    if has_permission('add') and contextless_has_permission('forms'):
+@snovault.calculated_property(context=Item.Collection, category='action')
+def add(context, request):
+    if request.has_permission('add'):
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': '{item_uri}#!add'.format(item_uri=item_uri),
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
         }
 
 
-@contentbase.calculated_property(context=Item, category='action')
-def edit(item_uri, item_type, has_permission):
-    if has_permission('edit') and contextless_has_permission('forms'):
+@snovault.calculated_property(context=Item, category='action')
+def edit(context, request):
+    if request.has_permission('edit'):
         return {
             'name': 'edit',
             'title': 'Edit',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': item_uri + '#!edit',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
         }
 
 
-@contentbase.calculated_property(context=Item, category='action')
-def edit_json(item_uri, item_type, has_permission):
-    if has_permission('edit'):
+@snovault.calculated_property(context=Item, category='action')
+def edit_json(context, request):
+    if request.has_permission('edit'):
         return {
             'name': 'edit-json',
             'title': 'Edit JSON',
-            'profile': '/profiles/{item_type}.json'.format(item_type=item_type),
-            'href': item_uri + '#!edit-json',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!edit-json'.format(item_uri=request.resource_path(context)),
         }

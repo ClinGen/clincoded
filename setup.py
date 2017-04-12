@@ -7,17 +7,23 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
+    'snovault',
     'Pillow',
     'PyBrowserID',
     'SQLAlchemy>=1.0.0b1',
     'WSGIProxy2',
     'WebTest',
     'boto',
+    'botocore',
+    'jmespath',
+    'boto3',
     'elasticsearch',
+    'lucenequery',
     'future',
     'humanfriendly',
-    'jsonschema',
+    'jsonschema_serialize_fork',
     'loremipsum',
+    'netaddr',
     'passlib',
     'psutil',
     'pyramid',
@@ -46,7 +52,9 @@ if sys.version_info.major == 2:
 tests_require = [
     'pytest>=2.4.0',
     'pytest-bdd',
+    'pytest-mock',
     'pytest-splinter',
+    'pytest_exact_fixtures',
 ]
 
 setup(
@@ -69,17 +77,17 @@ setup(
     },
     entry_points='''
         [console_scripts]
-        batchupgrade = contentbase.batchupgrade:main
-        create-mapping = contentbase.elasticsearch.create_mapping:main
+        batchupgrade = snovault.batchupgrade:main
+        create-mapping = snovault.elasticsearch.create_mapping:main
+        dev-servers = snovault.dev_servers:main
+        es-index-listener = snovault.elasticsearch.es_index_listener:main
 
         add-date-created = clincoded.commands.add_date_created:main
         check-files = clincoded.commands.check_files:main
         check-rendering = clincoded.commands.check_rendering:main
         deploy = clincoded.commands.deploy:main
-        dev-servers = clincoded.commands.dev_servers:main
         extract_test_data = clincoded.commands.extract_test_data:main
         es-index-data = clincoded.commands.es_index_data:main
-        es-index-listener = clincoded.commands.es_index_listener:main
         import-data = clincoded.commands.import_data:main
         jsonld-rdf = clincoded.commands.jsonld_rdf:main
         migrate-files-aws = clincoded.commands.migrate_files_aws:main
@@ -91,7 +99,7 @@ setup(
         main = clincoded:main
 
         [paste.composite_factory]
-        indexer = clincoded.commands.es_index_listener:composite
+        indexer = snovault.elasticsearch.es_index_listener:composite
 
         [paste.filter_app_factory]
         memlimit = clincoded.memlimit:filter_app

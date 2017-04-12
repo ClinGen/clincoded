@@ -29,13 +29,13 @@
             "title": "Case Cohort",
             "description": "Group used as case cohort",
             "type": "string",
-            "linkTo": "group"
+            "linkTo": "Group"
         },
         "controlCohort": {
             "title": "Control Cohort",
             "description": "Group used as control cohort",
             "type": "string",
-            "linkTo": "group"
+            "linkTo": "Group"
         },
         "studyType": {
             "title": "Study Type",
@@ -141,7 +141,7 @@
             "items": {
                 "title": "Score",
                 "type": "string",
-                "linkTo": "evidenceScore"
+                "linkTo": "EvidenceScore"
             }
         }
     },

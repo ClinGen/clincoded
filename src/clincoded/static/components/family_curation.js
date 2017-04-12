@@ -349,19 +349,19 @@ var FamilyCuration = React.createClass({
             var stateObj = {};
             datas.forEach(function(data) {
                 switch(data['@type'][0]) {
-                    case 'gdm':
+                    case 'Gdm':
                         stateObj.gdm = data;
                         break;
 
-                    case 'group':
+                    case 'Group':
                         stateObj.group = data;
                         break;
 
-                    case 'family':
+                    case 'Family':
                         stateObj.family = data;
                         break;
 
-                    case 'annotation':
+                    case 'Annotation':
                         stateObj.annotation = data;
                         break;
 
@@ -626,7 +626,7 @@ var FamilyCuration = React.createClass({
                 // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
                 var searchStr;
                 if (orphaIds && orphaIds.length > 0) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                    searchStr = '/search/?type=orphaphenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
                 }
                 else {
                     searchStr = '';
@@ -659,7 +659,7 @@ var FamilyCuration = React.createClass({
                 }).then(diseases => {
                     // Check for individual orphanet IDs if we have variants and no existing proband
                     if (!this.state.probandIndividual && this.state.individualRequired) {
-                        var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
+                        var searchStr = '/search/?type=orphaphenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
 
                         // Verify given Orpha ID exists in DB
                         return this.getRestData(searchStr).then(diseases => {
@@ -1361,7 +1361,7 @@ var FamilyCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
+globals.curator_page.register(FamilyCuration, 'CuratorPage', 'family-curation');
 
 
 // Family Name group curation panel. Call with .call(this) to run in the same context
@@ -2251,7 +2251,7 @@ var FamilyViewer = React.createClass({
     }
 });
 
-globals.content_views.register(FamilyViewer, 'family');
+globals.content_views.register(FamilyViewer, 'Family');
 
 
 // Display a segregation in a read-only panel. If the assessments can change while the page
@@ -2363,7 +2363,7 @@ var FamilyAddHistory = React.createClass({
     }
 });
 
-globals.history_views.register(FamilyAddHistory, 'family', 'add');
+globals.history_views.register(FamilyAddHistory, 'Family', 'add');
 
 
 // Display a history item for modifying a family
@@ -2382,7 +2382,7 @@ var FamilyModifyHistory = React.createClass({
     }
 });
 
-globals.history_views.register(FamilyModifyHistory, 'family', 'modify');
+globals.history_views.register(FamilyModifyHistory, 'Family', 'modify');
 
 
 // Display a history item for deleting a family
@@ -2405,4 +2405,4 @@ var FamilyDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(FamilyDeleteHistory, 'family', 'delete');
+globals.history_views.register(FamilyDeleteHistory, 'Family', 'delete');

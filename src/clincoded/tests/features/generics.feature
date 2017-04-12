@@ -11,7 +11,7 @@ Feature: Generics
         When I visit "/groups/"
         Then I should see "CaseGroupRousseau"
         When I visit "/users/"
-        Then I should see "J. Michael Cherry"
+        Then I should see "Mike Cherry"
         When I visit "/search/"
         Then I should see "Showing"
         When I visit "/gdm/"

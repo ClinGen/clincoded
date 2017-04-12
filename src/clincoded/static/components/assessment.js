@@ -356,8 +356,8 @@ var AssessmentAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(AssessmentAddModHistory, 'assessment', 'add');
-globals.history_views.register(AssessmentAddModHistory, 'assessment', 'modify');
+globals.history_views.register(AssessmentAddModHistory, 'Assessment', 'add');
+globals.history_views.register(AssessmentAddModHistory, 'Assessment', 'modify');
 
 
 // Display a history item for deleting an assessment
@@ -367,7 +367,7 @@ var AssessmentDeleteHistory = React.createClass({
     }
 });
 
-globals.history_views.register(AssessmentDeleteHistory, 'assessment', 'delete');
+globals.history_views.register(AssessmentDeleteHistory, 'Assessment', 'delete');
 
 
 // Return the assessment from the given array of assessments that's owned by the curator with the
