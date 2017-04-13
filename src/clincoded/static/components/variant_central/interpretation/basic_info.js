@@ -25,9 +25,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarRCV: React.PropTypes.array,
+        ext_clinVarSCV: React.PropTypes.array,
         ext_clinvarInterpretationSummary: React.PropTypes.object,
         loading_clinvarEutils: React.PropTypes.bool,
         loading_clinvarRCV: React.PropTypes.bool,
+        loading_clinvarSCV: React.PropTypes.bool,
         loading_ensemblHgvsVEP: React.PropTypes.bool
     },
 
@@ -43,6 +45,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             sequence_location: [],
             primary_transcript: {},
             clinVarRCV: [],
+            clinVarSCV: [],
             clinVarInterpretationSummary: {},
             hgvs_GRCh37: null,
             hgvs_GRCh38: null,
@@ -52,6 +55,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             uniprot_id: null,
             loading_clinvarEutils: this.props.loading_clinvarEutils,
             loading_clinvarRCV: this.props.loading_clinvarRCV,
+            loading_clinvarSCV: this.props.loading_clinvarSCV,
             loading_ensemblHgvsVEP: this.props.loading_ensemblHgvsVEP
         };
     },
@@ -70,6 +74,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
         if (this.props.ext_clinVarRCV) {
             this.setState({clinVarRCV: this.props.ext_clinVarRCV});
+        }
+        if (this.props.ext_clinVarSCV) {
+            this.setState({clinVarSCV: this.props.ext_clinVarSCV});
         }
         if (this.props.ext_clinvarInterpretationSummary) {
             this.setState({clinVarInterpretationSummary: this.props.ext_clinvarInterpretationSummary});
@@ -90,13 +97,17 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (nextProps.ext_clinVarRCV) {
             this.setState({clinVarRCV: nextProps.ext_clinVarRCV});
         }
+        if (nextProps.ext_clinVarSCV) {
+            this.setState({clinVarSCV: nextProps.ext_clinVarSCV});
+        }
         if (nextProps.ext_clinvarInterpretationSummary) {
             this.setState({clinVarInterpretationSummary: nextProps.ext_clinvarInterpretationSummary});
         }
         this.setState({
             loading_ensemblHgvsVEP: nextProps.loading_ensemblHgvsVEP,
             loading_clinvarEutils: nextProps.loading_clinvarEutils,
-            loading_clinvarRCV: nextProps.loading_clinvarRCV
+            loading_clinvarRCV: nextProps.loading_clinvarRCV,
+            loading_clinvarSCV: nextProps.loading_clinvarSCV
         });
     },
 
@@ -218,6 +229,57 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
     },
 
+    // Render Clinical Assertion table rows
+    renderClinicalAssertions: function(item, key) {
+        let self = this;
+        return (
+            <tr key={key} className="clinical-assertion">
+                <td className="clinical-significance">
+                    {item.clinicalSignificance}<br/>{item.dateLastEvaluated ? '(' + item.dateLastEvaluated + ')' : null}
+                </td>
+                <td className="review-status">
+                    <div>{item.reviewStatus}</div><div>{this.handleAssertionMethodLinkOut(item)}</div>
+                </td>
+                <td className="disease">
+                    {item.phenotypeList.map((phenotype, i) => {
+                        return (self.handleCondition(phenotype, i, item.modeOfInheritance));
+                    })}
+                </td>
+                <td className="submitter">
+                    <a href={external_url_map['ClinVar'] + 'submitters/' + item.orgID + '/'} target="_blank">{item.submitterName}</a>
+                    {item.studyDescription ?
+                        <div><a className="study-description">Study description</a></div>
+                    : null}
+                </td>
+                <td className="submission-accession">{item.accession}.{item.version}</td>
+            </tr>
+        );
+    },
+
+    // Method to contruct linkouts for assertion methods
+    // based on a given url or pubmed id
+    handleAssertionMethodLinkOut(item) {
+        if (item.assertionMethod) {
+            if (item.AssertionMethodCitationURL) {
+                return (
+                    <a href={item.AssertionMethodCitationURL} target="_blank">{item.assertionMethod}</a>
+                );
+            } else if (item.AssertionMethodCitationPubMedID) {
+                return (
+                    <a href={external_url_map['PubMed'] + item.AssertionMethodCitationPubMedID} target="_blank">{item.assertionMethod}</a>
+                );
+            } else {
+                return (
+                    <span>{item.assertionMethod}</span>
+                );
+            }
+        } else {
+            // Certain SCVs don't have assertion methods, such as
+            // https://www.ncbi.nlm.nih.gov/clinvar/variation/17000/#clinical-assertions
+            return '';
+        }
+    },
+
     // Render ClinVar Interpretations table rows
     renderClinvarInterpretations: function(item, key) {
         let self = this;
@@ -236,11 +298,12 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     // Method to render each associated condition, which also consists of multiple identifiers
-    handleCondition: function(condition, key) {
+    handleCondition: function(condition, key, moi) {
         let self = this;
         return (
             <div className="condition" key={condition.name}>
                 <span className="condition-name">{condition.name}</span>&nbsp;
+                {moi ? <span className="mode-of-inheritance">({moi})&nbsp;</span> : null}
                 {condition.identifiers && condition.identifiers.length ?
                     <span className="identifiers">[<ul className="clearfix">
                         {condition.identifiers.map(function(identifier, i) {
@@ -395,6 +458,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var GRCh38 = this.state.hgvs_GRCh38;
         var primary_transcript = this.state.primary_transcript;
         var clinVarRCV = this.state.clinVarRCV;
+        var clinVarSCV = this.state.clinVarSCV;
         var clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
         var self = this;
 
@@ -447,6 +511,37 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                     <tbody>
                                         {clinVarRCV.map(function(item, i) {
                                             return (self.renderClinvarInterpretations(item, i));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            <div className="panel-body">
+                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div className="panel panel-info datasource-clinical-assertions">
+                    <div className="panel-heading"><h3 className="panel-title">ClinVar Assertions</h3></div>
+                    <div className="panel-content-wrapper">
+                        {this.state.loading_clinvarSCV ? showActivityIndicator('Retrieving data... ') : null}
+                        {(clinVarSCV.length > 0) ?
+                            <div className="clinical-assertions-content-wrapper">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Clinical significance (Last evaluated)</th>
+                                            <th>Review Status (Assertion method)</th>
+                                            <th>Condition(s) (Mode of inheritance)</th>
+                                            <th>Submitter - Study name</th>
+                                            <th>Submission accession</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {clinVarSCV.map((item, i) => {
+                                            return (self.renderClinicalAssertions(item, i));
                                         })}
                                     </tbody>
                                 </table>
