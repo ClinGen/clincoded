@@ -2403,6 +2403,12 @@ table.login-users-interpretations {
 
         h4 {
             font-size: 1.25em;
+
+            @media screen and (max-width: $screen-xs-max) {
+                font-style: italic;
+                margin-bottom: 20px;
+                padding-left: 0;
+            }
         }
 
         label {
@@ -2411,6 +2417,10 @@ table.login-users-interpretations {
 
         .invisible-placeholder {
             visibility: hidden;
+
+            @media screen and (max-width: $screen-xs-max) {
+                display: none;
+            }
         }
     }
 
@@ -2434,10 +2444,18 @@ table.login-users-interpretations {
 .panel.control-cohort {
     .section-disease {
         visibility: hidden;
+
+        @media screen and (max-width: $screen-xs-max) {
+            display: none;
+        }
     }
 
     .section-additional-info .other-genes {
         visibility: hidden;
+
+        @media screen and (max-width: $screen-xs-max) {
+            display: none;
+        }
     }
 
     .label-group {
@@ -2450,8 +2468,16 @@ table.login-users-interpretations {
         position: relative;
 
         h4 {
-            position: absolute;
-            margin-left: 0;
+            @media screen and (min-width: $screen-sm-min) {
+                position: absolute;
+                margin-left: 0;
+            }
+
+            @media screen and (max-width: $screen-xs-max) {
+                font-style: italic;
+                margin-bottom: 20px;
+                padding-left: 0;
+            }
         }
     }
 
@@ -2474,9 +2500,74 @@ table.login-users-interpretations {
     }
 }
 
-.control-cohort-view .panel.diseases,
-.control-cohort-view .additional-information .other-genes {
-    visibility: hidden;
+.case-cohort-view,
+.control-cohort-view {
+    @media screen and (max-width: $screen-xs-max) {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .panel-std {
+        dt {
+            width: auto;
+            text-align: left;
+            white-space: normal;
+            vertical-align: top;
+
+            @media screen and (min-width: $screen-lg-min) {
+                min-width: 300px;
+            }
+
+            @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max) {
+                min-width: 250px;
+            }
+
+            @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+                min-width: 135px;
+            }
+        }
+
+        dd {
+            width: 40%;
+            vertical-align: top;
+        }
+    }
+}
+
+.case-control-evaluation {
+    .panel-std {
+        dt {
+            width: auto;
+            text-align: left;
+            white-space: normal;
+            vertical-align: top;
+
+            @media screen and (min-width: $screen-lg-min) {
+                min-width: 400px;
+            }
+
+            @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max) {
+                min-width: 350px;
+            }
+
+            @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+                min-width: 300px;
+            }
+        }
+
+        dd {
+            width: 45%;
+            vertical-align: top;
+        }
+    }
+}
+
+.case-cohort-view {
+    padding-left: 0;
+}
+
+.control-cohort-view {
+    padding-right: 0;
 }
 
 .panel-body.panel-std {

@@ -1489,345 +1489,333 @@ var CaseControlViewer = React.createClass({
                                 <span> // {context.label} (Case: {caseCohort.label}; Control: {controlCohort.label})</span>
                             </h2>
                         </div>
-                        <div className="col-sm-6 case-cohort-view">
-                            <Panel title="Case Cohort - Disease(s) & Phenotype(s)" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Orphanet Common Diagnosis</dt>
-                                        <dd>{caseCohort.commonDiagnosis && caseCohort.commonDiagnosis.map(function(disease, i) {
-                                            return <span key={disease.orphaNumber + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
-                                        })}</dd>
-                                    </div>
+                        <div className="col-sm-12 diseases">
+                            <div className="col-sm-6 case-cohort-view">
+                                <Panel title="Case Cohort - Disease(s) & Phenotype(s)" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>Orphanet Common Diagnosis</dt>
+                                            <dd>{caseCohort.commonDiagnosis && caseCohort.commonDiagnosis.map(function(disease, i) {
+                                                return <span key={disease.orphaNumber + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                            })}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>HPO IDs</dt>
-                                        <dd>{caseCohort.hpoIdInDiagnosis && caseCohort.hpoIdInDiagnosis.map(function(hpo, i) {
-                                            return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                        })}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>HPO IDs</dt>
+                                            <dd>{caseCohort.hpoIdInDiagnosis && caseCohort.hpoIdInDiagnosis.map(function(hpo, i) {
+                                                return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                            })}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Phenotype Terms</dt>
-                                        <dd>{caseCohort.termsInDiagnosis}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Phenotype Terms</dt>
+                                            <dd>{caseCohort.termsInDiagnosis}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>NOT HPO IDs</dt>
-                                        <dd>{caseCohort.hpoIdInElimination && caseCohort.hpoIdInElimination.map(function(hpo, i) {
-                                            return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                        })}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>NOT HPO IDs</dt>
+                                            <dd>{caseCohort.hpoIdInElimination && caseCohort.hpoIdInElimination.map(function(hpo, i) {
+                                                return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                            })}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>NOT phenotype terms</dt>
-                                        <dd>{caseCohort.termsInElimination}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
-
-                            <Panel title="Case Cohort — Demographics" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt># Males</dt>
-                                        <dd>{caseCohort.numberOfMale}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt># Females</dt>
-                                        <dd>{caseCohort.numberOfFemale}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Country of Origin</dt>
-                                        <dd>{caseCohort.countryOfOrigin}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Ethnicity</dt>
-                                        <dd>{caseCohort.ethnicity}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Race</dt>
-                                        <dd>{caseCohort.race}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Age Range Type</dt>
-                                        <dd>{caseCohort.ageRangeType}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Age Range</dt>
-                                        <dd>{caseCohort.ageRangeFrom || caseCohort.ageRangeTo ? <span>{caseCohort.ageRangeFrom + ' – ' + caseCohort.ageRangeTo}</span> : null}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Age Range Unit</dt>
-                                        <dd>{caseCohort.ageRangeUnit}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
-
-                            <Panel title="Case Cohort — Methods" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Previous testing</dt>
-                                        <dd>{caseCohortMethod ? (caseCohortMethod.previousTesting === true ? 'Yes' : (caseCohortMethod.previousTesting === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Description of previous testing</dt>
-                                        <dd>{caseCohortMethod && caseCohortMethod.previousTestingDescription}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Genome-wide study</dt>
-                                        <dd>{caseCohortMethod ? (caseCohortMethod.genomeWideStudy === true ? 'Yes' : (caseCohortMethod.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Genotyping methods</dt>
-                                        <dd>{caseCohortMethod && caseCohortMethod.genotypingMethods && caseCohortMethod.genotypingMethods.join(', ')}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Entire gene sequenced</dt>
-                                        <dd>{caseCohortMethod ? (caseCohortMethod.entireGeneSequenced === true ? 'Yes' : (caseCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Copy number assessed</dt>
-                                        <dd>{caseCohortMethod ? (caseCohortMethod.copyNumberAssessed === true ? 'Yes' : (caseCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Specific mutations genotyped</dt>
-                                        <dd>{caseCohortMethod ? (caseCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (caseCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Description of genotyping method</dt>
-                                        <dd>{caseCohortMethod && caseCohortMethod.specificMutationsGenotypedMethod}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Additional Information about Group Method</dt>
-                                        <dd>{caseCohortMethod && caseCohortMethod.additionalInformation}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
-
-                            <Panel title="Case Cohort — Power" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Number of Cases with variant(s) in the gene in question</dt>
-                                        <dd>{caseCohort.numberWithVariant}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Number of all Cases genotyped/sequenced</dt>
-                                        <dd>{caseCohort.numberAllGenotypedSequenced}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Case Allele Frequency</dt>
-                                        <dd>{caseCohort.alleleFrequency}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
-
-                            <Panel title="Case Cohort — Additional Information" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Other genes found to have variants in them</dt>
-                                        <dd>{caseCohort.otherGenes && caseCohort.otherGenes.map(function(gene, i) {
-                                            return <span key={gene.symbol + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
-                                        })}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Additional Information about Group</dt>
-                                        <dd>{caseCohort.additionalInformation}</dd>
-                                    </div>
-
-                                    <dt>Other PMID(s) that report evidence about this same group</dt>
-                                    <dd>{caseCohort.otherPMIDs && caseCohort.otherPMIDs.map(function(article, i) {
-                                        return <span key={article.pmid + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                                    })}</dd>
-                                </dl>
-                            </Panel>
+                                        <div>
+                                            <dt>NOT phenotype terms</dt>
+                                            <dd>{caseCohort.termsInElimination}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                            <div className="col-sm-6 control-cohort-view">
+                                {/* Diseases and phenotypes data is not required for control cohort */}
+                            </div>
                         </div>
+                        <div className="col-sm-12 demographics">
+                            <div className="col-sm-6 case-cohort-view">
+                                <Panel title="Case Cohort — Demographics" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt># Males</dt>
+                                            <dd>{caseCohort.numberOfMale}</dd>
+                                        </div>
 
-                        <div className="col-sm-6 control-cohort-view">
-                            <Panel title="Control Cohort - Common Disease(s) & Phenotype(s)" panelClassName="panel-data diseases">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Orphanet Common Diagnosis</dt>
-                                        <dd>{controlCohort.commonDiagnosis && controlCohort.commonDiagnosis.map(function(disease, i) {
-                                            return <span key={disease.orphaNumber + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
-                                        })}</dd>
-                                    </div>
+                                        <div>
+                                            <dt># Females</dt>
+                                            <dd>{caseCohort.numberOfFemale}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>HPO IDs</dt>
-                                        <dd>{controlCohort.hpoIdInDiagnosis && controlCohort.hpoIdInDiagnosis.map(function(hpo, i) {
-                                            return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                        })}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Country of Origin</dt>
+                                            <dd>{caseCohort.countryOfOrigin}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Phenotype Terms</dt>
-                                        <dd>{controlCohort.termsInDiagnosis}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Ethnicity</dt>
+                                            <dd>{caseCohort.ethnicity}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>NOT HPO IDs</dt>
-                                        <dd>{controlCohort.hpoIdInElimination && controlCohort.hpoIdInElimination.map(function(hpo, i) {
-                                            return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
-                                        })}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Race</dt>
+                                            <dd>{caseCohort.race}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>NOT phenotype terms</dt>
-                                        <dd>{controlCohort.termsInElimination}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
+                                        <div>
+                                            <dt>Age Range Type</dt>
+                                            <dd>{caseCohort.ageRangeType}</dd>
+                                        </div>
 
-                            <Panel title="Control Cohort — Demographics" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt># Males</dt>
-                                        <dd>{controlCohort.numberOfMale}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Age Range</dt>
+                                            <dd>{caseCohort.ageRangeFrom || caseCohort.ageRangeTo ? <span>{caseCohort.ageRangeFrom + ' – ' + caseCohort.ageRangeTo}</span> : null}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt># Females</dt>
-                                        <dd>{controlCohort.numberOfFemale}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Age Range Unit</dt>
+                                            <dd>{caseCohort.ageRangeUnit}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                            <div className="col-sm-6 control-cohort-view">
+                                <Panel title="Control Cohort — Demographics" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt># Males</dt>
+                                            <dd>{controlCohort.numberOfMale}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Country of Origin</dt>
-                                        <dd>{controlCohort.countryOfOrigin}</dd>
-                                    </div>
+                                        <div>
+                                            <dt># Females</dt>
+                                            <dd>{controlCohort.numberOfFemale}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Ethnicity</dt>
-                                        <dd>{controlCohort.ethnicity}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Country of Origin</dt>
+                                            <dd>{controlCohort.countryOfOrigin}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Race</dt>
-                                        <dd>{controlCohort.race}</dd>
-                                    </div>
+                                        <div>
+                                            <dt>Ethnicity</dt>
+                                            <dd>{controlCohort.ethnicity}</dd>
+                                        </div>
 
-                                    <div><dd>&nbsp;</dd></div>
+                                        <div>
+                                            <dt>Race</dt>
+                                            <dd>{controlCohort.race}</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Age Range</dt>
-                                        <dd>{controlCohort.ageRangeFrom || controlCohort.ageRangeTo ? <span>{controlCohort.ageRangeFrom + ' – ' + controlCohort.ageRangeTo}</span> : null}</dd>
-                                    </div>
+                                        <div>
+                                            {/* Age range type data is not required for control cohort */}
+                                            <dd>&nbsp;</dd>
+                                        </div>
 
-                                    <div>
-                                        <dt>Age Range Unit</dt>
-                                        <dd>{controlCohort.ageRangeUnit}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
+                                        <div>
+                                            <dt>Age Range</dt>
+                                            <dd>{controlCohort.ageRangeFrom || controlCohort.ageRangeTo ? <span>{controlCohort.ageRangeFrom + ' – ' + controlCohort.ageRangeTo}</span> : null}</dd>
+                                        </div>
 
-                            <Panel title="Control Cohort — Methods" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Previous testing</dt>
-                                        <dd>{controlCohortMethod ? (controlCohortMethod.previousTesting === true ? 'Yes' : (controlCohortMethod.previousTesting === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Description of previous testing</dt>
-                                        <dd>{controlCohortMethod && controlCohortMethod.previousTestingDescription}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Genome-wide study</dt>
-                                        <dd>{controlCohortMethod ? (controlCohortMethod.genomeWideStudy === true ? 'Yes' : (controlCohortMethod.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Genotyping methods</dt>
-                                        <dd>{controlCohortMethod && controlCohortMethod.genotypingMethods && controlCohortMethod.genotypingMethods.join(', ')}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Entire gene sequenced</dt>
-                                        <dd>{controlCohortMethod ? (controlCohortMethod.entireGeneSequenced === true ? 'Yes' : (controlCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Copy number assessed</dt>
-                                        <dd>{controlCohortMethod ? (controlCohortMethod.copyNumberAssessed === true ? 'Yes' : (controlCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Specific mutations genotyped</dt>
-                                        <dd>{controlCohortMethod ? (controlCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (controlCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Description of genotyping method</dt>
-                                        <dd>{controlCohortMethod && controlCohortMethod.specificMutationsGenotypedMethod}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Additional Information about Group Method</dt>
-                                        <dd>{controlCohortMethod && controlCohortMethod.additionalInformation}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
-
-                            <Panel title="Control Cohort — Power" panelClassName="panel-data">
-                                <dl className="dl-horizontal">
-                                    <div>
-                                        <dt>Number of Cases with variant(s) in the gene in question</dt>
-                                        <dd>{controlCohort.numberWithVariant}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Number of all Cases genotyped/sequenced</dt>
-                                        <dd>{controlCohort.numberAllGenotypedSequenced}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Case Allele Frequency</dt>
-                                        <dd>{controlCohort.alleleFrequency}</dd>
-                                    </div>
-                                </dl>
-                            </Panel>
-
-                            <Panel title="Control Cohort — Additional Information" panelClassName="panel-data additional-information">
-                                <dl className="dl-horizontal">
-                                    <div className="other-genes">
-                                        <dt>Other genes found to have variants in them</dt>
-                                        <dd>{controlCohort.otherGenes && controlCohort.otherGenes.map(function(gene, i) {
-                                            return <span key={gene.symbol + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
-                                        })}</dd>
-                                    </div>
-
-                                    <div>
-                                        <dt>Additional Information about Group</dt>
-                                        <dd>{controlCohort.additionalInformation}</dd>
-                                    </div>
-
-                                    <dt>Other PMID(s) that report evidence about this same group</dt>
-                                    <dd>{controlCohort.otherPMIDs && controlCohort.otherPMIDs.map(function(article, i) {
-                                        return <span key={article.pmid + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
-                                    })}</dd>
-                                </dl>
-                            </Panel>
+                                        <div>
+                                            <dt>Age Range Unit</dt>
+                                            <dd>{controlCohort.ageRangeUnit}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
                         </div>
+                        <div className="col-sm-12 methods">
+                            <div className="col-sm-6 case-cohort-view">
+                                <Panel title="Case Cohort — Methods" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>Previous testing</dt>
+                                            <dd>{caseCohortMethod ? (caseCohortMethod.previousTesting === true ? 'Yes' : (caseCohortMethod.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                        </div>
 
+                                        <div>
+                                            <dt>Description of previous testing</dt>
+                                            <dd>{caseCohortMethod && caseCohortMethod.previousTestingDescription}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Genome-wide study</dt>
+                                            <dd>{caseCohortMethod ? (caseCohortMethod.genomeWideStudy === true ? 'Yes' : (caseCohortMethod.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Genotyping methods</dt>
+                                            <dd>{caseCohortMethod && caseCohortMethod.genotypingMethods && caseCohortMethod.genotypingMethods.join(', ')}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Entire gene sequenced</dt>
+                                            <dd>{caseCohortMethod ? (caseCohortMethod.entireGeneSequenced === true ? 'Yes' : (caseCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Copy number assessed</dt>
+                                            <dd>{caseCohortMethod ? (caseCohortMethod.copyNumberAssessed === true ? 'Yes' : (caseCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Specific mutations genotyped</dt>
+                                            <dd>{caseCohortMethod ? (caseCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (caseCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Description of genotyping method</dt>
+                                            <dd>{caseCohortMethod && caseCohortMethod.specificMutationsGenotypedMethod}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Additional Information about Group Method</dt>
+                                            <dd>{caseCohortMethod && caseCohortMethod.additionalInformation}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                            <div className="col-sm-6 control-cohort-view">
+                                <Panel title="Control Cohort — Methods" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>Previous testing</dt>
+                                            <dd>{controlCohortMethod ? (controlCohortMethod.previousTesting === true ? 'Yes' : (controlCohortMethod.previousTesting === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Description of previous testing</dt>
+                                            <dd>{controlCohortMethod && controlCohortMethod.previousTestingDescription}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Genome-wide study</dt>
+                                            <dd>{controlCohortMethod ? (controlCohortMethod.genomeWideStudy === true ? 'Yes' : (controlCohortMethod.genomeWideStudy === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Genotyping methods</dt>
+                                            <dd>{controlCohortMethod && controlCohortMethod.genotypingMethods && controlCohortMethod.genotypingMethods.join(', ')}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Entire gene sequenced</dt>
+                                            <dd>{controlCohortMethod ? (controlCohortMethod.entireGeneSequenced === true ? 'Yes' : (controlCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Copy number assessed</dt>
+                                            <dd>{controlCohortMethod ? (controlCohortMethod.copyNumberAssessed === true ? 'Yes' : (controlCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Specific mutations genotyped</dt>
+                                            <dd>{controlCohortMethod ? (controlCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (controlCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Description of genotyping method</dt>
+                                            <dd>{controlCohortMethod && controlCohortMethod.specificMutationsGenotypedMethod}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Additional Information about Group Method</dt>
+                                            <dd>{controlCohortMethod && controlCohortMethod.additionalInformation}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                        </div>
+                        <div className="col-sm-12 power">
+                            <div className="col-sm-6 case-cohort-view">
+                                <Panel title="Case Cohort — Power" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>Number of Cases with variant(s) in the gene in question</dt>
+                                            <dd>{caseCohort.numberWithVariant}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Number of all Cases genotyped/sequenced</dt>
+                                            <dd>{caseCohort.numberAllGenotypedSequenced}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Case Allele Frequency</dt>
+                                            <dd>{caseCohort.alleleFrequency}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                            <div className="col-sm-6 control-cohort-view">
+                                <Panel title="Control Cohort — Power" panelClassName="panel-data">
+                                    <dl className="dl-horizontal">
+                                        <div>
+                                            <dt>Number of Cases with variant(s) in the gene in question</dt>
+                                            <dd>{controlCohort.numberWithVariant}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Number of all Cases genotyped/sequenced</dt>
+                                            <dd>{controlCohort.numberAllGenotypedSequenced}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Case Allele Frequency</dt>
+                                            <dd>{controlCohort.alleleFrequency}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                        </div>
+                        <div className="col-sm-12 additional-information">
+                            <div className="col-sm-6 case-cohort-view">
+                                <Panel title="Case Cohort — Additional Information" panelClassName="panel-data additional-information">
+                                    <dl className="dl-horizontal">
+                                        <div className="other-genes">
+                                            <dt>Other genes found to have variants in them</dt>
+                                            <dd>{caseCohort.otherGenes && caseCohort.otherGenes.map(function(gene, i) {
+                                                return <span key={gene.symbol + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HGNC'] + gene.hgncId} title={"HGNC entry for " + gene.symbol + " in new tab"} target="_blank">{gene.symbol}</a></span>;
+                                            })}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Additional Information about Group</dt>
+                                            <dd>{caseCohort.additionalInformation}</dd>
+                                        </div>
+
+                                        <div className="other-pmids">
+                                            <dt>Other PMID(s) that report evidence about this same group</dt>
+                                            <dd>{caseCohort.otherPMIDs && caseCohort.otherPMIDs.map(function(article, i) {
+                                                return <span key={article.pmid + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                            })}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                            <div className="col-sm-6 control-cohort-view">
+                                <Panel title="Control Cohort — Additional Information" panelClassName="panel-data additional-information">
+                                    <dl className="dl-horizontal">
+                                        <div className="other-genes">
+                                            {/* Other genes data is not required for control cohort */}
+                                            <dd>&nbsp;</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Additional Information about Group</dt>
+                                            <dd>{controlCohort.additionalInformation}</dd>
+                                        </div>
+
+                                        <div className="other-pmids">
+                                            <dt>Other PMID(s) that report evidence about this same group</dt>
+                                            <dd>{controlCohort.otherPMIDs && controlCohort.otherPMIDs.map(function(article, i) {
+                                                return <span key={article.pmid + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['PubMed'] + article.pmid} title={"PubMed entry for PMID:" + article.pmid + " in new tab"} target="_blank">PMID:{article.pmid}</a></span>;
+                                            })}</dd>
+                                        </div>
+                                    </dl>
+                                </Panel>
+                            </div>
+                        </div>
                         <div className="col-sm-12 case-control-view">
-                            <Panel title="Case-Control Evaluation & Score" panelClassName="panel-data">
+                            <Panel title="Case-Control Evaluation & Score" panelClassName="panel-data case-control-evaluation">
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Study Type</dt>
@@ -1922,7 +1910,7 @@ var CaseControlViewer = React.createClass({
                                 </dl>
                             </Panel>
                             {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userCaseControl) ?
-                                <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data">
+                                <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
                                     <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
                                 </Panel>
                             : null}
