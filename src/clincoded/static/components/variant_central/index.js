@@ -16,7 +16,7 @@ var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
 import { parseKeyValue } from './helpers/parse_key_value';
-import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
+import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation, parseClinvarSCVs } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
@@ -42,6 +42,7 @@ var VariantCurationHub = React.createClass({
             ext_clinvarEutils: null,
             ext_clinVarEsearch: null,
             ext_clinVarRCV: null,
+            ext_clinVarSCV: null,
             ext_clinvarInterpretationSummary: null,
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
@@ -52,6 +53,7 @@ var VariantCurationHub = React.createClass({
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarRCV: true,
+            loading_clinvarSCV: true,
             loading_ensemblHgvsVEP: true,
             loading_ensemblVariation: true,
             loading_myVariantInfo: true,
@@ -123,7 +125,9 @@ var VariantCurationHub = React.createClass({
                     this.setState({
                         ext_clinvarEutils: variantData,
                         ext_clinvarInterpretationSummary: getClinvarInterpretations(xml),
-                        loading_clinvarEutils: false
+                        ext_clinVarSCV: parseClinvarSCVs(xml),
+                        loading_clinvarEutils: false,
+                        loading_clinvarSCV: false
                     });
                     // Last alternative to get gene id and symbol from ClinVar
                     // for API call to mygene.info to retreive gene related data
@@ -165,6 +169,7 @@ var VariantCurationHub = React.createClass({
                     this.setState({
                         loading_clinvarEutils: false,
                         loading_clinvarRCV: false,
+                        loading_clinvarSCV: false,
                         loading_clinvarEsearch: false
                     });
                     console.log('ClinVarEutils Fetch Error=: %o', err);
@@ -173,6 +178,7 @@ var VariantCurationHub = React.createClass({
                 this.setState({
                     loading_clinvarEutils: false,
                     loading_clinvarRCV: false,
+                    loading_clinvarSCV: false,
                     loading_clinvarEsearch: false
                 });
             }
@@ -470,6 +476,7 @@ var VariantCurationHub = React.createClass({
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                             ext_clinVarRCV={this.state.ext_clinVarRCV}
+                            ext_clinVarSCV={this.state.ext_clinVarSCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
@@ -477,6 +484,7 @@ var VariantCurationHub = React.createClass({
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             loading_clinvarRCV={this.state.loading_clinvarRCV}
+                            loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
