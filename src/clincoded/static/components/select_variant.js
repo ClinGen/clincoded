@@ -5,7 +5,6 @@ var moment = require('moment');
 var globals = require('./globals');
 var fetched = require('./fetched');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
@@ -18,13 +17,12 @@ var AddResourceId = add_external_resource.AddResourceId;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
-var Alert = modal.Alert;
-var ModalMixin = modal.ModalMixin;
 var Panel = panel.Panel;
 
+import ModalComponent from '../libs/bootstrap/modal';
 
 var SelectVariant = React.createClass({
-    mixins: [FormMixin, RestMixin, ModalMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CuratorHistory],
 
     contextTypes: {
         fetch: React.PropTypes.func,

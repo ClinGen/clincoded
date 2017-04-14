@@ -33,3 +33,27 @@ Feature: Create Gene Disease
 
         And I click the element with the css selector ".btn-default"
         Then I should not see "Required"
+
+
+    Scenario: Test GDM alert modal
+        When I visit "/logout"
+        Then I should see "Demo Login"
+        When I press "Demo Login"
+        And I wait for 10 seconds
+        Then I should see "Logout ClinGen Test Curator"
+        When I visit "/gdm/"
+        Then I should see "DICER1"
+        When I fill in "filterTerm" with "FANCM"
+        Then I should not see "DICER1"
+        When I visit "/create-gene-disease/"
+        And I fill in "hgncgene" with "DICER1"
+        And I fill in "orphanetid" with "ORPHA64742"
+        And I select "Autosomal dominant inheritance (HP:0000006)" from dropdown "form-control hpo"
+        And I click the element with the css selector ".btn-default"
+        Then I should see an element with the css selector ".modal-dialog" within 5 seconds
+        Then I should see "A curation record already exists for "
+        When I press the button "Curate"
+        Then I should see an element with the css selector ".pmid-selection-add-btn" within 5 seconds
+        When I press "Logout ClinGen Test Curator"
+        And I wait for 5 seconds
+        Then I should see "Access to these interfaces is currently restricted to ClinGen curators."

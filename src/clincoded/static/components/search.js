@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var cloneWithProps = require('react/lib/cloneWithProps');
 var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
@@ -48,7 +47,7 @@ var PickerActionsMixin = module.exports.PickerActionsMixin = {
         if (this.context.actions && this.context.actions.length) {
             return (
                 <div className="pull-right">
-                    {this.context.actions.map(action => cloneWithProps(action, {id: this.props.context['@id']}))}
+                    {this.context.actions.map(action => React.cloneElement(action, {id: this.props.context['@id']}))}
                 </div>
             );
         } else {

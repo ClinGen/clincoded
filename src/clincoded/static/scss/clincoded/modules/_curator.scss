@@ -75,6 +75,11 @@
         margin-top: 0;
         padding-bottom: 10px;
     }
+
+    .modal h4 {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
 }
 
 .equal-height {
@@ -413,6 +418,28 @@
 
 .edit-omim-modal {
     display: inline;
+
+    a.btn.btn-default {
+        border: none;
+        background: transparent;
+        color: #337ab7;
+        padding: 0;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+
+        &:before {
+            color: #000;
+            content: '[';
+        }
+
+        &:after {
+            color: #000;
+            content: ']';
+        }
+    }
 }
 
 .curation-pmid-summary {
@@ -2627,7 +2654,27 @@ table.login-users-interpretations {
 
 .panel.case-control-evidence-score,
 .panel.experimental-evidence-score,
-.panel.proband-evidence-score,
+.panel.proband-evidence-score {
+    .panel-body.panel-std {
+        padding-top: 25px;
+
+        label i {
+            display: block;
+            font-weight: normal;
+        }
+
+        label>span {
+            position: relative;
+
+            .required-field {
+                position: absolute;
+                top: -38px;
+                left: 4px;
+            }
+        }
+    }
+}
+
 .panel.case-control-evidence-score-viewer,
 .panel.experimental-evidence-score-viewer,
 .panel.proband-evidence-score-viewer {
@@ -2642,19 +2689,13 @@ table.login-users-interpretations {
         label>span {
             position: relative;
 
-            &>span:last-child {
+            .required-field {
                 position: absolute;
                 top: -38px;
-                left: 4px;
+                left: 198px;
             }
         }
-    }
-}
 
-.panel.case-control-evidence-score-viewer,
-.panel.experimental-evidence-score-viewer,
-.panel.proband-evidence-score-viewer {
-    .panel-body.panel-std {
         dl.calculated-score {
             dt {
                 padding-left: 10px;
