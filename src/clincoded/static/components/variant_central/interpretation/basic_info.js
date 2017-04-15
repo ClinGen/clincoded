@@ -14,6 +14,7 @@ var dbxref_prefix_map = globals.dbxref_prefix_map;
 
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
+import PopOverComponent from '../../../libs/bootstrap/popover';
 
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
@@ -229,7 +230,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
     },
 
-    // Render Clinical Assertion table rows
+    // Render Clinical Assertions table rows
     renderClinicalAssertions: function(item, key) {
         let self = this;
         return (
@@ -248,12 +249,30 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <td className="submitter">
                     <a href={external_url_map['ClinVar'] + 'submitters/' + item.orgID + '/'} target="_blank">{item.submitterName}</a>
                     {item.studyDescription ?
-                        <div><a className="study-description">Study description</a></div>
+                        <PopOverComponent popOverWrapperClass={'study-description org-' + item.orgID}
+                            actuatorTitle="Study description" popOverRef={ref => (this.popover = ref)}>
+                            {item.studyDescription}
+                        </PopOverComponent>
                     : null}
                 </td>
                 <td className="submission-accession">{item.accession}.{item.version}</td>
             </tr>
         );
+    },
+
+    // Method to render Clinical Assertions table header content
+    renderClinvarAssertionsHeader: function(clinvar_id, loading_clinvarSCV) {
+        if (clinvar_id && !loading_clinvarSCV) {
+            return (
+                <h3 className="panel-title">ClinVar Assertions
+                    <a className="panel-subtitle pull-right" href={external_url_map['ClinVarSearch'] + clinvar_id} target="_blank">See data in ClinVar</a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">ClinVar Assertions</h3>
+            );
+        }
     },
 
     // Method to contruct linkouts for assertion methods
@@ -524,7 +543,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 </div>
 
                 <div className="panel panel-info datasource-clinical-assertions">
-                    <div className="panel-heading"><h3 className="panel-title">ClinVar Assertions</h3></div>
+                    <div className="panel-heading">
+                        {this.renderClinvarAssertionsHeader(clinvar_id, this.state.loading_clinvarSCV)}
+                    </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarSCV ? showActivityIndicator('Retrieving data... ') : null}
                         {(clinVarSCV.length > 0) ?
