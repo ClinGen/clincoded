@@ -5,7 +5,6 @@ var _ = require('underscore');
 var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
@@ -16,8 +15,6 @@ var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 var add_external_resource = require('./add_external_resource');
 var CuratorHistory = require('./curator_history');
 
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var ViewRecordHeader = curator.ViewRecordHeader;
@@ -70,7 +67,7 @@ var initialCv = {
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, ModalMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -96,7 +93,9 @@ var FamilyCuration = React.createClass({
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
-            individualRequired: null, // Boolean for set up requirement of proband
+            individualRequired: false, // Boolean for set up requirement of proband
+            individualName: '', // Proband individual name
+            individualOrphanetId: '', // Orphanet IDs associated with the proband
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
@@ -125,13 +124,16 @@ var FamilyCuration = React.createClass({
         } else if (ref === 'orphanetid') {
             this.setState({orpha: false});
         } else if (ref === 'individualname' || ref === 'individualorphanetid') {
-            let individualName = this.refs['individualname'].getValue();
-            let individualOrphanetId = this.refs['individualorphanetid'].getValue();
-            if (individualName || individualOrphanetId) {
-                this.setState({individualRequired: true});
-            } else if (!individualName && !individualOrphanetId) {
-                this.setState({individualRequired: false});
-            }
+            this.setState({
+                individualName: this.refs['individualname'].getValue(),
+                individualOrphanetId: this.refs['individualorphanetid'].getValue()
+            }, () => {
+                if (this.state.individualName || this.state.individualOrphanetId) {
+                    this.setState({individualRequired: true});
+                } else if (!this.state.individualName && !this.state.individualOrphanetId) {
+                    this.setState({individualRequired: false});
+                }
+            });
         } else if (ref === 'SEGlodPublished') {
             let lodPublished = this.refs[ref].getValue();
             // Find out whether there is pre-existing score in db
@@ -303,12 +305,11 @@ var FamilyCuration = React.createClass({
                 estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
         }
-        if (isNaN(estimatedLodScore)) {
-            estimatedLodScore = null;
-        }
         if (lodCalcMode === 'ADX' || lodCalcMode === 'AR') {
-            if (estimatedLodScore) {
+            if (estimatedLodScore && !isNaN(estimatedLodScore)) {
                 estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
+            } else {
+                estimatedLodScore = '';
             }
             // Update state and form field if relevant
             this.setState({estimatedLodScore: estimatedLodScore});
@@ -1057,7 +1058,7 @@ var FamilyCuration = React.createClass({
         // Fill in the group fields from the Common Diseases & Phenotypes panel
         var hpoTerms = this.getFormValue('hpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(', '));
         }
         else if (newFamily.hpoIdInDiagnosis) {
             // allow to delete HPO ids
@@ -1073,7 +1074,7 @@ var FamilyCuration = React.createClass({
         }
         hpoTerms = this.getFormValue('nothpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(', '));
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
@@ -1374,7 +1375,7 @@ var FamilyName = function(displayNote) {
             {!this.getAssociation('family') && !this.getAssociation('associatedGroups') ?
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
             : null}
-            <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
+            <Input type="text" ref="familyname" label="Family Label:" value={family && family.label ? family.label : ''} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
@@ -1417,16 +1418,14 @@ var FamilyCount = function() {
 // Common diseases family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyCommonDiseases = function() {
-    var family = this.state.family;
-    var group = this.state.group;
-    var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups;
+    let family = this.state.family,
+        group = this.state.group;
+    let associatedGroups;
 
     // If we're editing a family, make editable values of the complex properties
-    if (family) {
-        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
-        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : null;
-        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : null;
-    }
+    let orphanetidVal = family && family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : '';
+    let hpoidVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : '';
+    let nothpoidVal = family && family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : '';
 
     // Make a list of diseases from the group, either from the given group,
     // or the family if we're editing one that has associated groups.renderPhenotype
@@ -1457,7 +1456,7 @@ var FamilyCommonDiseases = function() {
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'ft') : curator.renderPhenotype(null, 'Family', 'ft')
             }
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={family && family.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
             <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
@@ -1468,7 +1467,7 @@ var FamilyCommonDiseases = function() {
             <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={family && family.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
@@ -1521,7 +1520,7 @@ var FamilyDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin ? family.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1529,7 +1528,7 @@ var FamilyDemographics = function() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity ? family.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1537,7 +1536,7 @@ var FamilyDemographics = function() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race ? family.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1563,59 +1562,65 @@ var FamilySegregation = function() {
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
-            <Input type="number" yesInteger={true} ref="SEGnumberOfAffectedWithGenotype" label={<span>For Dominant AND Recessive inheritance:<br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
-                value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
-            <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype"
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfAffectedWithGenotype" label={<span>For Dominant AND Recessive inheritance:<br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
+                value={segregation && segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : ''}
+                handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype"
                 label={<span>For Recessive inheritance only:<br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for Recessive inheritance)</span>}
-                value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily"
+                value={segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : ''}
+                handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfSegregationsForThisFamily"
                 label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant or X-linked inheritance)</span>}
-                value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
-                error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
+                value={segregation && segregation.numberOfSegregationsForThisFamily ? segregation.numberOfSegregationsForThisFamily : ''}
+                handleChange={this.handleChange} error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals"
                 label={<span>Were there any inconsistent segregations amongst TESTED individuals? <i>(i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)</i></span>}
-                defaultValue="none" value={segregation.inconsistentSegregationAmongstTestedIndividuals} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                defaultValue="none" value={segregation && segregation.inconsistentSegregationAmongstTestedIndividuals ? segregation.inconsistentSegregationAmongstTestedIndividuals : 'none'}
+                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5" value={segregation.explanationForInconsistent} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none" value={segregation.familyConsanguineous} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5"
+                value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none"
+                value={segregation && segregation.familyConsanguineous ? segregation.familyConsanguineous : 'none'}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 <option value="Not Specified">Not Specified</option>
             </Input>
-            <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3" value={segregation.pedigreeLocation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
+            <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3"
+                value={segregation && segregation.pedigreeLocation ? segregation.pedigreeLocation : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
-            <Input type="select" ref="SEGlodPublished" label="Published LOD score?:"
-                defaultValue="none" value={curator.booleanToDropdown(segregation.lodPublished)} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            <Input type="select" ref="SEGlodPublished" label="Published LOD score?:" defaultValue="none"
+                value={curator.booleanToDropdown(segregation.lodPublished)}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
             {this.state.lodPublished === 'Yes' ?
-                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
-                    error={this.getFormError('SEGpublishedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGpublishedLodScore')}
+                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:"
+                    value={segregation && segregation.publishedLodScore ? segregation.publishedLodScore : ''}
+                    handleChange={this.handleChange} error={this.getFormError('SEGpublishedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGpublishedLodScore')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
                 <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published LOD score)</i></span>}
-                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore}
+                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore ? this.state.estimatedLodScore : ''}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
+                    placeholder={this.state.lodLocked && !this.state.estimatedLodScore ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
@@ -1626,10 +1631,12 @@ var FamilySegregation = function() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5" value={segregation.reasonExplanation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5"
+                value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5"
+                value={segregation && segregation.additionalInformation ? segregation.additionalInformation : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
@@ -1646,6 +1653,8 @@ var FamilyVariant = function() {
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
+    let individualName = this.state.individualName;
+    let individualOrphanetId = this.state.individualOrphanetId;
 
     return (
         <div className="row form-row-helper">
@@ -1666,7 +1675,7 @@ var FamilyVariant = function() {
                     <div className="col-sm-7 col-sm-offset-5 proband-label-note">
                         <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
                     </div>
-                    <Input type="text" ref="individualname" label="Proband Label" handleChange={this.handleChange}
+                    <Input type="text" ref="individualname" label="Proband Label" value={individualName} handleChange={this.handleChange}
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.individualRequired} />
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
@@ -1678,7 +1687,7 @@ var FamilyVariant = function() {
                         : null
                     }
                     <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA:15 or ORPHA15" handleChange={this.handleChange}
-                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
+                        value={individualOrphanetId} error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
                         buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
                     { this.state.orpha ?
@@ -1751,7 +1760,7 @@ var FamilyVariant = function() {
                                 </div>
                             </div>
                         : null}
-                        <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
+                        <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''}
                             error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                         <div className="row">
@@ -1815,17 +1824,16 @@ var LabelOtherVariant = React.createClass({
 // Additional Information family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyAdditional = function() {
-    var otherpmidsVal;
-    var family = this.state.family;
-    if (family) {
-        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
-    }
+    let family = this.state.family;
+    let otherpmidsVal = family && family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family && family.additionalInformation}
+            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5"
+                value={family && family.additionalInformation ? family.additionalInformation : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:"
+                value={otherpmidsVal} placeholder="e.g. 12089445, 21217753" rows="5"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>

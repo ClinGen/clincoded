@@ -5,7 +5,6 @@ var moment = require('moment');
 var globals = require('./globals');
 var fetched = require('./fetched');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
@@ -13,9 +12,7 @@ var RestMixin = require('./rest').RestMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
-var Alert = modal.Alert;
 var Panel = panel.Panel;
-
 
 var AddCurator = React.createClass({
     mixins: [FormMixin, RestMixin],

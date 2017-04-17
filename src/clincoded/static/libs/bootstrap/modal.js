@@ -1,166 +1,103 @@
 "use strict";
-var React = require('react');
-
-// Display a modal dialog box that blocks all other page input until it's dismissed.
-// Use it as a wrapper around a button or link that actuates it, like:
-// <Modal title="My Modal" btnOk="OK" btnCancel="Cancel">
-//     <button modal={<ModalContent />}>Open Modal</button>
-// </Modal>
-// The button or link to actuate the modal must have "modal" property that references the
-// React component that renders the content of the modal.
-// You must pass a "title" property to the Modal component. You can also pass btnOk which
-// specifies the text of the button to confirm and dismiss the modal, and it defaults to "OK".
-// You can pass btnCancel which specifies the text of the button to cancel and dismiss the
-// modal. If you don't pass this property, no Cancel button is displayed.
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 
-module.exports.ModalMixin = {
-    childContextTypes: {
-        modalOpen: React.PropTypes.bool, // T if modal is visible
-        alertOpen: React.PropTypes.object, // List of open alerts
-        openModal: React.PropTypes.func, // Function to open the modal
-        closeModal: React.PropTypes.func // Function to close the modal
-    },
+// Display a modal dialog box that blocks all other page input until the user dismisses it. The
+// typical format looks like:
+//
+// <ModalComponent {...this.props}>
+//     // Render JSX...
+// </ModalComponent>
+//
+// This component has been rewritten due to the React v15.4.0 upgrade from v0.14.8.
+// The previous modal component used MixIn that resulted in the use of non-standard DOM attribute
+// when implementing the modal component along with the actuator (link/button to invoke the modal).
+// 'Unknown props warnings' are now flagged in React v15.4.0:
+// https://facebook.github.io/react/warnings/unknown-prop.html
+//
+// <ModalComponent> usage details:
+// See 'ModalComponent.propTypes' for details
 
-    // Retrieve current React context
-    getChildContext: function() {
-        return {
-            modalOpen: this.state.modalOpen,
-            alertOpen: this.state.alertOpen,
-            openModal: this.openModal,
-            closeModal: this.closeModal
-        };
-    },
 
-    getInitialState: function() {
-        return {
-            modalOpen: false, // T if the model and blocking backdrop are visible
-            alertOpen: {} // Tracks the open state of each alert
-        };
-    },
+export default class ModalComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { isModalOpen: false };
+    }
 
-    // Open the modal
-    openModal: function() {
-        this.setState({modalOpen: true});
+    componentDidMount() {
+        this.props.onRef(this);
+    }
+
+    componentWillUnmount() {
+        this.props.onRef(null);
+    }
+
+    // Called by the actuator (link/button to invoke the modal)
+    openModal() {
+        this.setState({ isModalOpen: true });
 
         // Add class to body element to make modal-backdrop div visible
         document.body.classList.add('modal-open');
-    },
+    }
 
-    // Close the modal
-    closeModal: function() {
-        this.setState({modalOpen: false});
+    // Called by the modal's Cancel' button defined in the parent component
+    closeModal() {
+        this.setState({ isModalOpen: false });
 
         // Remove class from body element to make modal-backdrop div visible
         document.body.classList.remove('modal-open');
-    },
-
-    // Open an alert with the ID given in 'alert'
-    openAlert: function(alert) {
-        var currOpenStates = this.state.alertOpen;
-        currOpenStates[alert] = true;
-        this.setState({alertOpen: currOpenStates});
-    },
-
-    // Close the alert with the ID given in 'alert'
-    closeAlert: function(alert) {
-        var currOpenStates = this.state.alertOpen;
-        currOpenStates[alert] = false;
-        this.setState({alertOpen: currOpenStates});
     }
+
+    render() {
+        return (
+            <div className={this.props.modalWrapperClass}>
+                {this.props.actuatorTitle ?
+                    <a className={"btn btn-default " + this.props.actuatorClass} onClick={() => this.openModal()}>{this.props.actuatorTitle}</a>
+                : null}
+                <Modal isOpen={this.state.isModalOpen}>
+                    {this.props.modalTitle ?
+                        <div className={"modal-header " + this.props.modalClass}>
+                            <h4 className="modal-title">{this.props.modalTitle}</h4>
+                        </div>
+                    : null}
+                    {this.props.children}
+                </Modal>
+            </div>
+        );
+    }
+}
+
+ModalComponent.propTypes = {
+    modalTitle: React.PropTypes.string, // Title in modal's header
+    modalClass: React.PropTypes.string, // CSS class for modal header
+    modalWrapperClass: React.PropTypes.string, // CSS class for modal DOM wrapper
+    actuatorClass: React.PropTypes.string, // CSS class for link/button to invoke modal
+    actuatorTitle: React.PropTypes.oneOfType([ // Text for link/button to invoke modal
+        React.PropTypes.object,
+        React.PropTypes.string
+    ]),
+    children: React.PropTypes.node // JSX such as input field(s), dropdown(s), buttons
 };
 
-
-var Modal = module.exports.Modal = React.createClass({
-    propTypes: {
-        title: React.PropTypes.string.isRequired, // Title in modal's header
-        wrapperClassName: React.PropTypes.string, // CSS classes for modal trigger wrapper
-        modalClass: React.PropTypes.string, // CSS class for modal header
-    },
-
-    contextTypes: {
-        openModal: React.PropTypes.func, // Function to open the modal
-        modalOpen: React.PropTypes.bool // T if modal is visible
-    },
-
-    getInitialState: function() {
-        return {
-            modal: null
-        };
-    },
-
-    handleClick: function(el) {
-        this.setState({modal: el});
-        this.context.openModal();
-    },
-
-    render: function() {
-        // Get child nodes and assign the Modal click handler to open the model when the child is clicked
-        var children = React.Children.map(this.props.children, function(child) {
-            if (child.props.modal) {
-                // Child has "modal" prop; assign Modal click handler to child and pass it the child’s modal property.
-                // Modifying child React components requires modifying a clone, so...
-                var clone = React.cloneElement(child, {onClick: this.handleClick.bind(this, child.props.modal)});
-                return clone;
-            }
-
-            // Child doesn't have a "modal" prop; don't bother modifying (cloning with props) it
-            return child;
-        }.bind(this));
-
-        // Use or make OK button title
-        var btnOkTitle = this.props.btnOk ? this.props.btnOk : 'OK';
+class Modal extends React.Component {
+    render() {
+        if (this.props.isOpen === false) {
+            return null;
+        }
 
         return (
-            <div className={this.props.wrapperClassName}>
-                {children}
-                {this.context.modalOpen ?
-                    <div>
-                        <div className="modal" style={{display: 'block'}}>
-                            <div className="modal-dialog">
-                                <div className="modal-content">
-                                    <div className={"modal-header " + this.props.modalClass}>
-                                        <h4 className="modal-title">{this.props.title}</h4>
-                                    </div>
-                                    {this.state.modal}
-                                </div>
-                            </div>
+            <div className="modal-wrapper">
+                <div className="modal" style={{display: 'block'}}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            {this.props.children}
                         </div>
-                        <div className="modal-backdrop in"></div>
                     </div>
-                : null}
+                </div>
+                <div className="modal-backdrop in"></div>
             </div>
         );
     }
-});
-
-
-var Alert = module.exports.Alert = React.createClass({
-    propTypes: {
-        content: React.PropTypes.object.isRequired, // Content of alert
-        wrapperClassName: React.PropTypes.string // CSS classes for modal trigger wrapper
-    },
-
-    contextTypes: {
-        alertOpen: React.PropTypes.object // List of visible alerts
-    },
-
-    render: function() {
-        return (
-            <div className={this.props.wrapperClassName}>
-                {this.context.alertOpen[this.props.id] ?
-                    <div>
-                        <div className="modal" style={{display: 'block'}}>
-                            <div className="modal-dialog">
-                                <div className="modal-content">
-                                    {this.props.content}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="modal-backdrop in"></div>
-                    </div>
-                : null}
-            </div>
-        );
-    }
-});
+}

@@ -4,7 +4,6 @@ var _ = require('underscore');
 var globals = require('./globals');
 var moment = require('moment');
 var curator = require('./curator');
-var modal = require('../libs/bootstrap/modal');
 var form = require('../libs/bootstrap/form');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
@@ -14,8 +13,6 @@ var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 var add_external_resource = require('./add_external_resource');
 var AddResourceId = add_external_resource.AddResourceId;
 
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
@@ -212,8 +209,6 @@ var BetaNote = React.createClass({
 
 // Display the list of PubMed articles passed in pmidItems.
 var PmidSelectionList = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         annotations: React.PropTypes.array, // List of PubMed items
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
