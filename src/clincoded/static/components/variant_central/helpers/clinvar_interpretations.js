@@ -17,7 +17,7 @@ export function getClinvarInterpretations(xml) {
             if (ObservationList) {
                 let ObservationNodes = ObservationList.getElementsByTagName('Observation');
                 if (ObservationNodes && ObservationNodes.length) {
-                    let ReviewStatus, Description, DateLastEvaluated, SubmissionCount;
+                    let ReviewStatus, Description, DateLastEvaluated, SubmissionCount, Explanation;
                     for (var i = 0; i < ObservationNodes.length; i++) {
                         let ObservationType = ObservationNodes[i].getAttribute('ObservationType');
                         if (ObservationType === 'primary') {
@@ -27,12 +27,14 @@ export function getClinvarInterpretations(xml) {
                             if (ClinicalSignificance) {
                                 DateLastEvaluated = ClinicalSignificance.getAttribute('DateLastEvaluated');
                                 Description = ClinicalSignificance.getElementsByTagName('Description')[0];
+                                Explanation = ClinicalSignificance.getElementsByTagName('Explanation')[0];
                             }
                         }
                     }
                     interpretationSummary = {
                         'ReviewStatus': ReviewStatus.textContent,
-                        'ClinicalSignificance': Description.textContent,
+                        'ClinicalSignificance': Description ? Description.textContent : null,
+                        'Explanation': Explanation ? Explanation.textContent : null,
                         'DateLastEvaluated': DateLastEvaluated,
                         'SubmissionCount': SubmissionCount
                     };
