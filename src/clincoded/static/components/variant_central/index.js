@@ -16,7 +16,7 @@ var parseClinvar = require('../../libs/parse-resources').parseClinvar;
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
 import { parseKeyValue } from './helpers/parse_key_value';
-import { getClinvarInterpretations, getClinvarRCVs, parseClinvarInterpretation } from './helpers/clinvar_interpretations';
+import { getClinvarInterpretations } from './helpers/clinvar_interpretations';
 
 var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
 var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
@@ -41,7 +41,6 @@ var VariantCurationHub = React.createClass({
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
             ext_clinVarEsearch: null,
-            ext_clinVarRCV: null,
             ext_clinvarInterpretationSummary: null,
             ext_myGeneInfo_MyVariant: null,
             ext_myGeneInfo_VEP: null,
@@ -51,7 +50,6 @@ var VariantCurationHub = React.createClass({
             ext_singleNucleotide: true,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
-            loading_clinvarRCV: true,
             loading_ensemblHgvsVEP: true,
             loading_ensemblVariation: true,
             loading_myVariantInfo: true,
@@ -136,35 +134,9 @@ var VariantCurationHub = React.createClass({
                         this.setState({loading_myGeneInfo: false});
                     }
                     this.handleCodonEsearch(variantData);
-                    let clinVarRCVs = getClinvarRCVs(xml);
-                    return Promise.resolve(clinVarRCVs);
-                }).then(RCVs => {
-                    // If RCVs is not an empty array,
-                    // parse associated disease and clinical significance for each id
-                    if (RCVs.length) {
-                        let clinvarInterpretations = [];
-                        let Urls = [];
-                        for (let RCV of RCVs.values()) {
-                            Urls.push(external_url_map['ClinVarEfetch'] + '&rettype=clinvarset&id=' + RCV);
-                        }
-                        return this.getRestDatasXml(Urls).then(xml => {
-                            xml.forEach(result => {
-                                let clinvarInterpretation = parseClinvarInterpretation(result);
-                                clinvarInterpretations.push(clinvarInterpretation);
-                                this.setState({ext_clinVarRCV: clinvarInterpretations});
-                            });
-                            this.setState({loading_clinvarRCV: false});
-                        }).catch(err => {
-                            this.setState({loading_clinvarRCV: false});
-                            console.log('ClinVarEfetch for RCV Error=: %o', err);
-                        });
-                    } else {
-                        this.setState({loading_clinvarRCV: false});
-                    }
                 }).catch(err => {
                     this.setState({
                         loading_clinvarEutils: false,
-                        loading_clinvarRCV: false,
                         loading_clinvarEsearch: false
                     });
                     console.log('ClinVarEutils Fetch Error=: %o', err);
@@ -172,7 +144,6 @@ var VariantCurationHub = React.createClass({
             } else {
                 this.setState({
                     loading_clinvarEutils: false,
-                    loading_clinvarRCV: false,
                     loading_clinvarEsearch: false
                 });
             }
@@ -469,14 +440,12 @@ var VariantCurationHub = React.createClass({
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
-                            ext_clinVarRCV={this.state.ext_clinVarRCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
-                            loading_clinvarRCV={this.state.loading_clinvarRCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
