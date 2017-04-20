@@ -185,6 +185,9 @@ var ExperimentalCuration = React.createClass({
             if (this.refs['identifiedFunction']) {
                 this.refs['identifiedFunction'].setValue('');
             }
+            if (this.refs['identifiedFunctionTerms']) {
+                this.refs['identifiedFunctionTerms'].setValue('');
+            }
             if (this.refs['evidenceForFunction']) {
                 this.refs['evidenceForFunction'].resetValue();
             }
@@ -547,10 +550,10 @@ var ExperimentalCuration = React.createClass({
                 'limit': "Enter only " + limit + " gene symbols"
             },
             'goSlimIds': {
-                'invalid1': "Use GO_Slim ID (e.g. GO:0006259)",
-                'invalid': "Use GO_Slim IDs (e.g. GO:0006259) separated by commas",
-                'limit1': "Enter only one GO_Slim ID",
-                'limit': "Enter only " + limit + " GO_Slim IDs"
+                'invalid1': "Use GO ID (e.g. GO:0006259)",
+                'invalid': "Use GO IDs (e.g. GO:0006259) separated by commas",
+                'limit1': "Enter only one GO ID",
+                'limit': "Enter only " + limit + " GO IDs"
             },
             'hpoIDs': {
                 'invalid1': "Use HPO ID (e.g. HP:0000001)",
@@ -613,9 +616,17 @@ var ExperimentalCuration = React.createClass({
                     formError = true;
                     this.setFormErrors('geneWithSameFunctionSameDisease.geneImplicatedWithDisease', "Please see note below.");
                 }
+                // Make sure neither 'identifiedFunction' nor 'identifiedFunctionTerms' fields are empty
+                if (!formError && !this.getFormValue('identifiedFunction') && !this.getFormValue('identifiedFunctionTerms')) {
+                    formError = true;
+                    this.setFormErrors('identifiedFunction', 'Enter GO ID and/or free text.');
+                    this.setFormErrors('identifiedFunctionTerms', 'Enter GO ID and/or free text.');
+                }
                 // check goSlims
-                goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
-                formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'identifiedFunction', 1);
+                if (this.getFormValue('identifiedFunction')) {
+                    goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
+                    formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'identifiedFunction', 1);
+                }
                 // check geneSymbols
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'geneWithSameFunctionSameDisease.genes');
@@ -653,9 +664,17 @@ var ExperimentalCuration = React.createClass({
                     efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
                     formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.engineeredEquivalentCellType', 1);
                 }
+                // Make sure neither 'normalFunctionOfGene' nor 'normalFunctionOfGeneTerms' fields are empty
+                if (!formError && !this.getFormValue('normalFunctionOfGene') && !this.getFormValue('normalFunctionOfGeneTerms')) {
+                    formError = true;
+                    this.setFormErrors('normalFunctionOfGene', 'Enter GO ID and/or free text.');
+                    this.setFormErrors('normalFunctionOfGeneTerms', 'Enter GO ID and/or free text.');
+                }
                 // check goSlimIDs
-                goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
-                formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'normalFunctionOfGene', 1);
+                if (this.getFormValue('normalFunctionOfGene')) {
+                    goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
+                    formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'normalFunctionOfGene', 1);
+                }
             }
             else if (this.state.experimentalType == 'Model Systems') {
                 // Check form for Model Systems panel
@@ -719,6 +738,10 @@ var ExperimentalCuration = React.createClass({
                     var BFidentifiedFunction = this.getFormValue('identifiedFunction');
                     if (BFidentifiedFunction) {
                         newExperimental.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
+                    }
+                    var BFidentifiedFunctionTerms = this.getFormValue('identifiedFunctionTerms');
+                    if (BFidentifiedFunctionTerms) {
+                        newExperimental.biochemicalFunction.identifiedFunctionTerms = BFidentifiedFunctionTerms;
                     }
                     var BFevidenceForFunction = this.getFormValue('evidenceForFunction');
                     if (BFevidenceForFunction) {
@@ -846,6 +869,10 @@ var ExperimentalCuration = React.createClass({
                     var FAnormalFunctionOfGene = this.getFormValue('normalFunctionOfGene');
                     if (FAnormalFunctionOfGene) {
                         newExperimental.functionalAlteration.normalFunctionOfGene = FAnormalFunctionOfGene;
+                    }
+                    var FAnormalFunctionOfGeneTerms = this.getFormValue('normalFunctionOfGeneTerms');
+                    if (FAnormalFunctionOfGeneTerms) {
+                        newExperimental.functionalAlteration.normalFunctionOfGeneTerms = FAnormalFunctionOfGeneTerms;
                     }
                     var FAevidenceForNormalFunction = this.getFormValue('evidenceForNormalFunction');
                     if (FAevidenceForNormalFunction) {
@@ -1391,21 +1418,32 @@ var ExperimentalNameType = function() {
 var TypeBiochemicalFunction = function(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
-    let BF_identifiedFunction, BF_evidenceForFunction, BF_evidenceForFunctionInPaper;
+    let BF_identifiedFunction, BF_identifiedFunctionTerms, BF_evidenceForFunction, BF_evidenceForFunctionInPaper;
     if (biochemicalFunction) {
         BF_identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction : '';
+        BF_identifiedFunctionTerms = biochemicalFunction.identifiedFunctionTerms ? biochemicalFunction.identifiedFunctionTerms : '';
         BF_evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction : '';
         BF_evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : '';
     }
     return (
         <div className="row form-row-helper">
             <p className="col-sm-7 col-sm-offset-5">
-                Select a GO term for this gene (view <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt or search for a new term using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a>). The GO term must be from the GO aspect "Molecular Function" or "Biological Process."
+                Select a GO term for this gene (view <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in
+                UniProt or search for a new term using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a>). The GO term must be from the GO aspect
+                "Molecular Function" or "Biological Process." Search <a href="http://www.ebi.ac.uk/ols/ontologies/go" target="_blank">GO</a> using
+                the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
             </p>
-            <Input type="text" ref="identifiedFunction" label={<LabelIdentifiedFunction />}
-                error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
+            <Input type="text" ref="identifiedFunction" label={<span>Identified function of gene in this record <span className="normal">(GO ID)</span>:</span>}
+                error={this.getFormError('identifiedFunction')} clearError={this.clrMultiFormErrors.bind(null, ['identifiedFunction', 'identifiedFunctionTerms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={BF_identifiedFunction} placeholder="e.g. GO:0008150" inputDisabled={this.cv.othersAssessed} required />
+                value={BF_identifiedFunction} placeholder="e.g. GO:0008150" inputDisabled={this.cv.othersAssessed} />
+            <p className="col-sm-7 col-sm-offset-5">
+                If no GO term is available then describe the function of the gene below.
+            </p>
+            <Input type="text" ref="identifiedFunctionTerms" label={<span>Identified function of gene in this record <span className="normal">(free text)</span>:</span>}
+                error={this.getFormError('identifiedFunctionTerms')} clearError={this.clrMultiFormErrors.bind(null, ['identifiedFunction', 'identifiedFunctionTerms'])}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
+                value={BF_identifiedFunctionTerms} inputDisabled={this.cv.othersAssessed} />
             <Input type="textarea" ref="evidenceForFunction" label="Evidence for above function:"
                 error={this.getFormError('evidenceForFunction')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1423,13 +1461,6 @@ var TypeBiochemicalFunction = function(uniprotId) {
         </div>
     );
 };
-
-// HTML labels for Biochemical Functions panel
-var LabelIdentifiedFunction = React.createClass({
-    render: function() {
-        return <span>Identified function of gene in this record <span style={{fontWeight: 'normal'}}>(GO ID)</span>:</span>;
-    }
-});
 
 var TypeBiochemicalFunctionA = function() {
     let experimental = this.state.experimental ? this.state.experimental : {};
@@ -1705,13 +1736,14 @@ var TypeFunctionalAlteration = function(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
     let FA_cellMutationOrEngineeredEquivalent, FA_patientCellType, FA_engineeredEquivalentCellType, FA_descriptionOfGeneAlteration,
-        FA_normalFunctionOfGene, FA_evidenceForNormalFunction, FA_evidenceInPaper;
+        FA_normalFunctionOfGene, FA_normalFunctionOfGeneTerms, FA_evidenceForNormalFunction, FA_evidenceInPaper;
     if (functionalAlteration) {
         FA_cellMutationOrEngineeredEquivalent = functionalAlteration.cellMutationOrEngineeredEquivalent ? functionalAlteration.cellMutationOrEngineeredEquivalent : 'none';
         FA_patientCellType = functionalAlteration.patientCellType ? functionalAlteration.patientCellType : '';
         FA_engineeredEquivalentCellType = functionalAlteration.engineeredEquivalentCellType ? functionalAlteration.engineeredEquivalentCellType : '';
         FA_descriptionOfGeneAlteration = functionalAlteration.descriptionOfGeneAlteration ? functionalAlteration.descriptionOfGeneAlteration : '';
         FA_normalFunctionOfGene = functionalAlteration.normalFunctionOfGene ? functionalAlteration.normalFunctionOfGene : '';
+        FA_normalFunctionOfGeneTerms = functionalAlteration.normalFunctionOfGeneTerms ? functionalAlteration.normalFunctionOfGeneTerms : '';
         FA_evidenceForNormalFunction = functionalAlteration.evidenceForNormalFunction ? functionalAlteration.evidenceForNormalFunction : '';
         FA_evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : '';
     }
@@ -1748,12 +1780,22 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 </div>
             : null}
             <p className="col-sm-7 col-sm-offset-5">
-                Select a GO term for this gene (view <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt or search for a new term using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a>). The GO term must be from the GO aspect "Molecular Function" or "Biological Process."
+                Select a GO term for this gene (view <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in
+                UniProt or search for a new term using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a>). The GO term must be from the GO aspect
+                "Molecular Function" or "Biological Process." Search <a href="http://www.ebi.ac.uk/ols/ontologies/go" target="_blank">GO</a> using
+                the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
             </p>
-            <Input type="text" ref="normalFunctionOfGene" label={<LabelNormalFunctionOfGene />}
-                error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
+            <Input type="text" ref="normalFunctionOfGene" label={<span>Normal function of gene/gene product <span className="normal">(GO ID)</span>:</span>}
+                error={this.getFormError('normalFunctionOfGene')} clearError={this.clrMultiFormErrors.bind(null, ['normalFunctionOfGene', 'normalFunctionOfGeneTerms'])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={FA_normalFunctionOfGene} placeholder="e.g. GO:0006259" inputDisabled={this.cv.othersAssessed} required />
+                value={FA_normalFunctionOfGene} placeholder="e.g. GO:0006259" inputDisabled={this.cv.othersAssessed} />
+            <p className="col-sm-7 col-sm-offset-5">
+                If no GO term is available then describe the normal function of the gene/gene product below.
+            </p>
+            <Input type="text" ref="normalFunctionOfGeneTerms" label={<span>Normal function of gene/gene product <span className="normal">(free text)</span>:</span>}
+                error={this.getFormError('normalFunctionOfGeneTerms')} clearError={this.clrMultiFormErrors.bind(null, ['normalFunctionOfGene', 'normalFunctionOfGeneTerms'])}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
+                value={FA_normalFunctionOfGeneTerms} inputDisabled={this.cv.othersAssessed} />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1779,11 +1821,6 @@ var LabelFAPatientCellType = React.createClass({
 var LabelFAEngineeredEquivalent = React.createClass({
     render: function() {
         return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
-    }
-});
-var LabelNormalFunctionOfGene = React.createClass({
-    render: function() {
-        return <span>Normal function of gene/gene product <span style={{fontWeight: 'normal'}}>(GO ID)</span>:</span>;
     }
 });
 
