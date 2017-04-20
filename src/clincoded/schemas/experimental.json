@@ -49,7 +49,12 @@
             "properties": {
                 "identifiedFunction": {
                     "title": "Identified Function",
-                    "description": "GO_Slim id (required)",
+                    "description": "GO_ID (required if free text term is not provided)",
+                    "type": "string"
+                },
+                "identifiedFunctionTerms": {
+                    "title": "Identified Function Terms",
+                    "description": "Free text (required if GO_ID is not provided)",
                     "type": "string"
                 },
                 "evidenceForFunction": {
@@ -90,7 +95,7 @@
                         },
                         "explanationOfOtherGenes": {
                             "title": "Explanation of Other Genes",
-                            "description": "Explanation of relationship of other genes to the diasease  (optional)",
+                            "description": "Explanation of relationship of other genes to the diasease (optional)",
                             "type": "string"
                         },
                         "evidenceInPaper": {
@@ -288,7 +293,12 @@
                 },
                 "normalFunctionOfGene": {
                     "title": "Normal Function of Gene/Gene Procution",
-                    "description": "GO_Slim terms",
+                    "description": "GO_ID (required if free text term is not provided)",
+                    "type": "string"
+                },
+                "normalFunctionOfGeneTerms": {
+                    "title": "Normal Function of Gene/Gene Procution Terms",
+                    "description": "Free text (required if GO_ID is not provided)",
                     "type": "string"
                 },
                 "evidenceForNormalFunction": {
