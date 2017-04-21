@@ -79,15 +79,31 @@ var ExperimentalCuration = React.createClass({
             wildTypeRescuePhenotype: false,
             biochemicalFunctionHPO: false, // form enabled/disabled checks
             biochemicalFunctionFT: false,
+            bioChemicalFunctionIF_GoId: false, // True if GO ID is provided
+            bioChemicalFunctionIF_FreeText: false, // True if free text is provided
+            expressionOT_UberonId: false, // True if Uberon ID is provided
+            expressionOT_FreeText: false, // True if free text is provided
+            functionalAlterationNFG_GoId: false, // True if GO ID is provided
+            functionalAlterationNFG_FreeText: false, // True if free text is provided
+            functionalAlterationPCT_ClId: false, // True if CL Ontology ID is provided
+            functionalAlterationPCT_FreeText: false, // True if free text is provided
+            functionalAlterationEECT_EfoId: false, // True if EFO ID is provided
+            functionalAlterationEECT_FreeText: false, // True if free text is provided
             functionalAlterationPCEE: '',
             modelSystemsNHACCM: '',
             modelSystemsPOMSHPO: false,
             modelSystemsPOMSFT: false,
             modelSystemsPPHPO: false,
             modelSystemsPPFT: false,
+            modelSystemsCC_EfoId: false, // True if EFO ID is provided
+            modelSystemsCC_FreeText: false, // True if free text is provided
             rescuePCEE: '',
             rescuePRHPO: false,
             rescuePRFT: false,
+            rescuePCT_ClId: false, // True if CL Ontology ID is provided
+            rescuePCT_FreeText: false, // True if free text is provided
+            rescueEECT_EfoId: false, // True if EFO ID is provided
+            rescueEECT_FreeText: false, // True if free text is provided
             variantCount: 0, // Number of variants to display
             variantInfo: {}, // Extra holding info for variant display
             addVariantDisabled: false, // True if Add Another Variant button enabled
@@ -185,8 +201,8 @@ var ExperimentalCuration = React.createClass({
             if (this.refs['identifiedFunction']) {
                 this.refs['identifiedFunction'].setValue('');
             }
-            if (this.refs['identifiedFunctionTerms']) {
-                this.refs['identifiedFunctionTerms'].setValue('');
+            if (this.refs['identifiedFunctionFreeText']) {
+                this.refs['identifiedFunctionFreeText'].setValue('');
             }
             if (this.refs['evidenceForFunction']) {
                 this.refs['evidenceForFunction'].resetValue();
@@ -200,6 +216,9 @@ var ExperimentalCuration = React.createClass({
             }
             if (this.refs['organOfTissue']) {
                 this.refs['organOfTissue'].setValue('');
+            }
+            if (this.refs['organOfTissueFreeText']) {
+                this.refs['organOfTissueFreeText'].setValue('');
             }
             if (this.refs['normalExpression.expressedInTissue']) {
                 this.refs['normalExpression.expressedInTissue'].resetValue();
@@ -265,6 +284,66 @@ var ExperimentalCuration = React.createClass({
             this.setState({functionalAlterationPCEE: this.refs['cellMutationOrEngineeredEquivalent'].getValue()});
         } else if (ref === 'animalOrCellCulture') {
             this.setState({modelSystemsNHACCM: this.refs['animalOrCellCulture'].getValue()});
+        } else if (ref === 'identifiedFunction') { // Biochemical Function 'Identified Function' GO ID
+            if (this.refs['identifiedFunction'].getValue() === '') {
+                this.setState({bioChemicalFunctionIF_GoId: false});
+            } else {
+                this.setState({bioChemicalFunctionIF_GoId: true}, () => {this.clrFormErrors('identifiedFunctionFreeText')});
+            }
+        } else if (ref === 'identifiedFunctionFreeText') { // Biochemical Function 'Identified Function' free text
+            if (this.refs['identifiedFunctionFreeText'].getValue() === '') {
+                this.setState({bioChemicalFunctionIF_FreeText: false});
+            } else {
+                this.setState({bioChemicalFunctionIF_FreeText: true}, () => {this.clrFormErrors('identifiedFunction')});
+            }
+        } else if (ref === 'organOfTissue') { // Expression 'Organ of Tissue' Uberon ID
+            if (this.refs['organOfTissue'].getValue() === '') {
+                this.setState({expressionOT_UberonId: false});
+            } else {
+                this.setState({expressionOT_UberonId: true}, () => {this.clrFormErrors('organOfTissueFreeText')});
+            }
+        } else if (ref === 'organOfTissueFreeText') { // Expression 'Organ of Tissue' free text
+            if (this.refs['organOfTissueFreeText'].getValue() === '') {
+                this.setState({expressionOT_FreeText: false});
+            } else {
+                this.setState({expressionOT_FreeText: true}, () => {this.clrFormErrors('organOfTissue')});
+            }
+        } else if (ref === 'funcalt.patientCellType') { // Functional Alteration 'Patient Cell Type' CL Ontology
+            if (this.refs['funcalt.patientCellType'].getValue() === '') {
+                this.setState({functionalAlterationPCT_ClId: false});
+            } else {
+                this.setState({functionalAlterationPCT_ClId: true}, () => {this.clrFormErrors('funcalt.patientCellTypeFreeText')});
+            }
+        } else if (ref === 'funcalt.patientCellTypeFreeText') { // Functional Alteration 'Patient Cell Type' free text
+            if (this.refs['funcalt.patientCellTypeFreeText'].getValue() === '') {
+                this.setState({functionalAlterationPCT_FreeText: false});
+            } else {
+                this.setState({functionalAlterationPCT_FreeText: true}, () => {this.clrFormErrors('funcalt.patientCellType')});
+            }
+        } else if (ref === 'funcalt.engineeredEquivalentCellType') { // Functional Alteration 'Engineered Equivalent Cell Type' EFO ID
+            if (this.refs['funcalt.engineeredEquivalentCellType'].getValue() === '') {
+                this.setState({functionalAlterationEECT_EfoId: false});
+            } else {
+                this.setState({functionalAlterationEECT_EfoId: true}, () => {this.clrFormErrors('funcalt.engineeredEquivalentCellTypeFreeText')});
+            }
+        } else if (ref === 'funcalt.engineeredEquivalentCellTypeFreeText') { // Functional Alteration 'Engineered Equivalent Cell Type' free text
+            if (this.refs['funcalt.engineeredEquivalentCellTypeFreeText'].getValue() === '') {
+                this.setState({functionalAlterationEECT_FreeText: false});
+            } else {
+                this.setState({functionalAlterationEECT_FreeText: true}, () => {this.clrFormErrors('funcalt.engineeredEquivalentCellType')});
+            }
+        } else if (ref === 'normalFunctionOfGene') { // Functional Alteration 'Normal Function of Gene/Gene Product' GO ID
+            if (this.refs['normalFunctionOfGene'].getValue() === '') {
+                this.setState({functionalAlterationNFG_GoId: false});
+            } else {
+                this.setState({functionalAlterationNFG_GoId: true}, () => {this.clrFormErrors('normalFunctionOfGeneFreeText')});
+            }
+        } else if (ref === 'normalFunctionOfGeneFreeText') { // Functional Alteration 'Normal Function of Gene/Gene Product' free text
+            if (this.refs['normalFunctionOfGeneFreeText'].getValue() === '') {
+                this.setState({functionalAlterationNFG_FreeText: false});
+            } else {
+                this.setState({functionalAlterationNFG_FreeText: true}, () => {this.clrFormErrors('normalFunctionOfGene')});
+            }
         } else if (ref === 'model.phenotypeHPOObserved') {
             if (this.refs['model.phenotypeHPOObserved'].getValue() === '') {
                 this.setState({modelSystemsPOMSHPO: false});
@@ -277,6 +356,18 @@ var ExperimentalCuration = React.createClass({
             } else {
                 this.setState({modelSystemsPOMSFT: true});
             }
+        } else if (ref === 'cellCulture') { // Model Systems 'Cell Culture' EFO ID
+            if (this.refs['cellCulture'].getValue() === '') {
+                this.setState({modelSystemsCC_EfoId: false});
+            } else {
+                this.setState({modelSystemsCC_EfoId: true}, () => {this.clrFormErrors('cellCultureFreeText')});
+            }
+        } else if (ref === 'cellCultureFreeText') { // Model Systems 'Cell Culture' free text
+            if (this.refs['cellCultureFreeText'].getValue() === '') {
+                this.setState({modelSystemsCC_FreeText: false});
+            } else {
+                this.setState({modelSystemsCC_FreeText: true}, () => {this.clrFormErrors('cellCulture')});
+            }
         } else if (ref === 'model.phenotypeHPO') {
             if (this.refs['model.phenotypeHPO'].getValue() === '') {
                 this.setState({modelSystemsPPHPO: false});
@@ -288,6 +379,30 @@ var ExperimentalCuration = React.createClass({
                 this.setState({modelSystemsPPFT: false});
             } else {
                 this.setState({modelSystemsPPFT: true});
+            }
+        } else if (ref === 'rescue.patientCellType') { // Rescue 'Patient Cell Type' CL Ontology
+            if (this.refs['rescue.patientCellType'].getValue() === '') {
+                this.setState({rescuePCT_ClId: false});
+            } else {
+                this.setState({rescuePCT_ClId: true}, () => {this.clrFormErrors('rescue.patientCellTypeFreeText')});
+            }
+        } else if (ref === 'rescue.patientCellTypeFreeText') { // Rescue 'Patient Cell Type' free text
+            if (this.refs['rescue.patientCellTypeFreeText'].getValue() === '') {
+                this.setState({rescuePCT_FreeText: false});
+            } else {
+                this.setState({rescuePCT_FreeText: true}, () => {this.clrFormErrors('rescue.patientCellType')});
+            }
+        } else if (ref === 'rescue.engineeredEquivalentCellType') { // Rescue 'Engineered Equivalent Cell Type' EFO ID
+            if (this.refs['rescue.engineeredEquivalentCellType'].getValue() === '') {
+                this.setState({rescueEECT_EfoId: false});
+            } else {
+                this.setState({rescueEECT_EfoId: true}, () => {this.clrFormErrors('rescue.engineeredEquivalentCellTypeFreeText')});
+            }
+        } else if (ref === 'rescue.engineeredEquivalentCellTypeFreeText') { // Rescue 'Engineered Equivalent Cell Type' free text
+            if (this.refs['rescue.engineeredEquivalentCellTypeFreeText'].getValue() === '') {
+                this.setState({rescueEECT_FreeText: false});
+            } else {
+                this.setState({rescueEECT_FreeText: true}, () => {this.clrFormErrors('rescue.engineeredEquivalentCellType')});
             }
         } else if (ref === 'rescue.phenotypeHPO') {
             if (this.refs['rescue.phenotypeHPO'].getValue() === '') {
@@ -385,6 +500,12 @@ var ExperimentalCuration = React.createClass({
                             this.setState({'biochemicalFunctionFT': true});
                         }
                     }
+                    if (stateObj.experimental.biochemicalFunction.identifiedFunction !== '') {
+                        this.setState({bioChemicalFunctionIF_GoId: true}); // Set boolean state on 'required' prop for Biochemical Function 'Identified Function' GO ID
+                    }
+                    if (stateObj.experimental.biochemicalFunction.identifiedFunctionFreeText !== '') {
+                        this.setState({bioChemicalFunctionIF_FreeText: true}); // Set boolean state on 'required' prop for Biochemical Function 'Identified Function' free text
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Protein Interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
                         this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
@@ -407,8 +528,32 @@ var ExperimentalCuration = React.createClass({
                             this.setState({expressedInPatients: stateObj.experimental.expression.alteredExpression.expressedInPatients});
                         }
                     }
+                    if (stateObj.experimental.expression.organOfTissue !== '') {
+                        this.setState({expressionOT_UberonId: true}); // Set boolean state on 'required' prop for Expression 'Organ of Tissue' Uberon ID
+                    }
+                    if (stateObj.experimental.expression.organOfTissueFreeText !== '') {
+                        this.setState({expressionOT_FreeText: true}); // Set boolean state on 'required' prop for Expression 'Organ of Tissue' free text
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Functional Alteration') {
                     this.setState({functionalAlterationPCEE: stateObj.experimental.functionalAlteration.cellMutationOrEngineeredEquivalent});
+                    if (stateObj.experimental.functionalAlteration.patientCellType !== '') {
+                        this.setState({functionalAlterationPCT_ClId: true}); // Set boolean state on 'required' prop for Functional Alteration 'Patient Cell Type' CL Ontology
+                    }
+                    if (stateObj.experimental.functionalAlteration.patientCellTypeFreeText !== '') {
+                        this.setState({functionalAlterationPCT_FreeText: true}); // Set boolean state on 'required' prop for Functional Alteration 'Patient Cell Type' free text
+                    }
+                    if (stateObj.experimental.functionalAlteration.engineeredEquivalentCellType !== '') {
+                        this.setState({functionalAlterationEECT_EfoId: true}); // Set boolean state on 'required' prop for Functional Alteration 'Engineered Equivalent Cell Type' EFO ID
+                    }
+                    if (stateObj.experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText !== '') {
+                        this.setState({functionalAlterationEECT_FreeText: true}); // Set boolean state on 'required' prop for Functional Alteration 'Engineered Equivalent Cell Type' free text
+                    }
+                    if (stateObj.experimental.functionalAlteration.normalFunctionOfGene !== '') {
+                        this.setState({functionalAlterationNFG_GoId: true}); // Set boolean state on 'required' prop for Functional Alteration 'Normal Function of Gene/Gene Function' GO ID
+                    }
+                    if (stateObj.experimental.functionalAlteration.normalFunctionOfGeneFreeText !== '') {
+                        this.setState({functionalAlterationNFG_FreeText: true}); // Set boolean state on 'required' prop for Functional Alteration 'Normal Function of Gene/Gene Function' free text
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Model Systems') {
                     this.setState({modelSystemsNHACCM: stateObj.experimental.modelSystems.animalOrCellCulture});
                     if (stateObj.experimental.modelSystems.phenotypeHPOObserved !== '') {
@@ -423,6 +568,12 @@ var ExperimentalCuration = React.createClass({
                     if (stateObj.experimental.modelSystems.phenotypeFreeText !== '') {
                         this.setState({modelSystemsPPFT: true});
                     }
+                    if (stateObj.experimental.modelSystems.cellCulture !== '') {
+                        this.setState({modelSystemsCC_EfoId: true}); // Set boolean state on 'required' prop for Model Systems 'Cell Culture' EFO ID
+                    }
+                    if (stateObj.experimental.modelSystems.cellCultureFreeText !== '') {
+                        this.setState({modelSystemsCC_FreeText: true}); // Set boolean state on 'required' prop for Model Systems 'Cell Culture' free text
+                    }
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     this.setState({rescuePCEE: stateObj.experimental.rescue.patientCellOrEngineeredEquivalent});
                     if (stateObj.experimental.rescue.wildTypeRescuePhenotype) {
@@ -436,6 +587,18 @@ var ExperimentalCuration = React.createClass({
                     }
                     if (stateObj.experimental.rescue.phenotypeFreeText !== '') {
                         this.setState({rescuePRFT: true});
+                    }
+                    if (stateObj.experimental.rescue.patientCellType !== '') {
+                        this.setState({rescuePCT_ClId: true}); // Set boolean state on 'required' prop for Rescue 'Patient Cell Type' CL Ontology
+                    }
+                    if (stateObj.experimental.rescue.patientCellTypeFreeText !== '') {
+                        this.setState({rescuePCT_FreeText: true}); // Set boolean state on 'required' prop for Rescue 'Patient Cell Type' free text
+                    }
+                    if (stateObj.experimental.rescue.engineeredEquivalentCellType !== '') {
+                        this.setState({rescueEECT_EfoId: true}); // Set boolean state on 'required' prop for Rescue 'Engineered Equivalent Cell Type' EFO ID
+                    }
+                    if (stateObj.experimental.rescue.engineeredEquivalentCellTypeFreeText !== '') {
+                        this.setState({rescueEECT_FreeText: true}); // Set boolean state on 'required' prop for Rescue 'Engineered Equivalent Cell Type' free text
                     }
                 }
 
@@ -616,13 +779,7 @@ var ExperimentalCuration = React.createClass({
                     formError = true;
                     this.setFormErrors('geneWithSameFunctionSameDisease.geneImplicatedWithDisease', "Please see note below.");
                 }
-                // Make sure neither 'identifiedFunction' nor 'identifiedFunctionTerms' fields are empty
-                if (!formError && !this.getFormValue('identifiedFunction') && !this.getFormValue('identifiedFunctionTerms')) {
-                    formError = true;
-                    this.setFormErrors('identifiedFunction', 'Enter GO ID and/or free text.');
-                    this.setFormErrors('identifiedFunctionTerms', 'Enter GO ID and/or free text.');
-                }
-                // check goSlims
+                // Validate GO ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('identifiedFunction')) {
                     goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
                     formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'identifiedFunction', 1);
@@ -650,27 +807,23 @@ var ExperimentalCuration = React.createClass({
                     formError = true;
                     this.setFormErrors('alteredExpression.expressedInPatients', "Please see note below.");
                 }
-                // check uberonIDs
-                uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
-                formError = this.validateFormTerms(formError, 'uberonIDs', uberonIDs, 'organOfTissue', 1);
+                // Validate Uberon ID(s) if value is not empty. Don't validate if free text is provided.
+                if (this.getFormValue('organOfTissue')) {
+                    uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
+                    formError = this.validateFormTerms(formError, 'uberonIDs', uberonIDs, 'organOfTissue', 1);
+                }
             }
             else if (this.state.experimentalType == 'Functional Alteration') {
                 // Check form for Functional Alterations panel
-                // check clIDs/efoIDs depending on form selection
-                if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells') {
+                // Validate clIDs/efoIDs depending on form selection. Don't validate if free text is provided.
+                if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Patient cells' && this.getFormValue('funcalt.patientCellType')) {
                     clIDs = curator.capture.clids(this.getFormValue('funcalt.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'funcalt.patientCellType', 1);
-                } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent') {
+                } else if (this.getFormValue('cellMutationOrEngineeredEquivalent') === 'Engineered equivalent' && this.getFormValue('funcalt.engineeredEquivalentCellType')) {
                     efoIDs = curator.capture.efoids(this.getFormValue('funcalt.engineeredEquivalentCellType'));
                     formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.engineeredEquivalentCellType', 1);
                 }
-                // Make sure neither 'normalFunctionOfGene' nor 'normalFunctionOfGeneTerms' fields are empty
-                if (!formError && !this.getFormValue('normalFunctionOfGene') && !this.getFormValue('normalFunctionOfGeneTerms')) {
-                    formError = true;
-                    this.setFormErrors('normalFunctionOfGene', 'Enter GO ID and/or free text.');
-                    this.setFormErrors('normalFunctionOfGeneTerms', 'Enter GO ID and/or free text.');
-                }
-                // check goSlimIDs
+                // Validate GO ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('normalFunctionOfGene')) {
                     goSlimIDs = curator.capture.goslims(this.getFormValue('normalFunctionOfGene'));
                     formError = this.validateFormTerms(formError, 'goSlimIds', goSlimIDs, 'normalFunctionOfGene', 1);
@@ -678,8 +831,8 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Model Systems') {
                 // Check form for Model Systems panel
-                // check efoIDs depending on form selection
-                if (this.getFormValue('animalOrCellCulture') === 'Engineered equivalent') {
+                // Validate efoIDs depending on form selection. Don't validate if free text is provided.
+                if (this.getFormValue('animalOrCellCulture') === 'Engineered equivalent' && this.getFormValue('cellCulture')) {
                     efoIDs = curator.capture.efoids(this.getFormValue('cellCulture'));
                     formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'funcalt.cellCulture', 1);
                 }
@@ -696,15 +849,15 @@ var ExperimentalCuration = React.createClass({
             }
             else if (this.state.experimentalType == 'Rescue') {
                 // Check form for Rescue panel
-                // check clIDs/efoIDs depending on form selection
+                // Validate clIDs/efoIDs depending on form selection. Don't validate if free text is provided.
                 if (!this.getFormValue('wildTypeRescuePhenotype')) {
                     formError = true;
                     this.setFormErrors('wildTypeRescuePhenotype', "Please see note below.");
                 }
-                if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells') {
+                if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells' && this.getFormValue('rescue.patientCellType')) {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCellType', 1);
-                } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent') {
+                } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent' && this.getFormValue('rescue.engineeredEquivalentCellType')) {
                     efoIDs = curator.capture.efoids(this.getFormValue('rescue.engineeredEquivalentCellType'));
                     formError = this.validateFormTerms(formError, 'efoIDs', efoIDs, 'rescue.engineeredEquivalentCellType', 1);
                 }
@@ -739,9 +892,9 @@ var ExperimentalCuration = React.createClass({
                     if (BFidentifiedFunction) {
                         newExperimental.biochemicalFunction.identifiedFunction = BFidentifiedFunction;
                     }
-                    var BFidentifiedFunctionTerms = this.getFormValue('identifiedFunctionTerms');
-                    if (BFidentifiedFunctionTerms) {
-                        newExperimental.biochemicalFunction.identifiedFunctionTerms = BFidentifiedFunctionTerms;
+                    var BFidentifiedFunctionFreeText = this.getFormValue('identifiedFunctionFreeText');
+                    if (BFidentifiedFunctionFreeText) {
+                        newExperimental.biochemicalFunction.identifiedFunctionFreeText = BFidentifiedFunctionFreeText;
                     }
                     var BFevidenceForFunction = this.getFormValue('evidenceForFunction');
                     if (BFevidenceForFunction) {
@@ -822,6 +975,10 @@ var ExperimentalCuration = React.createClass({
                     if (EorganOfTissue) {
                         newExperimental.expression.organOfTissue = EorganOfTissue;
                     }
+                    var EorganOfTissueFreeText = this.getFormValue('organOfTissueFreeText');
+                    if (EorganOfTissueFreeText) {
+                        newExperimental.expression.organOfTissueFreeText = EorganOfTissueFreeText;
+                    }
                     if (this.state.experimentalSubtype.charAt(0) == 'A') {
                         newExperimental.expression['normalExpression'] = {};
                         var EexpressedInTissue = this.getFormValue('normalExpression.expressedInTissue');
@@ -858,9 +1015,17 @@ var ExperimentalCuration = React.createClass({
                     if (FApatientCellType) {
                         newExperimental.functionalAlteration.patientCellType = FApatientCellType;
                     }
+                    var FApatientCellTypeFreeText = this.getFormValue('funcalt.patientCellTypeFreeText');
+                    if (FApatientCellTypeFreeText) {
+                        newExperimental.functionalAlteration.patientCellTypeFreeText = FApatientCellTypeFreeText;
+                    }
                     var FAengineeredEquivalentCellType = this.getFormValue('funcalt.engineeredEquivalentCellType');
                     if (FAengineeredEquivalentCellType) {
                         newExperimental.functionalAlteration.engineeredEquivalentCellType = FAengineeredEquivalentCellType;
+                    }
+                    var FAengineeredEquivalentCellTypeFreeText = this.getFormValue('funcalt.engineeredEquivalentCellTypeFreeText');
+                    if (FAengineeredEquivalentCellTypeFreeText) {
+                        newExperimental.functionalAlteration.engineeredEquivalentCellTypeFreeText = FAengineeredEquivalentCellTypeFreeText;
                     }
                     var FAdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
                     if (FAdescriptionOfGeneAlteration) {
@@ -870,9 +1035,9 @@ var ExperimentalCuration = React.createClass({
                     if (FAnormalFunctionOfGene) {
                         newExperimental.functionalAlteration.normalFunctionOfGene = FAnormalFunctionOfGene;
                     }
-                    var FAnormalFunctionOfGeneTerms = this.getFormValue('normalFunctionOfGeneTerms');
-                    if (FAnormalFunctionOfGeneTerms) {
-                        newExperimental.functionalAlteration.normalFunctionOfGeneTerms = FAnormalFunctionOfGeneTerms;
+                    var FAnormalFunctionOfGeneFreeText = this.getFormValue('normalFunctionOfGeneFreeText');
+                    if (FAnormalFunctionOfGeneFreeText) {
+                        newExperimental.functionalAlteration.normalFunctionOfGeneFreeText = FAnormalFunctionOfGeneFreeText;
                     }
                     var FAevidenceForNormalFunction = this.getFormValue('evidenceForNormalFunction');
                     if (FAevidenceForNormalFunction) {
@@ -898,6 +1063,10 @@ var ExperimentalCuration = React.createClass({
                         var MScellCulture = this.getFormValue('cellCulture');
                         if (MScellCulture) {
                             newExperimental.modelSystems.cellCulture = MScellCulture;
+                        }
+                        var MScellCultureFreeText = this.getFormValue('cellCultureFreeText');
+                        if (MScellCultureFreeText) {
+                            newExperimental.modelSystems.cellCultureFreeText = MScellCultureFreeText;
                         }
                     }
                     var MSdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
@@ -939,9 +1108,17 @@ var ExperimentalCuration = React.createClass({
                     if (RpatientCellType) {
                         newExperimental.rescue.patientCellType = RpatientCellType;
                     }
+                    var RpatientCellTypeFreeText = this.getFormValue('rescue.patientCellTypeFreeText');
+                    if (RpatientCellTypeFreeText) {
+                        newExperimental.rescue.patientCellTypeFreeText = RpatientCellTypeFreeText;
+                    }
                     var RengineeredEquivalentCellType = this.getFormValue('rescue.engineeredEquivalentCellType');
                     if (RengineeredEquivalentCellType) {
                         newExperimental.rescue.engineeredEquivalentCellType = RengineeredEquivalentCellType;
+                    }
+                    var RengineeredEquivalentCellTypeFreeText = this.getFormValue('rescue.engineeredEquivalentCellTypeFreeText');
+                    if (RengineeredEquivalentCellTypeFreeText) {
+                        newExperimental.rescue.engineeredEquivalentCellTypeFreeText = RengineeredEquivalentCellTypeFreeText;
                     }
                     var RdescriptionOfGeneAlteration = this.getFormValue('descriptionOfGeneAlteration');
                     if (RdescriptionOfGeneAlteration) {
@@ -1418,10 +1595,10 @@ var ExperimentalNameType = function() {
 var TypeBiochemicalFunction = function(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
-    let BF_identifiedFunction, BF_identifiedFunctionTerms, BF_evidenceForFunction, BF_evidenceForFunctionInPaper;
+    let BF_identifiedFunction, BF_identifiedFunctionFreeText, BF_evidenceForFunction, BF_evidenceForFunctionInPaper;
     if (biochemicalFunction) {
         BF_identifiedFunction = biochemicalFunction.identifiedFunction ? biochemicalFunction.identifiedFunction : '';
-        BF_identifiedFunctionTerms = biochemicalFunction.identifiedFunctionTerms ? biochemicalFunction.identifiedFunctionTerms : '';
+        BF_identifiedFunctionFreeText = biochemicalFunction.identifiedFunctionFreeText ? biochemicalFunction.identifiedFunctionFreeText : '';
         BF_evidenceForFunction = biochemicalFunction.evidenceForFunction ? biochemicalFunction.evidenceForFunction : '';
         BF_evidenceForFunctionInPaper = biochemicalFunction.evidenceForFunctionInPaper ? biochemicalFunction.evidenceForFunctionInPaper : '';
     }
@@ -1434,16 +1611,20 @@ var TypeBiochemicalFunction = function(uniprotId) {
                 the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
             </p>
             <Input type="text" ref="identifiedFunction" label={<span>Identified function of gene in this record <span className="normal">(GO ID)</span>:</span>}
-                error={this.getFormError('identifiedFunction')} clearError={this.clrMultiFormErrors.bind(null, ['identifiedFunction', 'identifiedFunctionTerms'])}
+                error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={BF_identifiedFunction} placeholder="e.g. GO:0008150" inputDisabled={this.cv.othersAssessed} />
+                value={BF_identifiedFunction} placeholder="e.g. GO:0008150" inputDisabled={this.cv.othersAssessed}
+                handleChange={this.handleChange} required={!this.state.bioChemicalFunctionIF_FreeText}
+                customErrorMsg="Enter GO ID and/or free text" />
             <p className="col-sm-7 col-sm-offset-5">
                 If no GO term is available then describe the function of the gene below.
             </p>
-            <Input type="text" ref="identifiedFunctionTerms" label={<span>Identified function of gene in this record <span className="normal">(free text)</span>:</span>}
-                error={this.getFormError('identifiedFunctionTerms')} clearError={this.clrMultiFormErrors.bind(null, ['identifiedFunction', 'identifiedFunctionTerms'])}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={BF_identifiedFunctionTerms} inputDisabled={this.cv.othersAssessed} />
+            <Input type="textarea" ref="identifiedFunctionFreeText" label={<span>Identified function of gene in this record <span className="normal">(free text)</span>:</span>}
+                error={this.getFormError('identifiedFunctionFreeText')} clearError={this.clrFormErrors.bind(null, 'identifiedFunctionFreeText')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                value={BF_identifiedFunctionFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                handleChange={this.handleChange} required={!this.state.bioChemicalFunctionIF_GoId}
+                customErrorMsg="Enter GO ID and/or free text" />
             <Input type="textarea" ref="evidenceForFunction" label="Evidence for above function:"
                 error={this.getFormError('evidenceForFunction')} clearError={this.clrFormErrors.bind(null, 'evidenceForFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1642,17 +1823,32 @@ var LabelInteractingGenes = React.createClass({
 var TypeExpression = function() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let expression = experimental.expression ? experimental.expression : {};
-    let EXP_organOfTissue;
+    let EXP_organOfTissue, EXP_organOfTissueFreeText;
     if (expression) {
         EXP_organOfTissue = expression.organOfTissue ? expression.organOfTissue : '';
+        EXP_organOfTissueFreeText = expression.organOfTissueFreeText ? expression.organOfTissueFreeText : '';
     }
     return (
         <div className="row form-row-helper">
-            <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> for an organ type (e.g. heart = UBERON_0015228)</p>
+            <p className="col-sm-7 col-sm-offset-5">
+                Search <a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> for an organ type (e.g. heart = UBERON_0015228).
+                Search <a href="http://www.ebi.ac.uk/ols/ontologies/uberon" target="_blank">Uberon</a> using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
+            </p>
             <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={EXP_organOfTissue} placeholder="e.g. UBERON_0015228" inputDisabled={this.cv.othersAssessed} required />
+                value={EXP_organOfTissue} placeholder="e.g. UBERON_0015228" inputDisabled={this.cv.othersAssessed}
+                handleChange={this.handleChange} required={!this.state.expressionOT_FreeText}
+                customErrorMsg="Enter Uberon ID and/or free text" />
+            <p className="col-sm-7 col-sm-offset-5">
+                If no Uberon term is available then describe the organ type below.
+            </p>
+            <Input type="textarea" ref="organOfTissueFreeText" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(free text)</span>:</span>}
+                error={this.getFormError('organOfTissueFreeText')} clearError={this.clrFormErrors.bind(null, 'organOfTissueFreeText')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                value={EXP_organOfTissueFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                handleChange={this.handleChange} required={!this.state.expressionOT_UberonId}
+                customErrorMsg="Enter Uberon ID and/or free text" />
             {this.state.experimentalSubtype == 'A. Gene normally expressed in tissue relevant to the disease' ?
                 TypeExpressionA.call(this)
             : null}
@@ -1666,7 +1862,7 @@ var TypeExpression = function() {
 // HTML labels for Expression panel.
 var LabelUberonId = React.createClass({
     render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
+        return <span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
     }
 });
 
@@ -1735,15 +1931,18 @@ var TypeExpressionB = function() {
 var TypeFunctionalAlteration = function(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
-    let FA_cellMutationOrEngineeredEquivalent, FA_patientCellType, FA_engineeredEquivalentCellType, FA_descriptionOfGeneAlteration,
-        FA_normalFunctionOfGene, FA_normalFunctionOfGeneTerms, FA_evidenceForNormalFunction, FA_evidenceInPaper;
+    let FA_cellMutationOrEngineeredEquivalent, FA_patientCellType, FA_patientCellTypeFreeText,
+        FA_engineeredEquivalentCellType, FA_engineeredEquivalentCellTypeFreeText, FA_descriptionOfGeneAlteration,
+        FA_normalFunctionOfGene, FA_normalFunctionOfGeneFreeText, FA_evidenceForNormalFunction, FA_evidenceInPaper;
     if (functionalAlteration) {
         FA_cellMutationOrEngineeredEquivalent = functionalAlteration.cellMutationOrEngineeredEquivalent ? functionalAlteration.cellMutationOrEngineeredEquivalent : 'none';
         FA_patientCellType = functionalAlteration.patientCellType ? functionalAlteration.patientCellType : '';
+        FA_patientCellTypeFreeText = functionalAlteration.patientCellTypeFreeText ? functionalAlteration.patientCellTypeFreeText : '';
         FA_engineeredEquivalentCellType = functionalAlteration.engineeredEquivalentCellType ? functionalAlteration.engineeredEquivalentCellType : '';
+        FA_engineeredEquivalentCellTypeFreeText = functionalAlteration.engineeredEquivalentCellTypeFreeText ? functionalAlteration.engineeredEquivalentCellTypeFreeText : '';
         FA_descriptionOfGeneAlteration = functionalAlteration.descriptionOfGeneAlteration ? functionalAlteration.descriptionOfGeneAlteration : '';
         FA_normalFunctionOfGene = functionalAlteration.normalFunctionOfGene ? functionalAlteration.normalFunctionOfGene : '';
-        FA_normalFunctionOfGeneTerms = functionalAlteration.normalFunctionOfGeneTerms ? functionalAlteration.normalFunctionOfGeneTerms : '';
+        FA_normalFunctionOfGeneFreeText = functionalAlteration.normalFunctionOfGeneTerms ? functionalAlteration.normalFunctionOfGeneTerms : '';
         FA_evidenceForNormalFunction = functionalAlteration.evidenceForNormalFunction ? functionalAlteration.evidenceForNormalFunction : '';
         FA_evidenceInPaper = functionalAlteration.evidenceInPaper ? functionalAlteration.evidenceInPaper : '';
     }
@@ -1761,22 +1960,48 @@ var TypeFunctionalAlteration = function(uniprotId) {
             </Input>
             {this.state.functionalAlterationPCEE == 'Patient cells' ?
                 <div>
-                    <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057)</p>
+                    <p className="col-sm-7 col-sm-offset-5">
+                        Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057).
+                        Search <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology</a> using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
+                    </p>
                     <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />}
                         error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_patientCellType} placeholder="e.g. CL_0000057"
-                        inputDisabled={this.cv.othersAssessed} required />
+                        rows="1" value={FA_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        handleChange={this.handleChange} required={!this.state.functionalAlterationPCT_FreeText}
+                        customErrorMsg="Enter CL Ontology ID and/or free text" />
+                    <p className="col-sm-7 col-sm-offset-5">
+                        If no CL Ontology term is available then describe the cell type below.
+                    </p>
+                    <Input type="textarea" ref="funcalt.patientCellTypeFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
+                        error={this.getFormError('funcalt.patientCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellTypeFreeText')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                        value={FA_patientCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        handleChange={this.handleChange} required={!this.state.functionalAlterationPCT_ClId}
+                        customErrorMsg="Enter CL Ontology ID and/or free text" />
                 </div>
             : null}
             {this.state.functionalAlterationPCEE == 'Engineered equivalent' ?
                 <div>
-                     <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                     <p className="col-sm-7 col-sm-offset-5">
+                        Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187).
+                        Search <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
+                    </p>
                     <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />}
                         error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187"
-                        inputDisabled={this.cv.othersAssessed} required />
+                        rows="1" value={FA_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed}
+                        handleChange={this.handleChange} required={!this.state.functionalAlterationEECT_FreeText}
+                        customErrorMsg="Enter EFO ID and/or free text" />
+                    <p className="col-sm-7 col-sm-offset-5">
+                        If no EFO term is available then describe the cell line below.
+                    </p>
+                    <Input type="textarea" ref="funcalt.engineeredEquivalentCellTypeFreeText" label={<span>Engineered equivalent cell type/line <span className="normal">(free text)</span>:</span>}
+                        error={this.getFormError('funcalt.engineeredEquivalentCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellTypeFreeText')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                        value={FA_engineeredEquivalentCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        handleChange={this.handleChange} required={!this.state.functionalAlterationEECT_EfoId}
+                        customErrorMsg="Enter EFO ID and/or free text" />
                 </div>
             : null}
             <p className="col-sm-7 col-sm-offset-5">
@@ -1786,16 +2011,20 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
             </p>
             <Input type="text" ref="normalFunctionOfGene" label={<span>Normal function of gene/gene product <span className="normal">(GO ID)</span>:</span>}
-                error={this.getFormError('normalFunctionOfGene')} clearError={this.clrMultiFormErrors.bind(null, ['normalFunctionOfGene', 'normalFunctionOfGeneTerms'])}
+                error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={FA_normalFunctionOfGene} placeholder="e.g. GO:0006259" inputDisabled={this.cv.othersAssessed} />
+                value={FA_normalFunctionOfGene} placeholder="e.g. GO:0006259" inputDisabled={this.cv.othersAssessed}
+                handleChange={this.handleChange} required={!this.state.functionalAlterationNFG_FreeText}
+                customErrorMsg="Enter GO ID and/or free text" />
             <p className="col-sm-7 col-sm-offset-5">
                 If no GO term is available then describe the normal function of the gene/gene product below.
             </p>
-            <Input type="text" ref="normalFunctionOfGeneTerms" label={<span>Normal function of gene/gene product <span className="normal">(free text)</span>:</span>}
-                error={this.getFormError('normalFunctionOfGeneTerms')} clearError={this.clrMultiFormErrors.bind(null, ['normalFunctionOfGene', 'normalFunctionOfGeneTerms'])}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={FA_normalFunctionOfGeneTerms} inputDisabled={this.cv.othersAssessed} />
+            <Input type="textarea" ref="normalFunctionOfGeneFreeText" label={<span>Normal function of gene/gene product <span className="normal">(free text)</span>:</span>}
+                error={this.getFormError('normalFunctionOfGeneFreeText')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGeneFreeText')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" row="2"
+                value={FA_normalFunctionOfGeneFreeText} inputDisabled={this.cv.othersAssessed}
+                handleChange={this.handleChange} required={!this.state.functionalAlterationNFG_GoId}
+                customErrorMsg="Enter GO ID and/or free text" />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
                 error={this.getFormError('descriptionOfGeneAlteration')} clearError={this.clrFormErrors.bind(null, 'descriptionOfGeneAlteration')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1815,12 +2044,12 @@ var TypeFunctionalAlteration = function(uniprotId) {
 // HTML labels for Functional Alterations panel.
 var LabelFAPatientCellType = React.createClass({
     render: function() {
-        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
+        return <span>Patient cell type <span className="normal">(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
     }
 });
 var LabelFAEngineeredEquivalent = React.createClass({
     render: function() {
-        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
+        return <span>Engineered equivalent cell type/line <span className="normal">(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
     }
 });
 
@@ -1829,13 +2058,14 @@ var LabelFAEngineeredEquivalent = React.createClass({
 var TypeModelSystems = function() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let modelSystems = experimental.modelSystems ? experimental.modelSystems : {};
-    let MS_animalOrCellCulture, MS_animalModel, MS_cellCulture, MS_descriptionOfGeneAlteration,
+    let MS_animalOrCellCulture, MS_animalModel, MS_cellCulture, MS_cellCultureFreeText, MS_descriptionOfGeneAlteration,
         MS_phenotypeHPO, MS_phenotypeFreeText, MS_phenotypeHPOObserved, MS_phenotypeFreetextObserved,
         MS_explanation, MS_evidenceInPaper;
     if (modelSystems) {
         MS_animalOrCellCulture = modelSystems.animalOrCellCulture ? modelSystems.animalOrCellCulture : 'none';
         MS_animalModel = modelSystems.animalModel ? modelSystems.animalModel : 'none';
         MS_cellCulture = modelSystems.cellCulture ? modelSystems.cellCulture : '';
+        MS_cellCultureFreeText = modelSystems.cellCultureFreeText ? modelSystems.cellCultureFreeText : '';
         MS_descriptionOfGeneAlteration = modelSystems.descriptionOfGeneAlteration ? modelSystems.descriptionOfGeneAlteration : '';
         MS_phenotypeHPO = modelSystems.phenotypeHPO ? modelSystems.phenotypeHPO : '';
         MS_phenotypeFreeText = modelSystems.phenotypeFreeText ? modelSystems.phenotypeFreeText : '';
@@ -1888,11 +2118,25 @@ var TypeModelSystems = function() {
             : null}
             {this.state.modelSystemsNHACCM == 'Engineered equivalent' ?
                 <div>
-                    <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                    <p className="col-sm-7 col-sm-offset-5">
+                        Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187).
+                        Search <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
+                    </p>
                     <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed} required />
+                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed}
+                        handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
+                        customErrorMsg="Enter EFO ID and/or free text" />
+                    <p className="col-sm-7 col-sm-offset-5">
+                        If no EFO term is available then describe the cell line below.
+                    </p>
+                    <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture type/line <span className="normal">(free text)</span>:</span>}
+                        error={this.getFormError('cellCultureFreeText')} clearError={this.clrFormErrors.bind(null, 'cellCultureFreeText')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                        value={MS_cellCultureFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        handleChange={this.handleChange} required={!this.state.modelSystemsCC_EfoId}
+                        customErrorMsg="Enter EFO ID and/or free text" />
                 </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -1964,13 +2208,16 @@ var LabelPatientPhenotypeFT = React.createClass({
 var TypeRescue = function() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let rescue = experimental.rescue ? experimental.rescue : {};
-    let RES_patientCellOrEngineeredEquivalent, RES_patientCellType, RES_engineeredEquivalentCellType,
+    let RES_patientCellOrEngineeredEquivalent, RES_patientCellType, RES_patientCellTypeFreeText,
+        RES_engineeredEquivalentCellType, RES_engineeredEquivalentCellTypeFreeText,
         RES_descriptionOfGeneAlteration, RES_phenotypeHPO, RES_phenotypeFreeText,
         RES_rescueMethod, RES_explanation, RES_evidenceInPaper;
     if (rescue) {
         RES_patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : 'none';
         RES_patientCellType = rescue.patientCellType ? rescue.patientCellType : '';
+        RES_patientCellTypeFreeText = rescue.patientCellTypeFreeText ? rescue.patientCellTypeFreeText : '';
         RES_engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType : '';
+        RES_engineeredEquivalentCellTypeFreeText = rescue.engineeredEquivalentCellTypeFreeText ? rescue.engineeredEquivalentCellTypeFreeText : '';
         RES_descriptionOfGeneAlteration = rescue.descriptionOfGeneAlteration ? rescue.descriptionOfGeneAlteration : '';
         RES_phenotypeHPO = rescue.phenotypeHPO ? rescue.phenotypeHPO : '';
         RES_phenotypeFreeText = rescue.phenotypeFreeText ? rescue.phenotypeFreeText : '';
@@ -1992,20 +2239,48 @@ var TypeRescue = function() {
             </Input>
             {this.state.rescuePCEE == 'Patient cells' ?
                 <div>
-                    <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057)</p>
+                    <p className="col-sm-7 col-sm-offset-5">
+                        Search <a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> for a cell type (e.g. fibroblast = CL_0000057).
+                        Search <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology</a> using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
+                    </p>
                     <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed} required />
+                        rows="1" value={RES_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        handleChange={this.handleChange} required={!this.state.rescuePCT_FreeText}
+                        customErrorMsg="Enter CL Ontology ID and/or free text" />
+                    <p className="col-sm-7 col-sm-offset-5">
+                        If no CL Ontology term is available then describe the cell type below.
+                    </p>
+                    <Input type="textarea" ref="rescue.patientCellTypeFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
+                        error={this.getFormError('rescue.patientCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellTypeFreeText')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                        value={RES_patientCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        handleChange={this.handleChange} required={!this.state.rescuePCT_ClId}
+                        customErrorMsg="Enter CL Ontology ID and/or free text" />
                 </div>
             : null}
             {this.state.rescuePCEE == 'Engineered equivalent' ?
                 <div>
-                    <p className="col-sm-7 col-sm-offset-5">Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187)</p>
+                    <p className="col-sm-7 col-sm-offset-5">
+                        Search <a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> for a cell line (e.g. HepG2 = EFO_0001187).
+                        Search <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a>.
+                    </p>
                     <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />}
                         error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed} required />
+                        rows="1" value={RES_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187" inputDisabled={this.cv.othersAssessed}
+                        handleChange={this.handleChange} required={!this.state.rescueEECT_FreeText}
+                        customErrorMsg="Enter EFO ID and/or free text" />
+                    <p className="col-sm-7 col-sm-offset-5">
+                        If no EFO term is available then describe the cell line below.
+                    </p>
+                    <Input type="textarea" ref="rescue.engineeredEquivalentCellTypeFreeText" label={<span>Engineered equivalent cell type/line <span className="normal">(free text)</span>:</span>}
+                        error={this.getFormError('rescue.engineeredEquivalentCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellTypeFreeText')}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                        value={RES_engineeredEquivalentCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        handleChange={this.handleChange} required={!this.state.rescueEECT_EfoId}
+                        customErrorMsg="Enter EFO ID and/or free text" />
                 </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -2013,7 +2288,7 @@ var TypeRescue = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={RES_descriptionOfGeneAlteration} inputDisabled={this.cv.othersAssessed} required />
             {curator.renderPhenotype(null, 'Experimental')}
-            <Input type="textarea" ref="rescue.phenotypearea" label={<LabelPhenotypeRescue />} rows="1"
+            <Input type="textarea" ref="rescue.phenotypeHPO" label={<LabelPhenotypeRescue />} rows="1"
                 error={this.getFormError('rescue.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={RES_phenotypeHPO} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
@@ -2437,6 +2712,11 @@ var ExperimentalViewer = React.createClass({
                                 </div>
 
                                 <div>
+                                    <dt>Identified function of gene in this record (free text)</dt>
+                                    <dd>{experimental.biochemicalFunction.identifiedFunctionFreeText ? experimental.biochemicalFunction.identifiedFunctionFreeText : null}</dd>
+                                </div>
+
+                                <div>
                                     <dt>Evidence for above function</dt>
                                     <dd>{experimental.biochemicalFunction.evidenceForFunction}</dd>
                                 </div>
@@ -2551,6 +2831,11 @@ var ExperimentalViewer = React.createClass({
                                     <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
                                     <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
                                 </div>
+
+                                <div>
+                                    <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient (free text)</dt>
+                                    <dd>{experimental.expression.organOfTissueFreeText ? experimental.expression.organOfTissueFreeText : null}</dd>
+                                </div>
                             </dl>
                         </Panel>
                         : null}
@@ -2604,13 +2889,27 @@ var ExperimentalViewer = React.createClass({
 
                                 {experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells' ?
                                     <div>
-                                        <dt>Patient cell type</dt>
-                                        <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
+                                        <div>
+                                            <dt>Patient cell type</dt>
+                                            <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Patient cell type (free text)</dt>
+                                            <dd>{experimental.functionalAlteration.patientCellTypeFreeText ? experimental.functionalAlteration.patientCellTypeFreeText : null}</dd>
+                                        </div>
                                     </div>
                                 :
                                     <div>
-                                        <dt>Engineered cell type</dt>
-                                        <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
+                                        <div>
+                                            <dt>Engineered cell type</dt>
+                                            <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Engineered cell type (free text)</dt>
+                                            <dd>{experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText ? experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText : null}</dd>
+                                        </div>
                                     </div>
                                 }
 
@@ -2622,6 +2921,11 @@ var ExperimentalViewer = React.createClass({
                                 <div>
                                     <dt>Normal function of gene</dt>
                                     <dd>{experimental.functionalAlteration.normalFunctionOfGene ? <a href={external_url_map['QuickGoSearch'] + experimental.functionalAlteration.normalFunctionOfGene} title={"GO entry for " + experimental.functionalAlteration.normalFunctionOfGene + " in new tab"} target="_blank">{experimental.functionalAlteration.normalFunctionOfGene}</a> : null}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Normal function of gene (free text)</dt>
+                                    <dd>{experimental.functionalAlteration.normalFunctionOfGeneFreeText ? experimental.functionalAlteration.normalFunctionOfGeneFreeText: null}</dd>
                                 </div>
 
                                 <div>
@@ -2651,8 +2955,15 @@ var ExperimentalViewer = React.createClass({
                                     </div>
                                 :
                                     <div>
-                                        <dt>Cell-culture type/line</dt>
-                                        <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                        <div>
+                                            <dt>Cell-culture type/line</dt>
+                                            <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Cell-culture type/line (free text)</dt>
+                                            <dd>{experimental.modelSystems.cellCultureFreeText ? experimental.modelSystems.cellCultureFreeText : null}</dd>
+                                        </div>
                                     </div>
                                 }
 
@@ -2703,13 +3014,27 @@ var ExperimentalViewer = React.createClass({
 
                                 {experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells' ?
                                     <div>
-                                        <dt>Patient cell type</dt>
-                                        <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
+                                        <div>
+                                            <dt>Patient cell type</dt>
+                                            <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Patient cell type (free text)</dt>
+                                            <dd>{experimental.rescue.patientCellTypeFreeText ? experimental.rescue.patientCellTypeFreeText : null}</dd>
+                                        </div>
                                     </div>
                                 :
                                     <div>
-                                        <dt>Engineered equivalent cell type</dt>
-                                        <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
+                                        <div>
+                                            <dt>Engineered equivalent cell type</dt>
+                                            <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>Engineered equivalent cell type (free text)</dt>
+                                            <dd>{experimental.rescue.engineeredEquivalentCellTypeFreeText ? experimental.rescue.engineeredEquivalentCellTypeFreeText : null}</dd>
+                                        </div>
                                     </div>
                                 }
 
