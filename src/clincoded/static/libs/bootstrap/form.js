@@ -180,7 +180,7 @@ var FormMixin = module.exports.FormMixin = {
             if (props.required && !val) {
                 // Required field has no value. Set error state to render
                 // error, and remember to return false.
-                this.setFormErrors(ref, 'Required');
+                this.setFormErrors(ref, props.customErrorMsg ? props.customErrorMsg : 'Required');
                 valid = false;
             } else if (props.type === 'number') {
                 // Validate that type="number" fields have a valid number in them
