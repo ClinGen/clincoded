@@ -49,11 +49,11 @@
             "properties": {
                 "identifiedFunction": {
                     "title": "Identified Function",
-                    "description": "GO_ID (required if free text term is not provided)",
+                    "description": "GO_ID (required if free text for identified function is not provided)",
                     "type": "string"
                 },
-                "identifiedFunctionTerms": {
-                    "title": "Identified Function Terms",
+                "identifiedFunctionFreeText": {
+                    "title": "Identified Function Alternative Terms (Free text)",
                     "description": "Free text (required if GO_ID is not provided)",
                     "type": "string"
                 },
@@ -210,7 +210,12 @@
             "properties": {
                 "organOfTissue": {
                     "title": "Organ of Tissue",
-                    "description": "Uberon id",
+                    "description": "Uberon ID (required if free text for organ of tissue is not provided)",
+                    "type": "string"
+                },
+                "organOfTissueFreeText": {
+                    "title": "Organ of Tissue (Free text)",
+                    "description": "Free text (required if Uberon ID is not provided)",
                     "type": "string"
                 },
                 "normalExpression": {
@@ -278,12 +283,22 @@
                 },
                 "patientCellType": {
                     "title": "Patient Cell Type",
-                    "description": "EFO terms for patient cell type",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellTypeFreeText": {
+                    "title": "Patient Cell Type (Free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
                     "type": "string"
                 },
                 "engineeredEquivalentCellType": {
                     "title": "Engineered Equivalent Cell Type",
-                    "description": "EFO terms",
+                    "description": "EFO ID (required if free text for engineered equivalent cell type is not provided)",
+                    "type": "string"
+                },
+                "engineeredEquivalentCellTypeFreeText": {
+                    "title": "Engineered Equivalent Cell Type (Free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
                 "descriptionOfGeneAlteration": {
@@ -296,8 +311,8 @@
                     "description": "GO_ID (required if free text term is not provided)",
                     "type": "string"
                 },
-                "normalFunctionOfGeneTerms": {
-                    "title": "Normal Function of Gene/Gene Procution Terms",
+                "normalFunctionOfGeneFreeText": {
+                    "title": "Normal Function of Gene/Gene Procution (Free text)",
                     "description": "Free text (required if GO_ID is not provided)",
                     "type": "string"
                 },
@@ -356,7 +371,12 @@
                 },
                 "cellCulture": {
                     "title": "Cell Culture Type/Line",
-                    "description": "EFO id for cell culture type/line",
+                    "description": "EFO ID (required if free text for cell culture is not provided)",
+                    "type": "string"
+                },
+                "cellCultureFreeText": {
+                    "title": "Cell Culture Type/Line (Free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
                 "descriptionOfGeneAlteration": {
@@ -413,12 +433,22 @@
                 },
                 "patientCellType": {
                     "title": "Patient Cell Type",
-                    "description": "EFO term",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellTypeFreeText": {
+                    "title": "Patient Cell Type (Free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
                     "type": "string"
                 },
                 "engineeredEquivalentCellType": {
-                    "title": "Engineered Equivalent Cell Type/Line",
-                    "description": "EFO term",
+                    "title": "Engineered Equivalent Cell Type",
+                    "description": "EFO ID (required if free text for engineered equivalent cell type is not provided)",
+                    "type": "string"
+                },
+                "engineeredEquivalentCellTypeFreeText": {
+                    "title": "Engineered Equivalent Cell Type (Free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
                 "descriptionOfGeneAlteration": {
