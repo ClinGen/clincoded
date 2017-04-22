@@ -207,8 +207,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
     },
 
-    // TODO: Need to merge with SCV table rendering from #941
-
     // Method to render each associated condition, which also consists of multiple identifiers
     handleCondition: function(condition, key) {
         let self = this;
