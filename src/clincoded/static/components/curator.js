@@ -1453,7 +1453,7 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
@@ -1464,6 +1464,11 @@ module.exports.capture = {
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
         return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
+    efoclids: function(s) {
+        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
     }
 };
 
@@ -2133,6 +2138,44 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
         </div>
     );
 };
+
+// Generic render method for the yellow warning message box
+export function renderWarning(context) {
+    return (
+        <div>
+            { context === 'GO' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the gene's molecular function or biological process term  <strong>(required)</strong> using
+                        the Gene Ontology (GO) term wherever possible (e.g. GO:0008150). If no GO term exists, please
+                        email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and describe
+                        it in the free text box instead.
+                    </p>
+                </div>
+            : null }
+            { context === 'UBERON' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
+                        (e.g. UBERON:0015228). If no Uberon term exists, please
+                        email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and describe
+                        it in the free text box instead.
+                    </p>
+                </div>
+            : null}
+            { context === 'CLO_EFO' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant EFO or CLO term for the cell line/cell type whenever possible
+                        (e.g. CL_0000057, EFO_0001187). If no appropriate EFO or CLO term exists, please
+                        email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and describe
+                        it in the free text box instead.
+                    </p>
+                </div>
+            : null}
+        </div>
+    );
+}
 
 // A link to Mutalyzer to check HGVC terms
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
