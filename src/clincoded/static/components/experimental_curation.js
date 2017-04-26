@@ -162,7 +162,10 @@ var ExperimentalCuration = React.createClass({
             this.setState({
                 experimentalName: '',
                 experimentalType: tempExperimentalType,
-                experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType)
+                experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
+                functionalAlterationPCEE: '',
+                modelSystemsNHACCM: '',
+                rescuePCEE: ''
             });
             if (this.state.experimentalNameVisible) {
                 this.refs['experimentalName'].setValue('');
@@ -1953,7 +1956,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 <option value="Patient cells">Patient cells</option>
                 <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
-            {this.state.functionalAlterationPCEE == 'Patient cells' ?
+            {this.state.functionalAlterationPCEE === 'Patient cells' ?
                 <div>
                     {curator.renderWarning('CLO_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
@@ -1974,7 +1977,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
                         customErrorMsg="Enter CL Ontology ID and/or free text" />
                 </div>
             : null}
-            {this.state.functionalAlterationPCEE == 'Engineered equivalent' ?
+            {this.state.functionalAlterationPCEE === 'Engineered equivalent' ?
                 <div>
                     {curator.renderWarning('CLO_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
@@ -2064,7 +2067,7 @@ var TypeModelSystems = function() {
                 <option value="Animal model">Animal model</option>
                 <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
-            {this.state.modelSystemsNHACCM == 'Animal model' ?
+            {this.state.modelSystemsNHACCM === 'Animal model' ?
                 <div>
                     <Input type="select" ref="animalModel" label="Animal model:"
                         error={this.getFormError('animalModel')} clearError={this.clrFormErrors.bind(null, 'animalModel')}
@@ -2094,7 +2097,7 @@ var TypeModelSystems = function() {
                     </Input>
                 </div>
             : null}
-            {this.state.modelSystemsNHACCM == 'Engineered equivalent' ?
+            {this.state.modelSystemsNHACCM === 'Engineered equivalent' ?
                 <div>
                     {curator.renderWarning('CLO_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
@@ -2201,12 +2204,12 @@ var TypeRescue = function() {
                 <option value="Patient cells">Patient cells</option>
                 <option value="Engineered equivalent">Engineered equivalent</option>
             </Input>
-            {this.state.rescuePCEE == 'Patient cells' ?
+            {this.state.rescuePCEE === 'Patient cells' ?
                 <div>
                     {curator.renderWarning('CLO_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        ffor a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
+                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
                     </p>
                     <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL Ontology ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
@@ -2222,7 +2225,7 @@ var TypeRescue = function() {
                         customErrorMsg="Enter CL Ontology ID and/or free text" />
                 </div>
             : null}
-            {this.state.rescuePCEE == 'Engineered equivalent' ?
+            {this.state.rescuePCEE === 'Engineered equivalent' ?
                 <div>
                     {curator.renderWarning('CLO_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
