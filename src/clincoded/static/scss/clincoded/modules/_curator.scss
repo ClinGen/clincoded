@@ -1217,6 +1217,32 @@
                 }
             }
 
+            .basic-info .clinical-assertion .disease {
+                .condition {
+                    padding-bottom: 5px;
+                }
+
+                .identifiers {
+                    display: block;
+
+                    ul {
+                        display: inline;
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    li {
+                        display: inline;
+                    }
+
+                    li + li:before {
+                        content: "|";
+                        margin: 0 4px;
+                    }
+                }
+            }
+
             .basic-info .clinvar-interpretation .disease .identifiers li {
                 float: left;
             }

@@ -1,0 +1,26 @@
+.popover-component {
+    position: relative;
+
+    .popover-actuator {
+        cursor: pointer;
+    }
+
+    .popover-wrapper {
+        background-color: white;
+        border: 1px solid #31708f;
+        border-radius: 4px;
+        box-shadow: 1px 4px 12px 2px  #ccc;
+        position: absolute;
+
+        .closePopOver {
+            cursor: pointer;
+            position: absolute;
+            top: 1px;
+            right: 4px;
+        }
+
+        .popover-content {
+            margin: 13px 16px;
+        }
+    }
+}
