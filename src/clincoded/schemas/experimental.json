@@ -293,7 +293,7 @@
                 },
                 "engineeredEquivalentCellType": {
                     "title": "Engineered Equivalent Cell Type",
-                    "description": "EFO ID (required if free text for engineered equivalent cell type is not provided)",
+                    "description": "EFO or CL Ontology ID (required if free text for engineered equivalent cell type is not provided)",
                     "type": "string"
                 },
                 "engineeredEquivalentCellTypeFreeText": {
@@ -371,7 +371,7 @@
                 },
                 "cellCulture": {
                     "title": "Cell Culture Type/Line",
-                    "description": "EFO ID (required if free text for cell culture is not provided)",
+                    "description": "EFO or CL Ontology ID (required if free text for cell culture is not provided)",
                     "type": "string"
                 },
                 "cellCultureFreeText": {
@@ -443,7 +443,7 @@
                 },
                 "engineeredEquivalentCellType": {
                     "title": "Engineered Equivalent Cell Type",
-                    "description": "EFO ID (required if free text for engineered equivalent cell type is not provided)",
+                    "description": "EFO or CL Ontology ID (required if free text for engineered equivalent cell type is not provided)",
                     "type": "string"
                 },
                 "engineeredEquivalentCellTypeFreeText": {
