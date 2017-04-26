@@ -1839,7 +1839,7 @@ var TypeExpression = function() {
                 Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
                 for a <a href="http://www.ebi.ac.uk/ols/ontologies/uberon" target="_blank">Uberon</a> term.
             </p>
-            <Input type="text" ref="organOfTissue" label={<LabelUberonId />}
+            <Input type="text" ref="organOfTissue" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228" inputDisabled={this.cv.othersAssessed}
@@ -1860,13 +1860,6 @@ var TypeExpression = function() {
         </div>
     );
 };
-
-// HTML labels for Expression panel.
-var LabelUberonId = React.createClass({
-    render: function() {
-        return <span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(<a href={external_url_map['Uberon']} target="_blank" title="Open Uberon in a new tab">Uberon</a> ID)</span>:</span>;
-    }
-});
 
 var TypeExpressionA = function() {
     let experimental = this.state.experimental ? this.state.experimental : {};
@@ -1967,7 +1960,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
                         for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
                     </p>
-                    <Input type="textarea" ref="funcalt.patientCellType" label={<LabelFAPatientCellType />}
+                    <Input type="textarea" ref="funcalt.patientCellType" label={<span>Patient cell type <span className="normal">(CL Ontology ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={FA_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
@@ -1988,18 +1981,18 @@ var TypeFunctionalAlteration = function(uniprotId) {
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
                         for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
                     </p>
-                    <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<LabelFAEngineeredEquivalent />}
+                    <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CLO ID)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={FA_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationEECT_FreeText}
-                        customErrorMsg="Enter EFO ID and/or free text" />
+                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
                     <Input type="textarea" ref="funcalt.engineeredEquivalentCellTypeFreeText" label={<span>Engineered equivalent cell type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellTypeFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={FA_engineeredEquivalentCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
                         handleChange={this.handleChange} required={!this.state.functionalAlterationEECT_EfoId}
-                        customErrorMsg="Enter EFO ID and/or free text" />
+                        customErrorMsg="EEnter EFO or CLO ID, and/or free text" />
                 </div>
             : null}
             {curator.renderWarning('GO')}
@@ -2037,18 +2030,6 @@ var TypeFunctionalAlteration = function(uniprotId) {
         </div>
     );
 };
-
-// HTML labels for Functional Alterations panel.
-var LabelFAPatientCellType = React.createClass({
-    render: function() {
-        return <span>Patient cell type <span className="normal">(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
-    }
-});
-var LabelFAEngineeredEquivalent = React.createClass({
-    render: function() {
-        return <span>Engineered equivalent cell type/line <span className="normal">(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
-    }
-});
 
 // Model Systems type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
@@ -2120,18 +2101,18 @@ var TypeModelSystems = function() {
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
                         for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
                     </p>
-                    <Input type="textarea" ref="cellCulture" label={<LabelCellCulture />}
+                    <Input type="textarea" ref="cellCulture" label={<span>Cell-culture type/line <span className="normal">(EFO or CLO ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
-                        customErrorMsg="Enter EFO ID and/or free text" />
+                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
                     <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('cellCultureFreeText')} clearError={this.clrFormErrors.bind(null, 'cellCultureFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={MS_cellCultureFreeText} inputDisabled={this.cv.othersAssessed} row="2"
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_EfoId}
-                        customErrorMsg="Enter EFO ID and/or free text" />
+                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
                 </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -2175,12 +2156,6 @@ var TypeModelSystems = function() {
     );
 };
 
-// HTML labels for Model Systems panel.
-var LabelCellCulture = React.createClass({
-    render: function() {
-        return <span>Cell-culture type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
-    }
-});
 var LabelPhenotypeObserved = React.createClass({
     render: function() {
         return <span>Phenotype(s) observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
@@ -2233,7 +2208,7 @@ var TypeRescue = function() {
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
                         ffor a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
                     </p>
-                    <Input type="textarea" ref="rescue.patientCellType" label={<LabelRPatientCellType />}
+                    <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL Ontology ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={RES_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
@@ -2254,18 +2229,18 @@ var TypeRescue = function() {
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
                         for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
                     </p>
-                    <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<LabelREngineeredEquivalent />}
+                    <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CLO ID)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={RES_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescueEECT_FreeText}
-                        customErrorMsg="Enter EFO ID and/or free text" />
+                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
                     <Input type="textarea" ref="rescue.engineeredEquivalentCellTypeFreeText" label={<span>Engineered equivalent cell type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellTypeFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={RES_engineeredEquivalentCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
                         handleChange={this.handleChange} required={!this.state.rescueEECT_EfoId}
-                        customErrorMsg="Enter EFO ID and/or free text" />
+                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
                 </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -2310,17 +2285,6 @@ var TypeRescue = function() {
     );
 };
 
-// HTML labels for Rescue panel
-var LabelRPatientCellType = React.createClass({
-    render: function() {
-        return <span>Patient cell type <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['CL']} target="_blank" title="Open CL Ontology Browser in a new tab">CL Ontology</a> ID)</span>:</span>;
-    }
-});
-var LabelREngineeredEquivalent = React.createClass({
-    render: function() {
-        return <span>Engineered equivalent cell type/line <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['EFO']} target="_blank" title="Open EFO Browser in a new tab">EFO</a> ID)</span>:</span>;
-    }
-});
 var LabelPhenotypeRescue = React.createClass({
     render: function() {
         return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
