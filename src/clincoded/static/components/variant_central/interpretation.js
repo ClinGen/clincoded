@@ -39,12 +39,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblHgvsVEP: React.PropTypes.array,
         ext_clinvarEutils: React.PropTypes.object,
         ext_clinVarEsearch: React.PropTypes.object,
+        ext_clinVarSCV: React.PropTypes.array,
         ext_clinvarInterpretationSummary: React.PropTypes.object,
         ext_ensemblGeneId: React.PropTypes.string,
         ext_geneSynonyms: React.PropTypes.array,
         ext_singleNucleotide: React.PropTypes.bool,
         loading_clinvarEutils: React.PropTypes.bool,
         loading_clinvarEsearch: React.PropTypes.bool,
+        loading_clinvarSCV: React.PropTypes.bool,
         loading_ensemblHgvsVEP: React.PropTypes.bool,
         loading_ensemblVariation: React.PropTypes.bool,
         loading_myVariantInfo: React.PropTypes.bool,
@@ -65,12 +67,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
             ext_clinVarEsearch: this.props.ext_clinVarEsearch,
+            ext_clinVarSCV: this.props.ext_clinVarSCV,
             ext_clinvarInterpretationSummary: this.props.ext_clinvarInterpretationSummary,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_clinvarEutils: this.props.loading_clinvarEutils,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch,
+            loading_clinvarSCV: this.props.loading_clinvarSCV,
             loading_ensemblHgvsVEP: this.props.loading_ensemblHgvsVEP,
             loading_ensemblVariation: this.props.loading_ensemblVariation,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
@@ -106,6 +110,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_clinVarEsearch) {
             this.setState({ext_clinVarEsearch: nextProps.ext_clinVarEsearch});
         }
+        if (nextProps.ext_clinVarSCV) {
+            this.setState({ext_clinVarSCV: nextProps.ext_clinVarSCV});
+        }
         if (nextProps.ext_clinvarInterpretationSummary) {
             this.setState({ext_clinvarInterpretationSummary: nextProps.ext_clinvarInterpretationSummary});
         }
@@ -126,7 +133,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_ensemblVariation: nextProps.loading_ensemblVariation,
             loading_ensemblHgvsVEP: nextProps.loading_ensemblHgvsVEP,
             loading_clinvarEutils: nextProps.loading_clinvarEutils,
-            loading_clinvarEsearch: nextProps.loading_clinvarEsearch
+            loading_clinvarEsearch: nextProps.loading_clinvarEsearch,
+            loading_clinvarSCV: nextProps.loading_clinvarSCV
         });
     },
 
@@ -169,8 +177,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
+                            ext_clinVarSCV={this.state.ext_clinVarSCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
+                            loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP} />
                     </div>
                     : null}
