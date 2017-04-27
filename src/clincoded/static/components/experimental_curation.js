@@ -1948,7 +1948,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
     }
     return (
         <div className="row form-row-helper">
-            <Input type="select" ref="cellMutationOrEngineeredEquivalent" label="Patient cells with candidate mutation or engineered equivalent?:"
+            <Input type="select" ref="cellMutationOrEngineeredEquivalent" label="Candidate mutation in patient cells or non-patient cells?:"
                 error={this.getFormError('cellMutationOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'cellMutationOrEngineeredEquivalent')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 defaultValue="none" value={FA_cellMutationOrEngineeredEquivalent} handleChange={this.handleChange}
@@ -1956,7 +1956,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Patient cells">Patient cells</option>
-                <option value="Engineered equivalent">Engineered equivalent</option>
+                <option value="Engineered equivalent">Non-patient cells</option>
             </Input>
             {this.state.functionalAlterationPCEE === 'Patient cells' ?
                 <div>
@@ -2070,7 +2070,7 @@ var TypeModelSystems = function() {
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Animal model">Animal model</option>
-                <option value="Engineered equivalent">Engineered equivalent</option>
+                <option value="Engineered equivalent">Cell-culture model</option>
             </Input>
             {this.state.modelSystemsNHACCM === 'Animal model' ?
                 <div>
