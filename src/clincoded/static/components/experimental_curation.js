@@ -1633,6 +1633,7 @@ var TypeBiochemicalFunction = function(uniprotId) {
                 error={this.getFormError('identifiedFunctionFreeText')} clearError={this.clrFormErrors.bind(null, 'identifiedFunctionFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={BF_identifiedFunctionFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                 handleChange={this.handleChange} required={!this.state.bioChemicalFunctionIF_GoId}
                 customErrorMsg="Enter GO ID and/or free text" />
             <Input type="textarea" ref="evidenceForFunction" label="Evidence for above function:"
@@ -1840,7 +1841,7 @@ var TypeExpression = function() {
             {curator.renderWarning('UBERON')}
             <p className="col-sm-7 col-sm-offset-5">
                 Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                for a <a href="http://www.ebi.ac.uk/ols/ontologies/uberon" target="_blank">Uberon</a> term.
+                for an <a href="http://www.ebi.ac.uk/ols/ontologies/uberon" target="_blank">Uberon</a> term.
             </p>
             <Input type="text" ref="organOfTissue" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
@@ -1852,6 +1853,7 @@ var TypeExpression = function() {
                 error={this.getFormError('organOfTissueFreeText')} clearError={this.clrFormErrors.bind(null, 'organOfTissueFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={EXP_organOfTissueFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                 handleChange={this.handleChange} required={!this.state.expressionOT_UberonId}
                 customErrorMsg="Enter Uberon ID and/or free text" />
             {this.state.experimentalSubtype == 'A. Gene normally expressed in tissue relevant to the disease' ?
@@ -1958,44 +1960,46 @@ var TypeFunctionalAlteration = function(uniprotId) {
             </Input>
             {this.state.functionalAlterationPCEE === 'Patient cells' ?
                 <div>
-                    {curator.renderWarning('CLO_EFO')}
+                    {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
+                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
                     </p>
-                    <Input type="textarea" ref="funcalt.patientCellType" label={<span>Patient cell type <span className="normal">(CL Ontology ID)</span>:</span>}
+                    <Input type="textarea" ref="funcalt.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={FA_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationPCT_FreeText}
-                        customErrorMsg="Enter CL Ontology ID and/or free text" />
+                        customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="funcalt.patientCellTypeFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('funcalt.patientCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellTypeFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={FA_patientCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                         handleChange={this.handleChange} required={!this.state.functionalAlterationPCT_ClId}
-                        customErrorMsg="Enter CL Ontology ID and/or free text" />
+                        customErrorMsg="Enter CL ID and/or free text" />
                 </div>
             : null}
             {this.state.functionalAlterationPCEE === 'Engineered equivalent' ?
                 <div>
-                    {curator.renderWarning('CLO_EFO')}
+                    {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
+                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
                     </p>
-                    <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CLO ID)</span>:</span>}
+                    <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={FA_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationEECT_FreeText}
-                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
+                        customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="funcalt.engineeredEquivalentCellTypeFreeText" label={<span>Engineered equivalent cell type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellTypeFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={FA_engineeredEquivalentCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                         handleChange={this.handleChange} required={!this.state.functionalAlterationEECT_EfoId}
-                        customErrorMsg="EEnter EFO or CLO ID, and/or free text" />
+                        customErrorMsg="EEnter EFO or CL ID, and/or free text" />
                 </div>
             : null}
             {curator.renderWarning('GO')}
@@ -2016,6 +2020,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 error={this.getFormError('normalFunctionOfGeneFreeText')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGeneFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" row="2"
                 value={FA_normalFunctionOfGeneFreeText} inputDisabled={this.cv.othersAssessed}
+                placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                 handleChange={this.handleChange} required={!this.state.functionalAlterationNFG_GoId}
                 customErrorMsg="Enter GO ID and/or free text" />
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -2099,23 +2104,24 @@ var TypeModelSystems = function() {
             : null}
             {this.state.modelSystemsNHACCM === 'Engineered equivalent' ?
                 <div>
-                    {curator.renderWarning('CLO_EFO')}
+                    {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
+                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
                     </p>
-                    <Input type="textarea" ref="cellCulture" label={<span>Cell-culture type/line <span className="normal">(EFO or CLO ID)</span>:</span>}
+                    <Input type="textarea" ref="cellCulture" label={<span>Cell-culture type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
-                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
+                        customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('cellCultureFreeText')} clearError={this.clrFormErrors.bind(null, 'cellCultureFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={MS_cellCultureFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_EfoId}
-                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
+                        customErrorMsg="Enter EFO or CL ID, and/or free text" />
                 </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -2133,6 +2139,7 @@ var TypeModelSystems = function() {
                 error={this.getFormError('phenotypeFreetextObserved')} clearError={this.clrFormErrors.bind(null, 'phenotypeFreetextObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="2" value={MS_phenotypeFreetextObserved} handleChange={this.handleChange}
+                placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                 inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPOMSHPO}
                 customErrorMsg="Enter HPO ID(s) and/or free text" />
             <Input type="textarea" ref="model.phenotypeHPO" label={<LabelPatientPhenotype />} rows="1"
@@ -2145,6 +2152,7 @@ var TypeModelSystems = function() {
                 error={this.getFormError('model.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="2" value={MS_phenotypeFreeText} handleChange={this.handleChange}
+                placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                 inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPPHPO}
                 customErrorMsg="Enter HPO ID(s) and/or free text" />
             <Input type="textarea" ref="explanation" label="Explanation of how model system phenotype is similar to phenotype observed in humans:"
@@ -2206,44 +2214,46 @@ var TypeRescue = function() {
             </Input>
             {this.state.rescuePCEE === 'Patient cells' ?
                 <div>
-                    {curator.renderWarning('CLO_EFO')}
+                    {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
+                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
                     </p>
-                    <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL Ontology ID)</span>:</span>}
+                    <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={RES_patientCellType} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescuePCT_FreeText}
-                        customErrorMsg="Enter CL Ontology ID and/or free text" />
+                        customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="rescue.patientCellTypeFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('rescue.patientCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellTypeFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={RES_patientCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                         handleChange={this.handleChange} required={!this.state.rescuePCT_ClId}
-                        customErrorMsg="Enter CL Ontology ID and/or free text" />
+                        customErrorMsg="Enter CL ID and/or free text" />
                 </div>
             : null}
             {this.state.rescuePCEE === 'Engineered equivalent' ?
                 <div>
-                    {curator.renderWarning('CLO_EFO')}
+                    {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">CLO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> term.
+                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
                     </p>
-                    <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CLO ID)</span>:</span>}
+                    <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={RES_engineeredEquivalentCellType} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescueEECT_FreeText}
-                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
+                        customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="rescue.engineeredEquivalentCellTypeFreeText" label={<span>Engineered equivalent cell type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellTypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellTypeFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={RES_engineeredEquivalentCellTypeFreeText} inputDisabled={this.cv.othersAssessed} row="2"
+                        placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                         handleChange={this.handleChange} required={!this.state.rescueEECT_EfoId}
-                        customErrorMsg="Enter EFO or CLO ID, and/or free text" />
+                        customErrorMsg="Enter EFO or CL ID, and/or free text" />
                 </div>
             : null}
             <Input type="textarea" ref="descriptionOfGeneAlteration" label="Description of gene alteration:"
@@ -2261,6 +2271,7 @@ var TypeRescue = function() {
                 error={this.getFormError('rescue.phenotypeFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.phenotypeFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="2" value={RES_phenotypeFreeText} handleChange={this.handleChange}
+                placeholder="Use free text descriptions only after verifying no appropriate ontology term exists"
                 inputDisabled={this.cv.othersAssessed} required={!this.state.rescuePRHPO}
                 customErrorMsg="Enter HPO ID(s) and/or free text" />
             <Input type="textarea" ref="rescueMethod" label="Description of method used to rescue:"
