@@ -26,7 +26,7 @@ Feature: Select Variant
         Then I should see "NC_000015"
         When I press the button "Save and View Evidence"
         And I wait for 2 seconds
-        Then I should see "RCV000359576"
+        Then I should see "NM_005902.3:c.-28C>T"
         When I press the button "Interpretation "
         And I wait for 1 seconds
         Then I should see "Variant Interpretation Record"
