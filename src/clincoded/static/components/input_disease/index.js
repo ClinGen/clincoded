@@ -430,16 +430,16 @@ function queryResourceById(diseaseTermType) {
         let url;
         switch(diseaseTermType) {
             case 'orphanetid':
-                url = 'http://www.ebi.ac.uk/ols/api/ontologies/ordo/terms?iri=http://www.orpha.net/ORDO/Orphanet_';
+                url = 'https://www.ebi.ac.uk/ols/api/ontologies/ordo/terms?iri=http://www.orpha.net/ORDO/Orphanet_';
                 break;
             case 'doid':
-                url = 'http://www.ebi.ac.uk/ols/api/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_';
+                url = 'https://www.ebi.ac.uk/ols/api/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_';
                 break;
             case 'omimid':
-                url = 'http://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/OMIM_';
+                url = 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/OMIM_';
                 break;
             case 'ncitid':
-                url = 'http://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/NCIT_C';
+                url = 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/NCIT_C';
                 break;
         }
         // Make the API call
