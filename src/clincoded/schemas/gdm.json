@@ -24,10 +24,44 @@
             "linkTo": "gene"
         },
         "disease": {
-            "title": "Orpha ID",
-            "description": "Unique id for Orphanet phenotypes.",
+            "title": "Disease Term",
+            "description": "Unique id (Orphanet, DO, OMIM or NCit) or free text.",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "default": ""
+        },
+        "diseaseType": {
+            "title": "Source of the obtained disease term",
+            "description": "Orphanet, DO, OMIM, NCit or free text.",
+            "type": "string",
+             "enum": [
+                "Orphanet",
+                "DOID",
+                "OMIM",
+                "NCIT"
+            ]
+        },
+        "diseaseName": {
+            "title": "Disease name or label",
+            "description": "Name or label for the obtained disease term.",
+            "type": "string",
+            "default": ""
+        },
+        "diseaseDescription": {
+            "title": "Disease description",
+            "description": "Text description for the obtained disease term.",
+            "type": "string",
+            "default": ""
+        },
+        "phenotypes": {
+            "title": "Phenotype(s)",
+            "description": "List of Phenotypes (HPO IDs) for the disease",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "HPO ID",
+                "description": "HPO ID",
+                "type": "string"
+            }
         },
         "modeInheritance": {
             "title": "Mode",
