@@ -1962,8 +1962,8 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
+                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
+                        the OLS (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="funcalt.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
@@ -1984,8 +1984,8 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
+                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
+                        the OLS (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
@@ -2106,8 +2106,8 @@ var TypeModelSystems = function() {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
+                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
+                        the OLS (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="cellCulture" label={<span>Cell-culture type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
@@ -2216,8 +2216,8 @@ var TypeRescue = function() {
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
+                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
+                        the OLS (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
@@ -2238,8 +2238,8 @@ var TypeRescue = function() {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                        for a <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> term.
+                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
+                        the OLS (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
@@ -2789,7 +2789,7 @@ var ExperimentalViewer = React.createClass({
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
-                                    <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
+                                    <dd>{experimental.expression.organOfTissue ? <a href={'http://www.ebi.ac.uk/ols/ontologies/uberon/terms?iri=http://purl.obolibrary.org/obo/UBERON_' + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
                                 </div>
 
                                 <div>
