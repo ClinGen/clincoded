@@ -27,7 +27,7 @@
             "title": "Disease Term",
             "description": "Unique id (Orphanet, DO, OMIM or NCit) or free text.",
             "type": "string",
-            "default": ""
+            "linkTo": "orphaPhenotype"
         },
         "diseaseType": {
             "title": "Source of the obtained disease term",
