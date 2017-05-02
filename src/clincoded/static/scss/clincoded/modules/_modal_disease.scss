@@ -1,0 +1,71 @@
+.add-disease-modal {
+    .modal-body {
+        font-size: 14px;
+
+        .row {
+            margin: 0;
+
+            .form-group {
+                margin: 0;
+
+                label {
+                    text-align: left;
+                }
+
+                &.disease-id-input {
+                    margin: 15px 0 0 0;
+
+                    input {
+                        float: none;
+                    }
+
+                    .resource-metadata {
+                        margin: 15px 15px 0 15px;
+                        white-space: normal;
+
+                        .panel {
+                            border-radius: 4px;
+
+                            .p-break {
+                                font-weight: normal;
+                            }
+
+                            .disease-label {
+                                font-weight: bold;
+                            }
+                        }
+                    }
+
+                    .btn-query-ols {
+                        margin-right: 15px;
+                        margin-top: 0;
+                    }
+                }
+
+                &.disease-freetext-input {
+                    margin: 15px 0 0 0;
+
+                    input {
+                        float: none;
+                    }
+
+                    .disease-freetext-confirm,
+                    .disease-freetext-desc,
+                    .disease-freetext-phenotypes {
+                        white-space: normal;
+
+                        label {
+                            padding-top: 0;
+                        }
+                    }
+
+                    .disease-freetext-desc,
+                    .disease-freetext-phenotypes {
+                        margin-top: 15px;
+                    }
+                }
+            }
+
+        }
+    }
+}
