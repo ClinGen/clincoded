@@ -219,6 +219,11 @@ var Input = module.exports.Input = React.createClass({
             React.PropTypes.string,
             React.PropTypes.object
         ]),
+        hasModal: React.PropTypes.bool,
+        inputGroupBtn: React.PropTypes.oneOfType([ // <button> for input-group
+            React.PropTypes.string,
+            React.PropTypes.object
+        ]),
         placeholder: React.PropTypes.string, // <input> placeholder text
         maxLength: React.PropTypes.string, // maxlength for labels
         error: React.PropTypes.string, // Error message to display below input
@@ -280,6 +285,9 @@ var Input = module.exports.Input = React.createClass({
         } else if (this.props.type === 'checkbox') {
             ReactDOM.findDOMNode(this.refs.input).checked = val;
             this.setState({value: val});
+        } else if (this.props.type === 'input-group') {
+            ReactDOM.findDOMNode(this.refs.targetInput).value = val;
+            this.setState({value: val});
         }
     },
 
@@ -290,6 +298,8 @@ var Input = module.exports.Input = React.createClass({
             this.resetSelectedOption();
         } else if (this.props.type === 'checkbox') {
             this.resetSelectedCheckbox();
+        } else if (this.props.type === 'input-group') {
+            ReactDOM.findDOMNode(this.refs.targetInput).value = '';
         }
     },
 
@@ -461,6 +471,33 @@ var Input = module.exports.Input = React.createClass({
                     <span className={this.props.wrapperClassName}>
                         <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}>{title}</button>
                     </span>
+                );
+                break;
+
+            case 'input-group':
+                inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
+                var innerInput = (
+                    <span>
+                        <div className="input-group">
+                            <input className={inputClasses} type="text" id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
+                                ref="targetInput" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur}
+                                maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                            <span className="input-group-btn">
+                                {this.props.hasModal ?
+                                    this.props.inputGroupBtn
+                                    :
+                                    <button className="btn btn-default" type="button" id={'input-group-btn-' + this.props.id}>{this.props.inputGroupBtn}</button>
+                                }
+                            </span>
+                        </div>
+                        <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
+                    </span>
+                );
+                input = (
+                    <div className={this.props.groupClassName}>
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
+                        {this.props.wrapperClassName ? <div className={this.props.wrapperClassName}>{innerInput}</div> : <span>{innerInput}</span>}
+                    </div>
                 );
                 break;
 
