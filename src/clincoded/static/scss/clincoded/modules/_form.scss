@@ -291,3 +291,14 @@ select {
     display: inline-block;
     width: 35%;
 }
+
+.input-group {
+    .input-group-btn {
+        .btn {
+            .icon {
+                font-size: 16px;
+                margin-top: 1px;
+            }
+        }
+    }
+}
