@@ -2078,7 +2078,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                     <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
                         terms wherever possible (e.g. HP:0010704, HP:0030300). If you are unable to find an appropriate HPO term, use the free text box instead.
-                        Please email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null }
@@ -2148,7 +2148,7 @@ export function renderWarning(context) {
                     <p>
                         Please enter the gene's molecular function or biological process term  <strong>(required)</strong> using the Gene Ontology (GO)
                         term wherever possible (e.g. GO:0008150). If you are unable to find an appropriate GO term, use the free text box instead.
-                        Please email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null }
@@ -2157,7 +2157,7 @@ export function renderWarning(context) {
                     <p>
                         Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
                         (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
-                        Please email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null}
@@ -2166,7 +2166,7 @@ export function renderWarning(context) {
                     <p>
                         Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
                         If you are unable to find an appropriate CL term, use the free text box instead.
-                        Please email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null}
@@ -2175,7 +2175,7 @@ export function renderWarning(context) {
                     <p>
                         Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
                         (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
-                        Please email <a href="mail:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null}
