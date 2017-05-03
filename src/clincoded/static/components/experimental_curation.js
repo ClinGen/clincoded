@@ -580,10 +580,10 @@ var ExperimentalCuration = React.createClass({
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     let rescue = stateObj.experimental.rescue;
                     this.setState({rescuePCEE: rescue.patientCellOrEngineeredEquivalent});
-                    if (rescue.wildTypeRescuePhenotype && rescue.wildTypeRescuePhenotype.length) {
+                    if (rescue.wildTypeRescuePhenotype) {
                         this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
                     }
-                    if (rescue.patientVariantRescue && rescue.patientVariantRescue.length) {
+                    if (rescue.patientVariantRescue) {
                         this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
                     }
                     rescue.phenotypeHPO && rescue.phenotypeHPO.length ?
