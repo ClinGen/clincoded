@@ -1619,7 +1619,7 @@ var TypeBiochemicalFunction = function(uniprotId) {
             <div className="col-sm-7 col-sm-offset-5">
                 <ul className="gene-ontology help-text style-list">
                     <li>View <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt.</li>
-                    <li>Search for a GO using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service).</li>
+                    <li>Search for a GO using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
                     <li>Search for existing or new terms using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a></li>
                 </ul>
             </div>
@@ -1840,8 +1840,8 @@ var TypeExpression = function() {
         <div className="row form-row-helper">
             {curator.renderWarning('UBERON')}
             <p className="col-sm-7 col-sm-offset-5">
-                Search the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service)
-                for an <a href="http://www.ebi.ac.uk/ols/ontologies/uberon" target="_blank">Uberon</a> term.
+                Search the <a href={external_url_map['Uberon']} target="_blank">Uberon</a> using
+                the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
             </p>
             <Input type="text" ref="organOfTissue" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
@@ -1962,8 +1962,8 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
-                        the OLS (Ontology Lookup Service).
+                        Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
+                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="funcalt.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
@@ -1984,8 +1984,8 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
-                        the OLS (Ontology Lookup Service).
+                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
+                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
@@ -2006,7 +2006,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
             <div className="col-sm-7 col-sm-offset-5">
                 <ul className="gene-ontology help-text style-list">
                     <li>View <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt.</li>
-                    <li>Search for a GO using the <a href="http://www.ebi.ac.uk/ols/index" target="_blank">OLS</a> (Ontology Lookup Service).</li>
+                    <li>Search for a GO using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
                     <li>Search for existing or new terms using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a></li>
                 </ul>
             </div>
@@ -2106,8 +2106,8 @@ var TypeModelSystems = function() {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
-                        the OLS (Ontology Lookup Service).
+                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
+                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="cellCulture" label={<span>Cell-culture type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
@@ -2216,8 +2216,8 @@ var TypeRescue = function() {
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
-                        the OLS (Ontology Lookup Service).
+                        Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
+                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
@@ -2238,8 +2238,8 @@ var TypeRescue = function() {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href="http://www.ebi.ac.uk/ols/ontologies/efo" target="_blank">EFO</a> or <a href="http://www.ebi.ac.uk/ols/ontologies/cl" target="_blank">Cell Ontology (CL)</a> using
-                        the OLS (Ontology Lookup Service).
+                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
+                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
                     </p>
                     <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
@@ -2612,6 +2612,16 @@ var ExperimentalViewer = React.createClass({
         }
     },
 
+    handleSearchLinkById(id) {
+        let searchURL;
+        if (id.indexOf('EFO_') > -1) {
+            searchURL = external_url_map['EFOSearch'];
+        } else if (id.indexOf('CL_') > -1) {
+            searchURL = external_url_map['CLSearch'];
+        }
+        return searchURL;
+    },
+
     render: function() {
         var experimental = this.props.context;
         /****************************************/
@@ -2789,7 +2799,7 @@ var ExperimentalViewer = React.createClass({
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
-                                    <dd>{experimental.expression.organOfTissue ? <a href={'http://www.ebi.ac.uk/ols/ontologies/uberon/terms?iri=http://purl.obolibrary.org/obo/UBERON_' + experimental.expression.organOfTissue} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
+                                    <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue.replace(':', '_')} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
                                 </div>
 
                                 <div>
@@ -2849,27 +2859,25 @@ var ExperimentalViewer = React.createClass({
 
                                 {experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells' ?
                                     <div>
-                                        <div>
-                                            <dt>Patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
-                                        </div>
+                                        <dt>Patient cell type</dt>
+                                        <dd>{experimental.functionalAlteration.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCellType} title={"CL entry for " + experimental.functionalAlteration.patientCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCellType}</a> : null}</dd>
+                                    </div>
+                                    :
+                                    <div>
+                                        <dt>Engineered cell type</dt>
+                                        <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.engineeredEquivalentCellType) + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
+                                    </div>
+                                }
 
-                                        <div>
-                                            <dt>Patient cell type (free text)</dt>
-                                            <dd>{experimental.functionalAlteration.patientCellTypeFreeText ? experimental.functionalAlteration.patientCellTypeFreeText : null}</dd>
-                                        </div>
+                                {experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells' ?
+                                    <div>
+                                        <dt>Patient cell type (free text)</dt>
+                                        <dd>{experimental.functionalAlteration.patientCellTypeFreeText ? experimental.functionalAlteration.patientCellTypeFreeText : null}</dd>
                                     </div>
                                 :
                                     <div>
-                                        <div>
-                                            <dt>Engineered cell type</dt>
-                                            <dd>{experimental.functionalAlteration.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.functionalAlteration.engineeredEquivalentCellType} title={"EFO entry for " + experimental.functionalAlteration.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.functionalAlteration.engineeredEquivalentCellType}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Engineered cell type (free text)</dt>
-                                            <dd>{experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText ? experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText : null}</dd>
-                                        </div>
+                                        <dt>Engineered cell type (free text)</dt>
+                                        <dd>{experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText ? experimental.functionalAlteration.engineeredEquivalentCellTypeFreeText : null}</dd>
                                     </div>
                                 }
 
@@ -2915,17 +2923,17 @@ var ExperimentalViewer = React.createClass({
                                     </div>
                                 :
                                     <div>
-                                        <div>
-                                            <dt>Cell-culture type/line</dt>
-                                            <dd>{experimental.modelSystems.cellCulture ? <a href={external_url_map['EFO'] + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Cell-culture type/line (free text)</dt>
-                                            <dd>{experimental.modelSystems.cellCultureFreeText ? experimental.modelSystems.cellCultureFreeText : null}</dd>
-                                        </div>
+                                        <dt>Cell-culture type/line</dt>
+                                        <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
                                     </div>
                                 }
+
+                                {experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent' ?
+                                    <div>
+                                        <dt>Cell-culture type/line (free text)</dt>
+                                        <dd>{experimental.modelSystems.cellCultureFreeText ? experimental.modelSystems.cellCultureFreeText : null}</dd>
+                                    </div>
+                                : null}
 
                                 <div>
                                     <dt>Description of gene alteration</dt>
@@ -2974,27 +2982,25 @@ var ExperimentalViewer = React.createClass({
 
                                 {experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells' ?
                                     <div>
-                                        <div>
-                                            <dt>Patient cell type</dt>
-                                            <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
-                                        </div>
-
-                                        <div>
-                                            <dt>Patient cell type (free text)</dt>
-                                            <dd>{experimental.rescue.patientCellTypeFreeText ? experimental.rescue.patientCellTypeFreeText : null}</dd>
-                                        </div>
+                                        <dt>Patient cell type</dt>
+                                        <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
                                     </div>
                                 :
                                     <div>
-                                        <div>
-                                            <dt>Engineered equivalent cell type</dt>
-                                            <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={external_url_map['EFO'] + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
-                                        </div>
+                                        <dt>Engineered equivalent cell type</dt>
+                                        <dd>{experimental.rescue.engineeredEquivalentCellType ? <a href={this.handleSearchLinkById(experimental.rescue.engineeredEquivalentCellType) + experimental.rescue.engineeredEquivalentCellType} title={"EFO entry for " + experimental.rescue.engineeredEquivalentCellType + " in new tab"} target="_blank">{experimental.rescue.engineeredEquivalentCellType}</a> : null}</dd>
+                                    </div>
+                                }
 
-                                        <div>
-                                            <dt>Engineered equivalent cell type (free text)</dt>
-                                            <dd>{experimental.rescue.engineeredEquivalentCellTypeFreeText ? experimental.rescue.engineeredEquivalentCellTypeFreeText : null}</dd>
-                                        </div>
+                                {experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells' ?
+                                    <div>
+                                        <dt>Patient cell type (free text)</dt>
+                                        <dd>{experimental.rescue.patientCellTypeFreeText ? experimental.rescue.patientCellTypeFreeText : null}</dd>
+                                    </div>
+                                :
+                                    <div>
+                                        <dt>Engineered equivalent cell type (free text)</dt>
+                                        <dd>{experimental.rescue.engineeredEquivalentCellTypeFreeText ? experimental.rescue.engineeredEquivalentCellTypeFreeText : null}</dd>
                                     </div>
                                 }
 
