@@ -54,7 +54,8 @@ export default class ModalComponent extends React.Component {
         return (
             <div className={this.props.modalWrapperClass}>
                 {this.props.actuatorTitle ?
-                    <a className={"btn btn-default " + this.props.actuatorClass} onClick={() => this.openModal()}>{this.props.actuatorTitle}</a>
+                    <a className={this.props.bootstrapBtnClass ? this.props.bootstrapBtnClass + this.props.actuatorClass : "btn btn-default " + this.props.actuatorClass}
+                        onClick={() => this.openModal()}>{this.props.actuatorTitle}</a>
                 : null}
                 <Modal isOpen={this.state.isModalOpen}>
                     {this.props.modalTitle ?
@@ -73,6 +74,7 @@ ModalComponent.propTypes = {
     modalTitle: React.PropTypes.string, // Title in modal's header
     modalClass: React.PropTypes.string, // CSS class for modal header
     modalWrapperClass: React.PropTypes.string, // CSS class for modal DOM wrapper
+    bootstrapBtnClass: React.PropTypes.string, // Bootstrap class for button (e.g. btn-default, btn-primary)
     actuatorClass: React.PropTypes.string, // CSS class for link/button to invoke modal
     actuatorTitle: React.PropTypes.oneOfType([ // Text for link/button to invoke modal
         React.PropTypes.object,
