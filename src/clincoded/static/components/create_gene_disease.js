@@ -17,7 +17,7 @@ var Input = form.Input;
 var Panel = panel.Panel;
 
 import ModalComponent from '../libs/bootstrap/modal';
-import { InputDisease } from './input_disease';
+import { AddDisease } from './disease';
 
 var CreateGeneDisease = React.createClass({
     mixins: [FormMixin, RestMixin, CuratorHistory],
@@ -32,11 +32,8 @@ var CreateGeneDisease = React.createClass({
             gdm: {},
             hgncgene: '',
             orphanetid: '',
-            diseaseTerm: '',
-            diseaseTermType: 'none',
-            diseaseName: '',
-            diseaseDescription: '',
-            phenotypes: '',
+            diseaseObj: {},
+            diseaseError: null,
             adjectives: [],
             adjectiveDisabled: true
         };
@@ -181,14 +178,11 @@ var CreateGeneDisease = React.createClass({
         this.child.closeModal();
     },
 
-    updateGdmDiseaseInput(diseaseObj) {
-        this.setState({
-            diseaseTerm: diseaseObj.diseaseTerm,
-            diseaseTermType: diseaseObj.diseaseTermType,
-            diseaseName: diseaseObj.diseaseName,
-            diseaseDescription: diseaseObj.diseaseDescription,
-            phenotypes: diseaseObj.phenotypes
-        });
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj});
     },
 
     render: function() {
@@ -198,11 +192,6 @@ var CreateGeneDisease = React.createClass({
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
         let gdm = this.state.gdm;
-        let diseaseTerm = gdm && gdm.disease ? gdm.disease : this.state.diseaseTerm;
-        let diseaseTermType = gdm && gdm.diseaseType ? gdm.diseaseType : this.state.diseaseTermType;
-        let diseaseName = gdm && gdm.diseaseName ? gdm.diseaseName : this.state.diseaseName;
-        let diseaseDescription = gdm && gdm.diseaseDescription ? gdm.diseaseDescription : this.state.diseaseDescription;
-        let phenotypes = gdm && gdm.phenotypes ? gdm.phenotypes : this.state.phenotypes;
 
         return (
             <div className="container">
@@ -214,15 +203,7 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <InputDisease
-                                    ref="diseaseInput"
-                                    diseaseTerm={diseaseTerm}
-                                    diseaseTermType={diseaseTermType}
-                                    diseaseName={diseaseName}
-                                    diseaseDescription={diseaseDescription}
-                                    phenotypes={phenotypes}
-                                    updateGdmDiseaseInput={this.updateGdmDiseaseInput}
-                                />
+                                <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} />
                                 <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
