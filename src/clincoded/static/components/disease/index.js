@@ -253,7 +253,9 @@ const AddDiseaseModal = React.createClass({
             resourceFetched: false,
             tempResource: {}
         }, () => {
-            this.refs[this.state.diseaseTermType].resetValue();
+            if (this.refs[this.state.diseaseTermType] && this.refs[this.state.diseaseTermType].getValue()) {
+                this.refs[this.state.diseaseTermType].resetValue();
+            }
         });
     },
 
@@ -426,7 +428,7 @@ const AddDiseaseModal = React.createClass({
                 <div className="form-std">
                     <div className="modal-body">
                         <div className="row">
-                            <Input type="select" ref="diseaseTermType" label="Select disease type:"
+                            <Input type="select" ref="diseaseTermType" label="Select disease terminology:"
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input"
                                 value={diseaseTermType} handleChange={this.handleDiseaseTermTypeChange}>
                                 <option value="none">No Selection</option>
