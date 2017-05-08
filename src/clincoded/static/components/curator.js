@@ -2147,7 +2147,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the gene's molecular function or biological process term  <strong>(required)</strong> using the Gene Ontology (GO)
-                        term wherever possible (e.g. GO:0008150). If you are unable to find an appropriate GO term, use the free text box instead.
+                        term wherever possible (e.g. GO:2001284). If you are unable to find an appropriate GO term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
