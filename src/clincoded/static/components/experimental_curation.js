@@ -1619,14 +1619,14 @@ var TypeBiochemicalFunction = function(uniprotId) {
             <div className="col-sm-7 col-sm-offset-5">
                 <ul className="gene-ontology help-text style-list">
                     <li>View <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt.</li>
-                    <li>Search for a GO using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
+                    <li>Search for a GO term using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
                     <li>Search for existing or new terms using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a></li>
                 </ul>
             </div>
             <Input type="text" ref="identifiedFunction" label={<span>Identified function of gene in this record <span className="normal">(GO ID)</span>:</span>}
                 error={this.getFormError('identifiedFunction')} clearError={this.clrFormErrors.bind(null, 'identifiedFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={BF_identifiedFunction} placeholder="e.g. GO:0008150" inputDisabled={this.cv.othersAssessed}
+                value={BF_identifiedFunction} placeholder="e.g. GO:2001284" inputDisabled={this.cv.othersAssessed}
                 handleChange={this.handleChange} required={!this.state.bioChemicalFunctionIF_FreeText}
                 customErrorMsg="Enter GO ID and/or free text" />
             <Input type="textarea" ref="identifiedFunctionFreeText" label={<span>Identified function of gene in this record <span className="normal">(free text)</span>:</span>}
@@ -2006,14 +2006,14 @@ var TypeFunctionalAlteration = function(uniprotId) {
             <div className="col-sm-7 col-sm-offset-5">
                 <ul className="gene-ontology help-text style-list">
                     <li>View <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt.</li>
-                    <li>Search for a GO using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
+                    <li>Search for a GO term using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
                     <li>Search for existing or new terms using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a></li>
                 </ul>
             </div>
             <Input type="text" ref="normalFunctionOfGene" label={<span>Normal function of gene/gene product <span className="normal">(GO ID)</span>:</span>}
                 error={this.getFormError('normalFunctionOfGene')} clearError={this.clrFormErrors.bind(null, 'normalFunctionOfGene')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={FA_normalFunctionOfGene} placeholder="e.g. GO:0006259" inputDisabled={this.cv.othersAssessed}
+                value={FA_normalFunctionOfGene} placeholder="e.g. GO:2001284" inputDisabled={this.cv.othersAssessed}
                 handleChange={this.handleChange} required={!this.state.functionalAlterationNFG_FreeText}
                 customErrorMsg="Enter GO ID and/or free text" />
             <Input type="textarea" ref="normalFunctionOfGeneFreeText" label={<span>Normal function of gene/gene product <span className="normal">(free text)</span>:</span>}
@@ -2678,7 +2678,7 @@ var ExperimentalViewer = React.createClass({
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Identified function of gene in this record</dt>
-                                    <dd>{experimental.biochemicalFunction.identifiedFunction ? <a href={external_url_map['QuickGoSearch'] + experimental.biochemicalFunction.identifiedFunction} title={"GO entry for " + experimental.biochemicalFunction.identifiedFunction + " in new tab"} target="_blank">{experimental.biochemicalFunction.identifiedFunction}</a> : null}</dd>
+                                    <dd>{experimental.biochemicalFunction.identifiedFunction ? <a href={external_url_map['GOSearch'] + experimental.biochemicalFunction.identifiedFunction.replace(':', '_')} title={"GO entry for " + experimental.biochemicalFunction.identifiedFunction + " in new tab"} target="_blank">{experimental.biochemicalFunction.identifiedFunction}</a> : null}</dd>
                                 </div>
 
                                 <div>
@@ -2888,7 +2888,7 @@ var ExperimentalViewer = React.createClass({
 
                                 <div>
                                     <dt>Normal function of gene</dt>
-                                    <dd>{experimental.functionalAlteration.normalFunctionOfGene ? <a href={external_url_map['QuickGoSearch'] + experimental.functionalAlteration.normalFunctionOfGene} title={"GO entry for " + experimental.functionalAlteration.normalFunctionOfGene + " in new tab"} target="_blank">{experimental.functionalAlteration.normalFunctionOfGene}</a> : null}</dd>
+                                    <dd>{experimental.functionalAlteration.normalFunctionOfGene ? <a href={external_url_map['GOSearch'] + experimental.functionalAlteration.normalFunctionOfGene.replace(':', '_')} title={"GO entry for " + experimental.functionalAlteration.normalFunctionOfGene + " in new tab"} target="_blank">{experimental.functionalAlteration.normalFunctionOfGene}</a> : null}</dd>
                                 </div>
 
                                 <div>
