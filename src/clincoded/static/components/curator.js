@@ -513,17 +513,18 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
-        var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var caseControlUrl = curatorMatch ? ('/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var experimentalUrl = curatorMatch ? ('/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var curatorMatch = false;
+        var groupUrl = '/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var familyUrl = '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var individualUrl = '/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var caseControlUrl = '/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var experimentalUrl = '/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
+                curatorMatch = group && userMatch(group.submitted_by, session);
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var familyGroupRenders = group.familyIncluded.map(family => {
@@ -553,6 +554,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of family renders the unassociated families, and individuals that associate with them.
         if (annotation && annotation.families) {
             var familyAnnotationRenders = annotation.families.map(family => {
+                curatorMatch = family && userMatch(family.submitted_by, session);
                 if (family.individualIncluded) {
                     // Add to individual renders the individuals that are associated with this family
                     var individualFamilyRenders = family.individualIncluded.map(individual => {
@@ -568,6 +570,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of individual renders the unassociated individuals.
         if (annotation && annotation.individuals) {
             var individualAnnotationRenders = annotation.individuals.map(individual => {
+                curatorMatch = individual && userMatch(individual.submitted_by, session);
                 return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
             });
             individualRenders = individualRenders.concat(individualAnnotationRenders);
@@ -576,6 +579,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of case-control renders
         if (annotation && annotation.caseControlStudies) {
             let caseControlObj = annotation.caseControlStudies.map(caseControl => {
+                curatorMatch = caseControl && userMatch(caseControl.submitted_by, session);
                 return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch)}</div>;
             });
             caseControlRenders = caseControlRenders.concat(caseControlObj);
@@ -584,6 +588,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
+                curatorMatch = experimental && userMatch(experimental.submitted_by, session);
                 return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
             });
             experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
