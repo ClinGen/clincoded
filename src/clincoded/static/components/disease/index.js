@@ -106,7 +106,7 @@ const AddDisease = module.exports.AddDisease = React.createClass({
 
         return (
             <div className="form-group add-disease-group">
-                <label htmlFor="add-disease" className="col-sm-5 control-label"><span>Please add disease:<span className="required-field"> *</span></span></label>
+                <label htmlFor="add-disease" className="col-sm-5 control-label"><span>Please add disease:<span className="required-field"> *</span><span className="control-label-note">OLS</span></span></label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseName ? "disease-name col-sm-8" : "disease-name"}>
                         {error ?
@@ -380,7 +380,7 @@ const AddDiseaseModal = React.createClass({
                 placeholderText = 'e.g. OMIM:133780';
                 break;
             case 'ncitid':
-                diseaseIdInputLabel = 'Enter NCit ID:';
+                diseaseIdInputLabel = 'Enter NCIt ID:';
                 placeholderText = 'e.g. NCIT:C9038';
                 break;
         }
@@ -403,7 +403,7 @@ const AddDiseaseModal = React.createClass({
     renderDiseaseFreeTextInput(diseaseTermType) {
         return (
             <div className="form-group disease-freetext-input">
-                <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Confirm there is no known Orphanet, Disease Ontology, OMIM or NCit ID for this disease:"
+                <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Confirm there is no known Orphanet, Disease Ontology, OMIM or NCIt ID for this disease:"
                     error={this.getFormError('diseaseFreeTextConfirmation')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextConfirmation')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-confirm"
                     checked={this.state.diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} required />
@@ -428,6 +428,9 @@ const AddDiseaseModal = React.createClass({
                 <div className="form-std">
                     <div className="modal-body">
                         <div className="row">
+                            <div>
+                                <p>OLS (Ontology Lookup Service) is the provider of terminology data.</p>
+                            </div>
                             <Input type="select" ref="diseaseTermType" label="Select disease terminology:"
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input"
                                 value={diseaseTermType} handleChange={this.handleDiseaseTermTypeChange}>
@@ -435,7 +438,7 @@ const AddDiseaseModal = React.createClass({
                                 <option value="orphanetid">Orphanet ID</option>
                                 <option value="doid">DO ID</option>
                                 <option value="omimid">OMIM ID</option>
-                                <option value="ncitid">NCit ID</option>
+                                <option value="ncitid">NCIt ID</option>
                                 <option value="freetext">Free text</option>
                             </Input>
                             {diseaseTermType.match(pattern) ? this.renderDiseaseIdInput(diseaseTermType) : null}
@@ -525,14 +528,14 @@ function queryResourceById(diseaseTermType) {
                 this.setState({queryResourceBusy: false, tempResource: response['_embedded']['terms'][0], resourceFetched: true});
             } else {
                 // Disease ID not found at OLS
-                this.setFormErrors(diseaseTermType, 'Requested ID not found');
+                this.setFormErrors(diseaseTermType, 'Requested ID not found at OLS.');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
-        }).catch(e => {
+        }).catch(err => {
             // error handling for disease query
-            this.setFormErrors(diseaseTermType, 'Error querying OLS. Please check your input and try again.');
+            this.setFormErrors(diseaseTermType, 'Unable to retrieve data from OLS.');
             this.setState({queryResourceBusy: false, resourceFetched: false});
-            console.log(e);
+            console.warn('OLS terminology fetch error :: %o', err);
         });
     } else {
         this.setState({queryResourceBusy: false});
