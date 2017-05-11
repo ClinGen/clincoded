@@ -365,6 +365,16 @@
         .add-disease-group {
             margin-bottom: 30px;
 
+            .control-label {
+                padding-top: 0;
+
+                .control-label-note {
+                    font-weight: normal;
+                    display: block;
+                    margin-right: 15px;
+                }
+            }
+
             .add-disease {
                 .disease-name {
                     padding-left: 0px;
