@@ -1920,6 +1920,13 @@ var CaseControlViewer = React.createClass({
                                         handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
                                 </Panel>
                             : null}
+                            {evidenceScores.length < 1 && !userCaseControl ?
+                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                                    <div className="row">
+                                        <p className="creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
+                                    </div>
+                                </Panel>
+                            : null}
                         </div>
                     </div>
                 </div>
