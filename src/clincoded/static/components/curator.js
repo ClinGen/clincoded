@@ -1105,8 +1105,8 @@ var CuratorRecordHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
-        var annotationOwners = getAnnotationOwners(gdm);
-        var latestAnnotation = gdm && findLatestAnnotation(gdm);
+        var participants = findAllParticipants(gdm);
+        var latestRecord = gdm && findLatestRecord(gdm);
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -1115,21 +1115,21 @@ var CuratorRecordHeader = React.createClass({
                         <dl className="inline-dl clearfix">
                             <dt>Status: </dt><dd>{gdm.gdm_status === 'Summary/Provisional Classifications' ? 'In progress' : gdm.gdm_status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
-                            {annotationOwners && annotationOwners.length && latestAnnotation ?
+                            {participants && participants.length && latestRecord ?
                                 <div>
                                     <dt>Participants: </dt>
                                     <dd>
-                                        {annotationOwners.map(function(owner, i) {
+                                        {participants.map(function(participant, i) {
                                             return (
                                                 <span key={i}>
                                                     {i > 0 ? ', ' : ''}
-                                                    <a href={'mailto:' + owner.email}>{owner.title}</a>
+                                                    <a href={'mailto:' + participant.email}>{participant.title}</a>
                                                 </span>
                                             );
                                         })}
                                     </dd>
                                     <dt>Last edited: </dt>
-                                    <dd><a href={'mailto:' + latestAnnotation.submitted_by.email}>{latestAnnotation.submitted_by.title}</a> — {moment(latestAnnotation.date_created).format('YYYY MMM DD, h:mm a')}</dd>
+                                    <dd><a href={'mailto:' + latestRecord.submitted_by.email}>{latestRecord.submitted_by.title}</a> — {moment(latestRecord.last_modified).format('YYYY MMM DD, h:mm a')}</dd>
                                 </div>
                             : null}
                         </dl>
@@ -1140,7 +1140,9 @@ var CuratorRecordHeader = React.createClass({
     }
 });
 
-
+/**
+ * This method is no longer used due to changes in #1341
+ */
 // Return the latest annotation in the given GDM. This is the internal version; use the memoized version externally.
 var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
     var annotations = gdm && gdm.annotations;
@@ -1158,6 +1160,195 @@ var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
     }
     return latestAnnotation;
 };
+
+// Return an array of (annotations, evidence, scores) submitted_by objects sorted by last name given the GDM.
+function findAllParticipants(gdm) {
+    let allObjects = getAllObjects(gdm);
+
+    let submitters = allObjects.map(object => {
+        return object.submitted_by;
+    });
+
+    let participants = _.chain(submitters).uniq(submitter => {
+        return submitter.uuid;
+    }).sortBy('last_name').value();
+
+    return participants;
+}
+
+// Return the latest added/updated object in the given GDM (e.g. annotation, evidence)
+function findLatestRecord(gdm) {
+    let allObjects = getAllObjects(gdm);
+    let latestModifiedObject = null;
+    let latestModified = 0;
+    if (allObjects.length) {
+        allObjects.forEach(object => {
+            // If object is an annotation, use 'date_created'.
+            // Otherwise, use 'last_modified' for evidence object.
+            // Logic - a PMID can not be edited after being added
+            // while an evidence (group or family) can be edited.
+            let lastModified = object['@type'][0] === 'annotation' ? moment(object.date_created).format('x') : moment(object.last_modified).format('x');
+            if (latestModified < lastModified) {
+                latestModifiedObject = object;
+                latestModified = lastModified;
+            }
+        });
+    }
+
+    return latestModifiedObject;
+}
+
+// Return all record objects flattened in an array,
+// including annotations, evidence, scores
+function getAllObjects(gdm) {
+    let totalObjects = [];
+    // loop through gdms
+    let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
+    annotations.forEach(annotation => {
+        // Get annotation records
+        totalObjects.push(filteredObject(annotation));
+        // loop through groups
+        let groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
+        if (groups.length) {
+            groups.forEach(group => {
+                // Get group evidence
+                totalObjects.push(filteredObject(group));
+                // loop through families within each group
+                let groupFamiliesIncluded = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
+                if (groupFamiliesIncluded.length) {
+                    groupFamiliesIncluded.forEach(family => {
+                        // Get group's family evidence
+                        totalObjects.push(filteredObject(family));
+                        // loop through individuals within each family of the group
+                        let groupFamilyIndividualsIncluded = family.individualIncluded && family.individualIncluded.length ? family.individualIncluded : [];
+                        if (groupFamilyIndividualsIncluded.length) {
+                            groupFamilyIndividualsIncluded.forEach(individual => {
+                                // Get group's family's individual evidence
+                                totalObjects.push(filteredObject(individual));
+                                // loop through group's family's individual scores
+                                let groupFamilyIndividualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                                if (groupFamilyIndividualScores.length) {
+                                    groupFamilyIndividualScores.forEach(score => {
+                                        // Get scores
+                                        totalObjects.push(filteredObject(score));
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                // loop through individuals of group
+                let groupIndividualsIncluded = group.individualIncluded && group.individualIncluded.length ? group.individualIncluded : [];
+                if (groupIndividualsIncluded.length) {
+                    groupIndividualsIncluded.forEach(individual => {
+                        // Get group's individual evidence
+                        totalObjects.push(filteredObject(individual));
+                        // loop through group's individual scores
+                        let groupIndividualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                        if (groupIndividualScores.length) {
+                            groupIndividualScores.forEach(score => {
+                                // Get scores
+                                totalObjects.push(filteredObject(score));
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // loop through families
+        let families = annotation.families && annotation.families.length ? annotation.families : [];
+        if (families.length) {
+            families.forEach(family => {
+                // Get family evidence
+                totalObjects.push(filteredObject(family));
+                // loop through individuals with each family
+                let familyIndividualsIncluded = family.individualIncluded && family.individualIncluded.length ? family.individualIncluded : [];
+                if (familyIndividualsIncluded.length) {
+                    familyIndividualsIncluded.forEach(individual => {
+                        // Get family's individual evidence
+                        totalObjects.push(filteredObject(individual));
+                        // loop through family's individual scores
+                        let familyIndividualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                        if (familyIndividualScores.length) {
+                            familyIndividualScores.forEach(score => {
+                                // Get scores
+                                totalObjects.push(filteredObject(score));
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // loop through individuals
+        let individuals = annotation.individuals && annotation.individuals.length ? annotation.individuals : [];
+        if (individuals.length) {
+            individuals.forEach(individual => {
+                // Get individual evidence
+                totalObjects.push(filteredObject(individual));
+                // loop through individual scores
+                let individualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                if (individualScores.length) {
+                    individualScores.forEach(score => {
+                        // Get scores
+                        totalObjects.push(filteredObject(score));
+                    });
+                }
+            });
+        }
+
+        // loop through experimentals
+        let experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
+        if (experimentals.length) {
+            experimentals.forEach(experimental => {
+                // Get individual evidence
+                totalObjects.push(filteredObject(experimental));
+                // loop through experimental scores
+                let experimentalScores = experimental.scores && experimental.scores.length ? experimental.scores : [];
+                if (experimentalScores.length) {
+                    experimentalScores.forEach(score => {
+                        // Get scores
+                        totalObjects.push(filteredObject(score));
+                    });
+                }
+            });
+        }
+
+        // loop through case-controls
+        let caseControls = annotation.caseControlStudies && annotation.caseControlStudies.length ? annotation.caseControlStudies : [];
+        if (caseControls.length) {
+            caseControls.forEach(caseControl => {
+                // Get case-control evidence
+                totalObjects.push(filteredObject(caseControl));
+                // loop through case-control scores
+                let caseControlScores = caseControl.scores && caseControl.scores.length ? caseControl.scores : [];
+                if (caseControlScores.length) {
+                    caseControlScores.forEach(score => {
+                        // Get scores
+                        totalObjects.push(filteredObject(score));
+                    });
+                }
+            });
+        }
+    });
+
+    return totalObjects;
+}
+
+// Method to filter object keys
+function filteredObject(record) {
+    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type'];
+
+    const filtered = Object.keys(record)
+        .filter(key => allowed.includes(key))
+        .reduce((obj, key) => {
+            obj[key] = record[key];
+            return obj;
+        }, {});
+
+    return filtered;
+}
 
 
 // Display buttons to bring up the PubMed and doi-specified web pages.
@@ -1316,7 +1507,9 @@ var collectGdmVariants = function(gdm) {
     return Object.keys(allVariants).length ? allVariants : null;
 };
 
-
+/**
+ * This method is no longer used due to changes in #1341
+ */
 // Get a de-duped array of annotation submitted_by objects sorted by last name from the given GDM.
 var getAnnotationOwners = module.exports.getAnnotationOwners = function(gdm) {
     var owners = gdm && gdm.annotations.map(function(annotation) {
