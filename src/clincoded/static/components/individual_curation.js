@@ -1976,7 +1976,7 @@ var IndividualViewer = React.createClass({
                                 {evidenceScores.length < 1 && !userIndividual ?
                                     <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
                                         <div className="row">
-                                            <p className="creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
+                                            <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                         </div>
                                     </Panel>
                                 : null}
