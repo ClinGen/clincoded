@@ -1162,7 +1162,7 @@ var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
 };
 
 // Return an array of (annotations, evidence, scores) submitted_by objects sorted by last name given the GDM.
-function findAllParticipants(gdm) {
+export function findAllParticipants(gdm) {
     let allObjects = getAllObjects(gdm);
 
     let submitters = allObjects.map(object => {
@@ -1177,7 +1177,7 @@ function findAllParticipants(gdm) {
 }
 
 // Return the latest added/updated object in the given GDM (e.g. annotation, evidence)
-function findLatestRecord(gdm) {
+export function findLatestRecord(gdm) {
     let allObjects = getAllObjects(gdm);
     let latestModifiedObject = null;
     let latestModified = 0;
