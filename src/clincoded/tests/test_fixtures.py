@@ -14,10 +14,10 @@ def minitestdata(app, connection):
 
     item = {
         'term': 'AchondroplasiaTest',
-        'orphaNumber': '9999',
+        'id': 'Orphanet:9999',
         'type': 'Disease',
     }
-    testapp.post_json('/orphaPhenotype', item, status=201)
+    testapp.post_json('/disease', item, status=201)
 
     yield
     tx.rollback()
@@ -36,10 +36,10 @@ def minitestdata2(app, connection):
 
     item = {
         'term': 'AchondroplasiaTest3',
-        'orphaNumber': '9997',
+        'id': 'Orphanet:9997',
         'type': 'Disease',
     }
-    testapp.post_json('/orphaPhenotype', item, status=201)
+    testapp.post_json('/disease', item, status=201)
 
     yield
     tx.rollback()
@@ -51,42 +51,42 @@ def test_fixtures1(testapp):
 
     Still need to inspect the sql log to verify fixture correctness.
     """
-    res = testapp.get('/orphaPhenotype').maybe_follow()
+    res = testapp.get('/disease').maybe_follow()
     items = res.json['@graph']
     assert len(items) == 1
 
     # Trigger an error
     item = {'foo': 'bar'}
-    res = testapp.post_json('/orphaPhenotype', item, status=422)
+    res = testapp.post_json('/disease', item, status=422)
     assert res.json['errors']
 
-    res = testapp.get('/orphaPhenotype').maybe_follow()
+    res = testapp.get('/disease').maybe_follow()
     items = res.json['@graph']
     assert len(items) == 1
 
     item = {
         'term': 'AchondroplasiaTest2',
-        'orphaNumber': '9998',
+        'id': 'Orphanet:9998',
         'type': 'Disease',
     }
-    testapp.post_json('/orphaPhenotype', item, status=201)
+    testapp.post_json('/disease', item, status=201)
 
-    res = testapp.get('/orphaPhenotype').maybe_follow()
+    res = testapp.get('/disease').maybe_follow()
     items = res.json['@graph']
     assert len(items) == 2
 
     # Trigger an error
     item = {'foo': 'bar'}
-    res = testapp.post_json('/orphaPhenotype', item, status=422)
+    res = testapp.post_json('/disease', item, status=422)
     assert res.json['errors']
 
-    res = testapp.get('/orphaPhenotype').maybe_follow()
+    res = testapp.get('/disease').maybe_follow()
     items = res.json['@graph']
     assert len(items) == 2
 
 
 def test_fixtures2(minitestdata2, testapp):
     # http://stackoverflow.com/questions/15775601/mutually-exclusive-fixtures
-    res = testapp.get('/orphaPhenotype/').maybe_follow()
+    res = testapp.get('/disease/').maybe_follow()
     items = res.json['@graph']
     assert len(items) == 1
