@@ -33,7 +33,7 @@ class Gene(Item):
 
 
 @collection(
-    name='diseases',
+    name='orphaPhenotypes',
     unique_key='orphaPhenotype:orphaNumber',
     properties={
         'title': 'Orphanet Diseases',
@@ -43,6 +43,112 @@ class OrphaPhenotype(Item):
     item_type = 'orphaPhenotype'
     schema = load_schema('clincoded:schemas/orphaPhenotype.json')
     name_key = 'orphaNumber'
+
+
+@collection(
+    name='diseases',
+    unique_key='disease:uuid',
+    properties={
+        'title': 'Diseases',
+        'description': 'List of diseases stored locally',
+    })
+class Disease(Item):
+    item_type = 'disease'
+    schema = load_schema('clincoded:schemas/disease.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'associatedGdm',
+        'associatedGdm.disease',
+        'associatedGdm.submitted_by',
+        'associatedGroups',
+        'associatedGroups.commonDiagnosis',
+        'associatedGroups.submitted_by',
+        'associatedGroups.familyIncluded',
+        'associatedGroups.familyIncluded.commonDiagnosis',
+        'associatedGroups.familyIncluded.submitted_by',
+        'associatedGroups.familyIncluded.individualIncluded',
+        'associatedGroups.familyIncluded.individualIncluded.diagnosis',
+        'associatedGroups.familyIncluded.individualIncluded.submitted_by',
+        'associatedGroups.individualIncluded',
+        'associatedGroups.individualIncluded.diagnosis',
+        'associatedGroups.individualIncluded.submitted_by',
+        'associatedFamilies',
+        'associatedFamilies.commonDiagnosis',
+        'associatedFamilies.submitted_by',
+        'associatedFamilies.individualIncluded',
+        'associatedFamilies.individualIncluded.diagnosis',
+        'associatedFamilies.individualIncluded.submitted_by',
+        'associatedIndividuals',
+        'associatedIndividuals.diagnosis',
+        'associatedIndividuals.submitted_by',
+        'associatedInterpretations',
+        'associatedInterpretations.disease',
+        'associatedInterpretations.submitted_by'
+    ]
+    rev = {
+        'associatedGdm': ('gdm', 'disease'),
+        'associatedGroups': ('group', 'commonDiagnosis'),
+        'associatedFamilies': ('family', 'commonDiagnosis'),
+        'associatedIndividuals': ('individual', 'diagnosis'),
+        'associatedInterpretations': ('interpretation', 'disease')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated gdm",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "gdm.disease"
+        }
+    })
+    def associatedGdm(self, request, associatedGdm):
+        return paths_filtered_by_status(request, associatedGdm)
+
+    @calculated_property(schema={
+        "title": "Associated groups",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "group.commonDiagnosis"
+        }
+    })
+    def associatedGroups(self, request, associatedGroups):
+        return paths_filtered_by_status(request, associatedGroups)
+
+    @calculated_property(schema={
+        "title": "Associated families",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "family.commonDiagnosis"
+        }
+    })
+    def associatedFamilies(self, request, associatedFamilies):
+        return paths_filtered_by_status(request, associatedFamilies)
+
+    @calculated_property(schema={
+        "title": "Associated individuals",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "individual.diagnosis"
+        }
+    })
+    def associatedIndividuals(self, request, associatedIndividuals):
+        return paths_filtered_by_status(request, associatedIndividuals)
+
+    @calculated_property(schema={
+        "title": "Associated interpretation",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "interpretation.disease"
+        }
+    })
+    def associatedInterpretations(self, request, associatedInterpretations):
+        return paths_filtered_by_status(request, associatedInterpretations)
+
 
 '''
 @collection(
