@@ -1,0 +1,213 @@
+[
+    {
+        "uuid": "80635629-f3c1-4a48-b63e-0db849e8e354",
+        "term": "Achondroplasia",
+        "id": "Orphanet:15",
+        "description": "",
+        "ontology": "ORPHANET",
+        "active": true,
+        "omimIds": [
+            "100800"
+        ],
+        "type": "Disease"
+    },
+    {
+        "uuid": "e623cfdd-400c-4c6d-bd9f-c0fedf630e6b",
+        "term": "Fanconi anemia",
+        "id": "Orphanet:84",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "Fanconi pancytopenia"
+        ],
+        "active": true,
+        "omimIds": [
+            "609054",
+            "610832",
+            "613390",
+            "613951",
+            "614082",
+            "614083",
+            "614087",
+            "615272",
+            "227645",
+            "227646",
+            "227650",
+            "300514",
+            "600901",
+            "603467",
+            "609053"
+        ],
+        "type": "Malformation syndrome"
+    },
+    {
+        "uuid": "f8c8525c-adf9-4fda-8e86-a30832347edd",
+        "term": "Nephroblastoma",
+        "id": "Orphanet:654",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "Renal embryonic tumor",
+            "Wilms tumor"
+        ],
+        "active": true,
+        "omimIds": [
+            "194070",
+            "194071",
+            "194090",
+            "601363",
+            "601583"
+        ],
+        "type": "Disease"
+    },
+    {
+        "uuid": "88ddad2b-4849-4546-ad75-af157b2d4a1b",
+        "term": "Severe combined immunodeficiency",
+        "id": "Orphanet:183660",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "SCID"
+        ],
+        "active": true,
+        "type": "Group of phenomes"
+    },
+    {
+        "uuid": "657cb29e-63b6-4416-b613-557aa18ac765",
+        "term": "X-linked non-syndromic intellectual disability",
+        "id": "Orphanet:777",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "X-linked non-specific intellectual disability"
+        ],
+        "active": true,
+        "omimIds": [
+            "300046",
+            "300047",
+            "300062",
+            "300114",
+            "300115",
+            "300143",
+            "300210",
+            "300271",
+            "300324",
+            "300355",
+            "300372",
+            "300387",
+            "300419",
+            "300428",
+            "300433",
+            "300436",
+            "300454",
+            "300498",
+            "300504",
+            "300505",
+            "300518",
+            "300551",
+            "300558",
+            "300705",
+            "300716",
+            "300802",
+            "300803",
+            "300844",
+            "300848",
+            "300849",
+            "300850",
+            "300851",
+            "300852",
+            "300919",
+            "300928",
+            "309530",
+            "309549"
+        ],
+        "type": "Etiological subtype"
+    },
+    {
+        "uuid": "aa217d94-5e04-4144-af5d-0b49e9dba754",
+        "term": "Congenital muscular dystrophy with intellectual disability",
+        "id": "Orphanet:370968",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "CMD with intellectual disability",
+            "CMD-MR"
+        ],
+        "active": true,
+        "omimIds": [
+            "606612",
+            "608840",
+            "613155",
+            "613156",
+            "615351"
+        ],
+        "type": "Disease"
+    },
+    {
+        "uuid": "c5694e37-cd5b-42a3-b6db-e3fb6a629e63",
+        "term": "Aneurysm - osteoarthritis syndrome",
+        "id": "Orphanet:284984",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "AOS"
+        ],
+        "active": true,
+        "omimIds": [
+            "613795"
+        ],
+        "type": "Disease"
+    },
+    {
+        "uuid": "82e69bcc-91c5-4a66-8293-3befc7445966",
+        "term": "Familial exudative vitreoretinopathy",
+        "id": "Orphanet:891",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "Criswick-Schepens syndrome",
+            "FEVR"
+        ],
+        "active": true,
+        "omimIds": [
+            "133780",
+            "305390",
+            "601813",
+            "605750",
+            "613310"
+        ],
+        "type": "Disease"
+    },
+    {
+        "uuid": "e10d0bb8-7f3a-4c91-85a5-19d1ea0d79c3",
+        "term": "Pleuropulmonary blastoma",
+        "id": "Orphanet:64742",
+        "description": "",
+        "ontology": "ORPHANET",
+        "active": true,
+        "omimIds": [
+            "601200"
+        ],
+        "type": "Disease"
+    },
+    {
+        "uuid": "028c938f-0a1c-4aa1-bd02-4c574d2f58e2",
+        "term": "Milroy disease",
+        "id": "Orphanet:79452",
+        "description": "",
+        "ontology": "ORPHANET",
+        "synonyms": [
+            "Hereditary lymphedema type I",
+            "Nonne-Milroy lymphedema"
+        ],
+        "active": true,
+        "omimIds": [
+            "153100",
+            "247440",
+            "611944",
+            "613480",
+            "615907"
+        ],
+        "type": "Disease"
+    }
+]
