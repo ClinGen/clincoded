@@ -970,7 +970,7 @@ var DiseaseRecordHeader = React.createClass({
                     {disease ?
                         <dl>
                             <dt>{disease.term}</dt>
-                            <dd>Orphanet ID: <a href={external_url_map['OrphaNet'] + disease.orphaNumber} target="_blank" title={'Orphanet page for ORPHA' + disease.orphaNumber + ' in a new window'}>{'ORPHA' + disease.orphaNumber}</a></dd>
+                            <dd>Disease ID: <a href={external_url_map['MondoSearch'] + disease.id.replace(':', '_')} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id}</a></dd>
                             <dd>
                                 <a href="http://omim.org/" target="_blank" title="Online Mendelian Inheritance in Man home page in a new window">OMIM</a> ID: {this.props.omimId ?
                                     <a href={external_url_map['OMIM'] + this.props.omimId} title={'Open Online Mendelian Inheritance in Man page for OMIM ID ' + this.props.omimId + ' in a new window'} target="_blank">
