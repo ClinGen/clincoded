@@ -7,7 +7,7 @@ def _type_length():
     ORDER = [
         'user',
         'gene',
-        'orphaPhenotype',
+        'disease',
         'curator_page',
     ]
     from pkg_resources import resource_stream
@@ -126,35 +126,35 @@ def test_collection_limit(testapp):
 def test_collection_post(testapp):
     item = {
         'term': 'AchondroplasiaTest',
-        'orphaNumber': '9999',
+        'id': 'Orphanet:9999',
         'type': 'Disease',
     }
-    return testapp.post_json('/orphaPhenotype', item, status=201)
+    return testapp.post_json('/disease', item, status=201)
 
 
 def test_collection_post_bad_json(testapp):
     item = {'foo': 'bar'}
-    res = testapp.post_json('/orphaPhenotype', item, status=422)
+    res = testapp.post_json('/disease', item, status=422)
     assert res.json['errors']
 
 
 def test_collection_post_malformed_json(testapp):
     item = '{'
     headers = {'Content-Type': 'application/json'}
-    res = testapp.post('/orphaPhenotype', item, status=400, headers=headers)
+    res = testapp.post('/disease', item, status=400, headers=headers)
     assert res.json['detail'].startswith('Expecting')
 
 
 def test_collection_post_missing_content_type(testapp):
     item = '{}'
-    testapp.post('/orphaPhenotype', item, status=415)
+    testapp.post('/disease', item, status=415)
 
 
 def test_collection_post_bad_(anontestapp):
     from base64 import b64encode
     from pyramid.compat import ascii_native_
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
-    anontestapp.post_json('/orphaPhenotype', {}, headers={'Authorization': value}, status=401)
+    anontestapp.post_json('/disease', {}, headers={'Authorization': value}, status=401)
 
 
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
@@ -178,10 +178,10 @@ def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, gen
 def test_collection_put(testapp, execute_counter):
     initial = {
         'term': 'AchondroplasiaTestAgain',
-        'orphaNumber': '9999',
+        'id': 'Orphanet:9999',
         'type': 'Disease',
     }
-    item_url = testapp.post_json('/orphaPhenotype', initial).location
+    item_url = testapp.post_json('/disease', initial).location
 
     with execute_counter.expect(1):
         item = testapp.get(item_url).json
@@ -191,7 +191,7 @@ def test_collection_put(testapp, execute_counter):
 
     update = {
         'term': 'AchondroplasiaTestAgainAgain',
-        'orphaNumber': '9999',
+        'id': 'Orphanet:9999',
         'type': 'Disease',
     }
     testapp.put_json(item_url, update, status=200)
@@ -206,10 +206,10 @@ def test_post_duplicate_uuid(testapp, disease):
     item = {
         'uuid': disease['uuid'],
         'term': 'AchondroplasiaTestAgain',
-        'orphaNumber': '9999',
+        'id': 'Orphanet:9999',
         'type': 'Disease',
     }
-    testapp.post_json('/orphaPhenotype', item, status=409)
+    testapp.post_json('/disease', item, status=409)
 
 
 # def test_user_effective_principals(submitter, lab, anontestapp, execute_counter):
