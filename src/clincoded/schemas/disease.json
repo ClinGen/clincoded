@@ -58,19 +58,7 @@
             "title": "Type.",
             "description": "Type of Orphanet phenotype.",
             "type": "string",
-            "enum": [
-                "Disease",
-                "Malformation syndrome",
-                "Clinical subtype",
-                "Group of phenomes",
-                "Particular clinical situation in a disease or syndrome",
-                "Morphological anomaly",
-                "Etiological subtype",
-                "Clinical syndrome",
-                "No type",
-                "Histopathological subtype",
-                "Biological anomaly"
-            ]
+            "default": ""
         },
         "omimIds": {
             "title": "OMIM ID",
