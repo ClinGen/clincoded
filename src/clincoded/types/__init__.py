@@ -501,8 +501,8 @@ class Gdm(Item):
     })
     def gdm_title(self, gene, disease, modeCode):
         gene_symbol = gene.replace('/genes/', '').replace('/', '')
-        orpha_id = disease.replace('/diseases/', '').replace('/', '')
-        return gene_symbol + '-' + orpha_id + '-' + modeCode
+        disease_id = disease.replace('/diseases/', '').replace('/', '')
+        return gene_symbol + '-' + disease_id + '-' + modeCode
 
 
 @collection(
@@ -1292,7 +1292,7 @@ class Interpretation(Item):
     })
     def interpretation_disease(self, disease=''):
         if disease != '':
-            return 'ORPHA' + disease[10:-1]
+            return disease
         return ''
 
     @calculated_property(schema={
