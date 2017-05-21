@@ -5,13 +5,17 @@ import PropTypes from 'prop-types';
 import ModalComponent from '../../libs/bootstrap/modal';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { RestMixin } from '../rest';
+import { external_url_map } from '../globals';
+
+var curator = require('../curator');
+var _ = require('underscore');
 
 /**
  * Input component to display a text input field with a button to the right,
  * which can be clicked to invoke a modal.
  * This is referred to as an "input-group" in Bootstrap.
- * Usage: <InputDisease {...props} />
- * See 'InputDisease.propTypes' for props details.
+ * Usage: <AddDisease {...props} />
+ * See 'AddDisease.propTypes' for props details.
  */
 const AddDisease = module.exports.AddDisease = React.createClass({
     mixins: [FormMixin],
@@ -19,33 +23,53 @@ const AddDisease = module.exports.AddDisease = React.createClass({
     propTypes: {
         gdm: PropTypes.object, // For editing disease (passed to Modal)
         updateDiseaseObj: PropTypes.func,
-        error: PropTypes.string
+        error: PropTypes.string,
+        session: PropTypes.object
     },
 
     getInitialState() {
         return {
             gdm: this.props.gdm,
             error: this.props.error,
-            diseaseTerm: '',
-            diseaseTermType: 'none',
-            diseaseName: null,
+            diseaseId: '',
+            diseaseTerm: null,
+            diseaseOntology: null,
             diseaseDescription: null,
-            phenotypes: '',
+            synonyms: [],
+            phenotypes: [],
             diseaseFreeTextConfirm: false,
             diseaseObj: {}
         };
+    },
+
+    componentDidMount() {
+        let gdm = this.state.gdm;
+        if (gdm && gdm.disease) {
+            let disease = gdm.disease;
+            if (disease.id) { this.setState({diseaseId: disease.id}) };
+            if (disease.term) { this.setState({diseaseTerm: disease.term}) };
+            if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}) };
+            if (disease.description) { this.setState({diseaseDescription: disease.description}) };
+            if (disease.synonyms) { this.setState({synonyms: disease.synonyms}) };
+            if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}) };
+            if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}) };
+        }
     },
 
     componentWillReceiveProps(nextProps)  {
         if (nextProps.gdm) {
             this.setState({gdm: nextProps.gdm}, () => {
                 let gdm = this.state.gdm;
-                if (gdm && gdm.disease) { this.setState({diseaseTerm: gdm.disease}) };
-                if (gdm && gdm.diseaseType) { this.setState({diseaseTermType: gdm.diseaseType}) };
-                if (gdm && gdm.diseaseName) { this.setState({diseaseName: gdm.diseaseName}) };
-                if (gdm && gdm.diseaseDescription) { this.setState({diseaseDescription: gdm.diseaseDescription}) };
-                if (gdm && gdm.diseaseFreeTextConfirm) { this.setState({diseaseFreeTextConfirm: gdm.diseaseFreeTextConfirm}) };
-                if (gdm && gdm.phenotypes) { this.setState({phenotypes: gdm.phenotypes}) };
+                if (gdm && gdm.disease) {
+                    let disease = gdm.disease;
+                    if (disease.id) { this.setState({diseaseId: disease.id}) };
+                    if (disease.term) { this.setState({diseaseTerm: disease.term}) };
+                    if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}) };
+                    if (disease.description) { this.setState({diseaseDescription: disease.description}) };
+                    if (disease.synonyms) { this.setState({synonyms: disease.synonyms}) };
+                    if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}) };
+                    if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}) };
+                }
             });
         }
         if (nextProps.error) {
@@ -53,39 +77,46 @@ const AddDisease = module.exports.AddDisease = React.createClass({
         }
     },
 
-    passDataToParent(term, type, name, description, hpoids, confirm) {
+    passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
+        if (id) {
+            diseaseObj['id'] = id;
+            this.setState({diseaseId: id});
+        }
         if (term) {
-            diseaseObj['diseaseTerm'] = term;
+            diseaseObj['term'] = term;
             this.setState({diseaseTerm: term});
         }
-        if (type) {
-            diseaseObj['diseaseTermType'] = type;
-            this.setState({diseaseTermType: type});
-        }
-        if (name) {
-            diseaseObj['diseaseName'] = name;
-            this.setState({diseaseName: name});
+        if (ontology) {
+            diseaseObj['ontology'] = ontology;
+            this.setState({diseaseOntology: ontology});
         }
         if (description) {
-            diseaseObj['diseaseDescription'] = description;
+            diseaseObj['description'] = description;
             this.setState({diseaseDescription: description});
         } else {
-            if (diseaseObj['diseaseDescription']) { delete diseaseObj['diseaseDescription'] };
+            if (diseaseObj['description']) { delete diseaseObj['description'] };
             this.setState({diseaseDescription: null});
         }
-        if (hpoids) {
-            diseaseObj['phenotypes'] = hpoids;
-            this.setState({phenotypes: hpoids});
+         if (synonyms) {
+            diseaseObj['synonyms'] = synonyms;
+            this.setState({synonyms: synonyms});
+        } else {
+            if (diseaseObj['synonyms']) { delete diseaseObj['synonyms'] };
+            this.setState({synonyms: []});
+        }
+        if (phenotypes) {
+            diseaseObj['phenotypes'] = phenotypes;
+            this.setState({phenotypes: phenotypes});
         } else {
             if (diseaseObj['phenotypes']) { delete diseaseObj['phenotypes'] };
-            this.setState({phenotypes: ''});
+            this.setState({phenotypes: []});
         }
-        if (confirm) {
-            diseaseObj['diseaseFreeTextConfirm'] = true;
+        if (freetext) {
+            diseaseObj['freetext'] = true;
             this.setState({diseaseFreeTextConfirm: true});
         } else {
-            if (diseaseObj['diseaseFreeTextConfirm']) { delete diseaseObj['diseaseFreeTextConfirm'] };
+            if (diseaseObj['freetext']) { delete diseaseObj['freetext'] };
             this.setState({diseaseFreeTextConfirm: false});
         }
         this.setState({diseaseObj: diseaseObj}, () => {
@@ -95,36 +126,39 @@ const AddDisease = module.exports.AddDisease = React.createClass({
     },
 
     render() {
+        let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
-        let diseaseTermType = this.state.diseaseTermType;
-        let diseaseName = this.state.diseaseName;
+        let diseaseOntology = this.state.diseaseOntology;
         let diseaseDescription = this.state.diseaseDescription;
         let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
         let phenotypes = this.state.phenotypes;
-        let addDiseaseModalBtn = diseaseName ? <span>Disease<i className="icon icon-pencil"></i></span> : <span>Disease<i className="icon icon-plus-circle"></i></span>;
+        let synonyms = this.state.synonyms;
+        let addDiseaseModalBtn = diseaseTerm ? <span>Disease<i className="icon icon-pencil"></i></span> : <span>Disease<i className="icon icon-plus-circle"></i></span>;
         let error = this.state.error;
+        let source = !diseaseFreeTextConfirm ? diseaseId : this.props.session.user_properties.title;
 
         return (
             <div className="form-group add-disease-group">
-                <label htmlFor="add-disease" className="col-sm-5 control-label"><span>Please add disease:<span className="required-field"> *</span><span className="control-label-note">OLS</span></span></label>
+                <label htmlFor="add-disease" className="col-sm-5 control-label"><span>Please add disease:<span className="required-field"> *</span></span></label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
-                    <div ref="diseaseName" className={diseaseName ? "disease-name col-sm-8" : "disease-name"}>
+                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-8" : "disease-name"}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
-                            <span>{diseaseName}</span>
+                            <span>{diseaseTerm ? <span>{diseaseTerm + ' (' + source + ')'}</span> : null}</span>
                         }
                     </div>
                     <AddDiseaseModal
                         addDiseaseModalBtn={addDiseaseModalBtn}
+                        diseaseId={diseaseId}
                         diseaseTerm={diseaseTerm}
-                        diseaseTermType={diseaseTermType}
-                        diseaseName={diseaseName}
+                        diseaseOntology={diseaseOntology}
                         diseaseDescription={diseaseDescription}
                         diseaseFreeTextConfirm={diseaseFreeTextConfirm}
                         phenotypes={phenotypes}
+                        synonyms={synonyms}
                         passDataToParent={this.passDataToParent}
-                        addDiseaseModalBtnLayoutClass={diseaseName || error ? ' pull-right' : ''}
+                        addDiseaseModalBtnLayoutClass={diseaseTerm || error ? ' pull-right' : ''}
                     />
                 </div>
             </div>
@@ -140,53 +174,58 @@ const AddDiseaseModal = React.createClass({
 
     propTypes: {
         addDiseaseModalBtn: PropTypes.object.isRequired,
+        diseaseId: PropTypes.string,
         diseaseTerm: PropTypes.string,
-        diseaseTermType: PropTypes.string,
-        diseaseName: PropTypes.string,
+        diseaseOntology: PropTypes.string,
         diseaseDescription: PropTypes.string,
         diseaseFreeTextConfirm: PropTypes.bool,
-        phenotypes: PropTypes.string,
+        phenotypes: PropTypes.array,
+        synonyms: PropTypes.array,
         passDataToParent: PropTypes.func, // function to call upon pressing the Save button
         addDiseaseModalBtnLayoutClass: PropTypes.string
     },
 
     getInitialState() {
         return {
-            diseaseTerm: this.props.diseaseTerm, // Value for disease term input field (types of 'text' or 'textarea')
-            diseaseTermType: this.props.diseaseTermType, // Selected option for disease term type (e.g. Orphanet ID, free text)
-            diseaseName: this.props.diseaseName,
-            diseaseDescription: this.props.diseaseDescription,
-            phenotypes: this.props.phenotypes,
-            diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm,
+            diseaseId: this.props.diseaseId, // Value for disease id input field (types of 'text' or 'textarea')
+            diseaseTerm: this.props.diseaseTerm, // Name of the disease
+            diseaseOntology: this.props.diseaseOntology, // Orphanet, DOID, OMIM, NCIt, etc.
+            diseaseDescription: this.props.diseaseDescription, // Description/definition of the disease
+            phenotypes: this.props.phenotypes, // HPO IDs
+            synonyms: this.props.synonyms, // Disease synonyms
+            diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm, // User confirmation of entering free text for disease
             queryResourceDisabled: true, // Flag to disable the get OLS data button
             queryResourceBusy: false, // Flag to indicate the input button's 'busy' state
             resourceFetched: false, // Flag to indicate that a response from the resource has been obtained
             tempResource: {}, // Temporary object to hold the resource response
+            submitResourceDisabled: true, // Flag to disable the modal save button
             submitResourceBusy: false // Flag to indicate that the modal's submit button is in a 'busy' state (creating local db entry)
         };
     },
 
     componentDidMount() {
-        if (this.state.diseaseTermType && this.refs['diseaseTermType']) {
-            this.refs['diseaseTermType'].setValue(this.state.diseaseTermType);
+        if (this.state.diseaseId && this.refs['diseaseId']) {
+            this.refs['diseaseId'].setValue(this.state.diseaseId);
+            this.setState({submitResourceDisabled: false});
         }
-        if (this.state.diseaseTermType && this.state.diseaseTerm && this.refs[this.state.diseaseTermType]) {
-            this.refs[this.state.diseaseTermType].setValue(this.state.diseaseTerm);
+        if (this.state.diseaseTerm && this.refs['diseaseTerm']) {
+            this.refs['diseaseTerm'].setValue(this.state.diseaseTerm);
+            this.setState({submitResourceDisabled: false});
         }
-        if (this.state.diseaseName) {
+        if (this.state.diseaseTerm && this.refs['diseaseId']) {
             this.renderResourceResult();
         }
     },
 
     componentWillReceiveProps(nextProps)  {
+        if (nextProps.diseaseId) {
+            this.setState({diseaseId: nextProps.diseaseId, submitResourceDisabled: false});
+        }
         if (nextProps.diseaseTerm) {
-            this.setState({diseaseTerm: nextProps.diseaseTerm});
+            this.setState({diseaseTerm: nextProps.diseaseTerm, submitResourceDisabled: false});
         }
-        if (nextProps.diseaseTermType) {
-            this.setState({diseaseTermType: nextProps.diseaseTermType});
-        }
-        if (nextProps.diseaseName) {
-            this.setState({diseaseName: nextProps.diseaseName});
+        if (nextProps.diseaseOntology) {
+            this.setState({diseaseOntology: nextProps.diseaseOntology});
         }
         if (nextProps.diseaseDescription) {
             this.setState({diseaseDescription: nextProps.diseaseDescription});
@@ -196,6 +235,9 @@ const AddDiseaseModal = React.createClass({
         }
         if (nextProps.phenotypes) {
             this.setState({phenotypes: nextProps.phenotypes});
+        }
+        if (nextProps.synonyms) {
+            this.setState({synonyms: nextProps.synonyms});
         }
     },
 
@@ -223,12 +265,13 @@ const AddDiseaseModal = React.createClass({
     /************************************************************************************************/
     handleModalClose(trigger) {
         let errors = this.state.formErrors;
-        errors['diseaseTermType'] = '';
+        errors['diseaseId'] = '';
+        errors['diseaseTerm'] = '';
         if (!this.state.submitResourceBusy) {
             if (trigger && trigger === 'cancel') {
                 this.setState({
                     formErrors: errors,
-                    diseaseTermType: this.props.diseaseTermType,
+                    diseaseId: this.props.diseaseId,
                     diseaseTerm: this.props.diseaseTerm,
                     diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm,
                     queryResourceDisabled: true,
@@ -240,31 +283,12 @@ const AddDiseaseModal = React.createClass({
         }
     },
 
-    // Called when disease type pull-down selection is changed
-    handleDiseaseTermTypeChange() {
-        this.setState({
-            diseaseTermType: this.refs['diseaseTermType'].getValue(),
-            diseaseTerm: '',
-            diseaseName: null,
-            diseaseDescription: null,
-            diseaseFreeTextConfirm: false,
-            phenotypes: '',
-            formErrors: {},
-            resourceFetched: false,
-            tempResource: {}
-        }, () => {
-            if (this.refs[this.state.diseaseTermType] && this.refs[this.state.diseaseTermType].getValue()) {
-                this.refs[this.state.diseaseTermType].resetValue();
-            }
-        });
-    },
-
-    // Called when the value in the disease term input field is changed
-    handleDiseaseTermChange(e) {
-        if (this.refs[this.state.diseaseTermType]) {
-            let tempResourceId = this.refs[this.state.diseaseTermType].getValue();
-            this.setState({diseaseTerm: tempResourceId, resourceFetched: false, tempResource: {}});
-            if (this.refs[this.state.diseaseTermType].getValue().length > 0) {
+    // Called when the value in the disease id input field is changed
+    handleDiseaseIdChange(e) {
+        if (this.refs['diseaseId']) {
+            let tempResourceId = this.refs['diseaseId'].getValue();
+            this.setState({diseaseId: tempResourceId, resourceFetched: false, tempResource: {}});
+            if (tempResourceId.length > 0) {
                 this.setState({queryResourceDisabled: false});
             } else {
                 this.setState({queryResourceDisabled: true});
@@ -274,14 +298,38 @@ const AddDiseaseModal = React.createClass({
 
     // Called to select/deselect free text disease confirmation checkbox
     handleDiseaseFreeTextConfirmChange(e) {
-        this.setState({diseaseFreeTextConfirm: !this.state.diseaseFreeTextConfirm});
+        this.setState({
+            diseaseFreeTextConfirm: !this.state.diseaseFreeTextConfirm,
+            diseaseId: '',
+            diseaseTerm: null,
+            diseaseOntology: null,
+            diseaseDescription: null,
+            phenotypes: [],
+            synonyms: [],
+            formErrors: {},
+            resourceFetched: false,
+            tempResource: {}
+        }, () => {
+            if (this.refs['diseaseId'] && this.refs['diseaseId'].getValue()) {
+                this.refs['diseaseId'].resetValue();
+            }
+            if (this.refs['diseaseFreeTextTerm'] && this.refs['diseaseFreeTextTerm'].getValue()) {
+                this.refs['diseaseFreeTextTerm'].resetValue();
+            }
+        });
     },
 
     // Called when the value in the disease free text input field is changed
-    handleDiseaseFreeTextDescChange(e) {
-        if (this.refs['freetext']) {
-            let diseaseFreeText = this.refs['freetext'].getValue();
-            this.setState({diseaseTerm: diseaseFreeText && diseaseFreeText.length ? diseaseFreeText : ''});
+    handleDiseaseFreeTextTermChange(e) {
+        if (this.refs['diseaseFreeTextTerm']) {
+            let diseaseFreeTextTerm = this.refs['diseaseFreeTextTerm'].getValue();
+            this.setState({diseaseTerm: diseaseFreeTextTerm && diseaseFreeTextTerm.length ? diseaseFreeTextTerm : ''}, () => {
+                if (this.state.diseaseTerm.length > 0) {
+                    this.setState({submitResourceDisabled: false});
+                } else {
+                    this.setState({SubmitResourceDisabled: true});
+                }
+            });
         }
     },
 
@@ -289,42 +337,63 @@ const AddDiseaseModal = React.createClass({
     queryResource(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({queryResourceBusy: true, resourceFetched: false}, () => {
-            queryResourceById.call(this, this.state.diseaseTermType);
+            queryResourceById.call(this, this.state.diseaseId);
         });
     },
 
     // Called when the button to save the disease term (ID or free text) to the main form is pressed
     submitResource(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        if (this.state.diseaseTermType === 'freetext') {
-            if (!this.state.diseaseFreeTextConfirm) {
-                this.setFormErrors('diseaseFreeTextConfirmation', 'Required for free text disease');
+
+        // Save all form values from the DOM.
+        this.saveAllFormValues();
+
+        if (this.state.diseaseFreeTextConfirm) {
+            if (this.refs['diseaseFreeTextTerm'] && !this.refs['diseaseFreeTextTerm'].getValue()) {
+                this.setFormErrors('diseaseFreeTextTerm', 'Required for free text disease');
                 return;
             }
+            if (this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
+                let hpoids = curator.capture.hpoids(this.getFormValue('diseaseFreeTextPhenoTypes'));
+                let formError = false;
+                // Check HPO ID format
+                if (hpoids && hpoids.length && _(hpoids).any(id => { return id === null; })) {
+                    // HPOID list is bad
+                    formError = true;
+                    this.setFormErrors('diseaseFreeTextPhenoTypes', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+                    return;
+                }
+            }
             this.setState({
-                phenotypes: this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue() ? this.refs['diseaseFreeTextPhenoTypes'].getValue() : ''
+                diseaseDescription: this.refs['diseaseFreeTextDesc'] && this.refs['diseaseFreeTextDesc'].getValue() ? this.refs['diseaseFreeTextDesc'].getValue() : null,
+                phenotypes: this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue() ? this.refs['diseaseFreeTextPhenoTypes'].getValue().split(', ') : []
             }, () => {
                 this.props.passDataToParent(
+                    'FREETEXT:' + getRandomInt(10000000, 99999999), // Set free text disease id
                     this.state.diseaseTerm,
-                    this.state.diseaseTermType,
-                    this.state.diseaseTerm,
-                    null,
+                    null, // No ontology for free text
+                    this.state.diseaseDescription,
+                    [], // No synonyms for free text
                     this.state.phenotypes,
                     this.state.diseaseFreeTextConfirm
                 );
             });
         } else {
+            let diseaseId = this.state.diseaseId;
             this.setState({
-                diseaseName: this.state.tempResource['label'] ? this.state.tempResource['label'] : '',
-                diseaseDescription: this.state.tempResource['description'] ? this.state.tempResource['description'][0] : ''
+                diseaseTerm: this.state.tempResource['label'] ? this.state.tempResource['label'] : null,
+                diseaseOntology: diseaseId ? diseaseId.substr(0, diseaseId.indexOf(':')).toUpperCase() : null,
+                diseaseDescription: this.state.tempResource['annotation']['definition'] ? this.state.tempResource['annotation']['definition'][0] : null,
+                synonyms: this.state.tempResource['annotation']['has_exact_synonym'] ? this.state.tempResource['annotation']['has_exact_synonym'] : []
             }, () => {
                 this.props.passDataToParent(
+                    this.state.diseaseId,
                     this.state.diseaseTerm,
-                    this.state.diseaseTermType,
-                    this.state.diseaseName,
+                    this.state.diseaseOntology,
                     this.state.diseaseDescription,
-                    '',
-                    false
+                    this.state.synonyms,
+                    null, // No phenotypes (applicable to free text only)
+                    false // Free text confirmation not selected
                 );
             });
         }
@@ -332,95 +401,67 @@ const AddDiseaseModal = React.createClass({
     },
 
     // Method to render JSX when a disease term result is returned
-    renderResourceResult(type, term) {
-        // Set OLS linkout given the disease term type
-        let url;
-        let id = term.match(/[0-9]*$/);
-        switch(type) {
-            case 'orphanetid':
-                url = 'https://www.ebi.ac.uk/ols/ontologies/ordo/terms?iri=http://www.orpha.net/ORDO/Orphanet_';
-                break;
-            case 'doid':
-                url = 'https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_';
-                break;
-            case 'omimid':
-                url = 'https://www.ebi.ac.uk/ols/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/OMIM_';
-                break;
-            case 'ncitid':
-                url = 'https://www.ebi.ac.uk/ols/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/NCIT_C';
-                break;
-        }
-
+    renderResourceResult(id) {
         return(
             <div className="resource-metadata">
                 <p>Below are the data from OLS for the ID you submitted. Select "Save" below if it is the correct disease, otherwise revise your search above:</p>
                 <div className="panel panel-default">
-                    <span className="p-break disease-label"><a href={url + id} target="_blank">{this.state.tempResource['label']}</a></span>
-                    {this.state.tempResource['description'] ?
-                        <span className="p-break disease-description">{this.state.tempResource['description']}</span>
+                    <span className="p-break disease-label"><a href={external_url_map['MondoSearch'] + id.replace(':', "_")} target="_blank">{this.state.tempResource['label']}</a></span>
+                    {this.state.tempResource['annotation']['definition'] ?
+                        <span className="p-break disease-description">{this.state.tempResource['annotation']['definition']}</span>
                     : null}
                 </div>
             </div>
         );
     },
 
-    renderDiseaseIdInput(diseaseTermType) {
-        let diseaseIdInputLabel, placeholderText;
-        switch (diseaseTermType) {
-            case 'orphanetid':
-                diseaseIdInputLabel = 'Enter Orphanet ID:';
-                placeholderText = 'e.g. ORPHA:15';
-                break;
-            case 'doid':
-                diseaseIdInputLabel = 'Enter DO ID:';
-                placeholderText = 'e.g. DOID:7081';
-                break;
-            case 'omimid':
-                diseaseIdInputLabel = 'Enter OMIM ID:';
-                placeholderText = 'e.g. OMIM:133780';
-                break;
-            case 'ncitid':
-                diseaseIdInputLabel = 'Enter NCIt ID:';
-                placeholderText = 'e.g. NCIT:C9038';
-                break;
-        }
-
+    renderDiseaseIdInput() {
         return (
-            <div className="form-group disease-id-input">
-                <Input type="text" ref={diseaseTermType} label={diseaseIdInputLabel} handleChange={this.handleDiseaseTermChange} value={this.state.diseaseTerm}
-                    error={this.getFormError(diseaseTermType)} clearError={this.clrFormErrors.bind(null, diseaseTermType)}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input"
-                    placeholder={placeholderText} />
+            <div className="form-group disease-id-input clearfix">
+                <Input type="text" ref="diseaseId" label="Enter ID from MonDO search:" handleChange={this.handleDiseaseIdChange} value={this.state.diseaseId}
+                    error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input clearfix"
+                    placeholder="e.g. OMIM:100800, DOID:0050776" required />
                 <Input type="button-button" title="Retrieve from OLS" 
                     inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right btn-query-ols"} 
                     clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                 <div className="row">&nbsp;<br />&nbsp;</div>
-                {this.state.resourceFetched ? this.renderResourceResult(diseaseTermType, this.state.diseaseTerm) : null}
+                {this.state.resourceFetched ? this.renderResourceResult(this.state.diseaseId) : null}
+                <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Select this checkbox if you are unable to find a known disease ID:"
+                    labelClassName="col-sm-10 control-label" wrapperClassName="col-sm-2" groupClassName="form-group resource-input disease-freetext-confirm clearfix"
+                    checked={this.state.diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} />
             </div>
         );
     },
 
-    renderDiseaseFreeTextInput(diseaseTermType) {
+    renderDiseaseFreeTextInput() {
+        let phenotypes = this.state.phenotypes, hpoids;
+        if (phenotypes.length) {
+            hpoids = phenotypes.join(', ');
+        } else {
+            hpoids = ''
+        }
+
         return (
-            <div className="form-group disease-freetext-input">
-                <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Confirm there is no known Orphanet, Disease Ontology, OMIM or NCIt ID for this disease:"
-                    error={this.getFormError('diseaseFreeTextConfirmation')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextConfirmation')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-confirm"
-                    checked={this.state.diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} required />
-                <Input type="textarea" ref={diseaseTermType} label="Rich text description disease" handleChange={this.handleDiseaseFreeTextDescChange}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-desc"
-                    value={this.state.diseaseTerm} rows="2" required />
-                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s))" defaultValue={this.state.phenotypes}
+            <div className="form-group disease-freetext-input clearfix">
+                <Input type="text" ref="diseaseFreeTextTerm" label="Rich text disease name:" handleChange={this.handleDiseaseFreeTextTermChange}
+                    error={this.getFormError("diseaseFreeTextTerm")} clearError={this.clrFormErrors.bind(null, "diseaseFreeTextTerm")}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-name clearfix"
+                    value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxlength="200" required />
+                <Input type="textarea" ref="diseaseFreeTextDesc" label="Disease description:" handleChange={this.handleDiseaseFreeTextDescChange}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-desc clearfix"
+                    value={this.state.diseaseDescription ? this.state.diseaseDescription : ''} rows="2" />
+                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s)):" value={hpoids} placeholder="e.g. HP:0010704, HP:0030300"
                     error={this.getFormError('diseaseFreeTextPhenoTypes')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextPhenoTypes')} rows="1"
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-phenotypes" />
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-phenotypes clearfix" />
             </div>
         );
     },
 
     render() {
+        let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
-        let pattern = /^(orphanetid|doid|omimid|ncitid)$/i;
-        let diseaseTermType = this.state.diseaseTermType;
+        let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
 
         return (
             <ModalComponent modalTitle="Add Disease" modalClass="modal-default" modalWrapperClass={"add-disease-modal" + this.props.addDiseaseModalBtnLayoutClass}
@@ -428,21 +469,11 @@ const AddDiseaseModal = React.createClass({
                 <div className="form-std">
                     <div className="modal-body">
                         <div className="row">
-                            <div>
-                                <p>OLS (Ontology Lookup Service) is the provider of terminology data.</p>
+                            <div className="ontology-lookup-note">
+                                <p>Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</p>
                             </div>
-                            <Input type="select" ref="diseaseTermType" label="Select disease terminology:"
-                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input"
-                                value={diseaseTermType} handleChange={this.handleDiseaseTermTypeChange}>
-                                <option value="none">No Selection</option>
-                                <option value="orphanetid">Orphanet ID</option>
-                                <option value="doid">DO ID</option>
-                                <option value="omimid">OMIM ID</option>
-                                <option value="ncitid">NCIt ID</option>
-                                <option value="freetext">Free text</option>
-                            </Input>
-                            {diseaseTermType.match(pattern) ? this.renderDiseaseIdInput(diseaseTermType) : null}
-                            {diseaseTermType.indexOf('freetext') > -1 ? this.renderDiseaseFreeTextInput(diseaseTermType) : null}
+                            {!diseaseFreeTextConfirm ? this.renderDiseaseIdInput() : null}
+                            {diseaseFreeTextConfirm ? this.renderDiseaseFreeTextInput() : null}
                         </div>
                     </div>
                     <div className='modal-footer'>
@@ -451,9 +482,9 @@ const AddDiseaseModal = React.createClass({
                             type="button-button"
                             title="Save"
                             clickHandler={this.submitResource}
-                            inputDisabled={!diseaseTerm}
+                            inputDisabled={this.state.submitResourceDisabled}
                             submitBusy={this.state.submitResourceBusy}
-                            inputClassName={this.getFormError(diseaseTermType) === null || this.getFormError(diseaseTermType) === undefined || this.getFormError(diseaseTermType) === '' ?
+                            inputClassName={this.getFormError(diseaseId) === null || this.getFormError(diseaseId) === undefined || this.getFormError(diseaseId) === '' ?
                             "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"}
                         />
                     </div>
@@ -468,27 +499,21 @@ const AddDiseaseModal = React.createClass({
  * 1) numeric values only
  * 2) empty string not allowed
  */
-function validateDiseaseTermInput(diseaseTermType) {
-    // validating the field for user-entered disease term
+function validateDiseaseIdInput(id) {
+    // validating the field for user-entered disease id
     let valid = this.validateDefault();
-    let diseaseTerm = this.getFormValue(diseaseTermType);
 
     if (valid) {
-        if (diseaseTerm && diseaseTerm.length) {
-            /*
-            if (diseaseTerm.match(/^[0-9]*$/)) {
+        if (id && id.length) {
+            // Expect a semicolon (':') in the id and it is not at the start of the id string
+            // Such as 'DOID:7081' or 'Orphanet:777'
+            if (id.indexOf(':') < 1) {
                 valid = false;
-                this.setFormErrors(diseaseTermType, 'Please enter valid ID');
+                this.setFormErrors('diseaseId', 'Please enter a valid ID');
             }
-            
-            if (!diseaseTerm.match(/^(ORPHA|DOID|OMIM|NCIT)/)) {
-                valid = false;
-                this.setFormErrors(diseaseTermType, 'Please enter valid ID');
-            }
-            */
         } else {
             valid = false;
-            this.setFormErrors(diseaseTermType, 'Please enter an ID');
+            this.setFormErrors('diseaseId', 'Please enter a valid ID');
         }
     }
 
@@ -498,42 +523,29 @@ function validateDiseaseTermInput(diseaseTermType) {
 /**
  * Method to make OLS REST API call given the user-selected ID type
  */
-function queryResourceById(diseaseTermType) {
-    let term = this.state.diseaseTerm;
-    let id = term.match(/[0-9]*$/);
-    this.saveFormValue(diseaseTermType, id);
-    if (validateDiseaseTermInput.call(this, diseaseTermType)) {
-        // Set OLS REST API endpoint given the disease term type
-        let url;
-        switch(diseaseTermType) {
-            case 'orphanetid':
-                url = 'https://www.ebi.ac.uk/ols/api/ontologies/ordo/terms?iri=http://www.orpha.net/ORDO/Orphanet_';
-                break;
-            case 'doid':
-                url = 'https://www.ebi.ac.uk/ols/api/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_';
-                break;
-            case 'omimid':
-                url = 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/OMIM_';
-                break;
-            case 'ncitid':
-                url = 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/NCIT_C';
-                break;
-        }
-        // Make the API call
-        return this.getRestData(url + id).then(response => {
+function queryResourceById(id) {
+    this.saveFormValue('diseaseId', id);
+    if (validateDiseaseIdInput.call(this, id)) {
+        // Make the OLS REST API call
+        return this.getRestData(external_url_map['MondoApi'] + id.replace(':', '_')).then(response => {
             let termLabel = response['_embedded']['terms'][0]['label'];
             let termIri = response['_embedded']['terms'][0]['iri'];
             if (termLabel && termIri) {
                 // Disease ID is found at OLS
-                this.setState({queryResourceBusy: false, tempResource: response['_embedded']['terms'][0], resourceFetched: true});
+                this.setState({
+                    queryResourceBusy: false,
+                    submitResourceDisabled: false,
+                    tempResource: response['_embedded']['terms'][0],
+                    resourceFetched: true
+                });
             } else {
                 // Disease ID not found at OLS
-                this.setFormErrors(diseaseTermType, 'Requested ID not found at OLS.');
+                this.setFormErrors('diseaseId', 'Requested ID not found at OLS.');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
             }
         }).catch(err => {
             // error handling for disease query
-            this.setFormErrors(diseaseTermType, 'Unable to retrieve data from OLS.');
+            this.setFormErrors('diseaseId', 'Unable to retrieve data from OLS.');
             this.setState({queryResourceBusy: false, resourceFetched: false});
             console.warn('OLS terminology fetch error :: %o', err);
         });
@@ -542,3 +554,11 @@ function queryResourceById(diseaseTermType) {
     }
 }
 
+/**
+ * Method to randomly generate 8-digit integer number for free text id
+ */
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
