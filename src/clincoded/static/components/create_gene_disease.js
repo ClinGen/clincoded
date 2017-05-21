@@ -33,6 +33,7 @@ var CreateGeneDisease = React.createClass({
             hgncgene: '',
             orphanetid: '',
             diseaseObj: {},
+            diseaseUuid: null,
             diseaseError: null,
             adjectives: [],
             adjectiveDisabled: true
@@ -82,9 +83,15 @@ var CreateGeneDisease = React.createClass({
 
         // Check if orphanetid
         if (valid) {
+            /*
             valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
             if (!valid) {
                 this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
+            }
+            */
+            if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
+                this.setState({diseaseError: 'Disease is required!'});
+                valid = false;
             }
         }
         return valid;
@@ -100,7 +107,10 @@ var CreateGeneDisease = React.createClass({
 
         // Get values from form and validate them
         this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
-        this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
+        /**
+         * FIXME: Need to delete orphanet reference
+         */
+        // this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
         this.saveFormValue('hpo', this.refs.hpo.getValue());
         let moiAdjectiveValue = this.refs.moiAdjective.getValue();
         if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
@@ -108,29 +118,46 @@ var CreateGeneDisease = React.createClass({
         }
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
+            /**
+             * FIXME: Need to delete orphanet reference
+             */
+            // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('hpo');
             let adjective = this.getFormValue('moiAdjective');
+            let diseaseObj = this.state.diseaseObj;
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
             // If either error out, set the form error fields
             this.getRestDatas([
-                '/diseases/' + orphaId,
                 '/genes/' + geneId
             ], [
-                function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this),
                 function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
-            ]).then(data => {
+            ]).then(response => {
+                return this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
+                    let diseaseUuid;
+                    if (diseaseSearch.total === 0) {
+                        this.postRestData('/diseases/', diseaseObj).then(result => {
+                            let newDisease = result['@graph'][0];
+                            diseaseUuid = newDisease['uuid'];
+                            this.setState({diseaseUuid: diseaseUuid});
+                        });
+                    } else {
+                        let _id = diseaseSearch['@graph'][0]['@id'];
+                        diseaseUuid = _id.slice(10, -1);
+                        this.setState({diseaseUuid: diseaseUuid});
+                    }
+                });
+            }).then(data => {
                 // Load GDM if one with matching gene/disease/mode already exists
                 return this.getRestData(
-                    '/search/?type=gdm&disease.orphaNumber=' + orphaId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
+                    '/search/?type=gdm&disease.id=' + diseaseObj.id + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
                 ).then(gdmSearch => {
                     if (gdmSearch.total === 0) {
                         // Matching GDM not found. Create a new GDM
                         let newGdm = {
                             gene: geneId,
-                            disease: orphaId,
+                            disease: this.state.diseaseUuid,
                             modeInheritance: mode
                         };
                         if (adjective && adjective.length) {
@@ -203,7 +230,7 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} />
+                                <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} session={this.props.session} />
                                 <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
                                     error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
