@@ -18,6 +18,7 @@ var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 
 import ModalComponent from '../libs/bootstrap/modal';
+import { AddDisease } from './disease';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -78,8 +79,84 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         pmid: React.PropTypes.string
     },
 
+    getInitialState() {
+        return {
+            gdm: null,
+            diseaseObj: {},
+            diseaseError: null
+        };
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.gdm) {
+            this.setState({gdm: nextProps.gdm});
+        }
+    },
+
+    /**
+     * Update the 'diseaseObj' state used to save data upon modal form submission
+     * Also update the gdm-associated disease object in the database
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj}, () => {
+            const gdm = this.props.gdm;
+            const disease = this.props.gdm && this.props.gdm.disease;
+
+            this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
+                let flattenDiseaseObj = flatten(currDiseaseObj);
+                // Update disease object properties
+                flattenDiseaseObj['id'] = diseaseObj['diseaseId'];
+                flattenDiseaseObj['term'] = diseaseObj['diseaseTerm'];
+                flattenDiseaseObj['ontology'] = diseaseObj['diseaseOntology'];
+                // Update description (if any)
+                if (diseaseObj['diseaseDescription']) {
+                    flattenDiseaseObj['description'] = diseaseObj['diseaseDescription'];
+                } else {
+                    if ('description' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['description'];
+                    }
+                }
+                // Update optional phenotypes (applicable to free text only)
+                if (diseaseObj['phenotypes']) {
+                    flattenDiseaseObj['phenotypes'] = diseaseObj['phenotypes'];
+                } else {
+                    if ('phenotypes' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['phenotypes'];
+                    }
+                }
+                // Update optional free text confirmation (applicable to free text only)
+                if (diseaseObj['diseaseFreeTextConfirm']) {
+                    flattenDiseaseObj['freetext'] = true;
+                } else {
+                    if ('freetext' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['freetext'];
+                    }
+                }
+                // Update synonyms
+                if (diseaseObj['synonyms']) {
+                    flattenDiseaseObj['synonyms'] = diseaseObj['synonyms'];
+                } else {
+                    if ('synonyms' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['synonyms'];
+                    }
+                }
+
+                this.putRestData('/diseases/' + disease.uuid, flattenDiseaseObj).then(result => {
+                    let newDiseaseObj = result['@graph'][0];
+                    return Promise.resolve(newDiseaseObj);
+                }).then(data => {
+                    this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                        this.setState({gdm: updatedGdm});
+                    });
+                });
+            }).catch(err => {
+                console.warn('GCI update disease error :: %o', err);
+            });
+        });
+    },
+
     render: function() {
-        var gdm = this.props.gdm;
+        var gdm = this.state.gdm;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var summaryPage = this.props.summaryPage ? true : false;
 
@@ -163,6 +240,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
+                                        <span className="gdm-disease-edit">
+                                            {disease.freetext && userMatch(gdm.submitted_by, session) ?
+                                                <AddDisease ref="editDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
+                                                     session={this.props.session} />
+                                            : null}
+                                        </span>
                                         <span>&nbsp;
                                             {this.props.linkGdm ?
                                                 <a href={`/curation-central/?gdm=${gdm.uuid}` + (pmid ? `&pmid=${pmid}` : '')}><i className="icon icon-briefcase"></i></a>
@@ -970,7 +1053,14 @@ var DiseaseRecordHeader = React.createClass({
                     {disease ?
                         <dl>
                             <dt>{disease.term}</dt>
-                            <dd>Disease ID: <a href={external_url_map['MondoSearch'] + disease.id.replace(':', '_')} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id}</a></dd>
+                            <dd>
+                                <span>Disease ID: </span>
+                                {!disease.freetext && disease.id.indexOf('FREETEXT') < -1 ?
+                                    <a href={external_url_map['MondoSearch'] + disease.id.replace(':', '_')} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id}</a>
+                                    :
+                                    <span>{disease.id}</span>
+                                }
+                            </dd>
                             <dd>
                                 <a href="http://omim.org/" target="_blank" title="Online Mendelian Inheritance in Man home page in a new window">OMIM</a> ID: {this.props.omimId ?
                                     <a href={external_url_map['OMIM'] + this.props.omimId} title={'Open Online Mendelian Inheritance in Man page for OMIM ID ' + this.props.omimId + ' in a new window'} target="_blank">
@@ -1541,6 +1631,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenInterpretation(obj);
                 break;
 
+            case 'disease':
+                flat = flattenDisease(obj);
+                break;
+
             default:
                 break;
         }
@@ -1932,6 +2026,16 @@ var evidenceScoreSimpleProps = [
 
 function flattenEvidenceScore(evidencescore) {
     var flat = cloneSimpleProps(evidencescore, evidenceScoreSimpleProps);
+
+    return flat;
+}
+
+const diseaseSimpleProps = [
+    "id", "term", "description", "ontology", "phenotypes", "type", "omimIds", "synonyms"
+];
+
+function flattenDisease(disease) {
+    var flat = cloneSimpleProps(disease, diseaseSimpleProps);
 
     return flat;
 }
