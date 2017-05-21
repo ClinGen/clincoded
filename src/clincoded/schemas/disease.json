@@ -54,6 +54,11 @@
                 "type": "string"
             }
         },
+        "freetext": {
+            "title": "Flag for free text disease",
+            "description": "Boolean value to flag free text disease term",
+            "type": "boolean"
+        },
         "type": {
             "title": "Type.",
             "description": "Type of Orphanet phenotype.",
