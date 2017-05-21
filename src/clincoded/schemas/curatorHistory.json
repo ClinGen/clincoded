@@ -133,10 +133,10 @@
                             "linkTo": "gene"
                         },
                         "disease": {
-                            "title": "Orpha ID",
-                            "description": "Unique id for Orphanet phenotypes.",
+                            "title": "Unique ID of disease term",
+                            "description": "Unique id (Orphanet, DOID, OMIM or NCIt) or free text.",
                             "type": "string",
-                            "linkTo": "orphaPhenotype"
+                            "linkTo": "disease"
                         }
                     }
                 },
