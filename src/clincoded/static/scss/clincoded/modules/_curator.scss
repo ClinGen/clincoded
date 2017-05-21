@@ -41,6 +41,40 @@
         span {
             word-break: break-all;
         }
+
+        .add-disease-group {
+            display: inline-block;
+            font-weight: normal;
+            margin-bottom: 0;
+            text-align: left;
+            vertical-align: text-bottom;
+
+            &> label.col-sm-5 {
+                display: none;
+                float: none;
+            }
+
+            .add-disease {
+                padding: 0 3px 0 7px;
+                width: auto;
+
+                .disease-name {
+                    display: none;
+                }
+
+                .input-group-btn-disease-term {
+                    padding: 3px 8px;
+
+                    .icon {
+                        color: #fff;
+                        font-size: 16px;
+                        margin-top: 2px;
+                        margin-left: 5px;
+                        vertical-align: text-bottom;
+                    }
+                }
+            }
+        }
     }
 
     h2 {
