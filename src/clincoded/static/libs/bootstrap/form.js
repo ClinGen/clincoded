@@ -180,7 +180,7 @@ var FormMixin = module.exports.FormMixin = {
             if (props.required && !val) {
                 // Required field has no value. Set error state to render
                 // error, and remember to return false.
-                this.setFormErrors(ref, 'Required');
+                this.setFormErrors(ref, props.customErrorMsg ? props.customErrorMsg : 'Required');
                 valid = false;
             } else if (props.type === 'number') {
                 // Validate that type="number" fields have a valid number in them
@@ -219,6 +219,11 @@ var Input = module.exports.Input = React.createClass({
             React.PropTypes.string,
             React.PropTypes.object
         ]),
+        helpText: React.PropTypes.oneOfType([ // <p> help text beneath the text input field
+            React.PropTypes.string,
+            React.PropTypes.object
+        ]),
+        helpTextId: React.PropTypes.string, // <p> help text element id; required if 'helpText' props is used
         placeholder: React.PropTypes.string, // <input> placeholder text
         maxLength: React.PropTypes.string, // maxlength for labels
         error: React.PropTypes.string, // Error message to display below input
@@ -355,7 +360,10 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
+                            ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength}
+                            disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null} />
+                        {this.props.helpText ? <p id={this.props.helpTextId} className="form-text text-muted">{this.props.helpText}</p> : null}
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );

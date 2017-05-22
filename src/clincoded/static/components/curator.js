@@ -1453,7 +1453,7 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
@@ -1464,6 +1464,11 @@ module.exports.capture = {
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
         return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
+    efoclids: function(s) {
+        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
     }
 };
 
@@ -2072,8 +2077,8 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                 <div className="col-sm-7 alert alert-warning">
                     <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
-                        terms wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular feature,
-                        please describe it in the free text box instead.
+                        terms wherever possible (e.g. HP:0010704, HP:0030300). If you are unable to find an appropriate HPO term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null }
@@ -2133,6 +2138,50 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
         </div>
     );
 };
+
+// Generic render method for the yellow warning message box
+export function renderWarning(context) {
+    return (
+        <div>
+            { context === 'GO' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the gene's molecular function or biological process term  <strong>(required)</strong> using the Gene Ontology (GO)
+                        term wherever possible (e.g. GO:2001284). If you are unable to find an appropriate GO term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null }
+            { context === 'UBERON' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
+                        (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null}
+            { context === 'CL' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
+                        If you are unable to find an appropriate CL term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null}
+            { context === 'CL_EFO' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
+                        (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null}
+        </div>
+    );
+}
 
 // A link to Mutalyzer to check HGVC terms
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
