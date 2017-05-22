@@ -2,7 +2,7 @@
     {
         "uuid": "80635629-f3c1-4a48-b63e-0db849e8e354",
         "term": "Achondroplasia",
-        "id": "Orphanet:15",
+        "id": "Orphanet_15",
         "description": "",
         "ontology": "ORPHANET",
         "active": true,
@@ -14,7 +14,7 @@
     {
         "uuid": "e623cfdd-400c-4c6d-bd9f-c0fedf630e6b",
         "term": "Fanconi anemia",
-        "id": "Orphanet:84",
+        "id": "Orphanet_84",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -43,7 +43,7 @@
     {
         "uuid": "f8c8525c-adf9-4fda-8e86-a30832347edd",
         "term": "Nephroblastoma",
-        "id": "Orphanet:654",
+        "id": "Orphanet_654",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -63,7 +63,7 @@
     {
         "uuid": "88ddad2b-4849-4546-ad75-af157b2d4a1b",
         "term": "Severe combined immunodeficiency",
-        "id": "Orphanet:183660",
+        "id": "Orphanet_183660",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -75,7 +75,7 @@
     {
         "uuid": "657cb29e-63b6-4416-b613-557aa18ac765",
         "term": "X-linked non-syndromic intellectual disability",
-        "id": "Orphanet:777",
+        "id": "Orphanet_777",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -126,7 +126,7 @@
     {
         "uuid": "aa217d94-5e04-4144-af5d-0b49e9dba754",
         "term": "Congenital muscular dystrophy with intellectual disability",
-        "id": "Orphanet:370968",
+        "id": "Orphanet_370968",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -146,7 +146,7 @@
     {
         "uuid": "c5694e37-cd5b-42a3-b6db-e3fb6a629e63",
         "term": "Aneurysm - osteoarthritis syndrome",
-        "id": "Orphanet:284984",
+        "id": "Orphanet_284984",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -161,7 +161,7 @@
     {
         "uuid": "82e69bcc-91c5-4a66-8293-3befc7445966",
         "term": "Familial exudative vitreoretinopathy",
-        "id": "Orphanet:891",
+        "id": "Orphanet_891",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
@@ -181,7 +181,7 @@
     {
         "uuid": "e10d0bb8-7f3a-4c91-85a5-19d1ea0d79c3",
         "term": "Pleuropulmonary blastoma",
-        "id": "Orphanet:64742",
+        "id": "Orphanet_64742",
         "description": "",
         "ontology": "ORPHANET",
         "active": true,
@@ -193,7 +193,7 @@
     {
         "uuid": "028c938f-0a1c-4aa1-bd02-4c574d2f58e2",
         "term": "Milroy disease",
-        "id": "Orphanet:79452",
+        "id": "Orphanet_79452",
         "description": "",
         "ontology": "ORPHANET",
         "synonyms": [
