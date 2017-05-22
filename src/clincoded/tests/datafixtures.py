@@ -44,7 +44,7 @@ def gene(testapp):
 @pytest.fixture
 def disease(testapp):
     item = {
-        'id': 'Orphanet:15',
+        'id': 'Orphanet_15',
         'term': 'Achondroplasia',
     }
     res = testapp.post_json('/disease', item)
