@@ -218,6 +218,8 @@ const AddDiseaseModal = React.createClass({
             phenotypes: this.props.phenotypes, // HPO IDs
             synonyms: this.props.synonyms, // Disease synonyms
             diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm, // User confirmation of entering free text for disease
+            hasFreeTextDiseaseDescription: false, // True if disease description for free text is present
+            hasFreeTextDiseasePhenotypes: false, // True if phenotypes for free text is present
             queryResourceDisabled: true, // Flag to disable the get OLS data button
             queryResourceBusy: false, // Flag to indicate the input button's 'busy' state
             resourceFetched: false, // Flag to indicate that a response from the resource has been obtained
@@ -239,6 +241,20 @@ const AddDiseaseModal = React.createClass({
         if (this.state.diseaseTerm && this.refs['diseaseId']) {
             this.renderResourceResult();
         }
+        if (this.state.diseaseFreeTextConfirm) {
+            // Set boolean state on 'required' prop for free text disease description
+            if (this.state.diseaseDescription && this.state.diseaseDescription.length) {
+                this.setState({hasFreeTextDiseaseDescription: true});
+            } else {
+                this.setState({hasFreeTextDiseaseDescription: false});
+            }
+            // Set boolean state on 'required' prop for free text disease phenotypes
+            if (this.state.phenotypes && this.state.phenotypes.length) {
+                this.setState({hasFreeTextDiseasePhenotypes: true});
+            } else {
+                this.setState({hasFreeTextDiseasePhenotypes: false});
+            }
+        }
     },
 
     componentWillReceiveProps(nextProps)  {
@@ -252,13 +268,17 @@ const AddDiseaseModal = React.createClass({
             this.setState({diseaseOntology: nextProps.diseaseOntology});
         }
         if (nextProps.diseaseDescription) {
-            this.setState({diseaseDescription: nextProps.diseaseDescription});
+            this.setState({diseaseDescription: nextProps.diseaseDescription, hasFreeTextDiseaseDescription: true});
         }
         if (nextProps.diseaseFreeTextConfirm) {
             this.setState({diseaseFreeTextConfirm: nextProps.diseaseFreeTextConfirm});
         }
         if (nextProps.phenotypes) {
-            this.setState({phenotypes: nextProps.phenotypes});
+            this.setState({phenotypes: nextProps.phenotypes}, () => {
+                if (this.state.phenotypes.length) {
+                    this.setState({hasFreeTextDiseasePhenotypes: true});
+                }
+            });
         }
         if (nextProps.synonyms) {
             this.setState({synonyms: nextProps.synonyms});
@@ -357,6 +377,28 @@ const AddDiseaseModal = React.createClass({
         }
     },
 
+    /**
+     * Method to ensure either (or both) free text disease description or phenotypes are present
+     */
+    handleDiseaseFreeTextDescChange(e) {
+        if (this.refs['diseaseFreeTextDesc'] && !this.refs['diseaseFreeTextDesc'].getValue()) {
+            this.setState({hasFreeTextDiseaseDescription: false});
+        } else {
+            this.setState({hasFreeTextDiseaseDescription: true}, () => {this.clrFormErrors('diseaseFreeTextPhenoTypes')});
+        }
+    },
+
+    /**
+     * Method to ensure either (or both) free text disease description or phenotypes are present
+     */
+    handleDiseaseFreeTextPhenotypesChange(e) {
+        if (this.refs['diseaseFreeTextPhenoTypes'] && !this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
+            this.setState({hasFreeTextDiseasePhenotypes: false});
+        } else {
+            this.setState({hasFreeTextDiseasePhenotypes: true}, () => {this.clrFormErrors('diseaseFreeTextDesc')});
+        }
+    },
+
     // Invoked when the 'Retrieve...' button is pressed in the modal
     queryResource(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
@@ -371,37 +413,51 @@ const AddDiseaseModal = React.createClass({
 
         // Save all form values from the DOM.
         this.saveAllFormValues();
+        let formError = false;
 
         if (this.state.diseaseFreeTextConfirm) {
             if (this.refs['diseaseFreeTextTerm'] && !this.refs['diseaseFreeTextTerm'].getValue()) {
                 this.setFormErrors('diseaseFreeTextTerm', 'Required for free text disease');
                 return;
             }
+            if (this.refs['diseaseFreeTextDesc'] && !this.refs['diseaseFreeTextDesc'].getValue()) {
+                if (!this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
+                    formError = true;
+                    this.setFormErrors('diseaseFreeTextDesc', 'A description or HPO IDs (e.g. HP:0000001) are required');
+                }
+            }
+            if (this.refs['diseaseFreeTextPhenoTypes'] && !this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
+                if (!this.refs['diseaseFreeTextDesc'].getValue()) {
+                    formError = true;
+                    this.setFormErrors('diseaseFreeTextPhenoTypes', 'A description or HPO IDs (e.g. HP:0000001) are required');
+                }
+            }
             if (this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
                 let hpoids = curator.capture.hpoids(this.getFormValue('diseaseFreeTextPhenoTypes'));
-                let formError = false;
                 // Check HPO ID format
                 if (hpoids && hpoids.length && _(hpoids).any(id => { return id === null; })) {
                     // HPOID list is bad
                     formError = true;
                     this.setFormErrors('diseaseFreeTextPhenoTypes', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-                    return;
                 }
             }
-            this.setState({
-                diseaseDescription: this.refs['diseaseFreeTextDesc'] && this.refs['diseaseFreeTextDesc'].getValue() ? this.refs['diseaseFreeTextDesc'].getValue() : null,
-                phenotypes: this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue() ? this.refs['diseaseFreeTextPhenoTypes'].getValue().split(', ') : []
-            }, () => {
-                this.props.passDataToParent(
-                    'FREETEXT:' + getRandomInt(10000000, 99999999), // Set free text disease id
-                    this.state.diseaseTerm,
-                    null, // No ontology for free text
-                    this.state.diseaseDescription,
-                    [], // No synonyms for free text
-                    this.state.phenotypes,
-                    this.state.diseaseFreeTextConfirm
-                );
-            });
+            if (!formError) {
+                this.setState({
+                    diseaseDescription: this.refs['diseaseFreeTextDesc'] && this.refs['diseaseFreeTextDesc'].getValue() ? this.refs['diseaseFreeTextDesc'].getValue() : null,
+                    phenotypes: this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue() ? this.refs['diseaseFreeTextPhenoTypes'].getValue().split(', ') : []
+                }, () => {
+                    this.props.passDataToParent(
+                        'FREETEXT:' + getRandomInt(10000000, 99999999), // Set free text disease id
+                        this.state.diseaseTerm,
+                        null, // No ontology for free text
+                        this.state.diseaseDescription,
+                        [], // No synonyms for free text
+                        this.state.phenotypes,
+                        this.state.diseaseFreeTextConfirm
+                    );
+                    this.handleModalClose();
+                });
+            }
         } else {
             let diseaseId = this.state.diseaseId;
             this.setState({
@@ -419,9 +475,9 @@ const AddDiseaseModal = React.createClass({
                     null, // No phenotypes (applicable to free text only)
                     false // Free text confirmation not selected
                 );
+                this.handleModalClose();
             });
         }
-        this.handleModalClose();
     },
 
     // Method to render JSX when a disease term result is returned
@@ -484,10 +540,12 @@ const AddDiseaseModal = React.createClass({
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-name clearfix"
                     value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxLength="200" required />
                 <Input type="textarea" ref="diseaseFreeTextDesc" label="Disease description:" handleChange={this.handleDiseaseFreeTextDescChange}
+                    error={this.getFormError('diseaseFreeTextDesc')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextDesc')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-desc clearfix"
-                    value={this.state.diseaseDescription ? this.state.diseaseDescription : ''} rows="2" />
-                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s)):" value={hpoids} placeholder="e.g. HP:0010704, HP:0030300"
-                    error={this.getFormError('diseaseFreeTextPhenoTypes')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextPhenoTypes')} rows="1"
+                    value={this.state.diseaseDescription ? this.state.diseaseDescription : ''} rows="2" required={!this.state.hasFreeTextDiseasePhenotypes} />
+                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s)):" handleChange={this.handleDiseaseFreeTextPhenotypesChange}
+                    error={this.getFormError('diseaseFreeTextPhenoTypes')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextPhenoTypes')}
+                    value={hpoids} placeholder="e.g. HP:0010704, HP:0030300" rows="1" required={!this.state.hasFreeTextDiseaseDescription}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-phenotypes clearfix" />
             </div>
         );
