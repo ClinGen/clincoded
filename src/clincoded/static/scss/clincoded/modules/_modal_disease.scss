@@ -14,24 +14,31 @@
 
                 label {
                     text-align: left;
+
+                    .label-note {
+                        font-weight: normal;
+                    }
                 }
 
                 &.disease-id-input {
                     margin: 15px 0 0 0;
 
-                    input {
+                    input[type='text'] {
                         float: none;
+                        margin-top: 10px;
                     }
 
                     .disease-freetext-confirm {
-                        margin-top: 20px;
+                        margin-top: 15px;
+                        margin-bottom: 15px;
                         white-space: normal;
 
                         label {
+                            font-weight: normal;
                             padding-top: 0;
                         }
 
-                        .col-sm-2 {
+                        .col-sm-5 {
                             margin-left: 0;
                             padding-left: 0;
 
@@ -41,6 +48,7 @@
                         }
                     }
 
+                    .disease-freetext-confirm-input-group,
                     .resource-metadata {
                         margin: 15px 15px 0 15px;
                         white-space: normal;
