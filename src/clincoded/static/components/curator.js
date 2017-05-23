@@ -1055,8 +1055,8 @@ var DiseaseRecordHeader = React.createClass({
                             <dt>{disease.term}</dt>
                             <dd>
                                 <span>Disease ID: </span>
-                                {!disease.freetext && disease.id.indexOf('FREETEXT') < -1 ?
-                                    <a href={external_url_map['MondoSearch'] + disease.id.replace(':', '_')} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id}</a>
+                                {!disease.freetext && disease.id.indexOf('FREETEXT') < 0 ?
+                                    <a href={external_url_map['MondoSearch'] + disease.id} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id.replace('_', ':')}</a>
                                     :
                                     <span>{disease.id}</span>
                                 }
