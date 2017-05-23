@@ -412,6 +412,20 @@
             .add-disease {
                 .disease-name {
                     padding-left: 0px;
+
+                    .data-view {
+                        display: flex;
+                        font-weight: normal;
+
+                        &.disease-name {
+                            font-weight: bold;
+                        }
+
+                        &.disease-desc,
+                        &.disease-phenotypes {
+                            padding-top: 8px;
+                        }
+                    }
                 }
 
                 .btn {
