@@ -546,6 +546,13 @@ function validateDiseaseIdInput(id) {
                 valid = false;
                 this.setFormErrors('diseaseId', 'Please enter a valid ID');
             }
+            /**
+             * Disallow OMIA IDs
+             */
+            if (id.indexOf('OMIA') > -1) {
+                valid = false;
+                this.setFormErrors('diseaseId', 'OMIA IDs are not supported');
+            }
         } else {
             valid = false;
             this.setFormErrors('diseaseId', 'Please enter a valid ID');
