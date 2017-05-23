@@ -478,7 +478,7 @@ const AddDiseaseModal = React.createClass({
                 <Input type="text" ref="diseaseFreeTextTerm" label="Rich text disease name:" handleChange={this.handleDiseaseFreeTextTermChange}
                     error={this.getFormError("diseaseFreeTextTerm")} clearError={this.clrFormErrors.bind(null, "diseaseFreeTextTerm")}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-name clearfix"
-                    value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxlength="200" required />
+                    value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxLength="200" required />
                 <Input type="textarea" ref="diseaseFreeTextDesc" label="Disease description:" handleChange={this.handleDiseaseFreeTextDescChange}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-desc clearfix"
                     value={this.state.diseaseDescription ? this.state.diseaseDescription : ''} rows="2" />
