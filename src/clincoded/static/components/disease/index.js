@@ -142,7 +142,9 @@ const AddDisease = module.exports.AddDisease = React.createClass({
 
         return (
             <div className="form-group add-disease-group">
-                <label htmlFor="add-disease" className="col-sm-5 control-label"><span>Please add disease:<span className="required-field"> *</span></span></label>
+                <label htmlFor="add-disease" className="col-sm-5 control-label">
+                    <span>Select disease:<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a></span></span>
+                </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-8" : "disease-name"}>
                         {error ?
@@ -421,18 +423,29 @@ const AddDiseaseModal = React.createClass({
     renderDiseaseIdInput() {
         return (
             <div className="form-group disease-id-input clearfix">
-                <Input type="text" ref="diseaseId" label="Enter ID from MonDO search:" handleChange={this.handleDiseaseIdChange} value={this.state.diseaseId}
+                <Input type="text" ref="diseaseId" handleChange={this.handleDiseaseIdChange} value={this.state.diseaseId}
+                    label={<span>Enter the term "id" <span className="label-note">(Term "id" can be found in the "Term info" box displayed on the right hand side on the term page of the OLS)</span>:</span>}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input clearfix"
+                    labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
                     placeholder="e.g. OMIM:100800, DOID:0050776" required />
                 <Input type="button-button" title="Retrieve from OLS" 
                     inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right btn-query-ols"} 
                     clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                 <div className="row">&nbsp;<br />&nbsp;</div>
-                {this.state.resourceFetched ? this.renderResourceResult(this.state.diseaseId) : null}
-                <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Select this checkbox if you are unable to find a known disease ID:"
-                    labelClassName="col-sm-10 control-label" wrapperClassName="col-sm-2" groupClassName="form-group resource-input disease-freetext-confirm clearfix"
-                    checked={this.state.diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} />
+                {this.state.resourceFetched ?
+                    this.renderResourceResult(this.state.diseaseId)
+                :
+                <div className="disease-freetext-confirm-input-group clearfix">
+                    <p>Note: We strongly encourage use of a MonDO ontology term and therefore specific database identifier for a disease. If you have searchedand
+                        there is no appropriate database identifier you may contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and/or
+                        create a term using free text.</p>
+                    <div className="panel panel-default">
+                        <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Select this checkbox to find free text option:"
+                            labelClassName="col-sm-7 control-label" wrapperClassName="col-sm-5" groupClassName="form-group resource-input disease-freetext-confirm clearfix"
+                            checked={this.state.diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} />
+                    </div>
+                </div>
+                }
             </div>
         );
     },
