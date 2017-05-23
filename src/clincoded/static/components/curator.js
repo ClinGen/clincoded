@@ -250,7 +250,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         <span className="gdm-disease-edit">
-                                            {disease.freetext && userMatch(gdm.submitted_by, session) ?
+                                            {disease.freetext && userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
                                                 <AddDisease ref="editDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
                                                     clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
                                             : null}
