@@ -2722,6 +2722,10 @@ table.login-users-interpretations {
         margin-bottom: 10px;
     }
 
+    .gene-ontology.help-text.style-list {
+        padding-left: 14px;
+    }
+
     dl.calculated-score {
         width: 100%;
         margin-bottom: 15px;
@@ -2813,6 +2817,10 @@ table.login-users-interpretations {
                 padding-left: 10px;
                 text-align: left;
             }
+        }
+
+        .creator-score-status-note {
+            color: #606060;
         }
     }
 }

@@ -159,11 +159,11 @@ export function parseClinvarSCVs(xml) {
                                 let PhenotypeList = GermlineNodes[i].getElementsByTagName('PhenotypeList')[0];
                                 if (PhenotypeList) {
                                     let Phenotypes = PhenotypeList.getElementsByTagName('Phenotype');
-                                    let Phenotype = {};
+                                    for (var x = 0; x < Phenotypes.length; x++) {
+                                        let Phenotype = {};
                                         // Name this property as 'identifiers' instead of 'XRefList' so that we can
                                         // share the same rendering functions with the RCVs
                                         Phenotype['identifiers'] = [];
-                                    for (var x = 0; x < Phenotypes.length; x++) {
                                         if (Phenotypes[x].getAttribute('Name')) {
                                             Phenotype['name'] = Phenotypes[x].getAttribute('Name');
                                         }

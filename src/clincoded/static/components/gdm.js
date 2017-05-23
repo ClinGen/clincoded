@@ -41,9 +41,9 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         let gdms = this.props.context['@graph'];
         if (gdms && gdms.length) {
             gdms.forEach(gdm => {
-                let annotationOwners = curator.getAnnotationOwners(gdm);
-                let participants = annotationOwners ? annotationOwners.map(owner => { return owner.title; }).join(', ') : '';
-                let latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
+                let allRecordOwners = curator.findAllParticipants(gdm);
+                let participants = allRecordOwners ? allRecordOwners.map(owner => { return owner.title; }).join(', ') : '';
+                let latestRecord = gdm && curator.findLatestRecord(gdm);
                 let statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
                 let iconClass = 'icon gdm-status-icon-' + statusString;
                 // Directly passing the date string into the moment() method still cause the test to fail.
@@ -51,7 +51,7 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 // to be able to fix the failing pytest_bdd assertion on Travis CI.
                 // http://stackoverflow.com/questions/38251763/moment-js-to-convert-date-string-into-date#answers
                 let gdmCreatedDate = new Date(gdm.date_created);
-                let latestAnnotationDate = latestAnnotation ? new Date(latestAnnotation.date_created) : '';
+                let latestRecordDate = latestRecord ? new Date(latestRecord.last_modified) : '';
 
                 gdmObj = {
                     gdm_uuid: gdm.uuid,
@@ -64,10 +64,10 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     submitter_first_name: gdm.submitted_by.first_name,
                     created_date: moment(gdmCreatedDate).format('YYYY MMM DD'),
                     created_time: moment(gdmCreatedDate).format('h:mm a'),
-                    latest_date: latestAnnotation ? moment(latestAnnotationDate).format('YYYY MMM DD') : '',
-                    latest_time: latestAnnotation ? moment(latestAnnotationDate).format('h:mm a') : '',
+                    latest_date: latestRecordDate ? moment(latestRecordDate).format('YYYY MMM DD') : '',
+                    latest_time: latestRecordDate ? moment(latestRecordDate).format('h:mm a') : '',
                     iconClass: iconClass,
-                    latestAnnotation: latestAnnotation,
+                    latestRecord: latestRecord,
                     date_created: gdm.date_created
                 };
                 gdmObjList.push(gdmObj);
@@ -117,9 +117,9 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 diff = a.gene_symbol > b.gene_symbol ? 1 : -1;
                 break;
             case 'last':
-                var aAnnotation = a.latestAnnotation;
-                var bAnnotation = b.latestAnnotation;
-                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? 1 : -1);
+                var aRecord = a.latestRecord;
+                var bRecord = b.latestRecord;
+                diff = aRecord && bRecord ? Date.parse(aRecord.last_modified) - Date.parse(bRecord.last_modified) : (aRecord ? 1 : -1);
                 break;
             case 'creator':
                 var aLower = a.submitter_last_name.toLowerCase();
