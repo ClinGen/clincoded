@@ -42,7 +42,7 @@ var CreateGeneDisease = React.createClass({
 
     // Handle value changes in modeInheritance dropdown selection
     handleChange: function(ref, e) {
-        if (ref === 'hpo') {
+        if (ref === 'modeInheritance') {
             let selected = this.refs[ref].getValue();
             /******************************************************/
             /* If 'X-linked inheritance' is selected,             */
@@ -83,12 +83,11 @@ var CreateGeneDisease = React.createClass({
 
         // Check if orphanetid
         if (valid) {
-            /*
-            valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
-            if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
+            let mode = this.refs['modeInheritance'].getValue();
+            if (!mode.length || mode.indexOf('select') > -1) {
+                this.setFormErrors('modeInheritance', 'Mode of inheritance is required');
+                valid = false;
             }
-            */
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
                 this.setState({diseaseError: 'Disease is required!'});
                 valid = false;
@@ -111,7 +110,7 @@ var CreateGeneDisease = React.createClass({
          * FIXME: Need to delete orphanet reference
          */
         // this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
-        this.saveFormValue('hpo', this.refs.hpo.getValue());
+        this.saveFormValue('modeInheritance', this.refs['modeInheritance'].getValue());
         let moiAdjectiveValue = this.refs.moiAdjective.getValue();
         if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
             this.saveFormValue('moiAdjective', moiAdjectiveValue);
@@ -123,7 +122,7 @@ var CreateGeneDisease = React.createClass({
              */
             // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
             var geneId = this.getFormValue('hgncgene');
-            var mode = this.getFormValue('hpo');
+            var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');
             let diseaseObj = this.state.diseaseObj;
 
@@ -212,6 +211,13 @@ var CreateGeneDisease = React.createClass({
         this.setState({diseaseObj: diseaseObj});
     },
 
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent() {
+        this.setState({diseaseError: null});
+    },
+
     render: function() {
         let hgncgene = this.state.hgncgene;
         let orphanetid = this.state.orphanetid;
@@ -230,9 +236,9 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} session={this.props.session} />
-                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
-                                    error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
+                                <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
+                                <Input type="select" ref="modeInheritance" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
+                                    error={this.getFormError('modeInheritance')} clearError={this.clrFormErrors.bind(null, 'modeInheritance')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
                                     <option value="select" disabled="disabled">Select</option>
                                     <option value="" disabled="disabled"></option>
