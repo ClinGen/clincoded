@@ -128,6 +128,19 @@ const AddDisease = module.exports.AddDisease = React.createClass({
         });
     },
 
+    renderDiseaseData(id, term, desc, hpo, freetext) {
+        let source = !freetext ? id : this.props.session.user_properties.title;
+        if (term && term.length) {
+            return (
+                <span>
+                    <span className="data-view disease-name">{term + ' (' + source + ')'}</span>
+                    {desc && desc.length ? <span className="data-view disease-desc">{desc}</span> : null}
+                    {hpo && hpo.length ? <span className="data-view disease-phenotypes">{hpo.join(', ')}</span> : null}
+                </span>
+            );
+        }
+    },
+
     render() {
         let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
@@ -138,19 +151,21 @@ const AddDisease = module.exports.AddDisease = React.createClass({
         let synonyms = this.state.synonyms;
         let addDiseaseModalBtn = diseaseTerm ? <span>Disease<i className="icon icon-pencil"></i></span> : <span>Disease<i className="icon icon-plus-circle"></i></span>;
         let error = this.state.error;
-        let source = !diseaseFreeTextConfirm ? diseaseId : this.props.session.user_properties.title;
+        let inputLabel = diseaseFreeTextConfirm ? <span>Non-ID term:</span> : <span>Select disease:</span>;
 
         return (
             <div className="form-group add-disease-group">
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
-                    <span>Select disease:<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a></span></span>
+                    <span>{inputLabel}<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a></span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-8" : "disease-name"}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
-                            <span>{diseaseTerm ? <span>{diseaseTerm + ' (' + source + ')'}</span> : null}</span>
+                            <span>
+                                {this.renderDiseaseData(diseaseId, diseaseTerm, diseaseDescription, phenotypes, diseaseFreeTextConfirm)}
+                            </span>
                         }
                     </div>
                     <AddDiseaseModal
