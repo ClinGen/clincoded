@@ -23,6 +23,7 @@ const AddDisease = module.exports.AddDisease = React.createClass({
     propTypes: {
         gdm: PropTypes.object, // For editing disease (passed to Modal)
         updateDiseaseObj: PropTypes.func,
+        clearErrorInParent: PropTypes.func,
         error: PropTypes.string,
         session: PropTypes.object
     },
@@ -73,12 +74,15 @@ const AddDisease = module.exports.AddDisease = React.createClass({
             });
         }
         if (nextProps.error) {
-            this.setState({gdm: nextProps.error});
+            this.setState({error: nextProps.error});
         }
     },
 
     passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
+        this.setState({error: null}, () => {
+            this.props.clearErrorInParent();
+        });
         if (id) {
             /**
              * Changing colon to underscore in id string for database
@@ -159,7 +163,7 @@ const AddDisease = module.exports.AddDisease = React.createClass({
                     <span>{inputLabel}<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a></span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
-                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-8" : "disease-name"}>
+                    <div ref="diseaseName" className={diseaseTerm || error ? "disease-name col-sm-8" : "disease-name"}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
