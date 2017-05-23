@@ -80,7 +80,10 @@ const AddDisease = module.exports.AddDisease = React.createClass({
     passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
         if (id) {
-            diseaseObj['id'] = id;
+            /**
+             * Changing colon to underscore in id string for database
+             */
+            diseaseObj['id'] = id.replace(':', '_');
             this.setState({diseaseId: id});
         }
         if (term) {
