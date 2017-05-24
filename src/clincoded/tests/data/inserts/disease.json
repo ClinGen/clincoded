@@ -2,9 +2,9 @@
     {
         "uuid": "80635629-f3c1-4a48-b63e-0db849e8e354",
         "term": "Achondroplasia",
-        "id": "Orphanet_15",
+        "id": "OMIM_100800",
         "description": "",
-        "ontology": "ORPHANET",
+        "ontology": "OMIM",
         "active": true,
         "omimIds": [
             "100800"
@@ -181,9 +181,9 @@
     {
         "uuid": "e10d0bb8-7f3a-4c91-85a5-19d1ea0d79c3",
         "term": "Pleuropulmonary blastoma",
-        "id": "Orphanet_64742",
+        "id": "OMIM_601200",
         "description": "",
-        "ontology": "ORPHANET",
+        "ontology": "OMIM",
         "active": true,
         "omimIds": [
             "601200"
