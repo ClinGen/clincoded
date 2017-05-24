@@ -239,7 +239,7 @@ var CreateGeneDisease = React.createClass({
                                 <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
                                 <Input type="select" ref="modeInheritance" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
                                     error={this.getFormError('modeInheritance')} clearError={this.clrFormErrors.bind(null, 'modeInheritance')}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="modeOfInheritance" required>
                                     <option value="select" disabled="disabled">Select</option>
                                     <option value="" disabled="disabled"></option>
                                     {moiKeys.map(function(modeOfInheritance, i) {
