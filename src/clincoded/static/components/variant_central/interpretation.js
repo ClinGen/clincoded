@@ -339,7 +339,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                     clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
                     carId: interpretation.variant.carId ? interpretation.variant.carId : null,
                     grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
-                    orphanetId: interpretation.disease && interpretation.disease.orphaNumber ? interpretation.disease.orphaNumber : null,
+                    diseaseId: interpretation.disease && interpretation.disease.id ? interpretation.disease.id : null,
                     disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
                     modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
                     submitter_last_name: interpretation.submitted_by.last_name,
@@ -372,7 +372,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                         (interpretation.clinvarVariantTitle && interpretation.clinvarVariantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
                         (interpretation.carId && interpretation.carId.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
                         (interpretation.grch38 && interpretation.grch38.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
-                        (interpretation.orphanetId && interpretation.orphanetId.indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (interpretation.diseaseId && interpretation.diseaseId.indexOf(searchTerm.toLowerCase()) > -1) ||
                         (interpretation.disease_term && interpretation.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)
                     );
                 });
@@ -513,7 +513,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                                         </div>
                                     </div>
                                     <div className="table-cell-gdm">
-                                        {interpretation.disease_term ? <span>{interpretation.disease_term} (ORPHA{interpretation.orphanetId})</span> : null}
+                                        {interpretation.disease_term ? <span>{interpretation.disease_term} ({interpretation.diseaseId.replace('_', ':')})</span> : null}
                                     </div>
                                     <div className="table-cell-gdm">
                                         {interpretation.modeInheritance ? interpretation.modeInheritance : null}
