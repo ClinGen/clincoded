@@ -126,7 +126,7 @@ def test_collection_limit(testapp):
 def test_collection_post(testapp):
     item = {
         'term': 'AchondroplasiaTest',
-        'id': 'Orphanet_9999',
+        'id': 'OMIM_100800',
         'type': 'Disease',
     }
     return testapp.post_json('/disease', item, status=201)
