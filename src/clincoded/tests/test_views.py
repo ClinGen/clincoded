@@ -126,7 +126,7 @@ def test_collection_limit(testapp):
 def test_collection_post(testapp):
     item = {
         'term': 'AchondroplasiaTest',
-        'id': 'OMIM_100800',
+        'id': 'Orphanet_9999',
         'type': 'Disease',
     }
     return testapp.post_json('/disease', item, status=201)
@@ -183,7 +183,7 @@ def test_collection_put(testapp, execute_counter):
     }
     item_url = testapp.post_json('/disease', initial).location
 
-    with execute_counter.expect(1):
+    with execute_counter.expect(2):
         item = testapp.get(item_url).json
 
     for key in initial:
