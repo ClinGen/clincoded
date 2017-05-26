@@ -138,8 +138,8 @@ const AddDisease = module.exports.AddDisease = React.createClass({
             return (
                 <span>
                     <span className="data-view disease-name">{term + ' (' + source + ')'}</span>
-                    {desc && desc.length ? <span className="data-view disease-desc">{desc}</span> : null}
-                    {hpo && hpo.length ? <span className="data-view disease-phenotypes">{hpo.join(', ')}</span> : null}
+                    {desc && desc.length ? <span className="data-view disease-desc"><strong>Definition: </strong>{desc}</span> : null}
+                    {hpo && hpo.length ? <span className="data-view disease-phenotypes"><strong>HPO terms: </strong>{hpo.join(', ')}</span> : null}
                 </span>
             );
         }
@@ -160,7 +160,7 @@ const AddDisease = module.exports.AddDisease = React.createClass({
         return (
             <div className="form-group add-disease-group">
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
-                    <span>{inputLabel}<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a></span></span>
+                    <span>{inputLabel}<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using <a href={external_url_map['OLS']} target="_blank">OLS</a></span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseTerm || error ? "disease-name col-sm-8" : "disease-name"}>
@@ -259,10 +259,18 @@ const AddDiseaseModal = React.createClass({
 
     componentWillReceiveProps(nextProps)  {
         if (nextProps.diseaseId) {
-            this.setState({diseaseId: nextProps.diseaseId, submitResourceDisabled: false});
+            this.setState({
+                diseaseId: nextProps.diseaseId, 
+                submitResourceDisabled: false,
+                queryResourceDisabled: false
+            });
         }
         if (nextProps.diseaseTerm) {
-            this.setState({diseaseTerm: nextProps.diseaseTerm, submitResourceDisabled: false});
+            this.setState({
+                diseaseTerm: nextProps.diseaseTerm,
+                submitResourceDisabled: false,
+                queryResourceDisabled: false
+            });
         }
         if (nextProps.diseaseOntology) {
             this.setState({diseaseOntology: nextProps.diseaseOntology});
@@ -318,7 +326,7 @@ const AddDiseaseModal = React.createClass({
                     diseaseId: this.props.diseaseId,
                     diseaseTerm: this.props.diseaseTerm,
                     diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm,
-                    queryResourceDisabled: true,
+                    queryResourceDisabled: this.state.diseaseId ? false : true,
                     resourceFetched: false,
                     tempResource: {}
                 });
@@ -480,46 +488,72 @@ const AddDiseaseModal = React.createClass({
         }
     },
 
+    renderDiseaseDescription() {
+        let tempResource = this.state.tempResource,
+            diseaseDescription = this.state.diseaseDescription;
+
+        if (Object.keys(tempResource).length && tempResource['annotation']['definition']) {
+            return (
+                <span className="p-break disease-description">{tempResource['annotation']['definition']}</span>
+            );
+        } else if (diseaseDescription && diseaseDescription.length) {
+            return (
+                <span className="p-break disease-description">{diseaseDescription}</span>
+            );
+        }
+    },
+
     // Method to render JSX when a disease term result is returned
-    renderResourceResult(id) {
+    renderResourceResult() {
+        let diseaseId = this.state.diseaseId,
+            diseaseTerm = this.state.diseaseTerm,
+            tempResource = this.state.tempResource;
+        
         return(
             <div className="resource-metadata">
                 <p>Below are the data from OLS for the ID you submitted. Select "Save" below if it is the correct disease, otherwise revise your search above:</p>
                 <div className="panel panel-default">
-                    <span className="p-break disease-label"><a href={external_url_map['MondoSearch'] + id.replace(':', "_")} target="_blank">{this.state.tempResource['label']}</a></span>
-                    {this.state.tempResource['annotation']['definition'] ?
-                        <span className="p-break disease-description">{this.state.tempResource['annotation']['definition']}</span>
-                    : null}
+                    <span className="p-break disease-label">
+                        <a href={external_url_map['MondoSearch'] + diseaseId.replace(':', "_")} target="_blank">
+                            {Object.keys(tempResource).length && tempResource['label'] ? tempResource['label'] : diseaseTerm}
+                        </a>
+                    </span>
+                    {this.renderDiseaseDescription()}
                 </div>
             </div>
         );
     },
 
     renderDiseaseIdInput() {
+        let diseaseId = this.state.diseaseId,
+            diseaseTerm = this.state.diseaseTerm,
+            diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm,
+            resourceFetched = this.state.resourceFetched;
+
         return (
             <div className="form-group disease-id-input clearfix">
-                <Input type="text" ref="diseaseId" handleChange={this.handleDiseaseIdChange} value={this.state.diseaseId}
+                <Input type="text" ref="diseaseId" handleChange={this.handleDiseaseIdChange} value={diseaseId.replace('_', ':')}
                     label={<span>Enter the term "id" <span className="label-note">(Term "id" can be found in the "Term info" box displayed on the right hand side on the term page of the OLS)</span>:</span>}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
                     labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
-                    inputClassName="disease-id-input" placeholder="e.g. OMIM:100800, DOID:0050776" required />
+                    inputClassName="disease-id-input" placeholder="e.g. Orphanet:98464, DOID:0050776 OR OMIM:100800" required />
                 <Input type="button-button" title="Retrieve from OLS" 
                     inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right btn-query-ols"} 
                     clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
                 <div className="row">&nbsp;<br />&nbsp;</div>
-                {this.state.resourceFetched ?
-                    this.renderResourceResult(this.state.diseaseId)
+                {resourceFetched || diseaseTerm ?
+                    this.renderResourceResult()
                 :
-                <div className="disease-freetext-confirm-input-group clearfix">
-                    <p>Note: We strongly encourage use of a MonDO ontology term and therefore specific database identifier for a disease. If you have searchedand
-                        there is no appropriate database identifier you may contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and/or
-                        create a term using free text.</p>
-                    <div className="panel panel-default">
-                        <Input type="checkbox" ref="diseaseFreeTextConfirmation" label="Select this checkbox to find free text option:"
-                            labelClassName="col-sm-7 control-label" wrapperClassName="col-sm-5" groupClassName="form-group resource-input disease-freetext-confirm clearfix"
-                            checked={this.state.diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} />
+                    <div className="disease-freetext-confirm-input-group clearfix">
+                        <p className="alert alert-warning">Note: We strongly encourage use of a MonDO ontology term and therefore specific database identifier for a disease. If you have searched and
+                            there is no appropriate database identifier you may contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and/or
+                            create a term using free text.</p>
+                        <div className="panel panel-default">
+                            <Input type="checkbox" ref="diseaseFreeTextConfirmation" label={<span>Check this box <i>only</i> if you were unable to find a suitable ontology term and need to enter a free text term:</span>}
+                                labelClassName="col-sm-10 control-label" wrapperClassName="col-sm-2" groupClassName="form-group resource-input disease-freetext-confirm clearfix"
+                                checked={diseaseFreeTextConfirm} defaultChecked="false" handleChange={this.handleDiseaseFreeTextConfirmChange} />
+                        </div>
                     </div>
-                </div>
                 }
             </div>
         );
@@ -535,14 +569,18 @@ const AddDiseaseModal = React.createClass({
 
         return (
             <div className="form-group disease-freetext-input clearfix">
-                <Input type="text" ref="diseaseFreeTextTerm" label="Rich text disease name:" handleChange={this.handleDiseaseFreeTextTermChange}
+                <p className="alert alert-warning">Use of free text could result in different terms being used for the same disease. Please make certain there is no
+                    appropriate ontology term before applying a free text disease name.</p>
+                <Input type="text" ref="diseaseFreeTextTerm" label="Disease name:" handleChange={this.handleDiseaseFreeTextTermChange}
                     error={this.getFormError("diseaseFreeTextTerm")} clearError={this.clrFormErrors.bind(null, "diseaseFreeTextTerm")}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-name clearfix"
-                    value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxLength="200" required />
-                <Input type="textarea" ref="diseaseFreeTextDesc" label="Disease description:" handleChange={this.handleDiseaseFreeTextDescChange}
+                    value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxLength="100" placeholder="Short phrase (max 100 characters)" required />
+                <p>Either a definition or HPO term(s) is required to describe this disease (both fields may be used).</p>
+                <Input type="textarea" ref="diseaseFreeTextDesc" label="Disease definition:" handleChange={this.handleDiseaseFreeTextDescChange}
                     error={this.getFormError('diseaseFreeTextDesc')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextDesc')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-desc clearfix"
-                    value={this.state.diseaseDescription ? this.state.diseaseDescription : ''} rows="2" required={!this.state.hasFreeTextDiseasePhenotypes} />
+                    value={this.state.diseaseDescription ? this.state.diseaseDescription : ''} rows="2" placeholder="Describe this disease"
+                    required={!this.state.hasFreeTextDiseasePhenotypes} />
                 <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s)):" handleChange={this.handleDiseaseFreeTextPhenotypesChange}
                     error={this.getFormError('diseaseFreeTextPhenoTypes')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextPhenoTypes')}
                     value={hpoids} placeholder="e.g. HP:0010704, HP:0030300" rows="1" required={!this.state.hasFreeTextDiseaseDescription}
@@ -557,7 +595,7 @@ const AddDiseaseModal = React.createClass({
         let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
 
         return (
-            <ModalComponent modalTitle="Add Disease" modalClass="modal-default" modalWrapperClass={"add-disease-modal" + this.props.addDiseaseModalBtnLayoutClass}
+            <ModalComponent modalTitle={diseaseTerm ? "Edit Disease" : "Add Disease"} modalClass="modal-default" modalWrapperClass={"add-disease-modal" + this.props.addDiseaseModalBtnLayoutClass}
                 bootstrapBtnClass="btn btn-primary " actuatorClass="input-group-btn-disease-term" actuatorTitle={this.props.addDiseaseModalBtn} onRef={ref => (this.child = ref)}>
                 <div className="form-std">
                     <div className="modal-body">
