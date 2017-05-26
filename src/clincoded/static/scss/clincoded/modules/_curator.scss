@@ -88,6 +88,30 @@
     }
 }
 
+.curation-data-disease {
+    dt {
+        word-break: break-word;
+    }
+
+    .popover-component {
+        font-weight: normal;
+
+        .popover-actuator:before {
+            content: '[';
+        }
+
+        .popover-actuator:after {
+            content: ']';
+        }
+
+        .popover-wrapper {
+            position: fixed;
+            max-width: 300px;
+            z-index: 9999;
+        }
+    }
+}
+
 .curation-data-gene,
 .curation-data-disease {
     margin-bottom: 2px;
@@ -414,8 +438,9 @@
                     padding-left: 0px;
 
                     .data-view {
-                        display: flex;
+                        display: block;
                         font-weight: normal;
+                        word-break: break-word;
 
                         &.disease-name {
                             font-weight: bold;
