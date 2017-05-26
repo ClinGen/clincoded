@@ -18,6 +18,7 @@ var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 
 import ModalComponent from '../libs/bootstrap/modal';
+import PopOverComponent from '../libs/bootstrap/popover';
 import { AddDisease } from './disease';
 
 var CurationMixin = module.exports.CurationMixin = {
@@ -83,8 +84,9 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
     getInitialState() {
         return {
-            gdm: null,
+            gdm: this.props.gdm,
             diseaseObj: {},
+            diseaseUuid: null,
             diseaseError: null
         };
     },
@@ -102,7 +104,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
     updateDiseaseObj(diseaseObj) {
         this.setState({diseaseObj: diseaseObj}, () => {
             const gdm = this.props.gdm;
-            const disease = this.props.gdm && this.props.gdm.disease;
+            const disease = gdm && gdm.disease;
 
             this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
                 let flattenDiseaseObj = flatten(currDiseaseObj);
@@ -143,14 +145,68 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                     }
                 }
 
-                this.putRestData('/diseases/' + disease.uuid, flattenDiseaseObj).then(result => {
-                    let newDiseaseObj = result['@graph'][0];
-                    return Promise.resolve(newDiseaseObj);
-                }).then(data => {
-                    this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
-                        this.setState({gdm: updatedGdm});
+                if (!diseaseObj['freetext'] && diseaseObj['id'] !== disease.id) {
+                    /**
+                     * Handle the updating of MonDO term
+                     */
+                    this.getRestData('/search?type=disease&id=' + diseaseObj['id']).then(diseaseSearch => {
+                        let diseaseUuid,
+                            flattenGdmObj = flatten(gdm);
+                        if (diseaseSearch.total === 0) {
+                            /**
+                             * Post request for adding new disease to the database
+                             */
+                            this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({diseaseUuid: diseaseUuid});
+                            }).then(response => {
+                                /**
+                                 * Update existing GDM with a new UUID
+                                 */
+                                flattenGdmObj['disease'] = this.state.diseaseUuid;
+                                this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                    return Promise.resolve(gdmObj['@graph'][0]);
+                                }).then(data => {
+                                    this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                        this.setState({gdm: updatedGdm});
+                                    });
+                                });
+                            });
+                        } else {
+                            /**
+                             * User-selected disease already exists in the database
+                             */
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
+                            this.setState({diseaseUuid: diseaseUuid});
+                            /**
+                             * Update existing GDM with the UUID of the existing disease
+                             */
+                            flattenGdmObj['disease'] = this.state.diseaseUuid;
+                            this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                return Promise.resolve(gdmObj['@graph'][0]);
+                            }).then(data => {
+                                this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                    this.setState({gdm: updatedGdm});
+                                });
+                            });
+                        }
                     });
-                });
+
+                } else if (diseaseObj['freetext']) {
+                    /**
+                     * Put request for the updating of free text disease
+                     */
+                    this.putRestData('/diseases/' + disease.uuid, flattenDiseaseObj).then(result => {
+                        let newDiseaseObj = result['@graph'][0];
+                        return Promise.resolve(newDiseaseObj);
+                    }).then(data => {
+                        this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                            this.setState({gdm: updatedGdm});
+                        });
+                    });
+                }
             }).catch(err => {
                 console.warn('GCI update disease error :: %o', err);
             });
@@ -250,7 +306,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
                                         <span className="gdm-disease-edit">
-                                            {disease.freetext && userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
+                                            {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
                                                 <AddDisease ref="editDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
                                                     clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
                                             : null}
@@ -1066,7 +1122,21 @@ var DiseaseRecordHeader = React.createClass({
                 <div className="curation-data-disease">
                     {disease ?
                         <dl>
-                            <dt>{disease.term}</dt>
+                            <dt>
+                                {disease.term}
+                                {disease.description ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-description"
+                                        actuatorTitle="View description" popOverRef={ref => (this.popoverDesc = ref)}>
+                                        {disease.description}
+                                    </PopOverComponent>
+                                : null}
+                                {disease.phenotypes ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                        actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                        {disease.phenotypes}
+                                    </PopOverComponent>
+                                : null}
+                            </dt>
                             <dd>
                                 {!disease.freetext && disease.id.indexOf('FREETEXT') < 0 ?
                                     <span>
