@@ -255,7 +255,8 @@ var CreateGeneDisease = React.createClass({
                                         return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
                                     })}
                                 </Input>
-                                <div><p className="alert alert-warning">Currently, the above options (gene, disease, mode of inheritance, or adjective) cannot be altered for a Gene:Disease record once the record has been created. This includes adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
+                                <div><p className="alert alert-warning">The above options (gene, disease, mode of inheritance, or adjective) can be altered for a Gene:Disease record up until a PMID has been added to the record. This includes
+                                    adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>
