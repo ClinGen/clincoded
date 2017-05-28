@@ -59,23 +59,6 @@
             "description": "Boolean value to flag free text disease term",
             "type": "boolean"
         },
-        "type": {
-            "title": "Type.",
-            "description": "Type of Orphanet phenotype.",
-            "type": "string",
-            "default": ""
-        },
-        "omimIds": {
-            "title": "OMIM ID",
-            "description": "List of OMIM ids",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "OMIM ID",
-                "description": "OMIM ID",
-                "type": "string"
-            }
-        },
         "synonyms": {
             "title": "Synonyms",
             "description": "List of synonyms of the disease.",
