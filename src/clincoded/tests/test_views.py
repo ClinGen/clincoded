@@ -127,7 +127,6 @@ def test_collection_post(testapp):
     item = {
         'term': 'AchondroplasiaTest',
         'id': 'Orphanet_9999',
-        'type': 'Disease',
     }
     return testapp.post_json('/disease', item, status=201)
 
@@ -179,7 +178,6 @@ def test_collection_put(testapp, execute_counter):
     initial = {
         'term': 'AchondroplasiaTestAgain',
         'id': 'Orphanet_9999',
-        'type': 'Disease',
     }
     item_url = testapp.post_json('/disease', initial).location
 
@@ -192,7 +190,6 @@ def test_collection_put(testapp, execute_counter):
     update = {
         'term': 'AchondroplasiaTestAgainAgain',
         'id': 'Orphanet_9999',
-        'type': 'Disease',
     }
     testapp.put_json(item_url, update, status=200)
 
@@ -207,7 +204,6 @@ def test_post_duplicate_uuid(testapp, disease):
         'uuid': disease['uuid'],
         'term': 'AchondroplasiaTestAgain',
         'id': 'Orphanet_9999',
-        'type': 'Disease',
     }
     testapp.post_json('/disease', item, status=409)
 
