@@ -19,7 +19,7 @@ var truncateString = globals.truncateString;
 
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
-import { AddDisease } from './disease';
+import { GdmDisease } from './disease';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -307,7 +307,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                     <h1>{gene.symbol} – {disease.term}
                                         <span className="gdm-disease-edit">
                                             {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
-                                                <AddDisease ref="editDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
+                                                <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
                                                     clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
                                             : null}
                                         </span>
@@ -1124,13 +1124,13 @@ var DiseaseRecordHeader = React.createClass({
                         <dl>
                             <dt>
                                 {disease.term}
-                                {disease.description ?
+                                {disease.description && disease.description.length ?
                                     <PopOverComponent popOverWrapperClass="gdm-disease-description"
                                         actuatorTitle="View description" popOverRef={ref => (this.popoverDesc = ref)}>
                                         {disease.description}
                                     </PopOverComponent>
                                 : null}
-                                {disease.phenotypes ?
+                                {disease.phenotypes && disease.phenotypes.length ?
                                     <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
                                         actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
                                         {disease.phenotypes}
@@ -2411,7 +2411,7 @@ function flattenInterpretation(interpretation) {
 
 // Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
 // groups or families.
-var renderOrphanets = module.exports.renderOrphanets = function(objList, title) {
+var renderDiseaseList = module.exports.renderDiseaseList = function(objList, title) {
     return (
         <div>
             {objList && objList.length ?
@@ -2420,15 +2420,15 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Orphanet Disease(s) Associated with {title}:</strong>
+                                    <strong className="pull-right">Disease(s) Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
                                     { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
                                         obj.commonDiagnosis.map(function(disease, i) {
                                             return (
-                                                <span key={disease.orphaNumber}>
+                                                <span key={disease.id}>
                                                     {i > 0 ? ', ' : ''}
-                                                    {'ORPHA' + disease.orphaNumber}
+                                                    {disease.term}
                                                 </span>
                                             );
                                         })
