@@ -2576,6 +2576,32 @@ table.login-users-interpretations {
     .label-group {
         background-color: #f0ad4e;
     }
+
+    .section-disease {
+        .add-disease-group .add-disease {
+            .add-disease-button-group {
+                li {
+                    display: inherit;
+
+                    &:nth-child(even) {
+                        height: 8px;
+                        visibility: hidden;
+                    }
+
+                    .gdm-disease-copy>.btn,
+                    .evidence-disease>.btn {
+                        font-size: 13px;
+                        padding: 6px 8px;
+                    }
+                }
+            }
+
+            .delete-disease-button.pull-right {
+                float: left !important;
+                padding-top: 10px;
+            }
+        }
+    }
 }
 
 .panel.control-cohort {
@@ -2584,6 +2610,32 @@ table.login-users-interpretations {
 
         @media screen and (max-width: $screen-xs-max) {
             display: none;
+        }
+
+        .add-disease-group .add-disease {
+            .add-disease-button-group {
+                li {
+                    display: inherit;
+
+                    &:nth-child(even) {
+                        height: 8px;
+                        visibility: hidden;
+                    }
+
+                    .gdm-disease-copy>.btn,
+                    .evidence-disease>.btn {
+                        font-size: 13px;
+                        opacity: 0.5;
+                        padding: 6px 8px;
+                        pointer-events: none;
+                    }
+                }
+            }
+
+            .delete-disease-button.pull-right {
+                float: left !important;
+                padding-top: 10px;
+            }
         }
     }
 
@@ -2859,4 +2911,63 @@ table.login-users-interpretations {
     margin: 20px 0;
     padding: 0 0 20px 0;
     text-align: center;
+}
+
+.group-curation-content {
+    .add-disease-group {
+        margin-bottom: 20px;
+
+        .control-label {
+            padding-top: 0;
+
+            .control-label-note {
+                font-weight: normal;
+                display: block;
+                margin-right: 15px;
+            }
+        }
+
+        .add-disease {
+            .disease-name {
+                padding-left: 0px;
+
+                .data-view {
+                    display: block;
+                    font-weight: normal;
+                    word-break: break-word;
+
+                    &.disease-name {
+                        font-weight: bold;
+                    }
+
+                    &.disease-desc,
+                    &.disease-phenotypes {
+                        padding-top: 8px;
+                    }
+                }
+            }
+
+            .add-disease-button-group {
+                list-style: none;
+                padding-left: 0;
+
+                li {
+                    display: table-cell;
+                    
+                    &:nth-child(even) {
+                        padding: 0 10px;
+                    }
+                }
+            }
+
+            .btn {
+                .icon {
+                    font-size: 16px;
+                    margin-top: 2px;
+                    margin-left: 5px;
+                    vertical-align: text-bottom;
+                }
+            }
+        }
+    }
 }
