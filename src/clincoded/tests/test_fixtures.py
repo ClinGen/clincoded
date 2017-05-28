@@ -15,7 +15,6 @@ def minitestdata(app, connection):
     item = {
         'term': 'AchondroplasiaTest',
         'id': 'Orphanet_9999',
-        'type': 'Disease',
     }
     testapp.post_json('/disease', item, status=201)
 
@@ -37,7 +36,6 @@ def minitestdata2(app, connection):
     item = {
         'term': 'AchondroplasiaTest3',
         'id': 'Orphanet_9997',
-        'type': 'Disease',
     }
     testapp.post_json('/disease', item, status=201)
 
@@ -67,7 +65,6 @@ def test_fixtures1(testapp):
     item = {
         'term': 'AchondroplasiaTest2',
         'id': 'Orphanet_9998',
-        'type': 'Disease',
     }
     testapp.post_json('/disease', item, status=201)
 
