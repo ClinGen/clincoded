@@ -39,6 +39,9 @@ var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
 
+import ModalComponent from '../libs/bootstrap/modal';
+import { FamilyDisease, FamilyProbandDisease } from './disease';
+
 const MAX_VARIANTS = 2;
 
 // Maps segregation field refs to schema properties
@@ -82,7 +85,6 @@ var FamilyCuration = React.createClass({
         this.cv.assessmentTracker = initialCv;
 
         return {
-            orpha: null, // boolean for entered in Orphanet id input box
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
@@ -95,17 +97,21 @@ var FamilyCuration = React.createClass({
             familyName: '', // Currently entered family name
             individualRequired: false, // Boolean for set up requirement of proband
             individualName: '', // Proband individual name
-            individualOrphanetId: '', // Orphanet IDs associated with the proband
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
-            existedOrphanetId: null, // user-supplied value in Orphanet id input field
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             lodPublished: null, // Switch to show either calculated or estimated LOD score
             estimatedLodScore: null, // track estimated LOD value
             publishedLodScore: null, // track published LOD value
             lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
-            lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
+            lodCalcMode: null, // track which type of calculation we should do for LOD score, if applicable
+            diseaseObj: {},
+            diseaseUuid: null,
+            diseaseError: null,
+            probandDiseaseObj: {},
+            probandDiseaseUuid: null,
+            probandDiseaseError: null
         };
     },
 
@@ -118,19 +124,13 @@ var FamilyCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'familyname') {
             this.setState({familyName: this.refs[ref].getValue()});
-        } else if (ref === 'orphanetid' && this.refs[ref].getValue()) {
-            this.setState({orpha: true});
-            this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
-        } else if (ref === 'orphanetid') {
-            this.setState({orpha: false});
-        } else if (ref === 'individualname' || ref === 'individualorphanetid') {
+        } else if (ref === 'individualname') {
             this.setState({
-                individualName: this.refs['individualname'].getValue(),
-                individualOrphanetId: this.refs['individualorphanetid'].getValue()
+                individualName: this.refs['individualname'].getValue()
             }, () => {
-                if (this.state.individualName || this.state.individualOrphanetId) {
+                if (this.state.individualName || (this.state.probandDiseaseObj && this.state.probandDiseaseObj['id'])) {
                     this.setState({individualRequired: true});
-                } else if (!this.state.individualName && !this.state.individualOrphanetId) {
+                } else if (!this.state.individualName && (this.state.probandDiseaseObj && !Object.keys(this.state.probandDiseaseObj).length)) {
                     this.setState({individualRequired: false});
                 }
             });
@@ -225,11 +225,10 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Handle a click on a copy orphanet button or copy phenotype button
+    // Handle a click on a copy phenotype button
     handleClick: function(fromTarget, item, e) {
         e.preventDefault(); e.stopPropagation();
         var associatedGroups;
-        //var orphanetValTemp = [];
         var orphanetVal = '';
         var hpoIds = '';
         var hpoFreeText = '';
@@ -251,9 +250,6 @@ var FamilyCuration = React.createClass({
                             }).join(', ')
                         );
                     });
-                    this.refs['orphanetid'].setValue(orphanetVal.join(', '));
-                    this.setState({orpha: true});
-                    this.setState({existedOrphanetId: orphanetVal.join(', ').toUpperCase()});
                 }
                 else if (item === 'phenotype') {
                     hpoIds = associatedGroups.map(function(associatedGroup, i) {
@@ -280,11 +276,6 @@ var FamilyCuration = React.createClass({
             }
         } else if (fromTarget == 'family') {
             this.setState({individualRequired: true});
-            orphanetVal = this.refs['orphanetid'].getValue();
-            this.refs['individualorphanetid'].setValue(orphanetVal);
-            var errors = this.state.formErrors;
-            errors['individualorphanetid'] = '';
-            this.setState({formErrors: errors});
         }
     },
 
@@ -394,15 +385,7 @@ var FamilyCuration = React.createClass({
                 this.setState({familyName: stateObj.family.label});
 
                 if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
-                    let tempOrphanetTerms = [];
-                    stateObj.family.commonDiagnosis.map(diagnosis => {
-                        tempOrphanetTerms.push('ORPHA' + diagnosis.orphaNumber);
-                    });
-                    this.setState({orpha: true});
-                    this.setState({existedOrphanetId: tempOrphanetTerms.join(', ').toUpperCase()});
-                }
-                else {
-                    this.setState({orpha: false});
+                    this.setState({diseaseObj: stateObj.family['commonDiagnosis'][0]});
                 }
 
                 // Load the previously stored 'Published Calculated LOD score' if any
@@ -559,36 +542,17 @@ var FamilyCuration = React.createClass({
         if (this.validateDefault()) {
             var currFamily = this.state.family;
             var newFamily = {}; // Holds the new group object;
-            var familyDiseases = null, familyArticles, familyVariants = [], familyAssessments = [];
-            var individualDiseases = null;
+            var familyDiseases = [], familyArticles, familyVariants = [], familyAssessments = [];
+            var individualDiseases = [];
             var savedFamilies; // Array of saved written to DB
             var formError = false;
             var initvar = false; // T if edited family has variants for the first time, or if new family has variants
             var hadvar = false; // T if family had variants before being edited here.
 
-            // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
-            var indOrphaIds = curator.capture.orphas(this.getFormValue('individualorphanetid'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
-
-            // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
-                // ORPHA list is bad
-                formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
-            }
-
-            // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.individualRequired && !this.state.probandIndividual) {
-                if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
-                    // Individual’s ORPHA list is bad
-                    formError = true;
-                    this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
-                }
-            }
 
             // Check that all gene symbols have the proper format (will check for existence later)
             if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
@@ -624,61 +588,67 @@ var FamilyCuration = React.createClass({
             }
 
             if (!formError) {
-                // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
-                var searchStr;
-                if (orphaIds && orphaIds.length > 0) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
-                }
-                else {
-                    searchStr = '';
-                }
+                let searchStr;
                 this.setState({submitBusy: true});
 
-                // Verify given Orpha ID exists in DB
-                this.getRestData(searchStr).then(diseases => {
-                    if (orphaIds && orphaIds.length) {
-                        if (diseases['@graph'].length === orphaIds.length) {
-                            // Successfully retrieved all diseases
-                            familyDiseases = diseases;
-                            return Promise.resolve(diseases);
-                        } else {
-                            // Get array of missing Orphanet IDs
-                            this.setState({submitBusy: false}); // submit error; re-enable submit button
-                            var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                            this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                            throw diseases;
-                        }
+                /**
+                 * Retrieve disease from database. If not existed, add it to the database.
+                 */
+                let diseaseObj = this.state.diseaseObj;
+                this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
+                    let diseaseUuid;
+                    if (diseaseSearch.total === 0) {
+                        this.postRestData('/diseases/', diseaseObj).then(result => {
+                            let newDisease = result['@graph'][0];
+                            diseaseUuid = newDisease['uuid'];
+                            this.setState({diseaseUuid: diseaseUuid}, () => {
+                                familyDiseases.push(diseaseUuid);
+                                return Promise.resolve(diseaseSearch);
+                            });
+                        });
                     } else {
-                        // if no Orphanet id entered.
-                        return Promise.resolve(null);
+                        let _id = diseaseSearch['@graph'][0]['@id'];
+                        diseaseUuid = _id.slice(10, -1);
+                        this.setState({diseaseUuid: diseaseUuid}, () => {
+                            familyDiseases.push(diseaseUuid);
+                            return Promise.resolve(diseaseSearch);
+                        });
                     }
                 }, e => {
-                    // The given orpha IDs couldn't be retrieved for some reason.
+                    // The given disease couldn't be retrieved for some reason.
                     this.setState({submitBusy: false}); // submit error; re-enable submit button
-                    this.setFormErrors('orphanetid', 'The given diseases not found');
+                    this.setState({diseaseError: 'Error on validating disease.'});
                     throw e;
                 }).then(diseases => {
-                    // Check for individual orphanet IDs if we have variants and no existing proband
+                    // Check for individual disease if we have variants and no existing proband
                     if (!this.state.probandIndividual && this.state.individualRequired) {
-                        var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
-
-                        // Verify given Orpha ID exists in DB
-                        return this.getRestData(searchStr).then(diseases => {
-                            if (diseases['@graph'].length === indOrphaIds.length) {
-                                // Successfully retrieved all diseases
-                                individualDiseases = diseases;
-                                return Promise.resolve(diseases);
+                        /**
+                         * Retrieve disease from database. If not existed, add it to the database.
+                         */
+                        let probandDiseaseObj = this.state.probandDiseaseObj;
+                        return this.getRestData('/search?type=disease&id=' + probandDiseaseObj.id).then(diseaseSearch => {
+                            let probandDiseaseUuid;
+                            if (diseaseSearch.total === 0) {
+                                this.postRestData('/diseases/', probandDiseaseObj).then(result => {
+                                    let newDisease = result['@graph'][0];
+                                    probandDiseaseUuid = newDisease['uuid'];
+                                    this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
+                                        individualDiseases.push(probandDiseaseUuid);
+                                        return Promise.resolve(diseaseSearch);
+                                    });
+                                });
                             } else {
-                                // Get array of missing Orphanet IDs
-                                this.setState({submitBusy: false}); // submit error; re-enable submit button
-                                var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                                this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                                throw diseases;
+                                let _id = diseaseSearch['@graph'][0]['@id'];
+                                probandDiseaseUuid = _id.slice(10, -1);
+                                this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
+                                    individualDiseases.push(probandDiseaseUuid);
+                                    return Promise.resolve(diseaseSearch);
+                                });
                             }
                         }, e => {
-                            // The given orpha IDs couldn't be retrieved for some reason.
+                            // The given disease couldn't be retrieved for some reason.
                             this.setState({submitBusy: false}); // submit error; re-enable submit button
-                            this.setFormErrors('individualorphanetid', 'The given diseases not found');
+                            this.setState({probandDiseaseError: 'Error on validating disease.'});
                             throw e;
                         });
                     }
@@ -770,7 +740,7 @@ var FamilyCuration = React.createClass({
                     if (!this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
-                        diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                        diseases = individualDiseases.map(disease => { return disease; });
                         return makeStarterIndividual(label, diseases, familyVariants, zygosity, this);
                     }
 
@@ -1042,8 +1012,8 @@ var FamilyCuration = React.createClass({
         newFamily.label = this.getFormValue('familyname');
 
         // Get an array of all given disease IDs
-        if (familyDiseases) {
-            newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
+        if (familyDiseases && familyDiseases.length) {
+            newFamily.commonDiagnosis = familyDiseases.map(disease => { return disease; });
         }
         else if (newFamily.commonDiagnosis && newFamily.commonDiagnosis.length > 0) {
             // allow to delete oephanet ids when editing family
@@ -1122,7 +1092,7 @@ var FamilyCuration = React.createClass({
             variantCount -= 1;  // we have one less variant to show
         }
 
-        // if variant data entered, must enter proband individual name and orphanet
+        // if variant data entered, must enter proband individual name and disease
         // First check if data entered in either ClinVar Variant ID or Other description at each variant
         var noVariantData = true;
         _.range(variantCount).map(i => {
@@ -1132,22 +1102,20 @@ var FamilyCuration = React.createClass({
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
         if (noVariantData && this.refs['individualname']) {
-            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
+            if (this.refs['individualname'].getValue() || (this.state.probandDiseaseObj && this.state.probandDiseaseObj['id'])) {
                 this.setState({individualRequired: true});
             } else {
                 this.setState({individualRequired: false});
             }
             var errors = this.state.formErrors;
             errors['individualname'] = '';
-            errors['individualorphanetid'] = '';
-            this.setState({formErrors: errors});
+            this.setState({formErrors: errors, probandDiseaseError: null});
         } else {
             this.setState({individualRequired: true});
         }
 
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantCount: variantCount});
-        this.clrFormErrors('individualorphanetid');
+        this.setState({variantInfo: newVariantInfo, variantCount: variantCount, probandDiseaseError: null});
         this.clrFormErrors('zygosityHemizygous');
         this.clrFormErrors('zygosityHomozygous');
     },
@@ -1207,6 +1175,38 @@ var FamilyCuration = React.createClass({
         if (this.cv.othersAssessed && this.cv.othersAssessed != false) {
             this.cv.othersAssessed = false;
         }
+    },
+
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj});
+    },
+
+    /**
+     * Update the 'probandDiseaseObj' state used for the proband individual
+     */
+    updateFamilyProbandDiseaseObj(action, probandDiseaseObj) {
+        if (action === 'add' && (probandDiseaseObj && Object.keys(probandDiseaseObj).length > 0)) {
+            this.setState({probandDiseaseObj: probandDiseaseObj});
+        } else if (action === 'copy' && this.state.diseaseObj) {
+            this.setState({probandDiseaseObj: this.state.diseaseObj});
+        } else if (action === 'delete') {
+            this.setState({probandDiseaseObj: {}});
+        }
+    },
+
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent(target) {
+        if (target === 'family') {
+            this.setState({diseaseError: null});
+        } else if (target === 'familyProband') {
+            this.setState({probandDiseaseError: null});
+        }
+        
     },
 
     render: function() {
@@ -1423,7 +1423,6 @@ var FamilyCommonDiseases = function() {
     let associatedGroups;
 
     // If we're editing a family, make editable values of the complex properties
-    let orphanetidVal = family && family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : '';
     let hpoidVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : '';
     let nothpoidVal = family && family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : '';
 
@@ -1439,14 +1438,10 @@ var FamilyCommonDiseases = function() {
 
     return (
         <div className="row">
-            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderOrphanets(associatedGroups, 'Group') : null}
-            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15"
-                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ?
-            <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
-                clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
-            : null}
+            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderDiseaseList(associatedGroups, 'Group') : null}
+            <FamilyDisease group={associatedGroups && associatedGroups[0] ? associatedGroups[0] : null}
+                family={family} gdm={this.state.gdm} updateDiseaseObj={this.updateDiseaseObj} clearErrorInParent={this.clearErrorInParent}
+                diseaseObj={this.state.diseaseObj} error={this.state.diseaseError} session={this.props.session} />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'hpo') : curator.renderPhenotype(null, 'Family', 'hpo')
             }
@@ -1472,14 +1467,6 @@ var FamilyCommonDiseases = function() {
         </div>
     );
 };
-
-
-// HTML labels for inputs follow.
-var LabelOrphanetId = React.createClass({
-    render: function() {
-        return <span>Disease(s) in Common <span className="normal">(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
-    }
-});
 
 // HTML labels for inputs follow.
 var LabelHpoId = React.createClass({
@@ -1645,6 +1632,7 @@ var FamilySegregation = function() {
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
     var family = this.state.family;
+    let group = this.state.group;
     var gdm = this.state.gdm;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
@@ -1654,7 +1642,6 @@ var FamilyVariant = function() {
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
     let individualName = this.state.individualName;
-    let individualOrphanetId = this.state.individualOrphanetId;
 
     return (
         <div className="row form-row-helper">
@@ -1679,23 +1666,16 @@ var FamilyVariant = function() {
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.individualRequired} />
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
-                    {this.state.orpha ?
+                    {this.state.diseaseObj ?
                         <div className="form-group">
-                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
+                            <div className="col-sm-5"><strong className="pull-right">Disease term associated with Family:</strong></div>
+                            <div className="col-sm-7">{this.state.diseaseObj.term}</div>
                         </div>
                         : null
                     }
-                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA:15 or ORPHA15" handleChange={this.handleChange}
-                        value={individualOrphanetId} error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
-                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
-                    { this.state.orpha ?
-                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
-                        :
-                        null
-                    }
+                    <FamilyProbandDisease gdm={this.state.gdm} group={group} family={family} updateFamilyProbandDiseaseObj={this.updateFamilyProbandDiseaseObj}
+                        probandDiseaseObj={this.state.probandDiseaseObj} error={this.state.probandDiseaseError} clearErrorInParent={this.clearErrorInParent}
+                        session={this.props.session} required={this.state.individualRequired} />
                 </div>
             :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
@@ -2051,9 +2031,9 @@ var FamilyViewer = React.createClass({
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
-                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dt>Common Diagnosis</dt>
                                     <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                        return <span key={disease.id}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['MondoSearch'] + disease.id} target="_blank">{disease.id.replace('_', ':')}</a>)</span>;
                                     })}</dd>
                                 </div>
 
