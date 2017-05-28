@@ -17,7 +17,7 @@ var Input = form.Input;
 var Panel = panel.Panel;
 
 import ModalComponent from '../libs/bootstrap/modal';
-import { AddDisease } from './disease';
+import { GdmDisease } from './disease';
 
 var CreateGeneDisease = React.createClass({
     mixins: [FormMixin, RestMixin, CuratorHistory],
@@ -236,7 +236,8 @@ var CreateGeneDisease = React.createClass({
                                 <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <AddDisease ref="addDiseaseComponent" gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError} clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
+                                <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} clearErrorInParent={this.clearErrorInParent}
+                                    error={this.state.diseaseError} session={this.props.session} />
                                 <Input type="select" ref="modeInheritance" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
                                     error={this.getFormError('modeInheritance')} clearError={this.clrFormErrors.bind(null, 'modeInheritance')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="modeOfInheritance" required>
