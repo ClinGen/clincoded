@@ -293,12 +293,12 @@ const CaseControlCuration = React.createClass({
                     if (valid_disease) {
                         let diseaseUuid;
                         if (diseaseSearch.total === 0) {
-                            this.postRestData('/diseases/', diseaseObj).then(result => {
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
                                 let newDisease = result['@graph'][0];
                                 diseaseUuid = newDisease['uuid'];
                                 this.setState({diseaseUuid: diseaseUuid}, () => {
                                     groupDiseases.push(diseaseUuid);
-                                    return Promise.resolve(diseaseSearch);
+                                    return Promise.resolve(result);
                                 });
                             });
                         } else {
@@ -306,7 +306,6 @@ const CaseControlCuration = React.createClass({
                             diseaseUuid = _id.slice(10, -1);
                             this.setState({diseaseUuid: diseaseUuid}, () => {
                                 groupDiseases.push(diseaseUuid);
-                                return Promise.resolve(diseaseSearch);
                             });
                         }
                     }
