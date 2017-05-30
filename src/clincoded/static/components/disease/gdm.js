@@ -64,13 +64,13 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
      * @param {*} disease 
      */
     setDiseaseObjectStates(disease) {
-        if (disease.id) { this.setState({diseaseId: disease.id}) };
-        if (disease.term) { this.setState({diseaseTerm: disease.term}) };
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}) };
-        if (disease.description) { this.setState({diseaseDescription: disease.description}) };
-        if (disease.synonyms) { this.setState({synonyms: disease.synonyms}) };
-        if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}) };
-        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}) };
+        if (disease.id) { this.setState({diseaseId: disease.id}); }
+        if (disease.term) { this.setState({diseaseTerm: disease.term}) ;}
+        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
+        if (disease.description) { this.setState({diseaseDescription: disease.description}); }
+        if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
+        if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
+        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
     passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
@@ -97,28 +97,28 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
             diseaseObj['description'] = description;
             this.setState({diseaseDescription: description});
         } else {
-            if (diseaseObj['description']) { delete diseaseObj['description'] };
+            if (diseaseObj['description']) { delete diseaseObj['description']; }
             this.setState({diseaseDescription: null});
         }
         if (synonyms) {
             diseaseObj['synonyms'] = synonyms;
             this.setState({synonyms: synonyms});
         } else {
-            if (diseaseObj['synonyms']) { delete diseaseObj['synonyms'] };
+            if (diseaseObj['synonyms']) { delete diseaseObj['synonyms']; }
             this.setState({synonyms: []});
         }
         if (phenotypes) {
             diseaseObj['phenotypes'] = phenotypes;
             this.setState({phenotypes: phenotypes});
         } else {
-            if (diseaseObj['phenotypes']) { delete diseaseObj['phenotypes'] };
+            if (diseaseObj['phenotypes']) { delete diseaseObj['phenotypes']; }
             this.setState({phenotypes: []});
         }
         if (freetext) {
             diseaseObj['freetext'] = true;
             this.setState({diseaseFreeTextConfirm: true});
         } else {
-            if (diseaseObj['freetext']) { delete diseaseObj['freetext'] };
+            if (diseaseObj['freetext']) { delete diseaseObj['freetext']; }
             this.setState({diseaseFreeTextConfirm: false});
         }
         this.setState({diseaseObj: diseaseObj}, () => {

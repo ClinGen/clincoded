@@ -74,13 +74,13 @@ const FamilyDisease = module.exports.FamilyDisease = React.createClass({
      * @param {*} disease
      */
     setDiseaseObjectStates(disease) {
-        if (disease.id) { this.setState({diseaseId: disease.id}) };
-        if (disease.term) { this.setState({diseaseTerm: disease.term}) };
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}) };
-        if (disease.description) { this.setState({diseaseDescription: disease.description}) };
-        if (disease.synonyms) { this.setState({synonyms: disease.synonyms}) };
-        if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}) };
-        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}) };
+        if (disease.id) { this.setState({diseaseId: disease.id}); }
+        if (disease.term) { this.setState({diseaseTerm: disease.term}); }
+        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
+        if (disease.description) { this.setState({diseaseDescription: disease.description}); }
+        if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
+        if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
+        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
     passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
@@ -107,28 +107,28 @@ const FamilyDisease = module.exports.FamilyDisease = React.createClass({
             diseaseObj['description'] = description;
             this.setState({diseaseDescription: description});
         } else {
-            if (diseaseObj['description']) { delete diseaseObj['description'] };
+            if (diseaseObj['description']) { delete diseaseObj['description']; }
             this.setState({diseaseDescription: null});
         }
         if (synonyms && synonyms.length) {
             diseaseObj['synonyms'] = synonyms;
             this.setState({synonyms: synonyms});
         } else {
-            if (diseaseObj['synonyms']) { delete diseaseObj['synonyms'] };
+            if (diseaseObj['synonyms']) { delete diseaseObj['synonyms']; }
             this.setState({synonyms: []});
         }
         if (phenotypes && phenotypes.length) {
             diseaseObj['phenotypes'] = phenotypes;
             this.setState({phenotypes: phenotypes});
         } else {
-            if (diseaseObj['phenotypes']) { delete diseaseObj['phenotypes'] };
+            if (diseaseObj['phenotypes']) { delete diseaseObj['phenotypes']; }
             this.setState({phenotypes: []});
         }
         if (freetext) {
             diseaseObj['freetext'] = true;
             this.setState({diseaseFreeTextConfirm: true});
         } else {
-            if (diseaseObj['freetext']) { delete diseaseObj['freetext'] };
+            if (diseaseObj['freetext']) { delete diseaseObj['freetext']; }
             this.setState({diseaseFreeTextConfirm: false});
         }
         this.setState({diseaseObj: diseaseObj}, () => {
@@ -224,13 +224,13 @@ const FamilyDisease = module.exports.FamilyDisease = React.createClass({
      * @param {*} diseaseObj
      */
     handleCopyDiseaseStates(disease, diseaseObj) {
-        if (disease.id) { this.setState({diseaseId: disease.id}, () => { diseaseObj['id'] = disease.id }) };
-        if (disease.term) { this.setState({diseaseTerm: disease.term}, () => { diseaseObj['term'] = disease.term }) };
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}, () => { diseaseObj['ontology'] = disease.ontology }) };
-        if (disease.description) { this.setState({diseaseDescription: disease.description}, () => { diseaseObj['description'] = disease.description }) };
-        if (disease.synonyms && disease.synonyms.length) { this.setState({synonyms: disease.synonyms}, () => { diseaseObj['synonyms'] = disease.synonyms }) };
-        if (disease.phenotypes && disease.phenotypes.length) { this.setState({phenotypes: disease.phenotypes}, () => { diseaseObj['phenotypes'] = disease.phenotypes }) };
-        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}, () => { diseaseObj['freetext'] = true }) };
+        if (disease.id) { this.setState({diseaseId: disease.id}, () => { diseaseObj['id'] = disease.id; }); }
+        if (disease.term) { this.setState({diseaseTerm: disease.term}, () => { diseaseObj['term'] = disease.term; }); }
+        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}, () => { diseaseObj['ontology'] = disease.ontology; }); }
+        if (disease.description) { this.setState({diseaseDescription: disease.description}, () => { diseaseObj['description'] = disease.description; }); }
+        if (disease.synonyms && disease.synonyms.length) { this.setState({synonyms: disease.synonyms}, () => { diseaseObj['synonyms'] = disease.synonyms; }); }
+        if (disease.phenotypes && disease.phenotypes.length) { this.setState({phenotypes: disease.phenotypes}, () => { diseaseObj['phenotypes'] = disease.phenotypes; }); }
+        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}, () => { diseaseObj['freetext'] = true; }); }
     },
 
     /**
