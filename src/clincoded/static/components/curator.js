@@ -156,10 +156,11 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             /**
                              * Post request for adding new disease to the database
                              */
-                            this.postRestData('/diseases/', diseaseObj).then(result => {
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
                                 let newDisease = result['@graph'][0];
                                 diseaseUuid = newDisease['uuid'];
                                 this.setState({diseaseUuid: diseaseUuid});
+                                return Promise.resolve(result);
                             }).then(response => {
                                 /**
                                  * Update existing GDM with a new UUID
