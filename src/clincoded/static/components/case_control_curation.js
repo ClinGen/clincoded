@@ -1505,7 +1505,7 @@ var CaseControlViewer = React.createClass({
                                         <div>
                                             <dt>Common Diagnosis</dt>
                                             <dd>{caseCohort.commonDiagnosis && caseCohort.commonDiagnosis.map(function(disease, i) {
-                                                return <span key={disease.id + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['MondoSearch'] + disease.id} target="_blank">{disease.id.replace('_', ':')}</a>)</span>;
+                                                return <span key={disease.id + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.id} target="_blank">{disease.id.replace('_', ':')}</a> : null}</span>;
                                             })}</dd>
                                         </div>
 
