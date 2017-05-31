@@ -284,23 +284,23 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
         if (confirm) {
             this.handleDeleteDisease();
         }
-        this.child.closeModal();
+        this.confirm.closeModal();
     },
 
     /**
      * Handler for button press event to alert/confirm disease deletion
      * if the interpretation had been marked as 'Provisional'
      */
-    confirmDiseaseDeletion(e) {
-        e.preventDefault(); e.stopPropagation();
-
+    renderDeleteDiseaseBtn() {
         let interpretation = this.props.interpretation;
+
         if (interpretation && interpretation.markAsProvisional) {
             return (
-                <ModalComponent modalClass="modal-default" modalWrapperClass="confirm-interpretation-delete-disease-modal" onRef={ref => (this.child = ref)}>
+                <ModalComponent modalTitle="Confirm disease deletion" modalClass="modal-default" modalWrapperClass="confirm-interpretation-delete-disease-modal pull-right"
+                    bootstrapBtnClass="btn btn-default " actuatorClass="interpretation-delete-disease-btn" actuatorTitle="Delete disease" onRef={ref => (this.confirm = ref)}>
                     <div>
                         <div className="modal-body">
-                            <p className="alert alert-warning">
+                            <p>
                                 Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
                                 or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
                                 <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
@@ -309,13 +309,16 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
                         </div>
                         <div className='modal-footer'>
                             <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleDeleteConfirm.bind(null, false)} title="Cancel" />
-                            <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleDeleteConfirm.bind(null, true)} title="Confirm" />
+                            <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.handleDeleteConfirm.bind(null, true)} title="Confirm" />
                         </div>
                     </div>
                 </ModalComponent>
             );
         } else if (interpretation && !interpretation.markAsProvisional) {
-            this.handleDeleteDisease();
+            return (
+                <Input type="button" ref="interpretationDeleteDisease" title="Delete disease" clickHandler={this.handleDeleteDisease}
+                    wrapperClassName="disease-delete" inputClassName="btn-default pull-right" />
+            );
         }
     },
 
@@ -348,9 +351,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
                     </div>
                 :
                     <div className="delete-disease-button">
-                        <Input type="button" ref="interpretationDeleteDisease" title="Delete disease"
-                            wrapperClassName="disease-delete" inputClassName="btn-default pull-right"
-                            clickHandler={this.confirmDiseaseDeletion} />
+                        {this.renderDeleteDiseaseBtn()}
                     </div>
                 }
             </div>
