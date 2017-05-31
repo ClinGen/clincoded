@@ -8,6 +8,8 @@ var RestMixin = require('../rest').RestMixin;
 var queryKeyValue = globals.queryKeyValue;
 let external_url_map = globals.external_url_map;
 
+import PopOverComponent from '../../libs/bootstrap/popover';
+
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = React.createClass({
     mixins: [RestMixin],
@@ -92,9 +94,27 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                             <h4>My Interpretation</h4>
                             {myInterpretation ?
                                 <div className="current-user-interpretations">
-                                    <div><strong>Disease:</strong>&nbsp;
+                                    <div className="associated-disease"><strong>Disease:</strong>&nbsp;
                                         {myInterpretation && myInterpretation.disease ?
-                                            <span>{myInterpretation.disease.term} {!myInterpretation.disease.freetext ? <a href={external_url_map['MondoSearch'] + myInterpretation.disease.id} target="_blank">{myInterpretation.disease.id.replace('_', ':')}</a> : null}</span>
+                                            <span>
+                                                {myInterpretation.disease.term}
+                                                <span>&nbsp;</span>
+                                                {!myInterpretation.disease.freetext ? 
+                                                    <span>
+                                                        (
+                                                        <a href={external_url_map['MondoSearch'] + myInterpretation.disease.id} target="_blank">{myInterpretation.disease.id.replace('_', ':')}</a>
+                                                        {myInterpretation.disease.description && myInterpretation.disease.description.length ?
+                                                            <span><span>,&nbsp;</span>
+                                                                <PopOverComponent popOverWrapperClass="interpretation-disease-description"
+                                                                    actuatorTitle="View description" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                    {myInterpretation.disease.description}
+                                                                </PopOverComponent>
+                                                            </span>
+                                                        : null}
+                                                        )
+                                                    </span>
+                                                : null}
+                                            </span>
                                             :
                                             <span>Not associated</span>
                                         }
