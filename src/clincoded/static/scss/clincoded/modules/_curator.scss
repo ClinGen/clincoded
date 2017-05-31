@@ -1496,6 +1496,21 @@
     dl.inline-dl dt {
         float: none;
     }
+
+    .associated-disease {
+        word-break: break-word;
+
+        .popover-component {
+            display: inline-block;
+            font-weight: normal;
+
+            .popover-wrapper {
+                position: fixed;
+                max-width: 300px;
+                z-index: 9999;
+            }
+        }
+    }
 }
 
 .curation-variant  {
