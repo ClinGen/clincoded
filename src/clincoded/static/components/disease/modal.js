@@ -255,13 +255,13 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
             if (this.refs['diseaseFreeTextDesc'] && !this.refs['diseaseFreeTextDesc'].getValue()) {
                 if (!this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
                     formError = true;
-                    this.setFormErrors('diseaseFreeTextDesc', 'A description or HPO IDs (e.g. HP:0000001) are required');
+                    this.setFormErrors('diseaseFreeTextDesc', 'Either a description or HPO term(s) (e.g. HP:0000001) is required');
                 }
             }
             if (this.refs['diseaseFreeTextPhenoTypes'] && !this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
                 if (!this.refs['diseaseFreeTextDesc'].getValue()) {
                     formError = true;
-                    this.setFormErrors('diseaseFreeTextPhenoTypes', 'A description or HPO IDs (e.g. HP:0000001) are required');
+                    this.setFormErrors('diseaseFreeTextPhenoTypes', 'Either a description or HPO term(s) (e.g. HP:0000001) is required');
                 }
             }
             if (this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
