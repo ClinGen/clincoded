@@ -166,7 +166,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     handleChange: function(ref, e) {
         // Handle modified pathogenicity dropdown
         if (ref === 'provisional-pathogenicity') {
-            if (this.refs[ref].getValue()) {
+            if (this.refs[ref].getValue() && this.refs[ref].getValue() !== 'none') {
                 this.setState({provisionalPathogenicity: this.refs[ref].getValue()}, () => {
                     // Pass dropdown state change back to parent component
                     this.props.setProvisionalEvaluation('provisional-pathogenicity', this.state.provisionalPathogenicity);
@@ -347,7 +347,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let provisionalVariant = null;
         let alteredClassification = null;
         let provisionalStatus = null;
-        let provisionalPathogenicity = this.state.provisionalPathogenicity ? this.state.provisionalPathogenicity : '';
+        let provisionalPathogenicity = this.state.provisionalPathogenicity ? this.state.provisionalPathogenicity : 'none';
         let provisionalReason = this.state.provisionalReason ? this.state.provisionalReason : '';
         let provisionalInterpretation = this.state.provisionalInterpretation ? this.state.provisionalInterpretation : false;
         let disabledCheckbox = this.state.disabledCheckbox;
@@ -409,9 +409,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                         <div className="col-xs-12 col-sm-6">
                                             <div className="evaluation-provision provisional-pathogenicity">
                                                 <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
-                                                    value={provisionalPathogenicity} handleChange={this.handleChange}
+                                                    defaultValue={provisionalPathogenicity} handleChange={this.handleChange}
                                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                                                    <option value=''>No Selection</option>
+                                                    <option value='none'>No Selection</option>
                                                     <option disabled="disabled"></option>
                                                     <option value="Benign">Benign</option>
                                                     <option value="Likely benign">Likely Benign</option>
