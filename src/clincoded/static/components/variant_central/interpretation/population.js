@@ -737,36 +737,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                <div className="bs-callout bs-callout-info clearfix">
-                    <h4>Highest Minor Allele Frequency</h4>
-                    <div className="clearfix">
-                        <div className="bs-callout-content-container">
-                            <dl className="inline-dl clearfix">
-                                <dt>Population: </dt><dd>{highestMAF && highestMAF.popLabel ? highestMAF.popLabel : 'N/A'}</dd>
-                                <dt># Variant Alleles: </dt><dd>{highestMAF && highestMAF.ac ? highestMAF.ac : 'N/A'}</dd>
-                                <dt>Total # Alleles Tested: </dt><dd>{highestMAF && highestMAF.ac_tot ? highestMAF.ac_tot : 'N/A'}</dd>
-                            </dl>
-                        </div>
-                        <div className="bs-callout-content-container">
-                            <dl className="inline-dl clearfix">
-                                <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
-                                <dt>Allele Frequency: </dt><dd>{highestMAF && (highestMAF.af || highestMAF.af === 0) ? this.parseFloatShort(highestMAF.af) : 'N/A'}</dd>
-                                {(this.state.interpretation && highestMAF) ?
-                                    <span>
-                                        <dt className="dtFormLabel">Desired CI:</dt>
-                                        <dd className="ddFormInput">
-                                            <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI} inputDisabled={true}
-                                                onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
-                                        </dd>
-                                        <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
-                                        <dt>CI - upper: </dt><dd>{this.state.CIHigh || this.state.CIHigh === 0 ? this.parseFloatShort(this.state.CIHigh) : ''}</dd>
-                                    </span>
-                                : null}
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
                     {(this.state.data && this.state.interpretation) ?
                     <div className="row">
@@ -786,6 +756,37 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </p>
                         </div>
                     : null}
+
+                    <div className="bs-callout bs-callout-info clearfix">
+                        <h4>Subpopulation with Highest Minor Allele Frequency</h4>
+                        <div className="clearfix">
+                            <div className="bs-callout-content-container">
+                                <dl className="inline-dl clearfix">
+                                    <dt>Population: </dt><dd>{highestMAF && highestMAF.popLabel ? highestMAF.popLabel : 'N/A'}</dd>
+                                    <dt># Variant Alleles: </dt><dd>{highestMAF && highestMAF.ac ? highestMAF.ac : 'N/A'}</dd>
+                                    <dt>Total # Alleles Tested: </dt><dd>{highestMAF && highestMAF.ac_tot ? highestMAF.ac_tot : 'N/A'}</dd>
+                                </dl>
+                            </div>
+                            <div className="bs-callout-content-container">
+                                <dl className="inline-dl clearfix">
+                                    <dt>Source: </dt><dd>{highestMAF && highestMAF.source ? highestMAF.source : 'N/A'}</dd>
+                                    <dt>Allele Frequency: </dt><dd>{highestMAF && (highestMAF.af || highestMAF.af === 0) ? this.parseFloatShort(highestMAF.af) : 'N/A'}</dd>
+                                    {(this.state.interpretation && highestMAF) ?
+                                        <span>
+                                            <dt className="dtFormLabel">Desired CI:</dt>
+                                            <dd className="ddFormInput">
+                                                <Input type="number" inputClassName="desired-ci-input" ref="desiredCI" value={desiredCI} handleChange={this.changeDesiredCI} inputDisabled={true}
+                                                    onBlur={this.onBlurDesiredCI} minVal={0} maxVal={100} maxLength="2" placeholder={CI_DEFAULT.toString()} />
+                                            </dd>
+                                            <dt>CI - lower: </dt><dd>{this.state.CILow || this.state.CILow === 0 ? this.parseFloatShort(this.state.CILow) : ''}</dd>
+                                            <dt>CI - upper: </dt><dd>{this.state.CIHigh || this.state.CIHigh === 0 ? this.parseFloatShort(this.state.CIHigh) : ''}</dd>
+                                        </span>
+                                    : null}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading">
                             {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
@@ -948,7 +949,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 // code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList1 = ['BA1', 'PM2', 'BS1'], // array of criteria code handled subgroup of this section
+    let criteriaList1 = ['BA1', 'BS1', 'PM2'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
