@@ -297,7 +297,8 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
         if (interpretation && interpretation.markAsProvisional) {
             return (
                 <ModalComponent modalTitle="Confirm disease deletion" modalClass="modal-default" modalWrapperClass="confirm-interpretation-delete-disease-modal pull-right"
-                    bootstrapBtnClass="btn btn-default " actuatorClass="interpretation-delete-disease-btn" actuatorTitle="Delete disease" onRef={ref => (this.confirm = ref)}>
+                    bootstrapBtnClass="btn btn-primary disease-delete " actuatorClass="interpretation-delete-disease-btn" actuatorTitle={<span>Disease<i className="icon icon-trash-o"></i></span>}
+                    onRef={ref => (this.confirm = ref)}>
                     <div>
                         <div className="modal-body">
                             <p>
@@ -316,8 +317,9 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
             );
         } else if (interpretation && !interpretation.markAsProvisional) {
             return (
-                <Input type="button" ref="interpretationDeleteDisease" title="Delete disease" clickHandler={this.handleDeleteDisease}
-                    wrapperClassName="disease-delete" inputClassName="btn-default pull-right" />
+                <a ref="interpretationDeleteDisease" className="btn btn-primary pull-right disease-delete" onClick={this.handleDeleteDisease}>
+                    <span>Disease<i className="icon icon-trash-o"></i></span>
+                </a>
             );
         }
     },
