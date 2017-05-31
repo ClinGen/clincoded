@@ -397,7 +397,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                         <div className="col-xs-12 col-sm-6">
                                             <dl className="inline-dl clearfix">
                                                 <dt>Disease:</dt>
-                                                <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
+                                                <dd>{interpretation.disease ? interpretation.disease.id : 'None'}</dd>
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>Mode of Inheritance:</dt>
