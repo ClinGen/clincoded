@@ -440,7 +440,7 @@
                             "title": "Disease",
                             "description": "Disease associated with the interpretation",
                             "type": "string",
-                            "linkTo": "orphaPhenotype"
+                            "linkTo": "disease"
                         },
                         "modeInheritance": {
                             "title": "Mode of Inheritance",
