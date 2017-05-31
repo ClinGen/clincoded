@@ -16,6 +16,7 @@ var FormMixin = form.FormMixin;
 var queryKeyValue = globals.queryKeyValue;
 
 import ModalComponent from '../../libs/bootstrap/modal';
+import { InterpretationDisease } from '../disease';
 
 // Display the variant curation action bar above the criteria and tabs
 var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
@@ -37,7 +38,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretation: this.props.interpretation,
             isInterpretationActive: this.props.interpretation ? true : false,
             hasAssociatedDisease: this.props.interpretation && this.props.interpretation.disease ? true : false,
-            hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false
+            hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false,
+            diseaseObj: {},
+            diseaseUuid: null
         };
     },
 
@@ -94,6 +97,13 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
     },
 
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj});
+    },
+
     render: function() {
         let hasExistingInterpretation = this.props.interpretation ? true : false;
         if (!hasExistingInterpretation) {
@@ -116,9 +126,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                         <div className="btn-group">
                             <InheritanceModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedInheritance={this.state.hasAssociatedInheritance}
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            <DiseaseModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedDisease={this.state.hasAssociatedDisease}
-                                interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj}
-                                calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} />
+                            <InterpretationDisease variantData={this.props.variantData} interpretation={this.props.interpretation} diseaseObj={this.state.diseaseObj} editKey={this.props.editkey}
+                                updateInterpretationObj={this.props.updateInterpretationObj} updateDiseaseObj={this.updateDiseaseObj} hasAssociatedDisease={this.state.hasAssociatedDisease}
+                                calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} session={this.props.session} />
                         </div>
                     </div>
                     :
