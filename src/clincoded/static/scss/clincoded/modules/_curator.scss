@@ -2971,3 +2971,16 @@ table.login-users-interpretations {
         }
     }
 }
+
+.curation-actions.curation-variant {
+    .add-disease-interpretation {
+        .btn {
+            .icon {
+                font-size: 14px;
+                margin-top: 2px;
+                margin-left: 5px;
+                vertical-align: text-bottom;
+            }
+        }
+    }
+}
