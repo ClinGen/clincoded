@@ -836,8 +836,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                                 </table>
                                                 :
                                                 <div className="panel-body">
-                                                    <span>We are not currently displaying ExAC data for multi-allelic loci because sometimes the data returned is for the alternate allele at the same locus. This issue
-                                                        will be fixed soon. For the correct allele, <a href={exacDataLinkout} target="_blank">see data in ExAC</a>.</span>
+                                                    <span>ExAC data is not currently displayed for this variant as it occurs at a multi-allelic locus and data is sometimes returned
+                                                        for an alternate allele at these loci due to changes in the data structure. This issue is being addressed and will be fixed
+                                                        soon. For the correct allele, <a href={exacDataLinkout} target="_blank">see data in ExAC</a>.</span>
                                                 </div>
                                             }
                                         </div>
