@@ -216,7 +216,7 @@ var InheritanceModalButton = React.createClass({
                 updateInterpretationObj={this.props.updateInterpretationObj}
                 title={associateInheritanceModalTitle}
                 buttonText={associateInheritanceButtonTitle}
-                buttonClass='btn-primary pull-right btn-inline-spacer'
+                buttonClass={this.props.hasAssociatedInheritance ? 'btn-info pull-right btn-inline-spacer' : 'btn-primary pull-right btn-inline-spacer'}
             />
         );
     }
