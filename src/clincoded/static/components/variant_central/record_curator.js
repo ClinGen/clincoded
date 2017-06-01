@@ -106,7 +106,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                         {myInterpretation.disease.description && myInterpretation.disease.description.length ?
                                                             <span><span>,&nbsp;</span>
                                                                 <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                                    actuatorTitle="View description" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                    actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
                                                                     {myInterpretation.disease.description}
                                                                 </PopOverComponent>
                                                             </span>
