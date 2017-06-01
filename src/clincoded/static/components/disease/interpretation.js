@@ -317,7 +317,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
             );
         } else if (interpretation && !interpretation.markAsProvisional) {
             return (
-                <a ref="interpretationDeleteDisease" className="btn btn-primary pull-right disease-delete" onClick={this.handleDeleteDisease}>
+                <a ref="interpretationDeleteDisease" className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
                     <span>Disease<i className="icon icon-trash-o"></i></span>
                 </a>
             );
