@@ -269,7 +269,7 @@ const FamilyDisease = module.exports.FamilyDisease = React.createClass({
         return (
             <div className="form-group add-disease-group">
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
-                    <span>Disease(s) in Common:<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using <a href={external_url_map['OLS']} target="_blank">OLS</a></span></span>
+                    <span>Disease(s) in Common for Family:<span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : "disease-name"}>
@@ -303,10 +303,10 @@ const FamilyDisease = module.exports.FamilyDisease = React.createClass({
                             </li>
                         </ul>
                     :
-                        <div className="delete-disease-button pull-right">
-                            <Input type="button" ref="groupDeleteDisease" title="Delete disease"
-                                wrapperClassName="disease-delete" inputClassName="btn-default"
-                                clickHandler={this.handleDeleteDisease} />
+                        <div className="delete-disease-button">
+                            <a className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
+                                <span>Disease<i className="icon icon-trash-o"></i></span>
+                            </a>
                         </div>
                     }
                 </div>
