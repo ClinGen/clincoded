@@ -1125,16 +1125,16 @@ var DiseaseRecordHeader = React.createClass({
                         <dl>
                             <dt>
                                 {disease.term}
-                                {disease.description && disease.description.length ?
-                                    <PopOverComponent popOverWrapperClass="gdm-disease-description"
-                                        actuatorTitle="View description" popOverRef={ref => (this.popoverDesc = ref)}>
-                                        {disease.description}
-                                    </PopOverComponent>
-                                : null}
                                 {disease.phenotypes && disease.phenotypes.length ?
                                     <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
                                         actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
-                                        {disease.phenotypes}
+                                        {disease.phenotypes.join(', ')}
+                                    </PopOverComponent>
+                                : null}
+                                {disease.description && disease.description.length ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-description"
+                                        actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                        {disease.description}
                                     </PopOverComponent>
                                 : null}
                             </dt>
@@ -2410,7 +2410,7 @@ function flattenInterpretation(interpretation) {
 }
 
 
-// Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
+// Given an array of group or families in 'objList', render a list of IDs for all diseases in those
 // groups or families.
 var renderDiseaseList = module.exports.renderDiseaseList = function(objList, title) {
     return (
@@ -2424,18 +2424,20 @@ var renderDiseaseList = module.exports.renderDiseaseList = function(objList, tit
                                     <strong className="pull-right">Disease(s) Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
-                                        obj.commonDiagnosis.map(function(disease, i) {
-                                            return (
-                                                <span key={disease.id}>
-                                                    {i > 0 ? ', ' : ''}
-                                                    {disease.term}
-                                                </span>
-                                            );
-                                        })
-                                        :
-                                        <span>&nbsp;</span>
-                                    }
+                                    <strong>
+                                        { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
+                                            obj.commonDiagnosis.map(function(disease, i) {
+                                                return (
+                                                    <span key={disease.id}>
+                                                        {i > 0 ? ', ' : ''}
+                                                        {disease.term}
+                                                    </span>
+                                                );
+                                            })
+                                            :
+                                            <span>&nbsp;</span>
+                                        }
+                                    </strong>
                                 </div>
                             </div>
                         );
