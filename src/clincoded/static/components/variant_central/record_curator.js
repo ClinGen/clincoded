@@ -113,7 +113,26 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                         : null}
                                                         )
                                                     </span>
-                                                : null}
+                                                    :
+                                                    <span>
+                                                        (
+                                                        {myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ?
+                                                            <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                                                actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                                                {myInterpretation.disease.phenotypes.join(', ')}
+                                                            </PopOverComponent>
+                                                        : null}
+                                                        {myInterpretation.disease.description && myInterpretation.disease.description.length ?
+                                                            <span>{myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
+                                                                <PopOverComponent popOverWrapperClass="interpretation-disease-description"
+                                                                    actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                    {myInterpretation.disease.description}
+                                                                </PopOverComponent>
+                                                            </span>
+                                                        : null}
+                                                        )
+                                                    </span>
+                                                }
                                             </span>
                                             :
                                             <span>Not associated</span>
