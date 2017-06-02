@@ -1668,7 +1668,7 @@ var FamilyVariant = function() {
                     {this.state.diseaseObj ?
                         <div className="form-group">
                             <div className="col-sm-5"><strong className="pull-right">Disease term associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.state.diseaseObj.term}</div>
+                            <div className="col-sm-7"><strong>{this.state.diseaseObj.term}</strong></div>
                         </div>
                         : null
                     }
