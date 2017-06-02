@@ -309,7 +309,7 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
                     <span>Disease for individual{this.props.probandLabel}:
                         {this.state.required ? <span className="required-field"> *</span> : null}
-                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using <a href={external_url_map['OLS']} target="_blank">OLS</a></span>
+                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span>
                     </span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
@@ -344,10 +344,10 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
                             </li>
                         </ul>
                     :
-                        <div className="delete-disease-button pull-right">
-                            <Input type="button" ref="groupDeleteDisease" title="Delete disease"
-                                wrapperClassName="disease-delete" inputClassName="btn-default"
-                                clickHandler={this.handleDeleteDisease} />
+                        <div className="delete-disease-button">
+                            <a className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
+                                <span>Disease<i className="icon icon-trash-o"></i></span>
+                            </a>
                         </div>
                     }
                 </div>
