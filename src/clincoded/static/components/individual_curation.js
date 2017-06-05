@@ -332,7 +332,9 @@ var IndividualCuration = React.createClass({
             // Disease is required for proband individual
             if (this.state.proband_selected && (this.state.diseaseObj && !Object.keys(this.state.diseaseObj).length)) {
                 formError = true;
-                this.setState({diseaseError: 'Disease is required for proband.'});
+                this.setState({diseaseError: 'Required for proband'}, () => {
+                    this.setFormErrors('diseaseError', 'Required for proband');
+                });
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -789,7 +791,9 @@ var IndividualCuration = React.createClass({
      * Update the 'diseaseObj' state used to save data upon form submission
      */
     updateDiseaseObj(diseaseObj) {
-        this.setState({diseaseObj: diseaseObj});
+        this.setState({diseaseObj: diseaseObj}, () => {
+            this.clrFormErrors('diseaseError');
+        });
     },
 
     /**
