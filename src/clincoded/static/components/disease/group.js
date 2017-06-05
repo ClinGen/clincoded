@@ -21,7 +21,8 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
         clearErrorInParent: PropTypes.func,
         error: PropTypes.string,
         session: PropTypes.object,
-        inputDisabled: PropTypes.bool
+        inputDisabled: PropTypes.bool,
+        required: PropTypes.bool
     },
 
     getInitialState() {
@@ -30,6 +31,7 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
             group: this.props.group,
             diseaseObj: this.props.diseaseObj,
             error: this.props.error,
+            required: this.props.required,
             diseaseId: '',
             diseaseTerm: null,
             diseaseOntology: null,
@@ -61,7 +63,13 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
         }
         if (nextProps.error) {
             this.setState({error: nextProps.error});
+        } else {
+            this.setState({error: null});
         }
+        /**
+         * Set the value either true or false
+         */
+        this.setState({required: nextProps.required});
     },
 
     /**
@@ -236,10 +244,13 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
         return (
             <div className="form-group add-disease-group">
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
-                    <span>Disease(s) in Common:<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span></span>
+                    <span>Disease(s) in Common:
+                        {this.state.required ? <span className="required-field"> *</span> : null}
+                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span>
+                    </span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
-                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : "disease-name"}>
+                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : (error ? "disease-name error pull-left" : "disease-name")}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
