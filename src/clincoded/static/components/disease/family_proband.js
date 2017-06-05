@@ -57,9 +57,10 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
         if (nextProps.error) {
             this.setState({error: nextProps.error});
         }
-        if (nextProps.required) {
-            this.setState({required: nextProps.required});
-        }
+        /**
+         * Set the value either true or false
+         */
+        this.setState({required: nextProps.required});
     },
 
     /**
@@ -219,7 +220,7 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
                     </span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
-                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : "disease-name"}>
+                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : (error ? "disease-name error pull-left" : "disease-name")}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
