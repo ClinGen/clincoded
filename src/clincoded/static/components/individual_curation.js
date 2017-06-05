@@ -1321,7 +1321,6 @@ var IndividualVariantInfo = function() {
                                             <dt className="no-label"></dt>
                                             <dd>
                                                 <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                                <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + variant.uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
                                             </dd>
                                         </div>
                                     : null}
@@ -1441,7 +1440,6 @@ var IndividualVariantInfo = function() {
                                                 <span className="col-sm-5 control-label"><label></label></span>
                                                 <span className="col-sm-7 text-no-input">
                                                     <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                                    <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
                                                 </span>
                                             </div>
                                         : null}
