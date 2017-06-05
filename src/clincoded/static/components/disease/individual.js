@@ -313,7 +313,7 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
                     </span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
-                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : "disease-name"}>
+                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : (error ? "disease-name error pull-left" : "disease-name")}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
