@@ -554,6 +554,16 @@ var FamilyCuration = React.createClass({
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
 
+            /**
+             * Proband disease is required if Proband name is not nil
+             */
+            if (this.state.individualName && (this.state.probandDiseaseObj && !Object.keys(this.state.probandDiseaseObj).length)) {
+                formError = true;
+                this.setState({probandDiseaseError: 'Required for proband'}, () => {
+                    this.setFormErrors('probandDisease', 'Required for proband');
+                });
+            }
+
             // Check that all gene symbols have the proper format (will check for existence later)
             if (pmids && pmids.length && _(pmids).any(function(id) { return id === null; })) {
                 // PMID list is bad
@@ -1188,11 +1198,25 @@ var FamilyCuration = React.createClass({
      */
     updateFamilyProbandDiseaseObj(action, probandDiseaseObj) {
         if (action === 'add' && (probandDiseaseObj && Object.keys(probandDiseaseObj).length > 0)) {
-            this.setState({probandDiseaseObj: probandDiseaseObj});
+            this.setState({probandDiseaseObj: probandDiseaseObj, individualRequired: true}, () => {
+                // Clear 'probandDisease' key in formErrors object
+                this.clrFormErrors('probandDisease');
+            });
         } else if (action === 'copy' && this.state.diseaseObj) {
-            this.setState({probandDiseaseObj: this.state.diseaseObj});
+            this.setState({probandDiseaseObj: this.state.diseaseObj, individualRequired: true}, () => {
+                // Clear 'probandDisease' key in formErrors object
+                this.clrFormErrors('probandDisease');
+            });
         } else if (action === 'delete') {
-            this.setState({probandDiseaseObj: {}});
+            this.setState({probandDiseaseObj: {}}, () => {
+                // Clear 'probandDisease' key in formErrors object
+                this.clrFormErrors('probandDisease');
+            });
+            if (this.state.individualName && !this.state.individualName.length) {
+                this.setState({individualRequired: true});
+            } else {
+                this.setState({individualRequired: false});
+            }
         }
     },
 
