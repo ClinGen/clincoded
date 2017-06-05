@@ -2960,6 +2960,10 @@ table.login-users-interpretations {
                         padding-top: 8px;
                     }
                 }
+
+                &.error .form-error {
+                    font-size: 14px;
+                }
             }
 
             .add-disease-button-group {
