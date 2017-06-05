@@ -272,7 +272,7 @@ const FamilyDisease = module.exports.FamilyDisease = React.createClass({
                     <span>Disease(s) in Common for Family:<span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
-                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : "disease-name"}>
+                    <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : (error ? "disease-name error pull-left" : "disease-name")}>
                         {error ?
                             <span className="form-error">{error}</span>
                             :
