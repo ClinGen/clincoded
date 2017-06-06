@@ -2599,8 +2599,7 @@ table.login-users-interpretations {
                     display: inherit;
 
                     &:nth-child(even) {
-                        height: 8px;
-                        visibility: hidden;
+                        margin: 4px 0;
                     }
 
                     .gdm-disease-copy>.btn,
