@@ -2659,6 +2659,9 @@ var ExperimentalViewer = React.createClass({
 
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
         let experimentalEvidenceType = this.state.experimentalEvidenceType;
+        let modelSystems_phenotypeHPOObserved = experimental.modelSystems.phenotypeHPOObserved ? experimental.modelSystems.phenotypeHPOObserved.split(', ') : [];
+        let modelSystems_phenotypeHPO = experimental.modelSystems.phenotypeHPO ? experimental.modelSystems.phenotypeHPO.split(', ') : [];
+        let rescue_phenotypeHPO = experimental.rescue.phenotypeHPO ? experimental.rescue.phenotypeHPO.split(', ') : [];
 
         return (
             <div>
@@ -2942,7 +2945,9 @@ var ExperimentalViewer = React.createClass({
 
                                 <div>
                                     <dt>Phenotype(s) observed in model system (HPO)</dt>
-                                    <dd>{experimental.modelSystems.phenotypeHPOObserved ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPOObserved} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPOObserved + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPOObserved}</a> : null}</dd>
+                                    <dd>{modelSystems_phenotypeHPOObserved && modelSystems_phenotypeHPOObserved.map((hpo, i) => {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
                                 </div>
 
                                 <div>
@@ -2952,7 +2957,9 @@ var ExperimentalViewer = React.createClass({
 
                                 <div>
                                     <dt>Human phenotype(s) (HPO)</dt>
-                                    <dd>{experimental.modelSystems.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.modelSystems.phenotypeHPO} title={"HPO Browser entry for " + experimental.modelSystems.phenotypeHPO + " in new tab"} target="_blank">{experimental.modelSystems.phenotypeHPO}</a> : null}</dd>
+                                    <dd>{modelSystems_phenotypeHPO && modelSystems_phenotypeHPO.map((hpo, i) => {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
                                 </div>
 
                                 <div>
@@ -3011,7 +3018,9 @@ var ExperimentalViewer = React.createClass({
 
                                 <div>
                                     <dt>Phenotype to rescue</dt>
-                                    <dd>{experimental.rescue.phenotypeHPO ? <a href={external_url_map['HPO'] + experimental.rescue.phenotypeHPO} title={"HPO Browser entry for " + experimental.rescue.phenotypeHPO + " in new tab"} target="_blank">{experimental.rescue.phenotypeHPO}</a> : null}</dd>
+                                    <dd>{rescue_phenotypeHPO && rescue_phenotypeHPO.map((hpo, i) => {
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                    })}</dd>
                                 </div>
 
                                 <div>
