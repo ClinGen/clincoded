@@ -198,7 +198,6 @@ var BetaNote = React.createClass({
             <div>
                 {!curatorMatch ?
                     <div className="beta-note">
-                        <p>Currently, only the curator who adds a paper to a Gene-Disease record can associate evidence with that paper.</p>
                         <p>PMID:{annotation.article.pmid} added by {annotation.submitted_by.title}.</p>
                     </div>
                 : null}
