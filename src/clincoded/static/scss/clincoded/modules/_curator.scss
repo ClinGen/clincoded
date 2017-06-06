@@ -2611,9 +2611,12 @@ table.login-users-interpretations {
                 }
             }
 
-            .delete-disease-button .btn.pull-right {
-                float: left !important;
+            .delete-disease-button {
                 padding-top: 10px;
+
+                .btn.pull-right {
+                    float: left !important;
+                }
             }
         }
     }
