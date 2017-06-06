@@ -27,7 +27,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
             gdm: null, // GDM object given in query string
             family: null, // Group object given in query string
             annotation: null, // Annotation object given in query string
-            haveIndividual: '' // Setting of have-individual switch
+            haveIndividual: 'none' // Setting of have-individual switch
         };
     },
 
@@ -178,7 +178,7 @@ var FamilySubmit = module.exports.FamilySubmit = React.createClass({
                                             <Input type="select" ref="haveindividual" defaultValue={this.state.haveIndividual}
                                                 label="No segregating variant information has been associated with this Family. Would you like to add it?"
                                                 handleChange={this.handleChange} labelClassName="family-submit-results-label" wrapperClassName="family-submit-results-switch" groupClassName="submit-results-wrapper">
-                                                <option value="" disabled="disabled">No Selection</option>
+                                                <option value="none" disabled="disabled">No Selection</option>
                                                 <option disabled="disabled"></option>
                                                 <option value="y">Yes</option>
                                                 <option value="n">No</option>

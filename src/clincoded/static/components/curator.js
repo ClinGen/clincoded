@@ -18,6 +18,8 @@ var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 
 import ModalComponent from '../libs/bootstrap/modal';
+import PopOverComponent from '../libs/bootstrap/popover';
+import { GdmDisease } from './disease';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -70,6 +72,8 @@ globals.content_views.register(CuratorPage, 'curator_page');
 
 // Curation data header for Gene:Disease
 var RecordHeader = module.exports.RecordHeader = React.createClass({
+    mixins: [RestMixin],
+
     propTypes: {
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
@@ -78,8 +82,181 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         pmid: React.PropTypes.string
     },
 
+    getInitialState() {
+        return {
+            gdm: this.props.gdm,
+            diseaseObj: {},
+            diseaseUuid: null,
+            diseaseError: null
+        };
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.gdm) {
+            this.setState({gdm: nextProps.gdm});
+        }
+    },
+
+    /**
+     * Update the 'diseaseObj' state used to save data upon modal form submission
+     * Also update the gdm-associated disease object in the database
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj}, () => {
+            const gdm = this.props.gdm;
+            const disease = gdm && gdm.disease;
+
+            this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
+                let flattenDiseaseObj = flatten(currDiseaseObj);
+                // Update disease object properties
+                flattenDiseaseObj['id'] = diseaseObj['id'];
+                flattenDiseaseObj['term'] = diseaseObj['term'];
+                // Update ontology if any
+                if (diseaseObj['ontology']) {
+                    flattenDiseaseObj['ontology'] = diseaseObj['ontology'];
+                } else {
+                    if ('ontology' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['ontology'];
+                    }
+                }
+                // Update description (if any)
+                if (diseaseObj['description']) {
+                    flattenDiseaseObj['description'] = diseaseObj['description'];
+                } else {
+                    if ('description' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['description'];
+                    }
+                }
+                // Update optional phenotypes (applicable to free text only)
+                if (diseaseObj['phenotypes']) {
+                    flattenDiseaseObj['phenotypes'] = diseaseObj['phenotypes'];
+                } else {
+                    if ('phenotypes' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['phenotypes'];
+                    }
+                }
+                // Update optional free text confirmation (applicable to free text only)
+                if (diseaseObj['freetext']) {
+                    flattenDiseaseObj['freetext'] = true;
+                } else {
+                    if ('freetext' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['freetext'];
+                    }
+                }
+                // Update synonyms
+                if (diseaseObj['synonyms']) {
+                    flattenDiseaseObj['synonyms'] = diseaseObj['synonyms'];
+                } else {
+                    if ('synonyms' in flattenDiseaseObj) {
+                        delete flattenDiseaseObj['synonyms'];
+                    }
+                }
+
+                let flattenGdmObj = flatten(gdm);
+                if (!diseaseObj['freetext'] && diseaseObj['id'] !== disease.id) {
+                    /**
+                     * Handle the updating of MonDO term
+                     */
+                    this.getRestData('/search?type=disease&id=' + diseaseObj['id']).then(diseaseSearch => {
+                        let diseaseUuid;
+                        if (diseaseSearch.total === 0) {
+                            /**
+                             * Post request for adding new disease to the database
+                             */
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({diseaseUuid: diseaseUuid});
+                                return Promise.resolve(result);
+                            }).then(response => {
+                                /**
+                                 * Update existing GDM with a new UUID
+                                 */
+                                flattenGdmObj['disease'] = this.state.diseaseUuid;
+                                this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                    return Promise.resolve(gdmObj['@graph'][0]);
+                                }).then(data => {
+                                    this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                        this.setState({gdm: updatedGdm});
+                                    });
+                                });
+                            });
+                        } else {
+                            /**
+                             * User-selected disease already exists in the database
+                             */
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
+                            this.setState({diseaseUuid: diseaseUuid});
+                            /**
+                             * Update existing GDM with the UUID of the existing disease
+                             */
+                            flattenGdmObj['disease'] = this.state.diseaseUuid;
+                            this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                return Promise.resolve(gdmObj['@graph'][0]);
+                            }).then(data => {
+                                this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                    this.setState({gdm: updatedGdm});
+                                });
+                            });
+                        }
+                    });
+                } else if (diseaseObj['freetext']) {
+                    let diseaseUuid;
+                    if (!disease.freetext) {
+                        /**
+                         * Post request for changing disease to free text from Mondo term
+                         * Treat as a new disease record since a new free text disease id is generated
+                         */
+                        return this.postRestData('/diseases/', diseaseObj).then(result => {
+                            let newDisease = result['@graph'][0];
+                            diseaseUuid = newDisease['uuid'];
+                            this.setState({diseaseUuid: diseaseUuid});
+                            return Promise.resolve(result);
+                        }).then(response => {
+                            /**
+                             * Update existing GDM with a new UUID
+                             */
+                            flattenGdmObj['disease'] = this.state.diseaseUuid;
+                            this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                return Promise.resolve(gdmObj['@graph'][0]);
+                            }).then(data => {
+                                this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                    this.setState({gdm: updatedGdm});
+                                });
+                            });
+                        });
+                    } else {
+                        /**
+                         * Put request for updating a free text disease without changing to Mondo term
+                         * Keep free text disease id and update description/phenotypes, etc.
+                         */
+                        return this.putRestData('/diseases/' + disease.uuid, flattenDiseaseObj).then(result => {
+                            let newDiseaseObj = result['@graph'][0];
+                            return Promise.resolve(newDiseaseObj);
+                        }).then(data => {
+                            this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                this.setState({gdm: updatedGdm});
+                            });
+                        });
+                    }
+                }
+            }).catch(err => {
+                console.warn('GCI update disease error :: %o', err);
+            });
+        });
+    },
+
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent() {
+        this.setState({diseaseError: null});
+    },
+
     render: function() {
-        var gdm = this.props.gdm;
+        var gdm = this.state.gdm;
+        var disease = gdm && gdm.disease;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var summaryPage = this.props.summaryPage ? true : false;
 
@@ -91,7 +268,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
-            var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             // Display selected MOI adjective if any. Otherwise, display selected MOI.
             var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective ? this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
@@ -163,6 +339,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
+                                        <span className="gdm-disease-edit">
+                                            {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
+                                                <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
+                                                    clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
+                                            : null}
+                                        </span>
                                         <span>&nbsp;
                                             {this.props.linkGdm ?
                                                 <a href={`/curation-central/?gdm=${gdm.uuid}` + (pmid ? `&pmid=${pmid}` : '')}><i className="icon icon-briefcase"></i></a>
@@ -974,8 +1156,29 @@ var DiseaseRecordHeader = React.createClass({
                 <div className="curation-data-disease">
                     {disease ?
                         <dl>
-                            <dt>{disease.term}</dt>
-                            <dd>Orphanet ID: <a href={external_url_map['OrphaNet'] + disease.orphaNumber} target="_blank" title={'Orphanet page for ORPHA' + disease.orphaNumber + ' in a new window'}>{'ORPHA' + disease.orphaNumber}</a></dd>
+                            <dt>
+                                {disease.term}
+                                {disease.phenotypes && disease.phenotypes.length ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                        actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                        {disease.phenotypes.join(', ')}
+                                    </PopOverComponent>
+                                : null}
+                                {disease.description && disease.description.length ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-description"
+                                        actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                        {disease.description}
+                                    </PopOverComponent>
+                                : null}
+                            </dt>
+                            <dd>
+                                {!disease.freetext && disease.id.indexOf('FREETEXT') < 0 ?
+                                    <span>
+                                        <span>Disease ID: </span>
+                                        <a href={external_url_map['MondoSearch'] + disease.id} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id.replace('_', ':')}</a>
+                                    </span>
+                                : null}
+                            </dd>
                             <dd>
                                 <a href="http://omim.org/" target="_blank" title="Online Mendelian Inheritance in Man home page in a new window">OMIM</a> ID: {this.props.omimId ?
                                     <a href={external_url_map['OMIM'] + this.props.omimId} title={'Open Online Mendelian Inheritance in Man page for OMIM ID ' + this.props.omimId + ' in a new window'} target="_blank">
@@ -1744,6 +1947,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenInterpretation(obj);
                 break;
 
+            case 'disease':
+                flat = flattenDisease(obj);
+                break;
+
             default:
                 break;
         }
@@ -2139,6 +2346,16 @@ function flattenEvidenceScore(evidencescore) {
     return flat;
 }
 
+const diseaseSimpleProps = [
+    "id", "term", "description", "ontology", "phenotypes", "type", "omimIds", "synonyms"
+];
+
+function flattenDisease(disease) {
+    var flat = cloneSimpleProps(disease, diseaseSimpleProps);
+
+    return flat;
+}
+
 
 var caseControlSimpleProps = [
     "label", "studyType", "detectionMethod", "statisticalValues", "pValue", "confidenceIntervalFrom", "confidenceIntervalTo",
@@ -2226,9 +2443,9 @@ function flattenInterpretation(interpretation) {
 }
 
 
-// Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
+// Given an array of group or families in 'objList', render a list of IDs for all diseases in those
 // groups or families.
-var renderOrphanets = module.exports.renderOrphanets = function(objList, title) {
+var renderDiseaseList = module.exports.renderDiseaseList = function(objList, title) {
     return (
         <div>
             {objList && objList.length ?
@@ -2237,21 +2454,23 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Orphanet Disease(s) Associated with {title}:</strong>
+                                    <strong className="pull-right">Disease(s) Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
-                                        obj.commonDiagnosis.map(function(disease, i) {
-                                            return (
-                                                <span key={disease.orphaNumber}>
-                                                    {i > 0 ? ', ' : ''}
-                                                    {'ORPHA' + disease.orphaNumber}
-                                                </span>
-                                            );
-                                        })
-                                        :
-                                        <span>&nbsp;</span>
-                                    }
+                                    <strong>
+                                        { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
+                                            obj.commonDiagnosis.map(function(disease, i) {
+                                                return (
+                                                    <span key={disease.id}>
+                                                        {i > 0 ? ', ' : ''}
+                                                        {disease.term}
+                                                    </span>
+                                                );
+                                            })
+                                            :
+                                            <span>&nbsp;</span>
+                                        }
+                                    </strong>
                                 </div>
                             </div>
                         );

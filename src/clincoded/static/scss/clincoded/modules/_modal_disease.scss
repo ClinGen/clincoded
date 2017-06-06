@@ -1,0 +1,121 @@
+.add-disease-modal {
+    .modal-body {
+        font-size: 14px;
+        word-break: normal;
+
+        .row {
+            margin: 0;
+
+            .ontology-lookup-note {
+                margin-left: 15px;
+            }
+
+            .form-group {
+                margin: 0;
+
+                label {
+                    line-height: 1.43;
+                    text-align: left;
+
+                    span {
+                        word-break: normal;
+                    }
+
+                    .label-note {
+                        font-weight: normal;
+                    }
+                }
+
+                &.disease-id-input {
+                    margin: 15px 0 0 0;
+
+                    input[type='text'] {
+                        float: none;
+                        margin-top: 10px;
+                    }
+
+                    .disease-freetext-confirm {
+                        margin-top: 15px;
+                        margin-bottom: 15px;
+                        white-space: normal;
+
+                        label {
+                            font-weight: normal;
+                            line-height: 1.43;
+                            padding-top: 0;
+
+                            span {
+                                word-break: normal;
+                            }
+                        }
+
+                        .col-sm-2 {
+                            margin-left: 0;
+                            padding-left: 0;
+
+                            input[type="checkbox"] {
+                                margin-top: 6px;
+                            }
+
+                            .form-error {
+                                display: none;
+                            }
+                        }
+                    }
+
+                    .disease-freetext-confirm-input-group,
+                    .resource-metadata {
+                        margin: 20px 15px 0 15px;
+                        white-space: normal;
+
+                        .panel {
+                            border-radius: 4px;
+
+                            .p-break {
+                                font-weight: normal;
+                                word-break: normal;
+
+                                &.disease-label {
+                                    font-weight: bold;
+                                }
+
+                                &.disease-description {
+                                    line-height: 1.43;
+                                }
+                            }
+                        }
+                    }
+
+                    .btn-query-ols {
+                        margin-right: 15px;
+                        margin-top: 0;
+                    }
+                }
+
+                &.disease-freetext-input {
+                    margin: 15px 0 0 0;
+
+                    p {
+                        margin: 5px 15px 20px 15px;
+                    }
+
+                    input {
+                        float: none;
+                    }
+
+                    .disease-freetext-name,
+                    .disease-freetext-desc,
+                    .disease-freetext-phenotypes {
+                        margin-top: 15px;
+                        white-space: normal;
+
+                        label {
+                            padding-top: 5px;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}

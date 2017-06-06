@@ -27,6 +27,9 @@ const PmidDoiButtons = curator.PmidDoiButtons;
 var ScoreCaseControl = require('./score/case_control_score').ScoreCaseControl;
 var ScoreViewer = require('./score/viewer').ScoreViewer;
 
+import ModalComponent from '../libs/bootstrap/modal';
+import { GroupDisease } from './disease';
+
 const CaseControlCuration = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
@@ -58,7 +61,11 @@ const CaseControlCuration = React.createClass({
             controlCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             statisticOtherType: 'collapsed',
             submitBusy: false, // True while form is submitting
-            userScoreObj: {} // Logged-in user's score object
+            userScoreObj: {}, // Logged-in user's score object
+            diseaseObj: {},
+            diseaseUuid: null,
+            diseaseError: null,
+            diseaseRequired: false
         };
     },
 
@@ -138,6 +145,9 @@ const CaseControlCuration = React.createClass({
             if (stateObj.caseGroup) {
                 stateObj.caseCohort_genotyping2Disabled = !(stateObj.caseGroup.method && stateObj.caseGroup.method.genotypingMethods && stateObj.caseGroup.method.genotypingMethods.length);
                 this.setState({caseGroupName: stateObj.caseGroup.label});
+                if (stateObj.caseGroup['commonDiagnosis'] && stateObj.caseGroup['commonDiagnosis'].length > 0) {
+                    this.setState({diseaseObj: stateObj.caseGroup['commonDiagnosis'][0]});
+                }
             }
             if (stateObj.controlGroup) {
                 stateObj.controlCohort_genotyping2Disabled = !(stateObj.controlGroup.method && stateObj.controlGroup.method.genotypingMethods && stateObj.controlGroup.method.genotypingMethods.length);
@@ -177,6 +187,11 @@ const CaseControlCuration = React.createClass({
         if (ref === 'statisticValueType') {
             this.refs[ref].getValue() === 'Other' ? this.setState({statisticOtherType: 'expanded'}) : this.setState({statisticOtherType: 'collapsed'});
         }
+        if (ref === 'caseCohort_hpoId' || ref === 'caseCohort_phenoTerms') {
+            this.setState({diseaseError: null, diseaseRequired: false}, () => {
+                this.clrFormErrors('diseaseError');
+            });
+        }
     },
 
     submitForm(e) {
@@ -187,7 +202,7 @@ const CaseControlCuration = React.createClass({
 
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
-            let groupDiseases, caseCohort_groupGenes, caseCohort_groupArticles;
+            let groupDiseases = [], caseCohort_groupGenes, caseCohort_groupArticles;
             let controlCohort_groupGenes, controlCohort_groupArticles;
             let savedCaseControl;
             let formError = false;
@@ -203,23 +218,18 @@ const CaseControlCuration = React.createClass({
             /**********************************/
             /* Only applicable to Case Cohort */
             /**********************************/
-            let orphaIds = curator.capture.orphas(this.getFormValue('caseCohort_orphanetId'));
             let hpoids = curator.capture.hpoids(this.getFormValue('caseCohort_hpoId'));
             let hpotext = curator.capture.hpoids(this.getFormValue('caseCohort_phenoTerms'));
             let nothpoids = curator.capture.hpoids(this.getFormValue('caseCohort_nothpoId'));
 
-            let valid_orphaId = false,
-                valid_phoId = false;
-
-            // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
-                // ORPHA list is bad
-                formError = true;
-                this.setFormErrors('caseCohort_orphanetId', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
-            } else if (orphaIds && orphaIds.length && !_(orphaIds).any(function(id) { return id === null; })) {
-                valid_orphaId = true;
+            let valid_disease = false;
+            if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
+                valid_disease = false;
+            } else {
+                valid_disease = true;
             }
 
+            let valid_phoId = false;
             // Check HPO ID format
             if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
                 // HPOID list is bad
@@ -229,13 +239,15 @@ const CaseControlCuration = React.createClass({
                 valid_phoId = true;
             }
 
-            // Check Orphanet ID, HPO ID and HPO text
-            if (!formError && !valid_orphaId && !valid_phoId && (!hpotext || !hpotext.length)) {
+            // Check disease, HPO ID and HPO text
+            if (!formError && !valid_disease && !valid_phoId && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
-                this.setFormErrors('caseCohort_orphanetId', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
-                this.setFormErrors('caseCohort_hpoId', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
-                this.setFormErrors('caseCohort_phenoTerms', 'Enter Orphanet ID(s) and/or HPO Id(s) and/or Phenotype free text.');
+                this.setState({diseaseError: 'Required', diseaseRequired: true}, () => {
+                    this.setFormErrors('diseaseError', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
+                });
+                this.setFormErrors('caseCohort_hpoId', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
+                this.setFormErrors('caseCohort_phenoTerms', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
             }
 
             // Check 'NOT Phenotype(s)' HPO ID format
@@ -272,46 +284,47 @@ const CaseControlCuration = React.createClass({
             }
 
             /*****************************************************/
-            /* 1) Validate disease(s) given the Orphanet IDs     */
+            /* 1) Validate disease(s) given the user input       */
             /* 2) 'then' #1 returning gene data by symbols       */
             /* 3) 'then' #2 returning articles by pmids          */
             /* 4) 'then' #3 get Group object property values     */
             /*    and put/post the data object to 'groups'       */
             /*****************************************************/
             if (!formError) {
-                // Build search string from given ORPHA IDs
                 var searchStr;
-                if (valid_orphaId) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
-                }
-                else {
-                    searchStr = '';
-                }
                 this.setState({submitBusy: true});
-
-                // Verify given Orpha ID exists in DB
-                this.getRestData(searchStr).then(diseases => {
-                    if (valid_orphaId) {
-                        if (diseases['@graph'].length === orphaIds.length) {
-                            // Successfully retrieved all diseases
-                            groupDiseases = diseases;
-                            return Promise.resolve(diseases);
+                /**
+                 * Retrieve disease from database. If not existed, add it to the database.
+                 */
+                let diseaseObj = this.state.diseaseObj;
+                this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
+                    if (valid_disease) {
+                        let diseaseUuid;
+                        if (diseaseSearch.total === 0) {
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({diseaseUuid: diseaseUuid}, () => {
+                                    groupDiseases.push(diseaseUuid);
+                                    return Promise.resolve(result);
+                                });
+                            });
                         } else {
-                            // Get array of missing Orphanet IDs
-                            this.setState({submitBusy: false}); // submit error; re-enable submit button
-                            var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                            this.setFormErrors('caseCohort_orphanetId', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                            throw diseases;
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
+                            this.setState({diseaseUuid: diseaseUuid}, () => {
+                                groupDiseases.push(diseaseUuid);
+                            });
                         }
                     }
                     else {
-                        // when no Orphanet id entered.
+                        // when no disease given.
                         return Promise.resolve(null);
                     }
                 }, e => {
-                    // The given orpha IDs couldn't be retrieved for some reason.
+                    // The given disease couldn't be retrieved for some reason.
                     this.setState({submitBusy: false}); // submit error; re-enable submit button
-                    this.setFormErrors('caseCohort_orphanetId', 'The given diseases not found');
+                    this.setState({diseaseError: 'Error on validating disease.'});
                     throw e;
                 }).then(diseases => {
                     /*****************************************************/
@@ -491,8 +504,8 @@ const CaseControlCuration = React.createClass({
                     /* Get input values for group properties             */
                     /*****************************************************/
                     // Get an array of all given disease IDs
-                    if (groupDiseases) {
-                        newCaseGroup.commonDiagnosis = groupDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                    if (groupDiseases && groupDiseases.length) {
+                        newCaseGroup.commonDiagnosis = groupDiseases.map(disease => { return disease; });
                     } else {
                         delete newCaseGroup.commonDiagnosis;
                     }
@@ -917,6 +930,22 @@ const CaseControlCuration = React.createClass({
         }
     },
 
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj, diseaseRequired: false}, () => {
+            this.clrMultiFormErrors(['diseaseError', 'caseCohort_hpoId', 'caseCohort_phenoTerms']);
+        });
+    },
+
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent() {
+        this.setState({diseaseError: null});
+    },
+
     render() {
         let gdm = this.state.gdm;
         let annotation = this.state.annotation;
@@ -1079,9 +1108,8 @@ function GroupName(groupType) {
 // as the calling component.
 function GroupCommonDiseases(groupType) {
     let inputDisabled = (groupType === 'control-cohort') ? true : false;
-    let orphanetId, hpoId, phenoTerms, nothpoId, notphenoTerms, group, cohortLabel;
+    let hpoId, phenoTerms, nothpoId, notphenoTerms, group, cohortLabel;
     if (groupType === 'case-cohort') {
-        orphanetId = 'caseCohort_orphanetId';
         hpoId = 'caseCohort_hpoId';
         phenoTerms = 'caseCohort_phenoTerms';
         nothpoId = 'caseCohort_nothpoId';
@@ -1090,7 +1118,6 @@ function GroupCommonDiseases(groupType) {
         group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
-        orphanetId = 'controlCohort_orphanetId';
         hpoId = 'controlCohort_hpoId';
         phenoTerms = 'controlCohort_phenoTerms';
         nothpoId = 'controlCohort_nothpoId';
@@ -1099,7 +1126,6 @@ function GroupCommonDiseases(groupType) {
         group = this.state.controlGroup;
     }
 
-    let orphanetidVal = group && group.commonDiagnosis ? group.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : '';
     let hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : '';
     let nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : '';
 
@@ -1107,17 +1133,17 @@ function GroupCommonDiseases(groupType) {
         <div className="row section section-disease">
             <h3><i className="icon icon-chevron-right"></i> Disease(s) & Phenotype(s)</h3>
             <div className="col-sm-7 col-sm-offset-5">
-                <p className="alert alert-warning">Please enter an Orphanet ID(s) and/or HPO ID(s) and/or Phenotype free text (required).</p>
+                <p className="alert alert-warning">Please enter a disease term and/or phenotype(s); phenotypes may be entered using HPO ID(s) (preferred)
+                    or free text when there is no appropriate HPO ID.</p>
             </div>
-            <Input type="text" ref={orphanetId} label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15" inputDisabled={inputDisabled}
-                error={this.getFormError(orphanetId)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            <GroupDisease gdm={this.state.gdm} group={group} updateDiseaseObj={this.updateDiseaseObj} diseaseObj={this.state.diseaseObj} required={this.state.diseaseRequired}
+                error={this.state.diseaseError} clearErrorInParent={this.clearErrorInParent} session={this.props.session} inputDisabled={inputDisabled} />
             <Input type="textarea" ref={hpoId} label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
-                error={this.getFormError(hpoId)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
+                error={this.getFormError(hpoId)} clearError={this.clrMultiFormErrors.bind(null, [hpoId, phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref={phenoTerms} label={<LabelPhenoTerms />} rows="2" inputDisabled={inputDisabled}
                 value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
-                error={this.getFormError(phenoTerms)} clearError={this.clrMultiFormErrors.bind(null, [orphanetId, hpoId, phenoTerms])}
+                error={this.getFormError(phenoTerms)} clearError={this.clrMultiFormErrors.bind(null, [hpoId, phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in {cohortLabel}</em> if they are specifically noted in the paper.</p>
             <Input type="textarea" ref={nothpoId} label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
@@ -1129,13 +1155,6 @@ function GroupCommonDiseases(groupType) {
         </div>
     );
 }
-
-// HTML labels for inputs follow.
-var LabelOrphanetId = React.createClass({
-    render: function() {
-        return <span>Disease(s) in Common (<span className="normal"><a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term</span>):</span>;
-    }
-});
 
 // HTML labels for inputs follow.
 var LabelHpoId = React.createClass({
@@ -1494,9 +1513,9 @@ var CaseControlViewer = React.createClass({
                                 <Panel title="Case Cohort - Disease(s) & Phenotype(s)" panelClassName="panel-data">
                                     <dl className="dl-horizontal">
                                         <div>
-                                            <dt>Orphanet Common Diagnosis</dt>
+                                            <dt>Common Diagnosis</dt>
                                             <dd>{caseCohort.commonDiagnosis && caseCohort.commonDiagnosis.map(function(disease, i) {
-                                                return <span key={disease.orphaNumber + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                                return <span key={disease.id + '_' + i}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.id} target="_blank">{disease.id.replace('_', ':')}</a> : null}</span>;
                                             })}</dd>
                                         </div>
 

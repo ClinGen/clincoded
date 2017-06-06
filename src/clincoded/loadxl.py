@@ -19,7 +19,7 @@ ORDER = [
     'image',
     'gene',
     'orphaPhenotype',
-    #'disease',
+    'disease',
     'article',
     'assessment',
     'evidenceScore',

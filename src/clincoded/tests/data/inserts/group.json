@@ -2,8 +2,8 @@
     {
         "label": "CaseGroupRousseau",
         "commonDiagnosis": [
-            "15",
-            "891"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "82e69bcc-91c5-4a66-8293-3befc7445966"
         ],
         "numberOfMale": 8,
         "numberOfFemale": 7,
@@ -44,8 +44,8 @@
     {
         "label": "CaseGroupAA",
         "commonDiagnosis": [
-            "15",
-            "777"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "657cb29e-63b6-4416-b613-557aa18ac765"
         ],
         "numberOfMale": 28,
         "numberOfFemale": 17,
@@ -77,8 +77,8 @@
     {
         "label": "CaseGroupShiang",
         "commonDiagnosis": [
-            "15",
-            "654"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "f8c8525c-adf9-4fda-8e86-a30832347edd"
         ],
         "numberOfMale": 18,
         "numberOfFemale": 17,
@@ -126,7 +126,7 @@
         "label": "Case Cohort 001",
         "groupType": ["Case cohort"],
         "commonDiagnosis": [
-            "891"
+            "82e69bcc-91c5-4a66-8293-3befc7445966"
         ],
         "numberOfMale": 28,
         "numberOfFemale": 17,
