@@ -64,7 +64,8 @@ const CaseControlCuration = React.createClass({
             userScoreObj: {}, // Logged-in user's score object
             diseaseObj: {},
             diseaseUuid: null,
-            diseaseError: null
+            diseaseError: null,
+            diseaseRequired: false
         };
     },
 
@@ -186,6 +187,11 @@ const CaseControlCuration = React.createClass({
         if (ref === 'statisticValueType') {
             this.refs[ref].getValue() === 'Other' ? this.setState({statisticOtherType: 'expanded'}) : this.setState({statisticOtherType: 'collapsed'});
         }
+        if (ref === 'caseCohort_hpoId' || ref === 'caseCohort_phenoTerms') {
+            this.setState({diseaseError: null, diseaseRequired: false}, () => {
+                this.clrFormErrors('diseaseError');
+            });
+        }
     },
 
     submitForm(e) {
@@ -237,7 +243,9 @@ const CaseControlCuration = React.createClass({
             if (!formError && !valid_disease && !valid_phoId && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
-                this.setState({diseaseError: 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.'});
+                this.setState({diseaseError: 'Required', diseaseRequired: true}, () => {
+                    this.setFormErrors('diseaseError', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
+                });
                 this.setFormErrors('caseCohort_hpoId', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
                 this.setFormErrors('caseCohort_phenoTerms', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
             }
@@ -926,7 +934,9 @@ const CaseControlCuration = React.createClass({
      * Update the 'diseaseObj' state used to save data upon form submission
      */
     updateDiseaseObj(diseaseObj) {
-        this.setState({diseaseObj: diseaseObj});
+        this.setState({diseaseObj: diseaseObj, diseaseRequired: false}, () => {
+            this.clrMultiFormErrors('diseaseError', 'caseCohort_hpoId', 'caseCohort_phenoTerms');
+        });
     },
 
     /**
@@ -1126,7 +1136,7 @@ function GroupCommonDiseases(groupType) {
                 <p className="alert alert-warning">Please enter a disease term and/or phenotype(s); phenotypes may be entered using HPO ID(s) (preferred)
                     or free text when there is no appropriate HPO ID.</p>
             </div>
-            <GroupDisease gdm={this.state.gdm} group={group} updateDiseaseObj={this.updateDiseaseObj} diseaseObj={this.state.diseaseObj}
+            <GroupDisease gdm={this.state.gdm} group={group} updateDiseaseObj={this.updateDiseaseObj} diseaseObj={this.state.diseaseObj} required={this.state.diseaseRequired}
                 error={this.state.diseaseError} clearErrorInParent={this.clearErrorInParent} session={this.props.session} inputDisabled={inputDisabled} />
             <Input type="textarea" ref={hpoId} label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300" inputDisabled={inputDisabled}
                 error={this.getFormError(hpoId)} clearError={this.clrMultiFormErrors.bind(null, [hpoId, phenoTerms])}
