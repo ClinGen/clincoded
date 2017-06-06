@@ -935,7 +935,7 @@ const CaseControlCuration = React.createClass({
      */
     updateDiseaseObj(diseaseObj) {
         this.setState({diseaseObj: diseaseObj, diseaseRequired: false}, () => {
-            this.clrMultiFormErrors('diseaseError', 'caseCohort_hpoId', 'caseCohort_phenoTerms');
+            this.clrMultiFormErrors(['diseaseError', 'caseCohort_hpoId', 'caseCohort_phenoTerms']);
         });
     },
 

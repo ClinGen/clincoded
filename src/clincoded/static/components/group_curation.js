@@ -499,7 +499,7 @@ var GroupCuration = React.createClass({
      */
     updateDiseaseObj(diseaseObj) {
         this.setState({diseaseObj: diseaseObj, diseaseRequired: false}, () => {
-            this.clrMultiFormErrors('diseaseError', 'hpoid', 'phenoterms');
+            this.clrMultiFormErrors(['diseaseError', 'hpoid', 'phenoterms']);
         });
     },
 
