@@ -26,7 +26,8 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         phenotypes: PropTypes.array,
         synonyms: PropTypes.array,
         passDataToParent: PropTypes.func, // function to call upon pressing the Save button
-        addDiseaseModalBtnLayoutClass: PropTypes.string
+        addDiseaseModalBtnLayoutClass: PropTypes.string,
+        resetAllowed: PropTypes.bool
     },
 
     getInitialState() {
@@ -38,6 +39,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
             phenotypes: this.props.phenotypes, // HPO IDs
             synonyms: this.props.synonyms, // Disease synonyms
             diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm, // User confirmation of entering free text for disease
+            resetAllowed: false, // Flag to allow resetting Gene-Disease Record when it's being created and created but without PMIDs
             hasFreeTextDiseaseDescription: false, // True if disease description for free text is present
             hasFreeTextDiseasePhenotypes: false, // True if phenotypes for free text is present
             queryResourceDisabled: true, // Flag to disable the get OLS data button
@@ -90,6 +92,14 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                 diseaseTerm: nextProps.diseaseTerm,
                 submitResourceDisabled: false,
                 queryResourceDisabled: false
+            }, () => {
+                /**
+                 * If parent prop 'resetAllowed' is true and there are existing disease id/term,
+                 * then show the reset button
+                 */
+                if (this.props.resetAllowed) {
+                    this.setState({resetAllowed: true});
+                }
             });
         }
         if (nextProps.diseaseOntology) {
@@ -100,6 +110,8 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         }
         if (nextProps.diseaseFreeTextConfirm) {
             this.setState({diseaseFreeTextConfirm: nextProps.diseaseFreeTextConfirm});
+        } else {
+            this.setState({diseaseFreeTextConfirm: false});
         }
         if (nextProps.phenotypes) {
             this.setState({phenotypes: nextProps.phenotypes}, () => {
@@ -414,6 +426,33 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         );
     },
 
+    /**
+     * Reset modal states and empty the form fields
+     * -- For GDM Only --
+     */
+    resetForm() {
+        this.clrAllFormErrors();
+        if (!this.state.submitResourceBusy) {
+            this.setState({
+                diseaseId: '',
+                diseaseTerm: null,
+                diseaseDescription: null,
+                diseaseOntology: null,
+                phenotypes: [],
+                synonyms: [],
+                diseaseFreeTextConfirm: false,
+                hasFreeTextDiseaseDescription: false,
+                hasFreeTextDiseasePhenotypes: false,
+                queryResourceDisabled: this.state.diseaseId ? false : true,
+                submitResourceDisabled: this.state.diseaseId ? false : true,
+                resourceFetched: false,
+                tempResource: {}
+            }, () => {
+                this.resetAllFormValues();
+            });
+        }
+    },
+
     render() {
         let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
@@ -433,6 +472,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                         </div>
                     </div>
                     <div className='modal-footer'>
+                        {this.state.resetAllowed ? <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.resetForm} title="Reset" /> : null}
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                         <Input
                             type="button-button"
