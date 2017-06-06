@@ -1,0 +1,97 @@
+{
+    "title": "Diseases",
+    "id": "/profiles/disease.json",
+    "description": "Schema for storing disease data of various terminologies (e.g. Orphanet, DOID, OMIM, NCIt, or free text).",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["id", "term"],
+    "identifyingProperties": ["uuid", "id"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/standard_status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "id": {
+            "title": "Unique identifier of disease term",
+            "description": "Disease term identifier consisting of the prefix (e.g. DOID:) followed by number.",
+            "type": "string",
+            "default": "",
+            "uniqueKey": "disease:id"
+        },
+        "term": {
+            "title": "Disease name",
+            "description": "Ontology name or label describing the diseases.",
+            "type":  "string",
+            "default": "",
+            "uniqueKey": "disease:id"
+        },
+        "description": {
+            "title": "Disease description",
+            "description": "Ontology term description for the disease terms.",
+            "type":  "string",
+            "default": ""
+        },
+        "ontology": {
+            "title": "Ontology for the disease identifier",
+            "description": "Name for the ontology used, such as ORPHA, DOID, OMIM, or NCIt, etc.",
+            "type":  "string",
+            "default": ""
+        },
+        "phenotypes": {
+            "title": "Phenotype(s)",
+            "description": "List of Phenotypes (HPO IDs) for the free text disease term.",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "HPO ID",
+                "description": "HPO ID",
+                "type": "string"
+            }
+        },
+        "freetext": {
+            "title": "Flag for free text disease",
+            "description": "Boolean value to flag free text disease term",
+            "type": "boolean"
+        },
+        "synonyms": {
+            "title": "Synonyms",
+            "description": "List of synonyms of the disease.",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "Synonym",
+                "description": "Term of one synonym",
+                "type": "string"
+            }
+        },
+        "active": {
+            "description": "boolean switch to set if the phenotype avaliable for curation.",
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "columns": {
+        "id": {
+            "title": "ID",
+            "type": "string"
+        },
+        "term": {
+            "title": "Term",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "type": "string"
+        },
+        "synonyms": {
+            "title": "Synonym(s)",
+            "type": "array"
+        }
+    }
+}

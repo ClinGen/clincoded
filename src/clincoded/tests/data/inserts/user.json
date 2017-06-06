@@ -2515,5 +2515,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "cthomas0@stanford.edu",
+        "first_name": "Christopher",
+        "last_name": "Thomas",
+        "uuid": "f20ef8f0-40f5-4f64-b95c-5737ec5cac63",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]

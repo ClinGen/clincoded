@@ -18,11 +18,11 @@ Feature: Generics
         Then I should see "AGTR2"
         When I fill in "filterTerm" with "CD3E"
         Then I should not see "AGTR2"
-        And I should see "Severe combined"
+        And I should see "severe combined"
         When I visit "/interpretations/"
         Then I should see "NM_000111"
-        When I fill in "filterTerm" with "79452"
+        When I fill in "filterTerm" with "0050466"
         Then I should not see "May 10"
-        Then I should see "Milroy disease"
+        Then I should see "Loeys-Dietz syndrome"
 
 # couldn't get Collections loop to work properly...
