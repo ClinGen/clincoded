@@ -2482,7 +2482,7 @@ var renderDiseaseList = module.exports.renderDiseaseList = function(objList, tit
 };
 
 // Given an array of group or families in 'objList', render a list of HPO IDs and/or Phenotype free text in those groups and familes.
-var renderPhenotype = module.exports.renderPhenotype = function(objList, title, type) {
+var renderPhenotype = module.exports.renderPhenotype = function(objList, title, type, parentObjName) {
     if (typeof type === 'undefined') {
         type = '';
     }
@@ -2523,7 +2523,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Phenotype(s) Associated with {title}
+                                    <strong className="pull-right">Phenotype(s) Associated with {parentObjName ? parentObjName : title}
                                     {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
                                     {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
                                     :</strong>

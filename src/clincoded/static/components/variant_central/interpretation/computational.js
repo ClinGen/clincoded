@@ -748,8 +748,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
 // code for rendering of this group of interpretation forms
 var criteriaMissense1 = function() {
-    let criteriaList1 = ['PP3', 'BP4'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, true], // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BP4', 'PP3'], // array of criteria code handled subgroup of this section
+        hiddenList1 = [true, false], // array indicating hidden status of explanation boxes for above list of criteria codes
         criteriaList2 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
         hiddenList2 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
@@ -779,7 +779,7 @@ var criteriaMissense1Update = function(nextProps) {
 // code for handling logic within the form
 var criteriaMissense1Change = function(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.call(this, ref, ['PP3', 'BP4']);
+    vciFormHelper.shareExplanation.call(this, ref, ['BP4', 'PP3']);
     vciFormHelper.shareExplanation.call(this, ref, ['BP1', 'PP2']);
 };
 
