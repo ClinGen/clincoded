@@ -70,7 +70,7 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
         if (disease.description) { this.setState({diseaseDescription: disease.description}); }
         if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
         if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
-        if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
+        disease.freetext ? this.setState({diseaseFreeTextConfirm: disease.freetext}) : this.setState({diseaseFreeTextConfirm: false});
     },
 
     passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
@@ -178,6 +178,7 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
                         synonyms={synonyms}
                         passDataToParent={this.passDataToParent}
                         addDiseaseModalBtnLayoutClass={diseaseTerm || error ? ' pull-right' : ''}
+                        resetAllowed={true}
                     />
                 </div>
             </div>
