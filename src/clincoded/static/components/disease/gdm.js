@@ -103,14 +103,14 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
             if (diseaseObj['description']) { delete diseaseObj['description']; }
             this.setState({diseaseDescription: null});
         }
-        if (synonyms) {
+        if (synonyms && synonyms.length) {
             diseaseObj['synonyms'] = synonyms;
             this.setState({synonyms: synonyms});
         } else {
             if (diseaseObj['synonyms']) { delete diseaseObj['synonyms']; }
             this.setState({synonyms: []});
         }
-        if (phenotypes) {
+        if (phenotypes && phenotypes.length) {
             diseaseObj['phenotypes'] = phenotypes;
             this.setState({phenotypes: phenotypes});
         } else {
