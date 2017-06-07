@@ -28,8 +28,7 @@
             "title": "Disease name",
             "description": "Ontology name or label describing the diseases.",
             "type":  "string",
-            "default": "",
-            "uniqueKey": "disease:id"
+            "default": ""
         },
         "description": {
             "title": "Disease description",
