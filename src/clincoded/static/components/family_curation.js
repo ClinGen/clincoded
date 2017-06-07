@@ -1745,11 +1745,6 @@ var FamilyVariant = function() {
                                         <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                     </div>
                                 : null}
-                                <div className="row variant-assessment">
-                                    <span className="col-sm-5 control-label"><label></label></span>
-                                    <span className="col-sm-7 text-no-input">
-                                    </span>
-                                </div>
                                 <div className="row variant-curation">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
