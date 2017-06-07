@@ -66,8 +66,8 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
     setDiseaseObjectStates(disease) {
         if (disease.id) { this.setState({diseaseId: disease.id}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}) ;}
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
-        if (disease.description) { this.setState({diseaseDescription: disease.description}); }
+        disease.ontology ? this.setState({diseaseOntology: disease.ontology}) : this.setState({diseaseOntology: null});
+        disease.description ? this.setState({diseaseDescription: disease.description}) : this.setState({diseaseDescription: null});
         if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
         if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
         disease.freetext ? this.setState({diseaseFreeTextConfirm: disease.freetext}) : this.setState({diseaseFreeTextConfirm: false});
@@ -92,6 +92,9 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
         if (ontology) {
             diseaseObj['ontology'] = ontology;
             this.setState({diseaseOntology: ontology});
+        } else {
+            if (diseaseObj['ontology']) { delete diseaseObj['ontology']; }
+            this.setState({diseaseOntology: null});
         }
         if (description) {
             diseaseObj['description'] = description;
