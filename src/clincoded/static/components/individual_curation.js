@@ -1319,9 +1319,6 @@ var IndividualVariantInfo = function() {
                                     {variant.uuid && gdmUuid && pmidUuid ?
                                         <div>
                                             <dt className="no-label"></dt>
-                                            <dd>
-                                                <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                            </dd>
                                         </div>
                                     : null}
 
@@ -1439,7 +1436,6 @@ var IndividualVariantInfo = function() {
                                             <div className="row variant-assessment">
                                                 <span className="col-sm-5 control-label"><label></label></span>
                                                 <span className="col-sm-7 text-no-input">
-                                                    <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
                                                 </span>
                                             </div>
                                         : null}
