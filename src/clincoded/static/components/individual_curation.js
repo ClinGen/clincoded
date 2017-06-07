@@ -1303,16 +1303,6 @@ var IndividualVariantInfo = function() {
                                             <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </div>
                                     : null}
-
-                                    {variant.uuid && gdmUuid && pmidUuid ?
-                                        <div>
-                                            <dt className="no-label"></dt>
-                                            <dd>
-                                                <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                            </dd>
-                                        </div>
-                                    : null}
-
                                     {variant.uuid ?
                                         <div>
                                             <dt className="no-label"></dt>
@@ -1421,14 +1411,6 @@ var IndividualVariantInfo = function() {
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
                                                 <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
-                                            </div>
-                                        : null}
-                                        {this.state.proband_selected ?
-                                            <div className="row variant-assessment">
-                                                <span className="col-sm-5 control-label"><label></label></span>
-                                                <span className="col-sm-7 text-no-input">
-                                                    <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                                </span>
                                             </div>
                                         : null}
                                         <div className="row variant-curation">
