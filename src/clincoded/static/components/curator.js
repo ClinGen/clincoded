@@ -203,43 +203,28 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                     });
                 } else if (diseaseObj['freetext']) {
                     let diseaseUuid;
-                    if (!disease.freetext) {
+                    /**
+                     * Post request for changing disease to free text from Mondo term
+                     * Treat as a new disease record since a new free text disease id is generated
+                     */
+                    return this.postRestData('/diseases/', diseaseObj).then(result => {
+                        let newDisease = result['@graph'][0];
+                        diseaseUuid = newDisease['uuid'];
+                        this.setState({diseaseUuid: diseaseUuid});
+                        return Promise.resolve(result);
+                    }).then(response => {
                         /**
-                         * Post request for changing disease to free text from Mondo term
-                         * Treat as a new disease record since a new free text disease id is generated
+                         * Update existing GDM with a new UUID
                          */
-                        return this.postRestData('/diseases/', diseaseObj).then(result => {
-                            let newDisease = result['@graph'][0];
-                            diseaseUuid = newDisease['uuid'];
-                            this.setState({diseaseUuid: diseaseUuid});
-                            return Promise.resolve(result);
-                        }).then(response => {
-                            /**
-                             * Update existing GDM with a new UUID
-                             */
-                            flattenGdmObj['disease'] = this.state.diseaseUuid;
-                            this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
-                                return Promise.resolve(gdmObj['@graph'][0]);
-                            }).then(data => {
-                                this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
-                                    this.setState({gdm: updatedGdm});
-                                });
-                            });
-                        });
-                    } else {
-                        /**
-                         * Put request for updating a free text disease without changing to Mondo term
-                         * Keep free text disease id and update description/phenotypes, etc.
-                         */
-                        return this.putRestData('/diseases/' + disease.uuid, flattenDiseaseObj).then(result => {
-                            let newDiseaseObj = result['@graph'][0];
-                            return Promise.resolve(newDiseaseObj);
+                        flattenGdmObj['disease'] = this.state.diseaseUuid;
+                        this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                            return Promise.resolve(gdmObj['@graph'][0]);
                         }).then(data => {
                             this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
                                 this.setState({gdm: updatedGdm});
                             });
                         });
-                    }
+                    });
                 }
             }).catch(err => {
                 console.warn('GCI update disease error :: %o', err);
