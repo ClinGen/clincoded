@@ -573,6 +573,8 @@ var AssociateInheritance = React.createClass({
         let moiAdjectiveValue = this.refs.moiAdjective.getValue();
         if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
             this.saveFormValue('moiAdjective', moiAdjectiveValue);
+        } else {
+            this.saveFormValue('moiAdjective', null);
         }
 
         // Invoke button progress indicator
