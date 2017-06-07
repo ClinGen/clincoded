@@ -605,23 +605,32 @@ var FamilyCuration = React.createClass({
                  * Retrieve disease from database. If not existed, add it to the database.
                  */
                 let diseaseObj = this.state.diseaseObj;
-                this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
-                    let diseaseUuid;
-                    if (diseaseSearch.total === 0) {
-                        return this.postRestData('/diseases/', diseaseObj).then(result => {
-                            let newDisease = result['@graph'][0];
-                            diseaseUuid = newDisease['uuid'];
+                if (Object.keys(diseaseObj).length && diseaseObj.id) {
+                    searchStr = '/search?type=disease&id=' + diseaseObj.id;
+                } else {
+                    searchStr = '';
+                }
+                this.getRestData(searchStr).then(diseaseSearch => {
+                    if (Object.keys(diseaseSearch).length && diseaseSearch['total']) {
+                        let diseaseUuid;
+                        if (diseaseSearch.total === 0) {
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({diseaseUuid: diseaseUuid}, () => {
+                                    familyDiseases.push(diseaseUuid);
+                                    return Promise.resolve(result);
+                                });
+                            });
+                        } else {
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
                             this.setState({diseaseUuid: diseaseUuid}, () => {
                                 familyDiseases.push(diseaseUuid);
-                                return Promise.resolve(result);
                             });
-                        });
+                        }
                     } else {
-                        let _id = diseaseSearch['@graph'][0]['@id'];
-                        diseaseUuid = _id.slice(10, -1);
-                        this.setState({diseaseUuid: diseaseUuid}, () => {
-                            familyDiseases.push(diseaseUuid);
-                        });
+                        return Promise.resolve(null);
                     }
                 }, e => {
                     // The given disease couldn't be retrieved for some reason.
@@ -1698,7 +1707,7 @@ var FamilyVariant = function() {
                     }
                     <FamilyProbandDisease gdm={this.state.gdm} group={group} family={family} updateFamilyProbandDiseaseObj={this.updateFamilyProbandDiseaseObj}
                         probandDiseaseObj={this.state.probandDiseaseObj} error={this.state.probandDiseaseError} clearErrorInParent={this.clearErrorInParent}
-                        session={this.props.session} required={this.state.individualRequired} />
+                        familyDiseaseObj={this.state.diseaseObj} session={this.props.session} required={this.state.individualRequired} />
                 </div>
             :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
