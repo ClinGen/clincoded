@@ -104,9 +104,13 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         }
         if (nextProps.diseaseOntology) {
             this.setState({diseaseOntology: nextProps.diseaseOntology});
+        } else {
+            this.setState({diseaseOntology: null});
         }
         if (nextProps.diseaseDescription) {
             this.setState({diseaseDescription: nextProps.diseaseDescription, hasFreeTextDiseaseDescription: true});
+        } else {
+            this.setState({diseaseDescription: null, hasFreeTextDiseaseDescription: false});
         }
         if (nextProps.diseaseFreeTextConfirm) {
             this.setState({diseaseFreeTextConfirm: nextProps.diseaseFreeTextConfirm});
@@ -354,6 +358,9 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                             {Object.keys(tempResource).length && tempResource['label'] ? tempResource['label'] : diseaseTerm}
                         </a>
                     </span>
+                    {Object.keys(tempResource).length && tempResource['is_obsolete'] ?
+                        <span className="p-break"><span className="label label-danger disease-is-obsolete">This term is obsolete</span></span>
+                    : null}
                     {this.renderDiseaseDescription()}
                 </div>
             </div>
@@ -443,8 +450,8 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                 diseaseFreeTextConfirm: false,
                 hasFreeTextDiseaseDescription: false,
                 hasFreeTextDiseasePhenotypes: false,
-                queryResourceDisabled: this.state.diseaseId ? false : true,
-                submitResourceDisabled: this.state.diseaseId ? false : true,
+                queryResourceDisabled: true,
+                submitResourceDisabled: true,
                 resourceFetched: false,
                 tempResource: {}
             }, () => {
