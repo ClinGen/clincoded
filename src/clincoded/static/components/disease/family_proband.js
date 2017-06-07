@@ -18,6 +18,7 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
         gdm: PropTypes.object, // For editing disease (passed to Modal)
         group: PropTypes.object,
         family: PropTypes.object,
+        familyDiseaseObj: PropTypes.object,
         probandDiseaseObj: PropTypes.object,
         updateFamilyProbandDiseaseObj: PropTypes.func,
         clearErrorInParent: PropTypes.func,
@@ -31,6 +32,7 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
             gdm: this.props.gdm,
             group: this.props.group,
             family: this.props.family,
+            familyDiseaseObj: this.props.familyDiseaseObj,
             probandDiseaseObj: this.props.probandDiseaseObj,
             error: this.props.error,
             required: this.props.required,
@@ -46,6 +48,9 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
     },
 
     componentWillReceiveProps(nextProps)  {
+        if (nextProps.familyDiseaseObj) {
+            this.setState({familyDiseaseObj: nextProps.familyDiseaseObj});
+        }
         if (nextProps.probandDiseaseObj) {
             this.setState({probandDiseaseObj: nextProps.probandDiseaseObj}, () => {
                 let probandDiseaseObj = this.state.probandDiseaseObj;
@@ -210,6 +215,7 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
         let synonyms = this.state.synonyms;
         let addDiseaseModalBtn = diseaseTerm ? <span>Disease<i className="icon icon-pencil"></i></span> : <span>Disease<i className="icon icon-plus-circle"></i></span>;
         let error = this.state.error;
+        let family = this.state.family, familyDiseaseObj = this.state.familyDiseaseObj;
 
         return (
             <div className="form-group add-disease-group">
@@ -231,10 +237,14 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createC
                     </div>
                     {!diseaseTerm ?
                         <ul className={error ? "add-disease-button-group pull-right" : "add-disease-button-group"}>
-                            <li>
-                                {this.renderCopyDiseaseButton()}
-                            </li>
-                            <li>- or -</li>
+                            {(family && family.disease && family.disease.term) || (familyDiseaseObj && familyDiseaseObj.term) ?
+                                <li>
+                                    {this.renderCopyDiseaseButton()}
+                                </li>
+                            : null}
+                            {(family && family.disease && family.disease.term) || (familyDiseaseObj && familyDiseaseObj.term) ?
+                                <li>- or -</li>
+                            : null}
                             <li>
                                 <DiseaseModal
                                     addDiseaseModalBtn={addDiseaseModalBtn}
