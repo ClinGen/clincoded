@@ -611,7 +611,7 @@ var FamilyCuration = React.createClass({
                     searchStr = '';
                 }
                 this.getRestData(searchStr).then(diseaseSearch => {
-                    if (Object.keys(diseaseSearch).length && diseaseSearch['total']) {
+                    if (Object.keys(diseaseSearch).length && diseaseSearch.hasOwnProperty('total')) {
                         let diseaseUuid;
                         if (diseaseSearch.total === 0) {
                             return this.postRestData('/diseases/', diseaseObj).then(result => {
