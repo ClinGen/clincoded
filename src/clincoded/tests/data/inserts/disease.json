@@ -1,5 +1,9 @@
 [
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "80635629-f3c1-4a48-b63e-0db849e8e354",
         "term": "achondroplasia",
         "diseaseId": "OMIM_100800",
@@ -9,10 +13,13 @@
             "Achondroplastic physique",
             "Chondrodystrophia",
             "osteosclerosis congenita"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "e623cfdd-400c-4c6d-bd9f-c0fedf630e6b",
         "term": "Fanconi anemia",
         "diseaseId": "DOID_13636",
@@ -22,10 +29,13 @@
             "Fanconi pancytopenia",
             "Fanconi panmyelopathy",
             "Fanconi's anemia"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "f8c8525c-adf9-4fda-8e86-a30832347edd",
         "term": "Neurofibromatosis type 2",
         "diseaseId": "OMIM_101000",
@@ -36,10 +46,13 @@
             "NF2",
             "Neurofibromatosis type 2",
             "Central neurofibromatosis"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "88ddad2b-4849-4546-ad75-af157b2d4a1b",
         "term": "T-B+ severe combined immunodeficiency due to CD3delta/CD3epsilon/CD3zeta",
         "diseaseId": "Orphanet_169160",
@@ -47,10 +60,13 @@
         "ontology": "ORPHANET",
         "synonyms": [
             "T-B+ SCID due to CD3delta/CD3epsilon/CD3zeta"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "657cb29e-63b6-4416-b613-557aa18ac765",
         "term": "non-syndromic X-linked intellectual disability",
         "diseaseId": "DOID_0050776",
@@ -60,10 +76,13 @@
             "non-specific X-linked mental retardation",
             "X-linked non-specific intellectual disability",
             "Mental Retardation, X-Linked type 95"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "aa217d94-5e04-4144-af5d-0b49e9dba754",
         "term": "Cobblestone lissencephaly without muscular or ocular involvement",
         "diseaseId": "OMIM_615191",
@@ -74,10 +93,13 @@
             "Lissencephaly type 2 without muscular or ocular involvement",
             "Cobblestone lissencephaly without muscular or eye involvement",
             "Lissencephaly type 5"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "c5694e37-cd5b-42a3-b6db-e3fb6a629e63",
         "term": "Aneurysm-osteoarthritis syndrome",
         "diseaseId": "OMIM_613795",
@@ -86,10 +108,13 @@
         "synonyms": [
             "AOS",
             "Loeys-Dietz Syndrome type 3"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "82e69bcc-91c5-4a66-8293-3befc7445966",
         "term": "von Hippel-Lindau disease",
         "diseaseId": "OMIM_193300",
@@ -104,10 +129,13 @@
             "Familial cerebelloretinal angiomatosis",
             "VHL",
             "Hippel Lindau syndrome"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "e10d0bb8-7f3a-4c91-85a5-19d1ea0d79c3",
         "term": "pleuropulmonary blastoma",
         "diseaseId": "OMIM_601200",
@@ -118,10 +146,13 @@
             "pleuropulmonary blastoma",
             "Pulmonary Blastoma of Childhood",
             "Pleuropulmonary blastoma (morphologic abnormality)"
-        ],
-        "active": true
+        ]
     },
     {
+        "@type": [
+            "disease",
+            "item"
+        ],
         "uuid": "028c938f-0a1c-4aa1-bd02-4c574d2f58e2",
         "term": "Loeys-Dietz syndrome",
         "diseaseId": "DOID_0050466",
@@ -129,7 +160,6 @@
         "ontology": "DOID",
         "synonyms": [
             "Aortic aneurysm syndrome due to TGF-beta receptors anomalies"
-        ],
-        "active": true
+        ]
     }
 ]
