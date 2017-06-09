@@ -125,7 +125,7 @@
             "title": "Gene Symbol",
             "type": "string"
         },
-        "disease.id": {
+        "disease.diseaseId": {
             "title": "Disease ID",
             "type": "string"
         },
@@ -188,7 +188,7 @@
     },
     "boost_values": {
         "gene.symbol": 1.0,
-        "disease.id": 1.0,
+        "disease.diseaseId": 1.0,
         "modeCode": 1.0,
         "annotations.article": 1.0
     }
