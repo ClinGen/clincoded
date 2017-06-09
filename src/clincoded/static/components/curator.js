@@ -110,7 +110,7 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                 this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
                     let flattenDiseaseObj = flatten(currDiseaseObj);
                     // Update disease object properties
-                    flattenDiseaseObj['id'] = diseaseObj['id'];
+                    flattenDiseaseObj['diseaseId'] = diseaseObj['diseaseId'];
                     flattenDiseaseObj['term'] = diseaseObj['term'];
                     // Update ontology if any
                     if (diseaseObj['ontology']) {
@@ -154,11 +154,11 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                     }
 
                     let flattenGdmObj = flatten(gdmObj);
-                    if (!diseaseObj['freetext'] && diseaseObj['id'] !== disease.id) {
+                    if (!diseaseObj['freetext'] && diseaseObj['diseaseId'] !== disease.diseaseId) {
                         /**
                          * Handle the updating of MonDO term
                          */
-                        this.getRestData('/search?type=disease&id=' + diseaseObj['id']).then(diseaseSearch => {
+                        this.getRestData('/search?type=disease&diseaseId=' + diseaseObj['diseaseId']).then(diseaseSearch => {
                             let diseaseUuid;
                             if (diseaseSearch.total === 0) {
                                 /**
@@ -1161,10 +1161,10 @@ var DiseaseRecordHeader = React.createClass({
                                 : null}
                             </dt>
                             <dd>
-                                {!disease.freetext && disease.id.indexOf('FREETEXT') < 0 ?
+                                {!disease.freetext && disease.diseaseId.indexOf('FREETEXT') < 0 ?
                                     <span>
                                         <span>Disease ID: </span>
-                                        <a href={external_url_map['MondoSearch'] + disease.id} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id.replace('_', ':')}</a>
+                                        <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank" title={'Ontology lookup for ' + disease.diseaseId + ' in a new window'}>{disease.diseaseId.replace('_', ':')}</a>
                                     </span>
                                 : null}
                             </dd>
@@ -2336,7 +2336,7 @@ function flattenEvidenceScore(evidencescore) {
 }
 
 const diseaseSimpleProps = [
-    "id", "term", "description", "ontology", "phenotypes", "type", "omimIds", "synonyms"
+    "diseaseId", "term", "description", "ontology", "phenotypes", "synonyms", "freetext"
 ];
 
 function flattenDisease(disease) {
@@ -2450,7 +2450,7 @@ var renderDiseaseList = module.exports.renderDiseaseList = function(objList, tit
                                         { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
                                             obj.commonDiagnosis.map(function(disease, i) {
                                                 return (
-                                                    <span key={disease.id}>
+                                                    <span key={disease.diseaseId}>
                                                         {i > 0 ? ', ' : ''}
                                                         {disease.term}
                                                     </span>

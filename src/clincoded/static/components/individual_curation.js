@@ -378,7 +378,7 @@ var IndividualCuration = React.createClass({
                  * Retrieve disease from database. If not existed, add it to the database.
                  */
                 let diseaseObj = this.state.diseaseObj;
-                this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
+                this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                     let diseaseUuid;
                     if (diseaseSearch.total === 0) {
                         return this.postRestData('/diseases/', diseaseObj).then(result => {
@@ -1721,7 +1721,7 @@ var IndividualViewer = React.createClass({
                                 <div>
                                     <dt>Common Diagnosis</dt>
                                     <dd>{individual.diagnosis && individual.diagnosis.map(function(disease, i) {
-                                        return <span key={disease.id}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.id} target="_blank">{disease.id.replace('_', ':')}</a> : null}</span>;
+                                        return <span key={disease.diseaseId}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.diseaseId.replace('_', ':')}</a> : null}</span>;
                                     })}</dd>
                                 </div>
 

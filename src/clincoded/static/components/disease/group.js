@@ -77,7 +77,7 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
      * @param {*} disease
      */
     setDiseaseObjectStates(disease) {
-        if (disease.id) { this.setState({diseaseId: disease.id}); }
+        if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}); }
         if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}); }
@@ -86,17 +86,17 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
         if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
-    passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
         this.setState({error: null}, () => {
             this.props.clearErrorInParent();
         });
-        if (id) {
+        if (diseaseId) {
             /**
              * Changing colon to underscore in id string for database
              */
-            diseaseObj['id'] = id.replace(':', '_');
-            this.setState({diseaseId: id});
+            diseaseObj['diseaseId'] = diseaseId.replace(':', '_');
+            this.setState({diseaseId: diseaseId});
         }
         if (term) {
             diseaseObj['term'] = term;
@@ -148,8 +148,8 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
      * @param {*} hpo
      * @param {*} freetext
      */
-    renderDiseaseData(id, term, desc, hpo, freetext) {
-        let source = !freetext ? id.replace('_', ':') : this.props.session.user_properties.title;
+    renderDiseaseData(diseaseId, term, desc, hpo, freetext) {
+        let source = !freetext ? diseaseId.replace('_', ':') : this.props.session.user_properties.title;
         if (term && term.length) {
             return (
                 <span>
@@ -198,7 +198,7 @@ const GroupDisease = module.exports.GroupDisease = React.createClass({
      * @param {*} diseaseObj
      */
     handleCopyDiseaseStates(disease, diseaseObj) {
-        if (disease.id) { this.setState({diseaseId: disease.id}, () => { diseaseObj['id'] = disease.id; }) ;}
+        if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}, () => { diseaseObj['diseaseId'] = disease.diseaseId; }) ;}
         if (disease.term) { this.setState({diseaseTerm: disease.term}, () => { diseaseObj['term'] = disease.term; }); }
         if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}, () => { diseaseObj['ontology'] = disease.ontology; }); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}, () => { diseaseObj['description'] = disease.description; }); }

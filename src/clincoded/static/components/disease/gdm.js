@@ -64,7 +64,7 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
      * @param {*} disease 
      */
     setDiseaseObjectStates(disease) {
-        if (disease.id) { this.setState({diseaseId: disease.id}); }
+        if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}) ;}
         disease.ontology ? this.setState({diseaseOntology: disease.ontology}) : this.setState({diseaseOntology: null});
         disease.description ? this.setState({diseaseDescription: disease.description}) : this.setState({diseaseDescription: null});
@@ -73,17 +73,17 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
         disease.freetext ? this.setState({diseaseFreeTextConfirm: disease.freetext}) : this.setState({diseaseFreeTextConfirm: false});
     },
 
-    passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
         this.setState({error: null}, () => {
             this.props.clearErrorInParent();
         });
-        if (id) {
+        if (diseaseId) {
             /**
              * Changing colon to underscore in id string for database
              */
-            diseaseObj['id'] = id.replace(':', '_');
-            this.setState({diseaseId: id});
+            diseaseObj['diseaseId'] = diseaseId.replace(':', '_');
+            this.setState({diseaseId: diseaseId});
         }
         if (term) {
             diseaseObj['term'] = term;
@@ -130,8 +130,8 @@ const GdmDisease = module.exports.GdmDisease = React.createClass({
         });
     },
 
-    renderDiseaseData(id, term, desc, hpo, freetext) {
-        let source = !freetext ? id : this.props.session.user_properties.title;
+    renderDiseaseData(diseaseId, term, desc, hpo, freetext) {
+        let source = !freetext ? diseaseId : this.props.session.user_properties.title;
         if (term && term.length) {
             return (
                 <span>

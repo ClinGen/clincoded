@@ -128,7 +128,7 @@ var FamilyCuration = React.createClass({
             this.setState({
                 individualName: this.refs['individualname'].getValue()
             }, () => {
-                if (this.state.individualName || (this.state.probandDiseaseObj && this.state.probandDiseaseObj['id'])) {
+                if (this.state.individualName || (this.state.probandDiseaseObj && this.state.probandDiseaseObj['diseaseId'])) {
                     this.setState({individualRequired: true});
                 } else if (!this.state.individualName && (this.state.probandDiseaseObj && !Object.keys(this.state.probandDiseaseObj).length)) {
                     this.setState({individualRequired: false});
@@ -605,8 +605,8 @@ var FamilyCuration = React.createClass({
                  * Retrieve disease from database. If not existed, add it to the database.
                  */
                 let diseaseObj = this.state.diseaseObj;
-                if (Object.keys(diseaseObj).length && diseaseObj.id) {
-                    searchStr = '/search?type=disease&id=' + diseaseObj.id;
+                if (Object.keys(diseaseObj).length && diseaseObj.diseaseId) {
+                    searchStr = '/search?type=disease&diseaseId=' + diseaseObj.diseaseId;
                 } else {
                     searchStr = '';
                 }
@@ -644,7 +644,7 @@ var FamilyCuration = React.createClass({
                          * Retrieve disease from database. If not existed, add it to the database.
                          */
                         let probandDiseaseObj = this.state.probandDiseaseObj;
-                        return this.getRestData('/search?type=disease&id=' + probandDiseaseObj.id).then(diseaseSearch => {
+                        return this.getRestData('/search?type=disease&diseaseId=' + probandDiseaseObj.diseaseId).then(diseaseSearch => {
                             let probandDiseaseUuid;
                             if (diseaseSearch.total === 0) {
                                 this.postRestData('/diseases/', probandDiseaseObj).then(result => {
@@ -2058,7 +2058,7 @@ var FamilyViewer = React.createClass({
                                 <div>
                                     <dt>Common Diagnosis</dt>
                                     <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                        return <span key={disease.id}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.id} target="_blank">{disease.id.replace('_', ':')}</a> : null}</span>;
+                                        return <span key={disease.diseaseId}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.diseaseId.replace('_', ':')}</a> : null}</span>;
                                     })}</dd>
                                 </div>
 

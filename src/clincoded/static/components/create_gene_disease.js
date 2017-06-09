@@ -133,7 +133,7 @@ var CreateGeneDisease = React.createClass({
             ], [
                 function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
             ]).then(response => {
-                return this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
+                return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                     let diseaseUuid;
                     if (diseaseSearch.total === 0) {
                         this.postRestData('/diseases/', diseaseObj).then(result => {
@@ -150,7 +150,7 @@ var CreateGeneDisease = React.createClass({
             }).then(data => {
                 // Load GDM if one with matching gene/disease/mode already exists
                 return this.getRestData(
-                    '/search/?type=gdm&disease.id=' + diseaseObj.id + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
+                    '/search/?type=gdm&disease.diseaseId=' + diseaseObj.diseaseId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
                 ).then(gdmSearch => {
                     if (gdmSearch.total === 0) {
                         // Matching GDM not found. Create a new GDM
@@ -265,7 +265,7 @@ var CreateGeneDisease = React.createClass({
                             <ModalComponent modalClass="modal-default" modalWrapperClass="confirm-edit-gdm-modal" onRef={ref => (this.child = ref)}>
                                 <div>
                                     <div className="modal-body">
-                                        <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene — disease — mode.</p>
+                                        <p>A curation record already exists for <strong>{gdm.gene.symbol} &#8211; {gdm.disease.term} &#8211; {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene &#8211; disease &#8211; mode.</p>
                                     </div>
                                     <div className='modal-footer'>
                                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, false)} title="Cancel" />
