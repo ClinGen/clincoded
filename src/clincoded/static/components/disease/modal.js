@@ -232,7 +232,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         if (this.refs['diseaseFreeTextDesc'] && !this.refs['diseaseFreeTextDesc'].getValue()) {
             this.setState({hasFreeTextDiseaseDescription: false});
         } else {
-            this.setState({hasFreeTextDiseaseDescription: true}, () => {this.clrFormErrors('diseaseFreeTextPhenoTypes')});
+            this.setState({hasFreeTextDiseaseDescription: true}, () => {this.clrFormErrors('diseaseFreeTextPhenoTypes');});
         }
     },
 
@@ -243,7 +243,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         if (this.refs['diseaseFreeTextPhenoTypes'] && !this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
             this.setState({hasFreeTextDiseasePhenotypes: false});
         } else {
-            this.setState({hasFreeTextDiseasePhenotypes: true}, () => {this.clrFormErrors('diseaseFreeTextDesc')});
+            this.setState({hasFreeTextDiseasePhenotypes: true}, () => {this.clrFormErrors('diseaseFreeTextDesc');});
         }
     },
 
@@ -295,7 +295,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                     phenotypes: this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue() ? this.refs['diseaseFreeTextPhenoTypes'].getValue().split(', ') : []
                 }, () => {
                     this.props.passDataToParent(
-                        'FTXT:' + generateUUID(), // Set free text disease id
+                        'FREETEXT:' + generateUUID(), // Set free text disease id
                         this.state.diseaseTerm,
                         null, // No ontology for free text
                         this.state.diseaseDescription,
@@ -408,7 +408,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         if (phenotypes.length) {
             hpoids = phenotypes.join(', ');
         } else {
-            hpoids = ''
+            hpoids = '';
         }
 
         return (
