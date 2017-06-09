@@ -68,11 +68,6 @@
                 "description": "Term of one synonym",
                 "type": "string"
             }
-        },
-        "active": {
-            "description": "boolean switch to set if the phenotype avaliable for curation.",
-            "type": "boolean",
-            "default": true
         }
     },
     "columns": {
