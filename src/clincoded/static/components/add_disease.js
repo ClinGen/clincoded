@@ -82,7 +82,7 @@ var AddDisease = React.createClass({
                         "uuid": uuid,
                         "diseaseId": diseaseId,
                         "term": term,
-                        "description": description && description.length ? description : null,
+                        "description": description && description.length ? description : '',
                         "ontology": ontology,
                         "synonyms": synonyms
                     };
