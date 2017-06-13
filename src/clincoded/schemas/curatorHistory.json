@@ -554,16 +554,16 @@
             "title": "HGNC Symbol",
             "type": "string"
         },
-        "meta.gdm.disease": {
-            "title": "Orpha ID",
+        "meta.gdm.disease.diseaseId": {
+            "title": "Disease ID",
             "type": "string"
         },
         "meta.interpretation.variant": {
             "title": "Variant ID",
             "type": "string"
         },
-        "meta.interpretation.disease": {
-            "title": "Orpha ID",
+        "meta.interpretation.disease.diseaseId": {
+            "title": "Disease ID",
             "type": "string"
         },
         "meta.interpretation.modeInheritance": {
