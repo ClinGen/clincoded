@@ -103,74 +103,94 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
      */
     updateDiseaseObj(diseaseObj) {
         this.setState({diseaseObj: diseaseObj}, () => {
-            const gdm = this.props.gdm;
-            const disease = gdm && gdm.disease;
+            let gdm = this.props.gdm;
+            this.getRestData('/gdm/' + gdm.uuid).then(gdmObj => {
+                let disease = gdmObj && gdmObj.disease;
+                
+                this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
+                    let flattenDiseaseObj = flatten(currDiseaseObj);
+                    // Update disease object properties
+                    flattenDiseaseObj['diseaseId'] = diseaseObj['diseaseId'];
+                    flattenDiseaseObj['term'] = diseaseObj['term'];
+                    // Update ontology if any
+                    if (diseaseObj['ontology']) {
+                        flattenDiseaseObj['ontology'] = diseaseObj['ontology'];
+                    } else {
+                        if ('ontology' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['ontology'];
+                        }
+                    }
+                    // Update description (if any)
+                    if (diseaseObj['description']) {
+                        flattenDiseaseObj['description'] = diseaseObj['description'];
+                    } else {
+                        if ('description' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['description'];
+                        }
+                    }
+                    // Update optional phenotypes (applicable to free text only)
+                    if (diseaseObj['phenotypes']) {
+                        flattenDiseaseObj['phenotypes'] = diseaseObj['phenotypes'];
+                    } else {
+                        if ('phenotypes' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['phenotypes'];
+                        }
+                    }
+                    // Update optional free text confirmation (applicable to free text only)
+                    if (diseaseObj['freetext']) {
+                        flattenDiseaseObj['freetext'] = true;
+                    } else {
+                        if ('freetext' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['freetext'];
+                        }
+                    }
+                    // Update synonyms
+                    if (diseaseObj['synonyms']) {
+                        flattenDiseaseObj['synonyms'] = diseaseObj['synonyms'];
+                    } else {
+                        if ('synonyms' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['synonyms'];
+                        }
+                    }
 
-            this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
-                let flattenDiseaseObj = flatten(currDiseaseObj);
-                // Update disease object properties
-                flattenDiseaseObj['id'] = diseaseObj['id'];
-                flattenDiseaseObj['term'] = diseaseObj['term'];
-                // Update ontology if any
-                if (diseaseObj['ontology']) {
-                    flattenDiseaseObj['ontology'] = diseaseObj['ontology'];
-                } else {
-                    if ('ontology' in flattenDiseaseObj) {
-                        delete flattenDiseaseObj['ontology'];
-                    }
-                }
-                // Update description (if any)
-                if (diseaseObj['description']) {
-                    flattenDiseaseObj['description'] = diseaseObj['description'];
-                } else {
-                    if ('description' in flattenDiseaseObj) {
-                        delete flattenDiseaseObj['description'];
-                    }
-                }
-                // Update optional phenotypes (applicable to free text only)
-                if (diseaseObj['phenotypes']) {
-                    flattenDiseaseObj['phenotypes'] = diseaseObj['phenotypes'];
-                } else {
-                    if ('phenotypes' in flattenDiseaseObj) {
-                        delete flattenDiseaseObj['phenotypes'];
-                    }
-                }
-                // Update optional free text confirmation (applicable to free text only)
-                if (diseaseObj['freetext']) {
-                    flattenDiseaseObj['freetext'] = true;
-                } else {
-                    if ('freetext' in flattenDiseaseObj) {
-                        delete flattenDiseaseObj['freetext'];
-                    }
-                }
-                // Update synonyms
-                if (diseaseObj['synonyms']) {
-                    flattenDiseaseObj['synonyms'] = diseaseObj['synonyms'];
-                } else {
-                    if ('synonyms' in flattenDiseaseObj) {
-                        delete flattenDiseaseObj['synonyms'];
-                    }
-                }
-
-                let flattenGdmObj = flatten(gdm);
-                if (!diseaseObj['freetext'] && diseaseObj['id'] !== disease.id) {
-                    /**
-                     * Handle the updating of MonDO term
-                     */
-                    this.getRestData('/search?type=disease&id=' + diseaseObj['id']).then(diseaseSearch => {
-                        let diseaseUuid;
-                        if (diseaseSearch.total === 0) {
-                            /**
-                             * Post request for adding new disease to the database
-                             */
-                            return this.postRestData('/diseases/', diseaseObj).then(result => {
-                                let newDisease = result['@graph'][0];
-                                diseaseUuid = newDisease['uuid'];
-                                this.setState({diseaseUuid: diseaseUuid});
-                                return Promise.resolve(result);
-                            }).then(response => {
+                    let flattenGdmObj = flatten(gdmObj);
+                    if (!diseaseObj['freetext'] && diseaseObj['diseaseId'] !== disease.diseaseId) {
+                        /**
+                         * Handle the updating of MonDO term
+                         */
+                        this.getRestData('/search?type=disease&diseaseId=' + diseaseObj['diseaseId']).then(diseaseSearch => {
+                            let diseaseUuid;
+                            if (diseaseSearch.total === 0) {
                                 /**
-                                 * Update existing GDM with a new UUID
+                                 * Post request for adding new disease to the database
+                                 */
+                                return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                    let newDisease = result['@graph'][0];
+                                    diseaseUuid = newDisease['uuid'];
+                                    this.setState({diseaseUuid: diseaseUuid});
+                                    return Promise.resolve(result);
+                                }).then(response => {
+                                    /**
+                                     * Update existing GDM with a new UUID
+                                     */
+                                    flattenGdmObj['disease'] = this.state.diseaseUuid;
+                                    this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                        return Promise.resolve(gdmObj['@graph'][0]);
+                                    }).then(data => {
+                                        this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                            this.setState({gdm: updatedGdm});
+                                        });
+                                    });
+                                });
+                            } else {
+                                /**
+                                 * User-selected disease already exists in the database
+                                 */
+                                let _id = diseaseSearch['@graph'][0]['@id'];
+                                diseaseUuid = _id.slice(10, -1);
+                                this.setState({diseaseUuid: diseaseUuid});
+                                /**
+                                 * Update existing GDM with the UUID of the existing disease
                                  */
                                 flattenGdmObj['disease'] = this.state.diseaseUuid;
                                 this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
@@ -180,38 +200,18 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                         this.setState({gdm: updatedGdm});
                                     });
                                 });
-                            });
-                        } else {
-                            /**
-                             * User-selected disease already exists in the database
-                             */
-                            let _id = diseaseSearch['@graph'][0]['@id'];
-                            diseaseUuid = _id.slice(10, -1);
-                            this.setState({diseaseUuid: diseaseUuid});
-                            /**
-                             * Update existing GDM with the UUID of the existing disease
-                             */
-                            flattenGdmObj['disease'] = this.state.diseaseUuid;
-                            this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
-                                return Promise.resolve(gdmObj['@graph'][0]);
-                            }).then(data => {
-                                this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
-                                    this.setState({gdm: updatedGdm});
-                                });
-                            });
-                        }
-                    });
-                } else if (diseaseObj['freetext']) {
-                    let diseaseUuid;
-                    if (!disease.freetext) {
+                            }
+                        });
+                    } else if (diseaseObj['freetext']) {
+                        let freetextDiseaseUuid;
                         /**
                          * Post request for changing disease to free text from Mondo term
                          * Treat as a new disease record since a new free text disease id is generated
                          */
                         return this.postRestData('/diseases/', diseaseObj).then(result => {
                             let newDisease = result['@graph'][0];
-                            diseaseUuid = newDisease['uuid'];
-                            this.setState({diseaseUuid: diseaseUuid});
+                            freetextDiseaseUuid = newDisease['uuid'];
+                            this.setState({diseaseUuid: freetextDiseaseUuid});
                             return Promise.resolve(result);
                         }).then(response => {
                             /**
@@ -226,23 +226,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 });
                             });
                         });
-                    } else {
-                        /**
-                         * Put request for updating a free text disease without changing to Mondo term
-                         * Keep free text disease id and update description/phenotypes, etc.
-                         */
-                        return this.putRestData('/diseases/' + disease.uuid, flattenDiseaseObj).then(result => {
-                            let newDiseaseObj = result['@graph'][0];
-                            return Promise.resolve(newDiseaseObj);
-                        }).then(data => {
-                            this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
-                                this.setState({gdm: updatedGdm});
-                            });
-                        });
                     }
-                }
+                }).catch(err => {
+                    console.warn('GCI update disease error :: %o', err);
+                });
             }).catch(err => {
-                console.warn('GCI update disease error :: %o', err);
+                console.warn('Get current GDM error :: %o', err);
             });
         });
     },
@@ -1172,10 +1161,10 @@ var DiseaseRecordHeader = React.createClass({
                                 : null}
                             </dt>
                             <dd>
-                                {!disease.freetext && disease.id.indexOf('FREETEXT') < 0 ?
+                                {!disease.freetext && disease.diseaseId.indexOf('FREETEXT') < 0 ?
                                     <span>
                                         <span>Disease ID: </span>
-                                        <a href={external_url_map['MondoSearch'] + disease.id} target="_blank" title={'Ontology lookup for ' + disease.id + ' in a new window'}>{disease.id.replace('_', ':')}</a>
+                                        <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank" title={'Ontology lookup for ' + disease.diseaseId + ' in a new window'}>{disease.diseaseId.replace('_', ':')}</a>
                                     </span>
                                 : null}
                             </dd>
@@ -2347,7 +2336,7 @@ function flattenEvidenceScore(evidencescore) {
 }
 
 const diseaseSimpleProps = [
-    "id", "term", "description", "ontology", "phenotypes", "type", "omimIds", "synonyms"
+    "diseaseId", "term", "description", "ontology", "phenotypes", "synonyms", "freetext"
 ];
 
 function flattenDisease(disease) {
@@ -2461,7 +2450,7 @@ var renderDiseaseList = module.exports.renderDiseaseList = function(objList, tit
                                         { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
                                             obj.commonDiagnosis.map(function(disease, i) {
                                                 return (
-                                                    <span key={disease.id}>
+                                                    <span key={disease.diseaseId}>
                                                         {i > 0 ? ', ' : ''}
                                                         {disease.term}
                                                     </span>

@@ -166,12 +166,12 @@
             "title": "Genes",
             "type": "string"
         },
-        "disease.id": {
+        "disease.diseaseId": {
             "title": "Disease ID",
             "type": "string"
         },
         "disease.term": {
-            "title": "Disease Orphanet Term",
+            "title": "Disease Term",
             "type": "string"
         },
         "modeInheritance": {

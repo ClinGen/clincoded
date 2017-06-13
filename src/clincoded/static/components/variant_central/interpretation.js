@@ -339,7 +339,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
                     clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
                     carId: interpretation.variant.carId ? interpretation.variant.carId : null,
                     grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
-                    diseaseId: interpretation.disease && interpretation.disease.id ? interpretation.disease.id : null,
+                    diseaseId: interpretation.disease && interpretation.disease.diseaseId ? interpretation.disease.diseaseId : null,
                     disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
                     modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
                     submitter_last_name: interpretation.submitted_by.last_name,

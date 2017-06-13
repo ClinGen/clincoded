@@ -106,5 +106,11 @@
         "title": "Case Control Submit Results",
         "status": "released",
         "uuid": "7827b383-efdd-458e-953b-6e59f50fb778"
+    },
+    {
+        "name": "add-disease",
+        "title": "Add Disease",
+        "status": "released",
+        "uuid": "bf6bc011-2130-4390-af50-a076618cb9e6"
     }
 ]

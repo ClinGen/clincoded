@@ -73,7 +73,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
      * @param {*} disease
      */
     setDiseaseObjectStates(disease) {
-        if (disease.id) { this.setState({diseaseId: disease.id}); }
+        if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}); }
         if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}); }
@@ -82,15 +82,15 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
         if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
-    passDataToParent(id, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
 
-        if (id) {
+        if (diseaseId) {
             /**
              * Changing colon to underscore in id string for database
              */
-            diseaseObj['id'] = id.replace(':', '_');
-            this.setState({diseaseId: id});
+            diseaseObj['diseaseId'] = diseaseId.replace(':', '_');
+            this.setState({diseaseId: diseaseId});
         }
         if (term) {
             diseaseObj['term'] = term;
@@ -143,7 +143,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = React.creat
         let interpretationDisease, currInterpretation, flatInterpretation;
 
         if (diseaseObj && diseaseObj.term) {
-            this.getRestData('/search?type=disease&id=' + diseaseObj.id).then(diseaseSearch => {
+            this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                 let diseaseUuid;
                 if (diseaseSearch.total === 0) {
                     return this.postRestData('/diseases/', diseaseObj).then(result => {

@@ -4,8 +4,8 @@
     "description": "Schema for storing disease data of various terminologies (e.g. Orphanet, DOID, OMIM, NCIt, or free text).",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["id", "term"],
-    "identifyingProperties": ["uuid", "id"],
+    "required": ["diseaseId", "term"],
+    "identifyingProperties": ["uuid", "diseaseId"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -17,19 +17,18 @@
         "schema_version": {
             "default": "1"
         },
-        "id": {
+        "diseaseId": {
             "title": "Unique identifier of disease term",
             "description": "Disease term identifier consisting of the prefix (e.g. DOID:) followed by number.",
             "type": "string",
             "default": "",
-            "uniqueKey": "disease:id"
+            "uniqueKey": "disease:diseaseId"
         },
         "term": {
             "title": "Disease name",
             "description": "Ontology name or label describing the diseases.",
             "type":  "string",
-            "default": "",
-            "uniqueKey": "disease:id"
+            "default": ""
         },
         "description": {
             "title": "Disease description",
@@ -69,15 +68,10 @@
                 "description": "Term of one synonym",
                 "type": "string"
             }
-        },
-        "active": {
-            "description": "boolean switch to set if the phenotype avaliable for curation.",
-            "type": "boolean",
-            "default": true
         }
     },
     "columns": {
-        "id": {
+        "diseaseId": {
             "title": "ID",
             "type": "string"
         },

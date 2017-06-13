@@ -104,9 +104,13 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         }
         if (nextProps.diseaseOntology) {
             this.setState({diseaseOntology: nextProps.diseaseOntology});
+        } else {
+            this.setState({diseaseOntology: null});
         }
         if (nextProps.diseaseDescription) {
             this.setState({diseaseDescription: nextProps.diseaseDescription, hasFreeTextDiseaseDescription: true});
+        } else {
+            this.setState({diseaseDescription: null, hasFreeTextDiseaseDescription: false});
         }
         if (nextProps.diseaseFreeTextConfirm) {
             this.setState({diseaseFreeTextConfirm: nextProps.diseaseFreeTextConfirm});
@@ -228,7 +232,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         if (this.refs['diseaseFreeTextDesc'] && !this.refs['diseaseFreeTextDesc'].getValue()) {
             this.setState({hasFreeTextDiseaseDescription: false});
         } else {
-            this.setState({hasFreeTextDiseaseDescription: true}, () => {this.clrFormErrors('diseaseFreeTextPhenoTypes')});
+            this.setState({hasFreeTextDiseaseDescription: true}, () => {this.clrFormErrors('diseaseFreeTextPhenoTypes');});
         }
     },
 
@@ -239,7 +243,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         if (this.refs['diseaseFreeTextPhenoTypes'] && !this.refs['diseaseFreeTextPhenoTypes'].getValue()) {
             this.setState({hasFreeTextDiseasePhenotypes: false});
         } else {
-            this.setState({hasFreeTextDiseasePhenotypes: true}, () => {this.clrFormErrors('diseaseFreeTextDesc')});
+            this.setState({hasFreeTextDiseasePhenotypes: true}, () => {this.clrFormErrors('diseaseFreeTextDesc');});
         }
     },
 
@@ -291,7 +295,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                     phenotypes: this.refs['diseaseFreeTextPhenoTypes'] && this.refs['diseaseFreeTextPhenoTypes'].getValue() ? this.refs['diseaseFreeTextPhenoTypes'].getValue().split(', ') : []
                 }, () => {
                     this.props.passDataToParent(
-                        'FREETEXT:' + getRandomInt(10000000, 99999999), // Set free text disease id
+                        'FREETEXT:' + generateUUID(), // Set free text disease id
                         this.state.diseaseTerm,
                         null, // No ontology for free text
                         this.state.diseaseDescription,
@@ -354,6 +358,9 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                             {Object.keys(tempResource).length && tempResource['label'] ? tempResource['label'] : diseaseTerm}
                         </a>
                     </span>
+                    {Object.keys(tempResource).length && tempResource['is_obsolete'] ?
+                        <span className="p-break"><span className="label label-danger disease-is-obsolete">This term is obsolete</span></span>
+                    : null}
                     {this.renderDiseaseDescription()}
                 </div>
             </div>
@@ -401,7 +408,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         if (phenotypes.length) {
             hpoids = phenotypes.join(', ');
         } else {
-            hpoids = ''
+            hpoids = '';
         }
 
         return (
@@ -443,8 +450,8 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                 diseaseFreeTextConfirm: false,
                 hasFreeTextDiseaseDescription: false,
                 hasFreeTextDiseasePhenotypes: false,
-                queryResourceDisabled: this.state.diseaseId ? false : true,
-                submitResourceDisabled: this.state.diseaseId ? false : true,
+                queryResourceDisabled: true,
+                submitResourceDisabled: true,
                 resourceFetched: false,
                 tempResource: {}
             }, () => {
@@ -466,6 +473,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                         <div className="row">
                             <div className="ontology-lookup-note">
                                 <p>Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using the OLS (Ontology Lookup Service).</p>
+                                <p><a href="/static/help/MonDO-search-help.pdf" target="_blank">MonDO Search Help</a></p>
                             </div>
                             {!diseaseFreeTextConfirm ? this.renderDiseaseIdInput() : null}
                             {diseaseFreeTextConfirm ? this.renderDiseaseFreeTextInput() : null}
@@ -561,10 +569,21 @@ function queryResourceById(id) {
 }
 
 /**
- * Method to randomly generate 8-digit integer number for free text id
+ * Method to generate UUID for free text disease id
+ * A RFC4122 version 4 compliant solution that solves that issue by offsetting the first 13 hex numbers
+ * by a hex portion of the timestamp. That way, even if Math.random is on the same seed, both clients
+ * would have to generate the UUID at the exact same millisecond (or 10,000+ years later) to get the same UUID.
+ * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
  */
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
+function generateUUID() {
+    let d = new Date().getTime();
+    if (window.performance && typeof window.performance.now === "function") {
+        d += performance.now(); //use high-precision timer if available
+    }
+    let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
 }

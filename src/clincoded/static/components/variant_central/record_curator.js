@@ -102,7 +102,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = React.createC
                                                 {!myInterpretation.disease.freetext ? 
                                                     <span>
                                                         (
-                                                        <a href={external_url_map['MondoSearch'] + myInterpretation.disease.id} target="_blank">{myInterpretation.disease.id.replace('_', ':')}</a>
+                                                        <a href={external_url_map['MondoSearch'] + myInterpretation.disease.diseaseId} target="_blank">{myInterpretation.disease.diseaseId.replace('_', ':')}</a>
                                                         {myInterpretation.disease.description && myInterpretation.disease.description.length ?
                                                             <span><span>,&nbsp;</span>
                                                                 <PopOverComponent popOverWrapperClass="interpretation-disease-description"
