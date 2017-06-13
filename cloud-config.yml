@@ -162,10 +162,10 @@ runcmd:
 - a2disconf localized-error-pages
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
-- if test "%(ROLE)s" = "demo"
-- then
+# - if test "%(ROLE)s" = "demo"
+# - then
 # -   sudo -u clincoded bin/batchupgrade production.ini --app-name app
-- fi
+# - fi
 
 users:
 - default
