@@ -473,6 +473,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                         <div className="row">
                             <div className="ontology-lookup-note">
                                 <p>Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using the OLS (Ontology Lookup Service).</p>
+                                <p><a href="/static/help/MonDO-search-help.pdf" target="_blank">MonDO Search Help</a></p>
                             </div>
                             {!diseaseFreeTextConfirm ? this.renderDiseaseIdInput() : null}
                             {diseaseFreeTextConfirm ? this.renderDiseaseFreeTextInput() : null}
