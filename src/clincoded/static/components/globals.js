@@ -181,6 +181,7 @@ module.exports.external_url_map = {
     'AmiGO2': 'http://amigo.geneontology.org/amigo/gene_product/UniProtKB:',
     'QuickGO': 'https://www.ebi.ac.uk/QuickGO/GProtein?ac=',
     'QuickGoSearch': 'http://www.ebi.ac.uk/QuickGO/GTerm?id=',
+    'GO': 'http://www.ebi.ac.uk/ols/ontologies/go',
     'GOSearch': 'http://www.ebi.ac.uk/ols/ontologies/go/terms?iri=http://purl.obolibrary.org/obo/',
     'OLS': 'http://www.ebi.ac.uk/ols/index',
     'CL': 'http://www.ebi.ac.uk/ols/ontologies/cl',
