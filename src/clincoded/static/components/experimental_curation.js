@@ -1619,7 +1619,7 @@ var TypeBiochemicalFunction = function(uniprotId) {
             <div className="col-sm-7 col-sm-offset-5">
                 <ul className="gene-ontology help-text style-list">
                     <li>View <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt.</li>
-                    <li>Search for a GO term using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
+                    <li>Search <a href={external_url_map['GO']} target="_blank">GO</a> using the OLS.</li>
                     <li>Search for existing or new terms using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a></li>
                 </ul>
             </div>
@@ -1677,9 +1677,9 @@ var TypeBiochemicalFunctionA = function() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceForOtherGenesWithSameFunction')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5"
                 value={BF_evidenceForOtherGenesWithSameFunction} inputDisabled={this.cv.othersAssessed} required />
-            <Input type="text" ref="geneWithSameFunctionSameDisease.sharedDisease" label={<LabelSharedDisease />}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                value={"ORPHA" + this.state.gdm.disease.orphaNumber} inputDisabled={true} />
+            <Input type="textarea" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease:"
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true} rows="2"
+                value={!this.state.gdm.disease.freetext ? this.state.gdm.disease.term + ' (' + this.state.gdm.disease.diseaseId + ')' : this.state.gdm.disease.term + ' (' + this.props.session.user_properties.title + ')'} />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1701,11 +1701,6 @@ var TypeBiochemicalFunctionA = function() {
 var LabelGenesWithSameFunction = React.createClass({
     render: function() {
         return <span>Other gene(s) with same function as gene in record <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
-    }
-});
-var LabelSharedDisease = React.createClass({
-    render: function() {
-        return <span>Shared disease <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet in a new tab">Orphanet</a> ID)</span>:</span>;
     }
 });
 
@@ -2006,7 +2001,7 @@ var TypeFunctionalAlteration = function(uniprotId) {
             <div className="col-sm-7 col-sm-offset-5">
                 <ul className="gene-ontology help-text style-list">
                     <li>View <a href={dbxref_prefix_map['UniProtKB'] + uniprotId} target="_blank">existing GO annotations for this gene</a> in UniProt.</li>
-                    <li>Search for a GO term using the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).</li>
+                    <li>Search <a href={external_url_map['GO']} target="_blank">GO</a> using the OLS.</li>
                     <li>Search for existing or new terms using <a href="https://www.ebi.ac.uk/QuickGO/" target="_blank">QuickGO</a></li>
                 </ul>
             </div>
@@ -2658,6 +2653,18 @@ var ExperimentalViewer = React.createClass({
         var tempPmid = tempGdmPmid[1];
 
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
+        let isEvidenceScored = false;
+        if (evidenceScores && evidenceScores.length > 0) {
+            evidenceScores.map(scoreObj => {
+                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                    isEvidenceScored = true;
+                } else {
+                    isEvidenceScored = false;
+                }
+            });
+        } else if (evidenceScores && evidenceScores.length < 1) {
+            isEvidenceScored = false;
+        }
         let experimentalEvidenceType = this.state.experimentalEvidenceType;
         let modelSystems_phenotypeHPOObserved = experimental.modelSystems.phenotypeHPOObserved ? experimental.modelSystems.phenotypeHPOObserved.split(', ') : [];
         let modelSystems_phenotypeHPO = experimental.modelSystems.phenotypeHPO ? experimental.modelSystems.phenotypeHPO.split(', ') : [];
@@ -3128,18 +3135,18 @@ var ExperimentalViewer = React.createClass({
                                 </dl>
                             </Panel>
                         : null}
-                        {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userExperimental)?
+                        {isEvidenceScored && !userExperimental ?
                             <Panel title="Experimental Data - Other Curator Scores" panelClassName="panel-data">
                                 <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
                             </Panel>
                         : null}
-                        {this.cv.gdmUuid && (evidenceScores.length > 0 || (evidenceScores.length < 1 && userExperimental)) ?
+                        {this.cv.gdmUuid && (isEvidenceScored || (!isEvidenceScored && userExperimental)) ?
                             <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
                                     evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
                             </Panel>
                         : null}
-                        {evidenceScores.length < 1 && !userExperimental ?
+                        {!isEvidenceScored && !userExperimental ?
                             <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
                             <div className="row">
                                     <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
