@@ -164,7 +164,7 @@ runcmd:
 - a2disconf serve-cgi-bin
 - if test "%(ROLE)s" = "demo"
 - then
-# -   sudo -u clincoded bin/batchupgrade production.ini --app-name app
+-   sudo -u clincoded bin/batchupgrade production.ini --app-name app
 - fi
 
 users:

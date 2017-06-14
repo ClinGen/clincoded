@@ -77,6 +77,7 @@ def gdm_3_4(value, system):
         value['disease'] = '9152c18a-fa5f-47a1-931f-a581d5aa3deb'
     if value['disease'] == 'b1db48c9-87d5-4c17-b980-96304bbb060f':
         value['disease'] = '86b1beae-97c3-4f14-9063-88116de15547'
+    if value['disease'] == '8bec6733-eecb-408c-9dbe-4ecd53661460':
         value['disease'] = '9f2ac0c7-a431-4ae0-8c83-087628f5f739'
     if value['disease'] == 'e80f4442-e8dc-4be5-87c7-6d2a6259486a':
         value['disease'] = 'e579aa67-c861-43ec-b0ee-94f6fa2ab756'
