@@ -378,23 +378,35 @@ var IndividualCuration = React.createClass({
                  * Retrieve disease from database. If not existed, add it to the database.
                  */
                 let diseaseObj = this.state.diseaseObj;
-                this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
-                    let diseaseUuid;
-                    if (diseaseSearch.total === 0) {
-                        return this.postRestData('/diseases/', diseaseObj).then(result => {
-                            let newDisease = result['@graph'][0];
-                            diseaseUuid = newDisease['uuid'];
+                if (Object.keys(diseaseObj).length && diseaseObj.diseaseId) {
+                    searchStr = '/search?type=disease&diseaseId=' + diseaseObj.diseaseId;
+                } else {
+                    /**
+                     * Disease is not required for a non-proband
+                     */
+                    searchStr = '';
+                }
+                this.getRestData(searchStr).then(diseaseSearch => {
+                    if (Object.keys(diseaseSearch).length && diseaseSearch.hasOwnProperty('total')) {
+                        let diseaseUuid;
+                        if (diseaseSearch.total === 0) {
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({diseaseUuid: diseaseUuid}, () => {
+                                    individualDiseases.push(diseaseUuid);
+                                    return Promise.resolve(result);
+                                });
+                            });
+                        } else {
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
                             this.setState({diseaseUuid: diseaseUuid}, () => {
                                 individualDiseases.push(diseaseUuid);
-                                return Promise.resolve(result);
                             });
-                        });
+                        }
                     } else {
-                        let _id = diseaseSearch['@graph'][0]['@id'];
-                        diseaseUuid = _id.slice(10, -1);
-                        this.setState({diseaseUuid: diseaseUuid}, () => {
-                            individualDiseases.push(diseaseUuid);
-                        });
+                        return Promise.resolve(null);
                     }
                 }, e => {
                     // The given disease couldn't be retrieved for some reason.
@@ -1660,6 +1672,18 @@ var IndividualViewer = React.createClass({
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
         let evidenceScores = individual && individual.scores ? individual.scores : [];
+        let isEvidenceScored = false;
+        if (evidenceScores && evidenceScores.length > 0) {
+            evidenceScores.map(scoreObj => {
+                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                    isEvidenceScored = true;
+                } else {
+                    isEvidenceScored = false;
+                }
+            });
+        } else if (evidenceScores && evidenceScores.length < 1) {
+            isEvidenceScored = false;
+        }
 
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
@@ -1930,18 +1954,18 @@ var IndividualViewer = React.createClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                {evidenceScores.length > 1 || (evidenceScores.length === 1 && !userIndividual) ?
+                                {isEvidenceScored && !userIndividual ?
                                     <Panel title={<LabelPanelTitleView individual={individual} labelText="Other Curator Scores" />} panelClassName="panel-data">
                                         <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
                                     </Panel>
                                 : null}
-                                {evidenceScores.length > 0 || (evidenceScores.length < 1 && userIndividual) ?
+                                {isEvidenceScored || (!isEvidenceScored && userIndividual) ?
                                     <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                         session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
                                     </Panel>
                                 : null}
-                                {evidenceScores.length < 1 && !userIndividual ?
+                                {!isEvidenceScored && !userIndividual ?
                                     <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
                                         <div className="row">
                                             <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>

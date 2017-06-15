@@ -147,6 +147,8 @@ def history_1_2(value, system):
                     value['meta']['gdm']['disease'] = 'e1fb9424-0a9f-4ce5-a7f5-88a12cb67955'
                 if value['meta']['gdm']['disease'] == '7bb7034d-7075-4940-86b8-0233dab3926a':
                     value['meta']['gdm']['disease'] = '2cea0443-a548-4f54-a4eb-a5fd581cbdef'
+
+    if value['meta']:
         if value['meta']['interpretation']:
             if value['meta']['interpretation']['disease']:
                 if value['meta']['interpretation']['disease'] == '78867c7a-16a6-11e5-8007-60f81dc5b05a':
