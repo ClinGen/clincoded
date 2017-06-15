@@ -558,12 +558,20 @@
             "title": "Disease ID",
             "type": "string"
         },
+        "meta.gdm.disease.term": {
+            "title": "Disease Term",
+            "type": "string"
+        },
         "meta.interpretation.variant": {
             "title": "Variant ID",
             "type": "string"
         },
         "meta.interpretation.disease.diseaseId": {
             "title": "Disease ID",
+            "type": "string"
+        },
+        "meta.interpretation.disease.term": {
+            "title": "Disease Term",
             "type": "string"
         },
         "meta.interpretation.modeInheritance": {
