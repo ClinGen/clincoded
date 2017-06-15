@@ -27,14 +27,15 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             annotation: null, // Annotation object given in query string
-            haveFamily: '' // Setting of have-family switch
+            haveFamily: 'none', // Setting of have-family switch
+            disabled: false
         };
     },
 
     // Handle value changes in the form
     handleChange: function(ref, e) {
         if (ref === 'havefamily') {
-            this.setState({haveFamily: this.refs[ref].getValue()});
+            this.setState({haveFamily: this.refs[ref].getValue(), disabled: true});
         }
     },
 
@@ -131,7 +132,7 @@ var GroupSubmit = module.exports.GroupSubmit = React.createClass({
                                 <Form formClassName="form-horizontal form-std">
                                     <Input type="select" ref="havefamily" label="Do any of the probands or other individuals in this Group have Family Information?" defaultValue={this.state.haveFamily}
                                         handleChange={this.handleChange} labelClassName="group-submit-results-label" wrapperClassName="group-submit-results-switch" groupClassName="submit-results-wrapper">
-                                        <option value="" disabled="disabled">No Selection</option>
+                                        <option value="none" disabled={this.state.disabled}>No Selection</option>
                                         <option disabled="disabled"></option>
                                         <option value="y">Yes</option>
                                         <option value="n">No</option>

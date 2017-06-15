@@ -1,16 +1,11 @@
 'use strict';
 var React = require('react');
 var globals = require('../globals');
-var modal = require('../../libs/bootstrap/modal');
 
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var external_url_map = globals.external_url_map;
 
 // Display the curator data of the curation data
 var CurationRecordVariant = module.exports.CurationRecordVariant = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         data: React.PropTypes.object, // ClinVar data payload
         interpretationTranscript: React.PropTypes.string,

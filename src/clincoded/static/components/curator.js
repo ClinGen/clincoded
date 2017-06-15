@@ -2,7 +2,6 @@
 var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
-var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
@@ -10,8 +9,6 @@ var CuratorHistory = require('./curator_history');
 var parseAndLogError = require('./mixins').parseAndLogError;
 
 var Panel = panel.Panel;
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var RestMixin = require('./rest').RestMixin;
@@ -19,6 +16,10 @@ var Input = form.Input;
 var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
+
+import ModalComponent from '../libs/bootstrap/modal';
+import PopOverComponent from '../libs/bootstrap/popover';
+import { GdmDisease } from './disease';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -71,6 +72,8 @@ globals.content_views.register(CuratorPage, 'curator_page');
 
 // Curation data header for Gene:Disease
 var RecordHeader = module.exports.RecordHeader = React.createClass({
+    mixins: [RestMixin],
+
     propTypes: {
         gdm: React.PropTypes.object, // GDM data to display
         omimId: React.PropTypes.string, // OMIM ID to display
@@ -79,8 +82,170 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
         pmid: React.PropTypes.string
     },
 
+    getInitialState() {
+        return {
+            gdm: this.props.gdm,
+            diseaseObj: {},
+            diseaseUuid: null,
+            diseaseError: null
+        };
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.gdm) {
+            this.setState({gdm: nextProps.gdm});
+        }
+    },
+
+    /**
+     * Update the 'diseaseObj' state used to save data upon modal form submission
+     * Also update the gdm-associated disease object in the database
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj}, () => {
+            let gdm = this.props.gdm;
+            this.getRestData('/gdm/' + gdm.uuid).then(gdmObj => {
+                let disease = gdmObj && gdmObj.disease;
+                
+                this.getRestData('/diseases/' + disease.uuid).then(currDiseaseObj => {
+                    let flattenDiseaseObj = flatten(currDiseaseObj);
+                    // Update disease object properties
+                    flattenDiseaseObj['diseaseId'] = diseaseObj['diseaseId'];
+                    flattenDiseaseObj['term'] = diseaseObj['term'];
+                    // Update ontology if any
+                    if (diseaseObj['ontology']) {
+                        flattenDiseaseObj['ontology'] = diseaseObj['ontology'];
+                    } else {
+                        if ('ontology' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['ontology'];
+                        }
+                    }
+                    // Update description (if any)
+                    if (diseaseObj['description']) {
+                        flattenDiseaseObj['description'] = diseaseObj['description'];
+                    } else {
+                        if ('description' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['description'];
+                        }
+                    }
+                    // Update optional phenotypes (applicable to free text only)
+                    if (diseaseObj['phenotypes']) {
+                        flattenDiseaseObj['phenotypes'] = diseaseObj['phenotypes'];
+                    } else {
+                        if ('phenotypes' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['phenotypes'];
+                        }
+                    }
+                    // Update optional free text confirmation (applicable to free text only)
+                    if (diseaseObj['freetext']) {
+                        flattenDiseaseObj['freetext'] = true;
+                    } else {
+                        if ('freetext' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['freetext'];
+                        }
+                    }
+                    // Update synonyms
+                    if (diseaseObj['synonyms']) {
+                        flattenDiseaseObj['synonyms'] = diseaseObj['synonyms'];
+                    } else {
+                        if ('synonyms' in flattenDiseaseObj) {
+                            delete flattenDiseaseObj['synonyms'];
+                        }
+                    }
+
+                    let flattenGdmObj = flatten(gdmObj);
+                    if (!diseaseObj['freetext'] && diseaseObj['diseaseId'] !== disease.diseaseId) {
+                        /**
+                         * Handle the updating of MonDO term
+                         */
+                        this.getRestData('/search?type=disease&diseaseId=' + diseaseObj['diseaseId']).then(diseaseSearch => {
+                            let diseaseUuid;
+                            if (diseaseSearch.total === 0) {
+                                /**
+                                 * Post request for adding new disease to the database
+                                 */
+                                return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                    let newDisease = result['@graph'][0];
+                                    diseaseUuid = newDisease['uuid'];
+                                    this.setState({diseaseUuid: diseaseUuid});
+                                    return Promise.resolve(result);
+                                }).then(response => {
+                                    /**
+                                     * Update existing GDM with a new UUID
+                                     */
+                                    flattenGdmObj['disease'] = this.state.diseaseUuid;
+                                    this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                        return Promise.resolve(gdmObj['@graph'][0]);
+                                    }).then(data => {
+                                        this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                            this.setState({gdm: updatedGdm});
+                                        });
+                                    });
+                                });
+                            } else {
+                                /**
+                                 * User-selected disease already exists in the database
+                                 */
+                                let _id = diseaseSearch['@graph'][0]['@id'];
+                                diseaseUuid = _id.slice(10, -1);
+                                this.setState({diseaseUuid: diseaseUuid});
+                                /**
+                                 * Update existing GDM with the UUID of the existing disease
+                                 */
+                                flattenGdmObj['disease'] = this.state.diseaseUuid;
+                                this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                    return Promise.resolve(gdmObj['@graph'][0]);
+                                }).then(data => {
+                                    this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                        this.setState({gdm: updatedGdm});
+                                    });
+                                });
+                            }
+                        });
+                    } else if (diseaseObj['freetext']) {
+                        let freetextDiseaseUuid;
+                        /**
+                         * Post request for changing disease to free text from Mondo term
+                         * Treat as a new disease record since a new free text disease id is generated
+                         */
+                        return this.postRestData('/diseases/', diseaseObj).then(result => {
+                            let newDisease = result['@graph'][0];
+                            freetextDiseaseUuid = newDisease['uuid'];
+                            this.setState({diseaseUuid: freetextDiseaseUuid});
+                            return Promise.resolve(result);
+                        }).then(response => {
+                            /**
+                             * Update existing GDM with a new UUID
+                             */
+                            flattenGdmObj['disease'] = this.state.diseaseUuid;
+                            this.putRestData('/gdm/' + gdm.uuid, flattenGdmObj).then(gdmObj => {
+                                return Promise.resolve(gdmObj['@graph'][0]);
+                            }).then(data => {
+                                this.getRestData('/gdm/' + gdm.uuid).then(updatedGdm => {
+                                    this.setState({gdm: updatedGdm});
+                                });
+                            });
+                        });
+                    }
+                }).catch(err => {
+                    console.warn('GCI update disease error :: %o', err);
+                });
+            }).catch(err => {
+                console.warn('Get current GDM error :: %o', err);
+            });
+        });
+    },
+
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent() {
+        this.setState({diseaseError: null});
+    },
+
     render: function() {
-        var gdm = this.props.gdm;
+        var gdm = this.state.gdm;
+        var disease = gdm && gdm.disease;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var summaryPage = this.props.summaryPage ? true : false;
 
@@ -92,7 +257,6 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
-            var disease = this.props.gdm.disease;
             var mode = this.props.gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
             // Display selected MOI adjective if any. Otherwise, display selected MOI.
             var modeInheritanceAdjective = this.props.gdm.modeInheritanceAdjective ? this.props.gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
@@ -164,6 +328,12 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                             <div>
                                 <span>
                                     <h1>{gene.symbol} – {disease.term}
+                                        <span className="gdm-disease-edit">
+                                            {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
+                                                <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
+                                                    clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
+                                            : null}
+                                        </span>
                                         <span>&nbsp;
                                             {this.props.linkGdm ?
                                                 <a href={`/curation-central/?gdm=${gdm.uuid}` + (pmid ? `&pmid=${pmid}` : '')}><i className="icon icon-briefcase"></i></a>
@@ -175,14 +345,14 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
                                 </span>
                             </div>
                             <div className="provisional-info-panel">
-                                <table border="1" style={{'width':'100%'}}>
+                                <table>
                                     <tbody>
                                         <tr>
                                             <td>
                                                 <div className="provisional-title">
                                                     <strong>Last Saved Summary & Provisional Classification</strong>
                                                 </div>
-                                                {   provisionalExist ?
+                                                { provisionalExist ?
                                                         <div>
                                                             <div className="provisional-data-left">
                                                                 <span>
@@ -514,17 +684,18 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
-        var groupUrl = curatorMatch ? ('/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var caseControlUrl = curatorMatch ? ('/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
-        var experimentalUrl = curatorMatch ? ('/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid) : null;
+        var curatorMatch = false;
+        var groupUrl = '/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var familyUrl = '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var individualUrl = '/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var caseControlUrl = '/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
+        var experimentalUrl = '/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
+                curatorMatch = group && userMatch(group.submitted_by, session);
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var familyGroupRenders = group.familyIncluded.map(family => {
@@ -554,6 +725,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of family renders the unassociated families, and individuals that associate with them.
         if (annotation && annotation.families) {
             var familyAnnotationRenders = annotation.families.map(family => {
+                curatorMatch = family && userMatch(family.submitted_by, session);
                 if (family.individualIncluded) {
                     // Add to individual renders the individuals that are associated with this family
                     var individualFamilyRenders = family.individualIncluded.map(individual => {
@@ -569,6 +741,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of individual renders the unassociated individuals.
         if (annotation && annotation.individuals) {
             var individualAnnotationRenders = annotation.individuals.map(individual => {
+                curatorMatch = individual && userMatch(individual.submitted_by, session);
                 return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
             });
             individualRenders = individualRenders.concat(individualAnnotationRenders);
@@ -577,6 +750,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of case-control renders
         if (annotation && annotation.caseControlStudies) {
             let caseControlObj = annotation.caseControlStudies.map(caseControl => {
+                curatorMatch = caseControl && userMatch(caseControl.submitted_by, session);
                 return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch)}</div>;
             });
             caseControlRenders = caseControlRenders.concat(caseControlObj);
@@ -585,6 +759,7 @@ var CurationPalette = module.exports.CurationPalette = React.createClass({
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
+                curatorMatch = experimental && userMatch(experimental.submitted_by, session);
                 return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
             });
             experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
@@ -954,8 +1129,6 @@ var GeneRecordHeader = React.createClass({
 
 // Display the disease section of the curation data
 var DiseaseRecordHeader = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         gdm: React.PropTypes.object, // Object to display
         omimId: React.PropTypes.string, // OMIM ID to display
@@ -972,8 +1145,29 @@ var DiseaseRecordHeader = React.createClass({
                 <div className="curation-data-disease">
                     {disease ?
                         <dl>
-                            <dt>{disease.term}</dt>
-                            <dd>Orphanet ID: <a href={external_url_map['OrphaNet'] + disease.orphaNumber} target="_blank" title={'Orphanet page for ORPHA' + disease.orphaNumber + ' in a new window'}>{'ORPHA' + disease.orphaNumber}</a></dd>
+                            <dt>
+                                {disease.term}
+                                {disease.phenotypes && disease.phenotypes.length ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                        actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                        {disease.phenotypes.join(', ')}
+                                    </PopOverComponent>
+                                : null}
+                                {disease.description && disease.description.length ?
+                                    <PopOverComponent popOverWrapperClass="gdm-disease-description"
+                                        actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                        {disease.description}
+                                    </PopOverComponent>
+                                : null}
+                            </dt>
+                            <dd>
+                                {!disease.freetext && disease.diseaseId.indexOf('FREETEXT') < 0 ?
+                                    <span>
+                                        <span>Disease ID: </span>
+                                        <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank" title={'Ontology lookup for ' + disease.diseaseId + ' in a new window'}>{disease.diseaseId.replace('_', ':')}</a>
+                                    </span>
+                                : null}
+                            </dd>
                             <dd>
                                 <a href="http://omim.org/" target="_blank" title="Online Mendelian Inheritance in Man home page in a new window">OMIM</a> ID: {this.props.omimId ?
                                     <a href={external_url_map['OMIM'] + this.props.omimId} title={'Open Online Mendelian Inheritance in Man page for OMIM ID ' + this.props.omimId + ' in a new window'} target="_blank">
@@ -981,9 +1175,7 @@ var DiseaseRecordHeader = React.createClass({
                                     </a>
                                 : null}&nbsp;
                                 {this.props.updateOmimId ?
-                                    <Modal title="Add/Change OMIM ID" wrapperClassName="edit-omim-modal">
-                                        <span>[</span><a modal={<AddOmimIdModal gdm={gdm} closeModal={this.closeModal} updateOmimId={this.props.updateOmimId} />} href="#">{addEdit}</a><span>]</span>
-                                    </Modal>
+                                    <AddOmimIdModal gdm={gdm} updateOmimId={this.props.updateOmimId} addEdit={addEdit} omimid={this.props.omimId ? this.props.omimId : ''} />
                                 : null}
                             </dd>
                         </dl>
@@ -1001,8 +1193,21 @@ var AddOmimIdModal = React.createClass({
 
     propTypes: {
         gdm: React.PropTypes.object.isRequired, // GDM being affected
-        closeModal: React.PropTypes.func.isRequired, // Function to call to close the modal
-        updateOmimId: React.PropTypes.func.isRequired // Function to call when we have a new OMIM ID
+        updateOmimId: React.PropTypes.func.isRequired, // Function to call when we have a new OMIM ID
+        addEdit: React.PropTypes.string.isRequired,
+        omimid: React.PropTypes.string
+    },
+
+    getInitialState() {
+        return {
+            omimid: this.props.omimid
+        };
+    },
+
+    componentWillReceiveProps(nextProps)  {
+        if (nextProps.omimid) {
+            this.setState({omimid: nextProps.omimid});
+        }
     },
 
     // Form content validation
@@ -1026,7 +1231,7 @@ var AddOmimIdModal = React.createClass({
         this.saveFormValue('omimid', this.refs.omimid.getValue());
         if (this.validateForm()) {
             // Form is valid -- we have a good OMIM ID. Close the modal and update the current GDM's OMIM ID
-            this.props.closeModal();
+            this.handleModalClose();
             var enteredOmimId = this.getFormValue('omimid');
             this.props.updateOmimId(this.props.gdm.uuid, enteredOmimId);
         }
@@ -1038,22 +1243,47 @@ var AddOmimIdModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        this.props.closeModal();
+        this.handleModalClose();
+    },
+
+    /************************************************************************************************/
+    /* Resetting the formErrors for selected input and other states was not needed previously       */
+    /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
+    /* to be defined outside of this component and closing the modal would delete this component    */
+    /* from virtual DOM, along with the states.                                                     */
+    /* The updated/converted implementation (without MixIn) wraps the actuator in the modal         */
+    /* component and thus this component always exists in the virtual DOM as long as the actuator   */
+    /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
+    /* and the modified states are retained.                                                        */
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose() {
+        let errors = this.state.formErrors;
+        errors['omimid'] = '';
+        this.setState({formErrors: errors});
+        this.child.closeModal();
     },
 
     render: function() {
+        let omimid = this.state.omimid;
+
         return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-body">
-                    <Input type="text" ref="omimid" label="Enter an OMIM ID"
-                        error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omim')}
-                        labelClassName="control-label" groupClassName="form-group" required />
-                </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add/Change OMIM ID" />
-                </div>
-            </Form>
+            <ModalComponent modalTitle="Add/Change OMIM ID" modalClass="modal-default" modalWrapperClass="edit-omim-modal"
+                actuatorClass="omimid-add-edit-btn" actuatorTitle={this.props.addEdit} onRef={ref => (this.child = ref)}>
+                <Form submitHandler={this.submitForm} formClassName="form-std">
+                    <div className="modal-body">
+                        <Input type="text" ref="omimid" label="Enter an OMIM ID" value={omimid}
+                            error={this.getFormError('omimid')} clearError={this.clrFormErrors.bind(null, 'omimid')}
+                            labelClassName="control-label" groupClassName="form-group" required />
+                    </div>
+                    <div className='modal-footer'>
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
+                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="Add/Change OMIM ID" />
+                    </div>
+                </Form>
+            </ModalComponent>
         );
     }
 });
@@ -1067,8 +1297,8 @@ var CuratorRecordHeader = React.createClass({
 
     render: function() {
         var gdm = this.props.gdm;
-        var annotationOwners = getAnnotationOwners(gdm);
-        var latestAnnotation = gdm && findLatestAnnotation(gdm);
+        var participants = findAllParticipants(gdm);
+        var latestRecord = gdm && findLatestRecord(gdm);
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -1077,21 +1307,21 @@ var CuratorRecordHeader = React.createClass({
                         <dl className="inline-dl clearfix">
                             <dt>Status: </dt><dd>{gdm.gdm_status === 'Summary/Provisional Classifications' ? 'In progress' : gdm.gdm_status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
-                            {annotationOwners && annotationOwners.length && latestAnnotation ?
+                            {participants && participants.length && latestRecord ?
                                 <div>
                                     <dt>Participants: </dt>
                                     <dd>
-                                        {annotationOwners.map(function(owner, i) {
+                                        {participants.map(function(participant, i) {
                                             return (
                                                 <span key={i}>
                                                     {i > 0 ? ', ' : ''}
-                                                    <a href={'mailto:' + owner.email}>{owner.title}</a>
+                                                    <a href={'mailto:' + participant.email}>{participant.title}</a>
                                                 </span>
                                             );
                                         })}
                                     </dd>
                                     <dt>Last edited: </dt>
-                                    <dd><a href={'mailto:' + latestAnnotation.submitted_by.email}>{latestAnnotation.submitted_by.title}</a> — {moment(latestAnnotation.date_created).format('YYYY MMM DD, h:mm a')}</dd>
+                                    <dd><a href={'mailto:' + latestRecord.submitted_by.email}>{latestRecord.submitted_by.title}</a> — {moment(latestRecord.last_modified).format('YYYY MMM DD, h:mm a')}</dd>
                                 </div>
                             : null}
                         </dl>
@@ -1102,7 +1332,9 @@ var CuratorRecordHeader = React.createClass({
     }
 });
 
-
+/**
+ * This method is no longer used due to changes in #1341
+ */
 // Return the latest annotation in the given GDM. This is the internal version; use the memoized version externally.
 var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
     var annotations = gdm && gdm.annotations;
@@ -1120,6 +1352,195 @@ var findLatestAnnotation = module.exports.findLatestAnnotation = function(gdm) {
     }
     return latestAnnotation;
 };
+
+// Return an array of (annotations, evidence, scores) submitted_by objects sorted by last name given the GDM.
+export function findAllParticipants(gdm) {
+    let allObjects = getAllObjects(gdm);
+
+    let submitters = allObjects.map(object => {
+        return object.submitted_by;
+    });
+
+    let participants = _.chain(submitters).uniq(submitter => {
+        return submitter.uuid;
+    }).sortBy('last_name').value();
+
+    return participants;
+}
+
+// Return the latest added/updated object in the given GDM (e.g. annotation, evidence)
+export function findLatestRecord(gdm) {
+    let allObjects = getAllObjects(gdm);
+    let latestModifiedObject = null;
+    let latestModified = 0;
+    if (allObjects.length) {
+        allObjects.forEach(object => {
+            // If object is an annotation, use 'date_created'.
+            // Otherwise, use 'last_modified' for evidence object.
+            // Logic - a PMID can not be edited after being added
+            // while an evidence (group or family) can be edited.
+            let lastModified = object['@type'][0] === 'annotation' ? moment(object.date_created).format('x') : moment(object.last_modified).format('x');
+            if (latestModified < lastModified) {
+                latestModifiedObject = object;
+                latestModified = lastModified;
+            }
+        });
+    }
+
+    return latestModifiedObject;
+}
+
+// Return all record objects flattened in an array,
+// including annotations, evidence, scores
+function getAllObjects(gdm) {
+    let totalObjects = [];
+    // loop through gdms
+    let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
+    annotations.forEach(annotation => {
+        // Get annotation records
+        totalObjects.push(filteredObject(annotation));
+        // loop through groups
+        let groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
+        if (groups.length) {
+            groups.forEach(group => {
+                // Get group evidence
+                totalObjects.push(filteredObject(group));
+                // loop through families within each group
+                let groupFamiliesIncluded = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
+                if (groupFamiliesIncluded.length) {
+                    groupFamiliesIncluded.forEach(family => {
+                        // Get group's family evidence
+                        totalObjects.push(filteredObject(family));
+                        // loop through individuals within each family of the group
+                        let groupFamilyIndividualsIncluded = family.individualIncluded && family.individualIncluded.length ? family.individualIncluded : [];
+                        if (groupFamilyIndividualsIncluded.length) {
+                            groupFamilyIndividualsIncluded.forEach(individual => {
+                                // Get group's family's individual evidence
+                                totalObjects.push(filteredObject(individual));
+                                // loop through group's family's individual scores
+                                let groupFamilyIndividualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                                if (groupFamilyIndividualScores.length) {
+                                    groupFamilyIndividualScores.forEach(score => {
+                                        // Get scores
+                                        totalObjects.push(filteredObject(score));
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                // loop through individuals of group
+                let groupIndividualsIncluded = group.individualIncluded && group.individualIncluded.length ? group.individualIncluded : [];
+                if (groupIndividualsIncluded.length) {
+                    groupIndividualsIncluded.forEach(individual => {
+                        // Get group's individual evidence
+                        totalObjects.push(filteredObject(individual));
+                        // loop through group's individual scores
+                        let groupIndividualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                        if (groupIndividualScores.length) {
+                            groupIndividualScores.forEach(score => {
+                                // Get scores
+                                totalObjects.push(filteredObject(score));
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // loop through families
+        let families = annotation.families && annotation.families.length ? annotation.families : [];
+        if (families.length) {
+            families.forEach(family => {
+                // Get family evidence
+                totalObjects.push(filteredObject(family));
+                // loop through individuals with each family
+                let familyIndividualsIncluded = family.individualIncluded && family.individualIncluded.length ? family.individualIncluded : [];
+                if (familyIndividualsIncluded.length) {
+                    familyIndividualsIncluded.forEach(individual => {
+                        // Get family's individual evidence
+                        totalObjects.push(filteredObject(individual));
+                        // loop through family's individual scores
+                        let familyIndividualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                        if (familyIndividualScores.length) {
+                            familyIndividualScores.forEach(score => {
+                                // Get scores
+                                totalObjects.push(filteredObject(score));
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // loop through individuals
+        let individuals = annotation.individuals && annotation.individuals.length ? annotation.individuals : [];
+        if (individuals.length) {
+            individuals.forEach(individual => {
+                // Get individual evidence
+                totalObjects.push(filteredObject(individual));
+                // loop through individual scores
+                let individualScores = individual.scores && individual.scores.length ? individual.scores : [];
+                if (individualScores.length) {
+                    individualScores.forEach(score => {
+                        // Get scores
+                        totalObjects.push(filteredObject(score));
+                    });
+                }
+            });
+        }
+
+        // loop through experimentals
+        let experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
+        if (experimentals.length) {
+            experimentals.forEach(experimental => {
+                // Get individual evidence
+                totalObjects.push(filteredObject(experimental));
+                // loop through experimental scores
+                let experimentalScores = experimental.scores && experimental.scores.length ? experimental.scores : [];
+                if (experimentalScores.length) {
+                    experimentalScores.forEach(score => {
+                        // Get scores
+                        totalObjects.push(filteredObject(score));
+                    });
+                }
+            });
+        }
+
+        // loop through case-controls
+        let caseControls = annotation.caseControlStudies && annotation.caseControlStudies.length ? annotation.caseControlStudies : [];
+        if (caseControls.length) {
+            caseControls.forEach(caseControl => {
+                // Get case-control evidence
+                totalObjects.push(filteredObject(caseControl));
+                // loop through case-control scores
+                let caseControlScores = caseControl.scores && caseControl.scores.length ? caseControl.scores : [];
+                if (caseControlScores.length) {
+                    caseControlScores.forEach(score => {
+                        // Get scores
+                        totalObjects.push(filteredObject(score));
+                    });
+                }
+            });
+        }
+    });
+
+    return totalObjects;
+}
+
+// Method to filter object keys
+function filteredObject(record) {
+    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type'];
+
+    const filtered = Object.keys(record)
+        .filter(key => allowed.includes(key))
+        .reduce((obj, key) => {
+            obj[key] = record[key];
+            return obj;
+        }, {});
+
+    return filtered;
+}
 
 
 // Display buttons to bring up the PubMed and doi-specified web pages.
@@ -1278,7 +1699,9 @@ var collectGdmVariants = function(gdm) {
     return Object.keys(allVariants).length ? allVariants : null;
 };
 
-
+/**
+ * This method is no longer used due to changes in #1341
+ */
 // Get a de-duped array of annotation submitted_by objects sorted by last name from the given GDM.
 var getAnnotationOwners = module.exports.getAnnotationOwners = function(gdm) {
     var owners = gdm && gdm.annotations.map(function(annotation) {
@@ -1420,7 +1843,7 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
@@ -1431,6 +1854,11 @@ module.exports.capture = {
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
         return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
+    efoclids: function(s) {
+        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
     }
 };
 
@@ -1506,6 +1934,10 @@ var flatten = module.exports.flatten = function(obj, type) {
 
             case 'interpretation':
                 flat = flattenInterpretation(obj);
+                break;
+
+            case 'disease':
+                flat = flattenDisease(obj);
                 break;
 
             default:
@@ -1903,6 +2335,16 @@ function flattenEvidenceScore(evidencescore) {
     return flat;
 }
 
+const diseaseSimpleProps = [
+    "diseaseId", "term", "description", "ontology", "phenotypes", "synonyms", "freetext"
+];
+
+function flattenDisease(disease) {
+    var flat = cloneSimpleProps(disease, diseaseSimpleProps);
+
+    return flat;
+}
+
 
 var caseControlSimpleProps = [
     "label", "studyType", "detectionMethod", "statisticalValues", "pValue", "confidenceIntervalFrom", "confidenceIntervalTo",
@@ -1990,9 +2432,9 @@ function flattenInterpretation(interpretation) {
 }
 
 
-// Given an array of group or families in 'objList', render a list of Orphanet IDs for all diseases in those
+// Given an array of group or families in 'objList', render a list of IDs for all diseases in those
 // groups or families.
-var renderOrphanets = module.exports.renderOrphanets = function(objList, title) {
+var renderDiseaseList = module.exports.renderDiseaseList = function(objList, title) {
     return (
         <div>
             {objList && objList.length ?
@@ -2001,21 +2443,23 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Orphanet Disease(s) Associated with {title}:</strong>
+                                    <strong className="pull-right">Disease(s) Associated with {title}:</strong>
                                 </div>
                                 <div className="col-sm-7">
-                                    { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
-                                        obj.commonDiagnosis.map(function(disease, i) {
-                                            return (
-                                                <span key={disease.orphaNumber}>
-                                                    {i > 0 ? ', ' : ''}
-                                                    {'ORPHA' + disease.orphaNumber}
-                                                </span>
-                                            );
-                                        })
-                                        :
-                                        <span>&nbsp;</span>
-                                    }
+                                    <strong>
+                                        { (obj.commonDiagnosis && obj.commonDiagnosis.length > 0) ?
+                                            obj.commonDiagnosis.map(function(disease, i) {
+                                                return (
+                                                    <span key={disease.diseaseId}>
+                                                        {i > 0 ? ', ' : ''}
+                                                        {disease.term}
+                                                    </span>
+                                                );
+                                            })
+                                            :
+                                            <span>&nbsp;</span>
+                                        }
+                                    </strong>
                                 </div>
                             </div>
                         );
@@ -2027,7 +2471,7 @@ var renderOrphanets = module.exports.renderOrphanets = function(objList, title) 
 };
 
 // Given an array of group or families in 'objList', render a list of HPO IDs and/or Phenotype free text in those groups and familes.
-var renderPhenotype = module.exports.renderPhenotype = function(objList, title, type) {
+var renderPhenotype = module.exports.renderPhenotype = function(objList, title, type, parentObjName) {
     if (typeof type === 'undefined') {
         type = '';
     }
@@ -2039,8 +2483,8 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                 <div className="col-sm-7 alert alert-warning">
                     <p style={{'marginBottom':'10px'}}>
                         Please enter the relevant phenotypic feature(s) <strong>(required)</strong> using the Human Phenotype Ontology (HPO)
-                        terms wherever possible (e.g. HP:0010704, HP:0030300). If no HPO code exists for a particular feature,
-                        please describe it in the free text box instead.
+                        terms wherever possible (e.g. HP:0010704, HP:0030300). If you are unable to find an appropriate HPO term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
             : null }
@@ -2068,7 +2512,7 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Phenotype(s) Associated with {title}
+                                    <strong className="pull-right">Phenotype(s) Associated with {parentObjName ? parentObjName : title}
                                     {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
                                     {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
                                     :</strong>
@@ -2100,6 +2544,50 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
         </div>
     );
 };
+
+// Generic render method for the yellow warning message box
+export function renderWarning(context) {
+    return (
+        <div>
+            { context === 'GO' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the gene's molecular function or biological process term  <strong>(required)</strong> using the Gene Ontology (GO)
+                        term wherever possible (e.g. GO:2001284). If you are unable to find an appropriate GO term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null }
+            { context === 'UBERON' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
+                        (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null}
+            { context === 'CL' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
+                        If you are unable to find an appropriate CL term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null}
+            { context === 'CL_EFO' ?
+                <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
+                    <p>
+                        Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
+                        (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
+                        Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
+                    </p>
+                </div>
+            : null}
+        </div>
+    );
+}
 
 // A link to Mutalyzer to check HGVC terms
 var renderMutalyzerLink = module.exports.renderMutalyzerLink = function() {
@@ -2144,7 +2632,6 @@ var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
 var DeleteButton = module.exports.DeleteButton = React.createClass({
-    mixins: [ModalMixin],
     propTypes: {
         gdm: React.PropTypes.object,
         parent: React.PropTypes.object,
@@ -2177,11 +2664,9 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
                     </a>
                 </div>
                 :
-                <div className="inline-button-wrapper delete-button-push pull-right"><Modal title="Delete Item" modalClass="modal-danger">
-                    <a className="btn btn-danger" modal={<DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} closeModal={this.closeModal} />}>
-                        Delete
-                    </a>
-                </Modal></div>
+                <div className="inline-button-wrapper delete-button-push pull-right">
+                    <DeleteButtonModal gdm={this.props.gdm} parent={this.props.parent} item={this.props.item} pmid={this.props.pmid} />
+                </div>
                 }
                 {this.state.noticeVisible ? <span className="delete-notice pull-right">This item cannot be deleted because it has been assessed by another user.</span> : <span></span>}
             </span>
@@ -2198,8 +2683,7 @@ var DeleteButtonModal = React.createClass({
         gdm: React.PropTypes.object,
         parent: React.PropTypes.object,
         item: React.PropTypes.object,
-        pmid: React.PropTypes.string,
-        closeModal: React.PropTypes.func // Function to call to close the modal
+        pmid: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -2420,13 +2904,24 @@ var DeleteButtonModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        this.props.closeModal();
+        this.handleModalClose();
     },
 
     // Called when user clicks a link in the delete confirmation modal to view another object.
     // Allows for scrolling in subsequent pages, as the initial modal rendering disabled scrolling.
     linkout: function(e) {
-        this.props.closeModal();
+        this.handleModalClose();
+    },
+
+    /************************************************************************************************/
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose() {
+        if (!this.state.submitBusy) {
+            this.child.closeModal();
+        }
     },
 
     render: function() {
@@ -2450,7 +2945,8 @@ var DeleteButtonModal = React.createClass({
             itemLabel = this.props.item.label;
         }
         return (
-            <div>
+            <ModalComponent modalTitle="Delete Item" modalClass="modal-danger" modalWrapperClass="delete-modal"
+                actuatorClass="btn-danger" actuatorTitle="Delete" onRef={ref => (this.child = ref)}>
                 <div className="modal-body">
                     {message}
                     <p>Are you sure you want to delete {itemLabel ? <span>Case-Control <strong>{itemLabel}</strong></span> : <span>this item</span>}?</p>
@@ -2466,7 +2962,7 @@ var DeleteButtonModal = React.createClass({
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                     <Input type="button-button" inputClassName="btn-danger btn-inline-spacer" clickHandler={this.deleteItem} title="Confirm Delete" submitBusy={this.state.submitBusy} />
                 </div>
-            </div>
+            </ModalComponent>
         );
     }
 });

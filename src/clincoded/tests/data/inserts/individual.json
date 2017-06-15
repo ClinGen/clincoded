@@ -3,7 +3,7 @@
         "uuid": "359612a3-18fb-11e5-be10-60f81dc5b05a",
         "label": "Individual AAA",
         "diagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "sex": "Male",
         "method": {
@@ -37,8 +37,8 @@
         "uuid": "6f762e73-1910-11e5-998f-60f81dc5b05a",
         "label": "Individual BBB",
         "diagnosis": [
-            "15",
-            "777"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "657cb29e-63b6-4416-b613-557aa18ac765"
         ],
         "sex": "Female",
         "method": {
@@ -71,7 +71,7 @@
         "uuid": "7997f687-1910-11e5-a066-60f81dc5b05a",
         "label": "Individual CCC",
         "diagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "sex": "Female",
         "method": {
@@ -98,8 +98,8 @@
         "uuid": "8395c173-1910-11e5-8c7c-60f81dc5b05a",
         "label": "Individual DDD",
         "diagnosis": [
-            "15",
-            "654"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "f8c8525c-adf9-4fda-8e86-a30832347edd"
         ],
         "sex": "Male",
         "method": {
@@ -128,7 +128,7 @@
         "uuid": "8e204451-1910-11e5-a206-60f81dc5b05a",
         "label": "Individual EEE",
         "diagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "sex": "Male",
         "method": {
@@ -154,7 +154,7 @@
         "uuid": "95df0123-1910-11e5-bf07-60f81dc5b05a",
         "label": "Individual FFF",
         "diagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "sex": "Female",
         "method": {
@@ -180,7 +180,7 @@
         "uuid": "446140ed-902d-429b-8a6b-855154e68185",
         "label": "Individual GGG",
         "diagnosis": [
-            "777"
+            "657cb29e-63b6-4416-b613-557aa18ac765"
         ],
         "sex": "Female",
         "method": {
@@ -209,7 +209,7 @@
         "uuid": "fd7ca9bb-5beb-4dde-95c9-80b54f9ad702",
         "label": "Individual HHH",
         "diagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "sex": "Male",
         "method": {
@@ -238,7 +238,7 @@
         "uuid": "201aa720-636f-458b-97b4-cbb5336d4978",
         "label": "Individual III",
         "diagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "sex": "Male",
         "method": {

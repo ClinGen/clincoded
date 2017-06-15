@@ -5,7 +5,6 @@ var _ = require('underscore');
 var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var globals = require('./globals');
 var curator = require('./curator');
 var RestMixin = require('./rest').RestMixin;
@@ -16,8 +15,6 @@ var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
 var add_external_resource = require('./add_external_resource');
 var CuratorHistory = require('./curator_history');
 
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var CurationMixin = curator.CurationMixin;
 var RecordHeader = curator.RecordHeader;
 var ViewRecordHeader = curator.ViewRecordHeader;
@@ -41,6 +38,9 @@ var recordIndividualHistory = individual_curation.recordIndividualHistory;
 var external_url_map = globals.external_url_map;
 var DeleteButton = curator.DeleteButton;
 var AddResourceId = add_external_resource.AddResourceId;
+
+import ModalComponent from '../libs/bootstrap/modal';
+import { FamilyDisease, FamilyProbandDisease } from './disease';
 
 const MAX_VARIANTS = 2;
 
@@ -70,7 +70,7 @@ var initialCv = {
 
 
 var FamilyCuration = React.createClass({
-    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, ModalMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
         navigate: React.PropTypes.func
@@ -85,7 +85,6 @@ var FamilyCuration = React.createClass({
         this.cv.assessmentTracker = initialCv;
 
         return {
-            orpha: null, // boolean for entered in Orphanet id input box
             gdm: null, // GDM object given in query string
             group: null, // Group object given in query string
             family: null, // If we're editing a group, this gets the fleshed-out group object we're editing
@@ -96,17 +95,23 @@ var FamilyCuration = React.createClass({
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
-            individualRequired: null, // Boolean for set up requirement of proband
+            individualRequired: false, // Boolean for set up requirement of proband
+            individualName: '', // Proband individual name
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
-            existedOrphanetId: null, // user-supplied value in Orphanet id input field
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             lodPublished: null, // Switch to show either calculated or estimated LOD score
             estimatedLodScore: null, // track estimated LOD value
             publishedLodScore: null, // track published LOD value
             lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
-            lodCalcMode: null // track which type of calculation we should do for LOD score, if applicable
+            lodCalcMode: null, // track which type of calculation we should do for LOD score, if applicable
+            diseaseObj: {},
+            diseaseUuid: null,
+            diseaseError: null,
+            probandDiseaseObj: {},
+            probandDiseaseUuid: null,
+            probandDiseaseError: null
         };
     },
 
@@ -119,19 +124,16 @@ var FamilyCuration = React.createClass({
             this.setState({genotyping2Disabled: this.refs[ref].getValue() === 'none'});
         } else if (ref === 'familyname') {
             this.setState({familyName: this.refs[ref].getValue()});
-        } else if (ref === 'orphanetid' && this.refs[ref].getValue()) {
-            this.setState({orpha: true});
-            this.setState({existedOrphanetId: this.refs[ref].getValue().toUpperCase()});
-        } else if (ref === 'orphanetid') {
-            this.setState({orpha: false});
-        } else if (ref === 'individualname' || ref === 'individualorphanetid') {
-            let individualName = this.refs['individualname'].getValue();
-            let individualOrphanetId = this.refs['individualorphanetid'].getValue();
-            if (individualName || individualOrphanetId) {
-                this.setState({individualRequired: true});
-            } else if (!individualName && !individualOrphanetId) {
-                this.setState({individualRequired: false});
-            }
+        } else if (ref === 'individualname') {
+            this.setState({
+                individualName: this.refs['individualname'].getValue()
+            }, () => {
+                if (this.state.individualName || (this.state.probandDiseaseObj && this.state.probandDiseaseObj['diseaseId'])) {
+                    this.setState({individualRequired: true});
+                } else if (!this.state.individualName && (this.state.probandDiseaseObj && !Object.keys(this.state.probandDiseaseObj).length)) {
+                    this.setState({individualRequired: false});
+                }
+            });
         } else if (ref === 'SEGlodPublished') {
             let lodPublished = this.refs[ref].getValue();
             // Find out whether there is pre-existing score in db
@@ -223,11 +225,10 @@ var FamilyCuration = React.createClass({
         }
     },
 
-    // Handle a click on a copy orphanet button or copy phenotype button
+    // Handle a click on a copy phenotype button
     handleClick: function(fromTarget, item, e) {
         e.preventDefault(); e.stopPropagation();
         var associatedGroups;
-        //var orphanetValTemp = [];
         var orphanetVal = '';
         var hpoIds = '';
         var hpoFreeText = '';
@@ -249,9 +250,6 @@ var FamilyCuration = React.createClass({
                             }).join(', ')
                         );
                     });
-                    this.refs['orphanetid'].setValue(orphanetVal.join(', '));
-                    this.setState({orpha: true});
-                    this.setState({existedOrphanetId: orphanetVal.join(', ').toUpperCase()});
                 }
                 else if (item === 'phenotype') {
                     hpoIds = associatedGroups.map(function(associatedGroup, i) {
@@ -278,11 +276,6 @@ var FamilyCuration = React.createClass({
             }
         } else if (fromTarget == 'family') {
             this.setState({individualRequired: true});
-            orphanetVal = this.refs['orphanetid'].getValue();
-            this.refs['individualorphanetid'].setValue(orphanetVal);
-            var errors = this.state.formErrors;
-            errors['individualorphanetid'] = '';
-            this.setState({formErrors: errors});
         }
     },
 
@@ -303,12 +296,11 @@ var FamilyCuration = React.createClass({
                 estimatedLodScore = Math.log(1 / (Math.pow(0.25, numAffected - 1) * Math.pow(0.75, numUnaffected))) / Math.log(10);
             }
         }
-        if (isNaN(estimatedLodScore)) {
-            estimatedLodScore = null;
-        }
         if (lodCalcMode === 'ADX' || lodCalcMode === 'AR') {
-            if (estimatedLodScore) {
+            if (estimatedLodScore && !isNaN(estimatedLodScore)) {
                 estimatedLodScore = parseFloat(estimatedLodScore.toFixed(2));
+            } else {
+                estimatedLodScore = '';
             }
             // Update state and form field if relevant
             this.setState({estimatedLodScore: estimatedLodScore});
@@ -393,15 +385,7 @@ var FamilyCuration = React.createClass({
                 this.setState({familyName: stateObj.family.label});
 
                 if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
-                    let tempOrphanetTerms = [];
-                    stateObj.family.commonDiagnosis.map(diagnosis => {
-                        tempOrphanetTerms.push('ORPHA' + diagnosis.orphaNumber);
-                    });
-                    this.setState({orpha: true});
-                    this.setState({existedOrphanetId: tempOrphanetTerms.join(', ').toUpperCase()});
-                }
-                else {
-                    this.setState({orpha: false});
+                    this.setState({diseaseObj: stateObj.family['commonDiagnosis'][0]});
                 }
 
                 // Load the previously stored 'Published Calculated LOD score' if any
@@ -558,35 +542,26 @@ var FamilyCuration = React.createClass({
         if (this.validateDefault()) {
             var currFamily = this.state.family;
             var newFamily = {}; // Holds the new group object;
-            var familyDiseases = null, familyArticles, familyVariants = [], familyAssessments = [];
-            var individualDiseases = null;
+            var familyDiseases = [], familyArticles, familyVariants = [], familyAssessments = [];
+            var individualDiseases = [];
             var savedFamilies; // Array of saved written to DB
             var formError = false;
             var initvar = false; // T if edited family has variants for the first time, or if new family has variants
             var hadvar = false; // T if family had variants before being edited here.
 
-            // Parse the comma-separated list of Orphanet IDs
-            var orphaIds = curator.capture.orphas(this.getFormValue('orphanetid'));
-            var indOrphaIds = curator.capture.orphas(this.getFormValue('individualorphanetid'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
 
-            // Check that all Orphanet IDs have the proper format (will check for existence later)
-            if (orphaIds && orphaIds.length && _(orphaIds).any(function(id) { return id === null; })) {
-                // ORPHA list is bad
+            /**
+             * Proband disease is required if Proband name is not nil
+             */
+            if (this.state.individualName && (this.state.probandDiseaseObj && !Object.keys(this.state.probandDiseaseObj).length)) {
                 formError = true;
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
-            }
-
-            // Check that all individual’s Orphanet IDs have the proper format (will check for existence later)
-            if (this.state.individualRequired && !this.state.probandIndividual) {
-                if (!indOrphaIds || !indOrphaIds.length || _(indOrphaIds).any(function(id) { return id === null; })) {
-                    // Individual’s ORPHA list is bad
-                    formError = true;
-                    this.setFormErrors('individualorphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15) separated by commas');
-                }
+                this.setState({probandDiseaseError: 'Required for proband'}, () => {
+                    this.setFormErrors('probandDisease', 'Required for proband');
+                });
             }
 
             // Check that all gene symbols have the proper format (will check for existence later)
@@ -623,61 +598,75 @@ var FamilyCuration = React.createClass({
             }
 
             if (!formError) {
-                // Build search string from given ORPHA IDs, empty string if no Orphanet id entered.
-                var searchStr;
-                if (orphaIds && orphaIds.length > 0) {
-                    searchStr = '/search/?type=orphaPhenotype&' + orphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
-                }
-                else {
-                    searchStr = '';
-                }
+                let searchStr;
                 this.setState({submitBusy: true});
 
-                // Verify given Orpha ID exists in DB
-                this.getRestData(searchStr).then(diseases => {
-                    if (orphaIds && orphaIds.length) {
-                        if (diseases['@graph'].length === orphaIds.length) {
-                            // Successfully retrieved all diseases
-                            familyDiseases = diseases;
-                            return Promise.resolve(diseases);
+                /**
+                 * Retrieve disease from database. If not existed, add it to the database.
+                 */
+                let diseaseObj = this.state.diseaseObj;
+                if (Object.keys(diseaseObj).length && diseaseObj.diseaseId) {
+                    searchStr = '/search?type=disease&diseaseId=' + diseaseObj.diseaseId;
+                } else {
+                    searchStr = '';
+                }
+                this.getRestData(searchStr).then(diseaseSearch => {
+                    if (Object.keys(diseaseSearch).length && diseaseSearch.hasOwnProperty('total')) {
+                        let diseaseUuid;
+                        if (diseaseSearch.total === 0) {
+                            return this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({diseaseUuid: diseaseUuid}, () => {
+                                    familyDiseases.push(diseaseUuid);
+                                    return Promise.resolve(result);
+                                });
+                            });
                         } else {
-                            // Get array of missing Orphanet IDs
-                            this.setState({submitBusy: false}); // submit error; re-enable submit button
-                            var missingOrphas = _.difference(orphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                            this.setFormErrors('orphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                            throw diseases;
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
+                            this.setState({diseaseUuid: diseaseUuid}, () => {
+                                familyDiseases.push(diseaseUuid);
+                            });
                         }
                     } else {
-                        // if no Orphanet id entered.
                         return Promise.resolve(null);
                     }
                 }, e => {
-                    // The given orpha IDs couldn't be retrieved for some reason.
+                    // The given disease couldn't be retrieved for some reason.
                     this.setState({submitBusy: false}); // submit error; re-enable submit button
-                    this.setFormErrors('orphanetid', 'The given diseases not found');
+                    this.setState({diseaseError: 'Error on validating disease.'});
                     throw e;
                 }).then(diseases => {
-                    // Check for individual orphanet IDs if we have variants and no existing proband
+                    // Check for individual disease if we have variants and no existing proband
                     if (!this.state.probandIndividual && this.state.individualRequired) {
-                        var searchStr = '/search/?type=orphaPhenotype&' + indOrphaIds.map(function(id) { return 'orphaNumber=' + id; }).join('&');
-
-                        // Verify given Orpha ID exists in DB
-                        return this.getRestData(searchStr).then(diseases => {
-                            if (diseases['@graph'].length === indOrphaIds.length) {
-                                // Successfully retrieved all diseases
-                                individualDiseases = diseases;
-                                return Promise.resolve(diseases);
+                        /**
+                         * Retrieve disease from database. If not existed, add it to the database.
+                         */
+                        let probandDiseaseObj = this.state.probandDiseaseObj;
+                        return this.getRestData('/search?type=disease&diseaseId=' + probandDiseaseObj.diseaseId).then(diseaseSearch => {
+                            let probandDiseaseUuid;
+                            if (diseaseSearch.total === 0) {
+                                this.postRestData('/diseases/', probandDiseaseObj).then(result => {
+                                    let newDisease = result['@graph'][0];
+                                    probandDiseaseUuid = newDisease['uuid'];
+                                    this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
+                                        individualDiseases.push(probandDiseaseUuid);
+                                        return Promise.resolve(diseaseSearch);
+                                    });
+                                });
                             } else {
-                                // Get array of missing Orphanet IDs
-                                this.setState({submitBusy: false}); // submit error; re-enable submit button
-                                var missingOrphas = _.difference(indOrphaIds, diseases['@graph'].map(function(disease) { return disease.orphaNumber; }));
-                                this.setFormErrors('individualorphanetid', missingOrphas.map(function(id) { return 'ORPHA' + id; }).join(', ') + ' not found');
-                                throw diseases;
+                                let _id = diseaseSearch['@graph'][0]['@id'];
+                                probandDiseaseUuid = _id.slice(10, -1);
+                                this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
+                                    individualDiseases.push(probandDiseaseUuid);
+                                    return Promise.resolve(diseaseSearch);
+                                });
                             }
                         }, e => {
-                            // The given orpha IDs couldn't be retrieved for some reason.
+                            // The given disease couldn't be retrieved for some reason.
                             this.setState({submitBusy: false}); // submit error; re-enable submit button
-                            this.setFormErrors('individualorphanetid', 'The given diseases not found');
+                            this.setState({probandDiseaseError: 'Error on validating disease.'});
                             throw e;
                         });
                     }
@@ -769,7 +758,7 @@ var FamilyCuration = React.createClass({
                     if (!this.state.probandIndividual && this.state.individualRequired) {
                         initvar = true;
                         label = this.getFormValue('individualname');
-                        diseases = individualDiseases['@graph'].map(function(disease) { return disease['@id']; });
+                        diseases = individualDiseases.map(disease => { return disease; });
                         return makeStarterIndividual(label, diseases, familyVariants, zygosity, this);
                     }
 
@@ -1041,8 +1030,8 @@ var FamilyCuration = React.createClass({
         newFamily.label = this.getFormValue('familyname');
 
         // Get an array of all given disease IDs
-        if (familyDiseases) {
-            newFamily.commonDiagnosis = familyDiseases['@graph'].map(function(disease) { return disease['@id']; });
+        if (familyDiseases && familyDiseases.length) {
+            newFamily.commonDiagnosis = familyDiseases.map(disease => { return disease; });
         }
         else if (newFamily.commonDiagnosis && newFamily.commonDiagnosis.length > 0) {
             // allow to delete oephanet ids when editing family
@@ -1057,7 +1046,7 @@ var FamilyCuration = React.createClass({
         // Fill in the group fields from the Common Diseases & Phenotypes panel
         var hpoTerms = this.getFormValue('hpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(','));
+            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(', '));
         }
         else if (newFamily.hpoIdInDiagnosis) {
             // allow to delete HPO ids
@@ -1073,7 +1062,7 @@ var FamilyCuration = React.createClass({
         }
         hpoTerms = this.getFormValue('nothpoid');
         if (hpoTerms) {
-            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(','));
+            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(', '));
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
@@ -1121,7 +1110,7 @@ var FamilyCuration = React.createClass({
             variantCount -= 1;  // we have one less variant to show
         }
 
-        // if variant data entered, must enter proband individual name and orphanet
+        // if variant data entered, must enter proband individual name and disease
         // First check if data entered in either ClinVar Variant ID or Other description at each variant
         var noVariantData = true;
         _.range(variantCount).map(i => {
@@ -1131,22 +1120,20 @@ var FamilyCuration = React.createClass({
         });
         // If not entered at all, proband individua is not required and must be no error messages at individual fields.
         if (noVariantData && this.refs['individualname']) {
-            if (this.refs['individualname'].getValue() || this.refs['individualorphanetid'].getValue()) {
+            if (this.refs['individualname'].getValue() || (this.state.probandDiseaseObj && this.state.probandDiseaseObj['id'])) {
                 this.setState({individualRequired: true});
             } else {
                 this.setState({individualRequired: false});
             }
             var errors = this.state.formErrors;
             errors['individualname'] = '';
-            errors['individualorphanetid'] = '';
-            this.setState({formErrors: errors});
+            this.setState({formErrors: errors, probandDiseaseError: null});
         } else {
             this.setState({individualRequired: true});
         }
 
         // Set state
-        this.setState({variantInfo: newVariantInfo, variantCount: variantCount});
-        this.clrFormErrors('individualorphanetid');
+        this.setState({variantInfo: newVariantInfo, variantCount: variantCount, probandDiseaseError: null});
         this.clrFormErrors('zygosityHemizygous');
         this.clrFormErrors('zygosityHomozygous');
     },
@@ -1206,6 +1193,52 @@ var FamilyCuration = React.createClass({
         if (this.cv.othersAssessed && this.cv.othersAssessed != false) {
             this.cv.othersAssessed = false;
         }
+    },
+
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj});
+    },
+
+    /**
+     * Update the 'probandDiseaseObj' state used for the proband individual
+     */
+    updateFamilyProbandDiseaseObj(action, probandDiseaseObj) {
+        if (action === 'add' && (probandDiseaseObj && Object.keys(probandDiseaseObj).length > 0)) {
+            this.setState({probandDiseaseObj: probandDiseaseObj, individualRequired: true}, () => {
+                // Clear 'probandDisease' key in formErrors object
+                this.clrFormErrors('probandDisease');
+            });
+        } else if (action === 'copy' && this.state.diseaseObj) {
+            this.setState({probandDiseaseObj: this.state.diseaseObj, individualRequired: true}, () => {
+                // Clear 'probandDisease' key in formErrors object
+                this.clrFormErrors('probandDisease');
+            });
+        } else if (action === 'delete') {
+            this.setState({probandDiseaseObj: {}}, () => {
+                // Clear 'probandDisease' key in formErrors object
+                this.clrFormErrors('probandDisease');
+            });
+            if (this.state.individualName && !this.state.individualName.length) {
+                this.setState({individualRequired: true});
+            } else {
+                this.setState({individualRequired: false});
+            }
+        }
+    },
+
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent(target) {
+        if (target === 'family') {
+            this.setState({diseaseError: null});
+        } else if (target === 'familyProband') {
+            this.setState({probandDiseaseError: null});
+        }
+        
     },
 
     render: function() {
@@ -1374,7 +1407,7 @@ var FamilyName = function(displayNote) {
             {!this.getAssociation('family') && !this.getAssociation('associatedGroups') ?
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
             : null}
-            <Input type="text" ref="familyname" label="Family Label:" value={family && family.label} handleChange={this.handleChange}
+            <Input type="text" ref="familyname" label="Family Label:" value={family && family.label ? family.label : ''} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
@@ -1417,16 +1450,13 @@ var FamilyCount = function() {
 // Common diseases family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyCommonDiseases = function() {
-    var family = this.state.family;
-    var group = this.state.group;
-    var orphanetidVal, hpoidVal, nothpoidVal, associatedGroups;
+    let family = this.state.family,
+        group = this.state.group;
+    let associatedGroups;
 
     // If we're editing a family, make editable values of the complex properties
-    if (family) {
-        orphanetidVal = family.commonDiagnosis ? family.commonDiagnosis.map(function(disease) { return 'ORPHA' + disease.orphaNumber; }).join(', ') : null;
-        hpoidVal = family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : null;
-        nothpoidVal = family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : null;
-    }
+    let hpoidVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : '';
+    let nothpoidVal = family && family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : '';
 
     // Make a list of diseases from the group, either from the given group,
     // or the family if we're editing one that has associated groups.renderPhenotype
@@ -1440,24 +1470,20 @@ var FamilyCommonDiseases = function() {
 
     return (
         <div className="row">
-            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderOrphanets(associatedGroups, 'Group') : null}
-            <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} value={orphanetidVal} placeholder="e.g. ORPHA:15 or ORPHA15"
-                error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ?
-            <Input type="button" ref="orphanetcopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Associated Group"
-                clickHandler={this.handleClick.bind(this, 'group', 'orphanetid')} />
-            : null}
+            {associatedGroups && associatedGroups[0].commonDiagnosis && associatedGroups[0].commonDiagnosis.length ? curator.renderDiseaseList(associatedGroups, 'Group') : null}
+            <FamilyDisease group={associatedGroups && associatedGroups[0] ? associatedGroups[0] : null}
+                family={family} gdm={this.state.gdm} updateDiseaseObj={this.updateDiseaseObj} clearErrorInParent={this.clearErrorInParent}
+                diseaseObj={this.state.diseaseObj} error={this.state.diseaseError} session={this.props.session} />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Family', 'hpo') : curator.renderPhenotype(null, 'Family', 'hpo')
+                curator.renderPhenotype(associatedGroups, 'Family', 'hpo', 'Group') : curator.renderPhenotype(null, 'Family', 'hpo')
             }
             <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Family', 'ft') : curator.renderPhenotype(null, 'Family', 'ft')
+                curator.renderPhenotype(associatedGroups, 'Family', 'ft', 'Group') : curator.renderPhenotype(null, 'Family', 'ft')
             }
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={family && family.termsInDiagnosis}
+            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
             <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
@@ -1468,19 +1494,11 @@ var FamilyCommonDiseases = function() {
             <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={family && family.termsInElimination}
+            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
-
-
-// HTML labels for inputs follow.
-var LabelOrphanetId = React.createClass({
-    render: function() {
-        return <span>Disease(s) in Common <span className="normal">(<a href={external_url_map['OrphanetHome']} target="_blank" title="Orphanet home page in a new tab">Orphanet</a> term)</span>:</span>;
-    }
-});
 
 // HTML labels for inputs follow.
 var LabelHpoId = React.createClass({
@@ -1521,7 +1539,7 @@ var FamilyDemographics = function() {
 
     return (
         <div className="row">
-            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin}
+            <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin ? family.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1529,7 +1547,7 @@ var FamilyDemographics = function() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
-            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity}
+            <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity ? family.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1537,7 +1555,7 @@ var FamilyDemographics = function() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race}
+            <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race ? family.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
@@ -1563,59 +1581,65 @@ var FamilySegregation = function() {
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
-            <Input type="number" yesInteger={true} ref="SEGnumberOfAffectedWithGenotype" label={<span>For Dominant AND Recessive inheritance:<br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
-                value={segregation.numberOfAffectedWithGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
-            <Input type="number" yesInteger={true} ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype"
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfAffectedWithGenotype" label={<span>For Dominant AND Recessive inheritance:<br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
+                value={segregation && segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : ''}
+                handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" required />
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype"
                 label={<span>For Recessive inheritance only:<br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for Recessive inheritance)</span>}
-                value={segregation.numberOfUnaffectedWithoutBiallelicGenotype} handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
-                clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" yesInteger={true} ref="SEGnumberOfSegregationsForThisFamily"
+                value={segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : ''}
+                handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfSegregationsForThisFamily"
                 label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant or X-linked inheritance)</span>}
-                value={segregation.numberOfSegregationsForThisFamily} handleChange={this.handleChange}
-                error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
+                value={segregation && segregation.numberOfSegregationsForThisFamily ? segregation.numberOfSegregationsForThisFamily : ''}
+                handleChange={this.handleChange} error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals"
                 label={<span>Were there any inconsistent segregations amongst TESTED individuals? <i>(i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)</i></span>}
-                defaultValue="none" value={segregation.inconsistentSegregationAmongstTestedIndividuals} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                defaultValue="none" value={segregation && segregation.inconsistentSegregationAmongstTestedIndividuals ? segregation.inconsistentSegregationAmongstTestedIndividuals : 'none'}
+                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5" value={segregation.explanationForInconsistent} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none" value={segregation.familyConsanguineous} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5"
+                value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none"
+                value={segregation && segregation.familyConsanguineous ? segregation.familyConsanguineous : 'none'}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 <option value="Not Specified">Not Specified</option>
             </Input>
-            <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3" value={segregation.pedigreeLocation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
+            <Input type="textarea" ref="SEGpedigreeLocation" label="If pedigree provided in publication, please indicate location:" rows="3"
+                value={segregation && segregation.pedigreeLocation ? segregation.pedigreeLocation : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
-            <Input type="select" ref="SEGlodPublished" label="Published LOD score?:"
-                defaultValue="none" value={curator.booleanToDropdown(segregation.lodPublished)} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+            <Input type="select" ref="SEGlodPublished" label="Published LOD score?:" defaultValue="none"
+                value={curator.booleanToDropdown(segregation.lodPublished)}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
             {this.state.lodPublished === 'Yes' ?
-                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:" value={segregation.publishedLodScore} handleChange={this.handleChange}
-                    error={this.getFormError('SEGpublishedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGpublishedLodScore')}
+                <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:"
+                    value={segregation && segregation.publishedLodScore ? segregation.publishedLodScore : ''}
+                    handleChange={this.handleChange} error={this.getFormError('SEGpublishedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGpublishedLodScore')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
             : null}
             {this.state.lodPublished === 'No' ?
                 <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published LOD score)</i></span>}
-                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore}
+                    inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore ? this.state.estimatedLodScore : ''}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                    placeholder={this.state.lodLocked && this.state.estimatedLodScore === null ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
+                    placeholder={this.state.lodLocked && !this.state.estimatedLodScore ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
             : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
@@ -1626,10 +1650,12 @@ var FamilySegregation = function() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
-            <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5" value={segregation.reasonExplanation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5" value={segregation.additionalInformation} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5"
+                value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5"
+                value={segregation && segregation.additionalInformation ? segregation.additionalInformation : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
@@ -1638,6 +1664,7 @@ var FamilySegregation = function() {
 // Display the Family variant panel. The number of copies depends on the variantCount state variable.
 var FamilyVariant = function() {
     var family = this.state.family;
+    let group = this.state.group;
     var gdm = this.state.gdm;
     var segregation = family && family.segregation ? family.segregation : null;
     var variants = segregation && segregation.variants;
@@ -1646,6 +1673,7 @@ var FamilyVariant = function() {
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
+    let individualName = this.state.individualName;
 
     return (
         <div className="row form-row-helper">
@@ -1666,27 +1694,20 @@ var FamilyVariant = function() {
                     <div className="col-sm-7 col-sm-offset-5 proband-label-note">
                         <div className="alert alert-warning">Once this Family page is saved, an option to score and add additional information about the proband (e.g. demographics, phenotypes) will appear.</div>
                     </div>
-                    <Input type="text" ref="individualname" label="Proband Label" handleChange={this.handleChange}
+                    <Input type="text" ref="individualname" label="Proband Label" value={individualName} handleChange={this.handleChange}
                         error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.individualRequired} />
                     <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
-                    {this.state.orpha ?
+                    {this.state.diseaseObj ?
                         <div className="form-group">
-                            <div className="col-sm-5"><strong className="pull-right">Orphanet Disease(s) Associated with Family:</strong></div>
-                            <div className="col-sm-7">{this.state.existedOrphanetId}</div>
+                            <div className="col-sm-5"><strong className="pull-right">Disease term associated with Family:</strong></div>
+                            <div className="col-sm-7"><strong>{this.state.diseaseObj.term}</strong></div>
                         </div>
                         : null
                     }
-                    <Input type="text" ref="individualorphanetid" label="Orphanet Disease(s) for Individual" placeholder="e.g. ORPHA:15 or ORPHA15" handleChange={this.handleChange}
-                        error={this.getFormError('individualorphanetid')} clearError={this.clrFormErrors.bind(null, 'individualorphanetid')}
-                        buttonClassName="btn btn-default" buttonLabel="Copy From Family" buttonHandler={this.handleclick}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required={this.state.individualRequired} />
-                    { this.state.orpha ?
-                        <Input type="button" ref="orphanetcopy" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Orphanet IDs from Family"
-                        clickHandler={this.handleClick.bind(this, 'family', 'orphanetid')} />
-                        :
-                        null
-                    }
+                    <FamilyProbandDisease gdm={this.state.gdm} group={group} family={family} updateFamilyProbandDiseaseObj={this.updateFamilyProbandDiseaseObj}
+                        probandDiseaseObj={this.state.probandDiseaseObj} error={this.state.probandDiseaseError} clearErrorInParent={this.clearErrorInParent}
+                        familyDiseaseObj={this.state.diseaseObj} session={this.props.session} required={this.state.individualRequired} />
                 </div>
             :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
@@ -1736,13 +1757,6 @@ var FamilyVariant = function() {
                                         <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                     </div>
                                 : null}
-                                <div className="row variant-assessment">
-                                    <span className="col-sm-5 control-label"><label></label></span>
-                                    <span className="col-sm-7 text-no-input">
-                                        <div className="alert alert-warning">Note: a variant's gene impact must be specified in order to score this proband.</div>
-                                        <a href={'/variant-curation/?all&gdm=' + gdmUuid + '&pmid=' + pmidUuid + '&variant=' + this.state.variantInfo[i].uuid + '&user=' + userUuid} target="_blank">Curate variant's gene impact</a>
-                                    </span>
-                                </div>
                                 <div className="row variant-curation">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
@@ -1751,7 +1765,7 @@ var FamilyVariant = function() {
                                 </div>
                             </div>
                         : null}
-                        <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid}
+                        <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''}
                             error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
                         <div className="row">
@@ -1815,17 +1829,16 @@ var LabelOtherVariant = React.createClass({
 // Additional Information family curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 var FamilyAdditional = function() {
-    var otherpmidsVal;
-    var family = this.state.family;
-    if (family) {
-        otherpmidsVal = family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : null;
-    }
+    let family = this.state.family;
+    let otherpmidsVal = family && family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5" value={family && family.additionalInformation}
+            <Input type="textarea" ref="additionalinfofamily" label="Additional Information about Family:" rows="5"
+                value={family && family.additionalInformation ? family.additionalInformation : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:" rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label="Enter PMID(s) that report evidence about this same family:"
+                value={otherpmidsVal} placeholder="e.g. 12089445, 21217753" rows="5"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
@@ -2043,9 +2056,9 @@ var FamilyViewer = React.createClass({
                         <Panel title="Common Disease(s) & Phenotype(s)" panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
-                                    <dt>Orphanet Common Diagnosis</dt>
+                                    <dt>Common Diagnosis</dt>
                                     <dd>{family.commonDiagnosis && family.commonDiagnosis.map(function(disease, i) {
-                                        return <span key={disease.orphaNumber}>{i > 0 ? ', ' : ''}{disease.term} (<a href={external_url_map['OrphaNet'] + disease.orphaNumber} title={"OrphaNet entry for ORPHA" + disease.orphaNumber + " in new tab"} target="_blank">ORPHA{disease.orphaNumber}</a>)</span>;
+                                        return <span key={disease.diseaseId}>{i > 0 ? ', ' : ''}{disease.term} {!disease.freetext ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.diseaseId.replace('_', ':')}</a> : null}</span>;
                                     })}</dd>
                                 </div>
 

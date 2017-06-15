@@ -3,8 +3,8 @@
         "uuid": "e659bd3a-18f8-11e5-9d3a-60f81dc5b05a",
         "label": "FamilyRousseau",
         "commonDiagnosis": [
-            "15",
-            "654"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "f8c8525c-adf9-4fda-8e86-a30832347edd"
         ],
         "numberOfMale": 3,
         "numberOfFemale": 3,
@@ -62,8 +62,8 @@
         "uuid": "d674b2c2-18f9-11e5-a556-60f81dc5b05a",
         "label": "FamilyCCC",
         "commonDiagnosis": [
-            "15",
-            "183660"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "88ddad2b-4849-4546-ad75-af157b2d4a1b"
         ],
         "numberOfMale": 4,
         "numberOfFemale": 4,
@@ -112,8 +112,8 @@
         "uuid": "25c6a663-18fa-11e5-8554-60f81dc5b05a",
         "label": "FamilyShiang",
         "commonDiagnosis": [
-            "15",
-            "370968"
+            "80635629-f3c1-4a48-b63e-0db849e8e354",
+            "aa217d94-5e04-4144-af5d-0b49e9dba754"
         ],
         "numberOfMale": 6,
         "numberOfFemale": 5,
@@ -164,7 +164,7 @@
         "uuid": "a20e9182-18fa-11e5-96d1-60f81dc5b05a",
         "label": "FamilyBBB",
         "commonDiagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "numberOfMale": 7,
         "numberOfFemale": 5,
@@ -226,7 +226,7 @@
         "uuid": "ab9a37ba-18fa-11e5-bad8-60f81dc5b05a",
         "label": "FamilyAAA",
         "commonDiagnosis": [
-            "15"
+            "80635629-f3c1-4a48-b63e-0db849e8e354"
         ],
         "numberOfMale": 4,
         "numberOfFemale": 5,

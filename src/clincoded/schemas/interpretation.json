@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "variant": {
             "title": "Variant",
@@ -39,7 +39,7 @@
             "description": "Disease associated to the variant.",
             "comment": "Not more than one disease, can be none.",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "linkTo": "disease"
         },
         "modeInheritance": {
             "title": "Mode",
@@ -166,12 +166,12 @@
             "title": "Genes",
             "type": "string"
         },
-        "disease.orphaNumber": {
-            "title": "Disease Orphanet Number",
+        "disease.diseaseId": {
+            "title": "Disease ID",
             "type": "string"
         },
         "disease.term": {
-            "title": "Disease Orphanet Term",
+            "title": "Disease Term",
             "type": "string"
         },
         "modeInheritance": {

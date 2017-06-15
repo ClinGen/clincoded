@@ -166,7 +166,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
     handleChange: function(ref, e) {
         // Handle modified pathogenicity dropdown
         if (ref === 'provisional-pathogenicity') {
-            if (this.refs[ref].getValue()) {
+            if (this.refs[ref].getValue() && this.refs[ref].getValue() !== 'none') {
                 this.setState({provisionalPathogenicity: this.refs[ref].getValue()}, () => {
                     // Pass dropdown state change back to parent component
                     this.props.setProvisionalEvaluation('provisional-pathogenicity', this.state.provisionalPathogenicity);
@@ -347,9 +347,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
         let provisionalVariant = null;
         let alteredClassification = null;
         let provisionalStatus = null;
-        let provisionalPathogenicity = this.state.provisionalPathogenicity;
-        let provisionalReason = this.state.provisionalReason;
-        let provisionalInterpretation = this.state.provisionalInterpretation;
+        let provisionalPathogenicity = this.state.provisionalPathogenicity ? this.state.provisionalPathogenicity : 'none';
+        let provisionalReason = this.state.provisionalReason ? this.state.provisionalReason : '';
+        let provisionalInterpretation = this.state.provisionalInterpretation ? this.state.provisionalInterpretation : false;
         let disabledCheckbox = this.state.disabledCheckbox;
         let disabledFormSumbit = this.state.disabledFormSumbit;
 
@@ -397,7 +397,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                         <div className="col-xs-12 col-sm-6">
                                             <dl className="inline-dl clearfix">
                                                 <dt>Disease:</dt>
-                                                <dd>{interpretation.disease ? interpretation.disease.term : 'None'}</dd>
+                                                <dd>{interpretation.disease && interpretation.disease.term ? interpretation.disease.term : 'None'}</dd>
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>Mode of Inheritance:</dt>
@@ -409,9 +409,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                         <div className="col-xs-12 col-sm-6">
                                             <div className="evaluation-provision provisional-pathogenicity">
                                                 <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
-                                                    value={provisionalPathogenicity ? provisionalPathogenicity : ''}
-                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange}>
-                                                    <option value=''>No Selection</option>
+                                                    defaultValue={provisionalPathogenicity} handleChange={this.handleChange}
+                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                                                    <option value='none'>No Selection</option>
                                                     <option disabled="disabled"></option>
                                                     <option value="Benign">Benign</option>
                                                     <option value="Likely benign">Likely Benign</option>
@@ -419,10 +419,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                     <option value="Likely pathogenic">Likely Pathogenic</option>
                                                     <option value="Pathogenic">Pathogenic</option>
                                                 </Input>
-                                                <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>} rows="5"
-                                                    value={provisionalReason ? provisionalReason : null}
+                                                <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>}
+                                                    value={provisionalReason} handleChange={this.handleChange} rows="5"
                                                     placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
-                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
+                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                                             </div>
                                         </div>
                                         <div className="col-xs-12 col-sm-6">
@@ -430,7 +430,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
                                                 <div>
                                                     <i className="icon icon-question-circle"></i>
                                                     <span>Change status to "Provisional Interpretation" <i>(optional)</i>:</span>
-                                                    <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation} defaultChecked="false"
+                                                    <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation}
                                                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
                                                 </div>
                                             </div>

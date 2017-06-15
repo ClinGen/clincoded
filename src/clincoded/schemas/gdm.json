@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "gene": {
             "title": "HGNC Symbol",
@@ -24,10 +24,10 @@
             "linkTo": "gene"
         },
         "disease": {
-            "title": "Orpha ID",
-            "description": "Unique id for Orphanet phenotypes.",
+            "title": "Unique ID of disease term",
+            "description": "Unique id (Orphanet, DOID, OMIM or NCIt) or free text.",
             "type": "string",
-            "linkTo": "orphaPhenotype"
+            "linkTo": "disease"
         },
         "modeInheritance": {
             "title": "Mode",
@@ -125,8 +125,8 @@
             "title": "Gene Symbol",
             "type": "string"
         },
-        "disease.orphaNumber": {
-            "title": "Orpha #",
+        "disease.diseaseId": {
+            "title": "Disease ID",
             "type": "string"
         },
         "disease.term": {
@@ -188,7 +188,7 @@
     },
     "boost_values": {
         "gene.symbol": 1.0,
-        "disease.orphaNumber": 1.0,
+        "disease.diseaseId": 1.0,
         "modeCode": 1.0,
         "annotations.article": 1.0
     }

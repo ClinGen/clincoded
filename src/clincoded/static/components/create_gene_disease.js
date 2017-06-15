@@ -5,7 +5,6 @@ var moment = require('moment');
 var globals = require('./globals');
 var fetched = require('./fetched');
 var form = require('../libs/bootstrap/form');
-var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var RestMixin = require('./rest').RestMixin;
@@ -15,12 +14,13 @@ var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var Input = form.Input;
-var Alert = modal.Alert;
-var ModalMixin = modal.ModalMixin;
 var Panel = panel.Panel;
 
+import ModalComponent from '../libs/bootstrap/modal';
+import { GdmDisease } from './disease';
+
 var CreateGeneDisease = React.createClass({
-    mixins: [FormMixin, RestMixin, ModalMixin, CuratorHistory],
+    mixins: [FormMixin, RestMixin, CuratorHistory],
 
     contextTypes: {
         fetch: React.PropTypes.func,
@@ -30,6 +30,11 @@ var CreateGeneDisease = React.createClass({
     getInitialState: function() {
         return {
             gdm: {},
+            hgncgene: '',
+            orphanetid: '',
+            diseaseObj: {},
+            diseaseUuid: null,
+            diseaseError: null,
             adjectives: [],
             adjectiveDisabled: true
         };
@@ -37,7 +42,7 @@ var CreateGeneDisease = React.createClass({
 
     // Handle value changes in modeInheritance dropdown selection
     handleChange: function(ref, e) {
-        if (ref === 'hpo') {
+        if (ref === 'modeInheritance') {
             let selected = this.refs[ref].getValue();
             /******************************************************/
             /* If 'X-linked inheritance' is selected,             */
@@ -78,9 +83,14 @@ var CreateGeneDisease = React.createClass({
 
         // Check if orphanetid
         if (valid) {
-            valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
-            if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
+            let mode = this.refs['modeInheritance'].getValue();
+            if (!mode.length || mode.indexOf('select') > -1) {
+                this.setFormErrors('modeInheritance', 'Mode of inheritance is required');
+                valid = false;
+            }
+            if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
+                this.setState({diseaseError: 'Disease is required!'});
+                valid = false;
             }
         }
         return valid;
@@ -96,37 +106,57 @@ var CreateGeneDisease = React.createClass({
 
         // Get values from form and validate them
         this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
-        this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
-        this.saveFormValue('hpo', this.refs.hpo.getValue());
+        /**
+         * FIXME: Need to delete orphanet reference
+         */
+        // this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
+        this.saveFormValue('modeInheritance', this.refs['modeInheritance'].getValue());
         let moiAdjectiveValue = this.refs.moiAdjective.getValue();
         if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
             this.saveFormValue('moiAdjective', moiAdjectiveValue);
         }
         if (this.validateForm()) {
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
+            /**
+             * FIXME: Need to delete orphanet reference
+             */
+            // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
             var geneId = this.getFormValue('hgncgene');
-            var mode = this.getFormValue('hpo');
+            var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');
+            let diseaseObj = this.state.diseaseObj;
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
             // If either error out, set the form error fields
             this.getRestDatas([
-                '/diseases/' + orphaId,
                 '/genes/' + geneId
             ], [
-                function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this),
                 function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
-            ]).then(data => {
+            ]).then(response => {
+                return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
+                    let diseaseUuid;
+                    if (diseaseSearch.total === 0) {
+                        this.postRestData('/diseases/', diseaseObj).then(result => {
+                            let newDisease = result['@graph'][0];
+                            diseaseUuid = newDisease['uuid'];
+                            this.setState({diseaseUuid: diseaseUuid});
+                        });
+                    } else {
+                        let _id = diseaseSearch['@graph'][0]['@id'];
+                        diseaseUuid = _id.slice(10, -1);
+                        this.setState({diseaseUuid: diseaseUuid});
+                    }
+                });
+            }).then(data => {
                 // Load GDM if one with matching gene/disease/mode already exists
                 return this.getRestData(
-                    '/search/?type=gdm&disease.orphaNumber=' + orphaId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
+                    '/search/?type=gdm&disease.diseaseId=' + diseaseObj.diseaseId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
                 ).then(gdmSearch => {
                     if (gdmSearch.total === 0) {
                         // Matching GDM not found. Create a new GDM
                         let newGdm = {
                             gene: geneId,
-                            disease: orphaId,
+                            disease: this.state.diseaseUuid,
                             modeInheritance: mode
                         };
                         if (adjective && adjective.length) {
@@ -155,7 +185,7 @@ var CreateGeneDisease = React.createClass({
                     } else {
                         // Found matching GDM. See of the user wants to curate it.
                         this.setState({gdm: gdmSearch['@graph'][0]});
-                        this.openAlert('confirm-edit-gdm');
+                        this.child.openModal();
                     }
                 });
             }).catch(e => {
@@ -165,10 +195,36 @@ var CreateGeneDisease = React.createClass({
         }
     },
 
+    // Called when any of the alert's buttons is clicked. Confirm is true if the 'Create' button was clicked;
+    // false if the 'Cancel' button was clicked.
+    handleAlertClick: function(confirm, e) {
+        if (confirm) {
+            this.editGdm();
+        }
+        this.child.closeModal();
+    },
+
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj});
+    },
+
+    /**
+     * Clear error msg on missing disease
+     */
+    clearErrorInParent() {
+        this.setState({diseaseError: null});
+    },
+
     render: function() {
+        let hgncgene = this.state.hgncgene;
+        let orphanetid = this.state.orphanetid;
         let adjectives = this.state.adjectives;
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
+        let gdm = this.state.gdm;
 
         return (
             <div className="container">
@@ -177,15 +233,14 @@ var CreateGeneDisease = React.createClass({
                     <Panel panelClassName="panel-create-gene-disease">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
-                                <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1"
+                                <Input type="text" ref="hgncgene" label={<LabelHgncGene />} placeholder="e.g. DICER1" value={hgncgene}
                                     error={this.getFormError('hgncgene')} clearError={this.clrFormErrors.bind(null, 'hgncgene')}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA:15 or ORPHA15"
-                                    error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" required />
-                                <Input type="select" ref="hpo" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
-                                    error={this.getFormError('hpo')} clearError={this.clrFormErrors.bind(null, 'hpo')}
-                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="hpo" required>
+                                <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} clearErrorInParent={this.clearErrorInParent}
+                                    error={this.state.diseaseError} session={this.props.session} />
+                                <Input type="select" ref="modeInheritance" label="Mode of Inheritance" defaultValue="select" handleChange={this.handleChange}
+                                    error={this.getFormError('modeInheritance')} clearError={this.clrFormErrors.bind(null, 'modeInheritance')}
+                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="modeOfInheritance" required>
                                     <option value="select" disabled="disabled">Select</option>
                                     <option value="" disabled="disabled"></option>
                                     {moiKeys.map(function(modeOfInheritance, i) {
@@ -201,11 +256,24 @@ var CreateGeneDisease = React.createClass({
                                         return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
                                     })}
                                 </Input>
-                                <div><p className="alert alert-warning">Currently, the above options (gene, disease, mode of inheritance, or adjective) cannot be altered for a Gene:Disease record once the record has been created. This includes adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
+                                <div><p className="alert alert-warning">The above options (gene, disease, mode of inheritance, or adjective) can be altered for a Gene:Disease record up until a PMID has been added to the record. This includes
+                                    adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
                                 <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
                             </div>
                         </Form>
-                        <Alert id="confirm-edit-gdm" content={<ConfirmEditGdm gdm={this.state.gdm} editGdm={this.editGdm} closeAlert={this.closeAlert} />} />
+                        {gdm && gdm.gene && gdm.disease && gdm.modeInheritance ?
+                            <ModalComponent modalClass="modal-default" modalWrapperClass="confirm-edit-gdm-modal" onRef={ref => (this.child = ref)}>
+                                <div>
+                                    <div className="modal-body">
+                                        <p>A curation record already exists for <strong>{gdm.gene.symbol} &#8211; {gdm.disease.term} &#8211; {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene &#8211; disease &#8211; mode.</p>
+                                    </div>
+                                    <div className='modal-footer'>
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, false)} title="Cancel" />
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, true)} title="Curate" />
+                                    </div>
+                                </div>
+                            </ModalComponent>
+                        : null}
                     </Panel>
                 </div>
             </div>
@@ -228,41 +296,6 @@ var LabelOrphanetId = React.createClass({
         return <span>Enter <a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> ID</span>;
     }
 });
-
-
-var ConfirmEditGdm = React.createClass({
-    propTypes: {
-        gdm: React.PropTypes.object, // GDM object under consideration
-        editGdm: React.PropTypes.func, // Function to call to edit the GDM
-        closeAlert: React.PropTypes.func // Function to call to close the alert
-    },
-
-    // Called when any of the alert's buttons is clicked. Confirm is true if the 'Create' button was clicked;
-    // false if the 'Cancel' button was clicked.
-    handleClick: function(confirm, e) {
-        if (confirm) {
-            this.props.editGdm();
-        }
-        this.props.closeAlert('confirm-edit-gdm');
-    },
-
-    render: function() {
-        var gdm = this.props.gdm;
-
-        return (
-            <div>
-                <div className="modal-body">
-                    <p>A curation record already exists for <strong>{gdm.gene.symbol} — ORPHA{gdm.disease.orphaNumber} — {gdm.modeInheritance}</strong>. You may curate this existing record, or cancel to specify a different gene — disease — mode.</p>
-                </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, false)} title="Cancel" />
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleClick.bind(null, true)} title="Curate" />
-                </div>
-            </div>
-        );
-    }
-});
-
 
 // Display a history item for adding a PMID to a GDM
 var GdmAddHistory = React.createClass({

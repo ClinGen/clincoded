@@ -180,13 +180,13 @@ var FormMixin = module.exports.FormMixin = {
             if (props.required && !val) {
                 // Required field has no value. Set error state to render
                 // error, and remember to return false.
-                this.setFormErrors(ref, 'Required');
+                this.setFormErrors(ref, props.customErrorMsg ? props.customErrorMsg : 'Required');
                 valid = false;
             } else if (props.type === 'number') {
                 // Validate that type="number" fields have a valid number in them
                 var numVal = this.getFormValueNumber(ref);
                 if (numVal === null) {
-                    if (props.yesInteger) {
+                    if (props.inputClassName && props.inputClassName.indexOf('integer-only') > -1) {
                         this.setFormErrors(ref, 'Non-decimal values only');
                         valid = false;
                     } else if (!this.getFormValue(ref).match(/^\d+\.\d+$/)) {
@@ -214,12 +214,21 @@ var FormMixin = module.exports.FormMixin = {
 // inputs can be handled through the labelClassName, groupClassName, and wrapperClassName properties.
 var Input = module.exports.Input = React.createClass({
     propTypes: {
-        yesInteger: React.PropTypes.bool,
         type: React.PropTypes.string.isRequired, // Type of input
         label: React.PropTypes.oneOfType([ // <label> for input; string or another React component
             React.PropTypes.string,
             React.PropTypes.object
         ]),
+        hasModal: React.PropTypes.bool,
+        inputGroupBtn: React.PropTypes.oneOfType([ // <button> for input-group
+            React.PropTypes.string,
+            React.PropTypes.object
+        ]),
+        helpText: React.PropTypes.oneOfType([ // <p> help text beneath the text input field
+            React.PropTypes.string,
+            React.PropTypes.object
+        ]),
+        helpTextId: React.PropTypes.string, // <p> help text element id; required if 'helpText' props is used
         placeholder: React.PropTypes.string, // <input> placeholder text
         maxLength: React.PropTypes.string, // maxlength for labels
         error: React.PropTypes.string, // Error message to display below input
@@ -281,6 +290,9 @@ var Input = module.exports.Input = React.createClass({
         } else if (this.props.type === 'checkbox') {
             ReactDOM.findDOMNode(this.refs.input).checked = val;
             this.setState({value: val});
+        } else if (this.props.type === 'input-group') {
+            ReactDOM.findDOMNode(this.refs.targetInput).value = val;
+            this.setState({value: val});
         }
     },
 
@@ -291,6 +303,8 @@ var Input = module.exports.Input = React.createClass({
             this.resetSelectedOption();
         } else if (this.props.type === 'checkbox') {
             this.resetSelectedCheckbox();
+        } else if (this.props.type === 'input-group') {
+            ReactDOM.findDOMNode(this.refs.targetInput).value = '';
         }
     },
 
@@ -356,13 +370,16 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} yesInteger={this.props.yesInteger} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder} ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
+                            ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength}
+                            disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null} />
+                        {this.props.helpText ? <p id={this.props.helpTextId} className="form-text text-muted">{this.props.helpText}</p> : null}
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
                 );
                 input = (
                     <div className={this.props.groupClassName}>
-                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         {this.props.wrapperClassName ? <div className={this.props.wrapperClassName}>{innerInput}</div> : <span>{innerInput}</span>}
                     </div>
                 );
@@ -372,7 +389,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
                     <div className={this.props.groupClassName}>
-                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
                             <select className={inputClasses} ref="input" onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
                                 {this.props.children}
@@ -387,7 +404,7 @@ var Input = module.exports.Input = React.createClass({
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
                     <div className={this.props.groupClassName}>
-                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
                             <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} disabled={this.props.inputDisabled} rows={this.props.rows} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -399,7 +416,7 @@ var Input = module.exports.Input = React.createClass({
             case 'text-range':
                 input = (
                     <div className={this.props.groupClassName}>
-                        {this.props.label ? <label className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        {this.props.label ? <label className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
                             {this.props.children}
                         </div>
@@ -435,7 +452,7 @@ var Input = module.exports.Input = React.createClass({
             case 'checkbox':
                 input = (
                     <div className={this.props.groupClassName}>
-                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? ' *' : ''}</span></label> : null}
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
                             <input className={inputClasses} ref="input" type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked={this.props.checked} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -462,6 +479,33 @@ var Input = module.exports.Input = React.createClass({
                     <span className={this.props.wrapperClassName}>
                         <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}>{title}</button>
                     </span>
+                );
+                break;
+
+            case 'input-group':
+                inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
+                var innerInput = (
+                    <span>
+                        <div className="input-group">
+                            <input className={inputClasses} type="text" id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
+                                ref="targetInput" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur}
+                                maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                            <span className="input-group-btn">
+                                {this.props.hasModal ?
+                                    this.props.inputGroupBtn
+                                    :
+                                    <button className="btn btn-default" type="button" id={'input-group-btn-' + this.props.id}>{this.props.inputGroupBtn}</button>
+                                }
+                            </span>
+                        </div>
+                        <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
+                    </span>
+                );
+                input = (
+                    <div className={this.props.groupClassName}>
+                        {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
+                        {this.props.wrapperClassName ? <div className={this.props.wrapperClassName}>{innerInput}</div> : <span>{innerInput}</span>}
+                    </div>
                 );
                 break;
 

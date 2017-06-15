@@ -2,12 +2,14 @@
 Feature: Select Variant
 
     Scenario: VCI select-variant modal ClinVar functionality
-        When I visit "/select-variant/"
-        And I wait for 1 seconds
-        Then I should see "Search and Select Variant"
+        When I visit "/logout"
+        Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
+        When I visit "/select-variant/"
+        And I wait for 1 seconds
+        Then I should see "Search and Select Variant"
         When I select "ClinVar Variation ID" from dropdown "form-control"
         And I wait for 1 seconds
         And I press "Add ClinVar ID"
@@ -24,7 +26,7 @@ Feature: Select Variant
         Then I should see "NC_000015"
         When I press the button "Save and View Evidence"
         And I wait for 2 seconds
-        Then I should see "RCV000359576"
+        Then I should see "NM_005902.3:c.-28C>T"
         When I press the button "Interpretation "
         And I wait for 1 seconds
         Then I should see "Variant Interpretation Record"
@@ -34,12 +36,14 @@ Feature: Select Variant
 
 
     Scenario: VCI select-variant modal CAR functionality
-        When I visit "/select-variant/"
-        And I wait for 1 seconds
-        Then I should see "Search and Select Variant"
+        When I visit "/logout"
+        Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
+        When I visit "/select-variant/"
+        And I wait for 1 seconds
+        Then I should see "Search and Select Variant"
         When I select "ClinGen Allele Registry ID (CA ID)" from dropdown "form-control"
         And I wait for 1 seconds
         And I press "Add CA ID"

@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "label": {
             "title": "Label",
@@ -26,12 +26,12 @@
         },
         "commonDiagnosis": {
             "title": "Common Diagnosis",
-            "description": "List of Orphanet IDs of common diagnosis for the group",
+            "description": "List of ontology IDs of common diagnosis for the group",
             "type": "array",
             "items": {
-                "title": "Orphanet ID",
+                "title": "Ontology ID",
                 "type": "string",
-                "linkTo": "orphaPhenotype"
+                "linkTo": "disease"
             }
         },
         "hpoIdInDiagnosis": {

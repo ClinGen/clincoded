@@ -2,7 +2,6 @@
 var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
-var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
 var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
@@ -17,8 +16,6 @@ var parseClinvar = require('../libs/parse-resources').parseClinvar;
 var parseCAR = require('../libs/parse-resources').parseCAR;
 
 var Panel = panel.Panel;
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
 var RestMixin = require('./rest').RestMixin;
@@ -27,11 +24,11 @@ var external_url_map = globals.external_url_map;
 var userMatch = globals.userMatch;
 var truncateString = globals.truncateString;
 
+import ModalComponent from '../libs/bootstrap/modal';
 
 // Class for the add resource button. This class only renders the button to add and clear the fields, and contains the modal wrapper.
 // The modal itself is defined by the AddResourceIdModal class below.
 var AddResourceId = module.exports.AddResourceId = React.createClass({
-    mixins: [ModalMixin],
     propTypes: {
         resourceType: React.PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
         label: React.PropTypes.object, // html for the button's label
@@ -83,13 +80,18 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
     buttonRender: function() {
         return (
             <span className={"inline-button-wrapper" + (this.props.buttonWrapperClass ? " " + this.props.buttonWrapperClass : "")}>
-                <Modal title={this.state.txtModalTitle} className="input-inline" modalClass="modal-default">
-                    <a className={"btn btn-default" + (this.props.buttonClass ? " " + this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
-                        modal={<AddResourceIdModal resourceType={this.props.resourceType} initialFormValue={this.props.initialFormValue} modalButtonText={this.props.modalButtonText}
-                        fieldNum={this.props.fieldNum} updateParentForm={this.props.updateParentForm} protocol={this.props.protocol} closeModal={this.closeModal} parentObj={this.props.parentObj} />}>
-                            {this.props.buttonText}
-                    </a>
-                </Modal>
+                <AddResourceIdModal
+                    resourceType={this.props.resourceType}
+                    initialFormValue={this.props.initialFormValue}
+                    modalButtonText={this.props.modalButtonText}
+                    fieldNum={this.props.fieldNum}
+                    updateParentForm={this.props.updateParentForm}
+                    protocol={this.props.protocol}
+                    parentObj={this.props.parentObj}
+                    title={this.state.txtModalTitle}
+                    buttonText={this.props.buttonText}
+                    buttonClass={(this.props.buttonClass ? this.props.buttonClass : "") + (this.props.disabled ? " disabled" : "")}
+                />
             </span>
         );
     },
@@ -138,10 +140,12 @@ var AddResourceIdModal = React.createClass({
         initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing
         modalButtonText: React.PropTypes.string, // text for submit button in modal
         fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
-        closeModal: React.PropTypes.func, // Function to call to close the modal
         protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
         updateParentForm: React.PropTypes.func, // Function to call when submitting and closing the modal
-        parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
+        parentObj: React.PropTypes.object, // parent object; used to see if a duplicate entry exists
+        title: React.PropTypes.string, // Text appearing in the modal header
+        buttonText: React.PropTypes.string, // Text of the link/button invoking the modal
+        buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
     },
 
     contextTypes: {
@@ -256,13 +260,13 @@ var AddResourceIdModal = React.createClass({
         // Apply submitResource logic depending on resourceType
         switch(this.props.resourceType) {
             case 'pubmed':
-                pubmedSubmitResource.call(this);
+                pubmedSubmitResource.call(this, this.handleModalClose);
                 break;
             case 'clinvar':
-                clinvarSubmitResource.call(this);
+                clinvarSubmitResource.call(this, this.handleModalClose);
                 break;
             case 'car':
-                carSubmitResource.call(this);
+                carSubmitResource.call(this, this.handleModalClose);
                 break;
         }
     },
@@ -286,31 +290,70 @@ var AddResourceIdModal = React.createClass({
         // Changed modal cancel button from a form input to a html button
         // as to avoid accepting enter/return key as a click event.
         // Removed hack in this method.
-        this.props.closeModal();
+        this.handleModalClose('cancel');
+    },
+
+    /************************************************************************************************/
+    /* Resetting the formErrors for selected input and other states was not needed previously       */
+    /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
+    /* to be defined outside of this component and closing the modal would delete this component    */
+    /* from virtual DOM, along with the states.                                                     */
+    /* The updated/converted implementation (without MixIn) wraps the actuator in the modal         */
+    /* component and thus this component always exists in the virtual DOM as long as the actuator   */
+    /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
+    /* and the modified states are retained.                                                        */
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is a way to call a function defined in the child component from the parent component.  */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose(trigger) {
+        let errors = this.state.formErrors;
+        errors['resourceId'] = '';
+        if (!this.state.submitResourceBusy) {
+            if (this.props.resourceType === 'pubmed' || (trigger && trigger === 'cancel')) {
+                this.setState({formErrors: errors, inputValue: '', queryResourceDisabled: true, resourceFetched: false, tempResource: {}});
+            }
+            this.child.closeModal();
+        }
+    },
+
+    // This lifecycle method is used to address the button UI behaviors
+    // in Family curation, Individual curation and Experimental curation
+    // in which this component is unmounted upon submitting the queried
+    // resource of either ClinVar or CAR
+    componentWillUnmount() {
+        let errors = this.state.formErrors;
+        errors['resourceId'] = '';
+        if (this.props.resourceType === 'clinvar' || this.props.resourceType === 'car') {
+            this.setState({formErrors: errors, inputValue: '', queryResourceDisabled: true, resourceFetched: false, tempResource: {}});
+        }
     },
 
     render: function() {
         return (
-            <div className="form-std">
-                <div className="modal-body">
-                    <Input type="text" ref="resourceId" label={this.state.txtInputLabel} handleChange={this.handleChange} value={this.props.initialFormValue}
-                        error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')} submitHandler={this.submitResource}
-                        labelClassName="control-label" groupClassName="resource-input" required />
-                    <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
-                    <div className="row">&nbsp;<br />&nbsp;</div>
-                    {this.state.resourceFetched ?
-                    <div>
-                        <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
-                        {this.renderResourceResult()}
+            <ModalComponent modalTitle={this.props.title} modalClass="modal-default" modalWrapperClass="input-inline add-resource-id-modal"
+                actuatorClass={this.props.buttonClass} actuatorTitle={this.props.buttonText} onRef={ref => (this.child = ref)}>
+                <div className="form-std">
+                    <div className="modal-body">
+                        <Input type="text" ref="resourceId" label={this.state.txtInputLabel} handleChange={this.handleChange} value={this.state.inputValue}
+                            error={this.getFormError('resourceId')} clearError={this.clrFormErrors.bind(null, 'resourceId')} submitHandler={this.submitResource}
+                            labelClassName="control-label" groupClassName="resource-input" required />
+                        <Input type="button-button" title={this.state.txtInputButton} inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right"} clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
+                        <div className="row">&nbsp;<br />&nbsp;</div>
+                        {this.state.resourceFetched ?
+                        <div>
+                            <p>&nbsp;<br />{this.state.txtResourceResponse}</p>
+                            {this.renderResourceResult()}
+                        </div>
+                        : this.state.txtHelpText}
                     </div>
-                    : this.state.txtHelpText}
+                    <div className='modal-footer'>
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
+                        <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
+                            "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title={this.props.modalButtonText ? this.props.modalButtonText : "Save"} clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
+                    </div>
                 </div>
-                <div className='modal-footer'>
-                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
-                    <Input type="button-button" inputClassName={this.getFormError('resourceId') === null || this.getFormError('resourceId') === undefined || this.getFormError('resourceId') === '' ?
-                        "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"} title={this.props.modalButtonText ? this.props.modalButtonText : "Save"} clickHandler={this.submitResource} inputDisabled={!this.state.resourceFetched} submitBusy={this.state.submitResourceBusy} />
-                </div>
-            </div>
+            </ModalComponent>
         );
     }
 });
@@ -443,7 +486,7 @@ function pubmedRenderResourceResult() {
         </div>
     );
 }
-function pubmedSubmitResource() {
+function pubmedSubmitResource(func) {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
     if (this.state.tempResource) {
@@ -459,8 +502,9 @@ function pubmedSubmitResource() {
                     this.props.updateParentForm(result['@graph'][0]);
                 });
             }
-            this.setState({submitResourceBusy: false});
-            this.props.closeModal();
+            this.setState({submitResourceBusy: false}, () => {
+                return func();
+            });
         });
     }
 }
@@ -587,7 +631,7 @@ function clinvarRenderResourceResult() {
         </div>
     );
 }
-function clinvarSubmitResource() {
+function clinvarSubmitResource(func) {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
     if (this.state.tempResource.clinvarVariantId) {
@@ -622,8 +666,9 @@ function clinvarSubmitResource() {
                     });
                 });
             }
-            this.setState({submitResourceBusy: false});
-            this.props.closeModal();
+            this.setState({submitResourceBusy: false}, () => {
+                return func();
+            });
         });
     }
 }
@@ -769,7 +814,7 @@ function carRenderResourceResult() {
         </div>
     );
 }
-function carSubmitResource() {
+function carSubmitResource(func) {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
     if (this.state.tempResource.clinvarVariantId || this.state.tempResource.carId) {
@@ -804,8 +849,9 @@ function carSubmitResource() {
                     });
                 });
             }
-            this.setState({submitResourceBusy: false});
-            this.props.closeModal();
+            this.setState({submitResourceBusy: false}, () => {
+                return func();
+            });
         });
     }
 }

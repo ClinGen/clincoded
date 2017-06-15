@@ -6,7 +6,6 @@ var fetched = require('../fetched');
 var RestMixin = require('../rest').RestMixin;
 var parseAndLogError = require('../mixins').parseAndLogError;
 var form = require('../../libs/bootstrap/form');
-var modal = require('../../libs/bootstrap/modal');
 var CuratorHistory = require('../curator_history');
 var curator = require('../curator');
 var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
@@ -14,9 +13,10 @@ var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
 var Input = form.Input;
 var Form = form.Form;
 var FormMixin = form.FormMixin;
-var Modal = modal.Modal;
-var ModalMixin = modal.ModalMixin;
 var queryKeyValue = globals.queryKeyValue;
+
+import ModalComponent from '../../libs/bootstrap/modal';
+import { InterpretationDisease } from '../disease';
 
 // Display the variant curation action bar above the criteria and tabs
 var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
@@ -38,7 +38,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
             interpretation: this.props.interpretation,
             isInterpretationActive: this.props.interpretation ? true : false,
             hasAssociatedDisease: this.props.interpretation && this.props.interpretation.disease ? true : false,
-            hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false
+            hasAssociatedInheritance: this.props.interpretation && this.props.interpretation.modeInheritance ? true : false,
+            diseaseObj: {},
+            diseaseUuid: null
         };
     },
 
@@ -95,6 +97,13 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
         }).catch(e => {parseAndLogError.bind(undefined, 'postRequest');});
     },
 
+    /**
+     * Update the 'diseaseObj' state used to save data upon form submission
+     */
+    updateDiseaseObj(diseaseObj) {
+        this.setState({diseaseObj: diseaseObj});
+    },
+
     render: function() {
         let hasExistingInterpretation = this.props.interpretation ? true : false;
         if (!hasExistingInterpretation) {
@@ -117,9 +126,9 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
                         <div className="btn-group">
                             <InheritanceModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedInheritance={this.state.hasAssociatedInheritance}
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            <DiseaseModalButton variantData={this.props.variantData} session={this.props.session} hasAssociatedDisease={this.state.hasAssociatedDisease}
-                                interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj}
-                                calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} />
+                            <InterpretationDisease variantData={this.props.variantData} interpretation={this.props.interpretation} diseaseObj={this.state.diseaseObj} editKey={this.props.editkey}
+                                updateInterpretationObj={this.props.updateInterpretationObj} updateDiseaseObj={this.updateDiseaseObj} hasAssociatedDisease={this.state.hasAssociatedDisease}
+                                calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} session={this.props.session} />
                         </div>
                     </div>
                     :
@@ -141,43 +150,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
     }
 });
 
-// class to contain the Disease button and its modal
-var DiseaseModalButton = React.createClass({
-    mixins: [ModalMixin],
-
-    propTypes: {
-        variantData: React.PropTypes.object,
-        hasAssociatedDisease: React.PropTypes.bool,
-        session: React.PropTypes.object,
-        interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func,
-        calculatedAssertion: React.PropTypes.string,
-        provisionalPathogenicity: React.PropTypes.string
-    },
-
-    render: function() {
-        let associateDiseaseButtonTitle = <span>Disease <i className="icon icon-plus-circle"></i></span>,
-            associateDiseaseModalTitle = 'Associate this interpretation with a disease';
-        if (this.props.hasAssociatedDisease) {
-            associateDiseaseButtonTitle = <span>Disease <i className="icon icon-pencil"></i></span>;
-            associateDiseaseModalTitle = 'Associate this interpretation with a different disease';
-        }
-
-        return (
-            <Modal title={associateDiseaseModalTitle} wrapperClassName="modal-associate-disease">
-                <button className="btn btn-primary pull-right" modal={<AssociateDisease closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
-                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj}
-                    calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} />}>{associateDiseaseButtonTitle}</button>
-            </Modal>
-        );
-    }
-});
-
 // class to contain the Inheritance button and its modal
 var InheritanceModalButton = React.createClass({
-    mixins: [ModalMixin],
-
     propTypes: {
         variantData: React.PropTypes.object,
         hasAssociatedInheritance: React.PropTypes.bool,
@@ -196,234 +170,17 @@ var InheritanceModalButton = React.createClass({
         }
 
         return (
-            <Modal title={associateInheritanceModalTitle} wrapperClassName="modal-associate-inheritance">
-                <button className="btn btn-primary pull-right btn-inline-spacer" modal={<AssociateInheritance closeModal={this.closeModal} data={this.props.variantData} session={this.props.session}
-                    interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />}>{associateInheritanceButtonTitle}</button>
-            </Modal>
+            <AssociateInheritance
+                data={this.props.variantData}
+                session={this.props.session}
+                interpretation={this.props.interpretation}
+                editKey={this.props.editkey}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                title={associateInheritanceModalTitle}
+                buttonText={associateInheritanceButtonTitle}
+                buttonClass={this.props.hasAssociatedInheritance ? 'btn-info pull-right btn-inline-spacer' : 'btn-primary pull-right btn-inline-spacer'}
+            />
         );
-    }
-});
-
-// handle 'Associate with Disease' button click event
-var AssociateDisease = React.createClass({
-    mixins: [RestMixin, FormMixin, CuratorHistory],
-
-    contextTypes: {
-        handleStateChange: React.PropTypes.func
-    },
-
-    propTypes: {
-        data: React.PropTypes.object, // variant object
-        session: React.PropTypes.object, // session object
-        closeModal: React.PropTypes.func, // Function to call to close the modal
-        interpretation: React.PropTypes.object, // interpretation object
-        editKey: React.PropTypes.bool, // edit flag
-        updateInterpretationObj: React.PropTypes.func,
-        calculatedAssertion: React.PropTypes.string,
-        provisionalPathogenicity: React.PropTypes.string
-    },
-
-    getInitialState: function() {
-        return {
-            submitResourceBusy: false,
-            shouldShowWarning: false
-        };
-    },
-
-    // Form content validation
-    validateForm: function() {
-        // Start with default validation
-        var valid = this.validateDefault();
-
-        if (valid && this.getFormValue('orphanetid') === '') {
-            return valid;
-        }
-        // Check if orphanetid
-        if (valid) {
-            valid = this.getFormValue('orphanetid').match(/^ORPHA:?[0-9]{1,6}$/i);
-            if (!valid) {
-                this.setFormErrors('orphanetid', 'Use Orphanet IDs (e.g. ORPHA:15 or ORPHA15)');
-            }
-        }
-        return valid;
-    },
-
-    // Handle value changes in provisional form
-    handleChange: function() {
-        if (!this.refs['orphanetid'].getValue()) {
-            let interpretation = this.props.interpretation;
-            if (interpretation && interpretation.markAsProvisional) {
-                this.setState({shouldShowWarning: true});
-            } else if (interpretation && !interpretation.markAsProvisional) {
-                this.setState({shouldShowWarning: false});
-            }
-        } else {
-            this.setState({shouldShowWarning: false});
-        }
-    },
-
-    // When the form is submitted...
-    submitForm: function(e) {
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        // Get values from form and validate them
-        this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
-        if (this.validateForm()) {
-            // Invoke button progress indicator
-            this.setState({submitResourceBusy: true});
-            // Get the free-text values for the Orphanet ID to check against the DB
-            var orphaId = this.getFormValue('orphanetid');
-            var interpretationDisease, currInterpretation, flatInterpretation;
-
-            if (orphaId !== '') {
-                orphaId = orphaId.match(/^ORPHA:?([0-9]{1,6})$/i)[1];
-                // Get the disease orresponding to the given Orphanet ID.
-                // If either error out, set the form error fields
-                this.getRestDatas([
-                    '/diseases/' + orphaId
-                ], [
-                    function() { this.setFormErrors('orphanetid', 'Orphanet ID not found'); }.bind(this)
-                ]).then(data => {
-                    interpretationDisease = data[0]['@id'];
-                    this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
-                        currInterpretation = interpretation;
-                        // get up-to-date copy of interpretation object and flatten it
-                        flatInterpretation = curator.flatten(currInterpretation);
-                        // if the interpretation object does not have a disease object, create it
-                        if (!('disease' in flatInterpretation)) {
-                            flatInterpretation.disease = '';
-                            // Return the newly flattened interpretation object in a Promise
-                            return Promise.resolve(flatInterpretation);
-                        } else {
-                            return Promise.resolve(flatInterpretation);
-                        }
-                    }).then(interpretationObj => {
-                        if (interpretationDisease) {
-                            // Set the disease '@id' to the newly flattened interpretation object's 'disease' property
-                            interpretationObj.disease = interpretationDisease;
-                            // Update the intepretation object partially with the new disease property value
-                            return this.putRestData('/interpretation/' + this.props.interpretation.uuid, interpretationObj).then(result => {
-                                this.props.updateInterpretationObj();
-                                var meta = {
-                                    interpretation: {
-                                        variant: this.props.data['@id'],
-                                        disease: interpretationDisease,
-                                        mode: 'edit-disease'
-                                    }
-                                };
-                                if (flatInterpretation.modeInheritance) {
-                                    meta.interpretation.modeInheritance = flatInterpretation.modeInheritance;
-                                }
-                                return this.recordHistory('modify', currInterpretation, meta).then(result => {
-                                    this.setState({submitResourceBusy: false});
-                                    // Need 'submitResourceBusy' state to proceed closing modal
-                                    return Promise.resolve(this.state.submitResourceBusy);
-                                });
-                            }).then(submitState => {
-                                // Close modal after 'submitResourceBusy' is completed
-                                if (submitState !== true) {
-                                    this.props.closeModal();
-                                }
-                            });
-                        }
-                    });
-                }).catch(e => {
-                    // Some unexpected error happened
-                    this.setState({submitResourceBusy: false});
-                    parseAndLogError.bind(undefined, 'fetchedRequest');
-                });
-            } else {
-                this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
-                    currInterpretation = interpretation;
-                    // get up-to-date copy of interpretation object and flatten it
-                    var flatInterpretation = curator.flatten(currInterpretation);
-                    // if the interpretation object does not have a disease object, create it
-                    if ('disease' in flatInterpretation) {
-                        delete flatInterpretation['disease'];
-                        let provisionalPathogenicity = this.props.provisionalPathogenicity;
-                        let calculatedAssertion = this.props.calculatedAssertion;
-                        if (provisionalPathogenicity === 'Likely pathogenic' || provisionalPathogenicity === 'Pathogenic') {
-                            flatInterpretation['markAsProvisional'] = false;
-                        } else if (!provisionalPathogenicity) {
-                            if (calculatedAssertion === 'Likely pathogenic' || calculatedAssertion === 'Pathogenic' ) {
-                                flatInterpretation['markAsProvisional'] = false;
-                            }
-                        }
-
-                        // Update the intepretation object partially with the new disease property value
-                        this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
-                            var meta = {
-                                interpretation: {
-                                    variant: this.props.data['@id'],
-                                    disease: interpretationDisease,
-                                    mode: 'edit-disease'
-                                }
-                            };
-                            this.recordHistory('modify', currInterpretation, meta).then(result => {
-                                this.setState({submitResourceBusy: false}, () => {
-                                    // Need 'submitResourceBusy' state to proceed closing modal
-                                    this.props.updateInterpretationObj();
-                                    this.props.closeModal();
-                                });
-                            });
-                        });
-                    } else {
-                        this.setState({submitResourceBusy: false}, () => {
-                            // Need 'submitResourceBusy' state to proceed closing modal
-                            this.props.closeModal();
-                        });
-                    }
-                }).catch(e => {
-                    // Some unexpected error happened
-                    this.setState({submitResourceBusy: false});
-                    parseAndLogError.bind(undefined, 'fetchedRequest');
-                });
-            }
-        }
-    },
-
-    // Called when the modal 'Cancel' button is clicked
-    cancelAction: function(e) {
-        this.setState({submitResourceBusy: false});
-        this.props.closeModal();
-    },
-
-    render: function() {
-        var disease_id = '';
-        if (this.props.interpretation) {
-            if (this.props.interpretation.interpretation_disease) {
-                disease_id = this.props.interpretation.interpretation_disease;
-            }
-        }
-
-        return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-box">
-                    <div className="modal-body clearfix">
-                        <Input type="text" ref="orphanetid" label={<LabelOrphanetId />} placeholder="e.g. ORPHA:15 or ORPHA15" value={(disease_id) ? disease_id : null}
-                            error={this.getFormError('orphanetid')} clearError={this.clrFormErrors.bind(null, 'orphanetid')} handleChange={this.handleChange}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-                    </div>
-                    {this.state.shouldShowWarning ?
-                        <div className="alert alert-warning">
-                            Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
-                            or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
-                            <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
-                            - otherwise, deleting the disease will automatically remove the "Provisional" status.
-                        </div>
-                    : null}
-                    <div className='modal-footer'>
-                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
-                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
-                    </div>
-                </div>
-            </Form>
-        );
-    }
-});
-
-var LabelOrphanetId = React.createClass({
-    render: function() {
-        return <span>Enter <a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> ID</span>;
     }
 });
 
@@ -438,34 +195,43 @@ var AssociateInheritance = React.createClass({
     propTypes: {
         data: React.PropTypes.object, // variant object
         session: React.PropTypes.object, // session object
-        closeModal: React.PropTypes.func, // Function to call to close the modal
         interpretation: React.PropTypes.object, // interpretation object
         editKey: React.PropTypes.bool, // edit flag
-        updateInterpretationObj: React.PropTypes.func
+        updateInterpretationObj: React.PropTypes.func,
+        title: React.PropTypes.string, // Text appearing in the modal header
+        buttonText: React.PropTypes.oneOfType([ // Text of the link/button invoking the modal
+            React.PropTypes.object,
+            React.PropTypes.string
+        ]),
+        buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
     },
 
     getInitialState: function() {
         return {
             submitResourceBusy: false,
             adjectives: [],
-            adjectiveDisabled: true
+            adjectiveDisabled: true,
+            tempAdjectives: [] // Temp storage for adjectives. Used for reverting to previous list if user cancels.
         };
     },
 
     componentDidMount: function() {
-        if (this.props.interpretation) {
-            if (this.props.interpretation.modeInheritance) {
-                let moi = this.props.interpretation.modeInheritance;
-                let adjective = this.props.interpretation.modeInheritanceAdjective;
-                this.parseModeInheritance(moi, adjective ? adjective : 'none');
-            }
+        let interpretation = this.props.interpretation;
+        if (interpretation && interpretation.modeInheritance) {
+            let moi = interpretation.modeInheritance;
+            let adjective = interpretation.modeInheritanceAdjective ? interpretation.modeInheritanceAdjective : 'none';
+            this.parseModeInheritance(moi, adjective);
         }
     },
 
     // Handle value changes in modeInheritance dropdown selection
     handleChange: function(ref, e) {
         if (ref === 'inheritance') {
-            this.parseModeInheritance(this.refs[ref].getValue(), 'none');
+            // Copy existing adjective array into temp storage when user changes the selected MOI,
+            // which triggers the re-rendering of a different adjective list
+            this.setState({tempAdjectives: this.state.adjectives}, () => {
+                this.parseModeInheritance(this.refs[ref].getValue(), 'none');
+            });
         }
     },
 
@@ -500,7 +266,11 @@ var AssociateInheritance = React.createClass({
         this.setState({
             adjectiveDisabled: adjectiveDisabled,
             adjectives: adjectives
-        }, () => {this.refs.moiAdjective.setValue(defaultValue);});
+        }, () => {
+            if (this.refs.moiAdjective) {
+                this.refs.moiAdjective.setValue(defaultValue);
+            }
+        });
     },
 
     // When the form is submitted...
@@ -511,6 +281,8 @@ var AssociateInheritance = React.createClass({
         let moiAdjectiveValue = this.refs.moiAdjective.getValue();
         if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
             this.saveFormValue('moiAdjective', moiAdjectiveValue);
+        } else {
+            this.saveFormValue('moiAdjective', null);
         }
 
         // Invoke button progress indicator
@@ -569,7 +341,7 @@ var AssociateInheritance = React.createClass({
         }).then(result => {
             this.setState({submitResourceBusy: false}, () => {
                 this.props.updateInterpretationObj();
-                this.props.closeModal();
+                this.handleModalClose();
             });
         }).catch(e => {
             // Some unexpected error happened
@@ -580,51 +352,91 @@ var AssociateInheritance = React.createClass({
 
     // Called when the modal 'Cancel' button is clicked
     cancelAction: function(e) {
-        this.setState({submitResourceBusy: false});
-        this.props.closeModal();
+        this.setState({submitResourceBusy: false}, () => {
+            this.handleModalClose('cancel');
+        });
+    },
+
+    /************************************************************************************************/
+    /* Form error checking for the 2 'Select' inputs in this Inheritance modal had been removed     */
+    /* because neither one of the selections are required. And the user is given a set of           */
+    /* pre-defined values to choose from.                                                           */
+    /************************************************************************************************/
+    /* Resetting the adjectives array for selected MOI adjective input was not needed previously    */
+    /* because the previous MixIn implementation allowed the actuator (button to show the modal)    */
+    /* to be defined outside of this component and closing the modal would delete this component    */
+    /* from virtual DOM, along with the states.                                                     */
+    /* The updated/converted implementation (without MixIn) wraps the actuator in the modal         */
+    /* component and thus this component always exists in the virtual DOM as long as the actuator   */
+    /* needs to be rendered in the UI. As a result, closing the modal does not remove the component */
+    /* and the modified states are retained.                                                        */
+    /* The MixIn function this.props.closeModal() has been replaced by this.child.closeModal(),     */
+    /* which is way to call a function defined in the child component from the parent component.    */
+    /* The reference example is at: https://jsfiddle.net/frenzzy/z9c46qtv/                          */
+    /************************************************************************************************/
+    handleModalClose(trigger) {
+        let interpretation = this.props.interpretation;
+        if (!this.state.submitResourceBusy) {
+            if (trigger === 'cancel') {
+                if (interpretation && interpretation.modeInheritanceAdjective) {
+                    // User cancels the modal and there is a pre-existing MOI adjective stored,
+                    // set the adjectives array to the last loaded state whether the user had
+                    // changed it or not.
+                    if (this.state.adjectives && this.state.adjectives.length) {
+                        this.setState({adjectives: this.state.tempAdjectives, adjectiveDisabled: false});
+                    }
+                } else {
+                    // User cancels the modal and there is no pre-existing MOI adjective stored,
+                    // reset all states.
+                    this.setState({adjectives: [], adjectiveDisabled: true, tempAdjectives: []});
+                }
+            } else {
+                // User saves the selected adjective and so we retain the associated adjectives array
+                this.setState({tempAdjectives: this.state.adjectives, adjectiveDisabled: false});
+            }
+            this.child.closeModal();
+        }
     },
 
     render: function() {
+        let interpretation = this.props.interpretation;
         let adjectives = this.state.adjectives;
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
 
-        let defaultModeInheritance = 'select';
-        if (this.props.interpretation) {
-            if (this.props.interpretation.modeInheritance) {
-                defaultModeInheritance = this.props.interpretation.modeInheritance;
-            }
-        }
+        let defaultModeInheritance = interpretation && interpretation.modeInheritance ? interpretation.modeInheritance : 'no-moi';
+        let defaultModeInheritanceAdjective = interpretation && interpretation.modeInheritanceAdjective ? interpretation.modeInheritanceAdjective : 'none';
 
         return (
-            <Form submitHandler={this.submitForm} formClassName="form-std">
-                <div className="modal-box">
-                    <div className="modal-body clearfix">
-                        <Input type="select" ref="inheritance" label="Mode of Inheritance" defaultValue={defaultModeInheritance} handleChange={this.handleChange}
-                            error={this.getFormError('inheritance')} clearError={this.clrFormErrors.bind(null, 'inheritance')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
-                            <option value="no-moi">No mode of inheritance</option>
-                            <option value="" disabled="disabled"></option>
-                            {moiKeys.map(function(modeOfInheritance, i) {
-                                return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
-                            })}
-                        </Input>
-                         <Input type="select" ref="moiAdjective" label="Select an adjective" defaultValue='none' inputDisabled={adjectiveDisabled}
-                            error={this.getFormError('moiAdjective')} clearError={this.clrFormErrors.bind(null, 'moiAdjective')}
-                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
-                            <option value="none">Select</option>
-                            <option disabled="disabled"></option>
-                            {adjectives.map(function(adjective, i) {
-                                return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
-                            })}
-                        </Input>
+            <ModalComponent modalTitle={this.props.title} modalClass="modal-default" modalWrapperClass="modal-associate-disease"
+                actuatorClass={this.props.buttonClass} actuatorTitle={this.props.buttonText} onRef={ref => (this.child = ref)}>
+                <Form submitHandler={this.submitForm} formClassName="form-std">
+                    <div className="modal-box">
+                        <div className="modal-body clearfix">
+                            <Input type="select" ref="inheritance" label="Mode of Inheritance" value={defaultModeInheritance} handleChange={this.handleChange}
+                                labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="inheritance" >
+                                <option value="no-moi">No mode of inheritance</option>
+                                <option value="" disabled="disabled"></option>
+                                {moiKeys.map(function(modeOfInheritance, i) {
+                                    return <option key={i} value={modeOfInheritance}>{modeOfInheritance}</option>;
+                                })}
+                            </Input>
+                             <Input type="select" ref="moiAdjective" label="Select an adjective" value={defaultModeInheritanceAdjective} inputDisabled={adjectiveDisabled}
+                                labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="moiAdjective">
+                                <option value="none">Select</option>
+                                <option disabled="disabled"></option>
+                                {adjectives.map(function(adjective, i) {
+                                    return <option key={i} value={adjective}>{adjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</option>;
+                                })}
+                            </Input>
+                        </div>
+                        <div className='modal-footer'>
+                            <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
+                            <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
+                        </div>
                     </div>
-                    <div className='modal-footer'>
-                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelAction} title="Cancel" />
-                        <Input type="submit" inputClassName="btn-primary btn-inline-spacer" title="OK" submitBusy={this.state.submitResourceBusy} />
-                    </div>
-                </div>
-            </Form>
+                </Form>
+            </ModalComponent>
         );
     }
 });

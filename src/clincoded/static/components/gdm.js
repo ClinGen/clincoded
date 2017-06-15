@@ -1,15 +1,10 @@
 'use strict';
 var React = require('react');
 var moment = require('moment');
-var form = require('../libs/bootstrap/form');
 var globals = require('./globals');
 var curator = require('./curator');
 
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
 var truncateString = globals.truncateString;
-
 
 // Map GDM statuses from
 var statusMappings = {
@@ -22,26 +17,93 @@ var statusMappings = {
 };
 
 var GdmCollection = module.exports.GdmCollection = React.createClass({
-    mixins: [FormMixin],
-
-    getInitialState: function() {
+    getInitialState() {
         return {
             sortCol: 'gdm',
             reversed: false,
-            searchTerm: ''
+            searchTerm: '', // User input to filter GDMs
+            allGdms: [], // Source of complete list of parsed and unfiltered GDMs
+            filteredGdms: [] // List of parsed and filtered/unfiltered GDMs
         };
     },
 
+    componentDidMount() {
+        this.parseGdms();
+    },
+
+    // Method to parse GDM and form the shape of the data object containing only the properties needed to
+    // render each GDM item in the table. Also as a workaround fix for the failing pytest_bdd assertion on
+    // Travis CI, since having the 'moment' date parsing logic in the render() method would still cause
+    // the python test to fail in the build.
+    parseGdms() {
+        let gdmObjList = [];
+        let gdmObj = {};
+        let gdms = this.props.context['@graph'];
+        if (gdms && gdms.length) {
+            gdms.forEach(gdm => {
+                let allRecordOwners = curator.findAllParticipants(gdm);
+                let participants = allRecordOwners ? allRecordOwners.map(owner => { return owner.title; }).join(', ') : '';
+                let latestRecord = gdm && curator.findLatestRecord(gdm);
+                let statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
+                let iconClass = 'icon gdm-status-icon-' + statusString;
+                // Directly passing the date string into the moment() method still cause the test to fail.
+                // The workaround of passing the date string into the 'new Date()' constructor first appears
+                // to be able to fix the failing pytest_bdd assertion on Travis CI.
+                // http://stackoverflow.com/questions/38251763/moment-js-to-convert-date-string-into-date#answers
+                let gdmCreatedDate = new Date(gdm.date_created);
+                let latestRecordDate = latestRecord ? new Date(latestRecord.last_modified) : '';
+
+                gdmObj = {
+                    gdm_uuid: gdm.uuid,
+                    gdm_status: gdm.gdm_status,
+                    gene_symbol: gdm.gene.symbol,
+                    disease_term: gdm.disease.term,
+                    modeInheritance: gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1],
+                    participants: participants,
+                    submitter_last_name: gdm.submitted_by.last_name,
+                    submitter_first_name: gdm.submitted_by.first_name,
+                    created_date: moment(gdmCreatedDate).format('YYYY MMM DD'),
+                    created_time: moment(gdmCreatedDate).format('h:mm a'),
+                    latest_date: latestRecordDate ? moment(latestRecordDate).format('YYYY MMM DD') : '',
+                    latest_time: latestRecordDate ? moment(latestRecordDate).format('h:mm a') : '',
+                    iconClass: iconClass,
+                    latestRecord: latestRecord,
+                    date_created: gdm.date_created
+                };
+                gdmObjList.push(gdmObj);
+            });
+            // Set the initial states upon component mounted
+            this.setState({allGdms: gdmObjList, filteredGdms: gdmObjList});
+        }
+    },
+
+    // Method to handle user input to filter/unfilter GDMs
+    handleChange(e) {
+        this.setState({searchTerm: e.target.value}, () => {
+            // Filter GDMs
+            let gdms = this.state.allGdms; // Get the complete list of GDMs
+            let searchTerm = this.state.searchTerm;
+            if (searchTerm && searchTerm.length) {
+                let filteredGdms = gdms.filter(function(gdm) {
+                    return gdm.gene_symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                });
+                this.setState({filteredGdms: filteredGdms});
+            } else {
+                this.setState({filteredGdms: this.state.allGdms});
+            }
+        });
+    },
+
     // Handle clicks in the table header for sorting
-    sortDir: function(colName) {
-        var reversed = colName === this.state.sortCol ? !this.state.reversed : false;
-        var sortCol = colName;
+    sortDir(colName) {
+        let reversed = colName === this.state.sortCol ? !this.state.reversed : false;
+        let sortCol = colName;
         this.setState({sortCol: sortCol, reversed: reversed});
     },
 
-    // Call-back for the JS sorting function. Expects GDMs to compare in a and b. Depending on the column currently selected
-    // for sorting, this function sorts on the relevant parts of the GDM.
-    sortCol: function(a, b) {
+    // Call-back for the JS sorting function. Expects GDMs (the parsed GDM state objects) to compare in a and b.
+    // Depending on the column currently selected for sorting, this function sorts on the relevant parts of the GDM.
+    sortCol(a, b) {
         var diff;
 
         switch (this.state.sortCol) {
@@ -52,16 +114,16 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                 diff = statusIndexA - statusIndexB;
                 break;
             case 'gdm':
-                diff = a.gene.symbol > b.gene.symbol ? 1 : -1;
+                diff = a.gene_symbol > b.gene_symbol ? 1 : -1;
                 break;
             case 'last':
-                var aAnnotation = curator.findLatestAnnotation(a);
-                var bAnnotation = curator.findLatestAnnotation(b);
-                diff = aAnnotation && bAnnotation ? Date.parse(aAnnotation.date_created) - Date.parse(bAnnotation.date_created) : (aAnnotation ? 1 : -1);
+                var aRecord = a.latestRecord;
+                var bRecord = b.latestRecord;
+                diff = aRecord && bRecord ? Date.parse(aRecord.last_modified) - Date.parse(bRecord.last_modified) : (aRecord ? 1 : -1);
                 break;
             case 'creator':
-                var aLower = a.submitted_by.last_name.toLowerCase();
-                var bLower = b.submitted_by.last_name.toLowerCase();
+                var aLower = a.submitter_last_name.toLowerCase();
+                var bLower = b.submitter_last_name.toLowerCase();
                 diff = aLower > bLower ? 1 : (aLower === bLower ? 0 : -1);
                 break;
             case 'created':
@@ -74,27 +136,11 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
         return this.state.reversed ? -diff : diff;
     },
 
-    searchChange: function(ref, e) {
-        var searchVal = this.refs[ref].getValue().toLowerCase();
-        this.setState({searchTerm: searchVal});
-    },
-
-    render: function () {
-        var context = this.props.context;
-        var gdms = context['@graph'];
-        var searchTerm = this.state.searchTerm;
-        var filteredGdms;
-        var sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
+    render() {
+        let filteredGdms = this.state.filteredGdms;
+        let gdms = filteredGdms && filteredGdms.length ? filteredGdms.sort(this.sortCol) : []; // Pre-sort the GDM list
+        let sortIconClass = {status: 'tcell-sort', gdm: 'tcell-sort', last: 'tcell-sort', creator: 'tcell-sort', created: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
-
-        // Filter GDMs
-        if (searchTerm) {
-            filteredGdms = gdms.filter(function(gdm) {
-                return gdm.gene.symbol.toLowerCase().indexOf(searchTerm) !== -1 || gdm.disease.term.toLowerCase().indexOf(searchTerm) !== -1;
-            });
-        } else {
-            filteredGdms = gdms;
-        }
 
         return (
             <div className="container">
@@ -104,10 +150,8 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <Form formClassName="form-std gdm-filter-form">
-                            <Input type="text" ref="q" placeholder="Filter by Gene or Disease" handleChange={this.searchChange}
-                                labelClassName="control-label" groupClassName="form-group" />
-                        </Form>
+                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
+                            value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
                 <GdmStatusLegend />
@@ -134,52 +178,33 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
                                 Created<span className={sortIconClass.created}></span>
                             </div>
                         </div>
-                        {filteredGdms.sort(this.sortCol).map(function(gdm) {
-                            var annotationOwners = curator.getAnnotationOwners(gdm);
-                            var latestAnnotation = gdm && curator.findLatestAnnotation(gdm);
-                            var mode = gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
-                            var term = truncateString(gdm.disease.term, 30);
-                            var createdTime = moment(gdm.date_created);
-                            var latestTime = latestAnnotation ? moment(latestAnnotation.date_created) : '';
-                            var participants = annotationOwners.map(function(owner) { return owner.title; }).join(', ');
-                            var statusString = statusMappings[gdm.gdm_status].cssClass; // Convert status string to CSS class
-                            var iconClass = 'icon gdm-status-icon-' + statusString;
-
+                        {gdms && gdms.length ? gdms.map(gdm => {
                             return (
-                                <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.uuid} key={gdm.uuid}>
+                                <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.gdm_uuid} key={gdm.gdm_uuid}>
                                     <div className="table-cell-gdm-status">
-                                        <span className={iconClass} title={gdm.gdm_status}></span>
+                                        <span className={gdm.iconClass} title={gdm.gdm_status}></span>
                                     </div>
-
                                     <div className="table-cell-gdm-main">
-                                        <div>{gdm.gene.symbol} – {gdm.disease.term}</div>
-                                        <div>{mode}</div>
+                                        <div>{gdm.gene_symbol} – {gdm.disease_term}</div>
+                                        <div>{gdm.modeInheritance}</div>
                                     </div>
-
                                     <div className="table-cell-gdm">
-                                        {participants}
+                                        {gdm.participants}
                                     </div>
-
                                     <div className="table-cell-gdm">
-                                        {latestTime ?
-                                            <div>
-                                                <div>{latestTime.format("YYYY MMM DD")}</div>
-                                                <div>{latestTime.format("h:mm a")}</div>
-                                            </div>
-                                        : null}
+                                        <div>{gdm.latest_date}</div>
+                                        <div>{gdm.latest_time}</div>
                                     </div>
-
                                     <div className="table-cell-gdm">
-                                        <div>{gdm.submitted_by.last_name}, {gdm.submitted_by.first_name}</div>
+                                        <div>{gdm.submitter_last_name}, {gdm.submitter_first_name}</div>
                                     </div>
-
                                     <div className="table-cell-gdm">
-                                        <div>{createdTime.format("YYYY MMM DD")}</div>
-                                        <div>{createdTime.format("h:mm a")}</div>
+                                        <div>{gdm.created_date}</div>
+                                        <div>{gdm.created_time}</div>
                                     </div>
                                 </a>
                             );
-                        })}
+                        }) : null}
                     </div>
                 </div>
             </div>
@@ -188,7 +213,6 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
 });
 
 globals.content_views.register(GdmCollection, 'gdm_collection');
-
 
 // Render the GDM status legend
 var GdmStatusLegend = React.createClass({

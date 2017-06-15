@@ -25,3 +25,11 @@ def computational_1_2(value, system):
                     if 'score' in value['computationalData']['other_predictors'][predictor]:
                         if value['computationalData']['other_predictors'][predictor]['score'] is not None:
                             value['computationalData']['other_predictors'][predictor]['score'] = [cast_to_intfloat(x) for x in str(value['computationalData']['other_predictors'][predictor]['score']).split(', ')]
+
+
+@upgrade_step('computational', '2', '3')
+def computational_2_3(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1328
+    # No diseases are found to be associated with computational records
+    # Update schema version only
+    return

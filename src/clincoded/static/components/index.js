@@ -38,5 +38,6 @@ require('./inputs');
 require('./provisional_curation');
 require('./add_curator');
 require('./select_variant');
+require('./add_disease');
 
 module.exports = require('./app');

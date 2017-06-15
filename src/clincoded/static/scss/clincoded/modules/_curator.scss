@@ -41,6 +41,40 @@
         span {
             word-break: break-all;
         }
+
+        .add-disease-group {
+            display: inline-block;
+            font-weight: normal;
+            margin-bottom: 0;
+            text-align: left;
+            vertical-align: text-bottom;
+
+            &> label.col-sm-5 {
+                display: none;
+                float: none;
+            }
+
+            .add-disease {
+                padding: 0 3px 0 7px;
+                width: auto;
+
+                .disease-name {
+                    display: none;
+                }
+
+                .input-group-btn-disease-term {
+                    padding: 3px 8px;
+
+                    .icon {
+                        color: #fff;
+                        font-size: 16px;
+                        margin-top: 2px;
+                        margin-left: 5px;
+                        vertical-align: text-bottom;
+                    }
+                }
+            }
+        }
     }
 
     h2 {
@@ -51,6 +85,30 @@
 
     a i {
         color: #245A88;
+    }
+}
+
+.curation-data-disease {
+    dt {
+        word-break: break-word;
+    }
+
+    .popover-component {
+        font-weight: normal;
+
+        .popover-actuator:before {
+            content: '[';
+        }
+
+        .popover-actuator:after {
+            content: ']';
+        }
+
+        .popover-wrapper {
+            position: fixed;
+            max-width: 300px;
+            z-index: 9999;
+        }
     }
 }
 
@@ -74,6 +132,11 @@
         border-bottom: 1px solid #c9c9c9;
         margin-top: 0;
         padding-bottom: 10px;
+    }
+
+    .modal h4 {
+        border-bottom: none;
+        padding-bottom: 0;
     }
 }
 
@@ -356,6 +419,50 @@
 .panel-create-gene-disease, .panel-select-variant {
     .panel-std {
         padding-bottom: 40px;
+
+        .add-disease-group {
+            margin-bottom: 30px;
+
+            .control-label {
+                padding-top: 0;
+
+                .control-label-note {
+                    font-weight: normal;
+                    display: block;
+                    margin-right: 15px;
+                }
+            }
+
+            .add-disease {
+                .disease-name {
+                    padding-left: 0px;
+
+                    .data-view {
+                        display: block;
+                        font-weight: normal;
+                        word-break: break-word;
+
+                        &.disease-name {
+                            font-weight: bold;
+                        }
+
+                        &.disease-desc,
+                        &.disease-phenotypes {
+                            padding-top: 8px;
+                        }
+                    }
+                }
+
+                .btn {
+                    .icon {
+                        font-size: 16px;
+                        margin-top: 2px;
+                        margin-left: 5px;
+                        vertical-align: text-bottom;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -413,6 +520,29 @@
 
 .edit-omim-modal {
     display: inline;
+
+    a.btn.btn-default {
+        border: none;
+        background: transparent;
+        color: #337ab7;
+        padding: 0;
+        text-decoration: none;
+        vertical-align: text-bottom;
+
+        &:hover {
+            text-decoration: underline;
+        }
+
+        &:before {
+            color: #000;
+            content: '[';
+        }
+
+        &:after {
+            color: #000;
+            content: ']';
+        }
+    }
 }
 
 .curation-pmid-summary {
@@ -1141,11 +1271,19 @@
 
             .basic-info .datasource-clinvar-interpretaions {
                 .clinvar-interpretation-summary {
-                    border: solid 1px #ddd;
-                    margin: 15px 15px 12px 15px;
-                    -webkit-border-radius: 2px;
-                    -moz-border-radius: 2px;
-                    border-radius: 2px;
+                    padding-left: 0;
+
+                    dl dt:first-child {
+                        margin-bottom: 6px;
+                    }
+
+                    dl:nth-child(odd) dt {
+                        width: 150px;
+                    }
+
+                    dl:nth-child(even) dt {
+                        width: 180px;
+                    }
 
                     .reviewStatus:first-letter {
                         text-transform: capitalize;
@@ -1186,6 +1324,32 @@
                         margin: 0;
                         padding: 0;
                         vertical-align: bottom;
+                    }
+                }
+            }
+
+            .basic-info .clinical-assertion .disease {
+                .condition {
+                    padding-bottom: 5px;
+                }
+
+                .identifiers {
+                    display: block;
+
+                    ul {
+                        display: inline;
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    li {
+                        display: inline;
+                    }
+
+                    li + li:before {
+                        content: "|";
+                        margin: 0 4px;
                     }
                 }
             }
@@ -1332,6 +1496,21 @@
     dl.inline-dl dt {
         float: none;
     }
+
+    .associated-disease {
+        word-break: break-word;
+
+        .popover-component {
+            display: inline-block;
+            font-weight: normal;
+
+            .popover-wrapper {
+                position: fixed;
+                max-width: 300px;
+                z-index: 9999;
+            }
+        }
+    }
 }
 
 .curation-variant  {
@@ -1376,7 +1555,7 @@
 /* bootstrap callout component styles */
 .bs-callout {
     padding: 20px;
-    margin: 20px 0;
+    margin: 0 0 20px 0;
     border: 1px solid #eee;
     border-left-width: 5px;
     border-radius: 3px;
@@ -2376,6 +2555,12 @@ table.login-users-interpretations {
 
         h4 {
             font-size: 1.25em;
+
+            @media screen and (max-width: $screen-xs-max) {
+                font-style: italic;
+                margin-bottom: 20px;
+                padding-left: 0;
+            }
         }
 
         label {
@@ -2384,6 +2569,10 @@ table.login-users-interpretations {
 
         .invisible-placeholder {
             visibility: hidden;
+
+            @media screen and (max-width: $screen-xs-max) {
+                display: none;
+            }
         }
     }
 
@@ -2402,15 +2591,76 @@ table.login-users-interpretations {
     .label-group {
         background-color: #f0ad4e;
     }
+
+    .section-disease {
+        .add-disease-group .add-disease {
+            .add-disease-button-group {
+                li {
+                    display: inherit;
+
+                    &:nth-child(even) {
+                        margin: 4px 0;
+                    }
+
+                    .gdm-disease-copy>.btn,
+                    .evidence-disease>.btn {
+                        font-size: 13px;
+                        padding: 6px 8px;
+                    }
+                }
+            }
+
+            .delete-disease-button {
+                .btn.pull-right {
+                    float: left !important;
+                    margin-top: 10px;
+                }
+            }
+        }
+    }
 }
 
 .panel.control-cohort {
     .section-disease {
         visibility: hidden;
+
+        @media screen and (max-width: $screen-xs-max) {
+            display: none;
+        }
+
+        .add-disease-group .add-disease {
+            .add-disease-button-group {
+                li {
+                    display: inherit;
+
+                    &:nth-child(even) {
+                        height: 8px;
+                        visibility: hidden;
+                    }
+
+                    .gdm-disease-copy>.btn,
+                    .evidence-disease>.btn {
+                        font-size: 13px;
+                        opacity: 0.5;
+                        padding: 6px 8px;
+                        pointer-events: none;
+                    }
+                }
+            }
+
+            .delete-disease-button.pull-right {
+                float: left !important;
+                padding-top: 10px;
+            }
+        }
     }
 
     .section-additional-info .other-genes {
         visibility: hidden;
+
+        @media screen and (max-width: $screen-xs-max) {
+            display: none;
+        }
     }
 
     .label-group {
@@ -2423,8 +2673,16 @@ table.login-users-interpretations {
         position: relative;
 
         h4 {
-            position: absolute;
-            margin-left: 0;
+            @media screen and (min-width: $screen-sm-min) {
+                position: absolute;
+                margin-left: 0;
+            }
+
+            @media screen and (max-width: $screen-xs-max) {
+                font-style: italic;
+                margin-bottom: 20px;
+                padding-left: 0;
+            }
         }
     }
 
@@ -2447,9 +2705,74 @@ table.login-users-interpretations {
     }
 }
 
-.control-cohort-view .panel.diseases,
-.control-cohort-view .additional-information .other-genes {
-    visibility: hidden;
+.case-cohort-view,
+.control-cohort-view {
+    @media screen and (max-width: $screen-xs-max) {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .panel-std {
+        dt {
+            width: auto;
+            text-align: left;
+            white-space: normal;
+            vertical-align: top;
+
+            @media screen and (min-width: $screen-lg-min) {
+                min-width: 300px;
+            }
+
+            @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max) {
+                min-width: 250px;
+            }
+
+            @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+                min-width: 135px;
+            }
+        }
+
+        dd {
+            width: 40%;
+            vertical-align: top;
+        }
+    }
+}
+
+.case-control-evaluation {
+    .panel-std {
+        dt {
+            width: auto;
+            text-align: left;
+            white-space: normal;
+            vertical-align: top;
+
+            @media screen and (min-width: $screen-lg-min) {
+                min-width: 400px;
+            }
+
+            @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max) {
+                min-width: 350px;
+            }
+
+            @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+                min-width: 300px;
+            }
+        }
+
+        dd {
+            width: 45%;
+            vertical-align: top;
+        }
+    }
+}
+
+.case-cohort-view {
+    padding-left: 0;
+}
+
+.control-cohort-view {
+    padding-right: 0;
 }
 
 .panel-body.panel-std {
@@ -2490,6 +2813,10 @@ table.login-users-interpretations {
 
     .variant-panel .mutalyzer-link {
         margin-bottom: 10px;
+    }
+
+    .gene-ontology.help-text.style-list {
+        padding-left: 14px;
     }
 
     dl.calculated-score {
@@ -2536,7 +2863,27 @@ table.login-users-interpretations {
 
 .panel.case-control-evidence-score,
 .panel.experimental-evidence-score,
-.panel.proband-evidence-score,
+.panel.proband-evidence-score {
+    .panel-body.panel-std {
+        padding-top: 25px;
+
+        label i {
+            display: block;
+            font-weight: normal;
+        }
+
+        label>span {
+            position: relative;
+
+            .required-field {
+                position: absolute;
+                top: -38px;
+                left: 4px;
+            }
+        }
+    }
+}
+
 .panel.case-control-evidence-score-viewer,
 .panel.experimental-evidence-score-viewer,
 .panel.proband-evidence-score-viewer {
@@ -2551,24 +2898,22 @@ table.login-users-interpretations {
         label>span {
             position: relative;
 
-            &>span:last-child {
+            .required-field {
                 position: absolute;
                 top: -38px;
-                left: 4px;
+                left: 198px;
             }
         }
-    }
-}
 
-.panel.case-control-evidence-score-viewer,
-.panel.experimental-evidence-score-viewer,
-.panel.proband-evidence-score-viewer {
-    .panel-body.panel-std {
         dl.calculated-score {
             dt {
                 padding-left: 10px;
                 text-align: left;
             }
+        }
+
+        .creator-score-status-note {
+            color: #606060;
         }
     }
 }
@@ -2582,4 +2927,87 @@ table.login-users-interpretations {
     margin: 20px 0;
     padding: 0 0 20px 0;
     text-align: center;
+}
+
+.group-curation-content {
+    .add-disease-group {
+        margin-bottom: 20px;
+
+        .control-label {
+            padding-top: 0;
+
+            .control-label-note {
+                font-weight: normal;
+                display: block;
+                margin-right: 15px;
+            }
+        }
+
+        .add-disease {
+            .disease-name {
+                padding-left: 0px;
+
+                .data-view {
+                    display: block;
+                    font-weight: normal;
+                    word-break: break-word;
+
+                    &.disease-name {
+                        font-weight: bold;
+                    }
+
+                    &.disease-desc,
+                    &.disease-phenotypes {
+                        padding-top: 8px;
+                    }
+                }
+
+                &.error .form-error {
+                    font-size: 14px;
+                }
+            }
+
+            .add-disease-button-group {
+                list-style: none;
+                padding-left: 0;
+
+                li {
+                    display: table-cell;
+                    
+                    &:nth-child(even) {
+                        padding: 0 10px;
+                    }
+                }
+            }
+
+            .btn {
+                .icon {
+                    font-size: 16px;
+                    margin-top: 2px;
+                    margin-left: 5px;
+                    vertical-align: text-bottom;
+                }
+            }
+        }
+    }
+}
+
+.curation-actions.curation-variant {
+    .add-disease-interpretation {
+        .btn {
+            .icon {
+                font-size: 14px;
+                margin-top: 2px;
+                margin-left: 5px;
+                vertical-align: text-bottom;
+            }
+        }
+    }
+
+    .modal-content {
+        .alert {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+    }
 }
