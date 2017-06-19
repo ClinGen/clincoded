@@ -1679,7 +1679,7 @@ var TypeBiochemicalFunctionA = function() {
                 value={BF_evidenceForOtherGenesWithSameFunction} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true} rows="2"
-                value={!this.state.gdm.disease.freetext ? this.state.gdm.disease.term + ' (' + this.state.gdm.disease.diseaseId + ')' : this.state.gdm.disease.term + ' (' + this.props.session.user_properties.title + ')'} />
+                value={!this.state.gdm.disease.freetext ? this.state.gdm.disease.term + ' (' + this.state.gdm.disease.diseaseId.replace('_', ':') + ')' : this.state.gdm.disease.term + ' (' + this.props.session.user_properties.title + ')'} />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
