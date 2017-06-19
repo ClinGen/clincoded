@@ -420,7 +420,8 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-name clearfix"
                     value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxLength="100" placeholder="Short phrase (max 100 characters)" required />
                 <p>Either HPO term(s) or a definition is required to describe this disease (both fields may be used).</p>
-                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s)):" handleChange={this.handleDiseaseFreeTextPhenotypesChange}
+                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" handleChange={this.handleDiseaseFreeTextPhenotypesChange}
+                    label={<span>Phenotype(s) (HPO ID(s)):<span className="control-label-note">Search <a href={external_url_map['HPOBrowser']} target="_blank">HPO-Browser</a></span></span>}
                     error={this.getFormError('diseaseFreeTextPhenoTypes')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextPhenoTypes')}
                     value={hpoids} placeholder="e.g. HP:0010704, HP:0030300" rows="1" required={!this.state.hasFreeTextDiseaseDescription}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-phenotypes clearfix" />
