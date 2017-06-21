@@ -54,7 +54,7 @@ module.exports = function(grunt) {
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
-                    ['envify', {NODE_ENV: JSON.stringify("production")}]
+                    'envify'
                 ],
                 plugin: [
                     ['minifyify', {
@@ -88,7 +88,7 @@ module.exports = function(grunt) {
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
-                    ['envify', {NODE_ENV: JSON.stringify("production")}]
+                    'envify'
                 ],
                 plugin: [
                     ['minifyify', {
@@ -110,7 +110,7 @@ module.exports = function(grunt) {
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
                     'brfs',
-                    ['envify', {NODE_ENV: JSON.stringify("production")}]
+                    'envify'
                 ],
                 plugin: [
                     ['minifyify', {
