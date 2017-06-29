@@ -1,5 +1,7 @@
 'use strict';
-var React = require('react');
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 var globals = require('./globals');
 var mixins = require('./mixins');
 var navigation = require('../libs/bootstrap/navigation');
@@ -34,7 +36,7 @@ var portal = {
 
 
 // Renders HTML common to all pages.
-var App = module.exports = React.createClass({
+var App = module.exports = createReactClass({
     mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
 
     triggers: {
@@ -175,7 +177,7 @@ var App = module.exports = React.createClass({
 
 
 // Render the common page header.
-var Header = React.createClass({
+var Header = createReactClass({
     render: function() {
         return (
             <header className="site-header">
@@ -189,7 +191,7 @@ var Header = React.createClass({
 // Render the notice bar, under header, if needed
 // Usage: <Notice noticeType='[TYPE]' noticeMessage={<span>[MESSAGE]</span>} {noticeClosable} />
 // Valid noticeTypes: success, info, warning, danger (bootstrap defaults), and demo, production (clingen customs)
-var Notice = React.createClass({
+var Notice = createReactClass({
     getInitialState: function () {
         return { noticeVisible: true };
     },
@@ -215,12 +217,12 @@ var Notice = React.createClass({
 });
 
 
-var NavbarMain = React.createClass({
+var NavbarMain = createReactClass({
     mixins: [NavbarMixin],
 
     propTypes: {
-        portal: React.PropTypes.object.isRequired,
-        href: React.PropTypes.string.isRequired
+        portal: PropTypes.object.isRequired,
+        href: PropTypes.string.isRequired
     },
 
     render: function() {
@@ -238,7 +240,7 @@ var NavbarMain = React.createClass({
 });
 
 
-var NavbarUser = React.createClass({
+var NavbarUser = createReactClass({
     render: function() {
         var session = this.props.session;
         var demoLoginEnabled = true;
