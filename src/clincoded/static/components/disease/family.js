@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { external_url_map } from '../globals';
 
@@ -11,7 +12,7 @@ import { DiseaseModal } from './modal';
  * Component for adding/copying/deleting disease when creating a new family evidence
  * either with or without an associated group
  */
-const FamilyDisease = module.exports.FamilyDisease = React.createClass({
+const FamilyDisease = module.exports.FamilyDisease = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {

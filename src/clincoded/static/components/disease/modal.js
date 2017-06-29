@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import ModalComponent from '../../libs/bootstrap/modal';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { RestMixin } from '../rest';
@@ -13,7 +14,7 @@ var _ = require('underscore');
 /**
  * Modal dialog box for adding disease (either by ID or free text)
  */
-const DiseaseModal = module.exports.DiseaseModal = React.createClass({
+const DiseaseModal = module.exports.DiseaseModal = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     propTypes: {
