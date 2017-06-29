@@ -1,5 +1,8 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+
 var _ = require('underscore');
 var moment = require('moment');
 var panel = require('../libs/bootstrap/panel');
@@ -55,7 +58,7 @@ var CurationMixin = module.exports.CurationMixin = {
 };
 
 
-var CuratorPage = module.exports.CuratorPage = React.createClass({
+var CuratorPage = module.exports.CuratorPage = createReactClass({
     render: function() {
         var context = this.props.context;
 
@@ -71,15 +74,15 @@ globals.content_views.register(CuratorPage, 'curator_page');
 
 
 // Curation data header for Gene:Disease
-var RecordHeader = module.exports.RecordHeader = React.createClass({
+var RecordHeader = module.exports.RecordHeader = createReactClass({
     mixins: [RestMixin],
 
     propTypes: {
-        gdm: React.PropTypes.object, // GDM data to display
-        omimId: React.PropTypes.string, // OMIM ID to display
-        updateOmimId: React.PropTypes.func, // Function to call when OMIM ID changes
-        linkGdm: React.PropTypes.bool, // whether or not to link GDM text back to GDM
-        pmid: React.PropTypes.string
+        gdm: PropTypes.object, // GDM data to display
+        omimId: PropTypes.string, // OMIM ID to display
+        updateOmimId: PropTypes.func, // Function to call when OMIM ID changes
+        linkGdm: PropTypes.bool, // whether or not to link GDM text back to GDM
+        pmid: PropTypes.string
     },
 
     getInitialState() {
@@ -411,10 +414,10 @@ var RecordHeader = module.exports.RecordHeader = React.createClass({
 });
 
 // Curation data header for Gene:Disease
-var ViewRecordHeader = module.exports.ViewRecordHeader = React.createClass({
+var ViewRecordHeader = module.exports.ViewRecordHeader = createReactClass({
     propTypes: {
-        gdm: React.PropTypes.object,
-        pmid: React.PropTypes.string
+        gdm: PropTypes.object,
+        pmid: PropTypes.string
     },
     render: function() {
         return (
@@ -517,11 +520,11 @@ var getVariantTitle = function(variant) {
 };
 
 // Display the header of all variants involved with the current GDM.
-var VariantHeader = module.exports.VariantHeader = React.createClass({
+var VariantHeader = module.exports.VariantHeader = createReactClass({
     propTypes: {
-        gdm: React.PropTypes.object, // GDM whose collected variants to display
-        pmid: React.PropTypes.string, // PMID of currently selected article
-        session: React.PropTypes.object // Logged-in session
+        gdm: PropTypes.object, // GDM whose collected variants to display
+        pmid: PropTypes.string, // PMID of currently selected article
+        session: PropTypes.object // Logged-in session
     },
 
     render: function() {
@@ -579,10 +582,10 @@ var VariantHeader = module.exports.VariantHeader = React.createClass({
 
 
 // Render the Variant Associations header.
-var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React.createClass({
+var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = createReactClass({
     propTypes: {
-        gdm: React.PropTypes.object, // GDM containing the PMIDs we're searching
-        variant: React.PropTypes.object // Variant whose associations we're searching for
+        gdm: PropTypes.object, // GDM containing the PMIDs we're searching
+        variant: PropTypes.object // Variant whose associations we're searching for
     },
 
     render: function() {
@@ -638,12 +641,12 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = React
 
 
 // Displays the PM item summary, with authors, title, citation
-var PmidSummary = module.exports.PmidSummary = React.createClass({
+var PmidSummary = module.exports.PmidSummary = createReactClass({
     propTypes: {
-        article: React.PropTypes.object, // Article object to display
-        displayJournal: React.PropTypes.bool, // T to display article journal
-        pmidLinkout: React.PropTypes.bool, // T to display pmid linkout
-        className: React.PropTypes.string
+        article: PropTypes.object, // Article object to display
+        displayJournal: PropTypes.bool, // T to display article journal
+        pmidLinkout: PropTypes.bool, // T to display pmid linkout
+        className: PropTypes.string
     },
 
     render: function() {
@@ -673,11 +676,11 @@ var PmidSummary = module.exports.PmidSummary = React.createClass({
 });
 
 
-var CurationPalette = module.exports.CurationPalette = React.createClass({
+var CurationPalette = module.exports.CurationPalette = createReactClass({
     propTypes: {
-        annotation: React.PropTypes.object.isRequired, // Current annotation that owns the article
-        gdm: React.PropTypes.object.isRequired, // Current GDM that owns the given annotation
-        session: React.PropTypes.object // Session object
+        annotation: PropTypes.object.isRequired, // Current annotation that owns the article
+        gdm: PropTypes.object.isRequired, // Current GDM that owns the given annotation
+        session: PropTypes.object // Session object
     },
 
     render: function() {
@@ -1076,10 +1079,10 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
 };
 
 // Title for each section of the curation palette. Contains the title and an Add button.
-var CurationPaletteTitles = React.createClass({
+var CurationPaletteTitles = createReactClass({
     propTypes: {
-        title: React.PropTypes.string, // Title to display
-        url: React.PropTypes.string // URL for panel title click to go to.
+        title: PropTypes.string, // Title to display
+        url: PropTypes.string // URL for panel title click to go to.
     },
 
     render: function() {
@@ -1102,9 +1105,9 @@ var CurationPaletteTitles = React.createClass({
 
 
 // Display the gene section of the curation data
-var GeneRecordHeader = React.createClass({
+var GeneRecordHeader = createReactClass({
     propTypes: {
-        gene: React.PropTypes.object // Object to display
+        gene: PropTypes.object // Object to display
     },
 
     render: function() {
@@ -1128,11 +1131,11 @@ var GeneRecordHeader = React.createClass({
 
 
 // Display the disease section of the curation data
-var DiseaseRecordHeader = React.createClass({
+var DiseaseRecordHeader = createReactClass({
     propTypes: {
-        gdm: React.PropTypes.object, // Object to display
-        omimId: React.PropTypes.string, // OMIM ID to display
-        updateOmimId: React.PropTypes.func // Function to call when OMIM ID changes
+        gdm: PropTypes.object, // Object to display
+        omimId: PropTypes.string, // OMIM ID to display
+        updateOmimId: PropTypes.func // Function to call when OMIM ID changes
     },
 
     render: function() {
@@ -1188,14 +1191,14 @@ var DiseaseRecordHeader = React.createClass({
 
 
 // The content of the Add PMID(s) modal dialog box
-var AddOmimIdModal = React.createClass({
+var AddOmimIdModal = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        gdm: React.PropTypes.object.isRequired, // GDM being affected
-        updateOmimId: React.PropTypes.func.isRequired, // Function to call when we have a new OMIM ID
-        addEdit: React.PropTypes.string.isRequired,
-        omimid: React.PropTypes.string
+        gdm: PropTypes.object.isRequired, // GDM being affected
+        updateOmimId: PropTypes.func.isRequired, // Function to call when we have a new OMIM ID
+        addEdit: PropTypes.string.isRequired,
+        omimid: PropTypes.string
     },
 
     getInitialState() {
@@ -1290,9 +1293,9 @@ var AddOmimIdModal = React.createClass({
 
 
 // Display the curator data of the curation data
-var CuratorRecordHeader = React.createClass({
+var CuratorRecordHeader = createReactClass({
     propTypes: {
-        gdm: React.PropTypes.object // GDM with curator data to display
+        gdm: PropTypes.object // GDM with curator data to display
     },
 
     render: function() {
@@ -1545,9 +1548,9 @@ function filteredObject(record) {
 
 // Display buttons to bring up the PubMed and doi-specified web pages.
 // For now, no doi is available
-var PmidDoiButtons = module.exports.PmidDoiButtons = React.createClass({
+var PmidDoiButtons = module.exports.PmidDoiButtons = createReactClass({
     propTypes: {
-        pmid: React.PropTypes.string // Numeric string PMID for PubMed page
+        pmid: PropTypes.string // Numeric string PMID for PubMed page
     },
 
     render: function() {
@@ -2631,13 +2634,13 @@ var variantHgvsRender = module.exports.variantHgvsRender = function(hgvsNames) {
 // Class for delete button (and associated modal) of Group, Family, Individual, and Experimental
 // Data objects. This class only renderes the button; please see DeleteButtonModal for bulk of
 // functionality
-var DeleteButton = module.exports.DeleteButton = React.createClass({
+var DeleteButton = module.exports.DeleteButton = createReactClass({
     propTypes: {
-        gdm: React.PropTypes.object,
-        parent: React.PropTypes.object,
-        item: React.PropTypes.object,
-        pmid: React.PropTypes.string,
-        disabled: React.PropTypes.bool
+        gdm: PropTypes.object,
+        parent: PropTypes.object,
+        item: PropTypes.object,
+        pmid: PropTypes.string,
+        disabled: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -2677,13 +2680,13 @@ var DeleteButton = module.exports.DeleteButton = React.createClass({
 // Delete Button confirmation modal. Sets target item to have status of 'deleted', and removes
 // the 'deleted' entry from its parent object. Forwards user back to curation central on delete
 // success
-var DeleteButtonModal = React.createClass({
+var DeleteButtonModal = createReactClass({
     mixins: [RestMixin, CuratorHistory],
     propTypes: {
-        gdm: React.PropTypes.object,
-        parent: React.PropTypes.object,
-        item: React.PropTypes.object,
-        pmid: React.PropTypes.string
+        gdm: PropTypes.object,
+        parent: PropTypes.object,
+        item: PropTypes.object,
+        pmid: PropTypes.string
     },
 
     getInitialState: function() {
