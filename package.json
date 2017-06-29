@@ -40,6 +40,7 @@
     "brfs": "^1.4.0",
     "browserify": "^13.3.0",
     "cookie-monster": "0.1.0",
+    "create-react-class": "^15.6.0",
     "domready": "^1.0.8",
     "envify": "^4.0.0",
     "es5-shim": "^4.0.3",
