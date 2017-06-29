@@ -1,5 +1,6 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
 var _ = require('underscore');
 var moment = require('moment');
 var globals = require('./globals');
@@ -14,7 +15,7 @@ var FormMixin = form.FormMixin;
 var Input = form.Input;
 var Panel = panel.Panel;
 
-var AddDisease = React.createClass({
+var AddDisease = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     getInitialState: function() {
