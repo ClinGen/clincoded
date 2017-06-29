@@ -1,6 +1,7 @@
 "use strict";
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 
 // Display a modal dialog box that blocks all other page input until the user dismisses it. The
@@ -71,16 +72,16 @@ export default class ModalComponent extends React.Component {
 }
 
 ModalComponent.propTypes = {
-    modalTitle: React.PropTypes.string, // Title in modal's header
-    modalClass: React.PropTypes.string, // CSS class for modal header
-    modalWrapperClass: React.PropTypes.string, // CSS class for modal DOM wrapper
-    bootstrapBtnClass: React.PropTypes.string, // Bootstrap class for button (e.g. btn-default, btn-primary)
-    actuatorClass: React.PropTypes.string, // CSS class for link/button to invoke modal
-    actuatorTitle: React.PropTypes.oneOfType([ // Text for link/button to invoke modal
-        React.PropTypes.object,
-        React.PropTypes.string
+    modalTitle: PropTypes.string, // Title in modal's header
+    modalClass: PropTypes.string, // CSS class for modal header
+    modalWrapperClass: PropTypes.string, // CSS class for modal DOM wrapper
+    bootstrapBtnClass: PropTypes.string, // Bootstrap class for button (e.g. btn-default, btn-primary)
+    actuatorClass: PropTypes.string, // CSS class for link/button to invoke modal
+    actuatorTitle: PropTypes.oneOfType([ // Text for link/button to invoke modal
+        PropTypes.object,
+        PropTypes.string
     ]),
-    children: React.PropTypes.node // JSX such as input field(s), dropdown(s), buttons
+    children: PropTypes.node // JSX such as input field(s), dropdown(s), buttons
 };
 
 class Modal extends React.Component {
