@@ -1,5 +1,5 @@
 "use strict";
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 // See 'ModalComponent.propTypes' for details
 
 
-export default class ModalComponent extends React.Component {
+export default class ModalComponent extends Component {
     constructor(props) {
         super(props);
         this.state = { isModalOpen: false };
@@ -84,7 +84,7 @@ ModalComponent.propTypes = {
     children: PropTypes.node // JSX such as input field(s), dropdown(s), buttons
 };
 
-class Modal extends React.Component {
+class Modal extends Component {
     render() {
         if (this.props.isOpen === false) {
             return null;
