@@ -1,24 +1,26 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('../globals');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 
-var Title = require('./title').Title;
-var CurationRecordVariant = require('./record_variant').CurationRecordVariant;
-var CurationRecordGeneDisease = require('./record_gene_disease').CurationRecordGeneDisease;
-var CurationRecordCurator = require('./record_curator').CurationRecordCurator;
+var _ = require('underscore');
+
+import { Title } from './title';
+import { CurationRecordVariant } from './record_variant';
+import { CurationRecordGeneDisease } from './record_gene_disease';
+import { CurationRecordCurator } from './record_curator';
 
 // Curation data header for Gene:Disease
-var VariantCurationHeader = module.exports.VariantCurationHeader = React.createClass({
+var VariantCurationHeader = module.exports.VariantCurationHeader = createReactClass({
     propTypes: {
-        variantData: React.PropTypes.object, // ClinVar data payload
-        interpretationUuid: React.PropTypes.string,
-        interpretation: React.PropTypes.object,
-        session: React.PropTypes.object,
-        setSummaryVisibility: React.PropTypes.func,
-        summaryVisible: React.PropTypes.bool,
-        getSelectedTab: React.PropTypes.func,
-        calculatedPathogenicity: React.PropTypes.string
+        variantData: PropTypes.object, // ClinVar data payload
+        interpretationUuid: PropTypes.string,
+        interpretation: PropTypes.object,
+        session: PropTypes.object,
+        setSummaryVisibility: PropTypes.func,
+        summaryVisible: PropTypes.bool,
+        getSelectedTab: PropTypes.func,
+        calculatedPathogenicity: PropTypes.string
     },
 
     getInitialState: function() {

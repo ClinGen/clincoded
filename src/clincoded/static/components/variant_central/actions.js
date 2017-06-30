@@ -1,35 +1,33 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
+import { queryKeyValue } from '../globals';
+
 var _ = require('underscore');
-var globals = require('../globals');
 var fetched = require('../fetched');
 var RestMixin = require('../rest').RestMixin;
 var parseAndLogError = require('../mixins').parseAndLogError;
-var form = require('../../libs/bootstrap/form');
 var CuratorHistory = require('../curator_history');
 var curator = require('../curator');
 var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
-
-var Input = form.Input;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var queryKeyValue = globals.queryKeyValue;
 
 import ModalComponent from '../../libs/bootstrap/modal';
 import { InterpretationDisease } from '../disease';
 
 // Display the variant curation action bar above the criteria and tabs
-var VariantCurationActions = module.exports.VariantCurationActions = React.createClass({
+var VariantCurationActions = module.exports.VariantCurationActions = createReactClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
-        variantData: React.PropTypes.object, // ClinVar data payload
-        session: React.PropTypes.object,
-        interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func,
-        calculatedAssertion: React.PropTypes.string,
-        provisionalPathogenicity: React.PropTypes.string
+        variantData: PropTypes.object, // ClinVar data payload
+        session: PropTypes.object,
+        interpretation: PropTypes.object,
+        editKey: PropTypes.string,
+        updateInterpretationObj: PropTypes.func,
+        calculatedAssertion: PropTypes.string,
+        provisionalPathogenicity: PropTypes.string
     },
 
     getInitialState: function() {
@@ -151,14 +149,14 @@ var VariantCurationActions = module.exports.VariantCurationActions = React.creat
 });
 
 // class to contain the Inheritance button and its modal
-var InheritanceModalButton = React.createClass({
+var InheritanceModalButton = createReactClass({
     propTypes: {
-        variantData: React.PropTypes.object,
-        hasAssociatedInheritance: React.PropTypes.bool,
-        session: React.PropTypes.object,
-        interpretation: React.PropTypes.object,
-        editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func
+        variantData: PropTypes.object,
+        hasAssociatedInheritance: PropTypes.bool,
+        session: PropTypes.object,
+        interpretation: PropTypes.object,
+        editKey: PropTypes.string,
+        updateInterpretationObj: PropTypes.func
     },
 
     render: function() {
@@ -185,25 +183,25 @@ var InheritanceModalButton = React.createClass({
 });
 
 // handle 'Associate with Inheritance' button click event
-var AssociateInheritance = React.createClass({
+var AssociateInheritance = createReactClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     contextTypes: {
-        handleStateChange: React.PropTypes.func
+        handleStateChange: PropTypes.func
     },
 
     propTypes: {
-        data: React.PropTypes.object, // variant object
-        session: React.PropTypes.object, // session object
-        interpretation: React.PropTypes.object, // interpretation object
-        editKey: React.PropTypes.bool, // edit flag
-        updateInterpretationObj: React.PropTypes.func,
-        title: React.PropTypes.string, // Text appearing in the modal header
-        buttonText: React.PropTypes.oneOfType([ // Text of the link/button invoking the modal
-            React.PropTypes.object,
-            React.PropTypes.string
+        data: PropTypes.object, // variant object
+        session: PropTypes.object, // session object
+        interpretation: PropTypes.object, // interpretation object
+        editKey: PropTypes.bool, // edit flag
+        updateInterpretationObj: PropTypes.func,
+        title: PropTypes.string, // Text appearing in the modal header
+        buttonText: PropTypes.oneOfType([ // Text of the link/button invoking the modal
+            PropTypes.object,
+            PropTypes.string
         ]),
-        buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
+        buttonClass: PropTypes.string // CSS class of the link/button invoking the modal
     },
 
     getInitialState: function() {
