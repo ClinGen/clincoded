@@ -1,6 +1,6 @@
 'use strict';
 
-import React, {PropTypes} from 'react';
+import React from 'react';
 import _ from 'underscore';
 import moment from 'moment';
 
@@ -38,12 +38,6 @@ module.exports = {
         if (case_control && case_control.studyType !== 'undefined') {
             caseControl = case_control;
         }
-        /*** Keep for next release enhancement
-        let evidenceScores = [{score: null, evidenceType: null}];
-        if (scores && scores.length) {
-            evidenceScores = scores;
-        }
-        */
 
         return (
             <div>
@@ -179,25 +173,6 @@ module.exports = {
                         value={caseControl.comments ? caseControl.comments : ''}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
                 </div>
-                {/*** Replaced with new score implementation ***
-                <div className="row section section-score">
-                    <h3><i className="icon icon-chevron-right"></i> Score Case-Control Study</h3>
-                    <div className="evidenceScores">
-                        <Input type="select" ref="evidenceScore" label="Score:" defaultValue="none" value={scores && scores.score ? scores.score : 'none'}
-                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                            <option value="none">No Selection</option>
-                            <option disabled="disabled"></option>
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                        </Input>
-                    </div>
-                </div>
-                */}
             </div>
         );
     },
