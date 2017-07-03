@@ -1,28 +1,28 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('../globals');
-var RestMixin = require('../rest').RestMixin;
-
-var VariantCurationHeader = require('./header').VariantCurationHeader;
-var VariantCurationActions = require('./actions').VariantCurationActions;
-var VariantCurationInterpretation = require('./interpretation').VariantCurationInterpretation;
-var SO_terms = require('./interpretation/mapping/SO_term.json');
-var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-var queryKeyValue = globals.queryKeyValue;
-var parseClinvar = require('../../libs/parse-resources').parseClinvar;
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import { RestMixin } from '../rest';
+import { VariantCurationHeader } from './header';
+import { VariantCurationActions } from './actions';
+import { VariantCurationInterpretation } from './interpretation';
+import { parseClinvar } from '../../libs/parse-resources';
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
 import { parseKeyValue } from './helpers/parse_key_value';
 import { getClinvarInterpretations, parseClinvarSCVs } from './helpers/clinvar_interpretations';
+import { CurationInterpretationCriteria } from './interpretation/criteria';
+import { EvaluationSummary } from './interpretation/summary';
 
-var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
-var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
+var _ = require('underscore');
+var globals = require('../globals');
+var external_url_map = globals.external_url_map;
+var dbxref_prefix_map = globals.dbxref_prefix_map;
+var queryKeyValue = globals.queryKeyValue;
+var SO_terms = require('./interpretation/mapping/SO_term.json');
+var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
 
 // Variant Curation Hub
-var VariantCurationHub = React.createClass({
+var VariantCurationHub = createReactClass({
     mixins: [RestMixin],
 
     getInitialState: function() {
