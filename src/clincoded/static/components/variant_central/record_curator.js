@@ -1,25 +1,25 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../globals');
-var RestMixin = require('../rest').RestMixin;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import moment from 'moment';
+import { queryKeyValue, external_url_map } from '../globals';
+import { RestMixin } from '../rest';
 
-var queryKeyValue = globals.queryKeyValue;
-let external_url_map = globals.external_url_map;
+var _ = require('underscore');
 
 import PopOverComponent from '../../libs/bootstrap/popover';
 
 // Display in-progress or provisional interpretations associated with variant
-var CurationRecordCurator = module.exports.CurationRecordCurator = React.createClass({
+var CurationRecordCurator = module.exports.CurationRecordCurator = createReactClass({
     mixins: [RestMixin],
 
     propTypes: {
-        calculatedPathogenicity: React.PropTypes.string,
-        data: React.PropTypes.object, // ClinVar data payload
-        interpretationUuid: React.PropTypes.string,
-        interpretation: React.PropTypes.object,
-        session: React.PropTypes.object
+        calculatedPathogenicity: PropTypes.string,
+        data: PropTypes.object, // ClinVar data payload
+        interpretationUuid: PropTypes.string,
+        interpretation: PropTypes.object,
+        session: PropTypes.object
     },
 
     getInitialState: function() {
