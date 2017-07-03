@@ -1,36 +1,25 @@
 'use strict';
-var React = require('react');
-var globals = require('../../globals');
-var RestMixin = require('../../rest').RestMixin;
-var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
-var vciFormHelper = require('./shared/form');
-var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
-var CompleteSection = require('./shared/complete_section').CompleteSection;
-var parseAndLogError = require('../../mixins').parseAndLogError;
-var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
-var extraEvidence = require('./shared/extra_evidence');
-
-var queryKeyValue = globals.queryKeyValue;
-var editQueryValue = globals.editQueryValue;
-
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-
-var panel = require('../../../libs/bootstrap/panel');
-var form = require('../../../libs/bootstrap/form');
-
-var externalLinks = require('./shared/externalLinks');
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../rest';
+import { parseClinvar } from '../../../libs/parse-resources';
+import { queryKeyValue, editQueryValue, dbxref_prefix_map, external_url_map } from '../../globals';
+import { setContextLinks } from './shared/externalLinks';
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
+import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
+import { findDiffKeyValuesMixin } from './shared/find_diff';
+import { CompleteSection } from './shared/complete_section';
+import { parseAndLogError } from '../../mixins';
 
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
+var vciFormHelper = require('./shared/form');
+var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var extraEvidence = require('./shared/extra_evidence');
 
 var validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
 
@@ -64,21 +53,21 @@ var computationStatic = {
 };
 
 // Display the curator data of the curation data
-var CurationInterpretationComputational = module.exports.CurationInterpretationComputational = React.createClass({
+var CurationInterpretationComputational = module.exports.CurationInterpretationComputational = createReactClass({
     mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        interpretation: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func,
-        href_url: React.PropTypes.object,
-        ext_myVariantInfo: React.PropTypes.object,
-        ext_bustamante: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object,
-        ext_singleNucleotide: React.PropTypes.bool,
-        loading_bustamante: React.PropTypes.bool,
-        loading_myVariantInfo: React.PropTypes.bool,
-        loading_clinvarEsearch: React.PropTypes.bool
+        data: PropTypes.object, // ClinVar data payload
+        interpretation: PropTypes.object,
+        updateInterpretationObj: PropTypes.func,
+        href_url: PropTypes.object,
+        ext_myVariantInfo: PropTypes.object,
+        ext_bustamante: PropTypes.object,
+        ext_clinVarEsearch: PropTypes.object,
+        ext_singleNucleotide: PropTypes.bool,
+        loading_bustamante: PropTypes.bool,
+        loading_myVariantInfo: PropTypes.bool,
+        loading_clinvarEsearch: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -436,10 +425,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             gRCh37 = variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : (variant.hgvsNames.gRCh37 ? variant.hgvsNames.gRCh37 : null);
         }
         if (gRCh38) {
-            links_38 = externalLinks.setContextLinks(gRCh38, 'GRCh38');
+            links_38 = setContextLinks(gRCh38, 'GRCh38');
         }
         if (gRCh37) {
-            links_37 = externalLinks.setContextLinks(gRCh37, 'GRCh37');
+            links_37 = setContextLinks(gRCh37, 'GRCh37');
         }
 
         return (

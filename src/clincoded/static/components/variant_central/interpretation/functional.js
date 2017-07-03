@@ -1,33 +1,27 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../../globals');
-var RestMixin = require('../../rest').RestMixin;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../rest';
+import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
+import { CompleteSection } from './shared/complete_section';
+
 var vciFormHelper = require('./shared/form');
-var extraEvidence = require('./shared/extra_evidence');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var CompleteSection = require('./shared/complete_section').CompleteSection;
-
-var panel = require('../../../libs/bootstrap/panel');
-var form = require('../../../libs/bootstrap/form');
-
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
+var extraEvidence = require('./shared/extra_evidence');
 
 // Display the curator data of the curation data
-var CurationInterpretationFunctional = module.exports.CurationInterpretationFunctional = React.createClass({
+var CurationInterpretationFunctional = module.exports.CurationInterpretationFunctional = createReactClass({
     mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object,
-        interpretation: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func,
-        href_url: React.PropTypes.object
+        data: PropTypes.object,
+        interpretation: PropTypes.object,
+        updateInterpretationObj: PropTypes.func,
+        href_url: PropTypes.object
     },
 
     getInitialState: function() {
