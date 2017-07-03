@@ -4,7 +4,7 @@
 // # Dependency: None
 
 'use strict';
-var React = require('react');
+import React from 'react';
 
 export function renderDataCredit(source) {
     if (source === 'myvariant') { 
