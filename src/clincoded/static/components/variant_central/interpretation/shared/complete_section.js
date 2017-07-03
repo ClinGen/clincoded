@@ -1,14 +1,12 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var RestMixin = require('../../../rest').RestMixin;
-var form = require('../../../../libs/bootstrap/form');
-var curator = require('../../../curator');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { RestMixin } from '../../../rest';
+import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
 
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
+var curator = require('../../../curator');
 
 var tabNames = {
     'population': 'Population',
@@ -21,13 +19,13 @@ var tabNames = {
 // but with values of true or false depending on whether or not oldObj's values for that key matches newValue's. A value of true means that
 // the key:value is different. Also creates diffObjFlag that keeps track of whether or not there is any change in the diffObj. A value of true
 // means that there is a difference between newObj and oldObj. Returns array [diffObj, diffObjFlag]
-var CompleteSection = module.exports.CompleteSection = React.createClass({
+var CompleteSection = module.exports.CompleteSection = createReactClass({
     mixins: [RestMixin, FormMixin],
 
     propTypes: {
-        interpretation: React.PropTypes.object,
-        tabName: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func
+        interpretation: PropTypes.object,
+        tabName: PropTypes.string,
+        updateInterpretationObj: PropTypes.func
     },
 
     getInitialState: function() {

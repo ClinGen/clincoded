@@ -1,38 +1,35 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var form = require('../../../../libs/bootstrap/form');
-var RestMixin = require('../../../rest').RestMixin;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../../rest';
+import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
+import { AddResourceId } from '../../../add_external_resource';
+
 var curator = require('../../../curator');
 var PmidSummary = curator.PmidSummary;
 var CuratorHistory = require('../../../curator_history');
-var add_external_resource = require('../../../add_external_resource');
-var AddResourceId = add_external_resource.AddResourceId;
-
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
 
 // Class to render the extra evidence table in VCI, and handle any interactions with it
-var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = React.createClass({
+var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
-        viewOnly: React.PropTypes.bool, // True if extra evidence is in view-only mode
-        tableName: React.PropTypes.object, // table name as HTML object
-        category: React.PropTypes.string, // category (usually the tab) the evidence is part of
-        subcategory: React.PropTypes.string, // subcategory (usually the panel) the evidence is part of
-        href_url: React.PropTypes.object, // href_url object
-        session: React.PropTypes.object, // session object
-        variant: React.PropTypes.object, // parent variant object
-        interpretation: React.PropTypes.object, // parent interpretation object
-        updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
+        viewOnly: PropTypes.bool, // True if extra evidence is in view-only mode
+        tableName: PropTypes.object, // table name as HTML object
+        category: PropTypes.string, // category (usually the tab) the evidence is part of
+        subcategory: PropTypes.string, // subcategory (usually the panel) the evidence is part of
+        href_url: PropTypes.object, // href_url object
+        session: PropTypes.object, // session object
+        variant: PropTypes.object, // parent variant object
+        interpretation: PropTypes.object, // parent interpretation object
+        updateInterpretationObj: PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
 
     contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
+        fetch: PropTypes.func // Function to perform a search
     },
 
     getInitialState: function() {
