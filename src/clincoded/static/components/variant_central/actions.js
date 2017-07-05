@@ -4,17 +4,16 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
 import { queryKeyValue } from '../globals';
+import _ from 'underscore';
+import { RestMixin } from '../rest';
+import { parseAndLogError } from '../mixins';
+import ModalComponent from '../../libs/bootstrap/modal';
+import { InterpretationDisease } from '../disease';
 
-var _ = require('underscore');
 var fetched = require('../fetched');
-var RestMixin = require('../rest').RestMixin;
-var parseAndLogError = require('../mixins').parseAndLogError;
 var CuratorHistory = require('../curator_history');
 var curator = require('../curator');
 var modesOfInheritance = require('../mapping/modes_of_inheritance.json');
-
-import ModalComponent from '../../libs/bootstrap/modal';
-import { InterpretationDisease } from '../disease';
 
 // Display the variant curation action bar above the criteria and tabs
 var VariantCurationActions = module.exports.VariantCurationActions = createReactClass({
