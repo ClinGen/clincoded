@@ -1,11 +1,10 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var _ = require('underscore');
+import React, { Component } from 'react';
+import { content_views } from './globals';
 
 
-var Page = module.exports.Page = React.createClass({
-    render: function() {
+export default class Page extends Component {
+    render() {
         var context = this.props.context;
         return (
             <div>
@@ -17,7 +16,6 @@ var Page = module.exports.Page = React.createClass({
             </div>
         );
     }
-});
+}
 
-
-globals.content_views.register(Page, 'page');
+content_views.register(Page, 'page');
