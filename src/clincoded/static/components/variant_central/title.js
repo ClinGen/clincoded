@@ -2,10 +2,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
 import { queryKeyValue, editQueryValue, addQueryKey } from '../globals';
-
-var _ = require('underscore');
 
 // General purpose title rendering
 var Title = module.exports.Title = createReactClass({
