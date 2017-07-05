@@ -1,13 +1,15 @@
 'use strict';
-var EventEmitter = require('events').EventEmitter;
-var React = require('react');
-var ReactForms = require('react-forms');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var closest = require('../libs/closest');
-var offset = require('../libs/offset');
-var ga = require('google-analytics');
-var _ = require('underscore');
+import { EventEmitter } from 'events';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import ReactForms from 'react-forms';
+import _ from 'underscore';
+import { parseAndLogError } from './mixins';
+import { closest } from '../libs/closest';
+import { offset } from '../libs/offset';
 
+var ga = require('google-analytics');
 
 var filterValue = function(value) {
     if (Array.isArray(value)) {
@@ -45,16 +47,16 @@ var makeValidationResult = function(validation) {
 };
 
 
-var Form = module.exports.Form = React.createClass({
+var Form = module.exports.Form = createReactClass({
     contextTypes: {
-        adviseUnsavedChanges: React.PropTypes.func,
-        fetch: React.PropTypes.func
+        adviseUnsavedChanges: PropTypes.func,
+        fetch: PropTypes.func
     },
 
     childContextTypes: {
-        canSave: React.PropTypes.func,
-        onTriggerSave: React.PropTypes.func,
-        formEvents: React.PropTypes.object
+        canSave: PropTypes.func,
+        onTriggerSave: PropTypes.func,
+        formEvents: PropTypes.object
     },
     getChildContext: function() {
         return {

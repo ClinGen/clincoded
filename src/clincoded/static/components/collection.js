@@ -1,12 +1,10 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var globals = require('./globals');
-var parseAndLogError = require('./mixins').parseAndLogError;
-
-var bindEvent = globals.bindEvent;
-var unbindEvent = globals.unbindEvent;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import url from 'url';
+import { parseAndLogError } from './mixins';
+import { content_views, listing_titles, bindEvent, unbindEvent } from './globals';
 
 var lookup_column = function (result, column) {
     var value = result;
@@ -17,7 +15,7 @@ var lookup_column = function (result, column) {
     return value;
 };
 
-var Collection = module.exports.Collection = React.createClass({
+var Collection = module.exports.Collection = createReactClass({
     render: function () {
         var context = this.props.context;
         return (
@@ -36,7 +34,7 @@ var Collection = module.exports.Collection = React.createClass({
     }
 });
 
-globals.content_views.register(Collection, 'collection');
+content_views.register(Collection, 'collection');
 
 
 class Cell {
@@ -99,9 +97,9 @@ var RowView = function (props) {
     );
 };
 
-var Table = module.exports.Table = React.createClass({
+var Table = module.exports.Table = createReactClass({
     contextTypes: {
-        fetch: React.PropTypes.func
+        fetch: PropTypes.func
     },
 
     getDefaultProps: function () {
@@ -186,14 +184,14 @@ var Table = module.exports.Table = React.createClass({
                 //}
                 var value = lookup_column(item, column);
                 if (column == '@id') {
-                    factory = globals.listing_titles.lookup(item);
+                    factory = listing_titles.lookup(item);
                     value = factory({context: item});
                 } else if (value === null) {
                     value = '';
                 } else if (value instanceof Array) {
                     value = value;
                 } else if (value['@type']) {
-                    factory = globals.listing_titles.lookup(value);
+                    factory = listing_titles.lookup(value);
                     value = factory({context: value});
                 }
                 var sortable = ('' + value).toLowerCase();
