@@ -2,9 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
-
-var _ = require('underscore');
-
+import _ from 'underscore';
 import { Title } from './title';
 import { CurationRecordVariant } from './record_variant';
 import { CurationRecordGeneDisease } from './record_gene_disease';
