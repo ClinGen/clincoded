@@ -2,31 +2,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var CuratorHistory = require('./curator_history');
-var variantHgvsRender = curator.variantHgvsRender;
-var PmidSummary = curator.PmidSummary;
-var parseAndLogError = require('./mixins').parseAndLogError;
-
-var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
-var parseClinvar = require('../libs/parse-resources').parseClinvar;
-var parseCAR = require('../libs/parse-resources').parseCAR;
-
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var RestMixin = require('./rest').RestMixin;
-var Input = form.Input;
-var external_url_map = globals.external_url_map;
-var userMatch = globals.userMatch;
-var truncateString = globals.truncateString;
-
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from './rest';
+import { userMatch, truncateString, external_url_map } from './globals';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import * as CuratorHistory from './curator_history';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { parseClinvar, parseCAR } from '../libs/parse-resources';
 import ModalComponent from '../libs/bootstrap/modal';
+import * as curator from './curator';
+const variantHgvsRender = curator.variantHgvsRender;
+const PmidSummary = curator.PmidSummary;
 
 // Class for the add resource button. This class only renders the button to add and clear the fields, and contains the modal wrapper.
 // The modal itself is defined by the AddResourceIdModal class below.
