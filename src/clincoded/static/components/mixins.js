@@ -1,11 +1,12 @@
 /*jshint scripturl:true */
 'use strict';
-var _ = require('underscore');
-var React = require('react');
-var url = require('url');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import url from 'url';
+import serialize from 'form-serialize';
 var origin = require('../libs/origin');
 var $script = require('scriptjs');
-var serialize = require('form-serialize');
 var ga = require('google-analytics');
 
 
@@ -79,7 +80,7 @@ class Timeout {
 module.exports.Auth0 = {
     // Mixin for providing Auth0 Authentication functionality. Call in app.js
     childContextTypes: {
-        fetch: React.PropTypes.func
+        fetch: PropTypes.func
     },
 
     getChildContext: function() {
@@ -360,8 +361,8 @@ module.exports.HistoryAndTriggers = {
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     childContextTypes: {
-        adviseUnsavedChanges: React.PropTypes.func,
-        navigate: React.PropTypes.func
+        adviseUnsavedChanges: PropTypes.func,
+        navigate: PropTypes.func
     },
 
     adviseUnsavedChanges: function () {
