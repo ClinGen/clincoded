@@ -2,15 +2,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import moment from 'moment';
-
-var _ = require('underscore');
-var globals = require('../globals');
-var curator = require('../curator');
-
-var queryKeyValue = globals.queryKeyValue;
-var editQueryValue = globals.editQueryValue;
-var truncateString = globals.truncateString;
+import * as curator from '../curator';
+import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';
@@ -256,7 +251,7 @@ class InterpretationAddHistory extends Component {
     }
 }
 
-globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
+history_views.register(InterpretationAddHistory, 'interpretation', 'add');
 
 // Display a history item for adding an individual
 class InterpretationModifyHistory extends Component {
@@ -288,7 +283,7 @@ class InterpretationModifyHistory extends Component {
     }
 }
 
-globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
+history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
 
 
 // Map Interpretation statuses from
@@ -541,7 +536,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
     }
 });
 
-globals.content_views.register(InterpretationCollection, 'interpretation_collection');
+content_views.register(InterpretationCollection, 'interpretation_collection');
 
 
 // Render the Interpretation status legend

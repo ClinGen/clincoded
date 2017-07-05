@@ -1,6 +1,7 @@
 'use strict';
 import React, { Component } from 'react';
 import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import { RestMixin } from '../rest';
 import { VariantCurationHeader } from './header';
 import { VariantCurationActions } from './actions';
@@ -12,12 +13,8 @@ import { parseKeyValue } from './helpers/parse_key_value';
 import { getClinvarInterpretations, parseClinvarSCVs } from './helpers/clinvar_interpretations';
 import { CurationInterpretationCriteria } from './interpretation/criteria';
 import { EvaluationSummary } from './interpretation/summary';
+import { curator_page, queryKeyValue, dbxref_prefix_map, external_url_map } from '../globals';
 
-var _ = require('underscore');
-var globals = require('../globals');
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-var queryKeyValue = globals.queryKeyValue;
 var SO_terms = require('./interpretation/mapping/SO_term.json');
 var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
 
@@ -475,4 +472,4 @@ var VariantCurationHub = createReactClass({
     }
 });
 
-globals.curator_page.register(VariantCurationHub, 'curator_page', 'variant-central');
+curator_page.register(VariantCurationHub, 'curator_page', 'variant-central');
