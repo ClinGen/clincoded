@@ -1,19 +1,15 @@
 'use strict';
 import React, { Component } from 'react';
 import createReactClass from 'create-react-class';
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('./globals');
-var fetched = require('./fetched');
-var form = require('../libs/bootstrap/form');
-var panel = require('../libs/bootstrap/panel');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var RestMixin = require('./rest').RestMixin;
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from './rest';
+import { curator_page } from './globals';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
 
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var Panel = panel.Panel;
+var fetched = require('./fetched');
 
 var AddCurator = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -129,4 +125,4 @@ var AddCurator = createReactClass({
     }
 });
 
-globals.curator_page.register(AddCurator, 'curator_page', 'add-curator');
+curator_page.register(AddCurator, 'curator_page', 'add-curator');
