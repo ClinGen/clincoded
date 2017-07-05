@@ -1,8 +1,8 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
 
-
-var FileInput = module.exports.FileInput = React.createClass({
+var FileInput = module.exports.FileInput = createReactClass({
 
     getInitialState: function() {
         return {
