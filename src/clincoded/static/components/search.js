@@ -1,18 +1,15 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var globals = require('./globals');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import url from 'url';
+import { content_views, listing_titles, listing_views, itemClass, truncateString, statusOrder } from './globals';
+import { AuditMixin, AuditIndicators, AuditDetail } from './audit';
+import { DbxrefList, Dbxref } from './dbxref';
+
 var image = require('./image');
 var search = module.exports;
-var dbxref = require('./dbxref');
-var audit = require('./audit');
-var DbxrefList = dbxref.DbxrefList;
-var Dbxref = dbxref.Dbxref;
-var statusOrder = globals.statusOrder;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
 
 // Should really be singular...
 var types = {
@@ -37,12 +34,12 @@ var Listing = module.exports.Listing = function (props) {
         context = props;
         props = {context: context,  key: context['@id']};
     }
-    var ListingView = globals.listing_views.lookup(props.context);
+    var ListingView = listing_views.lookup(props.context);
     return <ListingView {...props} />;
 };
 
 var PickerActionsMixin = module.exports.PickerActionsMixin = {
-    contextTypes: {actions: React.PropTypes.array},
+    contextTypes: {actions: PropTypes.array},
     renderActions: function() {
         if (this.context.actions && this.context.actions.length) {
             return (
@@ -56,11 +53,11 @@ var PickerActionsMixin = module.exports.PickerActionsMixin = {
     }
 };
 
-var Item = module.exports.Item = React.createClass({
+var Item = module.exports.Item = createReactClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
-        var title = globals.listing_titles.lookup(result)({context: result});
+        var title = listing_titles.lookup(result)({context: result});
         var item_type = result['@type'][0];
         return (
             <li>
@@ -84,10 +81,10 @@ var Item = module.exports.Item = React.createClass({
         );
     }
 });
-globals.listing_views.register(Item, 'item');
+listing_views.register(Item, 'item');
 
 // Display one antibody status indicator
-var StatusIndicator = React.createClass({
+var StatusIndicator = createReactClass({
     getInitialState: function() {
         return {
             tipOpen: false,
@@ -140,7 +137,7 @@ var StatusIndicator = React.createClass({
 
         return (
             <span className="tooltip-trigger">
-                <i className={globals.statusClass(this.props.status, 'indicator icon icon-circle')} ref="indicator" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}></i>
+                <i className={statusClass(this.props.status, 'indicator icon icon-circle')} ref="indicator" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}></i>
                 <div className={"tooltip sentence-case " + classes} style={this.state.tipStyles}>
                     {this.props.status}<br /><span>{this.props.terms.join(', ')}</span>
                 </div>
@@ -150,7 +147,7 @@ var StatusIndicator = React.createClass({
 });
 
 // Display the status indicators for one target
-var StatusIndicators = React.createClass({
+var StatusIndicators = createReactClass({
     render: function() {
         var targetTree = this.props.targetTree;
         var target = this.props.target;
@@ -169,7 +166,7 @@ var StatusIndicators = React.createClass({
     }
 });
 
-var Antibody = module.exports.Antibody = React.createClass({
+var Antibody = module.exports.Antibody = createReactClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
@@ -237,9 +234,9 @@ var Antibody = module.exports.Antibody = React.createClass({
         );
     }
 });
-globals.listing_views.register(Antibody, 'antibody_lot');
+listing_views.register(Antibody, 'antibody_lot');
 
-var Biosample = module.exports.Biosample = React.createClass({
+var Biosample = module.exports.Biosample = createReactClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
@@ -300,10 +297,10 @@ var Biosample = module.exports.Biosample = React.createClass({
         );
     }
 });
-globals.listing_views.register(Biosample, 'biosample');
+listing_views.register(Biosample, 'biosample');
 
 
-var Experiment = module.exports.Experiment = React.createClass({
+var Experiment = module.exports.Experiment = createReactClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
@@ -398,9 +395,9 @@ var Experiment = module.exports.Experiment = React.createClass({
         );
     }
 });
-globals.listing_views.register(Experiment, 'experiment');
+listing_views.register(Experiment, 'experiment');
 
-var Dataset = module.exports.Dataset = React.createClass({
+var Dataset = module.exports.Dataset = createReactClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
@@ -427,9 +424,9 @@ var Dataset = module.exports.Dataset = React.createClass({
         );
     }
 });
-globals.listing_views.register(Dataset, 'dataset');
+listing_views.register(Dataset, 'dataset');
 
-var Target = module.exports.Target = React.createClass({
+var Target = module.exports.Target = createReactClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
@@ -459,10 +456,10 @@ var Target = module.exports.Target = React.createClass({
         );
     }
 });
-globals.listing_views.register(Target, 'target');
+listing_views.register(Target, 'target');
 
 
-var Image = module.exports.Image = React.createClass({
+var Image = module.exports.Image = createReactClass({
     mixins: [PickerActionsMixin, ],
     render: function() {
         var result = this.props.context;
@@ -487,7 +484,7 @@ var Image = module.exports.Image = React.createClass({
         );
     }
 });
-globals.listing_views.register(Image, 'image');
+listing_views.register(Image, 'image');
 
 
 // If the given term is selected, return the href for the term
@@ -511,7 +508,7 @@ function countSelectedTerms(terms, field, filters) {
     return count;
 }
 
-var Term = search.Term = React.createClass({
+var Term = search.Term = createReactClass({
     render: function () {
         var filters = this.props.filters;
         var term = this.props.term['key'];
@@ -536,7 +533,7 @@ var Term = search.Term = React.createClass({
         return (
             <li id={selected ? "selected" : ""} key={term}>
                 {selected ? '' : <span className="bar" style={barStyle}></span>}
-                {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
+                {field === 'lot_reviews.status' ? <span className={statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
                 <a id={selected ? "selected" : ""} href={href} onClick={href ? this.props.onFilter : null}>
                     <span className="pull-right">{count} {selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                     <span className="facet-item">
@@ -548,7 +545,7 @@ var Term = search.Term = React.createClass({
     }
 });
 
-var TypeTerm = search.TypeTerm = React.createClass({
+var TypeTerm = search.TypeTerm = createReactClass({
     render: function () {
         var term = this.props.term['key'];
         var filters = this.props.filters;
@@ -564,7 +561,7 @@ var TypeTerm = search.TypeTerm = React.createClass({
 });
 
 
-var Facet = search.Facet = React.createClass({
+var Facet = search.Facet = createReactClass({
     getInitialState: function () {
         return {
             facetOpen: false
@@ -611,7 +608,7 @@ var Facet = search.Facet = React.createClass({
     }
 });
 
-var TextFilter = React.createClass({
+var TextFilter = createReactClass({
 
     getValue: function(props) {
         var filter = this.props.filters.filter(function(f) {
@@ -659,7 +656,7 @@ var TextFilter = React.createClass({
     }
 });
 
-var FacetList = search.FacetList = React.createClass({
+var FacetList = search.FacetList = createReactClass({
     render: function() {
         var term = this.props.term;
         var facets = this.props.facets;
@@ -688,7 +685,7 @@ var FacetList = search.FacetList = React.createClass({
     }
 });
 
-var ResultTable = search.ResultTable = React.createClass({
+var ResultTable = search.ResultTable = createReactClass({
 
     getDefaultProps: function() {
         return {
@@ -697,7 +694,7 @@ var ResultTable = search.ResultTable = React.createClass({
         };
     },
 
-    childContextTypes: {actions: React.PropTypes.array},
+    childContextTypes: {actions: PropTypes.array},
     getChildContext: function() {
         return {
             actions: this.props.actions
@@ -799,7 +796,7 @@ var ResultTable = search.ResultTable = React.createClass({
     }
 });
 
-var Search = search.Search = React.createClass({
+var Search = search.Search = createReactClass({
     render: function() {
         var context = this.props.context;
         var results = context['@graph'];
@@ -820,4 +817,4 @@ var Search = search.Search = React.createClass({
     }
 });
 
-globals.content_views.register(Search, 'search');
+content_views.register(Search, 'search');
