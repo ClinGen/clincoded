@@ -2,17 +2,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
-var globals = require('./globals');
-var mixins = require('./mixins');
-var navigation = require('../libs/bootstrap/navigation');
-var jsonScriptEscape = require('../libs/jsonScriptEscape');
-var url = require('url');
-
-var NavbarMixin = navigation.NavbarMixin;
-var Navbar = navigation.Navbar;
-var Nav = navigation.Nav;
-var NavItem = navigation.NavItem;
-
+import url from 'url';
+import { content_views } from './globals';
+import { Auth0, HistoryAndTriggers } from './mixins';
+import { NavbarMixin, Nav, Navbar, NavItem } from '../libs/bootstrap/navigation';
+import jsonScriptEscape from '../libs/jsonScriptEscape';
 
 var routes = {
     'curator': require('./curator').Curator
@@ -37,7 +31,7 @@ var portal = {
 
 // Renders HTML common to all pages.
 var App = module.exports = createReactClass({
-    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
+    mixins: [Auth0, HistoryAndTriggers],
 
     triggers: {
         demo: 'triggerAutoLogin',
@@ -90,7 +84,7 @@ var App = module.exports = createReactClass({
             context = context.default_page;
         }
         if (context) {
-            var ContentView = globals.content_views.lookup(context, current_action);
+            var ContentView = content_views.lookup(context, current_action);
             content = <ContentView {...this.props} context={context} href={this.state.href}
                 loadingComplete={this.state.loadingComplete} session={this.state.session}
                 portal={this.state.portal} navigate={this.navigate} href_url={href_url}
