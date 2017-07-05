@@ -1,8 +1,7 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-
-var addQueryKey = globals.addQueryKey;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { addQueryKey } from './globals';
 
 
 // Mixin to use REST APIs conveniently. In this project, this is mostly used to read or write data
@@ -21,7 +20,7 @@ var addQueryKey = globals.addQueryKey;
 var RestMixin = module.exports.RestMixin = {
     // Borrow 'fetch' function from Auth0 mixin used by App component
     contextTypes: {
-        fetch: React.PropTypes.func
+        fetch: PropTypes.func
     },
 
     getRestDataXml: function(uri, errorHandler) {
