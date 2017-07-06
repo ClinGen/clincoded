@@ -1,8 +1,8 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('./globals');
+import React from 'react';
+import _ from 'underscore';
+import moment from 'moment';
+import { history_views } from './globals';
 
 
 // The curator history records operations performed by the currently logged-in curator on the database.
@@ -73,6 +73,6 @@ module.exports = {
     //   var HistoryView = this.getHistoryView(history);
     //   <HistoryView history={history} />
     getHistoryView: function(history) {
-        return globals.history_views.lookup(history.primary, history.operationType);
+        return history_views.lookup(history.primary, history.operationType);
     }
 };
