@@ -1,18 +1,15 @@
 "use strict";
-var React = require('react');
-var _ = require('underscore');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var panel = require('../libs/bootstrap/panel');
+import React from 'react';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { RestMixin } from './rest';
+import { queryKeyValue, curator_page } from './globals';
+import { Panel } from '../libs/bootstrap/panel';
+import * as curator from './curator';
+const RecordHeader = curator.RecordHeader;
+const PmidSummary = curator.PmidSummary;
 
-var RecordHeader = curator.RecordHeader;
-var PmidSummary = curator.PmidSummary;
-var queryKeyValue = globals.queryKeyValue;
-var Panel = panel.Panel;
-
-
-var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
+var IndividualSubmit = module.exports.FamilySubmit = createReactClass({
     mixins: [RestMixin],
 
     // Keeps track of values from the query string
@@ -167,4 +164,4 @@ var IndividualSubmit = module.exports.FamilySubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(IndividualSubmit, 'curator_page', 'individual-submit');
+curator_page.register(IndividualSubmit, 'curator_page', 'individual-submit');
