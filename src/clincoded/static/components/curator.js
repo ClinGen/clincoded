@@ -2,24 +2,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
-
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var CuratorHistory = require('./curator_history');
-var parseAndLogError = require('./mixins').parseAndLogError;
-
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var RestMixin = require('./rest').RestMixin;
-var Input = form.Input;
-var external_url_map = globals.external_url_map;
-var userMatch = globals.userMatch;
-var truncateString = globals.truncateString;
-
+import _ from 'underscore';
+import moment from 'moment';
+import { curator_page, content_views, userMatch, truncateString, external_url_map } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
 import { GdmDisease } from './disease';
@@ -62,7 +52,7 @@ var CuratorPage = module.exports.CuratorPage = createReactClass({
     render: function() {
         var context = this.props.context;
 
-        var CuratorPageView = globals.curator_page.lookup(context, context.name);
+        var CuratorPageView = curator_page.lookup(context, context.name);
         var content = <CuratorPageView {...this.props} />;
         return (
             <div>{content}</div>
@@ -70,7 +60,7 @@ var CuratorPage = module.exports.CuratorPage = createReactClass({
     }
 });
 
-globals.content_views.register(CuratorPage, 'curator_page');
+content_views.register(CuratorPage, 'curator_page');
 
 
 // Curation data header for Gene:Disease
@@ -609,7 +599,7 @@ var VariantAssociationsHeader = module.exports.VariantAssociationsHeader = creat
                     });
                     var render = (
                         <div key={annotation.uuid} className="pmid-association-header">
-                            <span>PMID: <a href={globals.external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> &#x2192; </span>
+                            <span>PMID: <a href={external_url_map['PubMed'] + annotation.article.pmid} target="_blank" title="PubMed article in a new tab">{annotation.article.pmid}</a> &#x2192; </span>
                             {sortedAssociations.map(function(association, i) {
                                 var associationType = association['@type'][0];
                                 var probandLabel = (associationType === 'individual' && association.proband) ? <i className="icon icon-proband"></i> : null;
