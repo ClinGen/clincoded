@@ -1,30 +1,29 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('./globals');
-var fetched = require('./fetched');
-var form = require('../libs/bootstrap/form');
-var panel = require('../libs/bootstrap/panel');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var RestMixin = require('./rest').RestMixin;
-var CuratorHistory = require('./curator_history');
-var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
-
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var Panel = panel.Panel;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { curator_page, history_views } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import { GdmDisease } from './disease';
 
-var CreateGeneDisease = React.createClass({
+var fetched = require('./fetched');
+var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
+
+var CreateGeneDisease = createReactClass({
     mixins: [FormMixin, RestMixin, CuratorHistory],
 
     contextTypes: {
-        fetch: React.PropTypes.func,
-        navigate: React.PropTypes.func
+        fetch: PropTypes.func,
+        navigate: PropTypes.func
     },
 
     getInitialState: function() {
@@ -281,25 +280,19 @@ var CreateGeneDisease = React.createClass({
     }
 });
 
-globals.curator_page.register(CreateGeneDisease, 'curator_page', 'create-gene-disease');
+curator_page.register(CreateGeneDisease, 'curator_page', 'create-gene-disease');
 
 
 // HTML labels for inputs follow.
-var LabelHgncGene = React.createClass({
-    render: function() {
+class LabelHgncGene extends Component {
+    render() {
         return <span>Enter <a href="http://www.genenames.org" target="_blank" title="HGNC home page in a new tab">HGNC</a> gene symbol</span>;
     }
-});
-
-var LabelOrphanetId = React.createClass({
-    render: function() {
-        return <span>Enter <a href="http://www.orpha.net/" target="_blank" title="Orphanet home page in a new tab">Orphanet</a> ID</span>;
-    }
-});
+}
 
 // Display a history item for adding a PMID to a GDM
-var GdmAddHistory = React.createClass({
-    render: function() {
+class GdmAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var gdm = history.primary;
         var gdmMeta = history.meta.gdm;
@@ -316,6 +309,6 @@ var GdmAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(GdmAddHistory, 'gdm', 'add');
+history_views.register(GdmAddHistory, 'gdm', 'add');
