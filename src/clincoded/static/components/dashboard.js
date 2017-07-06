@@ -1,25 +1,22 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('./globals');
-var fetched = require('./fetched');
-var form = require('../libs/bootstrap/form');
-var panel = require('../libs/bootstrap/panel');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var RestMixin = require('./rest').RestMixin;
-var CuratorHistory = require('./curator_history');
-
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { curator_page, userMatch, external_url_map } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
+import * as curator from './curator';
 import { showActivityIndicator } from './activity_indicator';
 
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var Panel = panel.Panel;
-var external_url_map = globals.external_url_map;
-var userMatch = globals.userMatch;
+var fetched = require('./fetched');
 
-var Dashboard = React.createClass({
+var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
 
     getInitialState: function() {
@@ -235,4 +232,4 @@ var Dashboard = React.createClass({
     }
 });
 
-globals.curator_page.register(Dashboard, 'curator_page', 'dashboard');
+curator_page.register(Dashboard, 'curator_page', 'dashboard');
