@@ -8,10 +8,7 @@ import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
-import { parsePubmed } from '../libs/parse-pubmed';
-import { AddResourceId } from './add_external_resource';
 import * as CuratorHistory from './curator_history';
-import * as curator from './curator';
 import { showActivityIndicator } from './activity_indicator';
 
 var fetched = require('./fetched');
