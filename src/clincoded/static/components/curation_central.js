@@ -1,33 +1,26 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('./globals');
-var moment = require('moment');
-var curator = require('./curator');
-var form = require('../libs/bootstrap/form');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var RestMixin = require('./rest').RestMixin;
-var CurationMixin = require('./curator').CurationMixin;
-var CuratorHistory = require('./curator_history');
-var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
-var add_external_resource = require('./add_external_resource');
-var AddResourceId = add_external_resource.AddResourceId;
-
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var PmidDoiButtons = curator.PmidDoiButtons;
-var RecordHeader = curator.RecordHeader;
-var CurationPalette = curator.CurationPalette;
-var VariantHeader = curator.VariantHeader;
-var PmidSummary = curator.PmidSummary;
-var queryKeyValue = globals.queryKeyValue;
-var external_url_map = globals.external_url_map;
-var userMatch = globals.userMatch;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { curator_page, history_views, userMatch, queryKeyValue, external_url_map } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { parseAndLogError } from './mixins';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const PmidDoiButtons = curator.PmidDoiButtons;
+const RecordHeader = curator.RecordHeader;
+const CurationPalette = curator.CurationPalette;
+const VariantHeader = curator.VariantHeader;
+const PmidSummary = curator.PmidSummary;
 
 // Curator page content
-var CurationCentral = React.createClass({
+var CurationCentral = createReactClass({
     mixins: [RestMixin, CurationMixin, CuratorHistory],
 
     getInitialState: function() {
@@ -185,11 +178,11 @@ var CurationCentral = React.createClass({
     }
 });
 
-globals.curator_page.register(CurationCentral, 'curator_page', 'curation-central');
+curator_page.register(CurationCentral, 'curator_page', 'curation-central');
 
 
-var BetaNote = React.createClass({
-    render: function() {
+class BetaNote extends Component {
+    render() {
         var annotation = this.props.annotation;
         var session = this.props.session;
         var curatorMatch = annotation && userMatch(annotation.submitted_by, session);
@@ -204,17 +197,17 @@ var BetaNote = React.createClass({
             </div>
         );
     }
-});
+}
 
 // Display the list of PubMed articles passed in pmidItems.
-var PmidSelectionList = React.createClass({
+var PmidSelectionList = createReactClass({
     propTypes: {
-        annotations: React.PropTypes.array, // List of PubMed items
-        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        currPmid: React.PropTypes.string, // PMID of currently selected article
-        currPmidChange: React.PropTypes.func, // Function to call when currently selected article changes
-        updateGdmArticles: React.PropTypes.func, // Function to call when we have an article to add to the GDM
-        currGdm: React.PropTypes.object // Current GDM object
+        annotations: PropTypes.array, // List of PubMed items
+        protocol: PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
+        currPmid: PropTypes.string, // PMID of currently selected article
+        currPmidChange: PropTypes.func, // Function to call when currently selected article changes
+        updateGdmArticles: PropTypes.func, // Function to call when we have an article to add to the GDM
+        currGdm: PropTypes.object // Current GDM object
     },
 
     render: function() {
@@ -257,8 +250,8 @@ var PmidSelectionList = React.createClass({
 });
 
 // Display a history item for adding a PMID to a GDM
-var PmidGdmAddHistory = React.createClass({
-    render: function() {
+class PmidGdmAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var article = history.primary;
         var gdm = history.meta.article.gdm;
@@ -273,16 +266,16 @@ var PmidGdmAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(PmidGdmAddHistory, 'article', 'add');
+history_views.register(PmidGdmAddHistory, 'article', 'add');
 
 
 // Display a history item for deleting a PMID from a GDM
-var PmidGdmDeleteHistory = React.createClass({
-    render: function() {
+class PmidGdmDeleteHistory extends Component {
+    render() {
         return <div>PMIDGDMDELETE</div>;
     }
-});
+}
 
-globals.history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
+history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
