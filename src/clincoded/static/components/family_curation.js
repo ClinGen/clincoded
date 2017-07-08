@@ -14,7 +14,6 @@ import { parsePubmed } from '../libs/parse-pubmed';
 import { AddResourceId } from './add_external_resource';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
-import { AssessmentTracker, AssessmentPanel, AssessmentMixin } from './assessment';
 import { makeStarterIndividual, updateProbandVariants, recordIndividualHistory } from './individual_curation';
 import ModalComponent from '../libs/bootstrap/modal';
 import { FamilyDisease, FamilyProbandDisease } from './disease';
@@ -26,6 +25,10 @@ const CurationPalette = curator.CurationPalette;
 const PmidSummary = curator.PmidSummary;
 const PmidDoiButtons = curator.PmidDoiButtons;
 const DeleteButton = curator.DeleteButton;
+import * as Assessments from './assessment';
+const AssessmentTracker = Assessments.AssessmentTracker;
+const AssessmentPanel = Assessments.AssessmentPanel;
+const AssessmentMixin = Assessments.AssessmentMixin;
 
 const MAX_VARIANTS = 2;
 
