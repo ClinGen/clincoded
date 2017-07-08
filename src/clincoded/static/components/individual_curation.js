@@ -1,49 +1,39 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var methods = require('./methods');
-var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
-var add_external_resource = require('./add_external_resource');
-var CuratorHistory = require('./curator_history');
-
-var CurationMixin = curator.CurationMixin;
-var RecordHeader = curator.RecordHeader;
-var ViewRecordHeader = curator.ViewRecordHeader;
-var CurationPalette = curator.CurationPalette;
-var PmidSummary = curator.PmidSummary;
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
-var PmidDoiButtons = curator.PmidDoiButtons;
-var queryKeyValue = globals.queryKeyValue;
-var country_codes = globals.country_codes;
-var external_url_map = globals.external_url_map;
-var DeleteButton = curator.DeleteButton;
-var AddResourceId = add_external_resource.AddResourceId;
-
-var ScoreIndividual = require('./score/individual_score').ScoreIndividual;
-var ScoreViewer = require('./score/viewer').ScoreViewer;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { curator_page, content_views, history_views, queryKeyValue, external_url_map, country_codes } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
+import * as methods from './methods';
+import { ScoreIndividual } from './score/individual_score';
+import { ScoreViewer } from './score/viewer';
 import ModalComponent from '../libs/bootstrap/modal';
 import { IndividualDisease } from './disease';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const RecordHeader = curator.RecordHeader;
+const ViewRecordHeader = curator.ViewRecordHeader;
+const CurationPalette = curator.CurationPalette;
+const PmidSummary = curator.PmidSummary;
+const PmidDoiButtons = curator.PmidDoiButtons;
+const DeleteButton = curator.DeleteButton;
 
 const MAX_VARIANTS = 2;
 
-var IndividualCuration = React.createClass({
+var IndividualCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: PropTypes.func
     },
 
     // Keeps track of values from the query string
@@ -971,10 +961,10 @@ var IndividualCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
+curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
 
 // HTML labels for inputs follow.
-var LabelPanelTitle = React.createClass({
+var LabelPanelTitle = createReactClass({
     render: function() {
         var individual = this.props.individual;
         var probandLabelWhite = <span>{individual && individual.proband ? <i className="icon icon-proband-white"></i> : null}</span>;
@@ -1038,7 +1028,7 @@ var IndividualName = function(displayNote) {
 };
 
 // HTML labels for inputs follow.
-var LabelIndividualName = React.createClass({
+var LabelIndividualName = createReactClass({
     render: function() {
         return <span>{this.props.probandLabel}Individual Label:</span>;
     }
@@ -1158,9 +1148,9 @@ var IndividualCommonDiseases = function() {
 };
 
 // HTML labels for inputs follow.
-var LabelHpoId = React.createClass({
+var LabelHpoId = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -1174,9 +1164,9 @@ var LabelHpoId = React.createClass({
 });
 
 // HTML labels for inputs follow.
-var LabelPhenoTerms = React.createClass({
+var LabelPhenoTerms = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -1495,31 +1485,31 @@ var IndividualVariantInfo = function() {
 };
 
 
-var LabelClinVarVariant = React.createClass({
+var LabelClinVarVariant = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
     }
 });
 
-var LabelClinVarVariantTitle = React.createClass({
+var LabelClinVarVariantTitle = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
     }
 });
 
-var LabelCARVariant = React.createClass({
+var LabelCARVariant = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
     }
 });
 
-var LabelCARVariantTitle = React.createClass({
+var LabelCARVariantTitle = createReactClass({
     render: function() {
         return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
-var LabelOtherVariant = React.createClass({
+var LabelOtherVariant = createReactClass({
     render: function() {
         return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
     }
@@ -1548,13 +1538,13 @@ var IndividualAdditional = function() {
 };
 
 // HTML labels for inputs follow.
-var LabelAdditional = React.createClass({
+var LabelAdditional = createReactClass({
     render: function() {
         return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
     }
 });
 
-var LabelOtherPmids = React.createClass({
+var LabelOtherPmids = createReactClass({
     render: function() {
         return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
     }
@@ -1583,7 +1573,7 @@ var IndividualScore = function() {
     );
 };
 
-var IndividualViewer = React.createClass({
+var IndividualViewer = createReactClass({
     // Start:: Evidence score submission hanlding for viewer
     mixins: [RestMixin],
 
@@ -1982,12 +1972,12 @@ var IndividualViewer = React.createClass({
     }
 });
 
-globals.content_views.register(IndividualViewer, 'individual');
+content_views.register(IndividualViewer, 'individual');
 
 
 // HTML labels for inputs follow.
-var LabelPanelTitleView = React.createClass({
-    render: function() {
+class LabelPanelTitleView extends Component {
+    render() {
         var individual = this.props.individual;
         var probandLabel = <span>{individual && individual.proband ? <i className="icon icon-proband"></i> : null}</span>;
         var labelText = this.props.labelText;
@@ -2000,7 +1990,7 @@ var LabelPanelTitleView = React.createClass({
 
         return <h4><span className="panel-title-std">Individual{probandLabel} — {labelText}</span></h4>;
     }
-});
+}
 
 
 // Make a starter individual from the family and write it to the DB; always called from
@@ -2133,8 +2123,8 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
 
 
 // Display a history item for adding an individual
-var IndividualAddHistory = React.createClass({
-    render: function() {
+class IndividualAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var individual = history.primary;
         var gdm = history.meta.individual.gdm;
@@ -2164,14 +2154,14 @@ var IndividualAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(IndividualAddHistory, 'individual', 'add');
+history_views.register(IndividualAddHistory, 'individual', 'add');
 
 
 // Display a history item for modifying an individual
-var IndividualModifyHistory = React.createClass({
-    render: function() {
+class IndividualModifyHistory extends Component {
+    render() {
         var history = this.props.history;
         var individual = history.primary;
 
@@ -2183,14 +2173,14 @@ var IndividualModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(IndividualModifyHistory, 'individual', 'modify');
+history_views.register(IndividualModifyHistory, 'individual', 'modify');
 
 
 // Display a history item for deleting an individual
-var IndividualDeleteHistory = React.createClass({
-    render: function() {
+class IndividualDeleteHistory extends Component {
+    render() {
         var history = this.props.history;
         var individual = history.primary;
 
@@ -2201,6 +2191,6 @@ var IndividualDeleteHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(IndividualDeleteHistory, 'individual', 'delete');
+history_views.register(IndividualDeleteHistory, 'individual', 'delete');
