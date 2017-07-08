@@ -1,43 +1,33 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var methods = require('./methods');
-var Assessments = require('./assessment');
-var CuratorHistory = require('./curator_history');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { curator_page, content_views, history_views, truncateString, queryKeyValue, external_url_map, country_codes } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import * as CuratorHistory from './curator_history';
+import * as methods from './methods';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const RecordHeader = curator.RecordHeader;
+const VariantAssociationsHeader = curator.VariantAssociationsHeader;
+const CurationPalette = curator.CurationPalette;
+const PmidSummary = curator.PmidSummary;
+const PmidDoiButtons = curator.PmidDoiButtons;
+import * as Assessments from './assessment';
+const AssessmentTracker = Assessments.AssessmentTracker;
+const AssessmentPanel = Assessments.AssessmentPanel;
+const AssessmentMixin = Assessments.AssessmentMixin;
 
-var CurationMixin = curator.CurationMixin;
-var RecordHeader = curator.RecordHeader;
-var CurationPalette = curator.CurationPalette;
-var VariantAssociationsHeader = curator.VariantAssociationsHeader;
-var AssessmentTracker = Assessments.AssessmentTracker;
-var AssessmentPanel = Assessments.AssessmentPanel;
-var AssessmentMixin = Assessments.AssessmentMixin;
-var PmidSummary = curator.PmidSummary;
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
-var PmidDoiButtons = curator.PmidDoiButtons;
-var queryKeyValue = globals.queryKeyValue;
-var country_codes = globals.country_codes;
-var truncateString = globals.truncateString;
-var external_url_map = globals.external_url_map;
-
-
-var VariantCuration = React.createClass({
+var VariantCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: PropTypes.func
     },
 
     // Keeps track of values from the query string
@@ -466,15 +456,15 @@ var VariantCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(VariantCuration, 'curator_page', 'variant-curation');
+curator_page.register(VariantCuration, 'curator_page', 'variant-curation');
 
 
 // Display a single variant curation viewer panel
-var VariantCurationView = React.createClass({
+var VariantCurationView = createReactClass({
     propTypes: {
-        pathogenicity: React.PropTypes.object.isRequired, // Variant pathogenicity to display
-        note: React.PropTypes.string, // Note to display above key-value pairs.
-        named: React.PropTypes.bool // TRUE to put curator's name in title bar
+        pathogenicity: PropTypes.object.isRequired, // Variant pathogenicity to display
+        note: PropTypes.string, // Note to display above key-value pairs.
+        named: PropTypes.bool // TRUE to put curator's name in title bar
     },
 
     render: function() {
@@ -540,7 +530,7 @@ var VariantCurationView = React.createClass({
 
 
 // Display the pathogenicity when its uuid is passed in the URL.
-var VariantViewer = React.createClass({
+var VariantViewer = createReactClass({
     render: function() {
         var pathogenicity = this.props.context;
         var variant = pathogenicity.variant;
@@ -558,14 +548,14 @@ var VariantViewer = React.createClass({
     }
 });
 
-globals.content_views.register(VariantViewer, 'pathogenicity');
+content_views.register(VariantViewer, 'pathogenicity');
 
 
 // Display a history item for adding variant pathogenicities
-var PathogenicityAddModHistory = React.createClass({
+var PathogenicityAddModHistory = createReactClass({
     propTypes: {
-        history: React.PropTypes.object.isRequired, // History object
-        user: React.PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
+        history: PropTypes.object.isRequired, // History object
+        user: PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
     },
 
     render: function() {
@@ -585,23 +575,23 @@ var PathogenicityAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
-globals.history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
+history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
+history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
 
 
 // Display a history item for deleting variant pathogenicities
-var PathogenicityDeleteHistory = React.createClass({
-    render: function() {
+class PathogenicityDeleteHistory extends Component {
+    render() {
         return <div>PATHOGENICITYDELETE</div>;
     }
-});
+}
 
-globals.history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');
+history_views.register(PathogenicityDeleteHistory, 'pathogenicity', 'delete');
 
 
 // Display a history item for adding a variant
-var VariantAddHistory = React.createClass({
-    render: function() {
+class VariantAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var variant = history.primary;
 
@@ -612,16 +602,16 @@ var VariantAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(VariantAddHistory, 'variant', 'add');
+history_views.register(VariantAddHistory, 'variant', 'add');
 
 
 // Display a history item for adding a variant
-var VariantDeleteHistory = React.createClass({
-    render: function() {
+class VariantDeleteHistory extends Component {
+    render() {
         return <div>VARIANTDELETE</div>;
     }
-});
+}
 
-globals.history_views.register(VariantDeleteHistory, 'variant', 'delete');
+history_views.register(VariantDeleteHistory, 'variant', 'delete');

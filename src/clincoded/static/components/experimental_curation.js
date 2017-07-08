@@ -1,42 +1,31 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var methods = require('./methods');
-var Assessments = require('./assessment');
-var add_external_resource = require('./add_external_resource');
-var CuratorHistory = require('./curator_history');
-
-var CurationMixin = curator.CurationMixin;
-var RecordHeader = curator.RecordHeader;
-var ViewRecordHeader = curator.ViewRecordHeader;
-var CurationPalette = curator.CurationPalette;
-var AssessmentTracker = Assessments.AssessmentTracker;
-var AssessmentPanel = Assessments.AssessmentPanel;
-var AssessmentMixin = Assessments.AssessmentMixin;
-var PmidSummary = curator.PmidSummary;
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
-var PmidDoiButtons = curator.PmidDoiButtons;
-var queryKeyValue = globals.queryKeyValue;
-var country_codes = globals.country_codes;
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-var DeleteButton = curator.DeleteButton;
-var AddResourceId = add_external_resource.AddResourceId;
-
-var ScoreExperimental = require('./score/experimental_score').ScoreExperimental;
-var ScoreViewer = require('./score/viewer').ScoreViewer;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { curator_page, content_views, history_views, queryKeyValue, dbxref_prefix_map, external_url_map, country_codes } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
+import * as methods from './methods';
+import { ScoreExperimental } from './score/experimental_score';
+import { ScoreViewer } from './score/viewer';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const RecordHeader = curator.RecordHeader;
+const ViewRecordHeader = curator.ViewRecordHeader;
+const CurationPalette = curator.CurationPalette;
+const PmidSummary = curator.PmidSummary;
+const PmidDoiButtons = curator.PmidDoiButtons;
+const DeleteButton = curator.DeleteButton;
+import * as Assessments from './assessment';
+const AssessmentTracker = Assessments.AssessmentTracker;
+const AssessmentPanel = Assessments.AssessmentPanel;
+const AssessmentMixin = Assessments.AssessmentMixin;
 
 const MAX_VARIANTS = 5;
 
@@ -46,11 +35,11 @@ var initialCv = {
     othersAssessed: false // TRUE if other curators have assessed the experimental data
 };
 
-var ExperimentalCuration = React.createClass({
+var ExperimentalCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: PropTypes.func
     },
 
     cv: initialCv,
@@ -1521,7 +1510,7 @@ var ExperimentalCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
+curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
 
 
 // Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context
@@ -1698,7 +1687,7 @@ var TypeBiochemicalFunctionA = function() {
 };
 
 // HTML labels for Biochemical Functions panel A
-var LabelGenesWithSameFunction = React.createClass({
+var LabelGenesWithSameFunction = createReactClass({
     render: function() {
         return <span>Other gene(s) with same function as gene in record <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
     }
@@ -1743,7 +1732,7 @@ var TypeBiochemicalFunctionB = function() {
 };
 
 // HTML labels for Biochemical Functions panel B
-var LabelHPOIDs = React.createClass({
+var LabelHPOIDs = createReactClass({
     render: function() {
         return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
@@ -1815,7 +1804,7 @@ var TypeProteinInteractions = function() {
 };
 
 // HTML labels for Protein Interactions panel
-var LabelInteractingGenes = React.createClass({
+var LabelInteractingGenes = createReactClass({
     render: function() {
         return <span>Interacting gene(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
     }
@@ -2162,12 +2151,12 @@ var TypeModelSystems = function() {
     );
 };
 
-var LabelPhenotypeObserved = React.createClass({
+var LabelPhenotypeObserved = createReactClass({
     render: function() {
         return <span>Phenotype(s) observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
 });
-var LabelPatientPhenotype = React.createClass({
+var LabelPatientPhenotype = createReactClass({
     render: function() {
         return <span>Human phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
@@ -2294,7 +2283,7 @@ var TypeRescue = function() {
     );
 };
 
-var LabelPhenotypeRescue = React.createClass({
+var LabelPhenotypeRescue = createReactClass({
     render: function() {
         return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
     }
@@ -2433,37 +2422,37 @@ var ExperimentalDataVariant = function() {
     );
 };
 
-var LabelClinVarVariant = React.createClass({
+var LabelClinVarVariant = createReactClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
     }
 });
 
-var LabelClinVarVariantTitle = React.createClass({
+var LabelClinVarVariantTitle = createReactClass({
     render: function() {
         return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
     }
 });
 
-var LabelCARVariant = React.createClass({
+var LabelCARVariant = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
     }
 });
 
-var LabelCARVariantTitle = React.createClass({
+var LabelCARVariantTitle = createReactClass({
     render: function() {
         return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
-var LabelOtherVariant = React.createClass({
+var LabelOtherVariant = createReactClass({
     render: function() {
         return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
     }
 });
 
-var NoteAssessment = React.createClass({
+var NoteAssessment = createReactClass({
     render: function() {
         return (
             <div className="alert alert-warning">Note: The next release will provide a calculated score for this experimental evidence based on the information provided as well as the ability to adjust this score within the allowed range specified by the Clinical Validity Classification.</div>
@@ -2472,7 +2461,7 @@ var NoteAssessment = React.createClass({
 });
 
 
-var ExperimentalViewer = React.createClass({
+var ExperimentalViewer = createReactClass({
     mixins: [FormMixin, RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
@@ -3160,12 +3149,12 @@ var ExperimentalViewer = React.createClass({
     }
 });
 
-globals.content_views.register(ExperimentalViewer, 'experimental');
+content_views.register(ExperimentalViewer, 'experimental');
 
 
 // Display a history item for adding experimental data
-var ExperimentalAddHistory = React.createClass({
-    render: function() {
+class ExperimentalAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var experimental = history.primary;
         var gdm = history.meta.experimental.gdm;
@@ -3182,14 +3171,14 @@ var ExperimentalAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(ExperimentalAddHistory, 'experimental', 'add');
+history_views.register(ExperimentalAddHistory, 'experimental', 'add');
 
 
 // Display a history item for modifying experimental data
-var ExperimentModifyHistory = React.createClass({
-    render: function() {
+class ExperimentModifyHistory extends Component {
+    render() {
         var history = this.props.history;
         var experimental = history.primary;
 
@@ -3201,14 +3190,14 @@ var ExperimentModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
+history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
 
 
 // Display a history item for deleting experimental data
-var ExperimentDeleteHistory = React.createClass({
-    render: function() {
+class ExperimentDeleteHistory extends Component {
+    render() {
         var history = this.props.history;
         var experimental = history.primary;
 
@@ -3219,6 +3208,6 @@ var ExperimentDeleteHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(ExperimentDeleteHistory, 'experimental', 'delete');
+history_views.register(ExperimentDeleteHistory, 'experimental', 'delete');
