@@ -530,8 +530,8 @@ var VariantCurationView = createReactClass({
 
 
 // Display the pathogenicity when its uuid is passed in the URL.
-var VariantViewer = createReactClass({
-    render: function() {
+class VariantViewer extends Component {
+    render() {
         var pathogenicity = this.props.context;
         var variant = pathogenicity.variant;
 
@@ -546,19 +546,14 @@ var VariantViewer = createReactClass({
             </div>
         );
     }
-});
+}
 
 content_views.register(VariantViewer, 'pathogenicity');
 
 
 // Display a history item for adding variant pathogenicities
-var PathogenicityAddModHistory = createReactClass({
-    propTypes: {
-        history: PropTypes.object.isRequired, // History object
-        user: PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
-    },
-
-    render: function() {
+class PathogenicityAddModHistory extends Component {
+    render() {
         var history = this.props.history;
         var pathogenicity = history.primary;
         var gdm = history.meta.pathogenicity.gdm;
@@ -573,7 +568,12 @@ var PathogenicityAddModHistory = createReactClass({
             </div>
         );
     }
-});
+}
+
+PathogenicityAddModHistory.propTypes = {
+    history: PropTypes.object.isRequired, // History object
+    user: PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
+};
 
 history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'add');
 history_views.register(PathogenicityAddModHistory, 'pathogenicity', 'modify');
