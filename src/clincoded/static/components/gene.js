@@ -7,7 +7,6 @@ import { DbxrefList, Dbxref } from './dbxref';
 export class Gene extends Component {
     render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'view-detail panel key-value');
         var geneLink, geneRef, baseName, sep;
 
         if (context.organism.name == "human") {
@@ -37,7 +36,7 @@ export class Gene extends Component {
                     </div>
                 </header>
 
-                <dl className={itemClass}>
+                <dl className={itemClass(context, 'view-detail panel key-value')}>
                     <dt>Gene name</dt>
                     <dd>{context.label}</dd>
 

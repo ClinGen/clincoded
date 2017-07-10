@@ -19,12 +19,11 @@ var Software = module.exports.Software = createReactClass({
 
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item');
 
         var pipeline_url = '/search/?type=pipeline&analysis_steps.software_versions.software.uuid=' + context.uuid;
 
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{context.title}</h2>

@@ -32,11 +32,10 @@ var sorted_json = module.exports.sorted_json = function (obj) {
 var ItemEdit = module.exports.ItemEdit = createReactClass({
     render: function() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'view-item');
         var title = listing_titles.lookup(context)({context: context});
         var url = this.props.context['@id'] + '?frame=edit';
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>Edit {title}</h2>

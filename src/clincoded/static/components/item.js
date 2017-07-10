@@ -37,7 +37,6 @@ var Item = module.exports.Item = createReactClass({
     mixins: [AuditMixin],
     render: function() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'view-item') + ' container';
         var title = listing_titles.lookup(context)({context: context});
         var Panel = panel_views.lookup(context);
 
@@ -45,7 +44,7 @@ var Item = module.exports.Item = createReactClass({
         var altacc = context.alternate_accessions ? context.alternate_accessions.join(', ') : undefined;
 
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item') + ' container'}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{title}</h2>
@@ -79,10 +78,9 @@ content_views.fallback = function () {
 var Panel = module.exports.Panel = createReactClass({
     render: function() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'view-detail panel');
         return (
             <section className="col-sm-12">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'view-detail panel')}>
                     <pre>{JSON.stringify(context, null, 4)}</pre>
                 </div>
             </section>
@@ -232,7 +230,6 @@ var FetchedForm = createReactClass({
 var ItemEdit = module.exports.ItemEdit = createReactClass({
     render: function() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'view-item');
         var title = listing_titles.lookup(context)({context: context});
         var action, form, schemaUrl, type;
         if (context['@type'][0].indexOf('_collection') !== -1) {  // add form
@@ -259,7 +256,7 @@ var ItemEdit = module.exports.ItemEdit = createReactClass({
             );
         }
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{title}</h2>
