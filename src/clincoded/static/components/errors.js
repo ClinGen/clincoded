@@ -1,33 +1,30 @@
 'use strict';
 import React, { Component } from 'react';
-import createReactClass from 'create-react-class';
 import { content_views, listing_titles, itemClass } from './globals';
 
-var Error = module.exports.Error = createReactClass({
-    render: function() {
+export class Error extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <h1>{context.title}</h1>
                     <p>{context.description}</p>
                 </div>
             </div>
         );
     }
-});
+}
 
 content_views.register(Error, 'error');
 
 
-var HTTPNotFound = module.exports.HTTPNotFound = createReactClass({
-    render: function() {
+export class HTTPNotFound extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Not found</h1>
@@ -38,15 +35,14 @@ var HTTPNotFound = module.exports.HTTPNotFound = createReactClass({
             </div>
         );
     }
-});
+}
 
 content_views.register(HTTPNotFound, 'HTTPNotFound');
 
 
-var HTTPForbidden = module.exports.HTTPForbidden = createReactClass({
-    render: function() {
+export class HTTPForbidden extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'panel-gray');
         if (!this.props.loadingComplete) return (
             <div className="communicating">
                 <div className="loading-spinner"></div>
@@ -54,7 +50,7 @@ var HTTPForbidden = module.exports.HTTPForbidden = createReactClass({
         );
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Not available</h1>
@@ -66,12 +62,12 @@ var HTTPForbidden = module.exports.HTTPForbidden = createReactClass({
             </div>
         );
     }
-});
+}
 
 content_views.register(HTTPForbidden, 'HTTPForbidden');
 
 
-var BlankWhileLoading = module.exports.BlankWhileLoading = function (props) {
+export function BlankWhileLoading(props) {
     if (!props.loadingComplete) return "";
     return props.context.title;
 };
@@ -79,13 +75,12 @@ var BlankWhileLoading = module.exports.BlankWhileLoading = function (props) {
 listing_titles.register(BlankWhileLoading, 'HTTPForbidden');
 
 
-var LoginDenied = module.exports.LoginDenied = createReactClass({
-    render: function() {
+export class LoginDenied extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Login failure</h1>
@@ -97,18 +92,17 @@ var LoginDenied = module.exports.LoginDenied = createReactClass({
             </div>
         );
     }
-});
+}
 
 content_views.register(LoginDenied, 'LoginDenied');
 
 
-var LoginNotVerified = module.exports.LoginNotVerified = createReactClass({
-    render: function() {
+export class LoginNotVerified extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Account not verified</h1>
@@ -121,18 +115,17 @@ var LoginNotVerified = module.exports.LoginNotVerified = createReactClass({
             </div>
         );
     }
-});
+}
 
 content_views.register(LoginNotVerified, 'LoginNotVerified');
 
 
-var RenderingError = module.exports.RenderingError = createReactClass({
-    render: function() {
+export class RenderingError extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <h1>{context.title}</h1>
                     <p>{context.description}</p>
                     <pre>{context.detail}</pre>
@@ -140,6 +133,6 @@ var RenderingError = module.exports.RenderingError = createReactClass({
             </div>
         );
     }
-});
+}
 
 content_views.register(RenderingError, 'RenderingError');
