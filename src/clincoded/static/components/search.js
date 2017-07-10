@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import url from 'url';
-import { content_views, listing_titles, listing_views, itemClass, truncateString, statusOrder } from './globals';
+import { content_views, listing_titles, listing_views, statusOrder } from './globals';
 import { AuditMixin, AuditIndicators, AuditDetail } from './audit';
 import { DbxrefList, Dbxref } from './dbxref';
 
