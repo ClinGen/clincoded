@@ -1,17 +1,13 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var curator = require('./curator');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { history_views } from './globals';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import * as curator from './curator';
 
 var DEFAULT_VALUE = module.exports.DEFAULT_VALUE = 'Not Assessed';
 
@@ -191,27 +187,27 @@ var AssessmentMixin = module.exports.AssessmentMixin = {
 };
 
 
-var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
+var AssessmentPanel = module.exports.AssessmentPanel = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        ownerNotAssessed: React.PropTypes.bool, // true if evidence assessed already by its creator
-        noSeg: React.PropTypes.bool, // true if evidence is family and there is no segregation data exist.
-        assessmentTracker: React.PropTypes.object, // Current value of assessment
-        //disabled: React.PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
-        panelTitle: React.PropTypes.string, // Title of Assessment panel; 'Assessment' default
-        label: React.PropTypes.string, // Label for dropdown; 'Assessment' default
-        note: React.PropTypes.oneOfType([ // Note to display below the dropdown
-            React.PropTypes.string,
-            React.PropTypes.object
+        ownerNotAssessed: PropTypes.bool, // true if evidence assessed already by its creator
+        noSeg: PropTypes.bool, // true if evidence is family and there is no segregation data exist.
+        assessmentTracker: PropTypes.object, // Current value of assessment
+        //disabled: PropTypes.bool, // TRUE to make assessment dropdown disabled; FALSE to enable it (default)
+        panelTitle: PropTypes.string, // Title of Assessment panel; 'Assessment' default
+        label: PropTypes.string, // Label for dropdown; 'Assessment' default
+        note: PropTypes.oneOfType([ // Note to display below the dropdown
+            PropTypes.string,
+            PropTypes.object
         ]),
-        updateValue: React.PropTypes.func.isRequired, // Parent function to call when dropdown changes
-        assessmentSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        disableDefault: React.PropTypes.bool, // TRUE to disable the Default (Not Assessed) item
-        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
-        accordion: React.PropTypes.bool, // True if the panel should part of an openable accordion
-        open: React.PropTypes.bool, // True if the panel should be an openable panel
-        updateMsg: React.PropTypes.string // String to display by the Update button if desired
+        updateValue: PropTypes.func.isRequired, // Parent function to call when dropdown changes
+        assessmentSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        disableDefault: PropTypes.bool, // TRUE to disable the Default (Not Assessed) item
+        submitBusy: PropTypes.bool, // TRUE while the form submit is running
+        accordion: PropTypes.bool, // True if the panel should part of an openable accordion
+        open: PropTypes.bool, // True if the panel should be an openable panel
+        updateMsg: PropTypes.string // String to display by the Update button if desired
     },
 
     componentDidMount: function() {
@@ -301,10 +297,10 @@ var AssessmentPanel = module.exports.AssessmentPanel = React.createClass({
 });
 
 // Display a history item for adding or or modifying an assessment
-var AssessmentAddModHistory = React.createClass({
+var AssessmentAddModHistory = createReactClass({
     propTypes: {
-        history: React.PropTypes.object.isRequired, // History object
-        user: React.PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
+        history: PropTypes.object.isRequired, // History object
+        user: PropTypes.object // User session session ? '&user=' + session.user_properties.uuid : ''
     },
 
     render: function() {
@@ -356,18 +352,18 @@ var AssessmentAddModHistory = React.createClass({
     }
 });
 
-globals.history_views.register(AssessmentAddModHistory, 'assessment', 'add');
-globals.history_views.register(AssessmentAddModHistory, 'assessment', 'modify');
+history_views.register(AssessmentAddModHistory, 'assessment', 'add');
+history_views.register(AssessmentAddModHistory, 'assessment', 'modify');
 
 
 // Display a history item for deleting an assessment
-var AssessmentDeleteHistory = React.createClass({
+var AssessmentDeleteHistory = createReactClass({
     render: function() {
         return <div>ASSESSMENTYDELETE</div>;
     }
 });
 
-globals.history_views.register(AssessmentDeleteHistory, 'assessment', 'delete');
+history_views.register(AssessmentDeleteHistory, 'assessment', 'delete');
 
 
 // Return the assessment from the given array of assessments that's owned by the curator with the

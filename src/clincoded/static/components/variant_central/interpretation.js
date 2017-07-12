@@ -1,59 +1,56 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('../globals');
-var moment = require('moment');
-var curator = require('../curator');
-
-var queryKeyValue = globals.queryKeyValue;
-var editQueryValue = globals.editQueryValue;
-var truncateString = globals.truncateString;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import * as curator from '../curator';
+import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
 
 // Import individual tab components
-var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
-var CurationInterpretationBasicInfo = require('./interpretation/basic_info').CurationInterpretationBasicInfo;
-var CurationInterpretationPopulation = require('./interpretation/population').CurationInterpretationPopulation;
-var CurationInterpretationComputational = require('./interpretation/computational').CurationInterpretationComputational;
-var CurationInterpretationFunctional = require('./interpretation/functional').CurationInterpretationFunctional;
-var CurationInterpretationSegregation = require('./interpretation/segregation').CurationInterpretationSegregation;
-var CurationInterpretationGeneSpecific = require('./interpretation/gene_specific').CurationInterpretationGeneSpecific;
+import { CurationInterpretationCriteria } from './interpretation/criteria';
+import { CurationInterpretationBasicInfo } from './interpretation/basic_info';
+import { CurationInterpretationPopulation } from './interpretation/population';
+import { CurationInterpretationComputational } from './interpretation/computational';
+import { CurationInterpretationFunctional } from './interpretation/functional';
+import { CurationInterpretationSegregation } from './interpretation/segregation';
+import { CurationInterpretationGeneSpecific } from './interpretation/gene_specific';
 
 // Import pathogenicity calculator
-var calculator = require('./interpretation/shared/calculator');
-var PathogenicityCalculator = calculator.PathogenicityCalculator;
+import { PathogenicityCalculator } from './interpretation/shared/calculator';
 
 var validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
 
 // Curation data header for Gene:Disease
-var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = React.createClass({
+var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = createReactClass({
     propTypes: {
-        variantData: React.PropTypes.object, // ClinVar data payload
-        interpretation: React.PropTypes.object,
-        ext_myGeneInfo: React.PropTypes.object,
-        href_url: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func,
-        getSelectedTab: React.PropTypes.func,
-        ext_myVariantInfo: React.PropTypes.object,
-        ext_bustamante: React.PropTypes.object,
-        ext_ensemblVariation: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array,
-        ext_clinvarEutils: React.PropTypes.object,
-        ext_clinVarEsearch: React.PropTypes.object,
-        ext_clinVarSCV: React.PropTypes.array,
-        ext_clinvarInterpretationSummary: React.PropTypes.object,
-        ext_ensemblGeneId: React.PropTypes.string,
-        ext_geneSynonyms: React.PropTypes.array,
-        ext_singleNucleotide: React.PropTypes.bool,
-        loading_clinvarEutils: React.PropTypes.bool,
-        loading_clinvarEsearch: React.PropTypes.bool,
-        loading_clinvarSCV: React.PropTypes.bool,
-        loading_ensemblHgvsVEP: React.PropTypes.bool,
-        loading_ensemblVariation: React.PropTypes.bool,
-        loading_myVariantInfo: React.PropTypes.bool,
-        loading_myGeneInfo: React.PropTypes.bool,
-        loading_bustamante: React.PropTypes.bool,
-        setCalculatedPathogenicity: React.PropTypes.func,
-        selectedTab:React.PropTypes.string
+        variantData: PropTypes.object, // ClinVar data payload
+        interpretation: PropTypes.object,
+        ext_myGeneInfo: PropTypes.object,
+        href_url: PropTypes.object,
+        updateInterpretationObj: PropTypes.func,
+        getSelectedTab: PropTypes.func,
+        ext_myVariantInfo: PropTypes.object,
+        ext_bustamante: PropTypes.object,
+        ext_ensemblVariation: PropTypes.object,
+        ext_ensemblHgvsVEP: PropTypes.array,
+        ext_clinvarEutils: PropTypes.object,
+        ext_clinVarEsearch: PropTypes.object,
+        ext_clinVarSCV: PropTypes.array,
+        ext_clinvarInterpretationSummary: PropTypes.object,
+        ext_ensemblGeneId: PropTypes.string,
+        ext_geneSynonyms: PropTypes.array,
+        ext_singleNucleotide: PropTypes.bool,
+        loading_clinvarEutils: PropTypes.bool,
+        loading_clinvarEsearch: PropTypes.bool,
+        loading_clinvarSCV: PropTypes.bool,
+        loading_ensemblHgvsVEP: PropTypes.bool,
+        loading_ensemblVariation: PropTypes.bool,
+        loading_myVariantInfo: PropTypes.bool,
+        loading_myGeneInfo: PropTypes.bool,
+        loading_bustamante: PropTypes.bool,
+        setCalculatedPathogenicity: PropTypes.func,
+        selectedTab: PropTypes.string
     },
 
     getInitialState: function() {
@@ -239,8 +236,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
 });
 
 // Display a history item for adding an interpretation
-var InterpretationAddHistory = React.createClass({
-    render: function() {
+class InterpretationAddHistory extends Component {
+    render() {
         const history = this.props.history;
         const interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
@@ -252,13 +249,13 @@ var InterpretationAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(InterpretationAddHistory, 'interpretation', 'add');
+history_views.register(InterpretationAddHistory, 'interpretation', 'add');
 
 // Display a history item for adding an individual
-var InterpretationModifyHistory = React.createClass({
-    render: function() {
+class InterpretationModifyHistory extends Component {
+    render() {
         const history = this.props.history;
         const interpretation = history.primary,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
@@ -284,9 +281,9 @@ var InterpretationModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
+history_views.register(InterpretationModifyHistory, 'interpretation', 'modify');
 
 
 // Map Interpretation statuses from
@@ -296,7 +293,7 @@ var statusMappings = {
     'Provisional':                    {cssClass: 'provisional', shortName: 'Provisional'}
 };
 
-var InterpretationCollection = module.exports.InterpretationCollection = React.createClass({
+var InterpretationCollection = module.exports.InterpretationCollection = createReactClass({
     getInitialState() {
         return {
             sortCol: 'variant',
@@ -539,12 +536,12 @@ var InterpretationCollection = module.exports.InterpretationCollection = React.c
     }
 });
 
-globals.content_views.register(InterpretationCollection, 'interpretation_collection');
+content_views.register(InterpretationCollection, 'interpretation_collection');
 
 
 // Render the Interpretation status legend
-var InterpretationStatusLegend = React.createClass({
-    render: function() {
+class InterpretationStatusLegend extends Component {
+    render() {
         return (
             <div className="row">
                 <div className="gdm-status-legend">
@@ -562,4 +559,4 @@ var InterpretationStatusLegend = React.createClass({
             </div>
         );
     }
-});
+}

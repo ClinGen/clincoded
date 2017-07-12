@@ -1,19 +1,15 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { content_views, panel_views, listing_titles, itemClass } from './globals';
+import { ItemPreview, ObjectPicker, FileInput } from './inputs';
+import { AuditMixin, AuditIndicators, AuditDetail } from './audit';
+
 var fetched = require('./fetched');
-var globals = require('./globals');
-var ItemPreview = require('./inputs').ItemPreview;
-var ObjectPicker = require('./inputs').ObjectPicker;
-var FileInput = require('./inputs').FileInput;
-var audit = require('./audit');
-var _ = require('underscore');
 
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
-
-
-var Fallback = module.exports.Fallback = React.createClass({
+var Fallback = module.exports.Fallback = createReactClass({
     render: function() {
         var url = require('url');
         var context = this.props.context;
@@ -37,19 +33,18 @@ var Fallback = module.exports.Fallback = React.createClass({
 });
 
 
-var Item = module.exports.Item = React.createClass({
+var Item = module.exports.Item = createReactClass({
     mixins: [AuditMixin],
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item') + ' container';
-        var title = globals.listing_titles.lookup(context)({context: context});
-        var Panel = globals.panel_views.lookup(context);
+        var title = listing_titles.lookup(context)({context: context});
+        var Panel = panel_views.lookup(context);
 
         // Make string of alternate accessions
         var altacc = context.alternate_accessions ? context.alternate_accessions.join(', ') : undefined;
 
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item') + ' container'}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{title}</h2>
@@ -71,22 +66,21 @@ var Item = module.exports.Item = React.createClass({
     }
 });
 
-globals.content_views.register(Item, 'item');
+content_views.register(Item, 'item');
 
 
 // Also use this view as a fallback for anything we haven't registered
-globals.content_views.fallback = function () {
+content_views.fallback = function () {
     return Fallback;
 };
 
 
-var Panel = module.exports.Panel = React.createClass({
+var Panel = module.exports.Panel = createReactClass({
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-detail panel');
         return (
             <section className="col-sm-12">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'view-detail panel')}>
                     <pre>{JSON.stringify(context, null, 4)}</pre>
                 </div>
             </section>
@@ -94,11 +88,11 @@ var Panel = module.exports.Panel = React.createClass({
     }
 });
 
-globals.panel_views.register(Panel, 'item');
+panel_views.register(Panel, 'item');
 
 
 // Also use this view as a fallback for anything we haven't registered
-globals.panel_views.fallback = function () {
+panel_views.fallback = function () {
     return Panel;
 };
 
@@ -108,16 +102,16 @@ var title = module.exports.title = function (props) {
     return context.title || context.name || context.accession || context['@id'];
 };
 
-globals.listing_titles.register(title, 'item');
+listing_titles.register(title, 'item');
 
 
 // Also use this view as a fallback for anything we haven't registered
-globals.listing_titles.fallback = function () {
+listing_titles.fallback = function () {
     return title;
 };
 
 
-var RepeatingItem = React.createClass({
+var RepeatingItem = createReactClass({
 
   render: function() {
     return (
@@ -143,7 +137,7 @@ var RepeatingItem = React.createClass({
 });
 
 
-var FetchedFieldset = React.createClass({
+var FetchedFieldset = createReactClass({
 
     getInitialState: function() {
         var value = this.props.value;
@@ -215,7 +209,7 @@ var jsonSchemaToDefaultValue = function(schema) {
 };
 
 
-var FetchedForm = React.createClass({
+var FetchedForm = createReactClass({
 
     getInitialState: function() {
         var type = this.props.type;
@@ -233,11 +227,10 @@ var FetchedForm = React.createClass({
 });
 
 
-var ItemEdit = module.exports.ItemEdit = React.createClass({
+var ItemEdit = module.exports.ItemEdit = createReactClass({
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item');
-        var title = globals.listing_titles.lookup(context)({context: context});
+        var title = listing_titles.lookup(context)({context: context});
         var action, form, schemaUrl, type;
         if (context['@type'][0].indexOf('_collection') !== -1) {  // add form
             type = context['@type'][0].substr(0, context['@type'][0].length - 11);
@@ -263,7 +256,7 @@ var ItemEdit = module.exports.ItemEdit = React.createClass({
             );
         }
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{title}</h2>
@@ -275,5 +268,5 @@ var ItemEdit = module.exports.ItemEdit = React.createClass({
     }
 });
 
-globals.content_views.register(ItemEdit, 'item', 'edit');
-globals.content_views.register(ItemEdit, 'collection', 'add');
+content_views.register(ItemEdit, 'item', 'edit');
+content_views.register(ItemEdit, 'collection', 'add');

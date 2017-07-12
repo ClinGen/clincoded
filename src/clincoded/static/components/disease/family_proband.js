@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { external_url_map } from '../globals';
 
@@ -11,7 +12,7 @@ import { DiseaseModal } from './modal';
  * Component for adding/copying/deleting disease when creating adding a proband individual
  * to a new family evidence that is currently being created.
  */
-const FamilyProbandDisease = module.exports.FamilyProbandDisease = React.createClass({
+const FamilyProbandDisease = module.exports.FamilyProbandDisease = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {

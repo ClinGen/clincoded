@@ -1,35 +1,25 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../../globals');
-var RestMixin = require('../../rest').RestMixin;
-var vciFormHelper = require('./shared/form');
-var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var findDiffKeyValuesMixin = require('./shared/find_diff').findDiffKeyValuesMixin;
-var CompleteSection = require('./shared/complete_section').CompleteSection;
-var parseAndLogError = require('../../mixins').parseAndLogError;
-var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
-var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
-var extraEvidence = require('./shared/extra_evidence');
-
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-var queryKeyValue = globals.queryKeyValue;
-
-var panel = require('../../../libs/bootstrap/panel');
-var form = require('../../../libs/bootstrap/form');
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../rest';
+import { parseClinvar } from '../../../libs/parse-resources';
+import { queryKeyValue, dbxref_prefix_map, external_url_map } from '../../globals';
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
 import { parseKeyValue } from '../helpers/parse_key_value';
+import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
+import { findDiffKeyValuesMixin } from './shared/find_diff';
+import { CompleteSection } from './shared/complete_section';
+import { parseAndLogError } from '../../mixins';
 
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
+var vciFormHelper = require('./shared/form');
+var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+var extraEvidence = require('./shared/extra_evidence');
 
 var populationStatic = {
     exac: {
@@ -48,20 +38,20 @@ var populationStatic = {
 var CI_DEFAULT = 95;
 
 // Display the population data of external sources
-var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = React.createClass({
+var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = createReactClass({
     mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        interpretation: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func,
-        ext_myVariantInfo: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array,
-        ext_ensemblVariation: React.PropTypes.object,
-        ext_singleNucleotide: React.PropTypes.bool,
-        loading_myVariantInfo: React.PropTypes.bool,
-        loading_ensemblVariation: React.PropTypes.bool,
-        href_url: React.PropTypes.object
+        data: PropTypes.object, // ClinVar data payload
+        interpretation: PropTypes.object,
+        updateInterpretationObj: PropTypes.func,
+        ext_myVariantInfo: PropTypes.object,
+        ext_ensemblHgvsVEP: PropTypes.array,
+        ext_ensemblVariation: PropTypes.object,
+        ext_singleNucleotide: PropTypes.bool,
+        loading_myVariantInfo: PropTypes.bool,
+        loading_ensemblVariation: PropTypes.bool,
+        href_url: PropTypes.object
     },
 
     getInitialState: function() {

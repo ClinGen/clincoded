@@ -1,12 +1,15 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+
 var evidenceCodes = require('./mapping/evidence_code.json');
 
 // Display met criteria
-var CurationInterpretationCriteria = module.exports.CurationInterpretationCriteria = React.createClass({
+var CurationInterpretationCriteria = module.exports.CurationInterpretationCriteria = createReactClass({
     propTypes: {
-        interpretation: React.PropTypes.object,
-        selectedTab: React.PropTypes.string
+        interpretation: PropTypes.object,
+        selectedTab: PropTypes.string
     },
 
     getInitialState: function() {

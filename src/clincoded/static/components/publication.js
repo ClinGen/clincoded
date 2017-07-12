@@ -1,23 +1,18 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var dbxref = require('./dbxref');
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import { content_views, listing_views, itemClass, truncateString } from './globals';
+import { AuditMixin, AuditIndicators, AuditDetail } from './audit';
+import { DbxrefList, Dbxref } from './dbxref';
+
 var search = require('./search');
-var audit = require('./audit');
 
-var DbxrefList = dbxref.DbxrefList;
-var Dbxref = dbxref.Dbxref;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
-
-
-var Publication = module.exports.Panel = React.createClass({
+var Publication = module.exports.Panel = createReactClass({
     mixins: [AuditMixin],
 
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item');
+        var itemClass = itemClass(context, 'view-item');
         return (
             <div className={itemClass}>
                 <h2>{context.title}</h2>
@@ -49,11 +44,11 @@ var Publication = module.exports.Panel = React.createClass({
     }
 });
 
-globals.content_views.register(Publication, 'publication');
+content_views.register(Publication, 'publication');
 
 
-var Citation = module.exports.Citation = React.createClass({
-    render: function() {
+export class Citation extends Component {
+    render() {
         var context = this.props.context;
         return (
             <span>
@@ -62,11 +57,11 @@ var Citation = module.exports.Citation = React.createClass({
             </span>
         );
     }
-});
+}
 
 
-var Abstract = React.createClass({
-    render: function() {
+class Abstract extends Component {
+    render() {
         var context = this.props.context;
         return (
             <dl className="key-value">
@@ -109,11 +104,11 @@ var Abstract = React.createClass({
            </dl>
         );
     }
-});
+}
 
 
-var SupplementaryData = React.createClass({
-    render: function() {
+class SupplementaryData extends Component {
+    render() {
         var data = this.props.data;
         return (
             <section>
@@ -150,10 +145,10 @@ var SupplementaryData = React.createClass({
             </section>
         );
     }
-});
+}
 
 
-var SupplementaryDataListing = React.createClass({
+var SupplementaryDataListing = createReactClass({
     getInitialState: function() {
         return {excerptExpanded: false};
     },
@@ -165,7 +160,7 @@ var SupplementaryDataListing = React.createClass({
     render: function() {
         var data = this.props.data;
         var summary = data.data_summary;
-        var excerpt = (summary && (summary.length > 100) ? globals.truncateString(summary, 100) : undefined);
+        var excerpt = (summary && (summary.length > 100) ? truncateString(summary, 100) : undefined);
 
         // Make unique ID for ARIA identification
         var nodeId = this.props.id.replace(/\//g, '') + this.props.key;
@@ -202,7 +197,7 @@ var SupplementaryDataListing = React.createClass({
 });
 
 
-var Listing = React.createClass({
+var Listing = createReactClass({
     mixins: [search.PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
@@ -238,4 +233,4 @@ var Listing = React.createClass({
     }
 });
 
-globals.listing_views.register(Listing, 'publication');
+listing_views.register(Listing, 'publication');

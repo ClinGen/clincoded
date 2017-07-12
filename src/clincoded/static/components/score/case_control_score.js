@@ -1,20 +1,22 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { userScore } from './helpers/user_score';
 
 // Render scoring panel in Gene Curation Interface
-var ScoreCaseControl = module.exports.ScoreCaseControl = React.createClass({
+var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        session: React.PropTypes.object, // Session object passed from parent
-        evidence: React.PropTypes.object, // Individual, Experimental or Case Control
-        evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
-        handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
-        scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool // TRUE while the form submit is running
+        session: PropTypes.object, // Session object passed from parent
+        evidence: PropTypes.object, // Individual, Experimental or Case Control
+        evidenceType: PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
+        handleUserScoreObj: PropTypes.func, // Function to call create/update score object
+        scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        submitBusy: PropTypes.bool // TRUE while the form submit is running
     },
 
     getInitialState() {

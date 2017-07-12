@@ -1,11 +1,13 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 
 // Include this mixin for any components that contain navigation that needs to collapse on mobile
 var NavbarMixin = module.exports.NavbarMixin = {
     childContextTypes: {
-        mobileMenuOpen: React.PropTypes.bool, // T if mobile menu is open, F if closed
-        mobileMenuToggle: React.PropTypes.func // Function to set current mobile menu state
+        mobileMenuOpen: PropTypes.bool, // T if mobile menu is open, F if closed
+        mobileMenuToggle: PropTypes.func // Function to set current mobile menu state
     },
 
     // Retrieve current React context
@@ -29,15 +31,15 @@ var NavbarMixin = module.exports.NavbarMixin = {
 
 
 // Top-level navigation component. Use it to wrap <Nav> components
-var Navbar = module.exports.Navbar = React.createClass({
+var Navbar = module.exports.Navbar = createReactClass({
     contextTypes: {
-        mobileMenuToggle: React.PropTypes.func
+        mobileMenuToggle: PropTypes.func
     },
 
     propTypes: {
-        styles: React.PropTypes.string, // CSS classes to add to <nav> element
-        brandStyles: React.PropTypes.string, // CSS classes to add to .navbar-brand element
-        brand: React.PropTypes.string // Text brand in .navbar-brand element
+        styles: PropTypes.string, // CSS classes to add to <nav> element
+        brandStyles: PropTypes.string, // CSS classes to add to .navbar-brand element
+        brand: PropTypes.string // Text brand in .navbar-brand element
     },
 
     render: function() {
@@ -66,15 +68,15 @@ var Navbar = module.exports.Navbar = React.createClass({
 
 
 // Second-level navigation component. Use it to wrap <NavItem> components.
-var Nav = module.exports.Nav = React.createClass({
+var Nav = module.exports.Nav = createReactClass({
     contextTypes: {
-        mobileMenuOpen: React.PropTypes.bool
+        mobileMenuOpen: PropTypes.bool
     },
 
     propTypes: {
-        styles: React.PropTypes.string, // CSS classes to add to ul.'nav navbar-nav'
-        navbarStyles: React.PropTypes.string, // CSS classes for wrapper <div>
-        collapse: React.PropTypes.bool // Support mobile menu collapsing
+        styles: PropTypes.string, // CSS classes to add to ul.'nav navbar-nav'
+        navbarStyles: PropTypes.string, // CSS classes for wrapper <div>
+        collapse: PropTypes.bool // Support mobile menu collapsing
     },
 
     render: function() {
@@ -95,13 +97,13 @@ var Nav = module.exports.Nav = React.createClass({
 
 
 // Individual menu items within a <Nav> component.
-var NavItem = module.exports.NavItem = React.createClass({
+var NavItem = module.exports.NavItem = createReactClass({
     propTypes: {
-        title: React.PropTypes.string,
-        styles: React.PropTypes.string, // CSS classes to add to <li> elements
-        href: React.PropTypes.string, // URL to link this item to
-        icon: React.PropTypes.string, // CSS class for fontawesome icon (e.g. 'icon-home')
-        target: React.PropTypes.string // target attribute
+        title: PropTypes.string,
+        styles: PropTypes.string, // CSS classes to add to <li> elements
+        href: PropTypes.string, // URL to link this item to
+        icon: PropTypes.string, // CSS class for fontawesome icon (e.g. 'icon-home')
+        target: PropTypes.string // target attribute
         // Additional properties (data attributes) set on <a> for the item
     },
 

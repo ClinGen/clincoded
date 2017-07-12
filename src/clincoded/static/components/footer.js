@@ -1,13 +1,12 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
 
-var Footer = React.createClass({
-    shouldComponentUpdate: function (nextProps, nextState) {
+export default class Footer extends Component {
+    shouldComponentUpdate(nextProps, nextState) {
         return false;
-    },
+    }
 
-    render: function() {
-        console.log('render footer');
+    render() {
         return (
             <footer id="page-footer" className="page-footer">
                 <div className="container">
@@ -31,6 +30,5 @@ var Footer = React.createClass({
             </footer>
         );
     }
-});
+}
 
-module.exports = Footer;

@@ -1,6 +1,7 @@
 "use strict";
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 
 // Display a popover that shows descriptive text content until the user dismisses it.
@@ -59,12 +60,12 @@ export default class PopOverComponent extends React.Component {
 }
 
 PopOverComponent.propTypes = {
-    popOverWrapperClass: React.PropTypes.string, // CSS class for popover DOM wrapper
-    actuatorTitle: React.PropTypes.oneOfType([ // Text for link to invoke popover
-        React.PropTypes.object,
-        React.PropTypes.string
+    popOverWrapperClass: PropTypes.string, // CSS class for popover DOM wrapper
+    actuatorTitle: PropTypes.oneOfType([ // Text for link to invoke popover
+        PropTypes.object,
+        PropTypes.string
     ]),
-    children: React.PropTypes.node // JSX such as input field(s), dropdown(s), buttons, or text string
+    children: PropTypes.node // JSX such as input field(s), dropdown(s), buttons, or text string
 };
 
 class PopOver extends React.Component {
@@ -87,6 +88,6 @@ class PopOver extends React.Component {
 }
 
 PopOver.propTypes = {
-    closePopOver: React.PropTypes.func,
-    isPopOverOpen: React.PropTypes.bool
+    closePopOver: PropTypes.func,
+    isPopOverOpen: PropTypes.bool
 };

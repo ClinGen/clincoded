@@ -1,15 +1,15 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-
-var external_url_map = globals.external_url_map;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import { external_url_map } from '../globals';
 
 // Display the curator data of the curation data
-var CurationRecordVariant = module.exports.CurationRecordVariant = React.createClass({
+var CurationRecordVariant = module.exports.CurationRecordVariant = createReactClass({
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        interpretationTranscript: React.PropTypes.string,
-        updateInterpretationTranscript: React.PropTypes.func
+        data: PropTypes.object, // ClinVar data payload
+        interpretationTranscript: PropTypes.string,
+        updateInterpretationTranscript: PropTypes.func
     },
 
     getDefaultProps: function() {

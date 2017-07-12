@@ -1,5 +1,5 @@
 'use strict';
-var React = require('react');
+import React from 'react';
 
 // Recursive function to compare oldObj against newObj and its key:values. Creates diffObj that shares the keys (full-depth) with newObj,
 // but with values of true or false depending on whether or not oldObj's values for that key matches newValue's. A value of true means that

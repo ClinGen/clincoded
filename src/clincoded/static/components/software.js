@@ -1,33 +1,29 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { content_views, panel_views, listing_titles, itemClass } from './globals';
+import { AuditMixin, AuditIndicators, AuditDetail } from './audit';
+import StatusLabel from './statuslabel';
+import PubReferenceList from './reference';
+
 var search = require('./search');
 var pipeline = require('./pipeline');
 var fetched = require('./fetched');
-var reference = require('./reference');
-var StatusLabel = require('./statuslabel').StatusLabel;
-var audit = require('./audit');
-var _ = require('underscore');
-
 var PipelineTable = pipeline.PipelineTable;
 var FetchedItems = fetched.FetchedItems;
-var PubReferenceList = reference.PubReferenceList;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
 
-
-var Software = module.exports.Software = React.createClass({
+var Software = module.exports.Software = createReactClass({
     mixins: [AuditMixin],
 
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item');
 
         var pipeline_url = '/search/?type=pipeline&analysis_steps.software_versions.software.uuid=' + context.uuid;
 
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{context.title}</h2>
@@ -93,7 +89,7 @@ globals.content_views.register(Software, 'software');
 
 // Commenting out until pipelines are used.
 
-var PipelinesUsingSoftwareVersion = module.exports.PipelinesUsingSoftwareVersion = React.createClass({
+var PipelinesUsingSoftwareVersion = module.exports.PipelinesUsingSoftwareVersion = createReactClass({
     render: function () {
         var context = this.props.context;
         return (
@@ -106,7 +102,7 @@ var PipelinesUsingSoftwareVersion = module.exports.PipelinesUsingSoftwareVersion
 });
 
 
-var SoftwareVersionTable = module.exports.SoftwareVersionTable = React.createClass({
+var SoftwareVersionTable = module.exports.SoftwareVersionTable = createReactClass({
     render: function() {
         var rows = {};
         this.props.items.forEach(function (version) {
@@ -144,7 +140,7 @@ var SoftwareVersionTable = module.exports.SoftwareVersionTable = React.createCla
 });
 
 
-var Listing = React.createClass({
+var Listing = createReactClass({
     mixins: [search.PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;

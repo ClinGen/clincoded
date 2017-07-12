@@ -1,11 +1,13 @@
 "use strict";
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 
 
 // Controls a group of Panel components. Useful for accordions.
-var PanelGroup = module.exports.PanelGroup = React.createClass({
+var PanelGroup = module.exports.PanelGroup = createReactClass({
     propTypes: {
-        accordion: React.PropTypes.bool // T if child panels should accordion
+        accordion: PropTypes.bool // T if child panels should accordion
     },
 
     render: function() {
@@ -28,16 +30,16 @@ var PanelGroup = module.exports.PanelGroup = React.createClass({
 });
 
 // Displays one panel. It can be a child of a PanelGroup if you're doing accordions.
-var Panel = module.exports.Panel = React.createClass({
+var Panel = module.exports.Panel = createReactClass({
     propTypes: {
-        title: React.PropTypes.oneOfType([
-            React.PropTypes.string,
-            React.PropTypes.object
+        title: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.object
         ]), // Title for panel header
-        open: React.PropTypes.bool, // T if an accordion panel should default to open
-        accordion: React.PropTypes.bool, // T if part of an accordion panel group; copied from PanelGroup props
-        panelClassName: React.PropTypes.string, // Classes to add to panel
-        panelBodyClassName: React.PropTypes.string // Classes to add to panel body
+        open: PropTypes.bool, // T if an accordion panel should default to open
+        accordion: PropTypes.bool, // T if part of an accordion panel group; copied from PanelGroup props
+        panelClassName: PropTypes.string, // Classes to add to panel
+        panelBodyClassName: PropTypes.string // Classes to add to panel body
     },
 
     getInitialState: function() {

@@ -1,17 +1,15 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var form = require('../../../../libs/bootstrap/form');
-var RestMixin = require('../../../rest').RestMixin;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../../rest';
+import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
+
 var curator = require('../../../curator');
 var CuratorHistory = require('../../../curator_history');
 var evidenceCodes = require('../mapping/evidence_code.json');
-
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
 
 /*
 NOTE: disease dependency of criteria codes are in a state of flux right now. The mapping to actually
@@ -23,24 +21,24 @@ search for 'diseaseCriteria', 'diseaseAssociated', 'diseaseDependent', and final
 */
 
 // Form component to be re-used by various tabs
-var CurationInterpretationForm = module.exports.CurationInterpretationForm = React.createClass({
+var CurationInterpretationForm = module.exports.CurationInterpretationForm = createReactClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
-        renderedFormContent: React.PropTypes.func, // the function that returns the rendering of the form items
-        evidenceData: React.PropTypes.object, // any extra evidence data that is passed from the parent page
-        evidenceDataUpdated: React.PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
-        formDataUpdater: React.PropTypes.func, // the function that updates the rendered form with data from evidenceData
-        formChangeHandler: React.PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
-        variantUuid: React.PropTypes.string, // UUID of the parent variant
-        criteria: React.PropTypes.array, // array of criteria codes being handled by this form
-        criteriaCrossCheck: React.PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
-        interpretation: React.PropTypes.object, // parent interpretation object
-        updateInterpretationObj: React.PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
+        renderedFormContent: PropTypes.func, // the function that returns the rendering of the form items
+        evidenceData: PropTypes.object, // any extra evidence data that is passed from the parent page
+        evidenceDataUpdated: PropTypes.bool, // passed in by parent page, which does the comparison of stored and new external data
+        formDataUpdater: PropTypes.func, // the function that updates the rendered form with data from evidenceData
+        formChangeHandler: PropTypes.func, // function that will take care of any in-form logic that needs to be taken in to account
+        variantUuid: PropTypes.string, // UUID of the parent variant
+        criteria: PropTypes.array, // array of criteria codes being handled by this form
+        criteriaCrossCheck: PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
+        interpretation: PropTypes.object, // parent interpretation object
+        updateInterpretationObj: PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
     },
 
     contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
+        fetch: PropTypes.func // Function to perform a search
     },
 
     getInitialState: function() {

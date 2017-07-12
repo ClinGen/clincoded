@@ -1,33 +1,30 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var home = require('./home');
+import React, { Component } from 'react';
+import { content_views, listing_titles, itemClass } from './globals';
 
-var Error = module.exports.Error = React.createClass({
-    render: function() {
+export class Error extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <h1>{context.title}</h1>
                     <p>{context.description}</p>
                 </div>
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(Error, 'error');
+content_views.register(Error, 'error');
 
 
-var HTTPNotFound = module.exports.HTTPNotFound = React.createClass({
-    render: function() {
+export class HTTPNotFound extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Not found</h1>
@@ -38,15 +35,14 @@ var HTTPNotFound = module.exports.HTTPNotFound = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(HTTPNotFound, 'HTTPNotFound');
+content_views.register(HTTPNotFound, 'HTTPNotFound');
 
 
-var HTTPForbidden = module.exports.HTTPForbidden = React.createClass({
-    render: function() {
+export class HTTPForbidden extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'panel-gray');
         if (!this.props.loadingComplete) return (
             <div className="communicating">
                 <div className="loading-spinner"></div>
@@ -54,7 +50,7 @@ var HTTPForbidden = module.exports.HTTPForbidden = React.createClass({
         );
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Not available</h1>
@@ -66,26 +62,25 @@ var HTTPForbidden = module.exports.HTTPForbidden = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(HTTPForbidden, 'HTTPForbidden');
+content_views.register(HTTPForbidden, 'HTTPForbidden');
 
 
-var BlankWhileLoading = module.exports.BlankWhileLoading = function (props) {
+export function BlankWhileLoading(props) {
     if (!props.loadingComplete) return "";
     return props.context.title;
 };
 
-globals.listing_titles.register(BlankWhileLoading, 'HTTPForbidden');
+listing_titles.register(BlankWhileLoading, 'HTTPForbidden');
 
 
-var LoginDenied = module.exports.LoginDenied = React.createClass({
-    render: function() {
+export class LoginDenied extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Login failure</h1>
@@ -97,18 +92,17 @@ var LoginDenied = module.exports.LoginDenied = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(LoginDenied, 'LoginDenied');
+content_views.register(LoginDenied, 'LoginDenied');
 
 
-var LoginNotVerified = module.exports.LoginNotVerified = React.createClass({
-    render: function() {
+export class LoginNotVerified extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
                             <h1>Account not verified</h1>
@@ -121,18 +115,17 @@ var LoginNotVerified = module.exports.LoginNotVerified = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(LoginNotVerified, 'LoginNotVerified');
+content_views.register(LoginNotVerified, 'LoginNotVerified');
 
 
-var RenderingError = module.exports.RenderingError = React.createClass({
-    render: function() {
+export class RenderingError extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'panel-gray');
         return (
             <div className="container">
-                <div className={itemClass}>
+                <div className={itemClass(context, 'panel-gray')}>
                     <h1>{context.title}</h1>
                     <p>{context.description}</p>
                     <pre>{context.detail}</pre>
@@ -140,6 +133,6 @@ var RenderingError = module.exports.RenderingError = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(RenderingError, 'RenderingError');
+content_views.register(RenderingError, 'RenderingError');

@@ -1,28 +1,24 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('./globals');
-var dbxref = require('./dbxref');
+import React, { Component } from 'react';
+import _ from 'underscore';
+import { content_views, itemClass, dbxref_prefix_map } from './globals';
+import { DbxrefList, Dbxref } from './dbxref';
 
-var DbxrefList = dbxref.DbxrefList;
-var Dbxref = dbxref.Dbxref;
-
-var Gene = module.exports.Gene = React.createClass({
-    render: function() {
+export class Gene extends Component {
+    render() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-detail panel key-value');
         var geneLink, geneRef, baseName, sep;
 
         if (context.organism.name == "human") {
-            geneLink = globals.dbxref_prefix_map.HGNC + context.gene_name;
+            geneLink = dbxref_prefix_map.HGNC + context.gene_name;
         } else if (context.organism.name == "mouse") {
             var uniProtValue = JSON.stringify(context.dbxref);
             sep = uniProtValue.indexOf(":") + 1;
             var uniProtID = uniProtValue.substring(sep, uniProtValue.length - 2);
-            geneLink = globals.dbxref_prefix_map.UniProtKB + uniProtID;
+            geneLink = dbxref_prefix_map.UniProtKB + uniProtID;
         } else if (context.organism.name == 'dmelanogaster' || context.organism.name == 'celegans') {
             var organismPrefix = context.organism.name == 'dmelanogaster' ? 'FBgn': 'WBGene';
-            var baseUrl = context.organism.name == 'dmelanogaster' ? globals.dbxref_prefix_map.FlyBase : globals.dbxref_prefix_map.WormBase;
+            var baseUrl = context.organism.name == 'dmelanogaster' ? dbxref_prefix_map.FlyBase : dbxref_prefix_map.WormBase;
             geneRef = _.find(context.dbxref, function(ref) {
                 return ref.indexOf(organismPrefix) != -1;
             });
@@ -33,14 +29,14 @@ var Gene = module.exports.Gene = React.createClass({
             }
         }
         return (
-            <div className={globals.itemClass(context, 'view-item')}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>{context.label} (<em>{context.organism.scientific_name}</em>)</h2>
                     </div>
                 </header>
 
-                <dl className={itemClass}>
+                <dl className={itemClass(context, 'view-detail panel key-value')}>
                     <dt>Gene name</dt>
                     <dd>{context.label}</dd>
 
@@ -57,6 +53,6 @@ var Gene = module.exports.Gene = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(Gene, 'gene');
+content_views.register(Gene, 'gene');

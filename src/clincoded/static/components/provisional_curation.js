@@ -1,36 +1,28 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var methods = require('./methods');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var CuratorHistory = require('./curator_history');
-var modal = require('../libs/bootstrap/modal');
-var Modal = modal.Modal;
-var CurationMixin = curator.CurationMixin;
-var RecordHeader = curator.RecordHeader;
-var CurationPalette = curator.CurationPalette;
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
-var queryKeyValue = globals.queryKeyValue;
-var userMatch = globals.userMatch;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { curator_page, history_views, userMatch, queryKeyValue } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import * as CuratorHistory from './curator_history';
+import * as methods from './methods';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const RecordHeader = curator.RecordHeader;
+const CurationPalette = curator.CurationPalette;
 
-var ProvisionalCuration = React.createClass({
+var ProvisionalCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
-        navigate: React.PropTypes.func,
-        closeModal: React.PropTypes.func
+        navigate: PropTypes.func,
+        closeModal: PropTypes.func
     },
 
     queryValues: {},
@@ -834,7 +826,7 @@ var ProvisionalCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
+curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
 
 // Generate Classification Description page for url ../provisional-curation/?gdm=GDMId&classification=display
 var Classification = function() {
@@ -1036,8 +1028,8 @@ var DefinitiveClassification = function() {
 */
 
 // Display a history item for adding a family
-var ProvisionalAddModHistory = React.createClass({
-    render: function() {
+class ProvisionalAddModHistory extends Component {
+    render() {
         var history = this.props.history;
         var meta = history.meta.provisionalClassification;
         var gdm = meta.gdm;
@@ -1051,14 +1043,14 @@ var ProvisionalAddModHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(ProvisionalAddModHistory, 'provisionalClassification', 'add');
+history_views.register(ProvisionalAddModHistory, 'provisionalClassification', 'add');
 
 
 // Display a history item for modifying a family
-var ProvisionalModifyHistory = React.createClass({
-    render: function() {
+class ProvisionalModifyHistory extends Component {
+    render() {
         var history = this.props.history;
         var meta = history.meta.provisionalClassification;
         var gdm = meta.gdm;
@@ -1072,16 +1064,16 @@ var ProvisionalModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(ProvisionalModifyHistory, 'provisionalClassification', 'modify');
+history_views.register(ProvisionalModifyHistory, 'provisionalClassification', 'modify');
 
 
 // Display a history item for deleting a family
-var ProvisionalDeleteHistory = React.createClass({
-    render: function() {
+class ProvisionalDeleteHistory extends Component {
+    render() {
         return <div>PROVISIONALDELETE</div>;
     }
-});
+}
 
-globals.history_views.register(ProvisionalDeleteHistory, 'provisionalClassification', 'delete');
+history_views.register(ProvisionalDeleteHistory, 'provisionalClassification', 'delete');
