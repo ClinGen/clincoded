@@ -1,27 +1,22 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('../globals');
-var form = require('../../libs/bootstrap/form');
-
-var Input = form.Input;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var queryKeyValue = globals.queryKeyValue;
-var editQueryValue = globals.editQueryValue;
-var addQueryKey = globals.addQueryKey;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
+import { queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 
 // General purpose title rendering
-var Title = module.exports.Title = React.createClass({
+var Title = module.exports.Title = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        interpretationUuid: React.PropTypes.string,
-        interpretation: React.PropTypes.object,
-        setSummaryVisibility: React.PropTypes.func,
-        summaryVisible: React.PropTypes.bool,
-        getSelectedTab: React.PropTypes.func
+        data: PropTypes.object, // ClinVar data payload
+        interpretationUuid: PropTypes.string,
+        interpretation: PropTypes.object,
+        setSummaryVisibility: PropTypes.func,
+        summaryVisible: PropTypes.bool,
+        getSelectedTab: PropTypes.func
     },
 
     getInitialState: function() {

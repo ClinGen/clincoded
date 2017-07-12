@@ -1,32 +1,28 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('./globals');
-var fetched = require('./fetched');
-var form = require('../libs/bootstrap/form');
-var panel = require('../libs/bootstrap/panel');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var RestMixin = require('./rest').RestMixin;
-var variantHgvsRender = require('./curator').variantHgvsRender;
-var CuratorHistory = require('./curator_history');
-var add_external_resource = require('./add_external_resource');
-var external_url_map = globals.external_url_map;
-var AddResourceId = add_external_resource.AddResourceId;
-
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var Panel = panel.Panel;
-
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { curator_page, external_url_map } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
+import * as curator from './curator';
+const variantHgvsRender = curator.variantHgvsRender;
 
-var SelectVariant = React.createClass({
+var fetched = require('./fetched');
+
+var SelectVariant = createReactClass({
     mixins: [FormMixin, RestMixin, CuratorHistory],
 
     contextTypes: {
-        fetch: React.PropTypes.func,
-        navigate: React.PropTypes.func
+        fetch: PropTypes.func,
+        navigate: PropTypes.func
     },
 
     getInitialState: function() {
@@ -112,4 +108,4 @@ var SelectVariant = React.createClass({
     }
 });
 
-globals.curator_page.register(SelectVariant, 'curator_page', 'select-variant');
+curator_page.register(SelectVariant, 'curator_page', 'select-variant');

@@ -1,46 +1,34 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var methods = require('./methods');
-var individual_curation = require('./individual_curation');
-var Assessments = require('./assessment');
-var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
-var add_external_resource = require('./add_external_resource');
-var CuratorHistory = require('./curator_history');
-
-var CurationMixin = curator.CurationMixin;
-var RecordHeader = curator.RecordHeader;
-var ViewRecordHeader = curator.ViewRecordHeader;
-var CurationPalette = curator.CurationPalette;
-var PmidSummary = curator.PmidSummary;
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var AssessmentTracker = Assessments.AssessmentTracker;
-var AssessmentPanel = Assessments.AssessmentPanel;
-var AssessmentMixin = Assessments.AssessmentMixin;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
-var PmidDoiButtons = curator.PmidDoiButtons;
-var queryKeyValue = globals.queryKeyValue;
-var country_codes = globals.country_codes;
-var makeStarterIndividual = individual_curation.makeStarterIndividual;
-var updateProbandVariants = individual_curation.updateProbandVariants;
-var recordIndividualHistory = individual_curation.recordIndividualHistory;
-var external_url_map = globals.external_url_map;
-var DeleteButton = curator.DeleteButton;
-var AddResourceId = add_external_resource.AddResourceId;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { curator_page, content_views, history_views, queryKeyValue, external_url_map, country_codes } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { AddResourceId } from './add_external_resource';
+import * as CuratorHistory from './curator_history';
+import * as methods from './methods';
+import { makeStarterIndividual, updateProbandVariants, recordIndividualHistory } from './individual_curation';
 import ModalComponent from '../libs/bootstrap/modal';
 import { FamilyDisease, FamilyProbandDisease } from './disease';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const RecordHeader = curator.RecordHeader;
+const ViewRecordHeader = curator.ViewRecordHeader;
+const CurationPalette = curator.CurationPalette;
+const PmidSummary = curator.PmidSummary;
+const PmidDoiButtons = curator.PmidDoiButtons;
+const DeleteButton = curator.DeleteButton;
+import * as Assessments from './assessment';
+const AssessmentTracker = Assessments.AssessmentTracker;
+const AssessmentPanel = Assessments.AssessmentPanel;
+const AssessmentMixin = Assessments.AssessmentMixin;
 
 const MAX_VARIANTS = 2;
 
@@ -69,11 +57,11 @@ var initialCv = {
 };
 
 
-var FamilyCuration = React.createClass({
+var FamilyCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
 
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: PropTypes.func
     },
 
     cv: initialCv,
@@ -1394,7 +1382,7 @@ var FamilyCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
+curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
 
 
 // Family Name group curation panel. Call with .call(this) to run in the same context
@@ -1501,9 +1489,9 @@ var FamilyCommonDiseases = function() {
 };
 
 // HTML labels for inputs follow.
-var LabelHpoId = React.createClass({
+var LabelHpoId = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -1517,9 +1505,9 @@ var LabelHpoId = React.createClass({
 });
 
 // HTML labels for inputs follow.
-var LabelPhenoTerms = React.createClass({
+var LabelPhenoTerms = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -1795,31 +1783,31 @@ var FamilyVariant = function() {
     );
 };
 
-var LabelClinVarVariant = React.createClass({
+var LabelClinVarVariant = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
     }
 });
 
-var LabelClinVarVariantTitle = React.createClass({
+var LabelClinVarVariantTitle = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
     }
 });
 
-var LabelCARVariant = React.createClass({
+var LabelCARVariant = createReactClass({
     render: function() {
         return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
     }
 });
 
-var LabelCARVariantTitle = React.createClass({
+var LabelCARVariantTitle = createReactClass({
     render: function() {
         return <span><strong>Genomic HGVS Title:</strong></span>;
     }
 });
 
-var LabelOtherVariant = React.createClass({
+var LabelOtherVariant = createReactClass({
     render: function() {
         return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
     }
@@ -1870,7 +1858,7 @@ function segregationExists(segregation) {
 }
 
 
-var FamilyViewer = React.createClass({
+var FamilyViewer = createReactClass({
     mixins: [RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
@@ -2264,7 +2252,7 @@ var FamilyViewer = React.createClass({
     }
 });
 
-globals.content_views.register(FamilyViewer, 'family');
+content_views.register(FamilyViewer, 'family');
 
 
 // Display a segregation in a read-only panel. If the assessments can change while the page
@@ -2350,8 +2338,8 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
 
 
 // Display a history item for adding a family
-var FamilyAddHistory = React.createClass({
-    render: function() {
+class FamilyAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var family = history.primary;
         var gdm = history.meta.family.gdm;
@@ -2374,14 +2362,14 @@ var FamilyAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(FamilyAddHistory, 'family', 'add');
+history_views.register(FamilyAddHistory, 'family', 'add');
 
 
 // Display a history item for modifying a family
-var FamilyModifyHistory = React.createClass({
-    render: function() {
+class FamilyModifyHistory extends Component {
+    render() {
         var history = this.props.history;
         var family = history.primary;
 
@@ -2393,14 +2381,14 @@ var FamilyModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(FamilyModifyHistory, 'family', 'modify');
+history_views.register(FamilyModifyHistory, 'family', 'modify');
 
 
 // Display a history item for deleting a family
-var FamilyDeleteHistory = React.createClass({
-    render: function() {
+class FamilyDeleteHistory extends Component {
+    render() {
         var history = this.props.history;
         var family = history.primary;
 
@@ -2416,6 +2404,6 @@ var FamilyDeleteHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(FamilyDeleteHistory, 'family', 'delete');
+history_views.register(FamilyDeleteHistory, 'family', 'delete');

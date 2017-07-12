@@ -1,12 +1,8 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../../../globals');
+import React from 'react';
+import { external_url_map } from '../../../globals';
 
-var external_url_map = globals.external_url_map;
-
-module.exports.setContextLinks = function(nc_hgvs, ref) {
+export function setContextLinks(nc_hgvs, ref) {
     // get Chromosome
     var chr = nc_hgvs.substr(7, 2);
     if (chr.indexOf('0') === 0) {

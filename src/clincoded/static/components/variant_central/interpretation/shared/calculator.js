@@ -1,12 +1,14 @@
 'use strict';
 import React from 'react';
-import  _ from 'underscore';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
 
 
-var PathogenicityCalculator = module.exports.PathogenicityCalculator = React.createClass({
+var PathogenicityCalculator = module.exports.PathogenicityCalculator = createReactClass({
     propTypes: {
-        interpretation: React.PropTypes.object,
-        setCalculatedPathogenicity: React.PropTypes.func
+        interpretation: PropTypes.object,
+        setCalculatedPathogenicity: PropTypes.func
     },
 
     getInitialState: function() {

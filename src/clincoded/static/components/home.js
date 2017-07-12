@@ -1,11 +1,13 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var url = require('url');
-var moment = require('moment');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import moment from 'moment';
+import url from 'url';
+import { content_views } from './globals';
 
-var SignIn = module.exports.SignIn = React.createClass({
-    render: function() {
+export class SignIn extends Component {
+    render() {
         var hidden = !this.props.session || this.props.session['auth.userid'];
         var disabled = !this.props.loadingComplete;
         return (
@@ -17,11 +19,11 @@ var SignIn = module.exports.SignIn = React.createClass({
             </div>
         );
     }
-});
+}
 
-var Home = module.exports.Home = React.createClass({
+var Home = module.exports.Home = createReactClass({
     propTypes: {
-        demoVersion: React.PropTypes.bool
+        demoVersion: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -89,5 +91,4 @@ var Home = module.exports.Home = React.createClass({
     }
 });
 
-
-globals.content_views.register(Home, 'portal');
+content_views.register(Home, 'portal');

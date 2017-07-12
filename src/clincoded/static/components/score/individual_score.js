@@ -1,6 +1,8 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, X_LINKED } from './constants/evidence_types';
 import CASE_INFO_TYPES from './constants/case_info_types';
@@ -9,19 +11,19 @@ import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 
 // Render scoring panel in Gene Curation Interface
-var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
+var ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        session: React.PropTypes.object, // Session object passed from parent
-        evidence: React.PropTypes.object, // Individual, Experimental or Case Control
-        modeInheritance: React.PropTypes.string, // Mode of Inheritance
-        evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
-        variantInfo: React.PropTypes.object, // Variant count for Individual evidence
-        handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
-        scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
-        formError: React.PropTypes.bool // TRUE if no explanation is given for a different score
+        session: PropTypes.object, // Session object passed from parent
+        evidence: PropTypes.object, // Individual, Experimental or Case Control
+        modeInheritance: PropTypes.string, // Mode of Inheritance
+        evidenceType: PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
+        variantInfo: PropTypes.object, // Variant count for Individual evidence
+        handleUserScoreObj: PropTypes.func, // Function to call create/update score object
+        scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        submitBusy: PropTypes.bool, // TRUE while the form submit is running
+        formError: PropTypes.bool // TRUE if no explanation is given for a different score
     },
 
     getInitialState() {

@@ -1,21 +1,23 @@
 'use strict';
-import React, {PropTypes} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { RestMixin } from '../../rest';
 import * as curator from '../../curator';
 import * as evidenceCodes from './mapping/evidence_code.json';
 
-var EvaluationSummary = module.exports.EvaluationSummary = React.createClass({
+var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     propTypes: {
-        interpretation: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func,
-        setProvisionalEvaluation: React.PropTypes.func,
-        calculatedAssertion: React.PropTypes.string,
-        provisionalPathogenicity: React.PropTypes.string,
-        provisionalReason: React.PropTypes.string,
-        provisionalInterpretation: React.PropTypes.bool
+        interpretation: PropTypes.object,
+        updateInterpretationObj: PropTypes.func,
+        setProvisionalEvaluation: PropTypes.func,
+        calculatedAssertion: PropTypes.string,
+        provisionalPathogenicity: PropTypes.string,
+        provisionalReason: PropTypes.string,
+        provisionalInterpretation: PropTypes.bool
     },
 
     getInitialState: function() {

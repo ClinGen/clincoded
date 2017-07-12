@@ -1,42 +1,34 @@
 'use strict';
-var React = require('react');
-var url = require('url');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var methods = require('./methods');
-var CuratorHistory = require('./curator_history');
-var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
-
-var CurationMixin = curator.CurationMixin;
-var RecordHeader = curator.RecordHeader;
-var ViewRecordHeader = curator.ViewRecordHeader;
-var CurationPalette = curator.CurationPalette;
-var PmidSummary = curator.PmidSummary;
-var PanelGroup = panel.PanelGroup;
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var InputMixin = form.InputMixin;
-var PmidDoiButtons = curator.PmidDoiButtons;
-var queryKeyValue = globals.queryKeyValue;
-var country_codes = globals.country_codes;
-var external_url_map = globals.external_url_map;
-var DeleteButton = curator.DeleteButton;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { curator_page, content_views, history_views, queryKeyValue, external_url_map, country_codes } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import { parsePubmed } from '../libs/parse-pubmed';
+import * as CuratorHistory from './curator_history';
+import * as methods from './methods';
 import ModalComponent from '../libs/bootstrap/modal';
 import { GroupDisease } from './disease';
+import * as curator from './curator';
+const CurationMixin = curator.CurationMixin;
+const RecordHeader = curator.RecordHeader;
+const ViewRecordHeader = curator.ViewRecordHeader;
+const CurationPalette = curator.CurationPalette;
+const PmidSummary = curator.PmidSummary;
+const PmidDoiButtons = curator.PmidDoiButtons;
+const DeleteButton = curator.DeleteButton;
 
-var GroupCuration = React.createClass({
+var GroupCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: PropTypes.func
     },
 
     // Keeps track of values from the query string
@@ -601,7 +593,7 @@ var GroupCuration = React.createClass({
     }
 });
 
-globals.curator_page.register(GroupCuration, 'curator_page', 'group-curation');
+curator_page.register(GroupCuration, 'curator_page', 'group-curation');
 
 
 // Group Name group curation panel. Call with .call(this) to run in the same context
@@ -652,9 +644,9 @@ var GroupCommonDiseases = function() {
 };
 
 // HTML labels for inputs follow.
-var LabelHpoId = React.createClass({
+var LabelHpoId = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -668,9 +660,9 @@ var LabelHpoId = React.createClass({
 });
 
 // HTML labels for inputs follow.
-var LabelPhenoTerms = React.createClass({
+var LabelPhenoTerms = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -804,11 +796,11 @@ var GroupProbandInfo = function() {
 };
 
 // HTML labels for inputs follow.
-var LabelOtherGenes = React.createClass({
-    render: function() {
+class LabelOtherGenes extends Component {
+    render() {
         return <span>Other genes found to have variants in them (<a href={external_url_map['HGNCHome']} title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
     }
-});
+}
 
 
 // Additional Information group curation panel. Call with .call(this) to run in the same context
@@ -837,8 +829,8 @@ var GroupAdditional = function() {
 };
 
 
-var GroupViewer = React.createClass({
-    render: function() {
+class GroupViewer extends Component {
+    render() {
         var context = this.props.context;
         var method = context.method;
 
@@ -1045,14 +1037,14 @@ var GroupViewer = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.content_views.register(GroupViewer, 'group');
+content_views.register(GroupViewer, 'group');
 
 
 // Display a history item for adding a group
-var GroupAddHistory = React.createClass({
-    render: function() {
+class GroupAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var group = history.primary;
         var gdm = history.meta.group.gdm;
@@ -1069,14 +1061,14 @@ var GroupAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(GroupAddHistory, 'group', 'add');
+history_views.register(GroupAddHistory, 'group', 'add');
 
 
 // Display a history item for modifying a group
-var GroupModifyHistory = React.createClass({
-    render: function() {
+class GroupModifyHistory extends Component {
+    render() {
         var history = this.props.history;
         var group = history.primary;
 
@@ -1088,14 +1080,14 @@ var GroupModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(GroupModifyHistory, 'group', 'modify');
+history_views.register(GroupModifyHistory, 'group', 'modify');
 
 
 // Display a history item for deleting a group
-var GroupDeleteHistory = React.createClass({
-    render: function() {
+class GroupDeleteHistory extends Component {
+    render() {
         var history = this.props.history;
         var group = history.primary;
 
@@ -1111,6 +1103,6 @@ var GroupDeleteHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
-globals.history_views.register(GroupDeleteHistory, 'group', 'delete');
+history_views.register(GroupDeleteHistory, 'group', 'delete');

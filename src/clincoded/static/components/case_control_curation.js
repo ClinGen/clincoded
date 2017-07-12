@@ -1,21 +1,23 @@
 'use strict';
-
-import React, {PropTypes} from 'react';
-import url from 'url';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-
-import * as curator from './curator';
+import url from 'url';
+import { queryKeyValue, country_codes, external_url_map, curator_page, history_views, content_views } from './globals';
+import { RestMixin } from './rest';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../libs/bootstrap/panel';
+import { parsePubmed } from '../libs/parse-pubmed';
 import * as methods from './methods';
 import * as CaseControlEvalScore from './case_control/evaluation_score';
 import * as CuratorHistory from './curator_history';
-
-import { RestMixin } from './rest';
-import { queryKeyValue, country_codes, external_url_map, curator_page, history_views, content_views } from './globals';
-import { Form, FormMixin, Input, InputMixin } from '../libs/bootstrap/form';
-import { PanelGroup, Panel } from '../libs/bootstrap/panel';
-import { parsePubmed } from '../libs/parse-pubmed';
-
+import { ScoreCaseControl } from './score/case_control_score';
+import { ScoreViewer } from './score/viewer';
+import ModalComponent from '../libs/bootstrap/modal';
+import { GroupDisease } from './disease';
+import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
 const ViewRecordHeader = curator.ViewRecordHeader;
@@ -24,15 +26,9 @@ const PmidSummary = curator.PmidSummary;
 const DeleteButton = curator.DeleteButton;
 const PmidDoiButtons = curator.PmidDoiButtons;
 
-var ScoreCaseControl = require('./score/case_control_score').ScoreCaseControl;
-var ScoreViewer = require('./score/viewer').ScoreViewer;
-
-import ModalComponent from '../libs/bootstrap/modal';
-import { GroupDisease } from './disease';
-
-const CaseControlCuration = React.createClass({
+const CaseControlCuration = createReactClass({
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: PropTypes.func
     },
 
     mixins: [
@@ -1157,9 +1153,9 @@ function GroupCommonDiseases(groupType) {
 }
 
 // HTML labels for inputs follow.
-var LabelHpoId = React.createClass({
+var LabelHpoId = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -1173,9 +1169,9 @@ var LabelHpoId = React.createClass({
 });
 
 // HTML labels for inputs follow.
-var LabelPhenoTerms = React.createClass({
+var LabelPhenoTerms = createReactClass({
     propTypes: {
-        not: React.PropTypes.bool // T to show 'NOT' version of label
+        not: PropTypes.bool // T to show 'NOT' version of label
     },
 
     render: function() {
@@ -1362,7 +1358,7 @@ function GroupPower(groupType) {
 }
 
 // HTML labels for inputs follow.
-var LabelOtherGenes = React.createClass({
+var LabelOtherGenes = createReactClass({
     render: function() {
         return <span>Other genes found to have variants in them (<a href={external_url_map['HGNCHome']} title="HGNC home page in a new tab" target="_blank">HGNC</a> symbol):</span>;
     }
@@ -1408,7 +1404,7 @@ function GroupAdditional(groupType) {
     );
 }
 
-var CaseControlViewer = React.createClass({
+var CaseControlViewer = createReactClass({
     // Start:: Evidence score submission hanlding for viewer
     mixins: [RestMixin],
 
@@ -1969,8 +1965,8 @@ var CaseControlViewer = React.createClass({
 content_views.register(CaseControlViewer, 'caseControl');
 
 // Display a history item for adding a case-control
-var CaseControlAddHistory = React.createClass({
-    render: function() {
+class CaseControlAddHistory extends Component {
+    render() {
         var history = this.props.history;
         var caseControl = history.primary;
         var gdm = history.meta.caseControl.gdm;
@@ -1987,13 +1983,13 @@ var CaseControlAddHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
 history_views.register(CaseControlAddHistory, 'caseControl', 'add');
 
 // Display a history item for modifying a case-control
-var CaseControlModifyHistory = React.createClass({
-    render: function() {
+class CaseControlModifyHistory extends Component {
+    render() {
         var history = this.props.history;
         var caseControl = history.primary;
 
@@ -2005,14 +2001,14 @@ var CaseControlModifyHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
 history_views.register(CaseControlModifyHistory, 'caseControl', 'modify');
 
 
 // Display a history item for deleting a case-control
-var CaseControlDeleteHistory = React.createClass({
-    render: function() {
+class CaseControlDeleteHistory extends Component {
+    render() {
         var history = this.props.history;
         var caseControl = history.primary;
 
@@ -2028,7 +2024,7 @@ var CaseControlDeleteHistory = React.createClass({
             </div>
         );
     }
-});
+}
 
 history_views.register(CaseControlDeleteHistory, 'caseControl', 'delete');
 

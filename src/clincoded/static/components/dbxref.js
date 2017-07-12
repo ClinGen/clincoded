@@ -1,6 +1,7 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import { dbxref_prefix_map } from './globals';
 
 var Dbxref = module.exports.Dbxref = function (props) {
     var value = props.value || '';
@@ -13,7 +14,7 @@ var Dbxref = module.exports.Dbxref = function (props) {
         prefix = value.slice(0, sep);
         local = encodeURIComponent(value.slice(sep + 1)).replace(/%20/g,'_');
     }
-    var base = prefix && globals.dbxref_prefix_map[prefix];
+    var base = prefix && dbxref_prefix_map[prefix];
     if (!base) {
         return <span>{value}</span>;
     }
@@ -28,7 +29,7 @@ var Dbxref = module.exports.Dbxref = function (props) {
     return <a href={base + local}>{value}</a>;
 };
 
-module.exports.DbxrefList = React.createClass({
+module.exports.DbxrefList = createReactClass({
     render: function () {
         var props = this.props;
         return (

@@ -1,30 +1,28 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../../globals');
-var RestMixin = require('../../rest').RestMixin;
-var CompleteSection = require('./shared/complete_section').CompleteSection;
-
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../rest';
+import { dbxref_prefix_map, external_url_map } from '../../globals';
+import { CompleteSection } from './shared/complete_section';
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
 
 // Display the curator data of the curation data
-var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGeneSpecific = React.createClass({
+var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGeneSpecific = createReactClass({
     mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        interpretation: React.PropTypes.object,
-        updateInterpretationObj: React.PropTypes.func,
-        href_url: React.PropTypes.object,
-        ext_myGeneInfo: React.PropTypes.object,
-        ext_ensemblGeneId: React.PropTypes.string,
-        ext_geneSynonyms: React.PropTypes.array,
-        loading_myGeneInfo: React.PropTypes.bool
+        data: PropTypes.object, // ClinVar data payload
+        interpretation: PropTypes.object,
+        updateInterpretationObj: PropTypes.func,
+        href_url: PropTypes.object,
+        ext_myGeneInfo: PropTypes.object,
+        ext_ensemblGeneId: PropTypes.string,
+        ext_geneSynonyms: PropTypes.array,
+        loading_myGeneInfo: PropTypes.bool
     },
 
     getInitialState: function() {

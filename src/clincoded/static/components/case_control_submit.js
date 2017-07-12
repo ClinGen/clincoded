@@ -1,6 +1,7 @@
 'use strict';
 
-import React, {PropTypes} from 'react';
+import React from 'react';
+import createReactClass from 'create-react-class';
 import _ from 'underscore';
 
 import * as curator from './curator';
@@ -13,7 +14,7 @@ import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 const RecordHeader = curator.RecordHeader;
 const PmidSummary = curator.PmidSummary;
 
-var CaseControlSubmit = module.exports.CaseControlSubmit = React.createClass({
+var CaseControlSubmit = module.exports.CaseControlSubmit = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     // Keeps track of values from the query string

@@ -1,11 +1,12 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var url = require('url');
+import React from 'react';
+import createReactClass from 'create-react-class';
+import url from 'url';
+import { content_views, bindEvent, unbindEvent } from './globals';
 
 
 // Fixed-position lightbox background and image
-var Lightbox = module.exports.Lightbox = React.createClass({
+var Lightbox = module.exports.Lightbox = createReactClass({
     getInitialState: function() {
         return {imgHeight: 0};
     },
@@ -16,12 +17,12 @@ var Lightbox = module.exports.Lightbox = React.createClass({
     },
 
     componentDidMount: function() {
-        globals.bindEvent(window, 'resize', this.handleResize);
+        bindEvent(window, 'resize', this.handleResize);
         this.setState({imgHeight: this.refs.lightbox.offsetHeight - 40});
     },
 
     componentWillUnmount: function() {
-        globals.unbindEvent(window, 'resize', this.handleResize);
+        unbindEvent(window, 'resize', this.handleResize);
     },
 
     render: function() {
@@ -43,7 +44,7 @@ var Lightbox = module.exports.Lightbox = React.createClass({
 });
 
 
-var Attachment = module.exports.Attachment = React.createClass({
+var Attachment = module.exports.Attachment = createReactClass({
     // Handle a click on the lightbox trigger (thumbnail)
     lightboxClick: function(attachmentType, e) {
         if(attachmentType === 'image') {
@@ -70,12 +71,12 @@ var Attachment = module.exports.Attachment = React.createClass({
 
     // Register for keyup events for ESC key
     componentDidMount: function() {
-        globals.bindEvent(window, 'keyup', this.handleEscKey);
+        bindEvent(window, 'keyup', this.handleEscKey);
     },
 
     // Unregister keyup events when component closes
     componentWillUnmount: function() {
-        globals.unbindEvent(window, 'keyup', this.handleEscKey);
+        unbindEvent(window, 'keyup', this.handleEscKey);
     },
 
     render: function() {
@@ -129,7 +130,7 @@ var Attachment = module.exports.Attachment = React.createClass({
 });
 
 
-var Image = React.createClass({
+var Image = createReactClass({
     render: function() {
         return (
             <figure>
@@ -141,4 +142,4 @@ var Image = React.createClass({
 });
 
 
-globals.content_views.register(Image, 'image');
+content_views.register(Image, 'image');

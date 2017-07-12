@@ -1,10 +1,9 @@
 'use strict';
-var React = require('react');
-var moment = require('moment');
-var globals = require('./globals');
-var curator = require('./curator');
-
-var truncateString = globals.truncateString;
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import moment from 'moment';
+import * as curator from './curator';
+import { content_views, truncateString } from './globals';
 
 // Map GDM statuses from
 var statusMappings = {
@@ -16,7 +15,7 @@ var statusMappings = {
     'Final Classification':                {cssClass: 'final',       shortName: 'Final'}
 };
 
-var GdmCollection = module.exports.GdmCollection = React.createClass({
+var GdmCollection = module.exports.GdmCollection = createReactClass({
     getInitialState() {
         return {
             sortCol: 'gdm',
@@ -212,11 +211,11 @@ var GdmCollection = module.exports.GdmCollection = React.createClass({
     }
 });
 
-globals.content_views.register(GdmCollection, 'gdm_collection');
+content_views.register(GdmCollection, 'gdm_collection');
 
 // Render the GDM status legend
-var GdmStatusLegend = React.createClass({
-    render: function() {
+class GdmStatusLegend extends Component {
+    render() {
         return (
             <div className="row">
                 <div className="gdm-status-legend">
@@ -234,4 +233,4 @@ var GdmStatusLegend = React.createClass({
             </div>
         );
     }
-});
+}

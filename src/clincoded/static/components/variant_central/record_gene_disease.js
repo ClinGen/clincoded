@@ -1,17 +1,18 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import moment from 'moment';
+import { external_url_map } from '../globals';
+
 var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../globals');
 var externalLinks = require('./interpretation/shared/externalLinks');
 
-var external_url_map = globals.external_url_map;
-
 // Display the curator data of the curation data
-var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = React.createClass({
+var CurationRecordGeneDisease = module.exports.CurationRecordGeneDisease = createReactClass({
 
     propTypes: {
-        data: React.PropTypes.object // ClinVar data payload
+        data: PropTypes.object // ClinVar data payload
     },
 
     getDefaultProps: function() {

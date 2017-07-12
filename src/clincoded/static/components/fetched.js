@@ -1,14 +1,18 @@
 'use strict';
-var React = require('react');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var globals = require('./globals');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import url from 'url';
+import { content_views } from './globals';
+import { parseAndLogError } from './mixins';
+
 var ga = require('google-analytics');
-var _ = require('underscore');
 
-
-var Param = module.exports.Param = React.createClass({
+var Param = module.exports.Param = createReactClass({
     contextTypes: {
-        fetch: React.PropTypes.func
+        fetch: PropTypes.func
     },
 
     getInitialState: function () {
@@ -72,7 +76,7 @@ var Param = module.exports.Param = React.createClass({
 });
 
 
-var FetchedData = module.exports.FetchedData = React.createClass({
+var FetchedData = module.exports.FetchedData = createReactClass({
 
     getDefaultProps: function() {
         return {loadingComplete: true};
@@ -130,7 +134,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
             return (
                 <div className="error done">
                     {errors.map(error => {
-                        var ErrorView = globals.content_views.lookup(error);
+                        var ErrorView = content_views.lookup(error);
                         return <ErrorView {...this.props} context={error} />;
                     })}
                 </div>
@@ -156,7 +160,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
 });
 
 
-var Items = React.createClass({
+var Items = createReactClass({
 
     render: function() {
         var Component = this.props.Component;
@@ -169,7 +173,7 @@ var Items = React.createClass({
 });
 
 
-var FetchedItems = module.exports.FetchedItems = React.createClass({
+var FetchedItems = module.exports.FetchedItems = createReactClass({
     
     render: function() {
         return (
