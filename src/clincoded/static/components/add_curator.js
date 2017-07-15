@@ -3,7 +3,6 @@ var React = require('react');
 var _ = require('underscore');
 var moment = require('moment');
 var globals = require('./globals');
-var fetched = require('./fetched');
 var form = require('../libs/bootstrap/form');
 var modal = require('../libs/bootstrap/modal');
 var panel = require('../libs/bootstrap/panel');
