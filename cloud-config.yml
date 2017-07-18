@@ -104,8 +104,7 @@ runcmd:
 - echo "include 'custom.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - if test "%(ROLE)s" = "demo"
 - then
--   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
--   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
+-   echo "standby_mode = off" >> /var/lib/postgresql/9.4/main/recovery.conf
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - fi
 - sudo -u postgres createuser clincoded
@@ -130,6 +129,7 @@ runcmd:
 -   echo "====== restoring data from backup"
 -   /etc/init.d/postgresql stop
 -   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
+# -   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 -   /etc/init.d/postgresql start
 # (load local test data plus all genes and diseases)
 - elif test "%(BACKUPDB)s" = "test_gene_and_disease_data"
@@ -224,7 +224,7 @@ write_files:
   content: |
     archive_command = '/opt/wal-e/bin/wal-e --aws-profile default --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" wal-push "%%p"'
 
-- path: /etc/postgresql/9.4/main/recovery.conf
+- path: /var/lib/postgresql/9.4/main/recovery.conf
   content: |
     # recovery.conf must be linked into data dir to do anything
     recovery_target_timeline = 'latest'
