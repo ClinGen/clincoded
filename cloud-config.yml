@@ -96,8 +96,6 @@ runcmd:
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
 - sudo echo "BEFORE postgresql install"
-- sudo mkdir -p /var/lib/postgresql/9.4/main
-- sudo ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 - sudo apt-get -y install postgresql-9.4
 - sudo echo "postgresql installing"
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
@@ -134,9 +132,7 @@ runcmd:
 -   echo "====== restoring data from backup"
 -   /etc/init.d/postgresql stop
 -   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
--   sudo echo "IN THE IF RIGHT BEFORE LINK MADE"
 -   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
--   sudo echo "LINK WAS MADE"
 -   /etc/init.d/postgresql start
 # (load local test data plus all genes and diseases)
 - elif test "%(BACKUPDB)s" = "test_gene_and_disease_data"
