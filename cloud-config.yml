@@ -105,6 +105,7 @@ runcmd:
 - if test "%(ROLE)s" = "demo"
 - then
 -   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
+-   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - fi
 - sudo -u postgres createuser clincoded
@@ -129,7 +130,6 @@ runcmd:
 -   echo "====== restoring data from backup"
 -   /etc/init.d/postgresql stop
 -   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
--   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 -   /etc/init.d/postgresql start
 # (load local test data plus all genes and diseases)
 - elif test "%(BACKUPDB)s" = "test_gene_and_disease_data"
@@ -140,11 +140,8 @@ runcmd:
 - else
 # (load local test data [minimal])
 -   echo "====== restoring local test data"
--   /etc/init.d/postgresql stop
 -   sudo -u clincoded psql clincoded < DEV_TEST_DB_DUMP_9.4
 -   sudo -u clincoded psql -c 'update transactions set xid = NULL'
--   sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/ORIGrecovery.conf
--   /etc/init.d/postgresql start
 - fi
 - sudo -u clincoded python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
 - sudo -u clincoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
