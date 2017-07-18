@@ -96,6 +96,7 @@ runcmd:
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
 - sudo echo "BEFORE postgresql install"
+- sudo -u postgres mkdir -p /var/lib/postgresql/9.4/main
 - sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 - sudo apt-get -y install postgresql-9.4
 - sudo echo "postgresql installing"
