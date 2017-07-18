@@ -97,6 +97,7 @@ runcmd:
 - sudo apt-get update
 - sudo echo "BEFORE postgresql install"
 - sudo apt-get -y install postgresql-9.4
+- sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
 - sudo echo "postgresql installing"
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 - sudo apt-get install -y nodejs
