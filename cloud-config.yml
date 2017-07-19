@@ -95,7 +95,10 @@ runcmd:
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
+- sudo echo "BEFORE postgresql install"
+- sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recoveryORIG.conf
 - sudo apt-get -y install postgresql-9.4
+- sudo echo "postgresql installing"
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 - sudo apt-get install -y nodejs
 - update-rc.d elasticsearch defaults
@@ -104,7 +107,8 @@ runcmd:
 - echo "include 'custom.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - if test "%(ROLE)s" = "demo"
 - then
--   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
+-   sudo echo "in demo IF"
+-   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recoveryORIG.conf
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - fi
 - sudo -u postgres createuser clincoded
