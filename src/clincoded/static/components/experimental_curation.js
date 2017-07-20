@@ -99,7 +99,8 @@ var ExperimentalCuration = createReactClass({
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
             uniprotId: '',
-            formError: false
+            formError: false,
+            scoreDisabled: true, // Flag to enable/disable scoring
         };
     },
 
@@ -154,7 +155,19 @@ var ExperimentalCuration = createReactClass({
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
                 functionalAlterationPCEE: '',
                 modelSystemsNHACCM: '',
-                rescuePCEE: ''
+                rescuePCEE: '',
+                geneImplicatedWithDisease: false,
+                geneImplicatedInDisease: false,
+                expressedInTissue: false,
+                expressedInPatients: false,
+                patientVariantRescue: false,
+                wildTypeRescuePhenotype: false
+            }, () => {
+                if (this.state.experimentalType.indexOf('Functional Alteration') > -1 || this.state.experimentalType.indexOf('Model Systems') > -1) {
+                    this.setState({scoreDisabled: false});
+                } else {
+                    this.setState({scoreDisabled: true});
+                }
             });
             if (this.state.experimentalNameVisible) {
                 this.refs['experimentalName'].setValue('');
@@ -177,7 +190,18 @@ var ExperimentalCuration = createReactClass({
             }
         } else if (ref === 'experimentalSubtype') {
             var tempExperimentalSubtype = this.refs[ref].getValue();
-            this.setState({experimentalSubtype: tempExperimentalSubtype});
+            this.setState({experimentalSubtype: tempExperimentalSubtype}, () => {
+                /**
+                 * Selecting the 'Biochemical Function' subtype 'B' option shall enable scoring
+                 */
+                if (this.state.experimentalType.indexOf('Biochemical Function') > -1) {
+                    if (this.state.experimentalSubtype.indexOf('B. Gene function consistent with phenotype(s)') > -1) {
+                        this.setState({scoreDisabled: false});
+                    } else {
+                        this.setState({scoreDisabled: true});
+                    }
+                }
+            });
             // if assessmentTracker was set previously, reset its value
             if (this.cv.assessmentTracker) {
                 // set values for assessmentTracker
@@ -214,11 +238,15 @@ var ExperimentalCuration = createReactClass({
             }
             if (this.refs['normalExpression.expressedInTissue']) {
                 this.refs['normalExpression.expressedInTissue'].resetValue();
-                this.setState({expressedInTissue: false});
+                this.setState({expressedInTissue: false}, () => {
+                    this.toggleScoring(this.state.expressedInTissue);
+                });
             }
             if (this.refs['alteredExpression.expressedInPatients']) {
                 this.refs['alteredExpression.expressedInPatients'].resetValue();
-                this.setState({expressedInPatients: false});
+                this.setState({expressedInPatients: false}, () => {
+                    this.toggleScoring(this.state.expressedInPatients);
+                });
             }
             // If a subtype is not selected, do not let the user  specify the experimental name
             if (tempExperimentalSubtype == 'none' || tempExperimentalSubtype === '') {
@@ -233,31 +261,41 @@ var ExperimentalCuration = createReactClass({
                 });
             }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
-            this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
+            this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()}, () => {
+                this.toggleScoring(this.state.geneImplicatedWithDisease);
+            });
             if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
                 this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
                 this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'geneImplicatedInDisease') {
-            this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()});
+            this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()}, () => {
+                this.toggleScoring(this.state.geneImplicatedInDisease);
+            });
             if (this.refs['geneImplicatedInDisease'].getValue() === false) {
                 this.refs['relationshipOfOtherGenesToDisese'].resetValue();
                 this.refs['evidenceInPaper'].resetValue();
             }
         } else if (ref === 'normalExpression.expressedInTissue') {
-            this.setState({expressedInTissue: this.refs[ref].toggleValue()});
+            this.setState({expressedInTissue: this.refs[ref].toggleValue()}, () => {
+                this.toggleScoring(this.state.expressedInTissue);
+            });
             if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
                 this.refs['normalExpression.evidence'].resetValue();
                 this.refs['normalExpression.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'alteredExpression.expressedInPatients') {
-            this.setState({expressedInPatients: this.refs[ref].toggleValue()});
+            this.setState({expressedInPatients: this.refs[ref].toggleValue()}, () => {
+                this.toggleScoring(this.state.expressedInPatients);
+            });
             if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
                 this.refs['alteredExpression.evidence'].resetValue();
                 this.refs['alteredExpression.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'wildTypeRescuePhenotype') {
-            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
+            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()}, () => {
+                this.toggleScoring(this.state.wildTypeRescuePhenotype);
+            });
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO') {
@@ -479,7 +517,9 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
-                            this.setState({geneImplicatedWithDisease: bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
+                            this.setState({geneImplicatedWithDisease: bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease}, () => {
+                                this.toggleScoring(this.state.geneImplicatedWithDisease);
+                            });
                         }
                     } else if (!_.isEmpty(bioFunc.geneFunctionConsistentWithPhenotype)) {
                         this.setState({
@@ -501,7 +541,9 @@ var ExperimentalCuration = createReactClass({
                         this.setState({bioChemicalFunctionIF_FreeText: true}) : this.setState({bioChemicalFunctionIF_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Protein Interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
-                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
+                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease}, () => {
+                            this.toggleScoring(this.state.geneImplicatedInDisease);
+                        });
                     }
                 } else if (stateObj.experimental.evidenceType === 'Expression') {
                     let expression = stateObj.experimental.expression;
@@ -511,7 +553,9 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (expression.normalExpression.expressedInTissue) {
-                            this.setState({expressedInTissue: expression.normalExpression.expressedInTissue});
+                            this.setState({expressedInTissue: expression.normalExpression.expressedInTissue}, () => {
+                                this.toggleScoring(this.state.expressedInTissue);
+                            });
                         }
                     } else if (!_.isEmpty(expression.alteredExpression)) {
                         this.setState({
@@ -519,7 +563,9 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
                         });
                         if (expression.alteredExpression.expressedInPatients) {
-                            this.setState({expressedInPatients: expression.alteredExpression.expressedInPatients});
+                            this.setState({expressedInPatients: expression.alteredExpression.expressedInPatients}, () => {
+                                this.toggleScoring(this.state.expressedInPatients);
+                            });
                         }
                     }
                     // Set boolean state on 'required' prop for Expression 'Organ of Tissue' Uberon ID
@@ -570,7 +616,9 @@ var ExperimentalCuration = createReactClass({
                     let rescue = stateObj.experimental.rescue;
                     this.setState({rescuePCEE: rescue.patientCellOrEngineeredEquivalent});
                     if (rescue.wildTypeRescuePhenotype) {
-                        this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype});
+                        this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype}, () => {
+                            this.toggleScoring(this.state.wildTypeRescuePhenotype);
+                        });
                     }
                     if (rescue.patientVariantRescue) {
                         this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
@@ -674,11 +722,12 @@ var ExperimentalCuration = createReactClass({
         }
     },
 
-    // When the user changes the assessment value, this gets called
-    updateAssessment: function(value) {
-        var assessment = this.state.assessment;
-        assessment.value = value;
-        this.setState({assessment: assessment});
+    /**
+     * Method to set the flag to enable scoring
+     * @param {bool} value - The value of checkbox.
+     */
+    toggleScoring(value) {
+        this.setState({scoreDisabled: !value});
     },
 
     // validate values and return error messages as needed
@@ -1483,7 +1532,8 @@ var ExperimentalCuration = createReactClass({
                                                 <PanelGroup accordion>
                                                     <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
                                                         <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
-                                                            evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError} />
+                                                            evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError}
+                                                            scoreDisabled={this.state.scoreDisabled} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1515,8 +1565,8 @@ curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curati
 
 // Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var ExperimentalNameType = function() {
-    var experimental = this.state.experimental;
+function ExperimentalNameType() {
+    let experimental = this.state.experimental;
 
     return (
         <div className="row form-row-helper">
@@ -1588,11 +1638,11 @@ var ExperimentalNameType = function() {
             : null}
         </div>
     );
-};
+}
 
 // Biochemical Function type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeBiochemicalFunction = function(uniprotId) {
+function TypeBiochemicalFunction(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
     let BF_identifiedFunction, BF_identifiedFunctionFreeText, BF_evidenceForFunction, BF_evidenceForFunctionInPaper;
@@ -1641,9 +1691,9 @@ var TypeBiochemicalFunction = function(uniprotId) {
             : null}
         </div>
     );
-};
+}
 
-var TypeBiochemicalFunctionA = function() {
+function TypeBiochemicalFunctionA() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
     let BF_genes, BF_evidenceForOtherGenesWithSameFunction, BF_explanationOfOtherGenes, BF_evidenceInPaper;
@@ -1684,16 +1734,16 @@ var TypeBiochemicalFunctionA = function() {
                 value={BF_evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
         </div>
     );
-};
+}
 
 // HTML labels for Biochemical Functions panel A
-var LabelGenesWithSameFunction = createReactClass({
-    render: function() {
-        return <span>Other gene(s) with same function as gene in record <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
-    }
-});
+const LabelGenesWithSameFunction = () => {
+    return (
+        <span>Other gene(s) with same function as gene in record <span className="normal">(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>
+    );
+};
 
-var TypeBiochemicalFunctionB = function() {
+function TypeBiochemicalFunctionB() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
     let BF_phenotypeHPO, BF_phenotypeFreeText, BF_explanation, BF_evidenceInPaper;
@@ -1729,18 +1779,18 @@ var TypeBiochemicalFunctionB = function() {
                 inputDisabled={!(this.state.biochemicalFunctionHPO || this.state.biochemicalFunctionFT) || this.cv.othersAssessed} />
         </div>
     );
-};
+}
 
 // HTML labels for Biochemical Functions panel B
-var LabelHPOIDs = createReactClass({
-    render: function() {
-        return <span>Phenotype(s) consistent with function <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
-    }
-});
+const LabelHPOIDs = () => {
+    return (
+        <span>Phenotype(s) consistent with function <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+    );
+};
 
 // Protein Interaction type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeProteinInteractions = function() {
+function TypeProteinInteractions() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
     let PI_interactingGenes, PI_interactionType, PI_experimentalInteractionDetection, PI_relationshipOfOtherGenesToDisese, PI_evidenceInPaper;
@@ -1801,18 +1851,18 @@ var TypeProteinInteractions = function() {
                 rows="5" value={PI_evidenceInPaper}inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} />
         </div>
     );
-};
+}
 
 // HTML labels for Protein Interactions panel
-var LabelInteractingGenes = createReactClass({
-    render: function() {
-        return <span>Interacting gene(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>;
-    }
-});
+const LabelInteractingGenes = () => {
+    return (
+        <span>Interacting gene(s) <span className="normal">(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>
+    );
+};
 
 // Expression type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeExpression = function() {
+function TypeExpression() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let expression = experimental.expression ? experimental.expression : {};
     let EXP_organOfTissue, EXP_organOfTissueFreeText;
@@ -1848,9 +1898,9 @@ var TypeExpression = function() {
             : null}
         </div>
     );
-};
+}
 
-var TypeExpressionA = function() {
+function TypeExpressionA() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let expression = experimental.expression ? experimental.expression : {};
     let EXP_normalExpression_evidence, EXP_normalExpression_evidenceInPaper;
@@ -1878,9 +1928,9 @@ var TypeExpressionA = function() {
                 rows="5" value={EXP_normalExpression_evidenceInPaper} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} />
         </div>
     );
-};
+}
 
-var TypeExpressionB = function() {
+function TypeExpressionB() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let expression = experimental.expression ? experimental.expression : {};
     let EXP_alteredExpression_evidence, EXP_alteredExpression_evidenceInPaper;
@@ -1908,11 +1958,11 @@ var TypeExpressionB = function() {
                 rows="5" value={EXP_alteredExpression_evidenceInPaper} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} />
         </div>
     );
-};
+}
 
 // Functional Alteration type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeFunctionalAlteration = function(uniprotId) {
+function TypeFunctionalAlteration(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
     let FA_cellMutationOrEngineeredEquivalent, FA_patientCellType, FA_patientCellTypeFreeText,
@@ -2021,11 +2071,11 @@ var TypeFunctionalAlteration = function(uniprotId) {
                 rows="5" value={FA_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
-};
+}
 
 // Model Systems type curation panel. Call with .call(this) to run in the same context
 // as the calling component.
-var TypeModelSystems = function() {
+function TypeModelSystems() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let modelSystems = experimental.modelSystems ? experimental.modelSystems : {};
     let MS_animalOrCellCulture, MS_animalModel, MS_cellCulture, MS_cellCultureFreeText, MS_descriptionOfGeneAlteration,
@@ -2149,22 +2199,25 @@ var TypeModelSystems = function() {
                 rows="5" value={MS_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
+}
+
+const LabelPhenotypeObserved = () => {
+    return (
+        <span>Phenotype(s) observed in model system <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+    );
 };
 
-var LabelPhenotypeObserved = createReactClass({
-    render: function() {
-        return <span>Phenotype(s) observed in model system <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
-    }
-});
-var LabelPatientPhenotype = createReactClass({
-    render: function() {
-        return <span>Human phenotype(s) <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
-    }
-});
+const LabelPatientPhenotype = () => {
+    return (
+        <span>Human phenotype(s) <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+    );
+};
 
-// Rescue type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var TypeRescue = function() {
+/**
+ * Rescue type curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function TypeRescue() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let rescue = experimental.rescue ? experimental.rescue : {};
     let RES_patientCellOrEngineeredEquivalent, RES_patientCellType, RES_patientCellTypeFreeText,
@@ -2281,18 +2334,20 @@ var TypeRescue = function() {
                 rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} value={RES_evidenceInPaper} />
         </div>
     );
+}
+
+const LabelPhenotypeRescue = () => {
+    return (
+        <span>Phenotype to rescue <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+    );
 };
 
-var LabelPhenotypeRescue = createReactClass({
-    render: function() {
-        return <span>Phenotype to rescue <span style={{fontWeight: 'normal'}}>(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>;
-    }
-});
-
-// Display the Experimental Data variant panel. The number of copies depends on the variantCount state variable.
-var ExperimentalDataVariant = function() {
-    var experimental = this.state.experimental;
-    var variants = experimental && experimental.variants;
+/**
+ * Display the Experimental Data variant panel. The number of copies depends on the variantCount state variable.
+ */
+function ExperimentalDataVariant() {
+    let experimental = this.state.experimental;
+    let variants = experimental && experimental.variants;
 
     return (
         <div className="row">
@@ -2420,48 +2475,38 @@ var ExperimentalDataVariant = function() {
         }
         </div>
     );
+}
+
+const LabelClinVarVariant = () => {
+    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
 };
 
-var LabelClinVarVariant = createReactClass({
-    render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
-    }
-});
+const LabelClinVarVariantTitle = () => {
+    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
+};
 
-var LabelClinVarVariantTitle = createReactClass({
-    render: function() {
-        return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
-    }
-});
+const LabelCARVariant = () => {
+    return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+};
 
-var LabelCARVariant = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
-    }
-});
+const LabelCARVariantTitle = () => {
+    return <span><strong>Genomic HGVS Title:</strong></span>;
+};
 
-var LabelCARVariantTitle = createReactClass({
-    render: function() {
-        return <span><strong>Genomic HGVS Title:</strong></span>;
-    }
-});
+const LabelOtherVariant = () => {
+    return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
+};
 
-var LabelOtherVariant = createReactClass({
-    render: function() {
-        return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
-    }
-});
+const NoteAssessment = () => {
+    return (
+        <div className="alert alert-warning">
+            Note: The next release will provide a calculated score for this experimental evidence based on the information provided as well as
+            the ability to adjust this score within the allowed range specified by the Clinical Validity Classification.
+        </div>
+    );
+};
 
-var NoteAssessment = createReactClass({
-    render: function() {
-        return (
-            <div className="alert alert-warning">Note: The next release will provide a calculated score for this experimental evidence based on the information provided as well as the ability to adjust this score within the allowed range specified by the Clinical Validity Classification.</div>
-        );
-    }
-});
-
-
-var ExperimentalViewer = createReactClass({
+const ExperimentalViewer = createReactClass({
     mixins: [FormMixin, RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
