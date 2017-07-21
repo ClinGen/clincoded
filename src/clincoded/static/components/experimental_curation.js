@@ -44,7 +44,9 @@ var ExperimentalCuration = createReactClass({
 
     cv: initialCv,
 
-    // Keeps track of values from the query string
+    /**
+     * Keeps track of values from the query string
+     */
     queryValues: {},
 
     getInitialState: function() {
@@ -104,12 +106,16 @@ var ExperimentalCuration = createReactClass({
         };
     },
 
-    // Called by child function props to update user score obj
+    /**
+     * Called by child function props to update user score obj
+     */
     handleUserScoreObj: function(newUserScoreObj) {
         this.setState({userScoreObj: newUserScoreObj});
     },
 
-    // sets the description text below the experimental data type dropdown
+    /**
+     * sets the description text below the experimental data type dropdown
+     */
     getExperimentalTypeDescription: function(item, subitem) {
         subitem = typeof subitem !== 'undefined' ? subitem : '';
         var experimentalTypeDescriptionList = {
@@ -135,7 +141,9 @@ var ExperimentalCuration = createReactClass({
         }
     },
 
-    // Handle value changes in forms
+    /**
+     * Handle value changes in forms
+     */
     handleChange: function(ref, e) {
         var clinvarid, othervariant, user;
         if (ref === 'experimentalName' && this.refs[ref].getValue()) {
@@ -209,7 +217,9 @@ var ExperimentalCuration = createReactClass({
                 this.cv.assessmentTracker.setCurrentVal(Assessments.DEFAULT_VALUE);
                 this.setAssessmentValue(this.cv.assessmentTracker, Assessments.DEFAULT_VALUE);
             }
-            // Reset values when changing between Subtypes
+            /**
+             * Reset values when changing between Subtypes
+             */
             if (this.refs['experimentalName']) {
                 this.refs['experimentalName'].setValue('');
                 this.setState({experimentalName: ''});
@@ -248,7 +258,7 @@ var ExperimentalCuration = createReactClass({
                     this.toggleScoring(this.state.expressedInPatients);
                 });
             }
-            // If a subtype is not selected, do not let the user  specify the experimental name
+            // If a subtype is not selected, do not let the user specify the experimental name
             if (tempExperimentalSubtype == 'none' || tempExperimentalSubtype === '') {
                 this.setState({
                     experimentalTypeDescription: this.getExperimentalTypeDescription(this.state.experimentalType),
@@ -451,21 +461,27 @@ var ExperimentalCuration = createReactClass({
         }
     },
 
-    // Load objects from query string into the state variables. Must have already parsed the query string
-    // and set the queryValues property of this React class.
+    /**
+     * Load objects from query string into the state variables. Must have already parsed the query string
+     * and set the queryValues property of this React class.
+     */
     loadData: function() {
         var gdmUuid = this.queryValues.gdmUuid;
         var experimentalUuid = this.queryValues.experimentalUuid;
         var annotationUuid = this.queryValues.annotationUuid;
 
-        // Make an array of URIs to query the database. Don't include any that didn't include a query string.
+        /**
+         * Make an array of URIs to query the database. Don't include any that didn't include a query string.
+         */
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '',
             experimentalUuid ? '/experimental/' + experimentalUuid : '',
             annotationUuid ? '/evidence/' + annotationUuid : ''
         ]);
 
-        // With all given query string variables, get the corresponding objects from the DB.
+        /**
+         * With all given query string variables, get the corresponding objects from the DB.
+         */
         this.getRestDatas(
             uris
         ).then(datas => {
@@ -493,7 +509,9 @@ var ExperimentalCuration = createReactClass({
                 }
             });
 
-            // Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
+            /**
+             * Update the Curator Mixin OMIM state with the current GDM's OMIM ID.
+             */
             if (stateObj.gdm) {
                 this.getUniprotId(stateObj.gdm);
                 if (stateObj.gdm.omimId) {
@@ -1562,9 +1580,10 @@ var ExperimentalCuration = createReactClass({
 
 curator_page.register(ExperimentalCuration, 'curator_page', 'experimental-curation');
 
-
-// Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
+/**
+ * Experimental Data Name and Type curation panel. Call with .call(this) to run in the same context
+ * as the calling component.
+ */
 function ExperimentalNameType() {
     let experimental = this.state.experimental;
 
@@ -1640,8 +1659,10 @@ function ExperimentalNameType() {
     );
 }
 
-// Biochemical Function type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
+/**
+ * Biochemical Function type curation panel. Call with .call(this) to run in the same context
+ * as the calling component.
+ */
 function TypeBiochemicalFunction(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let biochemicalFunction = experimental.biochemicalFunction ? experimental.biochemicalFunction : {};
@@ -1736,7 +1757,9 @@ function TypeBiochemicalFunctionA() {
     );
 }
 
-// HTML labels for Biochemical Functions panel A
+/**
+ * HTML labels for Biochemical Functions panel A
+ */
 const LabelGenesWithSameFunction = () => {
     return (
         <span>Other gene(s) with same function as gene in record <span className="normal">(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>
@@ -1781,15 +1804,19 @@ function TypeBiochemicalFunctionB() {
     );
 }
 
-// HTML labels for Biochemical Functions panel B
+/**
+ * HTML labels for Biochemical Functions panel B
+ */
 const LabelHPOIDs = () => {
     return (
         <span>Phenotype(s) consistent with function <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
     );
 };
 
-// Protein Interaction type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
+/**
+ * Protein Interaction type curation panel. Call with .call(this) to run in the same context
+ * as the calling component.
+ */
 function TypeProteinInteractions() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let proteinInteractions = experimental.proteinInteractions ? experimental.proteinInteractions : {};
@@ -1853,15 +1880,19 @@ function TypeProteinInteractions() {
     );
 }
 
-// HTML labels for Protein Interactions panel
+/**
+ * HTML labels for Protein Interactions panel
+ */
 const LabelInteractingGenes = () => {
     return (
         <span>Interacting gene(s) <span className="normal">(<a href={external_url_map['HGNCHome']} target="_blank" title="HGNC homepage in a new tab">HGNC</a> symbol)</span>:</span>
     );
 };
 
-// Expression type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
+/**
+ * Expression type curation panel. Call with .call(this) to run in the same context
+ * as the calling component.
+ */
 function TypeExpression() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let expression = experimental.expression ? experimental.expression : {};
@@ -1960,8 +1991,11 @@ function TypeExpressionB() {
     );
 }
 
-// Functional Alteration type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
+/**
+ * Functional Alteration type curation panel. Call with .call(this) to run in the same context
+ * as the calling component.
+ * @param {string} uniprotId 
+ */
 function TypeFunctionalAlteration(uniprotId) {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let functionalAlteration = experimental.functionalAlteration ? experimental.functionalAlteration : {};
@@ -2073,8 +2107,10 @@ function TypeFunctionalAlteration(uniprotId) {
     );
 }
 
-// Model Systems type curation panel. Call with .call(this) to run in the same context
-// as the calling component.
+/**
+ * Model Systems type curation panel. Call with .call(this) to run in the same context
+ * as the calling component.
+ */
 function TypeModelSystems() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let modelSystems = experimental.modelSystems ? experimental.modelSystems : {};
@@ -2493,19 +2529,9 @@ const LabelCARVariantTitle = () => {
     return <span><strong>Genomic HGVS Title:</strong></span>;
 };
 
-const LabelOtherVariant = () => {
-    return <span>Other description <span style={{fontWeight: 'normal'}}>(only when ClinVar VariationID is not available)</span>:</span>;
-};
-
-const NoteAssessment = () => {
-    return (
-        <div className="alert alert-warning">
-            Note: The next release will provide a calculated score for this experimental evidence based on the information provided as well as
-            the ability to adjust this score within the allowed range specified by the Clinical Validity Classification.
-        </div>
-    );
-};
-
+/**
+ * Component to render view-only page of experimental data
+ */
 const ExperimentalViewer = createReactClass({
     mixins: [FormMixin, RestMixin, AssessmentMixin, CuratorHistory],
 
@@ -3196,8 +3222,9 @@ const ExperimentalViewer = createReactClass({
 
 content_views.register(ExperimentalViewer, 'experimental');
 
-
-// Display a history item for adding experimental data
+/**
+ * Display a history item for adding experimental data
+ */
 class ExperimentalAddHistory extends Component {
     render() {
         var history = this.props.history;
@@ -3221,7 +3248,9 @@ class ExperimentalAddHistory extends Component {
 history_views.register(ExperimentalAddHistory, 'experimental', 'add');
 
 
-// Display a history item for modifying experimental data
+/**
+ * Display a history item for modifying experimental data
+ */
 class ExperimentModifyHistory extends Component {
     render() {
         var history = this.props.history;
@@ -3240,7 +3269,9 @@ class ExperimentModifyHistory extends Component {
 history_views.register(ExperimentModifyHistory, 'experimental', 'modify');
 
 
-// Display a history item for deleting experimental data
+/**
+ * Display a history item for deleting experimental data
+ */
 class ExperimentDeleteHistory extends Component {
     render() {
         var history = this.props.history;
