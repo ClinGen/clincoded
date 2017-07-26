@@ -69,6 +69,11 @@ var FamilyCuration = createReactClass({
     // Keeps track of values from the query string
     queryValues: {},
 
+    propTypes: {
+        session: PropTypes.object,
+        href: PropTypes.string
+    },
+
     getInitialState: function() {
         this.cv.assessmentTracker = initialCv;
 
@@ -213,57 +218,43 @@ var FamilyCuration = createReactClass({
         }
     },
 
-    // Handle a click on a copy phenotype button
-    handleClick: function(fromTarget, item, e) {
+    /**
+     * Handle a click on a copy phenotype button
+     * @param {*} e - Event
+     */
+    handleCopyGroupPhenotypes(e) {
         e.preventDefault(); e.stopPropagation();
         var associatedGroups;
-        var orphanetVal = '';
         var hpoIds = '';
         var hpoFreeText = '';
-        if (fromTarget == 'group') {
-            this.setState({individualRequired: true});
-            if (this.state.group) {
-                // We have a group, so get the disease array from it.
-                associatedGroups = [this.state.group];
-            } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
-                // We have a family with associated groups. Combine the diseases from all groups.
-                associatedGroups = this.state.family.associatedGroups;
-            }
-            if (associatedGroups && associatedGroups.length > 0) {
-                if (item === 'orphanetid') {
-                    orphanetVal = associatedGroups.map(function(associatedGroup, i) {
-                        return (
-                            associatedGroup.commonDiagnosis.map(function(disease, i) {
-                                return ('ORPHA' + disease.orphaNumber);
-                            }).join(', ')
-                        );
-                    });
+        if (this.state.group) {
+            // We have a group, so get the disease array from it.
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            // We have a family with associated groups. Combine the diseases from all groups.
+            associatedGroups = this.state.family.associatedGroups;
+        }
+        if (associatedGroups && associatedGroups.length > 0) {
+            hpoIds = associatedGroups.map(function(associatedGroup, i) {
+                if (associatedGroup.hpoIdInDiagnosis && associatedGroup.hpoIdInDiagnosis.length) {
+                    return (
+                        associatedGroup.hpoIdInDiagnosis.map(function(hpoid, i) {
+                            return (hpoid);
+                        }).join(', ')
+                    );
                 }
-                else if (item === 'phenotype') {
-                    hpoIds = associatedGroups.map(function(associatedGroup, i) {
-                        if (associatedGroup.hpoIdInDiagnosis && associatedGroup.hpoIdInDiagnosis.length) {
-                            return (
-                                associatedGroup.hpoIdInDiagnosis.map(function(hpoid, i) {
-                                    return (hpoid);
-                                }).join(', ')
-                            );
-                        }
-                    });
-                    if (hpoIds.length) {
-                        this.refs['hpoid'].setValue(hpoIds.join(', '));
-                    }
-                    hpoFreeText = associatedGroups.map(function(associatedGroup, i) {
-                        if (associatedGroup.termsInDiagnosis) {
-                            return associatedGroup.termsInDiagnosis;
-                        }
-                    });
-                    if (hpoFreeText !== '') {
-                        this.refs['phenoterms'].setValue(hpoFreeText.join(', '));
-                    }
-                }
+            });
+            if (hpoIds.length) {
+                this.refs['hpoid'].setValue(hpoIds.join(', '));
             }
-        } else if (fromTarget == 'family') {
-            this.setState({individualRequired: true});
+            hpoFreeText = associatedGroups.map(function(associatedGroup, i) {
+                if (associatedGroup.termsInDiagnosis) {
+                    return associatedGroup.termsInDiagnosis;
+                }
+            });
+            if (hpoFreeText !== '') {
+                this.refs['phenoterms'].setValue(hpoFreeText.join(', '));
+            }
         }
     },
 
@@ -1270,12 +1261,6 @@ var FamilyCuration = createReactClass({
                 : '/family-submit/?gdm=' + gdm.uuid + (family ? '&family=' + family.uuid : '') + (annotation ? '&evidence=' + annotation.uuid : '');
         }
 
-        //if (!this.state.segregationFilled && (this.cv.assessmentTracker.currentVal !== 'Not Assessed' || !userAssessmentValue)) {
-        //    this.cv.assessmentTracker.currentVal = 'Not Assessed';
-        //} else if (userAssessmentValue) {
-        //    this.cv.assessmentTracker.currentVal = userAssessmentValue;
-        //}
-
         return (
             <div>
                 {(!this.queryValues.familyUuid || this.state.family) ?
@@ -1286,14 +1271,14 @@ var FamilyCuration = createReactClass({
                                 <div className="curation-pmid-summary">
                                     <PmidSummary article={annotation.article} displayJournal pmidLinkout />
                                 </div>
-                            : null}
+                                : null}
                             <div className="viewer-titles">
                                 <h1>{(family ? 'Edit' : 'Curate') + ' Family Information'}</h1>
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groups && groups.length ?
                                         <span> &#x2F;&#x2F; Group {groups.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
-                                    : null}
+                                        : null}
                                     <span> &#x2F;&#x2F; {this.state.familyName ? <span>Family {this.state.familyName}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
@@ -1325,13 +1310,13 @@ var FamilyCuration = createReactClass({
                                                     {FamilySegregation.call(this)}
                                                 </Panel>
                                             </PanelGroup>
-                                        :
+                                            :
                                             <div>
                                                 {family && family.segregation ?
                                                     <PanelGroup accordion>
                                                         {FamilySegregationViewer(family.segregation, null, true)}
                                                     </PanelGroup>
-                                                : null}
+                                                    : null}
                                             </div>
                                         }
 
@@ -1351,7 +1336,7 @@ var FamilyCuration = createReactClass({
                                                     </dd>
                                                 </dl>
                                             </Panel>
-                                        : null}
+                                            : null}
 
                                         <PanelGroup accordion>
                                             <Panel title="Family — Variant(s) Segregating with Proband" open>
@@ -1368,7 +1353,7 @@ var FamilyCuration = createReactClass({
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {family ?
                                                 <DeleteButton gdm={gdm} parent={groups.length > 0 ? groups[0] : annotation} item={family} pmid={pmid} disabled={this.cv.othersAssessed} />
-                                            : null}
+                                                : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -1376,7 +1361,7 @@ var FamilyCuration = createReactClass({
                             </div>
                         </div>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -1384,33 +1369,36 @@ var FamilyCuration = createReactClass({
 
 curator_page.register(FamilyCuration, 'curator_page', 'family-curation');
 
-
-// Family Name group curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilyName = function(displayNote) {
-    var family = this.state.family;
+/**
+ * Family Name group curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ * @param {string} displayNote
+ */
+function FamilyName(displayNote) {
+    let family = this.state.family;
 
     return (
         <div className="row">
             {!this.getAssociation('family') && !this.getAssociation('associatedGroups') ?
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Family is a member of a Group, please curate the Group first and then add the Family to that Group.</p></div>
-            : null}
+                : null}
             <Input type="text" ref="familyname" label="Family Label:" value={family && family.label ? family.label : ''} handleChange={this.handleChange}
                 error={this.getFormError('familyname')} clearError={this.clrFormErrors.bind(null, 'familyname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">{curator.renderLabelNote('Family')}</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one family with IDENTICAL information, you can indicate this at the bottom of this form.</p>
-            : null}
+                : null}
         </div>
     );
-};
+}
 
-
-// If the Family is being edited (we know this because there was a family
-// UUID in the query string), then don’t present the ability to specify multiple families.
-var FamilyCount = function() {
-    var family = this.state.family;
+/**
+ * If the Family is being edited (we know this because there was a family
+ * UUID in the query string), then don’t present the ability to specify multiple families.
+ */
+function FamilyCount() {
+    let family = this.state.family;
 
     return (
         <div>
@@ -1432,12 +1420,13 @@ var FamilyCount = function() {
             })}
         </div>
     );
-};
+}
 
-
-// Common diseases family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilyCommonDiseases = function() {
+/**
+ * Common diseases family curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function FamilyCommonDiseases() {
     let family = this.state.family,
         group = this.state.group;
     let associatedGroups;
@@ -1465,65 +1454,60 @@ var FamilyCommonDiseases = function() {
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'hpo', 'Group') : curator.renderPhenotype(null, 'Family', 'hpo')
             }
-            <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'ft', 'Group') : curator.renderPhenotype(null, 'Family', 'ft')
             }
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
+            <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy all Phenotype(s) from Associated Group"
-                clickHandler={this.handleClick.bind(this, 'group', 'phenotype')} />
-            : null
-            }
+                <Input type="button" ref={(button) => { this.phenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm"
+                    title="Copy all Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupPhenotypes} />
+                : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
-            <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
+            <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
+}
+
+/**
+ * HTML labels for inputs follow.
+ * @param {string} bool - Value of 'not'
+ */
+const LabelHpoId = bool => {
+    return (
+        <span>
+            {bool && bool === 'not' ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+            <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+        </span>
+    );
 };
 
-// HTML labels for inputs follow.
-var LabelHpoId = createReactClass({
-    propTypes: {
-        not: PropTypes.bool // T to show 'NOT' version of label
-    },
+/**
+ * HTML labels for inputs follow.
+ * @param {string} bool - Value of 'not'
+ */
+const LabelPhenoTerms = bool => {
+    return (
+        <span>
+            {bool && bool === 'not' ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
+            <span className="normal">(free text)</span>:
+        </span>
+    );
+};
 
-    render: function() {
-        return (
-            <span>
-                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
-            </span>
-        );
-    }
-});
-
-// HTML labels for inputs follow.
-var LabelPhenoTerms = createReactClass({
-    propTypes: {
-        not: PropTypes.bool // T to show 'NOT' version of label
-    },
-
-    render: function() {
-        return (
-            <span>
-                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span className="normal">(free text)</span>:
-            </span>
-        );
-    }
-});
-
-// Demographics family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilyDemographics = function() {
-    var family = this.state.family;
+/**
+ * Demographics family curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function FamilyDemographics() {
+    let family = this.state.family;
 
     return (
         <div className="row">
@@ -1557,14 +1541,15 @@ var FamilyDemographics = function() {
             </Input>
         </div>
     );
-};
+}
 
-
-// Segregation family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilySegregation = function() {
-    var family = this.state.family;
-    var segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
+/**
+ * Segregation family curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function FamilySegregation() {
+    let family = this.state.family;
+    let segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
 
     return (
         <div className="row section section-family-segregation">
@@ -1586,7 +1571,7 @@ var FamilySegregation = function() {
             <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals"
                 label={<span>Were there any inconsistent segregations amongst TESTED individuals? <i>(i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)</i></span>}
                 defaultValue="none" value={segregation && segregation.inconsistentSegregationAmongstTestedIndividuals ? segregation.inconsistentSegregationAmongstTestedIndividuals : 'none'}
-                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
                 <option value="Yes">Yes</option>
@@ -1621,14 +1606,14 @@ var FamilySegregation = function() {
                     value={segregation && segregation.publishedLodScore ? segregation.publishedLodScore : ''}
                     handleChange={this.handleChange} error={this.getFormError('SEGpublishedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGpublishedLodScore')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            : null}
+                : null}
             {this.state.lodPublished === 'No' ?
                 <Input type="number" ref="SEGestimatedLodScore" label={<span>Estimated LOD score:<br/><i>(optional, and only if no published LOD score)</i></span>}
                     inputDisabled={this.state.lodLocked} value={this.state.estimatedLodScore ? this.state.estimatedLodScore : ''}
                     error={this.getFormError('SEGestimatedLodScore')} clearError={this.clrFormErrors.bind(null, 'SEGestimatedLodScore')}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     placeholder={this.state.lodLocked && !this.state.estimatedLodScore ? "Not enough information entered to calculate an estimated LOD score" : "Number only"} />
-            : null}
+                : null}
             <Input type="select" ref="SEGincludeLodScoreInAggregateCalculation" label="Include LOD score in final aggregate calculation?"
                 defaultValue="none" value={curator.booleanToDropdown(segregation.includeLodScoreInAggregateCalculation)} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1646,17 +1631,19 @@ var FamilySegregation = function() {
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
-};
+}
 
-
-// Display the Family variant panel. The number of copies depends on the variantCount state variable.
-var FamilyVariant = function() {
-    var family = this.state.family;
+/**
+ * Display the Family variant panel.
+ * The number of copies depends on the variantCount state variable.
+ */
+function FamilyVariant() {
+    let family = this.state.family;
     let group = this.state.group;
-    var gdm = this.state.gdm;
-    var segregation = family && family.segregation ? family.segregation : null;
-    var variants = segregation && segregation.variants;
-    var annotation = this.state.annotation;
+    let gdm = this.state.gdm;
+    let segregation = family && family.segregation ? family.segregation : null;
+    let variants = segregation && segregation.variants;
+    let annotation = this.state.annotation;
     let probandIndividual = this.state.probandIndividual ? this.state.probandIndividual : null;
     let gdmUuid = this.state.gdm && this.state.gdm.uuid ? this.state.gdm.uuid : null;
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
@@ -1676,7 +1663,7 @@ var FamilyVariant = function() {
                         Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
                     </p>
                 </div>
-            : null}
+                : null}
             {!this.state.probandIndividual ?
                 <div className="variant-panel">
                     <div className="col-sm-7 col-sm-offset-5 proband-label-note">
@@ -1697,7 +1684,7 @@ var FamilyVariant = function() {
                         probandDiseaseObj={this.state.probandDiseaseObj} error={this.state.probandDiseaseError} clearErrorInParent={this.clearErrorInParent}
                         familyDiseaseObj={this.state.diseaseObj} session={this.props.session} required={this.state.individualRequired} />
                 </div>
-            :
+                :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
             }
             <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
@@ -1726,25 +1713,25 @@ var FamilyVariant = function() {
                                         <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
                                         <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                     </div>
-                                : null}
+                                    : null}
                                 {this.state.variantInfo[i].clinvarVariantTitle ?
                                     <div className="row">
                                         <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                         <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
                                     </div>
-                                : null}
+                                    : null}
                                 {this.state.variantInfo[i].carId ?
                                     <div className="row">
                                         <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
                                         <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                     </div>
-                                : null}
+                                    : null}
                                 {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
                                     <div className="row">
                                         <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
                                         <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                     </div>
-                                : null}
+                                    : null}
                                 <div className="row variant-curation">
                                     <span className="col-sm-5 control-label"><label></label></span>
                                     <span className="col-sm-7 text-no-input">
@@ -1752,7 +1739,7 @@ var FamilyVariant = function() {
                                     </span>
                                 </div>
                             </div>
-                        : null}
+                            : null}
                         <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''}
                             error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
@@ -1765,14 +1752,14 @@ var FamilyVariant = function() {
                                             buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                             updateParentForm={this.updateVariantId} buttonOnly={true} />
-                                    : null}
+                                        : null}
                                     {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                     {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
                                         <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Family'], 'variantList': this.state.variantInfo}}
                                             buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                             initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
                                             updateParentForm={this.updateVariantId} buttonOnly={true} />
-                                    : null}
+                                        : null}
                                 </span>
                             </div>
                         </div>
@@ -1781,42 +1768,33 @@ var FamilyVariant = function() {
             })}
         </div>
     );
+}
+
+const LabelClinVarVariant = () => {
+    return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
 };
 
-var LabelClinVarVariant = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
-    }
-});
+const LabelClinVarVariantTitle = () => {
+    return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
+};
 
-var LabelClinVarVariantTitle = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
-    }
-});
+const LabelCARVariant = () => {
+    return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
+};
 
-var LabelCARVariant = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
-    }
-});
+const LabelCARVariantTitle = () => {
+    return <span><strong>Genomic HGVS Title:</strong></span>;
+};
 
-var LabelCARVariantTitle = createReactClass({
-    render: function() {
-        return <span><strong>Genomic HGVS Title:</strong></span>;
-    }
-});
+const LabelOtherVariant = () => {
+    return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
+};
 
-var LabelOtherVariant = createReactClass({
-    render: function() {
-        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
-    }
-});
-
-
-// Additional Information family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var FamilyAdditional = function() {
+/**
+ * Additional Information family curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function FamilyAdditional() {
     let family = this.state.family;
     let otherpmidsVal = family && family.otherPMIDs ? family.otherPMIDs.map(function(article) { return article.pmid; }).join(', ') : '';
 
@@ -1831,12 +1809,14 @@ var FamilyAdditional = function() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
-};
+}
 
-
-// Determine whether the given segregation contains any non-empty values.
+/**
+ * Determine whether the given segregation contains any non-empty values.
+ * @param {object} segregation 
+ */
 function segregationExists(segregation) {
-    var exists = false;
+    let exists = false;
 
     if (segregation) {
         exists = (segregation.pedigreeDescription && segregation.pedigreeDescription.length > 0) ||
@@ -1857,8 +1837,7 @@ function segregationExists(segregation) {
     return exists;
 }
 
-
-var FamilyViewer = createReactClass({
+const FamilyViewer = createReactClass({
     mixins: [RestMixin, AssessmentMixin, CuratorHistory],
 
     cv: {
@@ -1866,7 +1845,13 @@ var FamilyViewer = createReactClass({
         gdmUuid: '' // UUID of the GDM; passed in the query string
     },
 
-    getInitialState: function() {
+    propTypes: {
+        context: PropTypes.object,
+        session: PropTypes.object,
+        href: PropTypes.string
+    },
+
+    getInitialState() {
         return {
             assessments: null, // Array of assessments for the family's segregation
             updatedAssessment: '', // Updated assessment value
@@ -1875,7 +1860,7 @@ var FamilyViewer = createReactClass({
     },
 
     // Handle the assessment submit button
-    assessmentSubmit: function(e) {
+    assessmentSubmit(e) {
         var updatedFamily;
         // GET the family object to have the most up-to-date version
         this.getRestData('/families/' + this.props.context.uuid).then(data => {
@@ -1939,7 +1924,7 @@ var FamilyViewer = createReactClass({
         });
     },
 
-    componentWillMount: function() {
+    componentWillMount() {
         var family = this.props.context;
 
         // Get the GDM and Family UUIDs from the query string
@@ -1954,14 +1939,14 @@ var FamilyViewer = createReactClass({
         }
     },
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
         if (typeof nextProps.session.user_properties !== undefined && nextProps.session.user_properties != this.props.session.user_properties) {
             var user = nextProps.session && nextProps.session.user_properties;
             this.loadAssessmentTracker(user);
         }
     },
 
-    loadAssessmentTracker: function(user) {
+    loadAssessmentTracker(user) {
         var family = this.props.context;
         var segregation = family.segregation;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
@@ -1979,7 +1964,7 @@ var FamilyViewer = createReactClass({
         }
     },
 
-    render: function() {
+    render() {
         var family = this.props.context;
         var method = family.method;
         var groups = family.associatedGroups;
@@ -1991,13 +1976,6 @@ var FamilyViewer = createReactClass({
                 validAssessments.push(assessment);
             }
         });
-        //var is_assessed = false; // filter out Not Assessed in assessments
-        //for(var i=0; i< assessments.length; i++) {
-        //    if (assessments[i].value !== 'Not Assessed') {
-        //        is_assessed = true;
-        //        break;
-        //    }
-        //}
 
         var variants = segregation ? ((segregation.variants && segregation.variants.length) ? segregation.variants : []) : [];
         var user = this.props.session && this.props.session.user_properties;
@@ -2037,7 +2015,7 @@ var FamilyViewer = createReactClass({
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groups && groups.length ?
                                     <span> &#x2F;&#x2F; Group {groups.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
-                                : null}
+                                    : null}
                                 <span> &#x2F;&#x2F; Family {family.label}</span>
                             </h2>
                         </div>
@@ -2166,7 +2144,7 @@ var FamilyViewer = createReactClass({
                                     </div>
                                 </dl>
                             </Panel>
-                        : null}
+                            : null}
 
                         <Panel title="Family - Variant(s) Segregating with Proband" panelClassName="panel-data">
                             {family.individualIncluded && family.individualIncluded.length ?
@@ -2182,7 +2160,7 @@ var FamilyViewer = createReactClass({
                                         );
                                     })}
                                 </div>
-                            : null }
+                                : null }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
@@ -2194,7 +2172,7 @@ var FamilyViewer = createReactClass({
                                                     <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {variant.clinvarVariantTitle ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -2202,7 +2180,7 @@ var FamilyViewer = createReactClass({
                                                     <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {variant.carId ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -2210,7 +2188,7 @@ var FamilyViewer = createReactClass({
                                                     <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -2218,7 +2196,7 @@ var FamilyViewer = createReactClass({
                                                     <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -2226,7 +2204,7 @@ var FamilyViewer = createReactClass({
                                                     <dd>{variant.otherDescription}</dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                     </div>
                                 );
                             })}
@@ -2255,11 +2233,12 @@ var FamilyViewer = createReactClass({
 content_views.register(FamilyViewer, 'family');
 
 
-// Display a segregation in a read-only panel. If the assessments can change while the page
-// gets dispalyed, pass the dynamic assessments in 'assessments'. If the assessments won't
-// change, don't pass anything in assessments -- the assessments in the segregation get
-// displayed.
-var FamilySegregationViewer = function(segregation, assessments, open) {
+/**
+ * Display a segregation in a read-only panel. If the assessments can change while the page
+ * gets dispalyed, pass the dynamic assessments in 'assessments'. If the assessments won't
+ * change, don't pass anything in assessments -- the assessments in the segregation get displayed.
+ */
+const FamilySegregationViewer = (segregation, assessments, open) => {
     if (!assessments) {
         assessments = segregation.assessments;
     }
@@ -2337,7 +2316,9 @@ var FamilySegregationViewer = function(segregation, assessments, open) {
 };
 
 
-// Display a history item for adding a family
+/**
+ * Display a history item for adding a family
+ */
 class FamilyAddHistory extends Component {
     render() {
         var history = this.props.history;
@@ -2352,7 +2333,7 @@ class FamilyAddHistory extends Component {
                 <span> added to </span>
                 {group ?
                     <span>group <a href={group['@id']}>{group.label}</a></span>
-                :
+                    :
                     <span>
                         <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                         <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
@@ -2366,8 +2347,9 @@ class FamilyAddHistory extends Component {
 
 history_views.register(FamilyAddHistory, 'family', 'add');
 
-
-// Display a history item for modifying a family
+/**
+ * Display a history item for modifying a family
+ */
 class FamilyModifyHistory extends Component {
     render() {
         var history = this.props.history;
@@ -2385,8 +2367,9 @@ class FamilyModifyHistory extends Component {
 
 history_views.register(FamilyModifyHistory, 'family', 'modify');
 
-
-// Display a history item for deleting a family
+/**
+ * Display a history item for deleting a family
+ */
 class FamilyDeleteHistory extends Component {
     render() {
         var history = this.props.history;
