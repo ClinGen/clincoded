@@ -95,6 +95,14 @@ runcmd:
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
+- if test "%(ROLE)s" = "demo"
+- then
+-   sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
+- fi
+- if test "%(BACKUPDB)s" = "s3_data"
+- then
+-   sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
+- fi
 - sudo apt-get -y install postgresql-9.4
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 - sudo apt-get install -y nodejs
@@ -104,7 +112,7 @@ runcmd:
 - echo "include 'custom.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - if test "%(ROLE)s" = "demo"
 - then
--   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
+-   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery-demo.conf
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - fi
 - sudo -u postgres createuser clincoded
@@ -127,6 +135,8 @@ runcmd:
 - if test "%(BACKUPDB)s" = "s3_data"
 - then
 -   echo "====== restoring data from backup"
+-   sudo mv /etc/postgresql/9.4/main/recovery-demo.conf /etc/postgresql/9.4/main/recovery.conf
+-   echo "standby_mode = on" >> /etc/postgresql/9.4/main/recovery.conf
 -   /etc/init.d/postgresql stop
 -   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
 -   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery.conf /var/lib/postgresql/9.4/main/
@@ -225,7 +235,7 @@ write_files:
     archive_command = '/opt/wal-e/bin/wal-e --aws-profile default --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" wal-push "%%p"'
 
 - path: /etc/postgresql/9.4/main/recovery.conf
-  content: |
+  content: | 
     # recovery.conf must be linked into data dir to do anything
     recovery_target_timeline = 'latest'
     restore_command = '/opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" wal-fetch "%%f" "%%p"'
