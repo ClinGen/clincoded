@@ -175,23 +175,23 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
     renderCopyDiseaseButton() {
         let group = this.props.group,
             family = this.props.family;
-        if (!group && !family) {
-            return (
-                <Input type="button" ref="copyGdmDisease" title="Copy disease term from Gene-Disease Record"
-                    wrapperClassName="gdm-disease-copy" inputClassName="btn-default"
-                    clickHandler={this.handleCopyGdmDisease} />
-            );
-        } else if (group && !family) {
+        if (group && !family) {
             return (
                 <Input type="button" ref="copyGroupDisease" title="Copy disease term from Associated Group"
                     wrapperClassName="group-disease-copy" inputClassName="btn-default"
                     clickHandler={this.handleCopyGroupDisease} />
             );
-        } else if (family) {
+        } else if (family && family.commonDiagnosis && family.commonDiagnosis.length) {
             return (
                 <Input type="button" ref="copyFamilyDisease" title="Copy disease term from Associated Family"
                     wrapperClassName="family-disease-copy" inputClassName="btn-default"
                     clickHandler={this.handleCopyFamilyDisease} />
+            );
+        } else {
+            return (
+                <Input type="button" ref="copyGdmDisease" title="Copy disease term from Gene-Disease Record"
+                    wrapperClassName="gdm-disease-copy" inputClassName="btn-default"
+                    clickHandler={this.handleCopyGdmDisease} />
             );
         }
     },
@@ -344,7 +344,7 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
                                 />
                             </li>
                         </ul>
-                    :
+                        :
                         <div className="delete-disease-button">
                             <a className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
                                 <span>Disease<i className="icon icon-trash-o"></i></span>
