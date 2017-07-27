@@ -95,6 +95,10 @@ runcmd:
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
+- if test "%(ROLE)s" = "demo"
+- then
+-   sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
+- fi
 - sudo apt-get -y install postgresql-9.4
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 - sudo apt-get install -y nodejs
@@ -104,6 +108,7 @@ runcmd:
 - echo "include 'custom.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - if test "%(ROLE)s" = "demo"
 - then
+-   sudo mv /etc/postgresql/9.4/main/recovery-demo.conf /etc/postgresql/9.4/main/recovery.conf
 -   echo "standby_mode = off" >> /etc/postgresql/9.4/main/recovery.conf
 -   echo "include 'demo.conf'" >> /etc/postgresql/9.4/main/postgresql.conf
 - fi
@@ -230,7 +235,7 @@ write_files:
     # recovery.conf must be linked into data dir to do anything
     recovery_target_timeline = 'latest'
     restore_command = '/opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" wal-fetch "%%f" "%%p"'
-    standby_mode = off
+    standby_mode = on
 
 - path: /etc/postgresql/9.4/main/wale_s3_prefix
   content: "%(WALE_S3_PREFIX)s"
