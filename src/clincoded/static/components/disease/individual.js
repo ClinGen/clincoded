@@ -49,7 +49,7 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
 
     componentDidMount() {
         let individual = this.props.individual;
-        if (individual && individual.diagnosis) {
+        if (individual && individual.diagnosis && individual.diagnosis.length) {
             this.setDiseaseObjectStates(individual.diagnosis[0]);
         }
     },
