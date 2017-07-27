@@ -57,6 +57,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     mixins: [RestMixin, findDiffKeyValuesMixin],
 
     propTypes: {
+        session: PropTypes.object,
         data: PropTypes.object, // ClinVar data payload
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
@@ -313,7 +314,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (clingenPred[key].visible === true) {
             return (
                 <tr key={key}>
-                    <td>{(rowName === 'REVEL') ? <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank">REVEL</a> (meta-predictor)</span> : rowName}</td>
+                    <td>{(rowName === 'REVEL') ? <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank" rel="noopener noreferrer">REVEL</a> (meta-predictor)</span> : rowName}</td>
                     <td>{clingenPred[key].score_range}</td>
                     <td>{clingenPred[key].score ? clingenPred[key].score : 'No data found'}</td>
                     <td>{clingenPred[key].prediction}</td>
@@ -440,293 +441,293 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     <li className="tab-label col-sm-3" role="tab" onClick={() => this.handleSubtabSelect('indel')} aria-selected={this.state.selectedSubtab == 'indel'}>In-frame Indel</li>
                 </ul>
                 {this.state.selectedSubtab == '' || this.state.selectedSubtab == 'missense' ?
-                <div role="tabpanel" className="tab-panel">
-                    <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
-                        {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense1}
-                                    evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
-                                    formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
-                                    criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
-                        : null}
-                        {computationObjDiffFlag ?
-                            <div className="row">
-                                <p className="alert alert-warning">
-                                    <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
-                                </p>
-                            </div>
-                        : null}
-                        <div className="panel panel-info datasource-clingen">
-                            <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
-                            <div className="panel-content-wrapper">
-                                {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
-                                {!singleNucleotide ?
-                                    <div className="panel-body"><span>These predictors only return data for missense variants.</span></div>
-                                    :
-                                    <div>
-                                    {clingenPred ?
-                                        <table className="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Source</th>
-                                                    <th>Score Range</th>
-                                                    <th>Score</th>
-                                                    <th>Prediction</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {clingenPredStatic._order.map(key => {
-                                                    return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
-                                                })}
-                                            </tbody>
-                                        </table>
-                                        :
-                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
-                                    }
+                    <div role="tabpanel" className="tab-panel">
+                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
+                            {(this.state.data && this.state.interpretation) ?
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <CurationInterpretationForm renderedFormContent={criteriaMissense1}
+                                            evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
+                                            formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
+                                            criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
                                     </div>
-                                }
-                            </div>
-                        </div>
-                        <div className="panel panel-info datasource-other">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Other Predictors
-                                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                                </h3>
-                            </div>
-                            <div className="panel-content-wrapper">
-                                {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                                {!singleNucleotide ?
-                                    <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
-                                    :
-                                    <div>
-                                    {this.state.hasOtherPredData ?
-                                        <table className="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Source</th>
-                                                    <th>Score Range</th>
-                                                    <th>Score</th>
-                                                    <th>Prediction</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {otherPredStatic._order.map(key => {
-                                                    return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
-                                                })}
-                                            </tbody>
-                                        </table>
+                                </div>
+                                : null}
+                            {computationObjDiffFlag ?
+                                <div className="row">
+                                    <p className="alert alert-warning">
+                                        <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
+                                    </p>
+                                </div>
+                                : null}
+                            <div className="panel panel-info datasource-clingen">
+                                <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
+                                <div className="panel-content-wrapper">
+                                    {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
+                                    {!singleNucleotide ?
+                                        <div className="panel-body"><span>These predictors only return data for missense variants.</span></div>
                                         :
-                                        <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                        <div>
+                                            {clingenPred ?
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Source</th>
+                                                            <th>Score Range</th>
+                                                            <th>Score</th>
+                                                            <th>Prediction</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {clingenPredStatic._order.map(key => {
+                                                            return (this.renderClingenPredRow(key, clingenPred, clingenPredStatic));
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                                :
+                                                <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                            }
+                                        </div>
                                     }
-                                    </div>
-                                }
+                                </div>
                             </div>
-                        </div>
-                        <div className="panel panel-info datasource-conservation">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Conservation Analysis
-                                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                                </h3>
-                            </div>
-                            <div className="panel-content-wrapper">
-                                {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                                {!singleNucleotide ?
-                                    <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
-                                    :
-                                    <div>
-                                    {this.state.hasConservationData ?
-                                        <table className="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Source</th>
-                                                    <th>Score</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {conservationStatic._order.map(key => {
-                                                    return (this.renderConservationRow(key, conservation, conservationStatic));
-                                                })}
-                                            </tbody>
-                                        </table>
+                            <div className="panel panel-info datasource-other">
+                                <div className="panel-heading">
+                                    <h3 className="panel-title">Other Predictors
+                                        <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                                    </h3>
+                                </div>
+                                <div className="panel-content-wrapper">
+                                    {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                                    {!singleNucleotide ?
+                                        <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
                                         :
-                                        <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                        <div>
+                                            {this.state.hasOtherPredData ?
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Source</th>
+                                                            <th>Score Range</th>
+                                                            <th>Score</th>
+                                                            <th>Prediction</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {otherPredStatic._order.map(key => {
+                                                            return (this.renderOtherPredRow(key, otherPred, otherPredStatic));
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                                :
+                                                <div className="panel-body"><span>No predictor data found for this allele.</span></div>
+                                            }
+                                        </div>
                                     }
-                                    </div>
-                                }
+                                </div>
                             </div>
-                        </div>
-                        <div className="panel panel-info datasource-splice">
-                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
-                            <div className="panel-body">
-                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan</a>
-                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE</a>
-                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder</a>
+                            <div className="panel panel-info datasource-conservation">
+                                <div className="panel-heading">
+                                    <h3 className="panel-title">Conservation Analysis
+                                        <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                                    </h3>
+                                </div>
+                                <div className="panel-content-wrapper">
+                                    {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                                    {!singleNucleotide ?
+                                        <div className="panel-body"><span>Data is currently only returned for single nucleotide variants.</span></div>
+                                        :
+                                        <div>
+                                            {this.state.hasConservationData ?
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Source</th>
+                                                            <th>Score</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {conservationStatic._order.map(key => {
+                                                            return (this.renderConservationRow(key, conservation, conservationStatic));
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                                :
+                                                <div className="panel-body"><span>No conservation analysis data found for this allele.</span></div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
                             </div>
-                        </div>
-                        <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
-                            variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            viewOnly={this.state.data && !this.state.interpretation} />
-                    </Panel></PanelGroup>
-
-                    <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
-                        {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaMissense2Update} variantUuid={variant['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
-                            </div>
-                        </div>
-                        : null}
-                        <div className="panel panel-info datasource-clinvar">
-                            <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
-                            <div className="panel-content-wrapper">
-                                {this.state.loading_clinvarEsearch ? showActivityIndicator('Retrieving data... ') : null}
+                            <div className="panel panel-info datasource-splice">
+                                <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                                 <div className="panel-body">
-                                    {this.renderVariantCodon(variant, codon)}
+                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank" rel="noopener noreferrer">Analyze using MaxEntScan</a>
+                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank" rel="noopener noreferrer">Analyze using NNSPLICE</a>
+                                    <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
                             </div>
-                        </div>
-                        <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon" session={this.props.session}
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
-                            variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            viewOnly={this.state.data && !this.state.interpretation} />
-                    </Panel></PanelGroup>
-                </div>
-                : null}
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
+                                variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                viewOnly={this.state.data && !this.state.interpretation} />
+                        </Panel></PanelGroup>
+
+                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                            {(this.state.data && this.state.interpretation) ?
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
+                                            evidenceData={null} evidenceDataUpdated={true}
+                                            formDataUpdater={criteriaMissense2Update} variantUuid={variant['@id']}
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    </div>
+                                </div>
+                                : null}
+                            <div className="panel panel-info datasource-clinvar">
+                                <div className="panel-heading"><h3 className="panel-title">ClinVar Variants</h3></div>
+                                <div className="panel-content-wrapper">
+                                    {this.state.loading_clinvarEsearch ? showActivityIndicator('Retrieving data... ') : null}
+                                    <div className="panel-body">
+                                        {this.renderVariantCodon(variant, codon)}
+                                    </div>
+                                </div>
+                            </div>
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon" session={this.props.session}
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
+                                variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                viewOnly={this.state.data && !this.state.interpretation} />
+                        </Panel></PanelGroup>
+                    </div>
+                    : null}
                 {this.state.selectedSubtab == 'lof' ?
-                <div role="tabpanel" className="tab-panel">
-                    <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
-                        {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaLof1} criteria={['PVS1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaLof1Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <div role="tabpanel" className="tab-panel">
+                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
+                            {(this.state.data && this.state.interpretation) ?
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <CurationInterpretationForm renderedFormContent={criteriaLof1} criteria={['PVS1']}
+                                            evidenceData={null} evidenceDataUpdated={true}
+                                            formDataUpdater={criteriaLof1Update} variantUuid={this.state.data['@id']}
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    </div>
+                                </div>
+                                : null}
+                            <div className="panel panel-info">
+                                <div className="panel-heading"><h3 className="panel-title">Does variant result in LOF?</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                        </tr>
+                                    </thead>
+                                </table>
                             </div>
-                        </div>
-                        : null}
-                        <div className="panel panel-info">
-                            <div className="panel-heading"><h3 className="panel-title">Does variant result in LOF?</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                        <div className="panel panel-info">
-                            <div className="panel-heading"><h3 className="panel-title">Is LOF known mechanism for disease of interest?</h3></div>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                        <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis" session={this.props.session}
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
-                            variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            viewOnly={this.state.data && !this.state.interpretation} />
-                    </Panel></PanelGroup>
-                </div>
-                : null}
+                            <div className="panel panel-info">
+                                <div className="panel-heading"><h3 className="panel-title">Is LOF known mechanism for disease of interest?</h3></div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis" session={this.props.session}
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
+                                variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                viewOnly={this.state.data && !this.state.interpretation} />
+                        </Panel></PanelGroup>
+                    </div>
+                    : null}
                 {this.state.selectedSubtab == 'silent-intron' ?
-                <div role="tabpanel" className="tab-panel">
-                    <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
-                        {(this.state.data && this.state.interpretation) ?
-                            <div className="row">
-                                <div className="col-sm-12">
-                                    <CurationInterpretationForm renderedFormContent={criteriaSilentIntron1} criteria={['BP7']}
-                                        evidenceData={null} evidenceDataUpdated={true}
-                                        formDataUpdater={criteriaSilentIntron1Update} variantUuid={this.state.data['@id']}
-                                        interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <div role="tabpanel" className="tab-panel">
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
+                            {(this.state.data && this.state.interpretation) ?
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <CurationInterpretationForm renderedFormContent={criteriaSilentIntron1} criteria={['BP7']}
+                                            evidenceData={null} evidenceDataUpdated={true}
+                                            formDataUpdater={criteriaSilentIntron1Update} variantUuid={this.state.data['@id']}
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    </div>
+                                </div>
+                                : null}
+                            <div className="panel panel-info datasource-splice">
+                                <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
+                                <div className="panel-body">
+                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank" rel="noopener noreferrer">Analyze using MaxEntScan</a>
+                                    <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank" rel="noopener noreferrer">Analyze using NNSPLICE</a>
+                                    <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
                             </div>
-                        : null}
-                        <div className="panel panel-info datasource-splice">
-                            <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
-                            <div className="panel-body">
-                                <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">Analyze using MaxEntScan</a>
-                                <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank">Analyze using NNSPLICE</a>
-                                <a href="http://www.umd.be/HSF3/HSF.html" target="_blank">Analyze using HumanSplicingFinder</a>
-                            </div>
-                        </div>
-                        <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron" session={this.props.session}
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
-                            variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            viewOnly={this.state.data && !this.state.interpretation} />
-                    </Panel></PanelGroup>
-                </div>
-                : null}
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron" session={this.props.session}
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
+                                variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                viewOnly={this.state.data && !this.state.interpretation} />
+                        </Panel></PanelGroup>
+                    </div>
+                    : null}
                 {this.state.selectedSubtab == 'indel' ?
-                <div role="tabpanel" className="tab-panel">
-                    <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
-                        {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
-                                    evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
-                                    formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaIndel1Change}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <div role="tabpanel" className="tab-panel">
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                            {(this.state.data && this.state.interpretation) ?
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
+                                            evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
+                                            formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaIndel1Change}
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    </div>
+                                </div>
+                                : null}
+                            <div className="panel panel-info">
+                                <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
+                                <div className="panel-body">
+                                    <dl className="inline-dl clearfix">
+                                        {(links_38 || links_37) ?
+                                            <dd>UCSC [
+                                                {links_38 ? <a href={links_38.ucsc_url_38} target="_blank" title={'UCSC Genome Browser for ' + gRCh38 + ' in a new window'}>GRCh38/hg38</a> : null }
+                                                {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                                {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + gRCh37 + ' in a new window'}>GRCh37/hg19</a> : null }
+                                                ]
+                                            </dd>
+                                            :
+                                            <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser</a></dd>
+                                        }
+                                        {(links_38 || links_37) ?
+                                            <dd>Variation Viewer [
+                                                {links_38 ? <a href={links_38.viewer_url_38} target="_blank" title={'Variation Viewer page for ' + gRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                                {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                                {links_37 ? <a href={links_37.viewer_url_37} target="_blank" title={'Variation Viewer page for ' + gRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                                ]
+                                            </dd>
+                                            :
+                                            <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer</a></dd>
+                                        }
+                                        {(links_38 || links_37) ?
+                                            <dd>Ensembl Browser [
+                                                {links_38 ? <a href={links_38.ensembl_url_38} target="_blank" title={'Ensembl Browser page for ' + gRCh38 + ' in a new window'}>GRCh38</a> : null }
+                                                {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
+                                                {links_37 ? <a href={links_37.ensembl_url_37} target="_blank" title={'Ensembl Browser page for ' + gRCh37 + ' in a new window'}>GRCh37</a> : null }
+                                                ]
+                                            </dd>
+                                            :
+                                            <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser</a></dd>
+                                        }
+                                    </dl>
+                                </div>
                             </div>
-                        </div>
-                        : null}
-                        <div className="panel panel-info">
-                            <div className="panel-heading"><h3 className="panel-title">LinkOut to external resources</h3></div>
-                            <div className="panel-body">
-                                <dl className="inline-dl clearfix">
-                                    {(links_38 || links_37) ?
-                                        <dd>UCSC [
-                                            {links_38 ? <a href={links_38.ucsc_url_38} target="_blank" title={'UCSC Genome Browser for ' + gRCh38 + ' in a new window'}>GRCh38/hg38</a> : null }
-                                            {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
-                                            {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + gRCh37 + ' in a new window'}>GRCh37/hg19</a> : null }
-                                            ]
-                                        </dd>
-                                        :
-                                        <dd className="col-lg-3"><a href={external_url_map['UCSCBrowserHome']} target="_blank">UCSC Browser</a></dd>
-                                    }
-                                    {(links_38 || links_37) ?
-                                        <dd>Variation Viewer [
-                                            {links_38 ? <a href={links_38.viewer_url_38} target="_blank" title={'Variation Viewer page for ' + gRCh38 + ' in a new window'}>GRCh38</a> : null }
-                                            {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
-                                            {links_37 ? <a href={links_37.viewer_url_37} target="_blank" title={'Variation Viewer page for ' + gRCh37 + ' in a new window'}>GRCh37</a> : null }
-                                            ]
-                                        </dd>
-                                        :
-                                        <dd className="col-lg-4"><a href={external_url_map['VariationViewerHome']} target="_blank">Variation Viewer</a></dd>
-                                    }
-                                    {(links_38 || links_37) ?
-                                        <dd>Ensembl Browser [
-                                            {links_38 ? <a href={links_38.ensembl_url_38} target="_blank" title={'Ensembl Browser page for ' + gRCh38 + ' in a new window'}>GRCh38</a> : null }
-                                            {(links_38 && links_37) ? <span>&nbsp;|&nbsp;</span> : null }
-                                            {links_37 ? <a href={links_37.ensembl_url_37} target="_blank" title={'Ensembl Browser page for ' + gRCh37 + ' in a new window'}>GRCh37</a> : null }
-                                            ]
-                                        </dd>
-                                        :
-                                        <dd className="col-lg-3"><a href={external_url_map['EnsemblBrowserHome']} target="_blank">Ensembl Browser</a></dd>
-                                    }
-                                </dl>
-                            </div>
-                        </div>
-                        <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
-                            href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
-                            variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            viewOnly={this.state.data && !this.state.interpretation} />
-                    </Panel></PanelGroup>
-                </div>
-                : null}
+                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
+                                href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
+                                variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                viewOnly={this.state.data && !this.state.interpretation} />
+                        </Panel></PanelGroup>
+                    </div>
+                    : null}
 
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
+                    : null}
 
                 {renderDataCredit('myvariant')}
 
@@ -735,8 +736,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     }
 });
 
-// code for rendering of this group of interpretation forms
-var criteriaMissense1 = function() {
+/**
+ * Code for rendering of this group of interpretation forms
+ */
+function criteriaMissense1() {
     let criteriaList1 = ['BP4', 'PP3'], // array of criteria code handled subgroup of this section
         hiddenList1 = [true, false], // array indicating hidden status of explanation boxes for above list of criteria codes
         criteriaList2 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
@@ -757,24 +760,32 @@ var criteriaMissense1 = function() {
             )}
         </div>
     );
-};
+}
 
-
-// code for updating the form values of interpretation forms upon receiving
-// existing interpretations and evaluations
-var criteriaMissense1Update = function(nextProps) {
+/**
+ * Code for updating the form values of interpretation forms upon receiving
+ * existing interpretations and evaluations
+ * @param {object} nextProps 
+ */
+function criteriaMissense1Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PP3', 'BP4', 'BP1', 'PP2'], null);
-};
-// code for handling logic within the form
-var criteriaMissense1Change = function(ref, e) {
+}
+
+/**
+ * Code for handling logic within the form
+ * @param {string} ref 
+ * @param {array} e 
+ */
+function criteriaMissense1Change(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
     vciFormHelper.shareExplanation.call(this, ref, ['BP4', 'PP3']);
     vciFormHelper.shareExplanation.call(this, ref, ['BP1', 'PP2']);
-};
+}
 
-
-// code for rendering of this group of interpretation forms
-var criteriaMissense2 = function() {
+/**
+ * Code for rendering of this group of interpretation forms
+ */
+function criteriaMissense2() {
     let criteriaList1 = ['PM5'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
         criteriaList2 = ['PS1'], // array of criteria code handled subgroup of this section
@@ -795,16 +806,21 @@ var criteriaMissense2 = function() {
             )}
         </div>
     );
-};
-// code for updating the form values of interpretation forms upon receiving
-// existing interpretations and evaluations
-var criteriaMissense2Update = function(nextProps) {
+}
+
+/**
+ * Code for updating the form values of interpretation forms upon receiving
+ * existing interpretations and evaluations
+ * @param {object} nextProps 
+ */
+function criteriaMissense2Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PM5', 'PS1'], null);
-};
+}
 
-
-// code for rendering of this group of interpretation forms
-var criteriaLof1 = function() {
+/**
+ * Code for rendering of this group of interpretation forms
+ */
+function criteriaLof1() {
     let criteriaList1 = ['PVS1'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
@@ -817,16 +833,21 @@ var criteriaLof1 = function() {
             )}
         </div>
     );
-};
-// code for updating the form values of interpretation forms upon receiving
-// existing interpretations and evaluations
-var criteriaLof1Update = function(nextProps) {
+}
+
+/**
+ * Code for updating the form values of interpretation forms upon receiving
+ * existing interpretations and evaluations
+ * @param {object} nextProps 
+ */
+function criteriaLof1Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PVS1'], null);
-};
+}
 
-
-// code for rendering of this group of interpretation forms
-var criteriaSilentIntron1 = function() {
+/**
+ * Code for rendering of this group of interpretation forms
+ */
+function criteriaSilentIntron1() {
     let criteriaList1 = ['BP7'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
@@ -839,16 +860,21 @@ var criteriaSilentIntron1 = function() {
             )}
         </div>
     );
-};
-// code for updating the form values of interpretation forms upon receiving
-// existing interpretations and evaluations
-var criteriaSilentIntron1Update = function(nextProps) {
+}
+
+/**
+ * code for updating the form values of interpretation forms upon receiving
+ * existing interpretations and evaluations
+ * @param {object} nextProps 
+ */
+function criteriaSilentIntron1Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BP7'], null);
-};
+}
 
-
-// code for rendering of this group of interpretation forms
-var criteriaIndel1 = function() {
+/**
+ * Code for rendering of this group of interpretation forms
+ */
+function criteriaIndel1() {
     let criteriaList1 = ['BP3', 'PM4'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
     return (
@@ -861,14 +887,23 @@ var criteriaIndel1 = function() {
             )}
         </div>
     );
-};
-// code for updating the form values of interpretation forms upon receiving
-// existing interpretations and evaluations
-var criteriaIndel1Update = function(nextProps) {
+}
+
+/**
+ * Code for updating the form values of interpretation forms upon receiving
+ * existing interpretations and evaluations
+ * @param {object} nextProps 
+ */
+function criteriaIndel1Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BP3', 'PM4'], null);
-};
-// code for handling logic within the form
-var criteriaIndel1Change = function(ref, e) {
+}
+
+/**
+ * Code for handling logic within the form
+ * @param {string} ref 
+ * @param {array} e 
+ */
+function criteriaIndel1Change(ref, e) {
     // Both explanation boxes for both criteria of each group must be the same
     vciFormHelper.shareExplanation.call(this, ref, ['BP3', 'PM4']);
-};
+}
