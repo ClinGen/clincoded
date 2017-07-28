@@ -1739,7 +1739,7 @@ function TypeBiochemicalFunctionA() {
                 value={BF_evidenceForOtherGenesWithSameFunction} inputDisabled={this.cv.othersAssessed} required />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.sharedDisease" label="Shared disease:"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputDisabled={true} rows="2"
-                value={!this.state.gdm.disease.freetext ? this.state.gdm.disease.term + ' (' + this.state.gdm.disease.diseaseId + ')' : this.state.gdm.disease.term + ' (' + this.props.session.user_properties.title + ')'} />
+                value={!this.state.gdm.disease.freetext ? this.state.gdm.disease.term + ' (' + this.state.gdm.disease.diseaseId.replace('_', ':') + ')' : this.state.gdm.disease.term + ' (' + this.props.session.user_properties.title + ')'} />
             <Input type="checkbox" ref="geneWithSameFunctionSameDisease.geneImplicatedWithDisease" label="Has this gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -1905,8 +1905,7 @@ function TypeExpression() {
         <div className="row form-row-helper">
             {curator.renderWarning('UBERON')}
             <p className="col-sm-7 col-sm-offset-5">
-                Search the <a href={external_url_map['Uberon']} target="_blank">Uberon</a> using
-                the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
+                Search the <a href={external_url_map['Uberon']} target="_blank">Uberon</a> using the OLS.
             </p>
             <Input type="text" ref="organOfTissue" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
@@ -2030,8 +2029,7 @@ function TypeFunctionalAlteration(uniprotId) {
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
-                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
+                        Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
                     <Input type="textarea" ref="funcalt.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCellType')}
@@ -2052,8 +2050,7 @@ function TypeFunctionalAlteration(uniprotId) {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
-                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
+                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
                     <Input type="textarea" ref="funcalt.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'funcalt.engineeredEquivalentCellType')}
@@ -2176,8 +2173,7 @@ function TypeModelSystems() {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
-                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
+                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
                     <Input type="textarea" ref="cellCulture" label={<span>Cell-culture type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
@@ -2289,8 +2285,7 @@ function TypeRescue() {
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
-                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
+                        Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
                     <Input type="textarea" ref="rescue.patientCellType" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellType')}
@@ -2311,8 +2306,7 @@ function TypeRescue() {
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
-                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using
-                        the <a href={external_url_map['OLS']} target="_blank">OLS</a> (Ontology Lookup Service).
+                        Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
                     <Input type="textarea" ref="rescue.engineeredEquivalentCellType" label={<span>Engineered equivalent cell type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.engineeredEquivalentCellType')} clearError={this.clrFormErrors.bind(null, 'rescue.engineeredEquivalentCellType')}
