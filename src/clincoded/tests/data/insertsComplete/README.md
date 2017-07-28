@@ -13,5 +13,5 @@ python3 obtain_external_data_files.py --source orphanet
 python create_orphaPhenotype_json.py
 ```
 
-- **gene.json** - 39,446 entries - data grabbed 2015/07/24
+- **gene.json** - 41,101 entries - data updated 2017/07/14
 - **orphaPhenotype.json** - 9,193 entries - data grabbed 2015/07/24 (1.1.4 / 4.1.3 ORPHANET [2014-10-03])

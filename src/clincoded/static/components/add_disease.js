@@ -9,8 +9,6 @@ import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
 
-var fetched = require('./fetched');
-
 var AddDisease = createReactClass({
     mixins: [FormMixin, RestMixin],
 

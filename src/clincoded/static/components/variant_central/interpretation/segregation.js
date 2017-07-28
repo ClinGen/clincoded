@@ -84,7 +84,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                             </div>
                         </div>
                     : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segreagtion-data" session={this.props.session}
+                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segregation-data" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Segregation data)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                         viewOnly={this.state.data && !this.state.interpretation} />
