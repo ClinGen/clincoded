@@ -51,7 +51,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
         this.loadData();
     },
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
         if (nextProps.experimentalType !== this.props.experimentalType) {
             this.setState({experimentalType: nextProps.experimentalType, scoreStatus: null, showScoreInput: false}, () => {
                 this.refs.scoreStatus.resetValue();
@@ -69,7 +69,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
             if (this.state.disableScoreStatus) {
                 this.setState({showScoreInput: false}, () => {
                     this.refs.scoreStatus.resetValue();
-                })
+                });
             }
         });
     },
@@ -382,7 +382,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     </Input>
                     {willNotCountScore ?
                         <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
-                    : null}
+                        : null}
                     {showScoreInput ?
                         <div>
                             <dl className="dl-horizontal calculated-score">
@@ -407,16 +407,16 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                                 rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                             {formError ?
                                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">A reason is required for the changed score.</p></div>
-                            : null}
+                                : null}
                         </div>
-                    : null}
+                        : null}
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">
                         <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit}
-                        title="Save" submitBusy={this.props.submitBusy} />
+                            title="Save" submitBusy={this.props.submitBusy} />
                     </div>
-                : null}
+                    : null}
             </div>
         );
     },
