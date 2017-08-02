@@ -20,6 +20,7 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
         group: PropTypes.object,
         family: PropTypes.object,
         individual: PropTypes.object,
+        probandLabel: PropTypes.object,
         diseaseObj: PropTypes.object,
         updateDiseaseObj: PropTypes.func,
         clearErrorInParent: PropTypes.func,
@@ -75,9 +76,7 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
         if (nextProps.error) {
             this.setState({error: nextProps.error});
         }
-        if (nextProps.required) {
-            this.setState({required: nextProps.required});
-        }
+        this.setState({required: nextProps.required});
     },
 
     /**
