@@ -1978,7 +1978,6 @@ const IndividualViewer = createReactClass({
 
 content_views.register(IndividualViewer, 'individual');
 
-
 /**
  * HTML labels for inputs follow.
  * @param {object} individual - Individual's data object
@@ -1999,13 +1998,20 @@ const LabelPanelTitleView = (individual, labelText, hasVariant) => {
             </span>
         </h4>
     );
-}
+};
 
-// Make a starter individual from the family and write it to the DB; always called from
-// family curation. Pass an array of disease objects to add, as well as an array of variants.
-// Returns a promise once the Individual object is written.
-var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, zygosity, context) {
-    var newIndividual = {};
+/**
+ * Make a starter individual from the family and write it to the DB; always called from
+ * family curation. Pass an array of disease objects to add, as well as an array of variants.
+ * Returns a promise once the Individual object is written.
+ * @param {string} label 
+ * @param {object} diseases 
+ * @param {object} variants 
+ * @param {object} zygosity 
+ * @param {object} context 
+ */
+export function makeStarterIndividual(label, diseases, variants, zygosity, context) {
+    let newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
     newIndividual.proband = true;
@@ -2019,12 +2025,17 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
     return context.postRestData('/individuals/', newIndividual).then(data => {
         return Promise.resolve(data['@graph'][0]);
     });
-};
+}
 
-
-// Update the individual with the variants, and write the updated individual to the DB.
-var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, zygosity, context) {
-    var updateNeeded = true;
+/**
+ * Update the individual with the variants, and write the updated individual to the DB.
+ * @param {object} individual 
+ * @param {object} variants 
+ * @param {object} zygosity 
+ * @param {object} context 
+ */
+export function updateProbandVariants(individual, variants, zygosity, context) {
+    let updateNeeded = true;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -2081,15 +2092,14 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         });
     }
     return Promise.resolve(null);
-};
+}
 
-
-var recordIndividualHistory = module.exports.recordIndividualHistory = function(gdm, annotation, individual, group, family, modified, context) {
+export function recordIndividualHistory(gdm, annotation, individual, group, family, modified, context) {
     // Add to the user history. data.individual always contains the new or edited individual. data.group contains the group the individual was
     // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
     // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
-    var meta, historyPromise;
+    let meta, historyPromise;
 
     if (modified){
         historyPromise = context.recordHistory('modify', individual);
@@ -2127,8 +2137,7 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
     }
 
     return historyPromise;
-};
-
+}
 
 /**
  * Display a history item for adding an individual
