@@ -623,24 +623,32 @@ var FamilyCuration = createReactClass({
                          * Retrieve disease from database. If not existed, add it to the database.
                          */
                         let probandDiseaseObj = this.state.probandDiseaseObj;
-                        return this.getRestData('/search?type=disease&diseaseId=' + probandDiseaseObj.diseaseId).then(diseaseSearch => {
-                            let probandDiseaseUuid;
-                            if (diseaseSearch.total === 0) {
-                                this.postRestData('/diseases/', probandDiseaseObj).then(result => {
-                                    let newDisease = result['@graph'][0];
-                                    probandDiseaseUuid = newDisease['uuid'];
+                        if (Object.keys(probandDiseaseObj).length && probandDiseaseObj.diseaseId) {
+                            searchStr = '/search?type=disease&diseaseId=' + probandDiseaseObj.diseaseId;
+                        } else {
+                            searchStr = '';
+                        }
+                        return this.getRestData(searchStr).then(diseaseSearch => {
+                            if (Object.keys(diseaseSearch).length && diseaseSearch.hasOwnProperty('total')) {
+                                let probandDiseaseUuid;
+                                if (diseaseSearch.total === 0) {
+                                    return this.postRestData('/diseases/', probandDiseaseObj).then(result => {
+                                        let newDisease = result['@graph'][0];
+                                        probandDiseaseUuid = newDisease['uuid'];
+                                        this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
+                                            individualDiseases.push(probandDiseaseUuid);
+                                            return Promise.resolve(result);
+                                        });
+                                    });
+                                } else {
+                                    let _id = diseaseSearch['@graph'][0]['@id'];
+                                    probandDiseaseUuid = _id.slice(10, -1);
                                     this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
                                         individualDiseases.push(probandDiseaseUuid);
-                                        return Promise.resolve(diseaseSearch);
                                     });
-                                });
+                                }
                             } else {
-                                let _id = diseaseSearch['@graph'][0]['@id'];
-                                probandDiseaseUuid = _id.slice(10, -1);
-                                this.setState({probandDiseaseUuid: probandDiseaseUuid}, () => {
-                                    individualDiseases.push(probandDiseaseUuid);
-                                    return Promise.resolve(diseaseSearch);
-                                });
+                                return Promise.resolve(null);
                             }
                         }, e => {
                             // The given disease couldn't be retrieved for some reason.
@@ -648,8 +656,9 @@ var FamilyCuration = createReactClass({
                             this.setState({probandDiseaseError: 'Error on validating disease.'});
                             throw e;
                         });
+                    } else {
+                        return Promise.resolve(null);
                     }
-                    return Promise.resolve(diseases);
                 }).then(diseases => {
                     // Handle 'Add any other PMID(s) that have evidence about this same Group' list of PMIDs
                     if (pmids && pmids.length) {
