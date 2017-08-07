@@ -29,6 +29,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             provisionalPathogenicity: this.props.provisionalPathogenicity,
             provisionalReason: this.props.provisionalReason,
             provisionalInterpretation: this.props.provisionalInterpretation,
+            evidenceSummary: '',
             disabledCheckbox: false,
             disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
@@ -240,6 +241,14 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 this.props.setProvisionalEvaluation('provisional-interpretation', this.state.provisionalInterpretation);
             });
         }
+        // Handle freetext evaluation evidence summary
+        if (ref === 'evaluation-evidence-summary') {
+            if (this.refs[ref].getValue()) {
+                this.setState({evidenceSummary: this.refs[ref].getValue()});
+            } else {
+                this.setState({evidenceSummary: ''});
+            }
+        }
     },
 
     submitForm: function(e) {
@@ -341,7 +350,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         }
     },
 
-    render: function() {
+    render() {
         let interpretation = this.state.interpretation;
         let evaluations = interpretation ? interpretation.evaluations : null;
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
@@ -431,22 +440,23 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                             <div className="evaluation-provision provisional-interpretation">
                                                 <div>
                                                     <i className="icon icon-question-circle"></i>
-                                                    <span>Change status to "Provisional Interpretation" <i>(optional)</i>:</span>
+                                                    <span>Mark status as "Provisional Interpretation" <i>(optional)</i>:</span>
                                                     <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation}
                                                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
                                                 </div>
                                             </div>
-                                            <div className="alert alert-warning">
-                                                Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic,"
-                                                a disease must first be associated with the interpretation before it can be marked
-                                                as a "Provisional Interpretation". Please select "Return to Interpretation" to add a disease.
+                                            <div className="evaluation-provision evidence-summary">
+                                                <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
+                                                    value={this.state.evidenceSummary} handleChange={this.handleChange}
+                                                    placeholder="You may provide a summary of the evidence here (optional)." rows="5"
+                                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
                                             </div>
                                             <div className="provisional-submit">
                                                 <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
                                                     id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
                                                 {this.state.updateMsg ?
                                                     <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                : null}
+                                                    : null}
                                             </div>
                                         </div>
                                     </div>
