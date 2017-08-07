@@ -2321,7 +2321,7 @@ dl.inline-dl {
                     color: #fff;
                     text-align: center;
                     border-radius: 3px;
-                    padding: 5px 0;
+                    padding: 7px 0;
                     position: absolute;
                     visibility: hidden;
                     width: 370px;
@@ -2329,7 +2329,7 @@ dl.inline-dl {
                     font-family: "Helvetica";
                     font-weight: bold;
                     z-index: 1;
-                    top: 25px;
+                    top: 22px;
                     left: 0;
                 }
 
@@ -2377,6 +2377,19 @@ dl.inline-dl {
                 &[disabled] {
                     color: #bbb;
                 }
+            }
+        }
+
+        &.evidence-summary {
+            margin-top: 25px;
+
+            label {
+                padding-right: 0;
+                padding-top: 0;
+            }
+
+            .form-error {
+                display: none;
             }
         }
     }
