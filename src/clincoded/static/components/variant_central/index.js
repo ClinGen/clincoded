@@ -58,7 +58,8 @@ var VariantCurationHub = createReactClass({
             autoClassification: null,
             provisionalPathogenicity: null,
             provisionalReason: null,
-            provisionalInterpretation: false
+            provisionalInterpretation: false,
+            evidenceSummary: null
         };
     },
 
@@ -72,7 +73,8 @@ var VariantCurationHub = createReactClass({
                         this.setState({
                             autoClassification: interpretation.provisional_variant[0].autoClassification,
                             provisionalPathogenicity: interpretation.provisional_variant[0].alteredClassification,
-                            provisionalReason: interpretation.provisional_variant[0].reason
+                            provisionalReason: interpretation.provisional_variant[0].reason,
+                            evidenceSummary: interpretation.provisional_variant[0].evidenceSummary ? interpretation.provisional_variant[0].evidenceSummary : null
                         });
                     }
                     // Return interpretation object's 'maskAsProvisional' property
@@ -411,6 +413,9 @@ var VariantCurationHub = createReactClass({
         if (field === 'provisional-interpretation' && this.state.provisionalInterpretation !== value) {
             this.setState({provisionalInterpretation: value});
         }
+        if (field === 'evidence-summary' && this.state.evidenceSummary !== value) {
+            this.setState({evidenceSummary: value});
+        }
     },
 
     render: function() {
@@ -465,7 +470,8 @@ var VariantCurationHub = createReactClass({
                         setProvisionalEvaluation={this.setProvisionalEvaluation}
                         provisionalPathogenicity={this.state.provisionalPathogenicity}
                         provisionalReason={this.state.provisionalReason}
-                        provisionalInterpretation={this.state.provisionalInterpretation} />
+                        provisionalInterpretation={this.state.provisionalInterpretation}
+                        evidenceSummary={this.state.evidenceSummary} />
                 }
             </div>
         );
