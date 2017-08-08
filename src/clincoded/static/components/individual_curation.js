@@ -29,7 +29,7 @@ const DeleteButton = curator.DeleteButton;
 
 const MAX_VARIANTS = 2;
 
-var IndividualCuration = createReactClass({
+const IndividualCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, CuratorHistory],
 
     contextTypes: {
@@ -39,7 +39,12 @@ var IndividualCuration = createReactClass({
     // Keeps track of values from the query string
     queryValues: {},
 
-    getInitialState: function() {
+    propTypes: {
+        session: PropTypes.object,
+        href: PropTypes.string
+    },
+
+    getInitialState() {
         return {
             proband_selected: null, // select proband at the form
             gdm: null, // GDM object given in query string
@@ -59,13 +64,15 @@ var IndividualCuration = createReactClass({
             userScoreObj: {}, // Logged-in user's score object
             diseaseObj: {},
             diseaseUuid: null,
-            diseaseError: null
+            diseaseError: null,
+            scoreError: false,
+            scoreErrorMsg: ''
         };
     },
 
     // Called by child function props to update user score obj
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj});
+        this.setState({userScoreObj: newUserScoreObj, scoreError: false, scoreErrorMsg: ''});
     },
 
     // Handle value changes in various form fields
@@ -287,11 +294,19 @@ var IndividualCuration = createReactClass({
         // Save all form values from the DOM.
         this.saveAllFormValues();
 
-        // Make sure there is an explanation for the score selected differently from the default score
+        /**
+         * 1) Make sure there is an explanation for the score selected differently from the default score
+         * 2) Make sure there is a selection of the 'Confirm Case Information type' if the 'Select Status'
+         *    value equals 'Score'
+         */
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
         if (Object.keys(newUserScoreObj).length) {
             if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
-                this.setState({formError: true});
+                this.setState({scoreError: true, scoreErrorMsg: 'A reason is required for the changed score.'});
+                return false;
+            }
+            if (newUserScoreObj['scoreStatus'] === 'Score' && !newUserScoreObj['caseInfoType']) {
+                this.setState({scoreError: true, scoreErrorMsg: 'A case information type is required for the Score status.'});
                 return false;
             }
         }
@@ -887,17 +902,17 @@ var IndividualCuration = createReactClass({
                                 <div className="curation-pmid-summary">
                                     <PmidSummary article={annotation.article} displayJournal pmidLinkout />
                                 </div>
-                            : null}
+                                : null}
                             <div className="viewer-titles">
                                 <h1>{individual ? 'Edit' : 'Curate'} Individual Information</h1>
                                 <h2>
                                     {gdm ? <a href={'/curation-central/?gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                     {groupTitles.length ?
                                         <span> &#x2F;&#x2F; Group {groupTitles.map(function(group, i) { return <span key={group['@id']}>{i > 0 ? ', ' : ''}<a href={group['@id']}>{group.label}</a></span>; })}</span>
-                                    : null}
+                                        : null}
                                     {familyTitles.length ?
                                         <span> &#x2F;&#x2F; Family {familyTitles.map(function(family, i) { return <span key={family['@id']}>{i > 0 ? ', ' : ''}<a href={family['@id']}>{family.label}</a></span>; })}</span>
-                                    : null}
+                                        : null}
                                     <span> &#x2F;&#x2F; {this.state.individualName ? <span>Individual {this.state.individualName}{probandLabel}</span> : <span className="no-entry">No entry</span>}</span>
                                 </h2>
                             </div>
@@ -908,17 +923,17 @@ var IndividualCuration = createReactClass({
                                             {IndividualName.call(this)}
                                         </Panel>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Disease & Phenotype(s)" />} open>
+                                            <Panel title={LabelPanelTitle(individual, 'Disease & Phenotype(s)')} open>
                                                 {IndividualCommonDiseases.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Demographics" />} open>
+                                            <Panel title={LabelPanelTitle(individual, 'Demographics')} open>
                                                 {IndividualDemographics.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Methods" />} open>
+                                            <Panel title={LabelPanelTitle(individual, 'Methods')} open>
                                                 {methods.render.call(this, method)}
                                             </Panel>
                                         </PanelGroup>
@@ -928,26 +943,26 @@ var IndividualCuration = createReactClass({
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
-                                            <Panel title={<LabelPanelTitle individual={individual} labelText="Additional Information" />} open>
+                                            <Panel title={LabelPanelTitle(individual, 'Additional Information')} open>
                                                 {IndividualAdditional.call(this)}
                                             </Panel>
                                         </PanelGroup>
                                         {(this.state.family && this.state.proband_selected) || (!this.state.family && this.state.proband_selected) ?
                                             <div>
                                                 <PanelGroup accordion>
-                                                    <Panel title={<LabelPanelTitle individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score" open>
+                                                    <Panel title={LabelPanelTitle(individual, 'Score Proband')} panelClassName="proband-evidence-score" open>
                                                         <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
-                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError} />
+                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
-                                        : null}
+                                            : null}
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {individual ?
                                                 <DeleteButton gdm={gdm} parent={families.length > 0 ? families[0] : (groups.length > 0 ? groups[0] : annotation)} item={individual} pmid={pmid} />
-                                            : null}
+                                                : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </Form>
@@ -955,7 +970,7 @@ var IndividualCuration = createReactClass({
                             </div>
                         </div>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -963,24 +978,27 @@ var IndividualCuration = createReactClass({
 
 curator_page.register(IndividualCuration, 'curator_page', 'individual-curation');
 
-// HTML labels for inputs follow.
-var LabelPanelTitle = createReactClass({
-    render: function() {
-        var individual = this.props.individual;
-        var probandLabelWhite = <span>{individual && individual.proband ? <i className="icon icon-proband-white"></i> : null}</span>;
+/**
+ * HTML labels for inputs follow.
+ * @param {object} individual - Individual's data object
+ * @param {string} labelText - Value of label
+ */
+const LabelPanelTitle = (individual, labelText) => {
+    return (
+        <h4>Individual<span>{individual && individual.proband ? <i className="icon icon-proband-white"></i> : null}</span> — {labelText}</h4>
+    );
+};
 
-        return <h4>Individual{probandLabelWhite} — {this.props.labelText}</h4>;
-    }
-});
-
-
-// Individual Name group curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var IndividualName = function(displayNote) {
-    var individual = this.state.individual;
-    var family = this.state.family;
-    var familyProbandExists = false;
-    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+/**
+ * Individual Name group curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ * @param {string} displayNote
+ */
+function IndividualName(displayNote) {
+    let individual = this.state.individual;
+    let family = this.state.family;
+    let familyProbandExists = false;
+    let probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
     if (individual && individual.proband) familyProbandExists = individual.proband;
     if (family && family.individualIncluded && family.individualIncluded.length && family.individualIncluded.length > 0) {
         for (var i = 0; i < family.individualIncluded.length; i++) {
@@ -991,23 +1009,23 @@ var IndividualName = function(displayNote) {
     return (
         <div className="row">
             {family && !familyProbandExists ?
-            <div className="col-sm-7 col-sm-offset-5">
-                <p className="alert alert-warning">
-                    This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + family.uuid}>Edit {family.label}</a>
-                </p>
-            </div>
-            : null}
+                <div className="col-sm-7 col-sm-offset-5">
+                    <p className="alert alert-warning">
+                        This page is only for adding non-probands to the Family. To create a proband for this Family, please edit its Family page: <a href={"/family-curation/?editsc&gdm=" + this.queryValues.gdmUuid + "&evidence=" + this.queryValues.annotationUuid + "&family=" + family.uuid}>Edit {family.label}</a>
+                    </p>
+                </div>
+                : null}
             {!this.getAssociation('individual') && !this.getAssociation('associatedFamilies') && !this.getAssociation('associatedGroups') ?
                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">If this Individual is part of a Family or a Group, please curate that Group or Family first and then add the Individual as a member.</p></div>
-            : null}
-            <Input type="text" ref="individualname" label={<LabelIndividualName probandLabel={probandLabel} />} handleChange={this.handleChange}
+                : null}
+            <Input type="text" ref="individualname" label={<span>{probandLabel}Individual Label:</span>} handleChange={this.handleChange}
                 value={individual && individual.label ? individual.label : ''}
                 error={this.getFormError('individualname')} clearError={this.clrFormErrors.bind(null, 'individualname')} maxLength="60"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <p className="col-sm-7 col-sm-offset-5 input-note-below">Note: Do not enter real names in this field. {curator.renderLabelNote('Individual')}</p>
             {displayNote ?
                 <p className="col-sm-7 col-sm-offset-5">Note: If there is more than one individual with IDENTICAL information, you can indicate this at the bottom of this form.</p>
-            : null}
+                : null}
             {!family ?
                 <div>
                     <Input type="select" ref="proband" label="Is this Individual a proband:" value={individual && individual.proband ? "Yes" : (individual ? "No" : "none")}
@@ -1022,23 +1040,17 @@ var IndividualName = function(displayNote) {
                         Note: Probands are indicated by the following icon: <i className="icon icon-proband"></i>
                     </p>
                 </div>
-            : null}
+                : null}
         </div>
     );
-};
+}
 
-// HTML labels for inputs follow.
-var LabelIndividualName = createReactClass({
-    render: function() {
-        return <span>{this.props.probandLabel}Individual Label:</span>;
-    }
-});
-
-
-// If the individual is being edited (we know this because there was an individual
-// UUID in the query string), then don’t present the ability to specify multiple individuals.
-var IndividualCount = function() {
-    var individual = this.state.individual;
+/**
+ * If the individual is being edited (we know this because there was an individual
+ * UUID in the query string), then don’t present the ability to specify multiple individuals.
+ */
+function IndividualCount() {
+    let individual = this.state.individual;
 
     return (
         <div>
@@ -1060,17 +1072,18 @@ var IndividualCount = function() {
             })}
         </div>
     );
-};
+}
 
-
-// Diseases individual curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var IndividualCommonDiseases = function() {
-    var individual = this.state.individual;
-    var family = this.state.family;
-    var group = this.state.group;
-    var associatedGroups, associatedFamilies;
-    var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
+/**
+ * Diseases individual curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function IndividualCommonDiseases() {
+    let individual = this.state.individual;
+    let family = this.state.family;
+    let group = this.state.group;
+    let associatedGroups, associatedFamilies;
+    let probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If we're editing an individual, make editable values of the complex properties
     let hpoidVal = individual && individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join(', ') : '';
@@ -1113,7 +1126,7 @@ var IndividualCommonDiseases = function() {
                     curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo') : curator.renderPhenotype(null, 'Individual', 'hpo')
                 )
             }
-            <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
@@ -1123,66 +1136,60 @@ var IndividualCommonDiseases = function() {
                     curator.renderPhenotype(associatedFamilies, 'Individual', 'ft') : curator.renderPhenotype(null, 'Individual', 'ft')
                 )
             }
-            <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2"
+            <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2"
                 value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
-                clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
-            : null
-            }
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                    clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
+                : null}
             {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-            <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Family"
-                clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
-            : null
-            }
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Family"
+                    clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
+                : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
-            <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
+            <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
-            <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2"
+            <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2"
                 value={individual && individual.termsInElimination ? individual.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
+}
+
+/**
+ * HTML labels for inputs follow.
+ * @param {string} bool - Value of 'not'
+ */
+const LabelHpoId = bool => {
+    return (
+        <span>
+            {bool && bool === 'not' ? <span className="emphasis">NOT </span> : ''}
+            Phenotype(s) <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+        </span>
+    );
 };
 
-// HTML labels for inputs follow.
-var LabelHpoId = createReactClass({
-    propTypes: {
-        not: PropTypes.bool // T to show 'NOT' version of label
-    },
+/**
+ * HTML labels for inputs follow.
+ * @param {string} bool - Value of 'not'
+ */
+const LabelPhenoTerms = bool => {
+    return (
+        <span>
+            {bool && bool === 'not' ? <span className="emphasis">NOT </span> : ''}
+            Phenotype(s) (<span className="normal">free text</span>):
+        </span>
+    );
+};
 
-    render: function() {
-        return (
-            <span>
-                {this.props.not ? <span className="emphasis">NOT </span> : ''}
-                Phenotype(s) <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
-            </span>
-        );
-    }
-});
-
-// HTML labels for inputs follow.
-var LabelPhenoTerms = createReactClass({
-    propTypes: {
-        not: PropTypes.bool // T to show 'NOT' version of label
-    },
-
-    render: function() {
-        return (
-            <span>
-                {this.props.not ? <span className="emphasis">NOT </span> : ''}
-                Phenotype(s) (<span className="normal">free text</span>):
-            </span>
-        );
-    }
-});
-
-// Demographics individual curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var IndividualDemographics = function() {
-    var individual = this.state.individual;
+/**
+ * Demographics individual curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function IndividualDemographics() {
+    let individual = this.state.individual;
 
     return (
         <div className="row">
@@ -1261,16 +1268,17 @@ var IndividualDemographics = function() {
             </div>
         </div>
     );
-};
+}
 
-
-// Only called if we have an associated family
-var IndividualVariantInfo = function() {
-    var individual = this.state.individual;
-    var family = this.state.family;
-    var gdm = this.state.gdm;
-    var annotation = this.state.annotation;
-    var variants = individual && individual.variants;
+/**
+ * Only called if we have an associated family
+ */
+function IndividualVariantInfo() {
+    let individual = this.state.individual;
+    let family = this.state.family;
+    let gdm = this.state.gdm;
+    let annotation = this.state.annotation;
+    let variants = individual && individual.variants;
     let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
@@ -1290,21 +1298,21 @@ var IndividualVariantInfo = function() {
                                             <dt>ClinVar Variation ID</dt>
                                             <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                         </div>
-                                    : null}
+                                        : null}
 
                                     {variant.clinvarVariantTitle ?
                                         <div>
                                             <dt>ClinVar Preferred Title</dt>
                                             <dd>{variant.clinvarVariantTitle}</dd>
                                         </div>
-                                    : null}
+                                        : null}
 
                                     {variant.carId ?
                                         <div>
                                             <dt>ClinGen Allele Registry ID</dt>
                                             <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </div>
-                                    : null}
+                                        : null}
                                     {variant.uuid ?
                                         <div>
                                             <dt className="no-label"></dt>
@@ -1312,28 +1320,28 @@ var IndividualVariantInfo = function() {
                                                 <a href={'/variant-central/?variant=' + variant.uuid} target="_blank">View variant evidence in Variant Curation Interface</a>
                                             </dd>
                                         </div>
-                                    : null}
+                                        : null}
 
                                     {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
                                         <div>
                                             <dt>Genomic HGVS Title</dt>
                                             <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                         </div>
-                                    : null}
+                                        : null}
 
                                     {variant.otherDescription && variant.otherDescription.length ?
                                         <div>
                                             <dt>Other description</dt>
                                             <dd>{variant.otherDescription}</dd>
                                         </div>
-                                    : null}
+                                        : null}
 
                                     {individual.recessiveZygosity && i === 0 ?
                                         <div>
                                             <dt>If Recessive, select variant zygosity</dt>
                                             <dd>{individual.recessiveZygosity}</dd>
                                         </div>
-                                    : null }
+                                        : null }
                                 </dl>
                             </div>
                         );
@@ -1366,9 +1374,9 @@ var IndividualVariantInfo = function() {
                                 <option value="No">No</option>
                             </Input>
                         </div>
-                    : null}
+                        : null}
                 </div>
-            :
+                :
                 <div>
                     <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
                         error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
@@ -1396,25 +1404,25 @@ var IndividualVariantInfo = function() {
                                                 <span className="col-sm-5 control-label"><label>{<LabelClinVarVariant />}</label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                             </div>
-                                        : null}
+                                            : null}
                                         {this.state.variantInfo[i].clinvarVariantTitle ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
                                                 <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
                                             </div>
-                                        : null}
+                                            : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
-                                        : null}
+                                            : null}
                                         {this.state.variantInfo[i].grch38 ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
                                                 <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
                                             </div>
-                                        : null}
+                                            : null}
                                         <div className="row variant-curation">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1422,7 +1430,7 @@ var IndividualVariantInfo = function() {
                                             </span>
                                         </div>
                                     </div>
-                                : null}
+                                    : null}
                                 <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''}
                                     error={this.getFormError('variantUuid' + i)} clearError={this.clrFormErrors.bind(null, 'variantUuid' + i)}
                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="hidden" />
@@ -1435,14 +1443,14 @@ var IndividualVariantInfo = function() {
                                                     buttonText="Add ClinVar ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].clinvarVariantId} fieldNum={String(i)}
                                                     updateParentForm={this.updateVariantId} buttonOnly={true} />
-                                            : null}
+                                                : null}
                                             {!this.state.variantInfo[i] ? <span> - or - </span> : null}
                                             {!this.state.variantInfo[i] || (this.state.variantInfo[i] && !this.state.variantInfo[i].clinvarVariantId) ?
                                                 <AddResourceId resourceType="car" parentObj={{'@type': ['variantList', 'Individual'], 'variantList': this.state.variantInfo}}
                                                     buttonText="Add CA ID" protocol={this.props.href_url.protocol} clearButtonRender={true} editButtonRenderHide={true} clearButtonClass="btn-inline-spacer"
                                                     initialFormValue={this.state.variantInfo[i] && this.state.variantInfo[i].carId} fieldNum={String(i)}
                                                     updateParentForm={this.updateVariantId} buttonOnly={true} />
-                                            : null}
+                                                : null}
                                         </span>
                                     </div>
                                 </div>
@@ -1477,48 +1485,38 @@ var IndividualVariantInfo = function() {
                                 <option value="No">No</option>
                             </Input>
                         </div>
-                    : null}
+                        : null}
                 </div>
             }
         </div>
     );
+}
+
+const LabelClinVarVariant = () => {
+    return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
 };
 
+const LabelClinVarVariantTitle = () => {
+    return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
+};
 
-var LabelClinVarVariant = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
-    }
-});
+const LabelCARVariant = () => {
+    return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
+};
 
-var LabelClinVarVariantTitle = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
-    }
-});
+const LabelCARVariantTitle = () => {
+    return <span><strong>Genomic HGVS Title:</strong></span>;
+};
 
-var LabelCARVariant = createReactClass({
-    render: function() {
-        return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
-    }
-});
+const LabelOtherVariant = () => {
+    return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
+};
 
-var LabelCARVariantTitle = createReactClass({
-    render: function() {
-        return <span><strong>Genomic HGVS Title:</strong></span>;
-    }
-});
-
-var LabelOtherVariant = createReactClass({
-    render: function() {
-        return <span>Other description when a ClinVar VariationID does not exist <span className="normal">(important: use CA ID registered with <a href={external_url_map['CAR']} target="_blank">ClinGen Allele Registry</a> whenever possible)</span>:</span>;
-    }
-});
-
-
-// Additional Information family curation panel. Call with .call(this) to run in the same context
-// as the calling component.
-var IndividualAdditional = function() {
+/**
+ * Additional Information family curation panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function IndividualAdditional() {
     var individual = this.state.individual;
     var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
@@ -1527,32 +1525,22 @@ var IndividualAdditional = function() {
 
     return (
         <div className="row">
-            <Input type="textarea" ref="additionalinfoindividual" label={<LabelAdditional probandLabel={probandLabel} />} rows="5"
-                value={individual && individual.additionalInformation ? individual.additionalInformation : ''}
+            <Input type="textarea" ref="additionalinfoindividual" label={<span>Additional Information about Individual{probandLabel}:</span>}
+                rows="5" value={individual && individual.additionalInformation ? individual.additionalInformation : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="textarea" ref="otherpmids" label={<LabelOtherPmids probandLabel={probandLabel} />} rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
+            <Input type="textarea" ref="otherpmids" label={<span>Enter PMID(s) that report evidence about this Individual{probandLabel}:</span>}
+                rows="5" value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
-};
+}
 
-// HTML labels for inputs follow.
-var LabelAdditional = createReactClass({
-    render: function() {
-        return <span>Additional Information about Individual{this.props.probandLabel}:</span>;
-    }
-});
-
-var LabelOtherPmids = createReactClass({
-    render: function() {
-        return <span>Enter PMID(s) that report evidence about this Individual{this.props.probandLabel}:</span>;
-    }
-});
-
-// Score Proband panel. Call with .call(this) to run in the same context
-// as the calling component.
-var IndividualScore = function() {
+/**
+ * Score Proband panel.
+ * Call with .call(this) to run in the same context as the calling component.
+ */
+function IndividualScore() {
     let individual = this.state.individual;
     let scores = individual && individual.scores ? individual.scores : null;
 
@@ -1571,17 +1559,24 @@ var IndividualScore = function() {
             </div>
         </div>
     );
-};
+}
 
-var IndividualViewer = createReactClass({
+const IndividualViewer = createReactClass({
     // Start:: Evidence score submission hanlding for viewer
     mixins: [RestMixin],
+
+    propTypes: {
+        context: PropTypes.object,
+        session: PropTypes.object,
+        href: PropTypes.string
+    },
 
     getInitialState: function() {
         return {
             userScoreObj: {}, // Logged-in user's score object
             submitBusy: false, // True while form is submitting
-            formError: false
+            scoreError: false,
+            scoreErrorMsg: ''
         };
     },
 
@@ -1605,9 +1600,18 @@ var IndividualViewer = createReactClass({
         /*****************************************************/
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
+        /**
+         * 1) Make sure there is an explanation for the score selected differently from the default score
+         * 2) Make sure there is a selection of the 'Confirm Case Information type' if the 'Select Status'
+         *    value equals 'Score'
+         */
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
-                this.setState({formError: true});
+            if (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
+                this.setState({scoreError: true, scoreErrorMsg: 'A reason is required for the changed score.'});
+                return false;
+            }
+            if (newUserScoreObj['scoreStatus'] === 'Score' && !newUserScoreObj['caseInfoType']) {
+                this.setState({scoreError: true, scoreErrorMsg: 'A case information type is required for the Score status.'});
                 return false;
             }
             this.setState({submitBusy: true});
@@ -1652,7 +1656,7 @@ var IndividualViewer = createReactClass({
     },
     // End:: Evidence score submission hanlding for viewer
 
-    render: function() {
+    render() {
         var individual = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
         var userIndividual = user && individual && individual.submitted_by ? user.uuid === individual.submitted_by.uuid : false;
@@ -1723,14 +1727,14 @@ var IndividualViewer = createReactClass({
                                 {tempGdm ? <a href={'/curation-central/?gdm=' + tempGdm.uuid + (tempGdm ? '&pmid=' + tempPmid : '')}><i className="icon icon-briefcase"></i></a> : null}
                                 {groupRenders.length ?
                                     <span> &#x2F;&#x2F; Group {groupRenders}</span>
-                                : null}
+                                    : null}
                                 {familyRenders.length ?
                                     <span> &#x2F;&#x2F; Family {familyRenders}</span>
-                                : null}
+                                    : null}
                                 <span> &#x2F;&#x2F; Individual {individual.label}</span>
                             </h2>
                         </div>
-                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Disease & Phenotype(s)" />} panelClassName="panel-data">
+                        <Panel title={LabelPanelTitleView(individual, 'Disease & Phenotype(s)')} panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Common Diagnosis</dt>
@@ -1765,7 +1769,7 @@ var IndividualViewer = createReactClass({
                             </dl>
                         </Panel>
 
-                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Demographics" />} panelClassName="panel-data">
+                        <Panel title={LabelPanelTitleView(individual, 'Demographics')} panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Sex</dt>
@@ -1804,7 +1808,7 @@ var IndividualViewer = createReactClass({
                             </dl>
                         </Panel>
 
-                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Methods" />} panelClassName="panel-data">
+                        <Panel title={LabelPanelTitleView(individual, 'Methods')} panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Previous testing</dt>
@@ -1848,7 +1852,7 @@ var IndividualViewer = createReactClass({
                             </dl>
                         </Panel>
 
-                        <Panel title={<LabelPanelTitleView individual={individual} variant />} panelClassName="panel-data">
+                        <Panel title={LabelPanelTitleView(individual, '', true)} panelClassName="panel-data">
                             <div>
                                 <dl className="dl-horizontal">
                                     <dt>Zygosity</dt>
@@ -1866,7 +1870,7 @@ var IndividualViewer = createReactClass({
                                                     <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {variant.clinvarVariantTitle ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -1874,7 +1878,7 @@ var IndividualViewer = createReactClass({
                                                     <dd>{variant.clinvarVariantTitle}</dd>
                                                 </dl>
                                             </div>
-                                        : null}
+                                            : null}
                                         {variant.carId ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -1882,7 +1886,7 @@ var IndividualViewer = createReactClass({
                                                     <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -1890,7 +1894,7 @@ var IndividualViewer = createReactClass({
                                                     <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -1898,7 +1902,7 @@ var IndividualViewer = createReactClass({
                                                     <dd>{variant.otherDescription}</dd>
                                                 </dl>
                                             </div>
-                                        : null }
+                                            : null }
                                     </div>
                                 );
                             })}
@@ -1925,10 +1929,10 @@ var IndividualViewer = createReactClass({
                                         </dl>
                                     </div>
                                 </div>
-                            : null}
+                                : null}
                         </Panel>
 
-                        <Panel title={<LabelPanelTitleView individual={individual} labelText="Additional Information" />} panelClassName="panel-data">
+                        <Panel title={LabelPanelTitleView(individual, 'Additional Information')} panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
                                     <dt>Additional Information about Individual</dt>
@@ -1945,26 +1949,26 @@ var IndividualViewer = createReactClass({
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
                                 {isEvidenceScored && !userIndividual ?
-                                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Other Curator Scores" />} panelClassName="panel-data">
+                                    <Panel title={LabelPanelTitleView(individual, 'Other Curator Scores')} panelClassName="panel-data">
                                         <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
                                     </Panel>
-                                : null}
+                                    : null}
                                 {isEvidenceScored || (!isEvidenceScored && userIndividual) ?
-                                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
+                                    <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
-                                        session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
+                                            session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
+                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} />
                                     </Panel>
-                                : null}
+                                    : null}
                                 {!isEvidenceScored && !userIndividual ?
-                                    <Panel title={<LabelPanelTitleView individual={individual} labelText="Score Proband" />} panelClassName="proband-evidence-score-viewer" open>
+                                    <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
                                         <div className="row">
                                             <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                         </div>
                                     </Panel>
-                                : null}
+                                    : null}
                             </div>
-                        : null}
-
+                            : null}
                     </div>
                 </div>
             </div>
@@ -1974,30 +1978,40 @@ var IndividualViewer = createReactClass({
 
 content_views.register(IndividualViewer, 'individual');
 
-
-// HTML labels for inputs follow.
-class LabelPanelTitleView extends Component {
-    render() {
-        var individual = this.props.individual;
-        var probandLabel = <span>{individual && individual.proband ? <i className="icon icon-proband"></i> : null}</span>;
-        var labelText = this.props.labelText;
-
-        if (this.props.variant) {
-            labelText = (individual && individual.associatedFamilies.length && individual.proband) ?
-                'Variant(s) segregating with Proband' :
-                'Associated Variant(s)';
-        }
-
-        return <h4><span className="panel-title-std">Individual{probandLabel} — {labelText}</span></h4>;
+/**
+ * HTML labels for inputs follow.
+ * @param {object} individual - Individual's data object
+ * @param {string} labelText - Value of label
+ * @param {boolean} hasVariant - Flag for associated variant
+ */
+const LabelPanelTitleView = (individual, labelText, hasVariant) => {
+    if (hasVariant) {
+        labelText = (individual && individual.associatedFamilies.length && individual.proband) ?
+            'Variant(s) segregating with Proband' :
+            'Associated Variant(s)';
     }
-}
 
+    return (
+        <h4>
+            <span className="panel-title-std">
+                Individual{<span>{individual && individual.proband ? <i className="icon icon-proband"></i> : null}</span>} — {labelText}
+            </span>
+        </h4>
+    );
+};
 
-// Make a starter individual from the family and write it to the DB; always called from
-// family curation. Pass an array of disease objects to add, as well as an array of variants.
-// Returns a promise once the Individual object is written.
-var makeStarterIndividual = module.exports.makeStarterIndividual = function(label, diseases, variants, zygosity, context) {
-    var newIndividual = {};
+/**
+ * Make a starter individual from the family and write it to the DB; always called from
+ * family curation. Pass an array of disease objects to add, as well as an array of variants.
+ * Returns a promise once the Individual object is written.
+ * @param {string} label 
+ * @param {object} diseases 
+ * @param {object} variants 
+ * @param {object} zygosity 
+ * @param {object} context 
+ */
+export function makeStarterIndividual(label, diseases, variants, zygosity, context) {
+    let newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
     newIndividual.proband = true;
@@ -2011,12 +2025,17 @@ var makeStarterIndividual = module.exports.makeStarterIndividual = function(labe
     return context.postRestData('/individuals/', newIndividual).then(data => {
         return Promise.resolve(data['@graph'][0]);
     });
-};
+}
 
-
-// Update the individual with the variants, and write the updated individual to the DB.
-var updateProbandVariants = module.exports.updateProbandVariants = function(individual, variants, zygosity, context) {
-    var updateNeeded = true;
+/**
+ * Update the individual with the variants, and write the updated individual to the DB.
+ * @param {object} individual 
+ * @param {object} variants 
+ * @param {object} zygosity 
+ * @param {object} context 
+ */
+export function updateProbandVariants(individual, variants, zygosity, context) {
+    let updateNeeded = true;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -2073,15 +2092,14 @@ var updateProbandVariants = module.exports.updateProbandVariants = function(indi
         });
     }
     return Promise.resolve(null);
-};
+}
 
-
-var recordIndividualHistory = module.exports.recordIndividualHistory = function(gdm, annotation, individual, group, family, modified, context) {
+export function recordIndividualHistory(gdm, annotation, individual, group, family, modified, context) {
     // Add to the user history. data.individual always contains the new or edited individual. data.group contains the group the individual was
     // added to, if it was added to a group. data.annotation contains the annotation the individual was added to, if it was added to
     // the annotation, and data.family contains the family the individual was added to, if it was added to a family. If none of data.group,
     // data.family, nor data.annotation exist, data.individual holds the existing individual that was modified.
-    var meta, historyPromise;
+    let meta, historyPromise;
 
     if (modified){
         historyPromise = context.recordHistory('modify', individual);
@@ -2119,10 +2137,11 @@ var recordIndividualHistory = module.exports.recordIndividualHistory = function(
     }
 
     return historyPromise;
-};
+}
 
-
-// Display a history item for adding an individual
+/**
+ * Display a history item for adding an individual
+ */
 class IndividualAddHistory extends Component {
     render() {
         var history = this.props.history;
@@ -2138,11 +2157,11 @@ class IndividualAddHistory extends Component {
                 <span> added to </span>
                 {family ?
                     <span>family <a href={family['@id']}>{family.label}</a></span>
-                :
+                    :
                     <span>
                         {group ?
                             <span>group <a href={group['@id']}>{group.label}</a></span>
-                        :
+                            :
                             <span>
                                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
@@ -2158,8 +2177,9 @@ class IndividualAddHistory extends Component {
 
 history_views.register(IndividualAddHistory, 'individual', 'add');
 
-
-// Display a history item for modifying an individual
+/**
+ * Display a history item for modifying an individual
+ */
 class IndividualModifyHistory extends Component {
     render() {
         var history = this.props.history;
@@ -2177,8 +2197,9 @@ class IndividualModifyHistory extends Component {
 
 history_views.register(IndividualModifyHistory, 'individual', 'modify');
 
-
-// Display a history item for deleting an individual
+/**
+ * Display a history item for deleting an individual
+ */
 class IndividualDeleteHistory extends Component {
     render() {
         var history = this.props.history;
