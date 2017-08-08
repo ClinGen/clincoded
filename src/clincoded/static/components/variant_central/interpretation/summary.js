@@ -468,7 +468,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                             <div className="evaluation-provision evidence-summary">
                                                 <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
                                                     value={evidenceSummary} handleChange={this.handleChange}
-                                                    placeholder="You may provide a summary of the evidence here (optional)." rows="5"
+                                                    placeholder="Summary of the evidence and rationale for the clinical significance (optional)." rows="5"
                                                     labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
                                             </div>
                                             <div className="provisional-submit">
