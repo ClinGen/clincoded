@@ -88,7 +88,7 @@ var ExperimentalCuration = createReactClass({
             modelSystemsPPFT: false,
             modelSystemsCC_EfoId: false, // True if EFO ID is provided
             modelSystemsCC_FreeText: false, // True if free text is provided
-            rescuePCEE: '',
+            rescueObserved: '',
             rescuePRHPO: false,
             rescuePRFT: false,
             rescuePCT_ClId: false, // True if CL Ontology ID is provided
@@ -163,7 +163,7 @@ var ExperimentalCuration = createReactClass({
                 experimentalTypeDescription: this.getExperimentalTypeDescription(tempExperimentalType),
                 functionalAlterationPCEE: '',
                 modelSystemsNHACCM: '',
-                rescuePCEE: '',
+                rescueObserved: '',
                 geneImplicatedWithDisease: false,
                 geneImplicatedInDisease: false,
                 expressedInTissue: false,
@@ -456,8 +456,8 @@ var ExperimentalCuration = createReactClass({
             } else {
                 this.setState({rescuePRFT: true});
             }
-        } else if (ref === 'patientCellOrEngineeredEquivalent') {
-            this.setState({rescuePCEE: this.refs['patientCellOrEngineeredEquivalent'].getValue()});
+        } else if (ref === 'rescueObserved') {
+            this.setState({rescueObserved: this.refs['rescueObserved'].getValue()});
         }
     },
 
@@ -632,7 +632,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({modelSystemsCC_FreeText: true}) : this.setState({modelSystemsCC_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     let rescue = stateObj.experimental.rescue;
-                    this.setState({rescuePCEE: rescue.patientCellOrEngineeredEquivalent});
+                    this.setState({rescueObserved: rescue.rescueObserved});
                     if (rescue.wildTypeRescuePhenotype) {
                         this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype}, () => {
                             this.toggleScoring(this.state.wildTypeRescuePhenotype);
@@ -920,10 +920,10 @@ var ExperimentalCuration = createReactClass({
                     formError = true;
                     this.setFormErrors('wildTypeRescuePhenotype', "Please see note below.");
                 }
-                if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Patient cells' && this.getFormValue('rescue.patientCellType')) {
+                if (this.getFormValue('rescueObserved') === 'Patient cells' && this.getFormValue('rescue.patientCellType')) {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCellType'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCellType', 1);
-                } else if (this.getFormValue('patientCellOrEngineeredEquivalent') === 'Engineered equivalent' && this.getFormValue('rescue.engineeredEquivalentCellType')) {
+                } else if (this.getFormValue('rescueObserved') === 'Engineered equivalent' && this.getFormValue('rescue.engineeredEquivalentCellType')) {
                     // This input field accepts both EFO and CLO IDs
                     efoClIDs = curator.capture.efoclids(this.getFormValue('rescue.engineeredEquivalentCellType'));
                     formError = this.validateFormTerms(formError, 'efoClIDs', efoClIDs, 'rescue.engineeredEquivalentCellType', 1);
@@ -1167,9 +1167,9 @@ var ExperimentalCuration = createReactClass({
                 } else if (newExperimental.evidenceType == 'Rescue') {
                     // newExperimental object for type Rescue
                     newExperimental.rescue = {};
-                    var RpatientCellOrEngineeredEquivalent = this.getFormValue('patientCellOrEngineeredEquivalent');
-                    if (RpatientCellOrEngineeredEquivalent) {
-                        newExperimental.rescue.patientCellOrEngineeredEquivalent = RpatientCellOrEngineeredEquivalent;
+                    var RrescueObserved = this.getFormValue('rescueObserved');
+                    if (RrescueObserved) {
+                        newExperimental.rescue.rescueObserved = RrescueObserved;
                     }
                     var RpatientCellType = this.getFormValue('rescue.patientCellType');
                     if (RpatientCellType) {
@@ -1462,7 +1462,7 @@ var ExperimentalCuration = createReactClass({
         } else if (this.state.experimentalType === 'Model Systems') {
             experimentalEvidenceType = this.state.modelSystemsNHACCM;
         } else if (this.state.experimentalType === 'Rescue') {
-            experimentalEvidenceType = this.state.rescuePCEE;
+            experimentalEvidenceType = this.state.rescueObserved;
         }
 
         return (
@@ -2252,12 +2252,12 @@ const LabelPatientPhenotype = () => {
 function TypeRescue() {
     let experimental = this.state.experimental ? this.state.experimental : {};
     let rescue = experimental.rescue ? experimental.rescue : {};
-    let RES_patientCellOrEngineeredEquivalent, RES_patientCellType, RES_patientCellTypeFreeText,
+    let RES_rescueObserved, RES_patientCellType, RES_patientCellTypeFreeText,
         RES_engineeredEquivalentCellType, RES_engineeredEquivalentCellTypeFreeText,
         RES_descriptionOfGeneAlteration, RES_phenotypeHPO, RES_phenotypeFreeText,
         RES_rescueMethod, RES_explanation, RES_evidenceInPaper;
     if (rescue) {
-        RES_patientCellOrEngineeredEquivalent = rescue.patientCellOrEngineeredEquivalent ? rescue.patientCellOrEngineeredEquivalent : 'none';
+        RES_rescueObserved = rescue.rescueObserved ? rescue.rescueObserved : 'none';
         RES_patientCellType = rescue.patientCellType ? rescue.patientCellType : '';
         RES_patientCellTypeFreeText = rescue.patientCellTypeFreeText ? rescue.patientCellTypeFreeText : '';
         RES_engineeredEquivalentCellType = rescue.engineeredEquivalentCellType ? rescue.engineeredEquivalentCellType : '';
@@ -2271,17 +2271,18 @@ function TypeRescue() {
     }
     return (
         <div className="row form-row-helper">
-            <Input type="select" ref="patientCellOrEngineeredEquivalent" label="Patient cells with or engineered equivalent?:"
-                error={this.getFormError('patientCellOrEngineeredEquivalent')} clearError={this.clrFormErrors.bind(null, 'patientCellOrEngineeredEquivalent')}
+            <Input type="select" ref="rescueObserved" label="Rescue observed in the following:"
+                error={this.getFormError('rescueObserved')} clearError={this.clrFormErrors.bind(null, 'rescueObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                defaultValue="none" value={RES_patientCellOrEngineeredEquivalent} handleChange={this.handleChange}
+                defaultValue="none" value={RES_rescueObserved} handleChange={this.handleChange}
                 inputDisabled={this.cv.othersAssessed} required>
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
-                <option value="Patient cells">Patient cells</option>
-                <option value="Engineered equivalent">Engineered equivalent</option>
+                <option value="The patient (human model)">The patient (human model)</option>
+                <option value="Animal model">Animal model</option>
+                <option value="Cell-culture model">Cell-culture model</option>
             </Input>
-            {this.state.rescuePCEE === 'Patient cells' ?
+            {this.state.rescueObserved === 'Patient cells' ?
                 <div>
                     {curator.renderWarning('CL')}
                     <p className="col-sm-7 col-sm-offset-5">
@@ -2302,7 +2303,7 @@ function TypeRescue() {
                         customErrorMsg="Enter CL ID and/or free text" />
                 </div>
             : null}
-            {this.state.rescuePCEE === 'Engineered equivalent' ?
+            {this.state.rescueObserved === 'Engineered equivalent' ?
                 <div>
                     {curator.renderWarning('CL_EFO')}
                     <p className="col-sm-7 col-sm-offset-5">
@@ -2633,7 +2634,7 @@ const ExperimentalViewer = createReactClass({
         } else if (experimental.evidenceType === 'Model Systems') {
             this.setState({experimentalEvidenceType: experimental.modelSystems.animalOrCellCulture});
         } else if (experimental.evidenceType === 'Rescue') {
-            this.setState({experimentalEvidenceType: experimental.rescue.patientCellOrEngineeredEquivalent});
+            this.setState({experimentalEvidenceType: experimental.rescue.rescueObserved});
         }
     },
 
@@ -3044,11 +3045,11 @@ const ExperimentalViewer = createReactClass({
                         <Panel title="Rescue" panelClassName="panel-data">
                             <dl className="dl-horizontal">
                                 <div>
-                                    <dt>Patient cells with or engineered equivalent?</dt>
-                                    <dd>{experimental.rescue.patientCellOrEngineeredEquivalent}</dd>
+                                    <dt>Rescue observed in the following</dt>
+                                    <dd>{experimental.rescue.rescueObserved}</dd>
                                 </div>
 
-                                {experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells' ?
+                                {experimental.rescue.rescueObserved === 'Patient cells' ?
                                     <div>
                                         <dt>Patient cell type</dt>
                                         <dd>{experimental.rescue.patientCellType ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCellType} title={"CL entry for " + experimental.rescue.patientCellType + " in new tab"} target="_blank">{experimental.rescue.patientCellType}</a> : null}</dd>
@@ -3060,7 +3061,7 @@ const ExperimentalViewer = createReactClass({
                                     </div>
                                 }
 
-                                {experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells' ?
+                                {experimental.rescue.rescueObserved === 'Patient cells' ?
                                     <div>
                                         <dt>Patient cell type (free text)</dt>
                                         <dd>{experimental.rescue.patientCellTypeFreeText ? experimental.rescue.patientCellTypeFreeText : null}</dd>
