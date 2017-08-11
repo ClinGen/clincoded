@@ -6,6 +6,8 @@ import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { RestMixin } from '../../rest';
 import * as curator from '../../curator';
 import * as evidenceCodes from './mapping/evidence_code.json';
+import PopOverComponent from '../../../libs/bootstrap/popover';
+import AlertMessage from '../../../libs/bootstrap/alert';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -34,7 +36,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             disabledCheckbox: false,
             disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
-            updateMsg: null // status message for Save/Update button
+            alertMsg: null, // status message for Save/Update button
+            alertType: null,
+            showAlertMessage: false
         };
     },
 
@@ -261,9 +265,25 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         }
     },
 
+    // Handle the showing of alert message
+    showAlertMessage(alertType, alertMsg) {
+        this.setState({
+            showAlertMessage: true,
+            alertType: alertType,
+            alertMsg: alertMsg
+        }, () => {
+            setTimeout(this.hideAlertMessage, 6000);
+        });
+    },
+
+    // Handle the hiding of alert message
+    hideAlertMessage() {
+        this.setState({showAlertMessage: false});
+    },
+
     submitForm(e) {
         e.preventDefault(); e.stopPropagation();
-        this.setState({submitBusy: true, updateMsg: null});
+        this.setState({submitBusy: true, alertMsg: null});
 
         const interpretation = this.state.interpretation;
         const provisionalInterpretation = this.state.provisionalInterpretation;
@@ -291,11 +311,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 }
 
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
-                    this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes saved successfully!</span>});
                     this.setState({
+                        submitBusy: false,
                         autoClassification: result['@graph'][0]['autoClassification'],
                         modifiedPathogenicity: result['@graph'][0]['alteredClassification']
                     });
+                    this.showAlertMessage('alert-success', 'Provisional changes saved successfully!');
                     let provisionalObjUuid = result['@graph'][0]['@id'];
                     if (!('provisional_variant' in flatInterpretationObj)) {
                         flatInterpretationObj.provisional_variant = [provisionalObjUuid];
@@ -312,7 +333,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         console.log(err);
                     });
                 }).catch(err => {
-                    this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to save provisional changes.</span>});
+                    this.setState({submitBusy: false});
+                    this.showAlertMessage('alert-danger', 'Unable to save provisional changes.');
                     console.log(err);
                 });
             } else {
@@ -346,14 +368,16 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     return Promise.resolve(flatProvisionalVariantObj);
                 }).then(newProvisionalVariantObj => {
                     this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, newProvisionalVariantObj).then(response => {
-                        this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
                         this.setState({
+                            submitBusy: false,
                             autoClassification: response['@graph'][0]['autoClassification'],
                             modifiedPathogenicity: response['@graph'][0]['alteredClassification']
                         });
+                        this.showAlertMessage('alert-success', 'Provisional changes updated successfully!');
                         this.props.updateInterpretationObj();
                     }).catch(err => {
-                        this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
+                        this.setState({submitBusy: false});
+                        this.showAlertMessage('alert-danger', 'Unable to update provisional changes.');
                         console.log(err);
                     });
                 }).catch(err => {
@@ -459,7 +483,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                         <div className="col-xs-12 col-sm-6">
                                             <div className="evaluation-provision provisional-interpretation">
                                                 <div>
-                                                    <i className="icon icon-question-circle"></i>
+                                                    <PopOverComponent popOverWrapperClass="popover-provisional-status-help" popOverStyleClass="alert alert-info"
+                                                        actuatorTitle={<i className="icon icon-question-circle"></i>} popOverRef={ref => (this.popover = ref)}>
+                                                        <span>
+                                                            An interpretation can still be edited after it's marked "Provisional." If the Interpretation is "Likely Pathogenic" or "Pathogenic,"
+                                                            it must be associated with a disease before it can be marked as "Provisional."
+                                                        </span>
+                                                    </PopOverComponent>
                                                     <span>Mark status as "Provisional Interpretation" <i>(optional)</i>:</span>
                                                     <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation}
                                                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
@@ -474,9 +504,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                             <div className="provisional-submit">
                                                 <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
                                                     id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
-                                                {this.state.updateMsg ?
-                                                    <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                    : null}
+                                                <AlertMessage
+                                                    visible={this.state.showAlertMessage}
+                                                    type={this.state.alertType}
+                                                    message={this.state.alertMsg}
+                                                    customClasses="pull-right"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -551,7 +584,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         </div>
 
                     </div>
-                :
+                    :
                     <div className="summary-content-wrapper"><p>No evaluations found in this interpretation.</p></div>
                 }
             </div>
