@@ -22,5 +22,18 @@
         .popover-content {
             margin: 13px 16px;
         }
+
+        &.alert {
+            .popover-content {
+                margin: 0 3px;
+                width: 360px;
+            }
+        }
+
+        &.alert-info {
+            background-color: #d9edf7;
+            border-color: #2697d1;
+            color: #31708f;
+        }
     }
 }
