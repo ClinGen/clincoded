@@ -6,6 +6,8 @@ import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { RestMixin } from '../../rest';
 import * as curator from '../../curator';
 import * as evidenceCodes from './mapping/evidence_code.json';
+import PopOverComponent from '../../../libs/bootstrap/popover';
+import AlertMessage from '../../../libs/bootstrap/alert';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -17,10 +19,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         calculatedAssertion: PropTypes.string,
         provisionalPathogenicity: PropTypes.string,
         provisionalReason: PropTypes.string,
-        provisionalInterpretation: PropTypes.bool
+        provisionalInterpretation: PropTypes.bool,
+        evidenceSummary: PropTypes.string
     },
 
-    getInitialState: function() {
+    getInitialState() {
         return {
             interpretation: this.props.interpretation,
             calculatedAssertion: this.props.calculatedAssertion,
@@ -29,35 +32,42 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             provisionalPathogenicity: this.props.provisionalPathogenicity,
             provisionalReason: this.props.provisionalReason,
             provisionalInterpretation: this.props.provisionalInterpretation,
+            evidenceSummary: this.props.evidenceSummary,
             disabledCheckbox: false,
             disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
-            updateMsg: null // status message for Save/Update button
+            alertMsg: null, // status message for Save/Update button
+            alertType: null,
+            showAlertMessage: false
         };
     },
 
-    componentDidMount: function() {
+    componentDidMount() {
         if (this.props.interpretation && this.props.calculatedAssertion) {
             // Uncheck pre-existing marked provisional checkbox and disable it if needed,
             // given the calculated/modified pathogenicity
             this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
             // Reset form values to last saved values
             let interpretation = this.props.interpretation;
-            let markAsProvisional, alteredClassification, reason;
+            let provisional_variant = interpretation.provisional_variant ? interpretation.provisional_variant : null;
+            let markAsProvisional, alteredClassification, reason, evidenceSummary;
             if (interpretation) {
                 markAsProvisional = interpretation.markAsProvisional;
-                if (interpretation.provisional_variant) {
-                    alteredClassification = interpretation.provisional_variant[0].alteredClassification;
-                    reason = interpretation.provisional_variant[0].reason;
+                if (provisional_variant && provisional_variant.length) {
+                    alteredClassification = provisional_variant[0].alteredClassification;
+                    reason = provisional_variant[0].reason;
+                    evidenceSummary = provisional_variant[0].evidenceSummary ? provisional_variant[0].evidenceSummary : null;
                 }
             }
+            // FIXME: Why do we need to update parent component immediately after mounting?
             this.props.setProvisionalEvaluation('provisional-pathogenicity', alteredClassification ? alteredClassification : null);
             this.props.setProvisionalEvaluation('provisional-reason', reason ? reason : null);
             this.props.setProvisionalEvaluation('provisional-interpretation', markAsProvisional);
+            this.props.setProvisionalEvaluation('evidence-summary', evidenceSummary);
         }
     },
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
         if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
         }
@@ -69,7 +79,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         this.setState({
             provisionalPathogenicity: nextProps.provisionalPathogenicity,
             provisionalReason: nextProps.provisionalReason,
-            provisionalInterpretation: nextProps.provisionalInterpretation
+            provisionalInterpretation: nextProps.provisionalInterpretation,
+            evidenceSummary: nextProps.evidenceSummary
         }, () => {
             if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length) {
                 if (!this.state.provisionalPathogenicity) {
@@ -80,12 +91,17 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     this.refs['provisional-reason'].setValue(this.state.provisionalReason);
                 }
             }
+            if (!this.state.evidenceSummary) {
+                this.refs['evaluation-evidence-summary'].resetValue();
+            } else {
+                this.refs['evaluation-evidence-summary'].setValue(this.state.evidenceSummary);
+            }
         });
     },
 
     // Method to display either mode of inheritance adjective,
     // or just mode of inheritance if no adjective
-    renderSelectedModeInheritance: function(interpretation) {
+    renderSelectedModeInheritance(interpretation) {
         let moi = '', moiAdjective = '';
 
         if (interpretation.modeInheritance) {
@@ -100,7 +116,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     },
 
     // Method to construct mode of inheritance linkout
-    renderModeInheritanceLink: function(modeInheritance, modeInheritanceAdjective) {
+    renderModeInheritanceLink(modeInheritance, modeInheritanceAdjective) {
         if (modeInheritance) {
             let start = modeInheritance.indexOf('(');
             let end = modeInheritance.indexOf(')');
@@ -125,7 +141,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     // Method to set the boolean value to the 'markAsProvisional' property
     // in the event in which the associated disease is deleted while either
     // the calculated or modified pathogenicity are 'Likely Pathogenic' or 'Pathogenic'
-    handleProvisionalCheckBox: function(pathogenicity) {
+    handleProvisionalCheckBox(pathogenicity) {
         if (!this.props.interpretation.disease) {
             let assertion = this.props.calculatedAssertion;
             if (assertion === 'Likely pathogenic' || assertion === 'Pathogenic') {
@@ -152,7 +168,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     },
 
     // Method to alert users about requied input missing values
-    handleRequiredInput: function(action) {
+    handleRequiredInput(action) {
         const inputElement = document.querySelector('.provisional-pathogenicity textarea');
         if (action === 'setAttribute') {
             if (!inputElement.getAttribute('required')) {
@@ -165,7 +181,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     },
 
     // Handle value changes in provisional form
-    handleChange: function(ref, e) {
+    handleChange(ref, e) {
         // Handle modified pathogenicity dropdown
         if (ref === 'provisional-pathogenicity') {
             if (this.refs[ref].getValue() && this.refs[ref].getValue() !== 'none') {
@@ -240,11 +256,34 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 this.props.setProvisionalEvaluation('provisional-interpretation', this.state.provisionalInterpretation);
             });
         }
+        // Handle freetext evaluation evidence summary
+        if (ref === 'evaluation-evidence-summary') {
+            let summary = this.refs[ref].getValue();
+            this.setState({evidenceSummary: summary ? summary : null}, () => {
+                this.props.setProvisionalEvaluation('evidence-summary', this.state.evidenceSummary);
+            });
+        }
     },
 
-    submitForm: function(e) {
+    // Handle the showing of alert message
+    showAlertMessage(alertType, alertMsg) {
+        this.setState({
+            showAlertMessage: true,
+            alertType: alertType,
+            alertMsg: alertMsg
+        }, () => {
+            setTimeout(this.hideAlertMessage, 6000);
+        });
+    },
+
+    // Handle the hiding of alert message
+    hideAlertMessage() {
+        this.setState({showAlertMessage: false});
+    },
+
+    submitForm(e) {
         e.preventDefault(); e.stopPropagation();
-        this.setState({submitBusy: true, updateMsg: null});
+        this.setState({submitBusy: true, alertMsg: null});
 
         const interpretation = this.state.interpretation;
         const provisionalInterpretation = this.state.provisionalInterpretation;
@@ -258,23 +297,26 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 // Configure 'provisional-variant' object properties
                 // Use case #1: user makes pathogenicity modification and marks the interpretation provisional
                 // Use case #2: user marks the interpretation provisional without any modification
-                let provisionalObj;
+                let provisionalObj = {};
+                // At least save the calculated assertion
+                provisionalObj['autoClassification'] = this.state.calculatedAssertion;
+                // If evidence summary is not nil, save it as well
+                if (this.state.evidenceSummary && this.state.evidenceSummary.length) {
+                    provisionalObj['evidenceSummary'] = this.state.evidenceSummary;
+                }
+                // If the modified pathogenicity selection is not nil, save it as well along with its explanation
                 if (this.state.provisionalPathogenicity) {
-                    provisionalObj = {
-                        'autoClassification': this.state.calculatedAssertion,
-                        'alteredClassification': this.state.provisionalPathogenicity,
-                        'reason': this.state.provisionalReason
-                    };
-                } else {
-                    provisionalObj = {'autoClassification': this.state.calculatedAssertion};
+                    provisionalObj['alteredClassification'] = this.state.provisionalPathogenicity;
+                    provisionalObj['reason'] = this.state.provisionalReason;
                 }
 
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
-                    this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes saved successfully!</span>});
                     this.setState({
+                        submitBusy: false,
                         autoClassification: result['@graph'][0]['autoClassification'],
                         modifiedPathogenicity: result['@graph'][0]['alteredClassification']
                     });
+                    this.showAlertMessage('alert-success', 'Provisional changes saved successfully!');
                     let provisionalObjUuid = result['@graph'][0]['@id'];
                     if (!('provisional_variant' in flatInterpretationObj)) {
                         flatInterpretationObj.provisional_variant = [provisionalObjUuid];
@@ -291,7 +333,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         console.log(err);
                     });
                 }).catch(err => {
-                    this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to save provisional changes.</span>});
+                    this.setState({submitBusy: false});
+                    this.showAlertMessage('alert-danger', 'Unable to save provisional changes.');
                     console.log(err);
                 });
             } else {
@@ -301,11 +344,19 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     // Configure 'provisional-variant' object properties
                     // Use case #1: user updates pathogenicity modification and marks the interpretation provisional
                     // Use case #2: user removes pre-existing modification and updates the form
+                    flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
+                    // If evidence summary is not nil, save it as well
+                    if (this.state.evidenceSummary && this.state.evidenceSummary.length) {
+                        flatProvisionalVariantObj['evidenceSummary'] = this.state.evidenceSummary;
+                    } else {
+                        if ('evidenceSummary' in flatProvisionalVariantObj) {
+                            delete flatProvisionalVariantObj['evidenceSummary'];
+                        }
+                    }
+                    // If the modified pathogenicity selection is not nil, save it as well along with its explanation
                     if (this.state.provisionalPathogenicity) {
-                        flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
                         flatProvisionalVariantObj['alteredClassification'] = this.state.provisionalPathogenicity;
                         flatProvisionalVariantObj['reason'] = this.state.provisionalReason;
-                        return Promise.resolve(flatProvisionalVariantObj);
                     } else {
                         if ('alteredClassification' in flatProvisionalVariantObj) {
                             delete flatProvisionalVariantObj['alteredClassification'];
@@ -313,19 +364,20 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         if ('reason' in flatProvisionalVariantObj) {
                             delete flatProvisionalVariantObj['reason'];
                         }
-                        flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
-                        return Promise.resolve(flatProvisionalVariantObj);
                     }
+                    return Promise.resolve(flatProvisionalVariantObj);
                 }).then(newProvisionalVariantObj => {
                     this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, newProvisionalVariantObj).then(response => {
-                        this.setState({submitBusy: false, updateMsg: <span className="text-success">Provisional changes updated successfully!</span>});
                         this.setState({
+                            submitBusy: false,
                             autoClassification: response['@graph'][0]['autoClassification'],
                             modifiedPathogenicity: response['@graph'][0]['alteredClassification']
                         });
+                        this.showAlertMessage('alert-success', 'Provisional changes updated successfully!');
                         this.props.updateInterpretationObj();
                     }).catch(err => {
-                        this.setState({submitBusy: false, updateMsg: <span className="text-danger">Unable to update provisional changes.</span>});
+                        this.setState({submitBusy: false});
+                        this.showAlertMessage('alert-danger', 'Unable to update provisional changes.');
                         console.log(err);
                     });
                 }).catch(err => {
@@ -341,7 +393,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         }
     },
 
-    render: function() {
+    render() {
         let interpretation = this.state.interpretation;
         let evaluations = interpretation ? interpretation.evaluations : null;
         let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
@@ -354,6 +406,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         let provisionalInterpretation = this.state.provisionalInterpretation ? this.state.provisionalInterpretation : false;
         let disabledCheckbox = this.state.disabledCheckbox;
         let disabledFormSumbit = this.state.disabledFormSumbit;
+        let evidenceSummary = this.state.evidenceSummary ? this.state.evidenceSummary : '';
 
         if (interpretation) {
             if (interpretation.markAsProvisional) {
@@ -430,23 +483,33 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                         <div className="col-xs-12 col-sm-6">
                                             <div className="evaluation-provision provisional-interpretation">
                                                 <div>
-                                                    <i className="icon icon-question-circle"></i>
-                                                    <span>Change status to "Provisional Interpretation" <i>(optional)</i>:</span>
+                                                    <PopOverComponent popOverWrapperClass="popover-provisional-status-help" popOverStyleClass="alert alert-info"
+                                                        actuatorTitle={<i className="icon icon-question-circle"></i>} popOverRef={ref => (this.popover = ref)}>
+                                                        <span>
+                                                            An interpretation can still be edited after it's marked "Provisional." If the Interpretation is "Likely Pathogenic" or "Pathogenic,"
+                                                            it must be associated with a disease before it can be marked as "Provisional."
+                                                        </span>
+                                                    </PopOverComponent>
+                                                    <span>Mark status as "Provisional Interpretation" <i>(optional)</i>:</span>
                                                     <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation}
                                                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
                                                 </div>
                                             </div>
-                                            <div className="alert alert-warning">
-                                                Note: If the Calculated Pathogenicity is "Likely Pathogenic" or "Pathogenic,"
-                                                a disease must first be associated with the interpretation before it can be marked
-                                                as a "Provisional Interpretation". Please select "Return to Interpretation" to add a disease.
+                                            <div className="evaluation-provision evidence-summary">
+                                                <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
+                                                    value={evidenceSummary} handleChange={this.handleChange}
+                                                    placeholder="Summary of the evidence and rationale for the clinical significance (optional)." rows="5"
+                                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
                                             </div>
                                             <div className="provisional-submit">
                                                 <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
                                                     id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
-                                                {this.state.updateMsg ?
-                                                    <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                : null}
+                                                <AlertMessage
+                                                    visible={this.state.showAlertMessage}
+                                                    type={this.state.alertType}
+                                                    message={this.state.alertMsg}
+                                                    customClasses="pull-right"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -521,7 +584,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         </div>
 
                     </div>
-                :
+                    :
                     <div className="summary-content-wrapper"><p>No evaluations found in this interpretation.</p></div>
                 }
             </div>

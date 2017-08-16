@@ -2307,13 +2307,18 @@ dl.inline-dl {
                 margin-left: -15px;
             }
 
+            .popover-provisional-status-help {
+                display: inline-block;
+                z-index: 999;
+            }
+
             .icon-question-circle {
                 cursor: pointer;
                 color: #2697d1;
                 font-size: 120%;
                 margin-right: 8px;
                 position: relative;
-
+                /*
                 &:after {
                     content: "Editing interpretation is permitted after selecting this option";
                     background-color: #000;
@@ -2321,7 +2326,7 @@ dl.inline-dl {
                     color: #fff;
                     text-align: center;
                     border-radius: 3px;
-                    padding: 5px 0;
+                    padding: 7px 0;
                     position: absolute;
                     visibility: hidden;
                     width: 370px;
@@ -2329,13 +2334,14 @@ dl.inline-dl {
                     font-family: "Helvetica";
                     font-weight: bold;
                     z-index: 1;
-                    top: 25px;
+                    top: 22px;
                     left: 0;
                 }
 
                 &:hover:after {
                     visibility: visible;
                 }
+                */
             }
 
             .form-group {
@@ -2377,6 +2383,19 @@ dl.inline-dl {
                 &[disabled] {
                     color: #bbb;
                 }
+            }
+        }
+
+        &.evidence-summary {
+            margin-top: 25px;
+
+            label {
+                padding-right: 0;
+                padding-top: 0;
+            }
+
+            .form-error {
+                display: none;
             }
         }
     }
@@ -3010,4 +3029,32 @@ table.login-users-interpretations {
             margin-bottom: 20px;
         }
     }
+}
+
+/**
+ * Styles alerts to fade in and out
+ */
+.feedback-message {
+    -webkit-transition: opacity 2s ease 0.25s, visibility 2s ease 0.25s;
+    -moz-transition: opacity 2s ease 0.25s, visibility 2s ease 0.25s;
+    -ms-transition: opacity 2s ease 0.25s, visibility 2s ease 0.25s;
+    -o-transition: opacity 2s ease 0.25s, visibility 2s ease 0.25s;
+    transition: opacity 2s ease 0.25s, visibility 2s ease 0.25s;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.feedback-message.alert {
+    margin: 0 10px;
+    padding: 6px 15px;
+}
+
+.feedback-message.isVisible {
+    opacity: 1;
+    visibility: visible; 
+}
+
+.feedback-message.isHidden {
+    opacity: 0;
+    visibility: hidden; 
 }
