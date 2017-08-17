@@ -121,7 +121,7 @@
         "label": "Experiment 6",
         "evidenceType": "Rescue",
         "rescue": {
-            "patientCellOrEngineeredEquivalent": "Patient cells",
+            "rescueObserved": "Patient cells",
             "patientCellType": "CL_0001234",
             "descriptionOfGeneAlteration": "some description about cell here",
             "phenotypeHPO": "HP:0000007",
