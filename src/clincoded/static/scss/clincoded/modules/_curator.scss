@@ -2878,6 +2878,18 @@ table.login-users-interpretations {
             margin-bottom: 6px;
         }
     }
+
+    .rescue-observed-group {
+        div {
+            display: block;
+            position: relative;
+
+            dd {
+                left: 407px;
+                position: absolute;
+            }
+        }
+    }
 }
 
 .panel.case-control-evidence-score,
