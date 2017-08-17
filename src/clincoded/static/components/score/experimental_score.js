@@ -299,8 +299,12 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
             } else if (experimentalType.indexOf('Rescue') > -1) {
                 if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Patient cells') > -1) {
                     type = RESCUE + '_PATIENT_CELLS';
-                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
-                    type = RESCUE + '_ENGINEERED_EQUIVALENT';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Cell-culture model') > -1) {
+                    type = RESCUE + '_CELL_CULTURE_MODEL';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Animal model') > -1) {
+                    type = RESCUE + '_ANIMAL_MODEL';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('The patient (human model)') > -1) {
+                    type = RESCUE + '_PATIENT_HUMAN_MODEL';
                 }
             }
         }
