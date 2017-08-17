@@ -19,3 +19,29 @@ def experimental_1_2(value, system):
                 value['proteinInteractions']['experimentalInteractionDetection'] = 'protein cross-linking with a bifunctional reagent (MI:0031)'
             if value['proteinInteractions']['experimentalInteractionDetection'] == 'comigration in gel electrophoresis (M:0807)':
                 value['proteinInteractions']['experimentalInteractionDetection'] = 'comigration in gel electrophoresis (MI:0807)'
+
+
+@upgrade_step('experimental', '2', '3')
+def experimental_2_3(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1335
+    if 'rescue' in value:
+        if 'patientCellOrEngineeredEquivalent' in value['rescue']:
+            if value['rescue']['patientCellOrEngineeredEquivalent'] == 'Engineered equivalent':
+                value['rescue']['patientCellOrEngineeredEquivalent'] = 'Cell-culture model'
+
+    if 'rescue' in value:
+        if 'patientCellOrEngineeredEquivalent' in value['rescue']:
+            value['rescue']['rescueObserved'] = value['rescue']['patientCellOrEngineeredEquivalent']
+            value['rescue'].pop('patientCellOrEngineeredEquivalent', None)
+        if 'engineeredEquivalentCellType' in value['rescue']:
+            if value['rescue']['engineeredEquivalentCellType'] != '':
+                value['rescue']['cellCultureModel'] = value['rescue']['engineeredEquivalentCellType']
+            else:
+                value['rescue']['cellCultureModel'] = ''
+            value['rescue'].pop('engineeredEquivalentCellType', None)
+        if 'engineeredEquivalentCellTypeFreeText' in value['rescue']:
+            if value['rescue']['engineeredEquivalentCellTypeFreeText'] != '':
+                value['rescue']['cellCultureModelFreeText'] = value['rescue']['engineeredEquivalentCellTypeFreeText']
+            else:
+                value['rescue']['cellCultureModelFreeText'] = ''
+            value['rescue'].pop('engineeredEquivalentCellTypeFreeText', None)
