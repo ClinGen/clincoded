@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "label": {
             "title": "Label",
@@ -423,14 +423,25 @@
             "default": {},
             "properties": {
                 "rescueObserved": {
-                    "title": "Cell Mutation Or Engineered Equivalent",
-                    "description": "Patient cell mutation or engineered equivalent",
+                    "title": "Rescue observed",
+                    "description": "Cell-culture model (previously engineered equivalent), Patient cells, Animal model or The patient (human model).",
                     "type": "string",
                     "enum": [
-                        "The patient (human model)",
+                        "Cell-culture model",
+                        "Patient cells",
                         "Animal model",
-                        "Cell-culture model"
+                        "The patient (human model)"
                     ]
+                },
+                "cellCultureModel": {
+                    "title": "Cell-culture model (previously engineered equivalent)",
+                    "description": "EFO or CL Ontology ID (required if free text for Cell-culture model is not provided)",
+                    "type": "string"
+                },
+                "cellCultureModelFreeText": {
+                    "title": "Cell-culture model type (Free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
                 },
                 "patientCellType": {
                     "title": "Patient Cell Type",
@@ -468,14 +479,9 @@
                         "Zebrafish (Daanio rerio) 7955"
                     ]
                 },
-                "engineeredEquivalentCellType": {
-                    "title": "Engineered Equivalent Cell Type",
-                    "description": "EFO or CL Ontology ID (required if free text for engineered equivalent cell type is not provided)",
-                    "type": "string"
-                },
-                "engineeredEquivalentCellTypeFreeText": {
-                    "title": "Engineered Equivalent Cell Type (Free text)",
-                    "description": "Free text (required if EFO ID is not provided)",
+                "patientHumanModel": {
+                    "title": "The patient (human model)",
+                    "description": "Proband label for the patient (human model)",
                     "type": "string"
                 },
                 "descriptionOfGeneAlteration": {
