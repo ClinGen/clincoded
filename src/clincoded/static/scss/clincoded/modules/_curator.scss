@@ -3063,7 +3063,7 @@ table.login-users-interpretations {
  * Styles for error pages
  */
 .type-error {
-    &.type-LoginDenied {
+    &.type-LoginDenied, &.type-LoginNotVerified {
         h1 {
             .icon {
                 font-size: 95%;
@@ -3093,6 +3093,18 @@ table.login-users-interpretations {
                 ol ol {
                     list-style-type: lower-alpha;
                 }
+            }
+        }
+    }
+
+    &.type-HTTPForbidden, &.type-HTTPNotFound {
+        .alert {
+            margin-top: 2rem;
+
+            h3 {
+                font-size: 1.5rem;
+                margin-top: 0;
+                margin-bottom: 0;
             }
         }
     }
