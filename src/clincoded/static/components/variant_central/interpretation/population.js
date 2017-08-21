@@ -619,6 +619,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return retVal;
     },
 
+    // Method to render PAGE population table header content
+    renderPageHeader: function(hasExacData, loading_myVariantInfo, exac, singleNucleotide) {
+        if (hasExacData && !loading_myVariantInfo && singleNucleotide) {
+            const variantExac = exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt;
+            const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+            return (
+                <h3 className="panel-title">PAGE {variantExac}
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in PAGE</a>
+                </h3>
+            );
+        } else {
+            return (
+                <h3 className="panel-title">PAGE
+                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                </h3>
+            );
+        }
+    },
+
     // Method to render ExAC population table header content
     renderExacHeader: function(hasExacData, loading_myVariantInfo, exac, singleNucleotide) {
         if (hasExacData && !loading_myVariantInfo && singleNucleotide) {
@@ -729,6 +749,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             tGenomesStatic = populationStatic.tGenomes,
             espStatic = populationStatic.esp;
         var highestMAF = this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null,
+            page = this.state.populationObj && this.state.populationObj.page ? this.state.populationObj.page : null, // Get PAGE data from global population object
             exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
@@ -789,7 +810,57 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </div>
                         </div>
                     </div>
-
+                    <div className="panel panel-info datasource-PAGE">
+                        <div className="panel-heading">
+                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
+                        </div>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                            {!singleNucleotide ?
+                                <div className="panel-body">
+                                    <span>Data is currently only returned for single nucleotide variants. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
+                                </div>
+                                :
+                                <div>
+                                    {this.state.hasExacData ?
+                                        <div>
+                                            {!this.state.hasMultiAllelicExacAllele ?
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Population</th>
+                                                            <th>Allele Count</th>
+                                                            <th>Allele Number</th>
+                                                            <th>Number of Homozygotes</th>
+                                                            <th>Allele Frequency</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {exacStatic._order.map(key => {
+                                                            return (this.renderExacRow(key, exac, exacStatic));
+                                                        })}
+                                                    </tbody>
+                                                    <tfoot>
+                                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                                    </tfoot>
+                                                </table>
+                                                :
+                                                <div className="panel-body">
+                                                    <span>PAGE data is not currently displayed for this variant as it occurs at a multi-allelic locus and data is sometimes returned
+                                                        for an alternate allele at these loci due to changes in the data structure. This issue is being addressed and will be fixed
+                                                        soon. For the correct allele, <a href={exacDataLinkout} target="_blank">see data in PAGE</a>.</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        :
+                                        <div className="panel-body">
+                                            <span>No population data was found for this allele in PAGE. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                     <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading">
                             {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
