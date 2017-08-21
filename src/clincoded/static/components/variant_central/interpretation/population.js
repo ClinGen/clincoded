@@ -22,6 +22,13 @@ var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
 var extraEvidence = require('./shared/extra_evidence');
 
 var populationStatic = {
+    page: {
+        _order: ['aan', 'asn', 'can', 'cbn', 'dmn', 'mxn', 'nan', 'nhn', 'prn', 'san', 'sas'],
+        _labels: {
+            aan: 'African American', asn: 'Asian', can: 'Central American', cbn: 'Cuban', dmn: 'Dominican', mxn: 'Mexican',
+            nan: 'Native American', nhn: 'Native Hawaiian', prn: 'Puerto Rican', san: 'South American', sas: 'South Asian'
+        }
+    },
     exac: {
         _order: ['afr', 'amr', 'sas', 'nfe', 'eas', 'fin', 'oth'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
@@ -72,6 +79,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 highestMAF: null,
                 desiredCI: 95,
                 mafCutoff: 5,
+                page: {
+                    aan: {}, asn: {}, can: {}, cbn: {}, dmn: {}, mxn: {}, nan: {}, nhn: {}, prn: {}, san: {}, sas: {}
+                },
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -451,7 +461,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return exacLink;
     },
 
-    /* the following methods are related to the rendering of population data tables */
+    /* The following methods are related to the rendering of population data tables */
+    /*
+     * Method to render a row of data for the PAGE table
+     */
+    renderPageRow(key, exac, exacStatic, rowNameCustom, className) {
+        let rowName = exacStatic._labels[key];
+        if (key == '_tot') {
+            rowName = rowNameCustom;
+        }
+        return (
+            <tr key={key} className={className ? className : ''}>
+                <td>{rowName}</td>
+                <td>{exac[key].ac || exac[key].ac === 0 ? exac[key].ac : '--'}</td>
+                <td>{exac[key].an || exac[key].an === 0 ? exac[key].an : '--'}</td>
+                <td>{exac[key].hom || exac[key].hom === 0 ? exac[key].hom : '--'}</td>
+                <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
+            </tr>
+        );
+    },
+
     // method to render a row of data for the ExAC table
     renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
         let rowName = exacStatic._labels[key];
@@ -812,7 +841,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-PAGE">
                         <div className="panel-heading">
-                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
+                            {this.renderPageHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
@@ -837,11 +866,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                                     </thead>
                                                     <tbody>
                                                         {exacStatic._order.map(key => {
-                                                            return (this.renderExacRow(key, exac, exacStatic));
+                                                            return (this.renderPageRow(key, exac, exacStatic));
                                                         })}
                                                     </tbody>
                                                     <tfoot>
-                                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                                        {this.renderPageRow('_tot', exac, exacStatic, 'Total', 'count')}
                                                     </tfoot>
                                                 </table>
                                                 :
