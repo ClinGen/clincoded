@@ -39,8 +39,12 @@ export function getHgvsNotation(variant, assembly, omitChrString) {
         }
     }
 
-    // Handle deleted genomic HGVS
-    if (hgvs && hgvs.indexOf('del') > 0) {
+    /**
+     * Handle 'deletion' genomic GRCh38 HGVS
+     * The ensembl vep/human rest api only accepts the identifier up to the 'del' marker
+     * in the hgvs string, such as in 'chr7:g.117120152_117120270del119ins299'
+     */
+    if (hgvs && hgvs.indexOf('del') > 0 && assembly === 'GRCh38') {
         hgvs = hgvs.substring(0, hgvs.indexOf('del') + 3);
     }
 
