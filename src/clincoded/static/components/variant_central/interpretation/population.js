@@ -415,17 +415,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render external ExAC linkout when no ExAC population data found
-    renderExacLinkout: function(response, singleNucleotide) {
+    renderExacLinkout: function(response) {
         let exacLink;
         // If no ExAC population data, construct external linkout for one of the following:
         // 1) clinvar/cadd data found & the variant type is substitution
         // 2) clinvar/cadd data found & the variant type is NOT substitution
         // 3) no data returned by myvariant.info
-        if (response && singleNucleotide) {
-            let chrom = response.chrom,
-                pos = response.hg19.start,
-                regionStart = parseInt(response.hg19.start) - 30,
-                regionEnd = parseInt(response.hg19.end) + 30;
+        if (response) {
+            let chrom = response.chrom;
+            let pos = response.hg19 ? response.hg19.start : (response.clinvar.hg19 ? response.clinvar.hg19.start : response.cadd.hg19.start);
+            let regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 : parseInt(response.cadd.hg19.start) - 30);
+            let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
             if (response.clinvar) {
                 // Try 'clinvar' as primary data object
                 let clinvar = response.clinvar;
