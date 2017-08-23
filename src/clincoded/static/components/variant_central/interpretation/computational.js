@@ -102,7 +102,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 },
                 clingen: {
                     revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
-                    cftr: {score_range: '--', score: null, prediction: '--', visible: false}
+                    cftr: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: false}
                 }
             },
             computationObjDiff: null,
@@ -314,7 +314,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (clingenPred[key].visible === true) {
             return (
                 <tr key={key}>
-                    <td>{(rowName === 'REVEL') ? <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank" rel="noopener noreferrer">REVEL</a> (meta-predictor)</span> : rowName}</td>
+                    <td>
+                        {(rowName === 'REVEL') ?
+                            <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank" rel="noopener noreferrer">{rowName}</a> (meta-predictor)</span> 
+                            : 
+                            <span>{rowName} (meta-predictor)</span>
+                        }
+                    </td>
                     <td>{clingenPred[key].score_range}</td>
                     <td>{clingenPred[key].score ? clingenPred[key].score : 'No data found'}</td>
                     <td>{clingenPred[key].prediction}</td>
