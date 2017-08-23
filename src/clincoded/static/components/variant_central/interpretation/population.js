@@ -724,6 +724,27 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return gnomADLink;
     },
 
+    /**
+     * Sort population data table by allele frequency from highest to lowest
+     */
+    sortObjKeys(obj) {
+        let arr = []; // Array converted from object
+        let filteredArray = []; // filtered array without the '_tot' and '_extra' key/value pairs
+        let sortedArray = []; // Sorting the filtered array from highest to lowest allele frequency
+        let sortedKeys = []; // Sorted order for the rendering of populations
+        if (Object.keys(obj).length) {
+            arr = Object.entries(obj);
+            filteredArray = arr.filter(item => {
+                return item[0].indexOf('_') < 0;
+            });
+            sortedArray = filteredArray.sort((x, y) => y[1]['af'] - x[1]['af']);
+            sortedArray.forEach(item => {
+                sortedKeys.push(item[0]);
+            });
+        }
+        return sortedKeys;
+    },
+
     render: function() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
@@ -735,7 +756,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
         var populationObjDiffFlag = this.state.populationObjDiffFlag;
         var singleNucleotide = this.state.ext_singleNucleotide;
-
+        let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
 
         return (
@@ -816,7 +837,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {exacStatic._order.map(key => {
+                                                        {exacSortedAlleleFrequency.map(key => {
                                                             return (this.renderExacRow(key, exac, exacStatic));
                                                         })}
                                                     </tbody>
