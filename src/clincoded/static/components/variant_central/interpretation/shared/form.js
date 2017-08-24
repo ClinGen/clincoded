@@ -35,7 +35,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         criteriaCrossCheck: PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
-        disableEvalForm: PropTypes.bool // Flag to disable form elements of Segregation's 'Reputable source' section if the gene is either BRCA1 or BRCA2
+        disableEvalForm: PropTypes.bool // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
     },
 
     contextTypes: {
@@ -455,8 +455,12 @@ export function evalFormNoteSectionWrapper(criteriaList) {
     );
 }
 
-// wrapper for rendering the dropdown section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
-// calls evalFormValueDropdown() to render a dropdown for each criteria
+/**
+ * wrapper for rendering the dropdown section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
+ * calls evalFormValueDropdown() to render a dropdown for each criteria
+ * @param {array} criteriaList - The list of criteria to be evaluated (e.g. ['BP6', 'PP5'])
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
 export function evalFormDropdownSectionWrapper(criteriaList, disableEvalForm) {
     return (
         <div>
@@ -473,7 +477,11 @@ export function evalFormDropdownSectionWrapper(criteriaList, disableEvalForm) {
     );
 }
 
-// helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
+/** 
+ * Helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
+ * @param {string} criteria - The individual criteria to be evaluated (e.g. 'BP6' or 'PP5')
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
 function evalFormValueDropdown(criteria, disableEvalForm) {
     // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
@@ -494,12 +502,16 @@ function evalFormValueDropdown(criteria, disableEvalForm) {
     );
 }
 
-// wrapper for rendering the explanation section of eval form group
-// criteriaList should be an array of criteria codes being handled in the section
-// hiddenList should be an array of booleans mirroring the size and order of criteriaList, with the booleans indicating whether or not the explanation input for
-//      that criteria should be visible. this should generally be used with shareExplanation()
-// customContentBefore should be HTML for any elements to render before the explanation inputs, in that column (optional)
-// customContentAfter should be HTML for any elements to render after the explanation inputs, in that column (optional)
+/**
+ * wrapper for rendering the explanation section of eval form group
+ * criteriaList should be an array of criteria codes being handled in the section
+ * hiddenList should be an array of booleans mirroring the size and order of criteriaList, with the booleans indicating whether or not the explanation input for
+ *      that criteria should be visible. this should generally be used with shareExplanation()
+ * customContentBefore should be HTML for any elements to render before the explanation inputs, in that column (optional)
+ * customContentAfter should be HTML for any elements to render after the explanation inputs, in that column (optional)
+ * @param {array} criteriaList - The list of criteria to be evaluated (e.g. ['BP6', 'PP5'])
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
 export function evalFormExplanationSectionWrapper(criteriaList, hiddenList, customContentBefore, customContentAfter, disableEvalForm) {
     return (
         <div>
@@ -512,7 +524,12 @@ export function evalFormExplanationSectionWrapper(criteriaList, hiddenList, cust
     );
 }
 
-// helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
+/**
+ * Helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
+ * @param {string} criteria - The individual criteria to be evaluated (e.g. 'BP6' or 'PP5')
+ * @param {boolean} hidden - The flag to hide the form element in UI
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
 function evalFormExplanationDefaultInput(criteria, hidden, disableEvalForm) {
     // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
