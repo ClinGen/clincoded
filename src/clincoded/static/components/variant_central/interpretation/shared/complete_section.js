@@ -12,7 +12,7 @@ var tabNames = {
     'population': 'Population',
     'predictors': 'Predictors',
     'experimental': 'Experimental',
-    'segregation-case': 'Segregation/Case'
+    'segregation-case': 'Case/Segregation'
 };
 
 // Recursive function to compare oldObj against newObj and its key:values. Creates diffObj that shares the keys (full-depth) with newObj,
