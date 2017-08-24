@@ -30,7 +30,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             data: this.props.data,
             clinvar_id: null,
             interpretation: this.props.interpretation,
-            disableEvalForm: false // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is either BRCA1 or BRCA2
+            disableEvalForm: false // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
         };
     },
 
@@ -38,12 +38,12 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
         /**
          * Disable form elements of Segregation's 'Reputable source' section
-         * when the associated gene is either BRCA1 or BRCA2
+         * when the associated gene is NEITHER BRCA1 or BRCA2
          */
         if (nextProps.ext_myGeneInfo && nextProps.ext_myGeneInfo.symbol) {
             let gene = nextProps.ext_myGeneInfo.symbol;
             this.setState({
-                disableEvalForm: (gene === 'BRCA1' || gene === 'BRCA2') ? true : false
+                disableEvalForm: (gene.indexOf('BRCA') < 0) ? true : false
             });
         }
     },
@@ -375,7 +375,11 @@ var criteriaGroup7Update = function(nextProps) {
 };
 
 
-// code for rendering of this group of interpretation forms
+/**
+ * Callback for rendering of this group of interpretation forms
+ * Disabling form currently only applies to 'BP6' and 'PP5' if the gene is NEITHER BRCA1 or BRCA2
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
 var criteriaGroup8 = function(disableEvalForm) {
     let criteriaList1 = ['BP6', 'PP5'], // array of criteria code handled subgroup of this section
         hiddenList1 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
