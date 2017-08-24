@@ -216,7 +216,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     {this.state.selectedTab == 'segregation-case' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} ext_myGeneInfo={this.state.ext_myGeneInfo} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'gene-centric' ?
