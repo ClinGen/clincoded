@@ -131,10 +131,11 @@ runcmd:
 - if test "%(BACKUPDB)s" = "s3_data"
 - then
 -   echo "====== restoring data from backup"
-#-   sudo mv /etc/postgresql/9.4/main/recovery-demo.conf /etc/postgresql/9.4/main/recovery.conf
--   echo "standby_mode = on" >> /etc/postgresql/9.4/main/recovery-demo.conf
+-   sudo mv /etc/postgresql/9.4/main/recovery-demo.conf /etc/postgresql/9.4/main/recovery.conf
+-   echo "standby_mode = on" >> /etc/postgresql/9.4/main/recovery.conf
 -   /etc/init.d/postgresql stop
 -   sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.4/main/wale_s3_prefix | tr -d "\n")" backup-fetch /var/lib/postgresql/9.4/main LATEST
+-   sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
 -   sudo -u postgres ln -s /etc/postgresql/9.4/main/recovery-demo.conf /var/lib/postgresql/9.4/main/recovery.conf
 -   /etc/init.d/postgresql start
 # (load local test data plus all genes and diseases)
