@@ -797,7 +797,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                     <div className="bs-callout bs-callout-info clearfix">
                         <h4>Subpopulation with Highest Minor Allele Frequency</h4>
-                        <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of ExAC, 1000 Genomes and ESP shown below.</p>
+                        <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of ExAC, 1000 Genomes, and ESP shown below.</p>
                         <div className="clearfix">
                             <div className="bs-callout-content-container">
                                 <dl className="inline-dl clearfix">
