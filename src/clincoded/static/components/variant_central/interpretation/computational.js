@@ -15,15 +15,16 @@ import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { findDiffKeyValuesMixin } from './shared/find_diff';
 import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
+import { parseKeyValue } from '../helpers/parse_key_value';
 
-var vciFormHelper = require('./shared/form');
-var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
-var extraEvidence = require('./shared/extra_evidence');
+const vciFormHelper = require('./shared/form');
+const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+const genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+const extraEvidence = require('./shared/extra_evidence');
 
-var validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
+const validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
 
-var computationStatic = {
+const computationStatic = {
     conservation: {
         _order: ['phylop7way', 'phylop20way', 'phastconsp7way', 'phastconsp20way', 'gerp', 'siphy'],
         _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'}
@@ -63,10 +64,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         updateInterpretationObj: PropTypes.func,
         href_url: PropTypes.object,
         ext_myVariantInfo: PropTypes.object,
-        ext_bustamante: PropTypes.object,
         ext_clinVarEsearch: PropTypes.object,
         ext_singleNucleotide: PropTypes.bool,
-        loading_bustamante: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_clinvarEsearch: PropTypes.bool
     },
@@ -78,7 +77,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             interpretation: this.props.interpretation,
             hasConservationData: false,
             hasOtherPredData: false,
-            hasBustamanteData: false,
             selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
             codonObj: {},
             computationObj: {
@@ -102,13 +100,12 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 },
                 clingen: {
                     revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
-                    cftr: {score_range: '--', score: null, prediction: '--', visible: false}
+                    cftr: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: false}
                 }
             },
             computationObjDiff: null,
             computationObjDiffFlag: false,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
-            loading_bustamante: this.props.loading_bustamante,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch
         };
@@ -124,9 +121,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (this.props.ext_myVariantInfo) {
             this.parseOtherPredData(this.props.ext_myVariantInfo);
             this.parseConservationData(this.props.ext_myVariantInfo);
-        }
-        if (this.props.ext_bustamante) {
-            this.parseClingenPredData(this.props.ext_bustamante);
+            this.parseClingenPredData(this.props.ext_myVariantInfo);
         }
         if (this.props.ext_clinVarEsearch) {
             var codonObj = {};
@@ -147,9 +142,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (nextProps.ext_myVariantInfo) {
             this.parseOtherPredData(nextProps.ext_myVariantInfo);
             this.parseConservationData(nextProps.ext_myVariantInfo);
-        }
-        if (nextProps.ext_bustamante) {
-            this.parseClingenPredData(nextProps.ext_bustamante);
+            this.parseClingenPredData(nextProps.ext_myVariantInfo);
         }
         if (nextProps.ext_clinVarEsearch) {
             var codonObj = {};
@@ -163,7 +156,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
-            loading_bustamante: nextProps.loading_bustamante,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_clinvarEsearch: nextProps.loading_clinvarEsearch
         });
@@ -173,8 +165,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', null));
         this.setState({
             hasConservationData: false,
-            hasOtherPredData: false,
-            hasBustamanteData: false
+            hasOtherPredData: false
         });
     },
 
@@ -189,19 +180,30 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
     },
 
-    // Method to assign clingen predictors data to global computation object
+    /**
+     * Method to assign clingen predictors data to global computation object
+     * REVEL data is now parsed from myvariant.info response
+     * It can be accessed via response['dbnsfp']['revel'] or using
+     * the 'parseKeyValue()' helper function which traverse the tree down to 2nd level
+     * 
+     * TBD on where the CFTR data is queried from after Bustamante lab is no longer the source
+     * And thus the CFTR data parsing in this method needs to be altered in the future
+     * 
+     * @param {object} response - The response object returned by myvariant.info
+     */
     parseClingenPredData: function(response) {
         let computationObj = this.state.computationObj;
-        if (response.results[0]) {
-            if (response.results[0].predictions) {
-                let predictions = response.results[0].predictions;
-                computationObj.clingen.revel.score = (predictions.revel) ? this.numToString(predictions.revel.score) : null;
-                computationObj.clingen.cftr.score = (predictions.CFTR) ? this.numToString(predictions.CFTR.score): null;
-                computationObj.clingen.cftr.visible = (predictions.CFTR) ? true : false;
-            }
-            // update computationObj, and set flag indicating that we have clingen predictors data
-            this.setState({hasBustamanteData: true, computationObj: computationObj});
+        let revel = parseKeyValue(response, 'revel'),
+            cftr = parseKeyValue(response, 'cftr');
+        if (revel) {
+            computationObj.clingen.revel.score = (revel.score) ? this.numToString(revel.score) : null;
         }
+        if (cftr) {
+            computationObj.clingen.cftr.score = (cftr.score) ? this.numToString(cftr.score): null;
+            computationObj.clingen.cftr.visible = (cftr.score) ? true : false;
+        }
+        // update computationObj, and set flag indicating that we have clingen predictors data
+        this.setState({computationObj: computationObj});
     },
 
     // Method to assign other predictors data to global computation object
@@ -314,7 +316,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (clingenPred[key].visible === true) {
             return (
                 <tr key={key}>
-                    <td>{(rowName === 'REVEL') ? <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank" rel="noopener noreferrer">REVEL</a> (meta-predictor)</span> : rowName}</td>
+                    <td>
+                        {(rowName === 'REVEL') ?
+                            <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank" rel="noopener noreferrer">{rowName}</a> (meta-predictor)</span> 
+                            : 
+                            <span>{rowName} (meta-predictor)</span>
+                        }
+                    </td>
                     <td>{clingenPred[key].score_range}</td>
                     <td>{clingenPred[key].score ? clingenPred[key].score : 'No data found'}</td>
                     <td>{clingenPred[key].prediction}</td>
@@ -464,7 +472,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="panel panel-info datasource-clingen">
                                 <div className="panel-heading"><h3 className="panel-title">ClinGen Predictors</h3></div>
                                 <div className="panel-content-wrapper">
-                                    {this.state.loading_bustamante ? showActivityIndicator('Retrieving data... ') : null}
+                                    {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
                                     {!singleNucleotide ?
                                         <div className="panel-body"><span>These predictors only return data for missense variants.</span></div>
                                         :

@@ -31,7 +31,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
@@ -75,7 +75,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
@@ -119,7 +119,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
@@ -163,7 +163,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"

@@ -415,22 +415,29 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render external ExAC linkout when no ExAC population data found
-    renderExacLinkout: function(response, singleNucleotide) {
-        let exacLink;
+    renderExacLinkout: function(response) {
+        let exacLink, linkText;
         // If no ExAC population data, construct external linkout for one of the following:
         // 1) clinvar/cadd data found & the variant type is substitution
         // 2) clinvar/cadd data found & the variant type is NOT substitution
         // 3) no data returned by myvariant.info
-        if (response && singleNucleotide) {
-            let chrom = response.chrom,
-                pos = response.hg19.start,
-                regionStart = parseInt(response.hg19.start) - 30,
-                regionEnd = parseInt(response.hg19.end) + 30;
+        if (response) {
+            let chrom = response.chrom;
+            let pos = response.hg19 ? response.hg19.start : (response.clinvar.hg19 ? response.clinvar.hg19.start : response.cadd.hg19.start);
+            let regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 : parseInt(response.cadd.hg19.start) - 30);
+            let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
+            // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
+            // Or there is no ExAC data object in the return myvariant.info JSON response
+            if (!this.state.ext_singleNucleotide || !this.state.hasExacData) {
+                exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
+                linkText = 'Search ExAC Region';
+            }
+            /*
             if (response.clinvar) {
                 // Try 'clinvar' as primary data object
                 let clinvar = response.clinvar;
                 // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
-                if (clinvar.type && clinvar.type === 'single nucleotide variant') {
+                if (clinvar.type && clinvar.type === 'single nucleotide variant' && this.state.hasExacData) {
                     exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
                 } else {
                     // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
@@ -439,16 +446,23 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             } else if (response.cadd) {
                 // Fallback to 'cadd' as alternative data object
                 let cadd = response.cadd;
-                if (cadd.type && cadd.type === 'SNV') {
+                if (cadd.type && cadd.type === 'SNV' && this.state.hasExacData) {
                     exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
                 } else {
                     exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
                 }
             }
+            */
         } else {
+            // 404 response from myvariant.info
             exacLink = external_url_map['EXACHome'];
+            linkText = 'Search ExAC';
         }
-        return exacLink;
+        return (
+            <span>
+                <a href={exacLink} target="_blank">{linkText}</a> for this variant.
+            </span>
+        );
     },
 
     /* the following methods are related to the rendering of population data tables */
@@ -724,6 +738,27 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return gnomADLink;
     },
 
+    /**
+     * Sort population data table by allele frequency from highest to lowest
+     */
+    sortObjKeys(obj) {
+        let arr = []; // Array converted from object
+        let filteredArray = []; // filtered array without the '_tot' and '_extra' key/value pairs
+        let sortedArray = []; // Sorting the filtered array from highest to lowest allele frequency
+        let sortedKeys = []; // Sorted order for the rendering of populations
+        if (Object.keys(obj).length) {
+            arr = Object.entries(obj);
+            filteredArray = arr.filter(item => {
+                return item[0].indexOf('_') < 0;
+            });
+            sortedArray = filteredArray.sort((x, y) => y[1]['af'] - x[1]['af']);
+            sortedArray.forEach(item => {
+                sortedKeys.push(item[0]);
+            });
+        }
+        return sortedKeys;
+    },
+
     render: function() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
@@ -735,7 +770,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
         var populationObjDiffFlag = this.state.populationObjDiffFlag;
         var singleNucleotide = this.state.ext_singleNucleotide;
-
+        let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
 
         return (
@@ -762,6 +797,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                     <div className="bs-callout bs-callout-info clearfix">
                         <h4>Subpopulation with Highest Minor Allele Frequency</h4>
+                        <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of ExAC, 1000 Genomes, and ESP shown below.</p>
                         <div className="clearfix">
                             <div className="bs-callout-content-container">
                                 <dl className="inline-dl clearfix">
@@ -798,7 +834,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
                             {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                    <span>Data is currently only returned for single nucleotide variants. {this.renderExacLinkout(this.props.ext_myVariantInfo)}</span>
                                 </div>
                                 :
                                 <div>
@@ -816,7 +852,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {exacStatic._order.map(key => {
+                                                        {exacSortedAlleleFrequency.map(key => {
                                                             return (this.renderExacRow(key, exac, exacStatic));
                                                         })}
                                                     </tbody>
@@ -834,7 +870,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         </div>
                                         :
                                         <div className="panel-body">
-                                            <span>No population data was found for this allele in ExAC. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search ExAC</a> for this variant.</span>
+                                            <span>No population data was found for this allele in ExAC. {this.renderExacLinkout(this.props.ext_myVariantInfo)}</span>
                                         </div>
                                     }
                                 </div>

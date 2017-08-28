@@ -9,7 +9,6 @@ import { VariantCurationInterpretation } from './interpretation';
 import { parseClinvar } from '../../libs/parse-resources';
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
-import { parseKeyValue } from './helpers/parse_key_value';
 import { getClinvarInterpretations, parseClinvarSCVs } from './helpers/clinvar_interpretations';
 import { CurationInterpretationCriteria } from './interpretation/criteria';
 import { EvaluationSummary } from './interpretation/summary';
@@ -33,7 +32,6 @@ var VariantCurationHub = createReactClass({
             selectedTab: queryKeyValue('tab', this.props.href),
             variantObj: null,
             ext_myVariantInfo: null,
-            ext_bustamante: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
@@ -53,7 +51,6 @@ var VariantCurationHub = createReactClass({
             loading_ensemblVariation: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
-            loading_bustamante: true,
             calculated_pathogenicity: null,
             autoClassification: null,
             provisionalPathogenicity: null,
@@ -96,7 +93,7 @@ var VariantCurationHub = createReactClass({
             this.setState({variantObj: response});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
-            this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
+            this.fetchMyVariantInfo(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
             this.parseVariantType(this.state.variantObj);
@@ -155,50 +152,29 @@ var VariantCurationHub = createReactClass({
         }
     },
 
-    // Retrieve data from MyVariantInfo and Bustamante data
-    fetchMyVariantInfoAndBustamante: function(variant) {
+    /**
+     * Retrieve data from MyVariantInfo
+     * REVEL data is no longer queried from Bustamante lab
+     * Since REVEL data is now available in the myvariant.info response
+     * So we can access its data object via response['dbnsfp']['revel']
+     * @param {object} variant - The variant data object
+     */
+    fetchMyVariantInfo(variant) {
         if (variant) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
                     this.setState({ext_myVariantInfo: response, loading_myVariantInfo: false});
                     this.parseMyVariantInfo(response);
-                    // check dbsnfp data for bustamante query
-                    let hgvsObj = {};
-                    let chrom = parseKeyValue(response, 'chrom'),
-                        hg19 = parseKeyValue(response, 'hg19');
-                    hgvsObj.chrom = (chrom && typeof chrom === 'string') ? chrom : null;
-                    hgvsObj.pos = (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null;
-                    if (response.dbnsfp) {
-                        hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    } else if (response.clinvar) {
-                        hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    } else if (response.dbsnp) {
-                        hgvsObj.alt = (response.dbsnp.alt) ? response.dbsnp.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    }
-                }).then(data => {
-                    this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
-                        this.setState({ext_bustamante: result, loading_bustamante: false});
-                    }).catch(err => {
-                        this.setState({
-                            loading_bustamante: false
-                        });
-                        console.log('Bustamante Fetch Error: %o', err);
-                    });
                 }).catch(err => {
                     this.setState({
-                        loading_myVariantInfo: false,
-                        loading_bustamante: false
+                        loading_myVariantInfo: false
                     });
-                    console.log('MyVariant or Bustamante Fetch Error=: %o', err);
+                    console.log('MyVariant Fetch Error=: %o', err);
                 });
             } else {
                 this.setState({
-                    loading_myVariantInfo: false,
-                    loading_bustamante: false
+                    loading_myVariantInfo: false
                 });
             }
         }
@@ -443,7 +419,6 @@ var VariantCurationHub = createReactClass({
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={my_gene_info}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_bustamante={this.state.ext_bustamante}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
@@ -460,7 +435,6 @@ var VariantCurationHub = createReactClass({
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
-                            loading_bustamante={this.state.loading_bustamante}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
                             selectedTab={selectedTab} />
                     </div>
