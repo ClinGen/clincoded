@@ -158,7 +158,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
