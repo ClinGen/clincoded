@@ -241,7 +241,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             actuatorTitle="Study description" popOverRef={ref => (this.popover = ref)}>
                             {item.studyDescription}
                         </PopOverComponent>
-                    : null}
+                        : null}
                 </td>
                 <td className="submission-accession">{item.accession}.{item.version}</td>
             </tr>
@@ -252,13 +252,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     renderClinvarAssertionsHeader: function(clinvar_id, loading_clinvarSCV) {
         if (clinvar_id && !loading_clinvarSCV) {
             return (
-                <h3 className="panel-title">ClinVar Assertions
+                <h3 className="panel-title">Interpretations Submitted to ClinVar
                     <a className="panel-subtitle pull-right" href={external_url_map['ClinVarSearch'] + clinvar_id} target="_blank">See data in ClinVar</a>
                 </h3>
             );
         } else {
             return (
-                <h3 className="panel-title">ClinVar Assertions</h3>
+                <h3 className="panel-title">Interpretations Submitted to ClinVar</h3>
             );
         }
     },
@@ -428,7 +428,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             );
         } else {
             return (
-                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener noreferrer">Search ClinVar</a> for this variant.</span>
             );
         }
     },
@@ -474,7 +474,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
                     <div className="panel-heading">
-                        <h3 className="panel-title">ClinVar Interpretations
+                        <h3 className="panel-title">Overall ClinVar Interpretation
                             {clinvar_id ? <a className="panel-subtitle pull-right" href={external_url_map['ClinVarSearch'] + clinvar_id} target="_blank">See data in ClinVar</a> : null}
                         </h3>
                     </div>
@@ -498,7 +498,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </div>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener noreferrer">Search ClinVar</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -531,7 +531,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </div>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener noreferrer">Search ClinVar</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -600,7 +600,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank">Search RefSeq</a> for this variant.</span>
+                                <span>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -632,7 +632,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank">Search Ensembl</a> for this variant.</span>
+                                <span>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
                             </div>
                         }
                     </div>
