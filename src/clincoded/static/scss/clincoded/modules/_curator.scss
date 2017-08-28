@@ -3070,3 +3070,54 @@ table.login-users-interpretations {
     opacity: 0;
     visibility: hidden; 
 }
+
+/**
+ * Styles for error pages
+ */
+.type-error {
+    &.type-LoginDenied, &.type-LoginNotVerified {
+        h1 {
+            .icon {
+                font-size: 95%;
+            }
+        }
+
+        .alert {
+            font-size: 1.05rem;
+            line-height: 160%;
+        }
+
+        .panel {
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+
+            .panel-body {
+                font-size: 1.05rem;
+                line-height: 160%;
+
+                .section-header {
+                    display: block;
+                    font-size: 1.15rem;
+                    font-weight: bold;
+                }
+
+                ol ol {
+                    list-style-type: lower-alpha;
+                }
+            }
+        }
+    }
+
+    &.type-HTTPForbidden, &.type-HTTPNotFound {
+        .alert {
+            margin-top: 2rem;
+
+            h3 {
+                font-size: 1.5rem;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+        }
+    }
+}

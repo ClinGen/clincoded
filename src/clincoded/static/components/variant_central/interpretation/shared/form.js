@@ -34,7 +34,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         criteria: PropTypes.array, // array of criteria codes being handled by this form
         criteriaCrossCheck: PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
         interpretation: PropTypes.object, // parent interpretation object
-        updateInterpretationObj: PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
+        updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
+        disableEvalForm: PropTypes.bool // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
     },
 
     contextTypes: {
@@ -395,14 +396,15 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         return (
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
-                    {this.props.renderedFormContent.call(this)}
+                    {this.props.renderedFormContent.call(this, this.props.disableEvalForm)}
                 </div>
                 <div className="curation-submit clearfix">
-                    <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"} id="submit" title={this.state.evaluationExists ? "Update" : "Save"}
-                        submitBusy={this.state.submitBusy} inputDisabled={this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated} />
+                    <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
+                        id="submit" title={this.state.evaluationExists ? "Update" : "Save"} submitBusy={this.state.submitBusy}
+                        inputDisabled={(this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated) || this.props.disableEvalForm} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                    : null}
+                        : null}
                 </div>
             </Form>
         );
@@ -418,7 +420,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
 // dropdownContent should be a call to evalFormDropdownSectionWrapper() - see below
 // explanationContent should be a call to evalFormExplanationSectionWrapper() - see below
 // divider is a boolean to indicate whether or not a gray divider bar should be rendered at the bottom of the group (for use if there is a subsequent form group before the Save button)
-var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(noteContent, dropdownContent, explanationContent, divider) {
+export function evalFormSectionWrapper(noteContent, dropdownContent, explanationContent, divider) {
     return (
         <div>
             <div className="col-sm-4">
@@ -433,11 +435,11 @@ var evalFormSectionWrapper = module.exports.evalFormSectionWrapper = function(no
             <div className={"clear" + (divider ? " divider" : "")}></div>
         </div>
     );
-};
+}
 
 // wrapper for rendering the note section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
 // description and disease-dependency are ascertained from evidence_codes.json
-var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = function(criteriaList) {
+export function evalFormNoteSectionWrapper(criteriaList) {
     return (
         <p className="alert alert-info criteria-description">
             {criteriaList.map((criteria, i) => {
@@ -451,17 +453,21 @@ var evalFormNoteSectionWrapper = module.exports.evalFormNoteSectionWrapper = fun
             })}
         </p>
     );
-};
+}
 
-// wrapper for rendering the dropdown section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
-// calls evalFormValueDropdown() to render a dropdown for each criteria
-var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapper = function(criteriaList) {
+/**
+ * wrapper for rendering the dropdown section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
+ * calls evalFormValueDropdown() to render a dropdown for each criteria
+ * @param {array} criteriaList - The list of criteria to be evaluated (e.g. ['BP6', 'PP5'])
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
+export function evalFormDropdownSectionWrapper(criteriaList, disableEvalForm) {
     return (
         <div>
             {criteriaList.map((criteria, i) => {
                 return (
                     <span key={i}>
-                        {evalFormValueDropdown.call(this, criteria)}
+                        {evalFormValueDropdown.call(this, criteria, disableEvalForm)}
                         {i < criteriaList.length - 1 ? <span className="col-xs-3 pad-bottom"><span className="pull-right">- or -</span></span> : null}
                         <div className="clear"></div>
                     </span>
@@ -469,16 +475,20 @@ var evalFormDropdownSectionWrapper = module.exports.evalFormDropdownSectionWrapp
             })}
         </div>
     );
-};
+}
 
-// helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
-function evalFormValueDropdown(criteria) {
+/** 
+ * Helper function for evalFormDropdownSectionWrapper() to generate the dropdown for each criteria
+ * @param {string} criteria - The individual criteria to be evaluated (e.g. 'BP6' or 'PP5')
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
+function evalFormValueDropdown(criteria, disableEvalForm) {
     // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
         <Input type="select" ref={criteria + "-status"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
             error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
-            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group">
+            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group" inputDisabled={disableEvalForm}>
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
@@ -492,31 +502,41 @@ function evalFormValueDropdown(criteria) {
     );
 }
 
-// wrapper for rendering the explanation section of eval form group
-// criteriaList should be an array of criteria codes being handled in the section
-// hiddenList should be an array of booleans mirroring the size and order of criteriaList, with the booleans indicating whether or not the explanation input for
-//      that criteria should be visible. this should generally be used with shareExplanation()
-// customContentBefore should be HTML for any elements to render before the explanation inputs, in that column (optional)
-// customContentAfter should be HTML for any elements to render after the explanation inputs, in that column (optional)
-var evalFormExplanationSectionWrapper = module.exports.evalFormExplanationSectionWrapper = function(criteriaList, hiddenList, customContentBefore, customContentAfter) {
+/**
+ * wrapper for rendering the explanation section of eval form group
+ * criteriaList should be an array of criteria codes being handled in the section
+ * hiddenList should be an array of booleans mirroring the size and order of criteriaList, with the booleans indicating whether or not the explanation input for
+ *      that criteria should be visible. this should generally be used with shareExplanation()
+ * customContentBefore should be HTML for any elements to render before the explanation inputs, in that column (optional)
+ * customContentAfter should be HTML for any elements to render after the explanation inputs, in that column (optional)
+ * @param {array} criteriaList - The list of criteria to be evaluated (e.g. ['BP6', 'PP5'])
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
+export function evalFormExplanationSectionWrapper(criteriaList, hiddenList, customContentBefore, customContentAfter, disableEvalForm) {
     return (
         <div>
             {customContentBefore ? customContentBefore : null}
             {criteriaList.map((criteria, i) => {
-                return (<span key={i}>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i])}</span>);
+                return (<span key={i}>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i], disableEvalForm)}</span>);
             })}
             {customContentAfter ? customContentAfter : null}
         </div>
     );
-};
+}
 
-// helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
-function evalFormExplanationDefaultInput(criteria, hidden) {
+/**
+ * Helper function for evalFormExplanationSectionWrapper() to generate the explanation input for each criteria
+ * @param {string} criteria - The individual criteria to be evaluated (e.g. 'BP6' or 'PP5')
+ * @param {boolean} hidden - The flag to hide the form element in UI
+ * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ */
+function evalFormExplanationDefaultInput(criteria, hidden, disableEvalForm) {
     // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
         <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
-            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"} handleChange={this.handleFormChange} />
+            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"}
+            handleChange={this.handleFormChange} inputDisabled={disableEvalForm} />
     );
 }
 
@@ -528,7 +548,7 @@ function evalFormExplanationDefaultInput(criteria, hidden) {
 // evaluation(s). customActions is a dictionary of criteria-specific logic for updating non-standard
 // form fields for a criteria. The key for this dict is the crtieria to which the custom action should
 // be applied to, and the value is an anonymous function with the desired logic
-var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteriaList, customActions) {
+export function updateEvalForm(nextProps, criteriaList, customActions) {
     if (nextProps.interpretation) {
         if (nextProps.interpretation.evaluations && nextProps.interpretation.evaluations.length > 0) {
             nextProps.interpretation.evaluations.map(evaluation => {
@@ -548,14 +568,14 @@ var updateEvalForm = module.exports.updateEvalForm = function(nextProps, criteri
             });
         }
     }
-};
+}
 
 
 /* Below code is for use in 'Change' portions of VCI eval forms */
 
 // logic for ensuring that multiple 'shared' criteria have the same explanation values at all times. Usually only one is visible.
 // criteriaList should be an array of criteria codes
-var shareExplanation = module.exports.shareExplanation = function(ref, criteriaList) {
+export function shareExplanation(ref, criteriaList) {
     let refCriteria = ref.substring(0, ref.indexOf("-")),
         refType = ref.substring(ref.indexOf("-") + 1);
     if (criteriaList.indexOf(refCriteria) > -1 && refType === "explanation") {
@@ -564,4 +584,4 @@ var shareExplanation = module.exports.shareExplanation = function(ref, criteriaL
             this.refs[criteria + '-explanation'].setValue(this.refs[ref].getValue());
         });
     }
-};
+}
