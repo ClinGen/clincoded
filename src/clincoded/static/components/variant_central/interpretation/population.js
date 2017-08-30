@@ -430,7 +430,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Or there is no ExAC data object in the return myvariant.info JSON response
             if (!this.state.ext_singleNucleotide || !this.state.hasExacData) {
                 exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
-                linkText = 'View the coverage in the ExAC region';
+                linkText = 'View the coverage of this region (+/- 30 bp) in ExAC';
             }
             /*
             if (response.clinvar) {

@@ -93,7 +93,7 @@ export class LoginDenied extends Component {
                                         <li>Intended use of ClinGen interface(s) -- select all that apply:
                                             <ol>
                                                 <li>ClinGen curation activity</li>
-                                                <li>Non-ClinGen variant curation (please note the Variant Curation Interface is open for public use but the Gene Curation Interface is currently restricted to use by ClinGen curators – contact ClinGen at <a href='mailto:clingen@clinicalgenome.org'>clingen@clinicalgenome.org <i className="icon icon-envelope"></i></a> if you wish to collaborate on gene curation)</li>
+                                                <li>Non-ClinGen variant curation (note: the Variant Curation Interface is open for public use but the Gene Curation Interface is currently restricted to use by ClinGen curators. If you wish to collaborate on gene curation please contact ClinGen at <a href='mailto:clingen@clinicalgenome.org'>clingen@clinicalgenome.org <i className="icon icon-envelope"></i></a>)</li>
                                                 <li>Demo only exploration of the interfaces using test data and your own account and display name</li>
                                             </ol>
                                         </li>
