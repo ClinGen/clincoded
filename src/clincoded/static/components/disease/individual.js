@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { external_url_map } from '../globals';
 
@@ -11,7 +12,7 @@ import { DiseaseModal } from './modal';
  * Component for adding/copying/deleting disease when creating a new individual evidence
  * either with an associated group, with an associated family, or without either.
  */
-const IndividualDisease = module.exports.IndividualDisease = React.createClass({
+const IndividualDisease = module.exports.IndividualDisease = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
@@ -19,6 +20,7 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
         group: PropTypes.object,
         family: PropTypes.object,
         individual: PropTypes.object,
+        probandLabel: PropTypes.object,
         diseaseObj: PropTypes.object,
         updateDiseaseObj: PropTypes.func,
         clearErrorInParent: PropTypes.func,
@@ -48,7 +50,7 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
 
     componentDidMount() {
         let individual = this.props.individual;
-        if (individual && individual.diagnosis) {
+        if (individual && individual.diagnosis && individual.diagnosis.length) {
             this.setDiseaseObjectStates(individual.diagnosis[0]);
         }
     },
@@ -74,9 +76,7 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
         if (nextProps.error) {
             this.setState({error: nextProps.error});
         }
-        if (nextProps.required) {
-            this.setState({required: nextProps.required});
-        }
+        this.setState({required: nextProps.required});
     },
 
     /**
@@ -174,23 +174,23 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
     renderCopyDiseaseButton() {
         let group = this.props.group,
             family = this.props.family;
-        if (!group && !family) {
-            return (
-                <Input type="button" ref="copyGdmDisease" title="Copy disease term from Gene-Disease Record"
-                    wrapperClassName="gdm-disease-copy" inputClassName="btn-default"
-                    clickHandler={this.handleCopyGdmDisease} />
-            );
-        } else if (group && !family) {
+        if (group && !family) {
             return (
                 <Input type="button" ref="copyGroupDisease" title="Copy disease term from Associated Group"
                     wrapperClassName="group-disease-copy" inputClassName="btn-default"
                     clickHandler={this.handleCopyGroupDisease} />
             );
-        } else if (family) {
+        } else if (family && family.commonDiagnosis && family.commonDiagnosis.length) {
             return (
                 <Input type="button" ref="copyFamilyDisease" title="Copy disease term from Associated Family"
                     wrapperClassName="family-disease-copy" inputClassName="btn-default"
                     clickHandler={this.handleCopyFamilyDisease} />
+            );
+        } else {
+            return (
+                <Input type="button" ref="copyGdmDisease" title="Copy disease term from Gene-Disease Record"
+                    wrapperClassName="gdm-disease-copy" inputClassName="btn-default"
+                    clickHandler={this.handleCopyGdmDisease} />
             );
         }
     },
@@ -343,7 +343,7 @@ const IndividualDisease = module.exports.IndividualDisease = React.createClass({
                                 />
                             </li>
                         </ul>
-                    :
+                        :
                         <div className="delete-disease-button">
                             <a className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
                                 <span>Disease<i className="icon icon-trash-o"></i></span>

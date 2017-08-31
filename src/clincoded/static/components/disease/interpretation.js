@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { external_url_map } from '../globals';
 
@@ -16,17 +17,17 @@ var parseAndLogError = require('../mixins').parseAndLogError;
 /**
  * Component for adding/deleting disease associated with an interpretation in VCI
  */
-const InterpretationDisease = module.exports.InterpretationDisease = React.createClass({
+const InterpretationDisease = module.exports.InterpretationDisease = createReactClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
     propTypes: {
         interpretation: PropTypes.object,
-        variantData: React.PropTypes.object,
-        hasAssociatedDisease: React.PropTypes.bool,
-        editKey: React.PropTypes.string,
-        updateInterpretationObj: React.PropTypes.func,
-        calculatedAssertion: React.PropTypes.string,
-        provisionalPathogenicity: React.PropTypes.string,
+        variantData: PropTypes.object,
+        hasAssociatedDisease: PropTypes.bool,
+        editKey: PropTypes.string,
+        updateInterpretationObj: PropTypes.func,
+        calculatedAssertion: PropTypes.string,
+        provisionalPathogenicity: PropTypes.string,
         diseaseObj: PropTypes.object,
         updateDiseaseObj: PropTypes.func,
         session: PropTypes.object

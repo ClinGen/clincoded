@@ -1,6 +1,8 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
 
 var editTargetMap = {
     'experiments': 'Experiment',
@@ -23,8 +25,8 @@ var editTargetMap = {
 
 var AuditMixin = module.exports.AuditMixin = {
     childContextTypes: {
-        auditDetailOpen: React.PropTypes.bool, // Audit details open
-        auditStateToggle: React.PropTypes.func // Function to set current audit detail type
+        auditDetailOpen: PropTypes.bool, // Audit details open
+        auditStateToggle: PropTypes.func // Function to set current audit detail type
     },
 
     // Retrieve current React context
@@ -47,10 +49,10 @@ var AuditMixin = module.exports.AuditMixin = {
 };
 
 
-var AuditIndicators = module.exports.AuditIndicators = React.createClass({
+var AuditIndicators = module.exports.AuditIndicators = createReactClass({
     contextTypes: {
-        auditDetailOpen: React.PropTypes.bool,
-        auditStateToggle: React.PropTypes.func
+        auditDetailOpen: PropTypes.bool,
+        auditStateToggle: PropTypes.func
     },
 
     render: function() {
@@ -90,9 +92,9 @@ var AuditIndicators = module.exports.AuditIndicators = React.createClass({
 
 
 
-var AuditDetail = module.exports.AuditDetail = React.createClass({
+var AuditDetail = module.exports.AuditDetail = createReactClass({
     contextTypes: {
-        auditDetailOpen: React.PropTypes.bool
+        auditDetailOpen: PropTypes.bool
     },
 
     render: function() {
@@ -138,7 +140,7 @@ var AuditDetail = module.exports.AuditDetail = React.createClass({
 // props.except: Path of object being reported on.
 // props.forcedEditLink: T if display path of reported object anyway.
 
-var DetailEmbeddedLink = React.createClass({
+var DetailEmbeddedLink = createReactClass({
     render: function() {
         var detail = this.props.detail;
 

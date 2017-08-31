@@ -1,35 +1,34 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('../../globals');
-var RestMixin = require('../../rest').RestMixin;
-var parseClinvar = require('../../../libs/parse-resources').parseClinvar;
-var SO_terms = require('./mapping/SO_term.json');
-var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
-var externalLinks = require('./shared/externalLinks');
-
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from '../../rest';
+import { parseClinvar } from '../../../libs/parse-resources';
+import { dbxref_prefix_map, external_url_map } from '../../globals';
+import { setContextLinks } from './shared/externalLinks';
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
 import PopOverComponent from '../../../libs/bootstrap/popover';
 
+var SO_terms = require('./mapping/SO_term.json');
+var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+
 // Display the curator data of the curation data
-var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = React.createClass({
+var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = createReactClass({
     mixins: [RestMixin],
 
     propTypes: {
-        data: React.PropTypes.object, // ClinVar data payload
-        href_url: React.PropTypes.object,
-        ext_ensemblHgvsVEP: React.PropTypes.array,
-        ext_clinvarEutils: React.PropTypes.object,
-        ext_clinVarSCV: React.PropTypes.array,
-        ext_clinvarInterpretationSummary: React.PropTypes.object,
-        loading_clinvarEutils: React.PropTypes.bool,
-        loading_clinvarSCV: React.PropTypes.bool,
-        loading_ensemblHgvsVEP: React.PropTypes.bool
+        data: PropTypes.object, // ClinVar data payload
+        href_url: PropTypes.object,
+        ext_ensemblHgvsVEP: PropTypes.array,
+        ext_clinvarEutils: PropTypes.object,
+        ext_clinVarSCV: PropTypes.array,
+        ext_clinvarInterpretationSummary: PropTypes.object,
+        loading_clinvarEutils: PropTypes.bool,
+        loading_clinvarSCV: PropTypes.bool,
+        loading_ensemblHgvsVEP: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -242,7 +241,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             actuatorTitle="Study description" popOverRef={ref => (this.popover = ref)}>
                             {item.studyDescription}
                         </PopOverComponent>
-                    : null}
+                        : null}
                 </td>
                 <td className="submission-accession">{item.accession}.{item.version}</td>
             </tr>
@@ -253,13 +252,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     renderClinvarAssertionsHeader: function(clinvar_id, loading_clinvarSCV) {
         if (clinvar_id && !loading_clinvarSCV) {
             return (
-                <h3 className="panel-title">ClinVar Assertions
+                <h3 className="panel-title">Interpretations Submitted to ClinVar
                     <a className="panel-subtitle pull-right" href={external_url_map['ClinVarSearch'] + clinvar_id} target="_blank">See data in ClinVar</a>
                 </h3>
             );
         } else {
             return (
-                <h3 className="panel-title">ClinVar Assertions</h3>
+                <h3 className="panel-title">Interpretations Submitted to ClinVar</h3>
             );
         }
     },
@@ -429,7 +428,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             );
         } else {
             return (
-                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener noreferrer">Search ClinVar</a> for this variant.</span>
             );
         }
     },
@@ -455,10 +454,10 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         var links_38 = null;
         var links_37 = null;
         if (GRCh38) {
-            links_38 = externalLinks.setContextLinks(GRCh38, 'GRCh38');
+            links_38 = setContextLinks(GRCh38, 'GRCh38');
         }
         if (GRCh37) {
-            links_37 = externalLinks.setContextLinks(GRCh37, 'GRCh37');
+            links_37 = setContextLinks(GRCh37, 'GRCh37');
         }
 
         return (
@@ -475,7 +474,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info datasource-clinvar-interpretaions">
                     <div className="panel-heading">
-                        <h3 className="panel-title">ClinVar Interpretations
+                        <h3 className="panel-title">Overall ClinVar Interpretation
                             {clinvar_id ? <a className="panel-subtitle pull-right" href={external_url_map['ClinVarSearch'] + clinvar_id} target="_blank">See data in ClinVar</a> : null}
                         </h3>
                     </div>
@@ -499,7 +498,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </div>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener noreferrer">Search ClinVar</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -532,7 +531,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </div>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">Search ClinVar</a> for this variant.</span>
+                                <span>No data was found for this allele in ClinVar. <a href="http://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" rel="noopener noreferrer">Search ClinVar</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -601,7 +600,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank">Search RefSeq</a> for this variant.</span>
+                                <span>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -633,7 +632,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank">Search Ensembl</a> for this variant.</span>
+                                <span>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
                             </div>
                         }
                     </div>

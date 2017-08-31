@@ -8,7 +8,7 @@
         "label": "Experiment 1",
         "evidenceType": "Expression",
         "expression": {
-            "organOfTissue" : "UBERON_0012345",
+            "organOfTissue" : "UBERON:0012345",
             "normalExpression": {
                 "expressedInTissue": true,
                 "evidence": "some evidence here",

@@ -1,20 +1,15 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var globals = require('./globals');
-var fetched = require('./fetched');
-var form = require('../libs/bootstrap/form');
-var panel = require('../libs/bootstrap/panel');
-var parseAndLogError = require('./mixins').parseAndLogError;
-var RestMixin = require('./rest').RestMixin;
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from './rest';
+import { curator_page } from './globals';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
 
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var Panel = panel.Panel;
-
-var AddDisease = React.createClass({
+var AddDisease = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     getInitialState: function() {
@@ -148,4 +143,4 @@ var AddDisease = React.createClass({
     }
 });
 
-globals.curator_page.register(AddDisease, 'curator_page', 'add-disease');
+curator_page.register(AddDisease, 'curator_page', 'add-disease');

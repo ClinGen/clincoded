@@ -31,6 +31,11 @@
             "title": "Reasons",
             "description": "Reasons user change the classification.",
             "type": "string"
+        },
+        "evidenceSummary": {
+            "title": "Evidence Summary",
+            "description": "Evidence summary for the variant interpretation",
+            "type": "string"
         }
     },
     "columns": {

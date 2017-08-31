@@ -1,9 +1,13 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var parseAndLogError = require('./mixins').parseAndLogError;
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { parseAndLogError } from './mixins';
+import { content_views, listing_titles, itemClass } from './globals';
+
 var fetched = require('./fetched');
-var _ = require('underscore');
 var $script = require('scriptjs');
 var ga = require('google-analytics');
 
@@ -25,14 +29,13 @@ var sorted_json = module.exports.sorted_json = function (obj) {
 };
 
 
-var ItemEdit = module.exports.ItemEdit = React.createClass({
+var ItemEdit = module.exports.ItemEdit = createReactClass({
     render: function() {
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-item');
-        var title = globals.listing_titles.lookup(context)({context: context});
+        var title = listing_titles.lookup(context)({context: context});
         var url = this.props.context['@id'] + '?frame=edit';
         return (
-            <div className={itemClass}>
+            <div className={itemClass(context, 'view-item')}>
                 <header className="row">
                     <div className="col-sm-12">
                         <h2>Edit {title}</h2>
@@ -47,9 +50,9 @@ var ItemEdit = module.exports.ItemEdit = React.createClass({
     }
 });
 
-var EditForm = module.exports.EditForm = React.createClass({
+var EditForm = module.exports.EditForm = createReactClass({
     contextTypes: {
-        fetch: React.PropTypes.func
+        fetch: PropTypes.func
     },
 
     render: function () {
@@ -154,4 +157,4 @@ var EditForm = module.exports.EditForm = React.createClass({
 });
 
 
-globals.content_views.register(ItemEdit, 'item', 'edit-json');
+content_views.register(ItemEdit, 'item', 'edit-json');

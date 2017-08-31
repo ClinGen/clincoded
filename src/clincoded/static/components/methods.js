@@ -1,12 +1,9 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var form = require('../libs/bootstrap/form');
-var curator = require('./curator');
-
-var Input = form.Input;
-
+import React from 'react';
+import _ from 'underscore';
+import moment from 'moment';
+import { Input } from '../libs/bootstrap/form';
+import * as curator from './curator';
 
 // Utilities so any pages that have a Methods panel can use this shared code
 // To display the panel, and convert its values to an object.

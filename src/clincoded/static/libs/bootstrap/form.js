@@ -5,13 +5,16 @@
 // mixin that handles standard form things like saving and retrieving form values, and
 // handling validation errors.
 
-var React = require('react');
-var ReactDOM = require('react-dom');
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+
 var _ = require('underscore');
 
 
 // Surround Input elements with the Form element
-var Form = module.exports.Form = React.createClass({
+var Form = module.exports.Form = createReactClass({
     // Add 'id' property to any Input elements. Make it a copy of the Input's ref. Run through all children
     // of the form, and any children of those children, recursively.
     createInputRefs: function(children) {
@@ -212,44 +215,44 @@ var FormMixin = module.exports.FormMixin = {
 
 // Handles most form inputs, like text fields and dropdowns. The different Bootstrap styles of
 // inputs can be handled through the labelClassName, groupClassName, and wrapperClassName properties.
-var Input = module.exports.Input = React.createClass({
+var Input = module.exports.Input = createReactClass({
     propTypes: {
-        type: React.PropTypes.string.isRequired, // Type of input
-        label: React.PropTypes.oneOfType([ // <label> for input; string or another React component
-            React.PropTypes.string,
-            React.PropTypes.object
+        type: PropTypes.string.isRequired, // Type of input
+        label: PropTypes.oneOfType([ // <label> for input; string or another React component
+            PropTypes.string,
+            PropTypes.object
         ]),
-        hasModal: React.PropTypes.bool,
-        inputGroupBtn: React.PropTypes.oneOfType([ // <button> for input-group
-            React.PropTypes.string,
-            React.PropTypes.object
+        hasModal: PropTypes.bool,
+        inputGroupBtn: PropTypes.oneOfType([ // <button> for input-group
+            PropTypes.string,
+            PropTypes.object
         ]),
-        helpText: React.PropTypes.oneOfType([ // <p> help text beneath the text input field
-            React.PropTypes.string,
-            React.PropTypes.object
+        helpText: PropTypes.oneOfType([ // <p> help text beneath the text input field
+            PropTypes.string,
+            PropTypes.object
         ]),
-        helpTextId: React.PropTypes.string, // <p> help text element id; required if 'helpText' props is used
-        placeholder: React.PropTypes.string, // <input> placeholder text
-        maxLength: React.PropTypes.string, // maxlength for labels
-        error: React.PropTypes.string, // Error message to display below input
-        labelClassName: React.PropTypes.string, // CSS classes to add to labels
-        groupClassName: React.PropTypes.string, // CSS classes to add to control groups (label/input wrapper div)
-        wrapperClassName: React.PropTypes.string, // CSS classes to add to wrapper div around inputs
-        inputClassName: React.PropTypes.string, // CSS classes to add to input elements themselves
-        rows: React.PropTypes.string, // Number of rows in textarea
-        value: React.PropTypes.oneOfType([ // Value to pre-fill input with
-            React.PropTypes.string,
-            React.PropTypes.number
+        helpTextId: PropTypes.string, // <p> help text element id; required if 'helpText' props is used
+        placeholder: PropTypes.string, // <input> placeholder text
+        maxLength: PropTypes.string, // maxlength for labels
+        error: PropTypes.string, // Error message to display below input
+        labelClassName: PropTypes.string, // CSS classes to add to labels
+        groupClassName: PropTypes.string, // CSS classes to add to control groups (label/input wrapper div)
+        wrapperClassName: PropTypes.string, // CSS classes to add to wrapper div around inputs
+        inputClassName: PropTypes.string, // CSS classes to add to input elements themselves
+        rows: PropTypes.string, // Number of rows in textarea
+        value: PropTypes.oneOfType([ // Value to pre-fill input with
+            PropTypes.string,
+            PropTypes.number
         ]),
-        defaultValue: React.PropTypes.string, // Default value for <select>
-        required: React.PropTypes.bool, // T to make this a required field
-        clickHandler: React.PropTypes.func, // Called to handle button click
-        submitHandler: React.PropTypes.func, // Called to handle submit button click
-        cancelHandler: React.PropTypes.func, // Called to handle cancel button click
-        submitBusy: React.PropTypes.bool, //
-        onBlur: React.PropTypes.func,
-        minVal: React.PropTypes.number, // Minimum value for a number formatted input
-        maxVal: React.PropTypes.number // Maximum value for a number formatted input
+        defaultValue: PropTypes.string, // Default value for <select>
+        required: PropTypes.bool, // T to make this a required field
+        clickHandler: PropTypes.func, // Called to handle button click
+        submitHandler: PropTypes.func, // Called to handle submit button click
+        cancelHandler: PropTypes.func, // Called to handle cancel button click
+        submitBusy: PropTypes.bool, //
+        onBlur: PropTypes.func,
+        minVal: PropTypes.number, // Minimum value for a number formatted input
+        maxVal: PropTypes.number // Maximum value for a number formatted input
     },
 
     getInitialState: function() {

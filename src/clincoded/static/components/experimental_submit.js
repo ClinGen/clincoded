@@ -1,22 +1,16 @@
 "use strict";
-var React = require('react');
-var _ = require('underscore');
-var globals = require('./globals');
-var curator = require('./curator');
-var RestMixin = require('./rest').RestMixin;
-var form = require('../libs/bootstrap/form');
-var panel = require('../libs/bootstrap/panel');
+import React from 'react';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { RestMixin } from './rest';
+import { queryKeyValue, curator_page } from './globals';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import * as curator from './curator';
+const RecordHeader = curator.RecordHeader;
+const PmidSummary = curator.PmidSummary;
 
-var RecordHeader = curator.RecordHeader;
-var PmidSummary = curator.PmidSummary;
-var queryKeyValue = globals.queryKeyValue;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var Input = form.Input;
-var Panel = panel.Panel;
-
-
-var ExperimentalSubmit = React.createClass({
+var ExperimentalSubmit = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     // Keeps track of values from the query string
@@ -151,4 +145,4 @@ var ExperimentalSubmit = React.createClass({
     }
 });
 
-globals.curator_page.register(ExperimentalSubmit, 'curator_page', 'experimental-submit');
+curator_page.register(ExperimentalSubmit, 'curator_page', 'experimental-submit');

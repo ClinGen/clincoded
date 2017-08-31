@@ -1,6 +1,8 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, X_LINKED } from './constants/evidence_types';
 import CASE_INFO_TYPES from './constants/case_info_types';
@@ -9,19 +11,20 @@ import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 
 // Render scoring panel in Gene Curation Interface
-var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
+const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        session: React.PropTypes.object, // Session object passed from parent
-        evidence: React.PropTypes.object, // Individual, Experimental or Case Control
-        modeInheritance: React.PropTypes.string, // Mode of Inheritance
-        evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
-        variantInfo: React.PropTypes.object, // Variant count for Individual evidence
-        handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
-        scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
-        formError: React.PropTypes.bool // TRUE if no explanation is given for a different score
+        session: PropTypes.object, // Session object passed from parent
+        evidence: PropTypes.object, // Individual, Experimental or Case Control
+        modeInheritance: PropTypes.string, // Mode of Inheritance
+        evidenceType: PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
+        variantInfo: PropTypes.object, // Variant count for Individual evidence
+        handleUserScoreObj: PropTypes.func, // Function to call create/update score object
+        scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        submitBusy: PropTypes.bool, // TRUE while the form submit is running
+        scoreError: PropTypes.bool, // TRUE if no explanation is given for modified score or no case info type
+        scoreErrorMsg: PropTypes.string // Text string in response to the type of score error
     },
 
     getInitialState() {
@@ -44,7 +47,8 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
             submitBusy: false, // TRUE while form is submitting
             disableScoreStatus: false, // TRUE if Individual evidence has no variants at all
             willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
-            formError: false // TRUE if no explanation is given for a different score
+            scoreError: this.props.scoreError, // TRUE if no explanation is given for modified score or no case info type
+            scoreErrorMsg: this.props.scoreErrorMsg // Text string in response to the type of score error
         };
     },
 
@@ -64,9 +68,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                 }
             });
         }
-        if (nextProps.formError && nextProps.formError !== this.props.formError) {
-            this.setState({formError: true});
-        }
+        this.setState({scoreError: nextProps.scoreError, scoreErrorMsg: nextProps.scoreErrorMsg});
     },
 
     loadData() {
@@ -187,8 +189,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     defaultScore: null,
                     modifiedScore: null,
                     scoreExplanation: null,
-                    requiredScoreExplanation: false,
-                    formError: false
+                    requiredScoreExplanation: false
                 }, () => {this.updateUserScoreObj();});
             }
         }
@@ -227,8 +228,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     modifiedScore: null,
                     scoreRange: [],
                     scoreExplanation: null,
-                    requiredScoreExplanation: false,
-                    formError: false
+                    requiredScoreExplanation: false
                 }, () => {
                     this.refs.scoreRange.resetValue();
                     this.refs.scoreExplanation.resetValue();
@@ -253,7 +253,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                 });
             } else {
                 // Reset explanation if default score is kept
-                this.setState({scoreExplanation: null, requiredScoreExplanation: false, formError: false}, () => {
+                this.setState({scoreExplanation: null, requiredScoreExplanation: false}, () => {
                     this.refs.scoreExplanation.resetValue();
                     this.updateUserScoreObj();
                 });
@@ -265,7 +265,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         if (this.refs.scoreExplanation) {
             // Parse the score explanation entered by the curator
             let scoreExplanation = this.refs.scoreExplanation.getValue();
-            this.setState({scoreExplanation: scoreExplanation, formError: false}, () => {
+            this.setState({scoreExplanation: scoreExplanation}, () => {
                 this.updateUserScoreObj();
             });
         }
@@ -441,7 +441,7 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
         let disableScoreStatus = this.state.disableScoreStatus;
         let willNotCountScore = this.state.willNotCountScore;
-        let formError = this.state.formError;
+        let scoreError = this.state.scoreError;
 
         // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
         let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
@@ -461,10 +461,10 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                     </Input>
                     {disableScoreStatus ?
                         <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Proband must be associated with at least one variant to Score this evidence.</p></div>
-                    : null}
+                        : null}
                     {willNotCountScore ?
                         <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
-                    : null}
+                        : null}
                     {showScoreInput ?
                         <div>
                             <Input type="select" ref="caseInfoType" label="Confirm Case Information type:" defaultValue={caseInfoType}
@@ -498,20 +498,20 @@ var ScoreIndividual = module.exports.ScoreIndividual = React.createClass({
                                         error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
                                         placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
                                         rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                                    {formError ?
-                                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">A reason is required for the changed score.</p></div>
-                                    : null}
+                                    {scoreError ?
+                                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">{this.state.scoreErrorMsg}</p></div>
+                                        : null}
                                 </div>
-                            : null}
+                                : null}
                         </div>
-                    : null}
+                        : null}
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">
                         <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit}
-                        title="Save" submitBusy={this.props.submitBusy} />
+                            title="Save" submitBusy={this.props.submitBusy} />
                     </div>
-                : null}
+                    : null}
             </div>
         );
     },

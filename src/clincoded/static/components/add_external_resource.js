@@ -1,53 +1,44 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var moment = require('moment');
-var panel = require('../libs/bootstrap/panel');
-var form = require('../libs/bootstrap/form');
-var globals = require('./globals');
-var curator = require('./curator');
-var CuratorHistory = require('./curator_history');
-var variantHgvsRender = curator.variantHgvsRender;
-var PmidSummary = curator.PmidSummary;
-var parseAndLogError = require('./mixins').parseAndLogError;
-
-var parsePubmed = require('../libs/parse-pubmed').parsePubmed;
-var parseClinvar = require('../libs/parse-resources').parseClinvar;
-var parseCAR = require('../libs/parse-resources').parseCAR;
-
-var Panel = panel.Panel;
-var Form = form.Form;
-var FormMixin = form.FormMixin;
-var RestMixin = require('./rest').RestMixin;
-var Input = form.Input;
-var external_url_map = globals.external_url_map;
-var userMatch = globals.userMatch;
-var truncateString = globals.truncateString;
-
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import moment from 'moment';
+import { RestMixin } from './rest';
+import { userMatch, truncateString, external_url_map } from './globals';
+import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { Panel } from '../libs/bootstrap/panel';
+import { parseAndLogError } from './mixins';
+import * as CuratorHistory from './curator_history';
+import { parsePubmed } from '../libs/parse-pubmed';
+import { parseClinvar, parseCAR } from '../libs/parse-resources';
 import ModalComponent from '../libs/bootstrap/modal';
+import * as curator from './curator';
+const variantHgvsRender = curator.variantHgvsRender;
+const PmidSummary = curator.PmidSummary;
 
 // Class for the add resource button. This class only renders the button to add and clear the fields, and contains the modal wrapper.
 // The modal itself is defined by the AddResourceIdModal class below.
-var AddResourceId = module.exports.AddResourceId = React.createClass({
+var AddResourceId = module.exports.AddResourceId = createReactClass({
     propTypes: {
-        resourceType: React.PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
-        label: React.PropTypes.object, // html for the button's label
-        labelVisible: React.PropTypes.bool, // specify whether or not the label is visible
-        buttonText: React.PropTypes.string, // text for the button
-        clearButtonText: React.PropTypes.string, // text for clear button
-        modalButtonText: React.PropTypes.string, // text for submit button in modal
-        initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
-        fieldNum: React.PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
-        updateParentForm: React.PropTypes.func, // function to call upon pressing the Save button
-        disabled: React.PropTypes.bool, // specify whether or not the button on the main form is disabled
-        wrapperClass: React.PropTypes.string, // specify any special css classes for the button
-        buttonWrapperClass: React.PropTypes.string, // specify any special css classes for the button
-        buttonClass: React.PropTypes.string, // specify any special css classes for the button
-        clearButtonClass: React.PropTypes.string, // specify any special css classes for the button
-        buttonOnly: React.PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
-        clearButtonRender: React.PropTypes.bool, // specify whether or not the Clear button should be rendered
-        editButtonRenderHide: React.PropTypes.bool, // specify whether or not the Edit button should be hidden
-        parentObj: React.PropTypes.object // parent object; used to see if a duplicate entry exists
+        resourceType: PropTypes.string, // specify what the resource you're trying to add is (passed to Modal)
+        label: PropTypes.object, // html for the button's label
+        labelVisible: PropTypes.bool, // specify whether or not the label is visible
+        buttonText: PropTypes.string, // text for the button
+        clearButtonText: PropTypes.string, // text for clear button
+        modalButtonText: PropTypes.string, // text for submit button in modal
+        initialFormValue: PropTypes.string, // specify the initial value of the resource, in case of editing (passed to Modal)
+        fieldNum: PropTypes.string, // specify which field on the main form this should edit (passed to Modal)
+        updateParentForm: PropTypes.func, // function to call upon pressing the Save button
+        disabled: PropTypes.bool, // specify whether or not the button on the main form is disabled
+        wrapperClass: PropTypes.string, // specify any special css classes for the button
+        buttonWrapperClass: PropTypes.string, // specify any special css classes for the button
+        buttonClass: PropTypes.string, // specify any special css classes for the button
+        clearButtonClass: PropTypes.string, // specify any special css classes for the button
+        buttonOnly: PropTypes.bool, // specify whether or not only the button should be rendered (no form-group)
+        clearButtonRender: PropTypes.bool, // specify whether or not the Clear button should be rendered
+        editButtonRenderHide: PropTypes.bool, // specify whether or not the Edit button should be hidden
+        parentObj: PropTypes.object // parent object; used to see if a duplicate entry exists
     },
 
     getInitialState: function() {
@@ -132,24 +123,24 @@ var AddResourceId = module.exports.AddResourceId = React.createClass({
 });
 
 // Class for the modal for adding external resource IDs
-var AddResourceIdModal = React.createClass({
+var AddResourceIdModal = createReactClass({
     mixins: [FormMixin, RestMixin, CuratorHistory],
 
     propTypes: {
-        resourceType: React.PropTypes.string, // specify what the resource you're trying to add is
-        initialFormValue: React.PropTypes.string, // specify the initial value of the resource, in case of editing
-        modalButtonText: React.PropTypes.string, // text for submit button in modal
-        fieldNum: React.PropTypes.string, // specify which field on the main form this should edit
-        protocol: React.PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
-        updateParentForm: React.PropTypes.func, // Function to call when submitting and closing the modal
-        parentObj: React.PropTypes.object, // parent object; used to see if a duplicate entry exists
-        title: React.PropTypes.string, // Text appearing in the modal header
-        buttonText: React.PropTypes.string, // Text of the link/button invoking the modal
-        buttonClass: React.PropTypes.string // CSS class of the link/button invoking the modal
+        resourceType: PropTypes.string, // specify what the resource you're trying to add is
+        initialFormValue: PropTypes.string, // specify the initial value of the resource, in case of editing
+        modalButtonText: PropTypes.string, // text for submit button in modal
+        fieldNum: PropTypes.string, // specify which field on the main form this should edit
+        protocol: PropTypes.string, // Protocol to use to access PubMed ('http:' or 'https:')
+        updateParentForm: PropTypes.func, // Function to call when submitting and closing the modal
+        parentObj: PropTypes.object, // parent object; used to see if a duplicate entry exists
+        title: PropTypes.string, // Text appearing in the modal header
+        buttonText: PropTypes.string, // Text of the link/button invoking the modal
+        buttonClass: PropTypes.string // CSS class of the link/button invoking the modal
     },
 
     contextTypes: {
-        fetch: React.PropTypes.func // Function to perform a search
+        fetch: PropTypes.func // Function to perform a search
     },
 
     getInitialState: function() {

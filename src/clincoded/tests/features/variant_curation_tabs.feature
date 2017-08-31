@@ -15,13 +15,13 @@ Feature: Variant Curation Tabs
         And I press "Add ClinVar ID"
         And I wait for an element with the css selector ".modal-open" to load
         Then I should see "Enter ClinVar VariationID"
-        When I fill in the css element field "input.form-control" with "53905"
+        When I fill in the css element field "input.form-control" with "17677"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NC_000007"
+        Then I should see "NM_007294.3(BRCA1):c.5266dupC (p.Gln1756Profs)"
         When I press the button "Save and View Evidence"
         And I wait for 2 seconds
-        Then I should see "NM_000492.3:c.412_414dupCTA"
+        Then I should see "NC_000017.11:g.43057065dupG"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -31,18 +31,18 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 1 seconds
-        Then I should see "ENSG00000001626"
+        Then I should see "ENSG00000012048"
         When I press the tab "Basic Information"
         And I wait for 1 seconds
-        Then I should see "NM_000492.3:c.412_414dupCTA"
+        Then I should see "NM_007294.3:c.5266dupC"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
+        Then I should see "All users may register for our demo version of the ClinGen interfaces"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Deletion)
@@ -75,7 +75,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
@@ -86,7 +86,7 @@ Feature: Variant Curation Tabs
         Then I should see "NM_000492.3:c.1373delG"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
+        Then I should see "All users may register for our demo version of the ClinGen interfaces"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Insertion)
@@ -119,7 +119,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
@@ -130,7 +130,7 @@ Feature: Variant Curation Tabs
         Then I should see "NM_000492.3:c.642_643insT"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
+        Then I should see "All users may register for our demo version of the ClinGen interfaces"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Indel)
@@ -163,7 +163,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Experimental "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
-        When I press the tab "Segregation/Case "
+        When I press the tab "Case/Segregation "
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
@@ -174,4 +174,4 @@ Feature: Variant Curation Tabs
         Then I should see "NM_000492.3:c.4_53+69del119ins299"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Access to these interfaces is currently restricted to ClinGen curators."
+        Then I should see "All users may register for our demo version of the ClinGen interfaces"

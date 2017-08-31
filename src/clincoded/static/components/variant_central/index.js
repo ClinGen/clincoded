@@ -1,28 +1,24 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
-var globals = require('../globals');
-var RestMixin = require('../rest').RestMixin;
-
-var VariantCurationHeader = require('./header').VariantCurationHeader;
-var VariantCurationActions = require('./actions').VariantCurationActions;
-var VariantCurationInterpretation = require('./interpretation').VariantCurationInterpretation;
-var SO_terms = require('./interpretation/mapping/SO_term.json');
-var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
-var external_url_map = globals.external_url_map;
-var dbxref_prefix_map = globals.dbxref_prefix_map;
-var queryKeyValue = globals.queryKeyValue;
-var parseClinvar = require('../../libs/parse-resources').parseClinvar;
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
+import { RestMixin } from '../rest';
+import { VariantCurationHeader } from './header';
+import { VariantCurationActions } from './actions';
+import { VariantCurationInterpretation } from './interpretation';
+import { parseClinvar } from '../../libs/parse-resources';
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
-import { parseKeyValue } from './helpers/parse_key_value';
 import { getClinvarInterpretations, parseClinvarSCVs } from './helpers/clinvar_interpretations';
+import { CurationInterpretationCriteria } from './interpretation/criteria';
+import { EvaluationSummary } from './interpretation/summary';
+import { curator_page, queryKeyValue, dbxref_prefix_map, external_url_map } from '../globals';
 
-var CurationInterpretationCriteria = require('./interpretation/criteria').CurationInterpretationCriteria;
-var EvaluationSummary = require('./interpretation/summary').EvaluationSummary;
+var SO_terms = require('./interpretation/mapping/SO_term.json');
+var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
 
 // Variant Curation Hub
-var VariantCurationHub = React.createClass({
+var VariantCurationHub = createReactClass({
     mixins: [RestMixin],
 
     getInitialState: function() {
@@ -36,7 +32,6 @@ var VariantCurationHub = React.createClass({
             selectedTab: queryKeyValue('tab', this.props.href),
             variantObj: null,
             ext_myVariantInfo: null,
-            ext_bustamante: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
@@ -56,12 +51,12 @@ var VariantCurationHub = React.createClass({
             loading_ensemblVariation: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
-            loading_bustamante: true,
             calculated_pathogenicity: null,
             autoClassification: null,
             provisionalPathogenicity: null,
             provisionalReason: null,
-            provisionalInterpretation: false
+            provisionalInterpretation: false,
+            evidenceSummary: null
         };
     },
 
@@ -75,7 +70,8 @@ var VariantCurationHub = React.createClass({
                         this.setState({
                             autoClassification: interpretation.provisional_variant[0].autoClassification,
                             provisionalPathogenicity: interpretation.provisional_variant[0].alteredClassification,
-                            provisionalReason: interpretation.provisional_variant[0].reason
+                            provisionalReason: interpretation.provisional_variant[0].reason,
+                            evidenceSummary: interpretation.provisional_variant[0].evidenceSummary ? interpretation.provisional_variant[0].evidenceSummary : null
                         });
                     }
                     // Return interpretation object's 'maskAsProvisional' property
@@ -97,7 +93,7 @@ var VariantCurationHub = React.createClass({
             this.setState({variantObj: response});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
-            this.fetchMyVariantInfoAndBustamante(this.state.variantObj);
+            this.fetchMyVariantInfo(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
             this.parseVariantType(this.state.variantObj);
@@ -156,50 +152,29 @@ var VariantCurationHub = React.createClass({
         }
     },
 
-    // Retrieve data from MyVariantInfo and Bustamante data
-    fetchMyVariantInfoAndBustamante: function(variant) {
+    /**
+     * Retrieve data from MyVariantInfo
+     * REVEL data is no longer queried from Bustamante lab
+     * Since REVEL data is now available in the myvariant.info response
+     * So we can access its data object via response['dbnsfp']['revel']
+     * @param {object} variant - The variant data object
+     */
+    fetchMyVariantInfo(variant) {
         if (variant) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
                     this.setState({ext_myVariantInfo: response, loading_myVariantInfo: false});
                     this.parseMyVariantInfo(response);
-                    // check dbsnfp data for bustamante query
-                    let hgvsObj = {};
-                    let chrom = parseKeyValue(response, 'chrom'),
-                        hg19 = parseKeyValue(response, 'hg19');
-                    hgvsObj.chrom = (chrom && typeof chrom === 'string') ? chrom : null;
-                    hgvsObj.pos = (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null;
-                    if (response.dbnsfp) {
-                        hgvsObj.alt = (response.dbnsfp.alt) ? response.dbnsfp.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    } else if (response.clinvar) {
-                        hgvsObj.alt = (response.clinvar.alt) ? response.clinvar.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    } else if (response.dbsnp) {
-                        hgvsObj.alt = (response.dbsnp.alt) ? response.dbsnp.alt : null;
-                        return Promise.resolve(hgvsObj);
-                    }
-                }).then(data => {
-                    this.getRestData('https:' + external_url_map['Bustamante'] + data.chrom + '/' + data.pos + '/' + data.alt + '/').then(result => {
-                        this.setState({ext_bustamante: result, loading_bustamante: false});
-                    }).catch(err => {
-                        this.setState({
-                            loading_bustamante: false
-                        });
-                        console.log('Bustamante Fetch Error: %o', err);
-                    });
                 }).catch(err => {
                     this.setState({
-                        loading_myVariantInfo: false,
-                        loading_bustamante: false
+                        loading_myVariantInfo: false
                     });
-                    console.log('MyVariant or Bustamante Fetch Error=: %o', err);
+                    console.log('MyVariant Fetch Error=: %o', err);
                 });
             } else {
                 this.setState({
-                    loading_myVariantInfo: false,
-                    loading_bustamante: false
+                    loading_myVariantInfo: false
                 });
             }
         }
@@ -414,6 +389,9 @@ var VariantCurationHub = React.createClass({
         if (field === 'provisional-interpretation' && this.state.provisionalInterpretation !== value) {
             this.setState({provisionalInterpretation: value});
         }
+        if (field === 'evidence-summary' && this.state.evidenceSummary !== value) {
+            this.setState({evidenceSummary: value});
+        }
     },
 
     render: function() {
@@ -441,7 +419,6 @@ var VariantCurationHub = React.createClass({
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={my_gene_info}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
-                            ext_bustamante={this.state.ext_bustamante}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
@@ -458,7 +435,6 @@ var VariantCurationHub = React.createClass({
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
-                            loading_bustamante={this.state.loading_bustamante}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
                             selectedTab={selectedTab} />
                     </div>
@@ -468,11 +444,12 @@ var VariantCurationHub = React.createClass({
                         setProvisionalEvaluation={this.setProvisionalEvaluation}
                         provisionalPathogenicity={this.state.provisionalPathogenicity}
                         provisionalReason={this.state.provisionalReason}
-                        provisionalInterpretation={this.state.provisionalInterpretation} />
+                        provisionalInterpretation={this.state.provisionalInterpretation}
+                        evidenceSummary={this.state.evidenceSummary} />
                 }
             </div>
         );
     }
 });
 
-globals.curator_page.register(VariantCurationHub, 'curator_page', 'variant-central');
+curator_page.register(VariantCurationHub, 'curator_page', 'variant-central');

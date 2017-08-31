@@ -1,14 +1,13 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
+import React, { Component } from 'react';
+import { panel_views } from './globals';
 
-
-var TestingRenderErrorPanel = module.exports.TestingRenderErrorPanel = React.createClass({
-    render: function() {
+export default class TestingRenderErrorPanel extends Component {
+    render() {
         console.log('log');
         console.warn('warn');
         this.method_does_not_exist();
     }
-});
+}
 
-globals.panel_views.register(TestingRenderErrorPanel, 'testing_render_error');
+panel_views.register(TestingRenderErrorPanel, 'testing_render_error');

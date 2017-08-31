@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { external_url_map } from '../globals';
 
@@ -12,7 +13,7 @@ import { DiseaseModal } from './modal';
  * and for editing disease (in the header) after a gdm had been created
  * (but not after a pmid had been added to the gdm)
  */
-const GdmDisease = module.exports.GdmDisease = React.createClass({
+const GdmDisease = module.exports.GdmDisease = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {

@@ -1,6 +1,8 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { FUNCTION, FUNCTIONAL_ALTERATION, MODEL_SYSTEMS, RESCUE } from './constants/evidence_types';
 import { defaultScore } from './helpers/default_score';
@@ -8,19 +10,20 @@ import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 
 // Render scoring panel in Gene Curation Interface
-var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
+var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
     mixins: [FormMixin],
 
     propTypes: {
-        session: React.PropTypes.object, // Session object passed from parent
-        evidence: React.PropTypes.object, // Individual, Experimental or Case Control
-        experimentalType: React.PropTypes.string, // Experimental types
-        experimentalEvidenceType: React.PropTypes.string, // Experimental evidence types
-        evidenceType: React.PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
-        handleUserScoreObj: React.PropTypes.func, // Function to call create/update score object
-        scoreSubmit: React.PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: React.PropTypes.bool, // TRUE while the form submit is running
-        formError: React.PropTypes.bool // TRUE if no explanation is given for a different score
+        session: PropTypes.object, // Session object passed from parent
+        evidence: PropTypes.object, // Individual, Experimental or Case Control
+        experimentalType: PropTypes.string, // Experimental types
+        experimentalEvidenceType: PropTypes.string, // Experimental evidence types
+        evidenceType: PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
+        handleUserScoreObj: PropTypes.func, // Function to call create/update score object
+        scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
+        submitBusy: PropTypes.bool, // TRUE while the form submit is running
+        formError: PropTypes.bool, // TRUE if no explanation is given for a different score
+        scoreDisabled: PropTypes.bool // FALSE if the matched checkbox is selected
     },
 
     getInitialState() {
@@ -38,6 +41,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             updateDefaultScore: false, // TRUE if either 'Score Status' or 'Case Information type' are changed
             requiredScoreExplanation: false, // TRUE if a different score is selected from the range
             submitBusy: false, // TRUE while form is submitting
+            disableScoreStatus: this.props.scoreDisabled, // FALSE if the matched checkbox is selected
             willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
             formError: false // TRUE if no explanation is given for a different score
         };
@@ -47,7 +51,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
         this.loadData();
     },
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
         if (nextProps.experimentalType !== this.props.experimentalType) {
             this.setState({experimentalType: nextProps.experimentalType, scoreStatus: null, showScoreInput: false}, () => {
                 this.refs.scoreStatus.resetValue();
@@ -61,6 +65,13 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
         if (nextProps.formError && nextProps.formError !== this.props.formError) {
             this.setState({formError: true});
         }
+        this.setState({disableScoreStatus: nextProps.scoreDisabled}, () => {
+            if (this.state.disableScoreStatus) {
+                this.setState({showScoreInput: false}, () => {
+                    this.refs.scoreStatus.resetValue();
+                });
+            }
+        });
     },
 
     loadData() {
@@ -353,6 +364,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
         let showScoreInput = this.state.showScoreInput;
         let updateDefaultScore = this.state.updateDefaultScore;
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
+        let disableScoreStatus = this.state.disableScoreStatus;
         let willNotCountScore = this.state.willNotCountScore;
         let formError = this.state.formError;
  
@@ -360,7 +372,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
             <div>
                 <div className="row">
                     <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue={scoreStatus}
-                        value={scoreStatus} handleChange={this.handleScoreStatusChange}
+                        value={scoreStatus} handleChange={this.handleScoreStatusChange} inputDisabled={disableScoreStatus}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
@@ -370,7 +382,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                     </Input>
                     {willNotCountScore ?
                         <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
-                    : null}
+                        : null}
                     {showScoreInput ?
                         <div>
                             <dl className="dl-horizontal calculated-score">
@@ -395,16 +407,16 @@ var ScoreExperimental = module.exports.ScoreExperimental = React.createClass({
                                 rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                             {formError ?
                                 <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">A reason is required for the changed score.</p></div>
-                            : null}
+                                : null}
                         </div>
-                    : null}
+                        : null}
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">
                         <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit}
-                        title="Save" submitBusy={this.props.submitBusy} />
+                            title="Save" submitBusy={this.props.submitBusy} />
                     </div>
-                : null}
+                    : null}
             </div>
         );
     },

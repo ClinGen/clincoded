@@ -2,18 +2,18 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import ModalComponent from '../../libs/bootstrap/modal';
 import { FormMixin, Input } from '../../libs/bootstrap/form';
 import { RestMixin } from '../rest';
 import { external_url_map } from '../globals';
-
-var curator = require('../curator');
-var _ = require('underscore');
+import * as curator from '../curator';
 
 /**
  * Modal dialog box for adding disease (either by ID or free text)
  */
-const DiseaseModal = module.exports.DiseaseModal = React.createClass({
+const DiseaseModal = module.exports.DiseaseModal = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     propTypes: {
@@ -360,10 +360,34 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                     </span>
                     {Object.keys(tempResource).length && tempResource['is_obsolete'] ?
                         <span className="p-break"><span className="label label-danger disease-is-obsolete">This term is obsolete</span></span>
-                    : null}
+                        : null}
                     {this.renderDiseaseDescription()}
                 </div>
             </div>
+        );
+    },
+
+    /**
+     * Method to render MonDO disease search instructions in modal
+     */
+    renderMondoInstructions() {
+        return (
+            <span>
+                Enter the term "id" for the desired MonDO disease term (Orphanet, DOID, OMIM and NCIt id's allowed). <span className="label-note">To find the term "id:"</span>
+                <ol>
+                    <li>
+                        <span className="label-note">
+                            Search for disease name (term) in MonDO using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
+                        </span>
+                    </li>
+                    <li>
+                        <span className="label-note">
+                            Once you have selected the term, locate the term "id" at the bottom of the "Term info" box displayed on the right hand side of the OLS term page
+                            (e.g. <a href={external_url_map['MondoSearch'] + 'Orphanet_93545'} target="_blank">Orphanet:93545</a>).
+                        </span>
+                    </li>
+                </ol>
+            </span>
         );
     },
 
@@ -376,8 +400,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
         return (
             <div className="form-group disease-id-input clearfix">
                 <Input type="text" ref="diseaseId" handleChange={this.handleDiseaseIdChange} value={diseaseId.replace('_', ':')}
-                    label={<span>Enter a MonDO term "id" from MonDO OLS search (Orphanet, DOID, OMIM and NCIt id's allowed). <span className="label-note">The term "id" can be found in the "Term info" box
-                        displayed on the right hand side of the OLS term page (e.g. <a href={external_url_map['MondoSearch'] + 'Orphanet_93545'} target="_blank">Orphanet:93545</a>)</span>:</span>}
+                    label={this.renderMondoInstructions()}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
                     labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
                     inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:100800 OR NCIT:C4089" required />
@@ -387,7 +410,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                 <div className="row">&nbsp;<br />&nbsp;</div>
                 {resourceFetched || diseaseTerm ?
                     this.renderResourceResult()
-                :
+                    :
                     <div className="disease-freetext-confirm-input-group clearfix">
                         <p className="alert alert-warning">Note: We strongly encourage use of an allowed MonDO ontology term and therefore specific database identifier for a disease. If you have searched and
                             there is no appropriate database identifier you may contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and/or
@@ -420,7 +443,8 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-name clearfix"
                     value={this.state.diseaseTerm ? this.state.diseaseTerm : ''} maxLength="100" placeholder="Short phrase (max 100 characters)" required />
                 <p>Either HPO term(s) or a definition is required to describe this disease (both fields may be used).</p>
-                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" label="Phenotype(s) (HPO ID(s)):" handleChange={this.handleDiseaseFreeTextPhenotypesChange}
+                <Input type="textarea" ref="diseaseFreeTextPhenoTypes" handleChange={this.handleDiseaseFreeTextPhenotypesChange}
+                    label={<span>Phenotype(s) (HPO ID(s)):<span className="control-label-note">Search <a href={external_url_map['HPOBrowser']} target="_blank">HPO-Browser</a></span></span>}
                     error={this.getFormError('diseaseFreeTextPhenoTypes')} clearError={this.clrFormErrors.bind(null, 'diseaseFreeTextPhenoTypes')}
                     value={hpoids} placeholder="e.g. HP:0010704, HP:0030300" rows="1" required={!this.state.hasFreeTextDiseaseDescription}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group resource-input disease-freetext-phenotypes clearfix" />
@@ -471,10 +495,6 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                 <div className="form-std">
                     <div className="modal-body">
                         <div className="row">
-                            <div className="ontology-lookup-note">
-                                <p>Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using the OLS (Ontology Lookup Service).</p>
-                                <p><a href="/static/help/MonDO-search-help.pdf" target="_blank">MonDO Search Help</a></p>
-                            </div>
                             {!diseaseFreeTextConfirm ? this.renderDiseaseIdInput() : null}
                             {diseaseFreeTextConfirm ? this.renderDiseaseFreeTextInput() : null}
                         </div>
@@ -489,7 +509,7 @@ const DiseaseModal = module.exports.DiseaseModal = React.createClass({
                             inputDisabled={this.state.submitResourceDisabled}
                             submitBusy={this.state.submitResourceBusy}
                             inputClassName={this.getFormError(diseaseId) === null || this.getFormError(diseaseId) === undefined || this.getFormError(diseaseId) === '' ?
-                            "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"}
+                                "btn-primary btn-inline-spacer" : "btn-primary btn-inline-spacer disabled"}
                         />
                     </div>
                 </div>
@@ -512,7 +532,7 @@ function validateDiseaseIdInput(id) {
         if (id && id.length) {
             // Expect a semicolon (':') in the id and it is not at the start of the id string
             // Such as 'DOID:7081' or 'Orphanet:777'
-            if (id.indexOf(':') < 0 || id.match(/\:/g).length > 1) {
+            if (id.indexOf(':') < 0 || id.match(/:/g).length > 1) {
                 valid = false;
                 this.setFormErrors('diseaseId', errMsg);
             }

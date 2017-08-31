@@ -1,10 +1,8 @@
 'use strict';
-var React = require('react');
-var _ = require('underscore');
+import React, { Component } from 'react';
 
-
-var PubReferenceList= module.exports.PubReferenceList = React.createClass({
-    render: function() {
+export default class PubReferenceList extends Component {
+    render() {
         var props = this.props;
         return (
             <ul className={props.className}>
@@ -18,4 +16,4 @@ var PubReferenceList= module.exports.PubReferenceList = React.createClass({
             </ul>
         );
     }
-});
+}

@@ -1,17 +1,19 @@
 'use strict';
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import CASE_INFO_TYPES from './constants/case_info_types';
 import { userScore } from './helpers/user_score';
 
 var _ = require('underscore');
 
 // Render scores viewer in Gene Curation Interface
-var ScoreViewer = module.exports.ScoreViewer = React.createClass({
+var ScoreViewer = module.exports.ScoreViewer = createReactClass({
     propTypes: {
-        session: React.PropTypes.object, // Session object passed from parent
-        evidence: React.PropTypes.object, // Individual, Experimental or Case Control
-        otherScores: React.PropTypes.bool // TRUE if we only want show scores by others
+        session: PropTypes.object, // Session object passed from parent
+        evidence: PropTypes.object, // Individual, Experimental or Case Control
+        otherScores: PropTypes.bool // TRUE if we only want show scores by others
     },
 
     getInitialState() {

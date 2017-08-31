@@ -1,9 +1,10 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-var fetched = require('../fetched');
-var ResultTable = require('../search').ResultTable;
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
+import { listing_views } from '../globals';
+import { ResultTable } from '../search';
 
+var fetched = require('../fetched');
 
 var openLinksInNewWindow = function(e) {
     if (e.isDefaultPrevented()) return;
@@ -20,7 +21,7 @@ var openLinksInNewWindow = function(e) {
 };
 
 
-var SearchBlockEdit = React.createClass({
+var SearchBlockEdit = createReactClass({
     render: function() {
         var styles = {maxHeight: 300, overflow: 'scroll', clear: 'both' };
         return (
@@ -32,11 +33,11 @@ var SearchBlockEdit = React.createClass({
 });
 
 
-var ItemPreview = module.exports.ItemPreview = React.createClass({
+var ItemPreview = module.exports.ItemPreview = createReactClass({
     render: function() {
         var context = this.props.data;
         if (context === undefined) return null;
-        var Listing = globals.listing_views.lookup(context);
+        var Listing = listing_views.lookup(context);
         return (
             <ul className="nav result-table" onClick={openLinksInNewWindow}>
                 <Listing context={context} columns={this.props.data.columns} key={context['@id']} />
@@ -46,7 +47,7 @@ var ItemPreview = module.exports.ItemPreview = React.createClass({
 });
 
 
-var ObjectPicker = module.exports.ObjectPicker = React.createClass({
+var ObjectPicker = module.exports.ObjectPicker = createReactClass({
 
     getDefaultProps: function() {
         return {

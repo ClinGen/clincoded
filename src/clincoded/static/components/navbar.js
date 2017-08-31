@@ -1,7 +1,8 @@
 'use strict';
-var React = require('react');
+import React, { Component } from 'react';
+import createReactClass from 'create-react-class';
 
-var Navbar = module.exports.Navbar = React.createClass({
+var Navbar = module.exports.Navbar = createReactClass({
     getInitialState: function() {
         return {mobileMenuOpen: false}; // True if mobile menu is visible; triggered by “
     },
@@ -34,7 +35,7 @@ var Navbar = module.exports.Navbar = React.createClass({
 });
 
 
-var GlobalSections = React.createClass({
+var GlobalSections = createReactClass({
     render: function() {
         var menus = this.props.portal.global_sections;
         var collapseClasses = 'navbar-collapse' + (this.props.mobileMenuOpen ? '' : ' collapse');
