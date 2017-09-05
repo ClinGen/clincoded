@@ -81,9 +81,6 @@ export class LoginDenied extends Component {
                     <div className="row">
                         <div className="col-sm-12">
                             <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Registration not yet complete</h1></div>
-                            <div className="alert alert-info">
-                                <span>If you do not wish to continue registering for the interfaces but want to explore a demo version of the interfaces, you may select the "Demo Login" button located at <a href="https://curation-test.clinicalgenome.org" target="_blank" rel="noopener noreferrer">curation-test.clinicalgenome.org</a>. Your name will display as "ClinGen Test Curator" in the interfaces, along with others who use the "Demo Login."</span>
-                            </div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
                                     <p>If you wish to continue registering your own account and display name, please follow the instructions below:</p>
@@ -96,13 +93,16 @@ export class LoginDenied extends Component {
                                         <li>Intended use of ClinGen interface(s) -- select all that apply:
                                             <ol>
                                                 <li>ClinGen curation activity</li>
-                                                <li>Non-ClinGen variant curation (please note the Variant Curation Interface is open for public use but the Gene Curation Interface is currently restricted to use by ClinGen curators – contact ClinGen if you wish to collaborate on gene curation)</li>
+                                                <li>Non-ClinGen variant curation (note: the Variant Curation Interface is open for public use but the Gene Curation Interface is currently restricted to use by ClinGen curators. If you wish to collaborate on gene curation please contact ClinGen at <a href='mailto:clingen@clinicalgenome.org'>clingen@clinicalgenome.org <i className="icon icon-envelope"></i></a>)</li>
                                                 <li>Demo only exploration of the interfaces using test data and your own account and display name</li>
                                             </ol>
                                         </li>
                                     </ol>
                                     <p>Please contact us with any questions regarding registration at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
                                 </div>
+                            </div>
+                            <div className="alert alert-info">
+                                <span>If you do not wish to continue registering for the interfaces but want to explore a demo version of the interfaces, you may select the "Demo Login" button located at <a href="https://curation-test.clinicalgenome.org" target="_blank" rel="noopener noreferrer">curation-test.clinicalgenome.org</a>. Your name will display as "ClinGen Test Curator" in the interfaces, along with others who use the "Demo Login."</span>
                             </div>
                         </div>
                     </div>
@@ -126,8 +126,8 @@ export class LoginNotVerified extends Component {
                             <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Auth0 account not yet verified</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
-                                    <p>Once you have created an account with Auth0, you must verify it via email - please check your inbox for an email from Auth0 and verify it according to their instructions.</p>
-                                    <p>Additionally, the same email you use for Auth0 must be registered for use with the interfaces. If you have not yet registered your email for the ClinGen interfaces, please send an email to <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>, supplying the email you used for your Auth0 account and your preferred display name within the interfaces.</p>
+                                    <p>Auth0 account activation requires email verification - please check your inbox for an email from Auth0 and verify it according to their instructions.</p>
+                                    <p>Once you have completed Auth0 account activation you must also register to use the ClinGen interfaces. To complete your registration please send the email address you verified with Auth0 and your preferred display name within the interfaces to <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
                                     <p>Please note that access to the ClinGen interfaces is currently restricted to ClinGen curators.</p>
                                 </div>
                             </div>

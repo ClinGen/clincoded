@@ -367,6 +367,30 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
         );
     },
 
+    /**
+     * Method to render MonDO disease search instructions in modal
+     */
+    renderMondoInstructions() {
+        return (
+            <span>
+                Enter the term "id" for the desired MonDO disease term (Orphanet, DOID, OMIM and NCIt id's allowed). <span className="label-note">To find the term "id:"</span>
+                <ol>
+                    <li>
+                        <span className="label-note">
+                            Search for disease name (term) in MonDO using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
+                        </span>
+                    </li>
+                    <li>
+                        <span className="label-note">
+                            Once you have selected the term, locate the term "id" at the bottom of the "Term info" box displayed on the right hand side of the OLS term page
+                            (e.g. <a href={external_url_map['MondoSearch'] + 'Orphanet_93545'} target="_blank">Orphanet:93545</a>).
+                        </span>
+                    </li>
+                </ol>
+            </span>
+        );
+    },
+
     renderDiseaseIdInput() {
         let diseaseId = this.state.diseaseId,
             diseaseTerm = this.state.diseaseTerm,
@@ -376,8 +400,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
         return (
             <div className="form-group disease-id-input clearfix">
                 <Input type="text" ref="diseaseId" handleChange={this.handleDiseaseIdChange} value={diseaseId.replace('_', ':')}
-                    label={<span>Enter the "term id" for the desired MonDO disease term (Orphanet, DOID, OMIM and NCIt id's allowed). <span className="label-note">The term "id" can be found in the "Term info" box
-                        displayed on the right hand side of the OLS term page (e.g. <a href={external_url_map['MondoSearch'] + 'Orphanet_93545'} target="_blank">Orphanet:93545</a>)</span>:</span>}
+                    label={this.renderMondoInstructions()}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
                     labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
                     inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:100800 OR NCIT:C4089" required />
@@ -472,9 +495,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                 <div className="form-std">
                     <div className="modal-body">
                         <div className="row">
-                            <div className="ontology-lookup-note">
-                                <p>Search for disease name (term) in MonDO using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].</p>
-                            </div>
                             {!diseaseFreeTextConfirm ? this.renderDiseaseIdInput() : null}
                             {diseaseFreeTextConfirm ? this.renderDiseaseFreeTextInput() : null}
                         </div>

@@ -21,31 +21,19 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         data: PropTypes.object, // ClinVar data payload
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
-        href_url: PropTypes.object,
-        ext_myGeneInfo: PropTypes.object
+        href_url: PropTypes.object
     },
 
     getInitialState() {
         return {
             data: this.props.data,
             clinvar_id: null,
-            interpretation: this.props.interpretation,
-            disableEvalForm: false // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
+            interpretation: this.props.interpretation
         };
     },
 
     componentWillReceiveProps(nextProps) {
         this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
-        /**
-         * Disable form elements of Segregation's 'Reputable source' section
-         * when the associated gene is NEITHER BRCA1 or BRCA2
-         */
-        if (nextProps.ext_myGeneInfo && nextProps.ext_myGeneInfo.symbol) {
-            let gene = nextProps.ext_myGeneInfo.symbol;
-            this.setState({
-                disableEvalForm: (gene.indexOf('BRCA') < 0) ? true : false
-            });
-        }
     },
 
     render() {
@@ -170,19 +158,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
-                                <div className="alert alert-info">
-                                    The rules in this section currently only apply to BRCA1 and BRCA2 variants
-                                    using <a href="https://www.clinicalgenome.org/data-sharing/sharing-clinical-reports-project-scrp/" target="_blank" rel="noopener noreferrer">SCRP</a> data
-                                </div>
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup8} criteria={['BP6', 'PP5']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
                                     formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup8Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    disableEvalForm={this.state.disableEvalForm} />
+                                    disableEvalForm={true} />
                             </div>
                         </div>
                         : null}
