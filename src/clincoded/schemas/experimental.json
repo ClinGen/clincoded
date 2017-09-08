@@ -272,32 +272,32 @@
             "type": "object",
             "default": {},
             "properties": {
-                "cellMutationOrEngineeredEquivalent": {
-                    "title": "Cell Mutation Or Engineered Equivalent",
-                    "description": "Patient cell mutation or engineered equivalent",
+                "functionalAlterationType": {
+                    "title": "Patient cells or non-patient cells",
+                    "description": "Cultured patient or non-patient cells carrying candidate variants",
                     "type": "string",
                     "enum": [
                         "Patient cells",
-                        "Engineered equivalent"
+                        "Non-patient cells"
                     ]
                 },
-                "patientCellType": {
-                    "title": "Patient Cell Type",
+                "patientCells": {
+                    "title": "Patient cell type",
                     "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
                     "type": "string"
                 },
-                "patientCellTypeFreeText": {
-                    "title": "Patient Cell Type (Free text)",
+                "patientCellsFreeText": {
+                    "title": "Patient cell type (free text)",
                     "description": "Free text (required if CL Ontology ID is not provided)",
                     "type": "string"
                 },
-                "engineeredEquivalentCellType": {
-                    "title": "Engineered Equivalent Cell Type",
-                    "description": "EFO or CL Ontology ID (required if free text for engineered equivalent cell type is not provided)",
+                "nonPatientCells": {
+                    "title": "Non-patient cell type",
+                    "description": "EFO or CL Ontology ID (required if free text for non-patient cell type is not provided)",
                     "type": "string"
                 },
-                "engineeredEquivalentCellTypeFreeText": {
-                    "title": "Engineered Equivalent Cell Type (Free text)",
+                "nonPatientCellsFreeText": {
+                    "title": "Non-patient cell type (free text)",
                     "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
@@ -334,18 +334,18 @@
             "type": "object",
             "default": {},
             "properties": {
-                "animalOrCellCulture": {
-                    "title": "Animal or Cell Culture Model",
-                    "description": "Non-human animal or cell-culture model",
+                "modelSystemsType": {
+                    "title": "Non-human model or cell culture model",
+                    "description": "Non-human model organism or cell culture model (previously Engineered equivalent)",
                     "type": "string",
                     "enum": [
-                        "Animal model",
-                        "Engineered equivalent"
+                        "Non-human model organism",
+                        "Cell culture model"
                     ]
                 },
-                "animalModel": {
-                    "title": "Animal Model",
-                    "description": "NCBI Taxon id for animal model",
+                "nonHumanModel": {
+                    "title": "Non-human model organism",
+                    "description": "NCBI Taxon id for non-human model organism (previously Animal model)",
                     "type": "string",
                     "enum": [
                         "",
@@ -370,12 +370,12 @@
                     ]
                 },
                 "cellCulture": {
-                    "title": "Cell Culture Type/Line",
+                    "title": "Cell culture type",
                     "description": "EFO or CL Ontology ID (required if free text for cell culture is not provided)",
                     "type": "string"
                 },
                 "cellCultureFreeText": {
-                    "title": "Cell Culture Type/Line (Free text)",
+                    "title": "Cell culture type (free text)",
                     "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
@@ -418,44 +418,29 @@
         },
         "rescue": {
             "title": "Rescue",
-            "description": "items in rescue type",
+            "description": "Items in rescue type",
             "type": "object",
             "default": {},
             "properties": {
-                "rescueObserved": {
+                "rescueType": {
                     "title": "Rescue observed",
-                    "description": "Cell-culture model (previously engineered equivalent), Patient cells, Animal model or The patient (human model).",
+                    "description": "Human, Non-human model organism, Cell-culture model (previously Engineered equivalent), Patient cells.",
                     "type": "string",
                     "enum": [
-                        "Cell-culture model",
-                        "Patient cells",
-                        "Animal model",
-                        "The patient (human model)"
+                        "Human",
+                        "Non-human model organism",
+                        "Cell culture model",
+                        "Patient cells"
                     ]
                 },
-                "cellCultureModel": {
-                    "title": "Cell-culture model (previously engineered equivalent)",
-                    "description": "EFO or CL Ontology ID (required if free text for Cell-culture model is not provided)",
+                "humanModel": {
+                    "title": "Human type",
+                    "description": "Proband label for the human type",
                     "type": "string"
                 },
-                "cellCultureModelFreeText": {
-                    "title": "Cell-culture model type (Free text)",
-                    "description": "Free text (required if EFO ID is not provided)",
-                    "type": "string"
-                },
-                "patientCellType": {
-                    "title": "Patient Cell Type",
-                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
-                    "type": "string"
-                },
-                "patientCellTypeFreeText": {
-                    "title": "Patient Cell Type (Free text)",
-                    "description": "Free text (required if CL Ontology ID is not provided)",
-                    "type": "string"
-                },
-                "animalModel": {
-                    "title": "Animal Model",
-                    "description": "NCBI Taxon id for animal model",
+                "nonHumanModel": {
+                    "title": "Non-human model type",
+                    "description": "NCBI Taxon id for non-human model organism",
                     "type": "string",
                     "enum": [
                         "",
@@ -479,9 +464,24 @@
                         "Zebrafish (Daanio rerio) 7955"
                     ]
                 },
-                "patientHumanModel": {
-                    "title": "The patient (human model)",
-                    "description": "Proband label for the patient (human model)",
+                "cellCulture": {
+                    "title": "Cell culture model (previously Engineered equivalent)",
+                    "description": "EFO or CL Ontology ID (required if free text for cell culture model is not provided)",
+                    "type": "string"
+                },
+                "cellCultureFreeText": {
+                    "title": "Cell culture model (free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
+                },
+                "patientCells": {
+                    "title": "Patient cell type",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellsFreeText": {
+                    "title": "Patient cell type (free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
                     "type": "string"
                 },
                 "descriptionOfGeneAlteration": {
