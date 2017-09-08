@@ -61,17 +61,17 @@ const SCORE_MAPS = {
         SCORE_RANGE: [0, 0.5, 1, 1.5, 2],
         MAX_SCORE: 2
     },
-    FUNCTIONAL_ALTERATION_ENGINEERED_EQUIVALENT: {
+    FUNCTIONAL_ALTERATION_NON_PATIENT_CELLS: {
         DEFAULT_SCORE: 0.5,
         SCORE_RANGE: [0, 0.5, 1],
         MAX_SCORE: 2
     },
-    MODEL_SYSTEMS_ANIMAL_MODEL: {
+    MODEL_SYSTEMS_NON_HUMAN_MODEL_ORGANISM: {
         DEFAULT_SCORE: 2,
         SCORE_RANGE: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4],
         MAX_SCORE: 4
     },
-    MODEL_SYSTEMS_ENGINEERED_EQUIVALENT: {
+    MODEL_SYSTEMS_CELL_CULTURE_MODEL: {
         DEFAULT_SCORE: 1,
         SCORE_RANGE: [0, 0.5, 1, 1.5, 2],
         MAX_SCORE: 4
@@ -86,12 +86,12 @@ const SCORE_MAPS = {
         SCORE_RANGE: [0, 0.5, 1, 1.5, 2],
         MAX_SCORE: 4
     },
-    RESCUE_ANIMAL_MODEL: {
+    RESCUE_NON_HUMAN_MODEL_ORGANISM: {
         DEFAULT_SCORE: 2,
         SCORE_RANGE: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4],
         MAX_SCORE: 4
     },
-    RESCUE_PATIENT_HUMAN_MODEL: {
+    RESCUE_HUMAN_MODEL: {
         DEFAULT_SCORE: 2,
         SCORE_RANGE: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4],
         MAX_SCORE: 4
