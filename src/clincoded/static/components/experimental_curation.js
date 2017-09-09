@@ -128,8 +128,8 @@ var ExperimentalCuration = createReactClass({
                 'A. The gene is expressed in tissues relevant to the disease of interest',
                 'B. The gene is altered in expression in patients who have the disease'
             ],
-            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in cultured patient or non-patient cells carrying candidate variants'],
-            'Model Systems': ['Non-human model organism OR cell culture model with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state'],
+            'Functional Alteration': ['The gene and/or gene product function is demonstrably altered in cultured patient or non-patient cells carrying candidate variant(s)'],
+            'Model Systems': ['Non-human model organism OR cell culture model with a similarly disrupted copy of the affected gene shows a phenotype consistent with human disease state'],
             'Rescue': ['The phenotype in humans, non-human model organisms, cell culture models, or patient cells can be rescued by exogenous wild-type gene or gene product']
         };
         if (subitem == 'A') {
@@ -542,7 +542,8 @@ var ExperimentalCuration = createReactClass({
                     } else if (!_.isEmpty(bioFunc.geneFunctionConsistentWithPhenotype)) {
                         this.setState({
                             experimentalSubtype: "B. Gene function consistent with phenotype(s)",
-                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B'),
+                            scoreDisabled: false
                         });
                         if (bioFunc.geneFunctionConsistentWithPhenotype.phenotypeHPO && bioFunc.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
                             this.setState({'biochemicalFunctionHPO': true});
@@ -594,7 +595,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({expressionOT_FreeText: true}) : this.setState({expressionOT_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Functional Alteration') {
                     let funcAlt = stateObj.experimental.functionalAlteration;
-                    this.setState({functionalAlterationType: funcAlt.functionalAlterationType});
+                    this.setState({functionalAlterationType: funcAlt.functionalAlterationType, scoreDisabled: false});
                     // Set boolean state on 'required' prop for Functional Alteration 'Patient Cell Type' CL Ontology
                     funcAlt.patientCells && funcAlt.patientCells.length ?
                         this.setState({functionalAlterationPCells_ClId: true}): this.setState({functionalAlterationPCells_ClId: false});
@@ -615,7 +616,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({functionalAlterationNFG_FreeText: true}) : this.setState({functionalAlterationNFG_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Model Systems') {
                     let modelSystems = stateObj.experimental.modelSystems;
-                    this.setState({modelSystemsType: modelSystems.modelSystemsType});
+                    this.setState({modelSystemsType: modelSystems.modelSystemsType, scoreDisabled: false});
                     modelSystems.phenotypeHPOObserved && modelSystems.phenotypeHPOObserved.length ?
                         this.setState({modelSystemsPOMSHPO: true}) : this.setState({modelSystemsPOMSHPO: false});
                     modelSystems.phenotypeFreetextObserved && modelSystems.phenotypeFreetextObserved.length ?
@@ -1621,8 +1622,8 @@ function ExperimentalNameType() {
                         <strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, OR the gene product is consistent with the observed phenotype(s)<br /><br />
                         <strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest<br /><br />
                         <strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, OR the gene is altered in expression in patients who have the disease<br /><br />
-                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in cultured patient or non-patient cells carrying candidate variants<br /><br />
-                        <strong>Model Systems</strong>: Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state<br /><br />
+                        <strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in cultured patient or non-patient cells carrying candidate variant(s)<br /><br />
+                        <strong>Model Systems</strong>: Non-human model organism OR cell culture model with a similarly disrupted copy of the affected gene shows a phenotype consistent with human disease state<br /><br />
                         <strong>Rescue</strong>: The phenotype in humans, non-human model organisms, cell culture models, or patient cells can be rescued by exogenous wild-type gene or gene product
                     </p>
                 </div>
@@ -2023,7 +2024,7 @@ function TypeFunctionalAlteration(uniprotId) {
     }
     return (
         <div className="row form-row-helper">
-            <Input type="select" ref="functionalAlterationType" label="Cultured patient or non-patient cells carrying candidate variants?:"
+            <Input type="select" ref="functionalAlterationType" label="Cultured patient or non-patient cells carrying candidate variant(s)?:"
                 error={this.getFormError('functionalAlterationType')} clearError={this.clrFormErrors.bind(null, 'functionalAlterationType')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 defaultValue="none" value={FA_functionalAlterationType} handleChange={this.handleChange}
@@ -2183,13 +2184,13 @@ function TypeModelSystems() {
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
-                    <Input type="textarea" ref="cellCulture" label={<span>Cell culture model type <span className="normal">(EFO or CL ID)</span>:</span>}
+                    <Input type="textarea" ref="cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
-                    <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture type <span className="normal">(free text)</span>:</span>}
+                    <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('cellCultureFreeText')} clearError={this.clrFormErrors.bind(null, 'cellCultureFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={MS_cellCultureFreeText} inputDisabled={this.cv.othersAssessed} row="2"
@@ -2301,7 +2302,7 @@ function TypeRescue() {
                 : null}
             {this.state.rescueType === 'Non-human model organism' ?
                 <div>
-                    <Input type="select" ref="rescue.nonHumanModel" label="Animal model:"
+                    <Input type="select" ref="rescue.nonHumanModel" label="Non-human model organism:"
                         error={this.getFormError('rescue.nonHumanModel')} clearError={this.clrFormErrors.bind(null, 'rescue.nonHumanModel')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         defaultValue="none" value={RES_nonHumanModel} handleChange={this.handleChange}
@@ -2335,13 +2336,13 @@ function TypeRescue() {
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href={external_url_map['EFO']} target="_blank">EFO</a> or <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
-                    <Input type="textarea" ref="rescue.cellCulture" label={<span>Cell culture model <span className="normal">(EFO or CL ID)</span>:</span>}
+                    <Input type="textarea" ref="rescue.cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.cellCulture')} clearError={this.clrFormErrors.bind(null, 'rescue.cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={RES_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescueCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
-                    <Input type="textarea" ref="rescue.cellCultureFreeText" label={<span>Cell culture model <span className="normal">(free text)</span>:</span>}
+                    <Input type="textarea" ref="rescue.cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('rescue.cellCultureFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.cellCultureFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={RES_cellCultureFreeText} inputDisabled={this.cv.othersAssessed} row="2"
@@ -2356,13 +2357,13 @@ function TypeRescue() {
                     <p className="col-sm-7 col-sm-offset-5">
                         Search the <a href={external_url_map['CL']} target="_blank">Cell Ontology (CL)</a> using the OLS.
                     </p>
-                    <Input type="textarea" ref="rescue.patientCells" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
+                    <Input type="textarea" ref="rescue.patientCells" label={<span>Patient cell type/line <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCells')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
                         rows="1" value={RES_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescuePCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
-                    <Input type="textarea" ref="rescue.patientCellsFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
+                    <Input type="textarea" ref="rescue.patientCellsFreeText" label={<span>Patient cell type/line <span className="normal">(free text)</span>:</span>}
                         error={this.getFormError('rescue.patientCellsFreeText')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCellsFreeText')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                         value={RES_patientCellsFreeText} inputDisabled={this.cv.othersAssessed} row="2"
