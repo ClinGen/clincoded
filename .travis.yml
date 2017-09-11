@@ -35,7 +35,6 @@ install:
   - npm config set python /usr/bin/python2.7
   - python bootstrap.py -v 2.3.1 --setuptools-version 15.2
   - bin/buildout -c buildout-travis.cfg || (echo "Retrying buildout" && bin/buildout -c buildout-travis.cfg)
-  - pip install six --upgrade
 before_script:
   - >
     if test -n "$BROWSER"; then
