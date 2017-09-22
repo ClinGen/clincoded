@@ -38,4 +38,14 @@
             border-right: none;
         }
     }
+
+    .evidence-summary {
+        &.panel-case-level {
+            .evidence-variant {
+                .variant-info {
+                    margin: 6px 0;
+                }
+            }
+        }
+    }
 }
