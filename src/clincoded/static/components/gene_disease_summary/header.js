@@ -2,42 +2,33 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { userMatch } from '../globals';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            gdm: this.props.gdm,
+            provisional: this.props.provisional
+        };
     }
 
-    /**
-     * Method to find the saved classification belonging to the currently logged-in user
-     * @param {array} classifications - provisional classifications saved by individual curators
-     * @param {object} session - user session in the browser
-     */
-    findClassification(classifications, session) {
-        let provisional;
-        if (classifications.length) {
-            classifications.forEach(item => {
-                if (userMatch(item.submitted_by, session)) {
-                    provisional = item;
-                }
-            });
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.gdm) {
+            this.setState({gdm: nextProps.gdm});
         }
-        return provisional;
+        if (nextProps.provisional) {
+            this.setState({provisional: nextProps.provisional});
+        }
     }
 
     render() {
-        const gdm = this.props.gdm, session = this.props.session;
+        const gdm = this.state.gdm;
+        const provisional = this.state.provisional;
         // Expecting the required fields of a GDM to always have values:
         // e.g. gene, disease, mode of inheritance
-        const gene = gdm && gdm.gene,
-            disease = gdm && gdm.disease,
-            modeInheritance = gdm && gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
+        const gene = gdm && gdm.gene, disease = gdm && gdm.disease;
+        const modeInheritance = gdm && gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
         const modeInheritanceAdjective = gdm && gdm.modeInheritanceAdjective ? gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
-        // Provisional classification array may have 0 length
-        // if none of the curators have saved their individual summaries
-        const provisionalClassifications = gdm && gdm.provisionalClassifications && gdm.provisionalClassifications.length ? gdm.provisionalClassifications : [];
-        const provisional = this.findClassification(provisionalClassifications, session);
 
         return (
             <div className="evidence-summary panel-header">
@@ -51,7 +42,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                     <div className="panel-body">
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Summary owner:</dt>
-                            <dd className="summaryOwnerName">{session && session.user_properties ? session.user_properties.title : null}</dd>
+                            <dd className="summaryOwnerName">{provisional && provisional.submitted_by ? provisional.submitted_by.title : null}</dd>
                             <dt>Calculated Provisional classification:</dt>
                             <dd className="provisionalClassificationSaved">{provisional ? provisional.autoClassification : null}</dd>
                             <dt>Modified Provisional Classification:</dt>
@@ -74,7 +65,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
 
 GeneDiseaseEvidenceSummaryHeader.propTypes = {
     gdm: PropTypes.object,
-    session: PropTypes.object
+    provisional: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummaryHeader;
