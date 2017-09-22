@@ -112,5 +112,11 @@
         "title": "Add Disease",
         "status": "released",
         "uuid": "bf6bc011-2130-4390-af50-a076618cb9e6"
+    },
+    {
+        "name": "gene-disease-evidence-summary",
+        "title": "Gene Disease Evidence Summary",
+        "status": "released",
+        "uuid": "fbd06c17-8107-4f19-8db8-547f52f338a1"
     }
 ]
