@@ -67,6 +67,11 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 <td className="evidence-lod-score">
                     {evidence.segregationLodScore}
                 </td>
+                <td className="evidence-lod-score-counted">
+                    {evidence.segregationLodScore ?
+                        <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span>
+                        : null}
+                </td>
                 <td className="evidence-previous-testing">
                     {evidence.previousTesting}
                 </td>
@@ -109,7 +114,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2">Age</th>
                                     <th rowSpan="2">Ethnicity</th>
                                     <th rowSpan="2">Phenotypes</th>
-                                    <th colSpan="3">Segregations</th>
+                                    <th colSpan="4">Segregations</th>
                                     <th rowSpan="2">Previous testing</th>
                                     <th rowSpan="2">Methods of detection</th>
                                     <th rowSpan="2">Proband score (default)</th>
@@ -118,6 +123,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th># Aff</th>
                                     <th># Unaff</th>
                                     <th>LOD score</th>
+                                    <th>Counted</th>
                                 </tr>
                             </thead>
                             <tbody>
