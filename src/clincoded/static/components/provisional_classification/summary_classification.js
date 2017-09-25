@@ -15,7 +15,6 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
         gdm: PropTypes.object,
         provisional: PropTypes.object,
         user: PropTypes.string,
-        updateGdmObj: PropTypes.func,
         totalScore: PropTypes.string,
         autoClassification: PropTypes.string,
         replicatedOverTime: PropTypes.bool,
