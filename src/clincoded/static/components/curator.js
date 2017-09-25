@@ -325,7 +325,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                             {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
                                                 <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
                                                     clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
-                                            : null}
+                                                : null}
                                         </span>
                                         <span>&nbsp;
                                             {this.props.linkGdm ?
@@ -346,33 +346,33 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     <strong>Last Saved Summary & Provisional Classification</strong>
                                                 </div>
                                                 { provisionalExist ?
-                                                        <div>
-                                                            <div className="provisional-data-left">
-                                                                <span>
-                                                                    Last Saved Summary<br />
-                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                                </span>
-                                                            </div>
-                                                            <div className="provisional-data-center">
-                                                                <span>
-                                                                    Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                    Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
-                                                                    { summaryPage ?
-                                                                        null
-                                                                        :
-                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
-                                                                    }
-                                                                </span>
-                                                            </div>
+                                                    <div>
+                                                        <div className="provisional-data-left">
+                                                            <span>
+                                                                Last Saved Summary<br />
+                                                                Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                            </span>
                                                         </div>
+                                                        <div className="provisional-data-center">
+                                                            <span>
+                                                                Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
+                                                                Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
+                                                                { summaryPage ?
+                                                                    null
+                                                                    :
+                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-classification/?gdm=' + gdm.uuid + '&edit=true'}><strong>Edit Classification</strong></a>]</span>
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                     :
-                                                        <div className="provisional-data-left"><span>None</span></div>
+                                                    <div className="provisional-data-left"><span>None</span></div>
                                                 }
                                             </td>
                                             <td className="button-box" rowSpan="2">
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-classification/?gdm=' + gdm.uuid + '&calculate=yes'}>
                                                             { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
                                                         </a>
                                                         : null
@@ -2296,7 +2296,8 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification", "reasons", "active"
+    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
+    "provisionalClassificationStatus", "evidenceSummary", "reasons", "active"
 ];
 
 function flattenProvisional(provisional) {
