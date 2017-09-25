@@ -38,6 +38,20 @@
             "type": "string",
             "default": ""
         },
+        "provisionalClassificationStatus": {
+            "title": "Mark status As Provisional Classification",
+            "description": "Flag to mark classification status as provisional",
+            "type": "string",
+            "enum": [
+                "In progress",
+                "Provisional"
+            ]
+        },
+        "evidenceSummary": {
+            "title": "Evidence Summary",
+            "description": "Evidence summary for the classification",
+            "type": "string"
+        },
         "replicatedOverTime": {
             "title": "Replication Over Time",
             "description": "Boolean value for greater than 2 pubs with convincing evidence over time",
