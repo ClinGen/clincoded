@@ -61,7 +61,6 @@ class GeneDiseaseScoreMatrix extends Component {
             });
         }
         if (this.state.gdm && Object.keys(this.state.gdm).length) {
-            console.warn('Calling calculate score table from componentDidMount()');
             this.calculateScoreTable();
         }
     }
@@ -84,7 +83,6 @@ class GeneDiseaseScoreMatrix extends Component {
             });
         }
         if (this.state.gdm && Object.keys(this.state.gdm).length) {
-            console.warn('Calling calculate score table from componentWillReceiveProps(nextProps)...');
             this.calculateScoreTable();
         }
         this.setState({disabledInput: this.state.disabledInput});
