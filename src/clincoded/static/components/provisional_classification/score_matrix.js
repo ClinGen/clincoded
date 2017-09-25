@@ -593,7 +593,7 @@ class GeneDiseaseScoreMatrix extends Component {
                                 <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
                                 <td>{this.state.totalScore}</td>
                                 <td>
-                                    {this.props.editKey && this.props.editKey === 'true' ?
+                                    {(this.props.editKey && this.props.editKey === 'true') || (this.props.calculateKey && this.props.calculateKey === 'yes')  ?
                                         <input type="checkbox" className="checkbox"
                                             ref={(checkbox) => { this.checkboxInput = checkbox; }}
                                             onChange={this.handleReplicatedOverTime}
@@ -651,7 +651,7 @@ class GeneDiseaseScoreMatrix extends Component {
                         autoClassification={this.state.autoClassification}
                         replicatedOverTime={this.state.replicatedOverTime}
                         contradictingEvidence={this.state.contradictingEvidence}
-                        editKey={this.props.editKey} />
+                        editKey={this.props.editKey} calculateKey={this.props.calculateKey} />
                     : null}
             </div>
         );
@@ -663,7 +663,8 @@ GeneDiseaseScoreMatrix.propTypes = {
     provisional: PropTypes.object,
     user: PropTypes.string,
     isProvisionalClassification: PropTypes.bool,
-    editKey: PropTypes.string
+    editKey: PropTypes.string,
+    calculateKey: PropTypes.string
 };
 
 export default GeneDiseaseScoreMatrix;
