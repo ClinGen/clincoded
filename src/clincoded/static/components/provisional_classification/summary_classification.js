@@ -19,7 +19,8 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
         autoClassification: PropTypes.string,
         replicatedOverTime: PropTypes.bool,
         contradictingEvidence: PropTypes.object,
-        editKey: PropTypes.string
+        editKey: PropTypes.string,
+        calculateKey: PropTypes.string
     },
 
     getInitialState() {
@@ -191,7 +192,8 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
     render() {
         let gdm = this.state.gdm ? this.state.gdm : null;
         let autoClassification = this.props.autoClassification;
-        let edit = this.props.editKey && this.props.editKey === 'true' ? 'yes' : 'no';
+        let edit = this.props.editKey && this.props.editKey === 'true' ? true : false;
+        let calculate = this.props.calculateKey && this.props.calculateKey === 'yes' ? true : false;
         // set the 'Current Classification' appropriately only if previous provisional exists
         let provisional = this.state.provisional;
         let currentClassification = 'None';
@@ -216,7 +218,7 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
                                                 <Input type="select" ref="alteredClassification"
                                                     label={<strong>Modify <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                                                    defaultValue={this.state.alteredClassification} handleChange={this.handleChange} inputDisabled={edit === 'no' ? true : false}>
+                                                    defaultValue={this.state.alteredClassification} handleChange={this.handleChange} inputDisabled={edit || calculate ? false : true}>
                                                     <option value="No Selection">No Selection</option>
                                                     {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
                                                     {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
@@ -230,18 +232,18 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
                                             <div className="altered-classification-reasons">
                                                 <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
                                                     wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
-                                                    clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange} inputDisabled={edit === 'no' ? true : false} />
+                                                    clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange} inputDisabled={edit || calculate ? false : true} />
                                             </div>
                                         </div>
                                         <div className="col-xs-12 col-sm-6">
                                             <div className="classification-status">
                                                 <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
                                                 <Input type="checkbox" ref="classification-status" checked={this.state.provisionalClassificationStatusChecked} handleChange={this.handleChange}
-                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" inputDisabled={edit === 'no' ? true : false} />
+                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" inputDisabled={edit || calculate ? false : true} />
                                             </div>
                                             <div className="classification-evidence-summary">
                                                 <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
-                                                    value={this.state.evidenceSummary} handleChange={this.handleChange} inputDisabled={edit === 'no' ? true : false}
+                                                    value={this.state.evidenceSummary} handleChange={this.handleChange} inputDisabled={edit || calculate ? false : true}
                                                     placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="5"
                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                             </div>
@@ -252,7 +254,7 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
                         </tbody>
                     </table>
                 </div>
-                {this.props.editKey && this.props.editKey === 'true' ?
+                {(this.props.editKey && this.props.editKey === 'true') || (this.props.calculateKey && this.props.calculateKey === 'yes') ?
                     <div className='modal-footer'>
                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancelForm} title="Cancel" />
                         <Input type="button" inputClassName={(currentClassification && currentClassification !== 'None' ? "btn-info" : "btn-primary") + " btn-inline-spacer pull-right submit"}
