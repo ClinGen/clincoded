@@ -30,7 +30,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             gdm: null, // The gdm object associated with the eivdence
             provisional: {}, // Logged-in user's existing provisional object
             caseLevelEvidenceList: [],
-            segregationEvidenceList: [],
             caseControlEvidenceList: [],
             experimentalEvidenceList: []
         };
@@ -81,6 +80,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
             // Parse proband evidence and its associated segregation data
             this.parseCaseLevelEvidence(annotations, user);
+            // Parse segregation evidence with LOD scores but without proband
+            // this.parseCaseLevelSegregationEvidence(annotations, user);
             // Parse case-control evidence and its associated disease data
             this.parseCaseControlEvidence(annotations, user);
             // Parse experimental evidence and its associated annotation data
@@ -132,11 +133,10 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      */
     parseCaseLevelEvidence(annotations, user) {
         let caseLevelEvidenceList = this.state.caseLevelEvidenceList;
-        let segregationEvidenceList = this.state.segregationEvidenceList;
         /*****************************************************/
         /* Find all proband individuals that had been scored */
         /*****************************************************/
-        let probandTotal = [], tempFamilyScraperValues = [], segregationTotal = [];
+        let probandTotal = [], tempFamilyScraperValues = [];
 
         if (annotations.length) {
             annotations.forEach(annotation => {
@@ -160,19 +160,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 let families = annotation.families && annotation.families.length ? annotation.families : [];
                 tempFamilyScraperValues = this.familyScraper(families, individualMatched);
                 individualMatched = tempFamilyScraperValues;
-                // Find all segregation without proband
-                families.forEach(family => {
-                    if (family.segregation && family.individualIncluded && family.individualIncluded.length) {
-                        family.individualIncluded.forEach(individual => {
-                            if (!individual.proband || typeof individual.proband === 'undefined') {
-                                segregationTotal.push(family);
-                            }
-                        });
-                    }
-                    if (family.segregation && (!family.individualIncluded || (family.individualIncluded && !family.individualIncluded.length))) {
-                        segregationTotal.push(family);
-                    }
-                });
 
                 // push all matched individuals from families and families of groups to probandTotal
                 individualMatched.forEach(item => {
@@ -192,24 +179,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 }
             });
         }
-
-        // Iterate segregations
-        segregationTotal.forEach(family => {
-            if (family.submitted_by.uuid === user) {
-                let segregation = family.segregation ? family.segregation : null;
-                let segregationEvidence = {};
-                if (segregation && (segregation.estimatedLodScore || segregation.publishedLodScore)) {
-                    segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
-                    segregationEvidence['segregationNumUnaffected'] = segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
-                    segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
-                    segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
-                    segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation');
-                    // Put object into array
-                    segregationEvidenceList.push(segregationEvidence);
-                    this.setState({segregationEvidenceList: segregationEvidenceList});
-                }
-            }
-        });
 
         // Iterate probands
         probandTotal.forEach(proband => {
@@ -280,6 +249,85 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 });
             }
         });
+    },
+
+    /**
+     * Method to loop through families (of GDM or of group) and find all family evidence without proband
+     * @param {array} families - a list of family evidence
+     * @param {array} familyMatched - list of matched family evidence
+     */
+    segregationScraper(families, familyMatched) {
+        if (families && families.length) {
+            families.forEach(family => {
+                if (family.segregation) {
+                    if (family.individualIncluded && family.individualIncluded.length) {
+                        family.individualIncluded.forEach(individual => {
+                            if (!individual.proband || typeof individual.proband === 'undefined') {
+                                familyMatched.push(family);
+                            }
+                        });
+                    }
+                    if (!family.individualIncluded || (family.individualIncluded && !family.individualIncluded.length)) {
+                        familyMatched.push(family);
+                    }
+                }
+            });
+        }
+        return familyMatched;
+    },
+
+    /**
+     * Method to find the case level segregation evidence entries both created
+     * by the currently logged-in user and having LOD scores but without proband
+     * @param {array} annotations - a list of annotations in a given gdm
+     * @param {string} user - user's uuid
+     */
+    parseCaseLevelSegregationEvidence(annotations, user) {
+        let segregationEvidenceList = [];
+        let segregationTotal = [], tempSegregationScraperValues = [];
+        if (annotations.length) {
+            annotations.forEach(annotation => {
+                let familyMatched = [];
+                // Iterate groups
+                let groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
+                if (groups && groups.length) {
+                    groups.forEach(group => {
+                        families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
+                        tempSegregationScraperValues = this.segregationScraper(families, familyMatched);
+                        familyMatched = tempSegregationScraperValues;
+                    });
+                }
+
+                // Iterate families and find all segregation without proband
+                let families = annotation.families && annotation.families.length ? annotation.families : [];
+                tempSegregationScraperValues = this.segregationScraper(families, familyMatched);
+                familyMatched = tempSegregationScraperValues;
+
+                // Push all matched families to segregationTotal
+                familyMatched.forEach(item => {
+                    segregationTotal.push(item);
+                });
+            });
+        }
+
+        // Iterate segregations
+        segregationTotal.forEach(family => {
+            let segregationEvidence = {};
+            if (family.submitted_by.uuid === user) {
+                let segregation = family.segregation ? family.segregation : null;
+                if (segregation && (segregation.estimatedLodScore || segregation.publishedLodScore)) {
+                    segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
+                    segregationEvidence['segregationNumUnaffected'] = segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
+                    segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
+                    segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
+                    segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation');
+                    // Put object into array
+                    segregationEvidenceList.push(segregationEvidence);
+                }
+            }
+        });
+
+        return segregationEvidenceList;
     },
 
     /**
@@ -477,12 +525,13 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     render() {
         const gdm = this.state.gdm;
         const provisional = this.state.provisional;
+        const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
 
         return (
             <div className="gene-disease-evidence-summary-wrapper">
                 <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
                 <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
-                <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} />
+                <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.parseCaseLevelSegregationEvidence(annotations, this.state.user)} />
                 <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
                 <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                 <GeneDiseaseScoreMatrix user={this.state.user} gdm={gdm} provisional={provisional} />
