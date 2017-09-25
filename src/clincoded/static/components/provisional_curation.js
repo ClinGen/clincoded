@@ -523,15 +523,15 @@ var ProvisionalCuration = createReactClass({
         scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
 
         tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
-        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
+        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? parseFloat(tempPoints).toFixed(2) : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
 
         tempPoints = scoreTableValues['functionalPointsCounted'] + scoreTableValues['functionalAlterationPointsCounted'] + scoreTableValues['modelsRescuePointsCounted'];
-        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? tempPoints : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
+        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? parseFloat(tempPoints).toFixed(2) : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
 
-        let totalScore = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
+        let totalScore = parseFloat(scoreTableValues['geneticEvidenceTotalPoints']) + parseFloat(scoreTableValues['experimentalEvidenceTotalPoints']);
 
         // set scoreTabValues state
-        this.setState({totalScore: totalScore, contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
+        this.setState({totalScore: parseFloat(totalScore).toFixed(2), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
 
         // set classification
         this.calculateClassifications(totalScore, this.state.replicatedOverTime);

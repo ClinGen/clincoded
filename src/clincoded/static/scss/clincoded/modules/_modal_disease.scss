@@ -6,10 +6,6 @@
         .row {
             margin: 0;
 
-            .ontology-lookup-note {
-                margin-left: 15px;
-            }
-
             .form-group {
                 margin: 0;
 
@@ -27,7 +23,25 @@
                 }
 
                 &.disease-id-input {
-                    margin: 15px 0 0 0;
+                    margin: 0;
+
+                    .resource-input {
+                        label {
+                            ol {
+                                padding-left: 15px;
+
+                                li {
+                                    display: list-item;
+                                    margin-top: 10px;
+                                    padding: 0
+                                }
+                            }
+
+                            .required-field {
+                                display: none;
+                            }
+                        }
+                    }
 
                     input[type='text'] {
                         float: none;
@@ -93,7 +107,7 @@
                 }
 
                 &.disease-freetext-input {
-                    margin: 15px 0 0 0;
+                    margin: 0;
 
                     p {
                         margin: 5px 15px 20px 15px;
