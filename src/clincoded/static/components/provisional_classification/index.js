@@ -33,6 +33,7 @@ var ProvisionalClassification = createReactClass({
             gdm: null, // current gdm object, must be null initially.
             provisional: {}, // login user's existing provisional object, must be null initially.
             editKey: queryKeyValue('edit', this.props.href),
+            calculateKey: queryKeyValue('calculate', this.props.href)
         };
     },
 
@@ -123,7 +124,7 @@ var ProvisionalClassification = createReactClass({
                                     will then represent the new "Last Saved Summary & Provisional Classification".
                                 </div>
                                 <GeneDiseaseScoreMatrix user={this.state.user} gdm={gdm} provisional={provisional}
-                                    isProvisionalClassification={true} editKey={this.state.editKey} />
+                                    isProvisionalClassification={true} editKey={this.state.editKey} calculateKey={this.state.calculateKey} />
                             </div>
                         </div>
                         :
