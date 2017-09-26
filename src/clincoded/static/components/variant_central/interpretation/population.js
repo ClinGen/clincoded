@@ -494,8 +494,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             <tr key={key} className="page-data-item">
                 <td>{populationStatic.page._labels[popKey]}</td>
                 <td>{pageObj['nobs']}</td>
-                <td>{this.parseFloatShort(pageObj['alleles'][0]) + ': ' + this.parseFloatShort(pageObj['freq'][0])}</td>
                 <td>{this.parseFloatShort(pageObj['alleles'][1]) + ': ' + this.parseFloatShort(pageObj['freq'][1])}</td>
+                <td>{this.parseFloatShort(pageObj['alleles'][0]) + ': ' + this.parseFloatShort(pageObj['freq'][0])}</td>
             </tr>
         );
     },
