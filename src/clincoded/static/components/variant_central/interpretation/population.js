@@ -485,15 +485,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     /* The following methods are related to the rendering of population data tables */
     /**
      * Method to render a row of data for the PAGE table
+     * @param {object} pageObj - Individual PAGE population data object (e.g. African American)
+     * @param {number} key - Unique number
      */
     renderPageRow(pageObj, key) {
-        let populationKey = pageObj['pop'];
+        let popKey = pageObj['pop'];
         return (
             <tr key={key} className="page-data-item">
-                <td>{populationStatic.page._labels[populationKey]}</td>
+                <td>{populationStatic.page._labels[popKey]}</td>
                 <td>{pageObj['nobs']}</td>
-                <td>{(pageObj['alleles'].length ? pageObj['alleles'][0] : null) + ': ' + (pageObj['freq'].length ? pageObj['freq'][0] : null)}</td>
-                <td>{(pageObj['alleles'].length ? pageObj['alleles'][1] : null) + ': ' + (pageObj['freq'].length ? pageObj['freq'][1] : null)}</td>
+                <td>{this.parseFloatShort(pageObj['alleles'][0]) + ': ' + this.parseFloatShort(pageObj['freq'][0])}</td>
+                <td>{this.parseFloatShort(pageObj['alleles'][1]) + ': ' + this.parseFloatShort(pageObj['freq'][1])}</td>
             </tr>
         );
     },
@@ -665,21 +667,28 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return retVal;
     },
 
-    // Method to render PAGE population table header content
+    /**
+     * Method to render PAGE population table header content
+     * @param {boolean} hasPageData - Flag for response from querying PAGE Rest api
+     * @param {boolean} loading_pageData - Flag for status on receiving/loading data
+     * @param {object} pageVariant - Data object abstracted from PAGE response
+     * @param (boolean) singleNucleotide - Flag for  single nucleotide variant
+     */
     renderPageHeader: function(hasPageData, loading_pageData, pageVariant, singleNucleotide) {
+        const variantData = this.state.data;
+        const nc_genomic = variantData && variantData.hgvsNames && variantData.hgvsNames.GRCh37 ? variantData.hgvsNames.GRCh37 : null;
         if (hasPageData && !loading_pageData && singleNucleotide) {
-            const variantPage = pageVariant.chrom + ':' + pageVariant.pos + ' ' + pageVariant['alleles'][0] + '/' + pageVariant['alleles'][1];
-            // const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+            // const variantPage = pageVariant.chrom + ':' + pageVariant.pos + ' ' + pageVariant['alleles'][0] + '/' + pageVariant['alleles'][1];
             return (
-                <h3 className="panel-title">PAGE {variantPage}
-                    <a href="https://www.pagestudy.org/" className="credit-pagestudy" title="pagestudy.org"><span>Population Study</span></a>
-                    <a className="panel-subtitle pull-right" href="https://www.pagestudy.org/" target="_blank">See data in GGV</a>
+                <h3 className="panel-title">PAGE: {nc_genomic} (GRCh37)
+                    <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><span>(PAGE Study)</span></a>
+                    <a className="panel-subtitle pull-right" href="https://popgen.uchicago.edu/" target="_blank" rel="noopener noreferrer">See data in GGV</a>
                 </h3>
             );
         } else {
             return (
-                <h3 className="panel-title">PAGE
-                    <a href="https://www.pagestudy.org/" className="credit-pagestudy" title="pagestudy.org"><span>Population Study</span></a>
+                <h3 className="panel-title">PAGE: {nc_genomic} (GRCh37)
+                    <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><span>(PAGE Study)</span></a>
                 </h3>
             );
         }
@@ -811,7 +820,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return sortedKeys;
     },
 
-    render: function() {
+    render() {
         var exacStatic = populationStatic.exac,
             tGenomesStatic = populationStatic.tGenomes,
             espStatic = populationStatic.esp;
@@ -831,26 +840,26 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             <div className="variant-interpretation population">
                 <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
                     {(this.state.data && this.state.interpretation) ?
-                    <div className="row">
-                        <div className="col-sm-12">
-                            <CurationInterpretationForm renderedFormContent={criteriaGroup1}
-                                evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
-                                formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
-                                criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
-                                interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <CurationInterpretationForm renderedFormContent={criteriaGroup1}
+                                    evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
+                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
+                                    criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            </div>
                         </div>
-                    </div>
-                    : null}
+                        : null}
                     {populationObjDiffFlag ?
                         <div className="row">
                             <p className="alert alert-warning">
                                 <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
                             </p>
                         </div>
-                    : null}
+                        : null}
 
                     <div className="bs-callout bs-callout-info clearfix">
-                        <h4>Subpopulation with Highest Minor Allele Frequency</h4>
+                        <h4>Subpopulation with Highest Minor Allele Frequency <span className="header-note">(Note: this calculation does not currently include PAGE study minor allele data)</span></h4>
                         <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of ExAC, 1000 Genomes, and ESP shown below.</p>
                         <div className="clearfix">
                             <div className="bs-callout-content-container">
@@ -877,46 +886,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         : null}
                                 </dl>
                             </div>
-                        </div>
-                    </div>
-                    <div className="panel panel-info datasource-PAGE">
-                        <div className="panel-heading">
-                            {this.renderPageHeader(this.state.hasPageData, this.state.loading_pageData, pageVariant, singleNucleotide)}
-                        </div>
-                        <div className="panel-content-wrapper">
-                            {this.state.loading_pageData ? showActivityIndicator('Retrieving data... ') : null}
-                            {!singleNucleotide ?
-                                <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
-                                </div>
-                                :
-                                <div>
-                                    {this.state.hasPageData ?
-                                        <div>
-                                            <table className="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Population</th>
-                                                        <th>Observation Count</th>
-                                                        <th colSpan="2">Allele Frequency</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {pageData.length ?
-                                                        pageData.map((item, i) => {
-                                                            return (this.renderPageRow(item, i));
-                                                        })
-                                                        : null}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        :
-                                        <div className="panel-body">
-                                            <span>No population data was found for this allele in PAGE. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
-                                        </div>
-                                    }
-                                </div>
-                            }
                         </div>
                     </div>
                     <div className="panel panel-info datasource-ExAC">
@@ -989,6 +958,46 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </ul>
                             </div>
                         }
+                    </div>
+                    <div className="panel panel-info datasource-PAGE">
+                        <div className="panel-heading">
+                            {this.renderPageHeader(this.state.hasPageData, this.state.loading_pageData, pageVariant, singleNucleotide)}
+                        </div>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_pageData ? showActivityIndicator('Retrieving data... ') : null}
+                            {!singleNucleotide ?
+                                <div className="panel-body">
+                                    <span>Data is currently only returned for single nucleotide variants. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
+                                </div>
+                                :
+                                <div>
+                                    {this.state.hasPageData ?
+                                        <div>
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Population</th>
+                                                        <th>Observation Count</th>
+                                                        <th colSpan="2">Allele Frequency</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {pageData.length ?
+                                                        pageData.map((item, i) => {
+                                                            return (this.renderPageRow(item, i));
+                                                        })
+                                                        : null}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        :
+                                        <div className="panel-body">
+                                            <span>No population data was found for this allele in PAGE. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </div>
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
@@ -1078,6 +1087,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
                 : null}
+
+                {renderDataCredit('pagestudy')}
 
                 {renderDataCredit('myvariant')}
 
