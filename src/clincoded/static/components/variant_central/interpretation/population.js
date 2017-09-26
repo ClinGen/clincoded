@@ -682,7 +682,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">PAGE: {nc_genomic} (GRCh37)
                     <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><span>(PAGE Study)</span></a>
-                    <a className="panel-subtitle pull-right" href="https://popgen.uchicago.edu/" target="_blank" rel="noopener noreferrer">See data in GGV</a>
+                    <a className="panel-subtitle pull-right" href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">See data in GGV</a>
                 </h3>
             );
         } else {
@@ -967,7 +967,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             {this.state.loading_pageData ? showActivityIndicator('Retrieving data... ') : null}
                             {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
+                                    <span>Data is currently only returned for single nucleotide variants. <a href="http://popgen.uchicago.edu/ggv/" target="_blank">Search PAGE</a> for this variant.</span>
                                 </div>
                                 :
                                 <div>
@@ -992,7 +992,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         </div>
                                         :
                                         <div className="panel-body">
-                                            <span>No population data was found for this allele in PAGE. <a href={this.renderExacLinkout(this.props.ext_myVariantInfo)} target="_blank">Search PAGE</a> for this variant.</span>
+                                            <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank">Search PAGE</a> for this variant.</span>
                                         </div>
                                     }
                                 </div>
