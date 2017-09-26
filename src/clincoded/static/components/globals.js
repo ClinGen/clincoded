@@ -224,7 +224,8 @@ module.exports.external_url_map = {
     'Bustamante': '//predictvar.bustamante-lab.net/variant/position/',
     'MeSH': 'https://www.ncbi.nlm.nih.gov/mesh?term=',
     'gnomAD': '//gnomad.broadinstitute.org/variant/',
-    'gnomADHome': 'http://gnomad.broadinstitute.org/'
+    'gnomADHome': 'http://gnomad.broadinstitute.org/',
+    'PAGE': '//popgen.uchicago.edu/dev-integrated/api/variant/PAGE-broad/'
 };
 
 
