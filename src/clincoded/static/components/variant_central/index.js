@@ -343,7 +343,7 @@ var VariantCurationHub = createReactClass({
             let position = hgvsParts[1].replace(/[^\d]/g, '');
             let pageDataVariantId = hgvsParts[0] + ':' + position;
             if (pageDataVariantId) {
-                this.getRestData('https:' + external_url_map['PAGE'] + pageDataVariantId).then(response => {
+                this.getRestData(external_url_map['PAGE'] + pageDataVariantId).then(response => {
                     this.setState({ext_pageData: response, loading_pageData: false});
                 }).catch(err => {
                     this.setState({loading_pageData: false});
