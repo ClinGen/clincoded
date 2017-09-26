@@ -23,10 +23,9 @@ var extraEvidence = require('./shared/extra_evidence');
 
 var populationStatic = {
     page: {
-        _order: ['aan', 'asn', 'can', 'cbn', 'dmn', 'mxn', 'nan', 'nhn', 'prn', 'san', 'sas'],
         _labels: {
-            aan: 'African American', asn: 'Asian', can: 'Central American', cbn: 'Cuban', dmn: 'Dominican', mxn: 'Mexican',
-            nan: 'Native American', nhn: 'Native Hawaiian', prn: 'Puerto Rican', san: 'South American', sas: 'South Asian'
+            AfricanAmerican: 'African American', Asian: 'Asian', CentralAmerican: 'Central American', Cuban: 'Cuban', Dominican: 'Dominican', Mexican: 'Mexican',
+            NativeAmerican: 'Native American', NativeHawaiian: 'Native Hawaiian', PuertoRican: 'Puerto Rican', SouthAmerican: 'South American', SouthAsian: 'South Asian'
         }
     },
     exac: {
@@ -82,9 +81,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 highestMAF: null,
                 desiredCI: 95,
                 mafCutoff: 5,
-                page: {
-                    aan: {}, asn: {}, can: {}, cbn: {}, dmn: {}, mxn: {}, nan: {}, nhn: {}, prn: {}, san: {}, sas: {}
-                },
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
@@ -492,12 +488,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
      * Method to render a row of data for the PAGE table
      */
     renderPageRow(pageObj, key) {
+        let populationKey = pageObj['pop'];
         return (
             <tr key={key} className="page-data-item">
-                <td>{pageObj['pop']}</td>
+                <td>{populationStatic.page._labels[populationKey]}</td>
                 <td>{pageObj['nobs']}</td>
-                <td>{(pageObj['alleles'] && pageObj['alleles'].length ? pageObj['alleles'][0] : null) + ':' + (pageObj['freq'] && pageObj['freq'].length ? pageObj['freq'][0] : null)}</td>
-                <td>{(pageObj['alleles'] && pageObj['alleles'].length ? pageObj['alleles'][1] : null) + ':' + (pageObj['freq'] && pageObj['freq'].length ? pageObj['freq'][1] : null)}</td>
+                <td>{(pageObj['alleles'].length ? pageObj['alleles'][0] : null) + ': ' + (pageObj['freq'].length ? pageObj['freq'][0] : null)}</td>
+                <td>{(pageObj['alleles'].length ? pageObj['alleles'][1] : null) + ': ' + (pageObj['freq'].length ? pageObj['freq'][1] : null)}</td>
             </tr>
         );
     },
