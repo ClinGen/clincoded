@@ -53,5 +53,13 @@ export function renderDataCredit(source) {
                 </div>
             </div>
         );
+    }  else if (source === 'pagestudy') {
+        return (
+            <div className="credits">
+                <div className="credit credit-pagestudy" id="credit-pagestudy"><a name="credit-pagestudy"></a>
+                    <span className="credit-pagestudy"><span>PAGE</span></span> - <a href="https://www.pagestudy.org/" target="_blank">Population Architecture using Genomics and Epidemiology</a>
+                </div>
+            </div>
+        );
     }
 }
