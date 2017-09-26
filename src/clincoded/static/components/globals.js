@@ -225,7 +225,7 @@ module.exports.external_url_map = {
     'MeSH': 'https://www.ncbi.nlm.nih.gov/mesh?term=',
     'gnomAD': '//gnomad.broadinstitute.org/variant/',
     'gnomADHome': 'http://gnomad.broadinstitute.org/',
-    'PAGE': '//popgen.uchicago.edu/dev-integrated/api/variant/PAGE-broad/'
+    'PAGE': 'https://popgen.uchicago.edu/dev-integrated/api/variant/PAGE-broad/'
 };
 
 
