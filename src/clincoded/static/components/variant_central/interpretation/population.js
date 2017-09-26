@@ -69,7 +69,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
             ensembl_exac_allele: {},
-            interpretationUuid: this.props.interpretationUuid,
             hasMultiAllelicExacAllele: false, // flag to display message regarding multi-allelic ExAC alleles
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
