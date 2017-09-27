@@ -2512,7 +2512,7 @@ function ExperimentalDataVariant() {
                                             : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelCARVariant />}</label></span>
+                                                <span className="col-sm-5 control-label"><label>{LabelCARVariant(this.state.variantRequired)}</label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
@@ -2570,8 +2570,8 @@ const LabelClinVarVariantTitle = () => {
     return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
 };
 
-const LabelCARVariant = () => {
-    return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{this.props.variantRequired ? ' *' : null}</strong></span>;
+const LabelCARVariant = variantRequired => {
+    return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{variantRequired ? ' *' : null}</strong></span>;
 };
 
 const LabelCARVariantTitle = () => {
