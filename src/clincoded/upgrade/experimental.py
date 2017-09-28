@@ -23,25 +23,84 @@ def experimental_1_2(value, system):
 
 @upgrade_step('experimental', '2', '3')
 def experimental_2_3(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1446
+    # https://github.com/ClinGen/clincoded/issues/1444
     # https://github.com/ClinGen/clincoded/issues/1335
-    if 'rescue' in value:
-        if 'patientCellOrEngineeredEquivalent' in value['rescue']:
-            if value['rescue']['patientCellOrEngineeredEquivalent'] == 'Engineered equivalent':
-                value['rescue']['patientCellOrEngineeredEquivalent'] = 'Cell-culture model'
+    if 'functionalAlteration' in value:
+        if 'cellMutationOrEngineeredEquivalent' in value['functionalAlteration']:
+            if value['functionalAlteration']['cellMutationOrEngineeredEquivalent'] == 'Engineered equivalent':
+                value['functionalAlteration']['functionalAlterationType'] = 'Non-patient cells'
+            else:
+                value['functionalAlteration']['functionalAlterationType'] = value['functionalAlteration']['cellMutationOrEngineeredEquivalent']
+            value['functionalAlteration'].pop('cellMutationOrEngineeredEquivalent', None)
+        if 'patientCellType' in value['functionalAlteration']:
+            if value['functionalAlteration']['patientCellType'] != '':
+                value['functionalAlteration']['patientCells'] = value['functionalAlteration']['patientCellType']
+            else:
+                value['functionalAlteration']['patientCells'] = ''
+            value['functionalAlteration'].pop('patientCellType', None)
+        if 'patientCellTypeFreeText' in value['functionalAlteration']:
+            if value['functionalAlteration']['patientCellTypeFreeText'] != '':
+                value['functionalAlteration']['patientCellsFreeText'] = value['functionalAlteration']['patientCellTypeFreeText']
+            else:
+                value['functionalAlteration']['patientCellsFreeText'] = ''
+            value['functionalAlteration'].pop('patientCellTypeFreeText', None)
+        if 'engineeredEquivalentCellType' in value['functionalAlteration']:
+            if value['functionalAlteration']['engineeredEquivalentCellType'] != '':
+                value['functionalAlteration']['nonPatientCells'] = value['functionalAlteration']['engineeredEquivalentCellType']
+            else:
+                value['functionalAlteration']['nonPatientCells'] = ''
+            value['functionalAlteration'].pop('engineeredEquivalentCellType', None)
+        if 'engineeredEquivalentCellTypeFreeText' in value['functionalAlteration']:
+            if value['functionalAlteration']['engineeredEquivalentCellTypeFreeText'] != '':
+                value['functionalAlteration']['nonPatientCellsFreeText'] = value['functionalAlteration']['engineeredEquivalentCellTypeFreeText']
+            else:
+                value['functionalAlteration']['nonPatientCellsFreeText'] = ''
+            value['functionalAlteration'].pop('engineeredEquivalentCellTypeFreeText', None)
+        
+    if 'modelSystems' in value:
+        if 'animalOrCellCulture' in value['modelSystems']:
+            if value['modelSystems']['animalOrCellCulture'] == 'Animal model':
+                value['modelSystems']['modelSystemsType'] = 'Non-human model organism'
+            else:
+                value['modelSystems']['modelSystemsType'] = 'Cell culture model'
+            value['modelSystems'].pop('animalOrCellCulture', None)
+        if 'animalModel' in value['modelSystems']:
+            if value['modelSystems']['animalModel'] != '':
+                value['modelSystems']['nonHumanModel'] = value['modelSystems']['animalModel']
+            else:
+                value['modelSystems']['nonHumanModel'] = ''
+            value['modelSystems'].pop('animalModel', None)
 
     if 'rescue' in value:
         if 'patientCellOrEngineeredEquivalent' in value['rescue']:
-            value['rescue']['rescueObserved'] = value['rescue']['patientCellOrEngineeredEquivalent']
+            if value['rescue']['patientCellOrEngineeredEquivalent'] == 'Engineered equivalent':
+                value['rescue']['rescueType'] = 'Cell culture model'
+            else:
+                value['rescue']['rescueType'] = value['rescue']['patientCellOrEngineeredEquivalent']
             value['rescue'].pop('patientCellOrEngineeredEquivalent', None)
+        if 'patientCellType' in value['rescue']:
+            if value['rescue']['patientCellType'] != '':
+                value['rescue']['patientCells'] = value['rescue']['patientCellType']
+            else:
+                value['rescue']['patientCells'] = ''
+            value['rescue'].pop('patientCellType', None)
+        if 'patientCellTypeFreeText' in value['rescue']:
+            if value['rescue']['patientCellTypeFreeText'] != '':
+                value['rescue']['patientCellsFreeText'] = value['rescue']['patientCellTypeFreeText']
+            else:
+                value['rescue']['patientCellsFreeText'] = ''
+            value['rescue'].pop('patientCellTypeFreeText', None)
         if 'engineeredEquivalentCellType' in value['rescue']:
             if value['rescue']['engineeredEquivalentCellType'] != '':
-                value['rescue']['cellCultureModel'] = value['rescue']['engineeredEquivalentCellType']
+                value['rescue']['cellCulture'] = value['rescue']['engineeredEquivalentCellType']
             else:
-                value['rescue']['cellCultureModel'] = ''
+                value['rescue']['cellCulture'] = ''
             value['rescue'].pop('engineeredEquivalentCellType', None)
         if 'engineeredEquivalentCellTypeFreeText' in value['rescue']:
             if value['rescue']['engineeredEquivalentCellTypeFreeText'] != '':
-                value['rescue']['cellCultureModelFreeText'] = value['rescue']['engineeredEquivalentCellTypeFreeText']
+                value['rescue']['cellCultureFreeText'] = value['rescue']['engineeredEquivalentCellTypeFreeText']
             else:
-                value['rescue']['cellCultureModelFreeText'] = ''
+                value['rescue']['cellCultureFreeText'] = ''
             value['rescue'].pop('engineeredEquivalentCellTypeFreeText', None)
+
