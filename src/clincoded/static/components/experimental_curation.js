@@ -67,6 +67,7 @@ var ExperimentalCuration = createReactClass({
             expressedInTissue: false,
             expressedInPatients: false,
             patientVariantRescue: false,
+            showPatientVariantRescue: true, // Flag for showing 'pateintVariantRescue'
             wildTypeRescuePhenotype: false,
             biochemicalFunctionHPO: false, // form enabled/disabled checks
             biochemicalFunctionFT: false,
@@ -102,7 +103,7 @@ var ExperimentalCuration = createReactClass({
             userScoreObj: {}, // Logged-in user's score object
             uniprotId: '',
             formError: false,
-            scoreDisabled: true, // Flag to enable/disable scoring
+            scoreDisabled: true // Flag to enable/disable scoring
         };
     },
 
@@ -457,7 +458,13 @@ var ExperimentalCuration = createReactClass({
                 this.setState({rescuePRFT: true});
             }
         } else if (ref === 'rescueType') {
-            this.setState({rescueType: this.refs['rescueType'].getValue()});
+            this.setState({rescueType: this.refs['rescueType'].getValue()}, () => {
+                if (this.state.rescueType === 'Human') {
+                    this.setState({showPatientVariantRescue: false});
+                } else {
+                    this.setState({showPatientVariantRescue: true});
+                }
+            });
         }
     },
 
@@ -633,14 +640,20 @@ var ExperimentalCuration = createReactClass({
                         this.setState({modelSystemsCC_FreeText: true}) : this.setState({modelSystemsCC_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Rescue') {
                     let rescue = stateObj.experimental.rescue;
-                    this.setState({rescueType: rescue.rescueType});
+                    this.setState({rescueType: rescue.rescueType}, () => {
+                        if (this.state.rescueType === 'Human') {
+                            this.setState({showPatientVariantRescue: false});
+                        } else {
+                            this.setState({showPatientVariantRescue: true});
+                        }
+                    });
                     if (rescue.wildTypeRescuePhenotype) {
-                        this.setState({wildTypeRescuePhenotype: stateObj.experimental.rescue.wildTypeRescuePhenotype}, () => {
+                        this.setState({wildTypeRescuePhenotype: rescue.wildTypeRescuePhenotype}, () => {
                             this.toggleScoring(this.state.wildTypeRescuePhenotype);
                         });
                     }
-                    if (rescue.patientVariantRescue) {
-                        this.setState({patientVariantRescue: stateObj.experimental.rescue.patientVariantRescue});
+                    if (rescue.hasOwnProperty('patientVariantRescue')) {
+                        this.setState({patientVariantRescue: rescue.patientVariantRescue});
                     }
                     rescue.phenotypeHPO && rescue.phenotypeHPO.length ?
                         this.setState({rescuePRHPO: true}) : this.setState({rescuePRHPO: false});
@@ -1214,8 +1227,10 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_wildTypeRescuePhenotype = this.getFormValue('wildTypeRescuePhenotype');
                     newExperimental.rescue.wildTypeRescuePhenotype = RES_wildTypeRescuePhenotype;
-                    const RES_patientVariantRescue = this.getFormValue('patientVariantRescue');
-                    newExperimental.rescue.patientVariantRescue = RES_patientVariantRescue;
+                    if (this.refs['patientVariantRescue']) {
+                        const RES_patientVariantRescue = this.getFormValue('patientVariantRescue');
+                        newExperimental.rescue.patientVariantRescue = RES_patientVariantRescue;
+                    }
                     const RES_explanation = this.getFormValue('explanation');
                     if (RES_explanation) {
                         newExperimental.rescue.explanation = RES_explanation;
@@ -2405,10 +2420,12 @@ function TypeRescue() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.wildTypeRescuePhenotype} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
             <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
-            <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
-                error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                checked={this.state.patientVariantRescue} defaultChecked="false" inputDisabled={this.cv.othersAssessed} />
+            {this.state.showPatientVariantRescue ?
+                <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
+                    error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')} handleChange={this.handleChange}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                    checked={this.state.patientVariantRescue} defaultChecked="false" inputDisabled={this.cv.othersAssessed} />
+                : null}
             <Input type="textarea" ref="explanation" label="Explanation of rescue of phenotype:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
@@ -3169,11 +3186,13 @@ const ExperimentalViewer = createReactClass({
                                         <dt>The wild-type rescues the above phenotype</dt>
                                         <dd>{experimental.rescue.wildTypeRescuePhenotype ? 'Yes' : 'No'}</dd>
                                     </div>
-
-                                    <div>
-                                        <dt>The patient variant rescues</dt>
-                                        <dd>{experimental.rescue.patientVariantRescue ? 'Yes' : 'No'}</dd>
-                                    </div>
+                                    
+                                    {experimental.rescue.hasOwnProperty('patientVariantRescue') ?
+                                        <div>
+                                            <dt>The patient variant rescues</dt>
+                                            <dd>{experimental.rescue.patientVariantRescue ? 'Yes' : 'No'}</dd>
+                                        </div>
+                                        : null}
 
                                     <div>
                                         <dt>Explanation of rescue of phenotype</dt>
