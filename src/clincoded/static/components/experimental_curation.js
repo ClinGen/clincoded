@@ -901,7 +901,7 @@ var ExperimentalCuration = createReactClass({
                 if (this.getFormValue('modelSystemsType') === 'Cell culture model' && this.getFormValue('cellCulture')) {
                     // This input field accepts both EFO and CLO IDs
                     efoClIDs = curator.capture.efoclids(this.getFormValue('cellCulture'));
-                    formError = this.validateFormTerms(formError, 'efoClIDs', efoClIDs, 'funcalt.cellCulture', 1);
+                    formError = this.validateFormTerms(formError, 'efoClIDs', efoClIDs, 'cellCulture', 1);
                 }
                 // check hpoIDs
                 if (this.getFormValue('model.phenotypeHPO') !== '') {
