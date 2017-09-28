@@ -272,6 +272,35 @@
             "type": "object",
             "default": {},
             "properties": {
+                "cellMutationOrEngineeredEquivalent": {
+                    "title": "Cell Mutation Or Engineered Equivalent",
+                    "description": "Patient cell mutation or engineered equivalent",
+                    "type": "string",
+                    "enum": [
+                        "Patient cells",
+                        "Engineered equivalent"
+                    ]
+                },
+                "patientCellType": {
+                    "title": "Patient Cell Type",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellTypeFreeText": {
+                    "title": "Patient Cell Type (Free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
+                    "type": "string"
+                },
+                "engineeredEquivalentCellType": {
+                    "title": "Engineered Equivalent Cell Type",
+                    "description": "EFO or CL Ontology ID (required if free text for engineered equivalent cell type is not provided)",
+                    "type": "string"
+                },
+                "engineeredEquivalentCellTypeFreeText": {
+                    "title": "Engineered Equivalent Cell Type (Free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
+                },
                 "functionalAlterationType": {
                     "title": "Patient cells or non-patient cells",
                     "description": "Cultured patient or non-patient cells carrying candidate variants",
@@ -334,6 +363,41 @@
             "type": "object",
             "default": {},
             "properties": {
+                "animalOrCellCulture": {
+                    "title": "Animal or Cell Culture Model",
+                    "description": "Non-human animal or cell-culture model",
+                    "type": "string",
+                    "enum": [
+                        "Animal model",
+                        "Engineered equivalent"
+                    ]
+                },
+                "animalModel": {
+                    "title": "Animal Model",
+                    "description": "NCBI Taxon id for animal model",
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "Cat (Felis catus) 9685",
+                        "Chicken (Gallus gallus) 9031",
+                        "Chimpanzee (Pan troglodytes) 9598",
+                        "Cow (Bos taurus) 9913",
+                        "Dog (Canis lupus familaris) 9615",
+                        "Frog (Xenopus) 262014",
+                        "Fruit fly (Drosophila) 7215",
+                        "Gerbil (Gerbilinae) 10045",
+                        "Guinea pig (Cavia porcellus) 10141",
+                        "Hamster (Cricetinae) 10026",
+                        "Macaque (Macaca) 9539",
+                        "Mouse (Mus musculus) 10090",
+                        "Pig (Sus scrofa) 9823",
+                        "Rabbit (Oryctolagus crunicu) 9986",
+                        "Rat (Rattus norvegicus) 10116",
+                        "Round worm (Carnorhabditis elegans) 6239",
+                        "Sheep (Ovis aries) 9940",
+                        "Zebrafish (Daanio rerio) 7955"
+                    ]
+                },
                 "modelSystemsType": {
                     "title": "Non-human model or cell culture model",
                     "description": "Non-human model organism or cell culture model (previously Engineered equivalent)",
@@ -425,6 +489,35 @@
             "type": "object",
             "default": {},
             "properties": {
+                "patientCellOrEngineeredEquivalent": {
+                    "title": "Cell Mutation Or Engineered Equivalent",
+                    "description": "Patient cell mutation or engineered equivalent",
+                    "type": "string",
+                    "enum": [
+                        "Patient cells",
+                        "Engineered equivalent"
+                    ]
+                },
+                "patientCellType": {
+                    "title": "Patient Cell Type",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellTypeFreeText": {
+                    "title": "Patient Cell Type (Free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
+                    "type": "string"
+                },
+                "engineeredEquivalentCellType": {
+                    "title": "Engineered Equivalent Cell Type",
+                    "description": "EFO or CL Ontology ID (required if free text for engineered equivalent cell type is not provided)",
+                    "type": "string"
+                },
+                "engineeredEquivalentCellTypeFreeText": {
+                    "title": "Engineered Equivalent Cell Type (Free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
+                },
                 "rescueType": {
                     "title": "Rescue observed",
                     "description": "Human, Non-human model organism, Cell-culture model (previously Engineered equivalent), Patient cells.",
