@@ -66,10 +66,8 @@ var ProvisionalCuration = createReactClass({
                 cellCultureCount: 0, cellCulturePoints: 0,
                 rescueHumanModelCount: 0, rescueHumanModelPoints: 0,
                 rescueNonHumanModelCount: 0, rescueNonHumanModelPoints: 0,
-                rescueHuamnAndNonHumanModelCount: 0, rescueHuamnAndNonHumanModelPoints: 0,
                 rescueCellCultureCount: 0, rescueCellCulturePoints: 0,
                 rescuePatientCellsCount: 0, rescuePatientCellsPoints: 0,
-                rescueCellCultureAndPatientCellsCount: 0, rescueCellCultureAndPatientCellsPoints: 0,
                 // variables for total counts
                 geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
@@ -531,9 +529,8 @@ var ProvisionalCuration = createReactClass({
         tempPoints = scoreTableValues['patientCellsPoints'] + scoreTableValues['nonPatientCellsPoints'];
         scoreTableValues['functionalAlterationPointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION;
 
-        scoreTableValues['rescueHumanAndNonHumanModelPoints'] = scoreTableValues['rescueHumanModelPoints'] + scoreTableValues['rescueNonHumanModelPoints'];
-        scoreTableValues['rescueCellCultureAndPatientCellsPoints'] = scoreTableValues['rescueCellCulturePoints'] + scoreTableValues['rescuePatientCellsPoints'];
-        tempPoints = scoreTableValues['nonHumanModelPoints'] + scoreTableValues['cellCulturePoints'] + scoreTableValues['rescueHumanAndNonHumanModelPoints'] + scoreTableValues['rescueCellCultureAndPatientCellsPoints'];
+        tempPoints = scoreTableValues['nonHumanModelPoints'] + scoreTableValues['cellCulturePoints'] + scoreTableValues['rescueHumanModelPoints'] + scoreTableValues['rescueNonHumanModelPoints']
+                    + scoreTableValues['rescueCellCulturePoints'] + scoreTableValues['rescuePatientCellsPoints'];
         scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
 
         tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
@@ -712,19 +709,23 @@ var ProvisionalCuration = createReactClass({
                                                             <tr>
                                                                 <td colSpan="3" rowSpan="4" className="header">Rescue</td>
                                                                 <td>Rescue in human</td>
-                                                                <td rowSpan="2">{scoreTableValues['rescueHumanModelCount'] + scoreTableValues['rescueNonHumanModelCount']}</td>
-                                                                <td rowSpan="2">{scoreTableValues['rescueHumanAndNonHumanModelPoints']}</td>
+                                                                <td>{scoreTableValues['rescueHumanModelCount']}</td>
+                                                                <td>{scoreTableValues['rescueHumanModelPoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Rescue in non-human model organism</td>
+                                                                <td>{scoreTableValues['rescueNonHumanModelCount']}</td>
+                                                                <td>{scoreTableValues['rescueNonHumanModelPoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Rescue in cell culture model</td>
-                                                                <td rowSpan="2">{scoreTableValues['rescueCellCultureCount'] + scoreTableValues['rescuePatientCellsCount']}</td>
-                                                                <td rowSpan="2">{scoreTableValues['rescueCellCultureAndPatientCellsPoints']}</td>
+                                                                <td>{scoreTableValues['rescueCellCultureCount']}</td>
+                                                                <td>{scoreTableValues['rescueCellCulturePoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Rescue in patient cells</td>
+                                                                <td>{scoreTableValues['rescuePatientCellsCount']}</td>
+                                                                <td>{scoreTableValues['rescuePatientCellsPoints']}</td>
                                                             </tr>
                                                             <tr className="header separator-below">
                                                                 <td colSpan="6">Experimental Evidence Total</td>
