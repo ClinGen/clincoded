@@ -10,7 +10,6 @@ import GeneDiseaseEvidenceSummarySegregation from './case_level_segregation';
 import GeneDiseaseEvidenceSummaryCaseControl from './case_control';
 import GeneDiseaseEvidenceSummaryExperimental from './experimental';
 import CASE_INFO_TYPES from '../score/constants/case_info_types';
-import GeneDiseaseScoreMatrix from '../provisional_classification/score_matrix';
 
 const GeneDiseaseEvidenceSummary = createReactClass({
     /**
@@ -546,7 +545,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.parseCaseLevelSegregationEvidence(annotations, this.state.user)} />
                 <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
                 <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
-                <GeneDiseaseScoreMatrix user={this.state.user} gdm={gdm} provisional={provisional} />
                 <div className="pdf-download-wrapper">
                     <button className="btn btn-primary pull-right">Download PDF Summary</button>
                     <br /><div>&nbsp;</div><br />
