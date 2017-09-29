@@ -522,6 +522,15 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         return explanation;
     },
 
+    /**
+     * Method to close current window
+     * @param {*} e - Window event
+     */
+    handleWindowClose(e) {
+        e.preventDefault(e);
+        window.close();
+    },
+
     render() {
         const gdm = this.state.gdm;
         const provisional = this.state.provisional;
@@ -529,6 +538,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
 
         return (
             <div className="gene-disease-evidence-summary-wrapper">
+                <div className="window-close-btn-wrapper">
+                    <button className="btn btn-default" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
+                </div>
                 <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
                 <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
                 <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.parseCaseLevelSegregationEvidence(annotations, this.state.user)} />
