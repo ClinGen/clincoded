@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "totalScore": {
             "title": "Total Score",
@@ -38,7 +38,7 @@
             "type": "string",
             "default": ""
         },
-        "provisionalClassificationStatus": {
+        "classificationStatus": {
             "title": "Mark status As Provisional Classification",
             "description": "Flag to mark classification status as provisional",
             "type": "string",
@@ -113,6 +113,10 @@
         },
         "alteredClassification": {
             "title": "Altered Classification",
+            "type": "string"
+        },
+        "classificationStatus": {
+            "title": "Classification Status",
             "type": "string"
         },
         "reasons": {
