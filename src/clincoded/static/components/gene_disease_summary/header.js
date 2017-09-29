@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { external_url_map } from '../globals';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -41,20 +42,26 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                     </div>
                     <div className="panel-body">
                         <dl className="inline-dl clearfix col-sm-6">
-                            <dt>Summary owner:</dt>
+                            <dt>Classification owner:</dt>
                             <dd className="summaryOwnerName">{provisional && provisional.submitted_by ? provisional.submitted_by.title : null}</dd>
                             <dt>Calculated Provisional classification:</dt>
-                            <dd className="provisionalClassificationSaved">{provisional ? provisional.autoClassification : null}</dd>
+                            <dd className="classificationSaved">{provisional ? provisional.autoClassification : null}</dd>
                             <dt>Modified Provisional Classification:</dt>
-                            <dd className="provisionalClassificationModified">
+                            <dd className="classificationModified">
                                 {provisional && provisional.alteredClassification ? (provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification) : null}
                             </dd>
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
-                            <dt>Date Provisional classification saved:</dt>
-                            <dd className="provisionalClassificationSaved">{provisional ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
-                            <dt>Status:</dt>
-                            <dd className="provisionalClassificationStatus">{provisional && provisional.provisionalClassificationStatus ? provisional.provisionalClassificationStatus : null}</dd>
+                            <dt>Classification status:</dt>
+                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? provisional.classificationStatus : null}</dd>
+                            {provisional ?
+                                <div>
+                                    <dt>Date classification saved:</dt>
+                                    <dd className="classificationSaved">{provisional ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                </div>
+                                : null}
+                            <dt>Disease:</dt>
+                            <dd className="disease-term">{disease && disease.term ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.term}</a> : null}</dd>
                         </dl>
                     </div>
                 </div>
