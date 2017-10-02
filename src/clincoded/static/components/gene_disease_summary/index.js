@@ -468,10 +468,12 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         if (evidence && evidence.evidenceType) {
             switch (evidence.evidenceType) {
                 case 'Biochemical Function':
-                    type = evidence.biochemicalFunction.geneWithSameFunctionSameDisease ? 'Gene(s) with same function implicated in same disease' : 'Gene function consistent with phenotype(s)';
+                    type = evidence.biochemicalFunction.geneWithSameFunctionSameDisease && Object.keys(evidence.biochemicalFunction.geneWithSameFunctionSameDisease).length ?
+                        'Gene(s) with same function implicated in same disease' : 'Gene function consistent with phenotype(s)';
                     break;
                 case 'Expression':
-                    type = evidence.expression.normalExpression ? 'Gene normally expressed in tissue relevant to the disease' : 'Altered expression in Patients';
+                    type = evidence.expression.normalExpression && Object.keys(evidence.expression.normalExpression).length ?
+                        'Gene normally expressed in tissue relevant to the disease' : 'Altered expression in Patients';
                     break;
                 default:
                     type = '';
