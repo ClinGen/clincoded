@@ -34,7 +34,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         return (
             <div className="evidence-summary panel-header">
                 <h1>Evidence Summary</h1>
-                <div className="panel panel-info">
+                <div className="panel panel-primary">
                     <div className="panel-heading">
                         <h3 className="panel-title">
                             {gene && gene.symbol ? gene.symbol : null} – {disease && disease.term ? disease.term : null} – <i>{modeInheritanceAdjective ? modeInheritance + ' (' + modeInheritanceAdjective + ')' : modeInheritance}</i>
