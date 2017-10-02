@@ -28,8 +28,8 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
             user: this.props.user, // login user uuid
             gdm: this.props.gdm, // current gdm object, must be null initially.
             provisional: this.props.provisional, // login user's existing provisional object, must be null initially.
-            provisionalClassificationStatus: 'In progress',
-            provisionalClassificationStatusChecked: false,
+            classificationStatus: 'In progress',
+            classificationStatusChecked: false,
             alteredClassification: 'No Selection',
             reasons: '',
             evidenceSummary: ''
@@ -42,8 +42,8 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
             this.setState({
                 alteredClassification: provisional.alteredClassification,
                 reasons: provisional.reasons,
-                provisionalClassificationStatus: provisional.hasOwnProperty('provisionalClassificationStatus') ? provisional.provisionalClassificationStatus : 'In progress',
-                provisionalClassificationStatusChecked: provisional.provisionalClassificationStatus !== 'In progress' ? true : false,
+                classificationStatus: provisional.hasOwnProperty('classificationStatus') ? provisional.classificationStatus : 'In progress',
+                classificationStatusChecked: provisional.classificationStatus !== 'In progress' ? true : false,
                 evidenceSummary: provisional.hasOwnProperty('evidenceSummary') ? provisional.evidenceSummary : ''
             }, () => {
                 this.refs['alteredClassification'].setValue(this.state.alteredClassification);
@@ -68,7 +68,7 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
             newProvisional.reasons = this.state.reasons;
             newProvisional.replicatedOverTime = this.props.replicatedOverTime;
             newProvisional.contradictingEvidence = this.props.contradictingEvidence;
-            newProvisional.provisionalClassificationStatus = this.state.provisionalClassificationStatus;
+            newProvisional.classificationStatus = this.state.classificationStatus;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
 
             // check required item (reasons)
@@ -179,11 +179,11 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
         } else if (ref === 'classification-evidence-summary') {
             this.setState({evidenceSummary: this.refs[ref].getValue()});
         } else if (ref === 'classification-status') {
-            this.setState({provisionalClassificationStatusChecked: !this.state.provisionalClassificationStatusChecked}, () => {
-                if (this.state.provisionalClassificationStatusChecked) {
-                    this.setState({provisionalClassificationStatus: 'Provisional'});
+            this.setState({classificationStatusChecked: !this.state.classificationStatusChecked}, () => {
+                if (this.state.classificationStatusChecked) {
+                    this.setState({classificationStatus: 'Provisional'});
                 } else {
-                    this.setState({provisionalClassificationStatus: 'In progress'});
+                    this.setState({classificationStatus: 'In progress'});
                 }
             });
         }
@@ -238,7 +238,7 @@ const GeneDiseaseSummaryClassification = module.exports.GeneDiseaseSummaryClassi
                                         <div className="col-xs-12 col-sm-6">
                                             <div className="classification-status">
                                                 <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
-                                                <Input type="checkbox" ref="classification-status" checked={this.state.provisionalClassificationStatusChecked} handleChange={this.handleChange}
+                                                <Input type="checkbox" ref="classification-status" checked={this.state.classificationStatusChecked} handleChange={this.handleChange}
                                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" inputDisabled={edit || calculate ? false : true} />
                                             </div>
                                             <div className="classification-evidence-summary">
