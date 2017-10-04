@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "label": {
             "title": "Label",
@@ -301,6 +301,35 @@
                     "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
+                "functionalAlterationType": {
+                    "title": "Patient cells or non-patient cells",
+                    "description": "Cultured patient or non-patient cells carrying candidate variants",
+                    "type": "string",
+                    "enum": [
+                        "Patient cells",
+                        "Non-patient cells"
+                    ]
+                },
+                "patientCells": {
+                    "title": "Patient cell type",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellsFreeText": {
+                    "title": "Patient cell type (free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
+                    "type": "string"
+                },
+                "nonPatientCells": {
+                    "title": "Non-patient cell type",
+                    "description": "EFO or CL Ontology ID (required if free text for non-patient cell type is not provided)",
+                    "type": "string"
+                },
+                "nonPatientCellsFreeText": {
+                    "title": "Non-patient cell type (free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
+                },
                 "descriptionOfGeneAlteration": {
                     "title": "Gene Alteration",
                     "description": "Description of gene alteration in engineered equivalent",
@@ -369,13 +398,51 @@
                         "Zebrafish (Daanio rerio) 7955"
                     ]
                 },
+                "modelSystemsType": {
+                    "title": "Non-human model or cell culture model",
+                    "description": "Non-human model organism or cell culture model (previously Engineered equivalent)",
+                    "type": "string",
+                    "enum": [
+                        "Non-human model organism",
+                        "Cell culture model"
+                    ]
+                },
+                "nonHumanModel": {
+                    "title": "Non-human model organism",
+                    "description": "NCBI Taxon id for non-human model organism (previously Animal model)",
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "Budding yeast (Saccharomyces cerevisiae) 4932",
+                        "Cat (Felis catus) 9685",
+                        "Chicken (Gallus gallus) 9031",
+                        "Chimpanzee (Pan troglodytes) 9598",
+                        "Chlamydomonas (Chlamydomonas reinhardtii) 3055",
+                        "Cow (Bos taurus) 9913",
+                        "Dog (Canis lupus familaris) 9615",
+                        "Fission yeast (Schizosaccharomyces pombe) 4896",
+                        "Frog (Xenopus) 262014",
+                        "Fruit fly (Drosophila) 7215",
+                        "Gerbil (Gerbilinae) 10045",
+                        "Guinea pig (Cavia porcellus) 10141",
+                        "Hamster (Cricetinae) 10026",
+                        "Macaque (Macaca) 9539",
+                        "Mouse (Mus musculus) 10090",
+                        "Pig (Sus scrofa) 9823",
+                        "Rabbit (Oryctolagus crunicu) 9986",
+                        "Rat (Rattus norvegicus) 10116",
+                        "Round worm (Carnorhabditis elegans) 6239",
+                        "Sheep (Ovis aries) 9940",
+                        "Zebrafish (Daanio rerio) 7955"
+                    ]
+                },
                 "cellCulture": {
-                    "title": "Cell Culture Type/Line",
+                    "title": "Cell culture type",
                     "description": "EFO or CL Ontology ID (required if free text for cell culture is not provided)",
                     "type": "string"
                 },
                 "cellCultureFreeText": {
-                    "title": "Cell Culture Type/Line (Free text)",
+                    "title": "Cell culture type (free text)",
                     "description": "Free text (required if EFO ID is not provided)",
                     "type": "string"
                 },
@@ -418,7 +485,7 @@
         },
         "rescue": {
             "title": "Rescue",
-            "description": "items in rescue type",
+            "description": "Items in rescue type",
             "type": "object",
             "default": {},
             "properties": {
@@ -449,6 +516,71 @@
                 "engineeredEquivalentCellTypeFreeText": {
                     "title": "Engineered Equivalent Cell Type (Free text)",
                     "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
+                },
+                "rescueType": {
+                    "title": "Rescue observed",
+                    "description": "Human, Non-human model organism, Cell-culture model (previously Engineered equivalent), Patient cells.",
+                    "type": "string",
+                    "enum": [
+                        "Human",
+                        "Non-human model organism",
+                        "Cell culture model",
+                        "Patient cells"
+                    ]
+                },
+                "humanModel": {
+                    "title": "Human type",
+                    "description": "Proband label for the human type",
+                    "type": "string"
+                },
+                "nonHumanModel": {
+                    "title": "Non-human model type",
+                    "description": "NCBI Taxon id for non-human model organism",
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "Budding yeast (Saccharomyces cerevisiae) 4932",
+                        "Cat (Felis catus) 9685",
+                        "Chicken (Gallus gallus) 9031",
+                        "Chimpanzee (Pan troglodytes) 9598",
+                        "Chlamydomonas (Chlamydomonas reinhardtii) 3055",
+                        "Cow (Bos taurus) 9913",
+                        "Dog (Canis lupus familaris) 9615",
+                        "Fission yeast (Schizosaccharomyces pombe) 4896",
+                        "Frog (Xenopus) 262014",
+                        "Fruit fly (Drosophila) 7215",
+                        "Gerbil (Gerbilinae) 10045",
+                        "Guinea pig (Cavia porcellus) 10141",
+                        "Hamster (Cricetinae) 10026",
+                        "Macaque (Macaca) 9539",
+                        "Mouse (Mus musculus) 10090",
+                        "Pig (Sus scrofa) 9823",
+                        "Rabbit (Oryctolagus crunicu) 9986",
+                        "Rat (Rattus norvegicus) 10116",
+                        "Round worm (Carnorhabditis elegans) 6239",
+                        "Sheep (Ovis aries) 9940",
+                        "Zebrafish (Daanio rerio) 7955"
+                    ]
+                },
+                "cellCulture": {
+                    "title": "Cell culture model (previously Engineered equivalent)",
+                    "description": "EFO or CL Ontology ID (required if free text for cell culture model is not provided)",
+                    "type": "string"
+                },
+                "cellCultureFreeText": {
+                    "title": "Cell culture model (free text)",
+                    "description": "Free text (required if EFO ID is not provided)",
+                    "type": "string"
+                },
+                "patientCells": {
+                    "title": "Patient cell type",
+                    "description": "CL Ontology ID (required if free text for patient cell type is not provided)",
+                    "type": "string"
+                },
+                "patientCellsFreeText": {
+                    "title": "Patient cell type (free text)",
+                    "description": "Free text (required if CL Ontology ID is not provided)",
                     "type": "string"
                 },
                 "descriptionOfGeneAlteration": {

@@ -121,8 +121,8 @@
         "label": "Experiment 6",
         "evidenceType": "Rescue",
         "rescue": {
-            "patientCellOrEngineeredEquivalent": "Patient cells",
-            "patientCellType": "CL_0001234",
+            "rescueType": "Patient cells",
+            "patientCells": "CL_0001234",
             "descriptionOfGeneAlteration": "some description about cell here",
             "phenotypeHPO": "HP:0000007",
             "rescueMethod": "rescue method here (not method object in clinical data)",
@@ -147,8 +147,8 @@
         "label": "Experiment 7",
         "evidenceType": "Functional Alteration",
         "functionalAlteration": {
-            "cellMutationOrEngineeredEquivalent": "Patient cells",
-            "patientCellType": "CL_0000009",
+            "functionalAlterationType": "Patient cells",
+            "patientCells": "CL_0000009",
             "normalFunctionOfGene": "GO:0000012",
             "descriptionOfGeneAlteration": "some description here",
             "evidenceForNormalFunction": "evidence 007",
@@ -169,11 +169,11 @@
         "modelSystems": {
             "descriptionOfGeneAlteration": "description here",
             "phenotypeHPOObserved": "HP:0001234",
-            "animalModel": "Cat (Felis catus) 9685",
+            "nonHumanModel": "Cat (Felis catus) 9685",
             "cellCulture": "",
             "explanation": "explanation here",
             "phenotypeFreetextObserved": "phenotype observed free text here",
-            "animalOrCellCulture": "Animal model",
+            "modelSystemsType": "Non-human model organism",
             "phenotypeFreeText": "human phenotype free text here",
             "evidenceInPaper": "location here",
             "phenotypeHPO": "HP:0012345"
