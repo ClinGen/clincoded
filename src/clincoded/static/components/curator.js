@@ -1298,7 +1298,6 @@ var CuratorRecordHeader = createReactClass({
                 <div className="curation-data-curator">
                     {gdm ?
                         <dl className="inline-dl clearfix">
-                            <dt>Status: </dt><dd>{gdm.gdm_status === 'Summary/Provisional Classifications' ? 'In progress' : gdm.gdm_status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {participants && participants.length && latestRecord ?
                                 <div>

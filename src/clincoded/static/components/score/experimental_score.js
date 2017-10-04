@@ -287,20 +287,24 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
             } else if (experimentalType.indexOf('Functional Alteration') > -1) {
                 if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Patient cells') > -1) {
                     type = FUNCTIONAL_ALTERATION + '_PATIENT_CELLS';
-                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
-                    type = FUNCTIONAL_ALTERATION + '_ENGINEERED_EQUIVALENT';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Non-patient cells') > -1) {
+                    type = FUNCTIONAL_ALTERATION + '_NON_PATIENT_CELLS';
                 }
             } else if (experimentalType.indexOf('Model Systems') > -1) {
-                if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Animal model') > -1) {
-                    type = MODEL_SYSTEMS + '_ANIMAL_MODEL';
-                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
-                    type = MODEL_SYSTEMS + '_ENGINEERED_EQUIVALENT';
+                if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Non-human model organism') > -1) {
+                    type = MODEL_SYSTEMS + '_NON_HUMAN_MODEL_ORGANISM';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Cell culture model') > -1) {
+                    type = MODEL_SYSTEMS + '_CELL_CULTURE_MODEL';
                 }
             } else if (experimentalType.indexOf('Rescue') > -1) {
                 if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Patient cells') > -1) {
                     type = RESCUE + '_PATIENT_CELLS';
-                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Engineered equivalent') > -1) {
-                    type = RESCUE + '_ENGINEERED_EQUIVALENT';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Cell culture model') > -1) {
+                    type = RESCUE + '_CELL_CULTURE_MODEL';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Non-human model organism') > -1) {
+                    type = RESCUE + '_NON_HUMAN_MODEL_ORGANISM';
+                } else if (experimentalEvidenceType && experimentalEvidenceType.indexOf('Human') > -1) {
+                    type = RESCUE + '_HUMAN_MODEL';
                 }
             }
         }
