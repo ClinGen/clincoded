@@ -5,10 +5,6 @@
     .window-close-btn-wrapper {
         text-align: right;
         margin: 15px 0 0 0;
-
-        .btn {
-            border-radius: 4px;
-        }
     }
 
     h1 {
@@ -16,7 +12,11 @@
     }
 
     .panel {
-        border-radius: 4px;
+        @include border-radius(4px);
+    }
+
+    .btn {
+        @include border-radius(4px);
     }
 
     .panel-body {
@@ -27,9 +27,9 @@
 
     .panel-header,
     .panel-case-level,
+    .panel-case-level-segregation,
     .panel-case-control,
     .panel-experimental {
-        @include border-radius(4px);
         margin-bottom: 20px;
     }
 
@@ -40,6 +40,10 @@
 
         &:last-child {
             border-right: none;
+        }
+
+        .Contradicts {
+            color: red;
         }
     }
 
@@ -57,6 +61,34 @@
             .evidence-variant {
                 .variant-info {
                     margin: 6px 0;
+                }
+            }
+        }
+
+        &.panel-experimental {
+            .evidence-category {
+                width: 16%
+            }
+
+            .evidence-score-status {
+                width: 8%;
+            }
+
+            .evidence-score {
+                width: 12%;
+            }
+
+            .evidence-reference,
+            .evidence-explanation {
+                width: 32%;
+            }
+
+            .panel-footer {
+                background-color: #eaf8ff;
+                color: #8c8c8c;
+    
+                p {
+                    margin: 2px 0;
                 }
             }
         }
