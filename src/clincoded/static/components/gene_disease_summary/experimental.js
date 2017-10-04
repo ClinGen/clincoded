@@ -26,7 +26,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
         return (
             <tr key={key} className="scored-experimental-evidence">
                 <td className="evidence-category">
-                    {evidence.evidenceType} {evidence.evidenceSubtype && evidence.evidenceSubtype.length ? <span>({evidence.evidenceSubtype})</span> : null}
+                    <strong>{evidence.evidenceType}</strong> {evidence.evidenceSubtype && evidence.evidenceSubtype.length ? <span>{evidence.evidenceSubtype}</span> : null}
                 </td>
                 <td className="evidence-reference">
                     <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
@@ -34,15 +34,18 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                 <td className="evidence-explanation">
                     {evidence.explanation}
                 </td>
+                <td className="evidence-score-status">
+                    {<span className={evidence.scoreStatus}>{evidence.scoreStatus}</span>}
+                </td>
                 <td className="evidence-score">
                     {evidence.scoreStatus !== 'Contradicts' ?
                         (evidence.modifiedScore ?
-                            <span>{evidence.modifiedScore} ({evidence.defaultScore})</span>
+                            <span><strong>{evidence.modifiedScore}</strong> ({evidence.defaultScore})</span>
                             :
-                            <span>{evidence.defaultScore} ({evidence.defaultScore})</span>
+                            <span><strong>{evidence.defaultScore}</strong> ({evidence.defaultScore})</span>
                         )
                         :
-                        <span>{evidence.scoreStatus}</span>
+                        <span className={evidence.scoreStatus}>n/a</span>
                     }
                 </td>
             </tr>
@@ -66,6 +69,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                     <th>Experimental category</th>
                                     <th>Reference</th>
                                     <th>Explanation</th>
+                                    <th>Score status</th>
                                     <th>Score (default score)</th>
                                 </tr>
                             </thead>
@@ -77,9 +81,17 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                         </table>
                         :
                         <div className="panel-body">
-                            <span>No scored Experimental evidence was found.</span>
+                            <span>No Experimental evidence was found.</span>
                         </div>
                     }
+                    <div className="panel-footer">
+                        <p><strong>Biochemical Function</strong>: The gene product performs a biochemical function shared with other known genes in the disease of interest, OR the gene product is consistent with the observed phenotype(s)</p>
+                        <p><strong>Protein Interactions</strong>: The gene product interacts with proteins previously implicated (genetically or biochemically) in the disease of interest</p>
+                        <p><strong>Expression</strong>: The gene is expressed in tissues relevant to the disease of interest, OR the gene is altered in expression in patients who have the disease</p>
+                        <p><strong>Functional Alteration of gene/gene product</strong>: The gene and/or gene product function is demonstrably altered in patients carrying candidate mutations or engineered equivalents</p>
+                        <p><strong>Model Systems</strong>: Non-human animal OR cell-culture models with a similarly disrupted copy of the affected gene show a phenotype consistent with human disease state</p>
+                        <p><strong>Rescue</strong>: The cellular phenotype in patient-derived cells OR engineered equivalents can be rescued by addition of the wild-type gene product</p>
+                    </div>
                 </div>
             </div>
         );
