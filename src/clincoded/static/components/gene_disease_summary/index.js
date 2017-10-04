@@ -29,6 +29,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             gdm: null, // The gdm object associated with the eivdence
             provisional: {}, // Logged-in user's existing provisional object
             caseLevelEvidenceList: [],
+            segregationEvidenceList: [],
             caseControlEvidenceList: [],
             experimentalEvidenceList: []
         };
@@ -80,7 +81,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             // Parse proband evidence and its associated segregation data
             this.parseCaseLevelEvidence(annotations, user);
             // Parse segregation evidence with LOD scores but without proband
-            // this.parseCaseLevelSegregationEvidence(annotations, user);
+            this.parseCaseLevelSegregationEvidence(annotations, user);
             // Parse case-control evidence and its associated disease data
             this.parseCaseControlEvidence(annotations, user);
             // Parse experimental evidence and its associated annotation data
@@ -197,7 +198,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 const probandObj = result.probandRestData;
 
                                 let annotation = {}, associatedFamily;
-
+                                // Find the annotation that the proband directly or indirectly belongs to
                                 if (probandObj.associatedAnnotations.length) {
                                     annotation = probandObj.associatedAnnotations[0];
                                 } else if (probandObj.associatedGroups.length) {
@@ -223,19 +224,22 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 caseLevelEvidence['pmid'] = annotation.article.pmid;
                                 caseLevelEvidence['pubYear'] = pubDate[1];
                                 caseLevelEvidence['sex'] = proband.sex ? proband.sex : '';
+                                caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
                                 caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
                                 caseLevelEvidence['ageUnit'] = proband.ageUnit && proband.ageUnit.length ? proband.ageUnit : '';
                                 caseLevelEvidence['ethnicity'] = proband.ethnicity && proband.ethnicity.length ? proband.ethnicity : '';
                                 caseLevelEvidence['hpoIdInDiagnosis'] = proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length ? proband.hpoIdInDiagnosis : [];
                                 caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';
-                                caseLevelEvidence['previousTesting'] = proband.method && proband.method.previousTesting && proband.method.previousTestingDescription ? proband.method.previousTestingDescription : '';
+                                caseLevelEvidence['previousTesting'] = proband.method && proband.method.previousTesting && proband.method.hasOwnProperty('previousTesting');
+                                caseLevelEvidence['previousTestingDescription'] = proband.method && proband.method.previousTesting && proband.method.previousTestingDescription ? proband.method.previousTestingDescription : '';
                                 caseLevelEvidence['genotypingMethods'] = proband.method && proband.method.genotypingMethods && proband.method.genotypingMethods.length ? proband.method.genotypingMethods : [];
                                 caseLevelEvidence['scoreStatus'] = score.scoreStatus;
                                 caseLevelEvidence['defaultScore'] = score.calculatedScore ? score.calculatedScore : null;
                                 caseLevelEvidence['modifiedScore'] = score.score ? score.score : null;
                                 caseLevelEvidence['segregationNumAffected'] = segregation && segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
                                 caseLevelEvidence['segregationNumUnaffected'] = segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
-                                caseLevelEvidence['segregationLodScore'] = segregation && segregation.publishedLodScore ? segregation.publishedLodScore : (segregation && segregation.estimatedLodScore ? segregation.estimatedLodScore : null);
+                                caseLevelEvidence['segregationPublishedLodScore'] = segregation && segregation.publishedLodScore ? segregation.publishedLodScore : null;
+                                caseLevelEvidence['segregationEstimatedLodScore'] = segregation && segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
                                 caseLevelEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation');
                                 // Put object into array
                                 caseLevelEvidenceList.push(caseLevelEvidence);
@@ -282,7 +286,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {string} user - user's uuid
      */
     parseCaseLevelSegregationEvidence(annotations, user) {
-        let segregationEvidenceList = [];
+        let segregationEvidenceList = this.state.segregationEvidenceList;
         let segregationTotal = [], tempSegregationScraperValues = [];
         if (annotations.length) {
             annotations.forEach(annotation => {
@@ -308,20 +312,48 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 });
             });
         }
-
+        
         // Iterate segregations
         segregationTotal.forEach(family => {
-            let segregationEvidence = {};
             if (family.submitted_by.uuid === user) {
                 let segregation = family.segregation ? family.segregation : null;
                 if (segregation && (segregation.estimatedLodScore || segregation.publishedLodScore)) {
-                    segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
-                    segregationEvidence['segregationNumUnaffected'] = segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
-                    segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
-                    segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
-                    segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation');
-                    // Put object into array
-                    segregationEvidenceList.push(segregationEvidence);
+                    let segregationEvidence = {};
+                    // Get family data object given the uuid
+                    this.getRestData(family['@id']).then(familyRestData => {
+                        return Promise.resolve({family, segregation, familyRestData});
+                    }).then(result => {
+                        const family = result.family;
+                        const segregation = result.segregation;
+                        const familyObj = result.familyRestData;
+                        let annotation = {};
+                        // Find the annotation that family directly or indirectly belongs to
+                        if (familyObj.associatedAnnotations.length) {
+                            annotation = familyObj.associatedAnnotations[0];
+                        } else if (familyObj.associatedGroups.length) {
+                            if (familyObj.associatedGroups[0].associatedAnnotations.length){
+                                annotation = familyObj.associatedGroups[0].associatedAnnotations[0];
+                            }
+                        }
+                        let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
+                        // Define object key/value pairs
+                        segregationEvidence['authors'] = annotation.article.authors;
+                        segregationEvidence['pmid'] = annotation.article.pmid;
+                        segregationEvidence['pubYear'] = pubDate[1];
+                        segregationEvidence['ethnicity'] = family.ethnicity ? family.ethnicity : '';
+                        segregationEvidence['hpoIdInDiagnosis'] = family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length ? family.hpoIdInDiagnosis : [];
+                        segregationEvidence['termsInDiagnosis'] = family.termsInDiagnosis && family.termsInDiagnosis.length ? family.termsInDiagnosis : '';
+                        segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
+                        segregationEvidence['segregationNumUnaffected'] = segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
+                        segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
+                        segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
+                        segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation');
+                        // Put object into array
+                        segregationEvidenceList.push(segregationEvidence);
+                        this.setState({segregationEvidenceList: segregationEvidenceList});
+                    }).catch(err => {
+                        console.log('Error in fetching rest data =: %o', err);
+                    });
                 }
             }
         });
@@ -379,12 +411,12 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                             caseControlEvidence['pmid'] = annotation.article.pmid;
                                             caseControlEvidence['pubYear'] = pubDate[1];
                                             caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
-                                            caseControlEvidence['detectionMethod'] = caseControl.detectionMethod ? caseControl.detectionMethod : '';
+                                            caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
                                             caseControlEvidence['caseCohort_numberWithVariant'] = caseControl.caseCohort.numberWithVariant ? caseControl.caseCohort.numberWithVariant : null;
                                             caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = caseControl.caseCohort.numberAllGenotypedSequenced ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
                                             caseControlEvidence['controlCohort_numberWithVariant'] = caseControl.controlCohort.numberWithVariant ? caseControl.controlCohort.numberWithVariant : null;
                                             caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = caseControl.controlCohort.numberAllGenotypedSequenced ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
-                                            caseControlEvidence['differInVariables'] = caseControl.differInVariables ? caseControl.differInVariables : '';
+                                            caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
                                             caseControlEvidence['explanationForDifference'] = caseControl.explanationForDifference ? caseControl.explanationForDifference : '';
                                             caseControlEvidence['statisticValueType'] = caseControl.statisticalValues[0].valueType ? caseControl.statisticalValues[0].valueType : '';
                                             caseControlEvidence['statisticValueTypeOther'] = caseControl.statisticalValues[0].otherType ? caseControl.statisticalValues[0].otherType : '';
@@ -392,7 +424,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                             caseControlEvidence['pValue'] = caseControl.pValue ? caseControl.pValue : null;
                                             caseControlEvidence['confidenceIntervalFrom'] = caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null;
                                             caseControlEvidence['confidenceIntervalTo'] = caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null;
-                                            caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
                                             caseControlEvidence['score'] = score.score ? score.score : null;
 
                                             caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
@@ -469,11 +500,11 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             switch (evidence.evidenceType) {
                 case 'Biochemical Function':
                     type = evidence.biochemicalFunction.geneWithSameFunctionSameDisease && Object.keys(evidence.biochemicalFunction.geneWithSameFunctionSameDisease).length ?
-                        'Gene(s) with same function implicated in same disease' : 'Gene function consistent with phenotype(s)';
+                        'A' : 'B';
                     break;
                 case 'Expression':
                     type = evidence.expression.normalExpression && Object.keys(evidence.expression.normalExpression).length ?
-                        'Gene normally expressed in tissue relevant to the disease' : 'Altered expression in Patients';
+                        'A' : 'B';
                     break;
                 default:
                     type = '';
@@ -544,7 +575,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 </div>
                 <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
                 <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
-                <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.parseCaseLevelSegregationEvidence(annotations, this.state.user)} />
+                <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} />
                 <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
                 <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                 <div className="pdf-download-wrapper">
