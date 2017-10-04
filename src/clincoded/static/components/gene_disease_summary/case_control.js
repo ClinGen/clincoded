@@ -39,44 +39,37 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 <td className="evidence-detection-method">
                     {evidence.detectionMethod}
                 </td>
-                <td className="evidence-power-case-cohort">
-                    {evidence.caseCohort_numberWithVariant ? evidence.caseCohort_numberWithVariant : null} 
-                    {evidence.caseCohort_numberAllGenotypedSequenced ?
-                        <span> / {evidence.caseCohort_numberAllGenotypedSequenced}</span>
-                        : null}
+                <td className="evidence-power-case-cohort-numberAllGenotypedSequenced">
+                    {evidence.caseCohort_numberAllGenotypedSequenced ? evidence.caseCohort_numberAllGenotypedSequenced : null}
                 </td>
-                <td className="evidence-power-control-cohort">
+                <td className="evidence-power-control-cohort-numberAllGenotypedSequenced">
+                    {evidence.controlCohort_numberAllGenotypedSequenced ? evidence.controlCohort_numberAllGenotypedSequenced : null}
+                </td>
+                <td className="evidence-bias-confounding">
+                    {evidence.comments}
+                </td>
+                <td className="evidence-statistics-case-cohort-numberWithVariant">
+                    {evidence.caseCohort_numberWithVariant ? evidence.caseCohort_numberWithVariant : null}
+                    {evidence.caseCohort_numberWithVariant && evidence.caseCohort_numberAllGenotypedSequenced ? <span>/</span> : null}
+                    {evidence.caseCohort_numberAllGenotypedSequenced ? evidence.caseCohort_numberAllGenotypedSequenced : null}
+                </td>
+                <td className="evidence-statistics-control-cohort-numberWithVariant">
                     {evidence.controlCohort_numberWithVariant ? evidence.controlCohort_numberWithVariant : null}
-                    {evidence.controlCohort_numberAllGenotypedSequenced ?
-                        <span> / {evidence.controlCohort_numberAllGenotypedSequenced}</span>
-                        : null}
-                </td>
-                <td className="evidence-bias-unknown">
-                    ???
-                </td>
-                <td className="evidence-bias-unknown">
-                    ???
-                </td>
-                <td className="evidence-bias-unknown">
-                    ???
-                </td>
-                <td className="evidence-bias-differ-in-variables">
-                    {evidence.differInVariables}
-                    {evidence.explanationForDifference.length ? <span> - {evidence.explanationForDifference}</span> : null}
+                    {evidence.controlCohort_numberWithVariant && evidence.controlCohort_numberAllGenotypedSequenced ? <span>/</span> : null}
+                    {evidence.controlCohort_numberAllGenotypedSequenced ? evidence.controlCohort_numberAllGenotypedSequenced : null}
                 </td>
                 <td className="evidence-statistics-value">
-                    {evidence.statisticValueType}
-                    {evidence.statisticValueTypeOther.length ? <span> - {evidence.statisticValueTypeOther}</span> : null}
-                    {evidence.statisticValue ? <span> / {evidence.statisticValue}</span> : null}
+                    {evidence.statisticValueType ? <strong>{evidence.statisticValueType}: </strong> : null}
+                    {evidence.statisticValueTypeOther.length ? <span>{evidence.statisticValueTypeOther} - </span> : null}
+                    {evidence.statisticValue ? <span>{evidence.statisticValue}</span> : null}
+                </td>
+                <td className="evidence-statistics-p-value">
+                    {evidence.pValue ? evidence.pValue : null}
                 </td>
                 <td className="evidence-statistics-confidence">
-                    {evidence.pValue ? evidence.pValue : null}
                     {evidence.confidenceIntervalFrom && evidence.confidenceIntervalTo ? 
-                        <span> / {evidence.confidenceIntervalFrom} - {evidence.confidenceIntervalTo}</span> 
+                        <span>{evidence.confidenceIntervalFrom}-{evidence.confidenceIntervalTo} (%)</span> 
                         : null}
-                </td>
-                <td className="evidence-additional-comments">
-                    {evidence.comments}
                 </td>
                 <td className="evidence-score">
                     {evidence.score}
@@ -100,23 +93,21 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                             <thead>
                                 <tr>
                                     <th rowSpan="2">Reference (PMID)</th>
-                                    <th rowSpan="2">Case disease associated with case (Disease ID)</th>
-                                    <th rowSpan="2">Study type (aggregate or single variant)</th>
+                                    <th rowSpan="2">Disease (Cases)</th>
+                                    <th rowSpan="2">Study type</th>
                                     <th rowSpan="2">Detection method</th>
                                     <th colSpan="2">Power</th>
-                                    <th colSpan="4">Bias</th>
-                                    <th colSpan="2">Statistics</th>
-                                    <th rowSpan="2">Additional comments</th>
+                                    <th rowSpan="2">Bias confounding</th>
+                                    <th colSpan="5">Statistics</th>
                                     <th rowSpan="2">Score</th>
                                 </tr>
                                 <tr>
-                                    <th>Case</th>
-                                    <th>Control</th>
-                                    <th>What?</th>
-                                    <th>What?</th>
-                                    <th>What?</th>
-                                    <th>Differ in other variables?</th>
-                                    <th>Statistical value</th>
+                                    <th># of cases genotyped/sequenced</th>
+                                    <th># of controls genotyped/sequenced</th>
+                                    <th>Cases wuth variant in gene / all cases genotyped/sequenced</th>
+                                    <th>Controls wuth variant in gene / all cases genotyped/sequenced</th>
+                                    <th>Test statistic: value</th>
+                                    <th>p-value</th>
                                     <th>Confidence interval</th>
                                 </tr>
                             </thead>
