@@ -48,45 +48,52 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.sex}
                 </td>
                 <td className="evidence-age">
-                    {evidence.ageValue ? <span>{evidence.ageValue} {evidence.ageUnit.length ? evidence.ageUnit : null}</span> : null}
+                    {evidence.ageValue ? <span>{evidence.ageType ? <strong>Age of {evidence.ageType}: </strong> : null}{evidence.ageValue} {evidence.ageUnit.length ? evidence.ageUnit : null}</span> : null}
                 </td>
                 <td className="evidence-ethnicity">
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? evidence.hpoIdInDiagnosis.join(', ') : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {evidence.hpoIdInDiagnosis.join(', ')}</span> : null}
                     {evidence.hpoIdInDiagnosis.length && evidence.termsInDiagnosis.length ? <span>; </span> : null}
-                    {evidence.termsInDiagnosis}
+                    {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong> {evidence.termsInDiagnosis}</span> : null}
                 </td>
                 <td className="evidence-segregation-num-affected">
-                    {evidence.segregationNumAffected}
+                    {evidence.segregationNumAffected ? evidence.segregationNumAffected : '-'}
                 </td>
                 <td className="evidence-segregation-num-unaffected">
-                    {evidence.segregationNumUnaffected}
+                    {evidence.segregationNumUnaffected ? evidence.segregationNumUnaffected : '-'}
                 </td>
                 <td className="evidence-lod-score">
-                    {evidence.segregationLodScore}
+                    {evidence.segregationPublishedLodScore ?
+                        <span><strong>Published:</strong> {evidence.segregationPublishedLodScore}</span>
+                        : 
+                        (evidence.segregationEstimatedLodScore ? <span><strong>Calculated:</strong> {evidence.segregationEstimatedLodScore}</span> : '-')
+                    }
                 </td>
                 <td className="evidence-lod-score-counted">
-                    {evidence.segregationLodScore ?
-                        <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span>
-                        : null}
+                    {evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore ? <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span> : '-'}
                 </td>
                 <td className="evidence-previous-testing">
-                    {evidence.previousTesting}
+                    {typeof evidence.previousTesting !== 'undefined' ?
+                        <span>{evidence.previousTesting ? 'Yes' : 'No'}{evidence.previousTestingDescription.length ? <span>. {evidence.previousTestingDescription}</span> : null}</span>
+                        : '-'}
                 </td>
                 <td className="evidence-detection-methods">
                     {evidence.genotypingMethods.length ? evidence.genotypingMethods.join(', ') : null}
                 </td>
+                <td className="evidence-score-status">
+                    {<span className={evidence.scoreStatus}>{evidence.scoreStatus}</span>}
+                </td>
                 <td className="evidence-proband-score">
                     {evidence.scoreStatus !== 'Contradicts' ?
                         (evidence.modifiedScore ?
-                            <span>{evidence.modifiedScore} ({evidence.defaultScore})</span>
+                            <span><strong>{evidence.modifiedScore}</strong> ({evidence.defaultScore})</span>
                             :
-                            <span>{evidence.defaultScore} ({evidence.defaultScore})</span>
+                            <span><strong>{evidence.defaultScore}</strong> ({evidence.defaultScore})</span>
                         )
                         :
-                        <span>{evidence.scoreStatus}</span>
+                        <span className={evidence.scoreStatus}>n/a</span>
                     }
                 </td>
             </tr>
@@ -110,13 +117,14 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2">Variant type</th>
                                     <th rowSpan="2">Variant</th>
                                     <th rowSpan="2">Reference</th>
-                                    <th rowSpan="2">Sex</th>
-                                    <th rowSpan="2">Age</th>
-                                    <th rowSpan="2">Ethnicity</th>
-                                    <th rowSpan="2">Phenotypes</th>
+                                    <th rowSpan="2">Proband sex</th>
+                                    <th rowSpan="2">Proband age</th>
+                                    <th rowSpan="2">Proband ethnicity</th>
+                                    <th rowSpan="2">Proband phenotypes</th>
                                     <th colSpan="4">Segregations</th>
-                                    <th rowSpan="2">Previous testing</th>
-                                    <th rowSpan="2">Methods of detection</th>
+                                    <th rowSpan="2">Proband previous testing</th>
+                                    <th rowSpan="2">Proband methods of detection</th>
+                                    <th rowSpan="2">Score status</th>
                                     <th rowSpan="2">Proband score (default)</th>
                                 </tr>
                                 <tr>
