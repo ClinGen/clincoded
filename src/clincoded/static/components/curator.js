@@ -343,26 +343,22 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                         <tr>
                                             <td>
                                                 <div className="provisional-title">
-                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                    <strong>Classification</strong>
                                                 </div>
                                                 { provisionalExist ?
                                                     <div>
                                                         <div className="provisional-data-left">
-                                                            <span>
-                                                                Last Saved Summary<br />
-                                                                Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                            </span>
+                                                            <span className="header-classification-item">Curator: {provisional.submitted_by.title}</span>
+                                                            {provisional.classificationStatus ? <span className="header-classification-item">Status: {provisional.classificationStatus}</span> : null}
                                                         </div>
                                                         <div className="provisional-data-center">
-                                                            <span>
-                                                                Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
-                                                                { summaryPage ?
-                                                                    null
-                                                                    :
-                                                                    <span>&nbsp;&nbsp;[<a href={'/provisional-classification/?gdm=' + gdm.uuid + '&edit=true'}><strong>Edit Classification</strong></a>]</span>
-                                                                }
+                                                            <span className="header-classification-item">
+                                                                Calculated Classification: {provisional.totalScore} ({provisional.autoClassification})
                                                             </span>
+                                                            <span className="header-classification-item">
+                                                                Modified Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
+                                                            </span>
+                                                            <span className="header-classification-item">Last Saved: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                                                         </div>
                                                     </div>
                                                     :
@@ -372,14 +368,10 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                             <td className="button-box" rowSpan="2">
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary" role="button" href={'/provisional-classification/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                        </a>
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalExist ? '&edit=yes' : '&calculate=yes')}>View Classification Matrix</a>
                                                         : null
                                                     )
-                                                    :
-                                                    null
-                                                }
+                                                    : null}
                                             </td>
                                         </tr>
                                         <tr style={{height:'10px'}}></tr>
