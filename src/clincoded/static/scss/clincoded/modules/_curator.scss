@@ -854,13 +854,21 @@
         float: left;
         text-align: left;
         padding-left: 10px;
-        padding-right: 100px;
+        padding-right: 136px;
+
+        .header-classification-item {
+            display: block;
+        }
     }
 
     .provisional-data-center {
         float: left;
         text-align: left;
         padding-left: 10px;
+
+        .header-classification-item {
+            display: block;
+        }
     }
 
     .provisional-button {
@@ -920,9 +928,7 @@
 }
 
 .summary-provisional-classification-description {
-    border-top: 1px solid #e5e5e5;
-    margin-bottom: 15px;
-    padding-top: 15px;
+    margin-bottom: 20px;
 }
 
 .summary-provisional-classification-wrapper {
@@ -1055,6 +1061,17 @@
                 &[disabled] {
                     color: #bbb;
                 }
+            }
+        }
+
+        &.view-only {
+            .classification-status {
+                margin-bottom: 0;
+            }
+
+            .altered-classification-reasons, 
+            .classification-evidence-summary {
+                text-align: left;
             }
         }
     }
