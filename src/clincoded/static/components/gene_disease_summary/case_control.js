@@ -93,9 +93,9 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                             <thead>
                                 <tr>
                                     <th rowSpan="2">Reference (PMID)</th>
-                                    <th rowSpan="2">Disease (Cases)</th>
+                                    <th rowSpan="2">Disease (Case)</th>
                                     <th rowSpan="2">Study type</th>
-                                    <th rowSpan="2">Detection method</th>
+                                    <th rowSpan="2">Detection method (Case)</th>
                                     <th colSpan="2">Power</th>
                                     <th rowSpan="2">Bias confounding</th>
                                     <th colSpan="5">Statistics</th>
