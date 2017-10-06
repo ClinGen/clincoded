@@ -104,8 +104,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                 <tr>
                                     <th># of cases genotyped/sequenced</th>
                                     <th># of controls genotyped/sequenced</th>
-                                    <th>Cases wuth variant in gene / all cases genotyped/sequenced</th>
-                                    <th>Controls wuth variant in gene / all cases genotyped/sequenced</th>
+                                    <th>Cases with variant in gene / all cases genotyped/sequenced</th>
+                                    <th>Controls with variant in gene / all cases genotyped/sequenced</th>
                                     <th>Test statistic: value</th>
                                     <th>p-value</th>
                                     <th>Confidence interval</th>
