@@ -1,4 +1,5 @@
 .gene-disease-evidence-summary-wrapper {
+    background-color: #fff;
     margin-left: 30px;
     margin-right: 30px;
 
@@ -67,20 +68,21 @@
 
         &.panel-experimental {
             .evidence-category {
-                width: 16%
+                width: 12%
             }
 
             .evidence-score-status {
-                width: 8%;
+                width: 6%;
             }
 
             .evidence-score {
-                width: 12%;
+                width: 10%;
             }
 
             .evidence-reference,
-            .evidence-explanation {
-                width: 32%;
+            .evidence-explanation,
+            .evidence-score-explanation {
+                width: 24%;
             }
 
             .panel-footer {
