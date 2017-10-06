@@ -44,6 +44,9 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                         <span className={evidence.scoreStatus}>n/a</span>
                     }
                 </td>
+                <td className="evidence-score-explanation">
+                    {evidence.scoreExplanation}
+                </td>
             </tr>
         );
     }
@@ -67,6 +70,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                     <th>Explanation</th>
                                     <th>Score status</th>
                                     <th>Score (default score)</th>
+                                    <th>Reason for changed score</th>
                                 </tr>
                             </thead>
                             <tbody>
