@@ -39,11 +39,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                 </td>
                 <td className="evidence-score">
                     {evidence.scoreStatus !== 'Contradicts' ?
-                        (evidence.modifiedScore ?
-                            <span><strong>{evidence.modifiedScore}</strong> ({evidence.defaultScore})</span>
-                            :
-                            <span><strong>{evidence.defaultScore}</strong> ({evidence.defaultScore})</span>
-                        )
+                        <span><strong>{typeof evidence.modifiedScore === 'number' ? evidence.modifiedScore : evidence.defaultScore}</strong> ({evidence.defaultScore})</span>
                         :
                         <span className={evidence.scoreStatus}>n/a</span>
                     }
