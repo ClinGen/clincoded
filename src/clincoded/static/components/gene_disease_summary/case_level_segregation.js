@@ -7,13 +7,17 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            segregationEvidenceList: this.props.segregationEvidenceList
+            segregationEvidenceList: this.props.segregationEvidenceList,
+            hpoTermList: this.props.hpoTermList
         };
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.segregationEvidenceList) {
             this.setState({segregationEvidenceList: nextProps.segregationEvidenceList});
+        }
+        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
+            this.setState({hpoTermList: nextProps.hpoTermList});
         }
     }
 
@@ -32,7 +36,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {evidence.hpoIdInDiagnosis.join(', ')}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {this.state.hpoTermList.join(', ')}</span> : null}
                     {evidence.hpoIdInDiagnosis.length && evidence.termsInDiagnosis.length ? <span>; </span> : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong> {evidence.termsInDiagnosis}</span> : null}
                 </td>
@@ -54,6 +58,27 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                 </td>
             </tr>
         );
+    }
+
+    /**
+     * Method to get the total score of all scored evidence
+     * @param {array} evidenceList - A list of evidence items
+     */
+    getTotalScore(evidenceList) {
+        let allScores = [];
+        evidenceList.forEach(item => {
+            let score;
+            if (item.includeLodScoreInAggregateCalculation) {
+                if (typeof item.segregationPublishedLodScore === 'number') {
+                    score = item.segregationPublishedLodScore;
+                } else if (typeof item.segregationEstimatedLodScore === 'number') {
+                    score = item.segregationEstimatedLodScore;
+                }
+                allScores.push(score);
+            }
+        });
+        const totalScore = allScores.reduce((a, b) => a + b, 0);
+        return totalScore;
     }
 
     render() {
@@ -83,6 +108,10 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                 {segregationEvidenceList.map((item, i) => {
                                     return (self.renderSegregationEvidence(item, i));
                                 })}
+                                <tr>
+                                    <td colSpan="5" className="total-score-label">Total score:</td>
+                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(segregationEvidenceList)}</td>
+                                </tr>
                             </tbody>
                         </table>
                         :
@@ -97,7 +126,8 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
 }
 
 GeneDiseaseEvidenceSummarySegregation.propTypes = {
-    segregationEvidenceList: PropTypes.array
+    segregationEvidenceList: PropTypes.array,
+    hpoTermList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummarySegregation;
