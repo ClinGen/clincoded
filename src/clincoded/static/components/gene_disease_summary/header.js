@@ -44,11 +44,15 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Classification owner:</dt>
                             <dd className="summaryOwnerName">{provisional && provisional.submitted_by ? provisional.submitted_by.title : null}</dd>
-                            <dt>Calculated Provisional classification:</dt>
+                            <dt>Calculated classification:</dt>
                             <dd className="classificationSaved">{provisional ? provisional.autoClassification : null}</dd>
-                            <dt>Modified Provisional Classification:</dt>
+                            <dt>Modified classification:</dt>
                             <dd className="classificationModified">
                                 {provisional && provisional.alteredClassification ? (provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification) : null}
+                            </dd>
+                            <dt>Reason for modified classification:</dt>
+                            <dd className="classificationModifiedReason">
+                                {provisional && provisional.reasons ? provisional.reasons : 'None'}
                             </dd>
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
@@ -63,6 +67,17 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             <dt>Disease:</dt>
                             <dd className="disease-term">{disease && disease.term ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.term}</a> : null}</dd>
                         </dl>
+                    </div>
+                </div>
+                <div className="panel panel-primary record-summary">
+                    <div className="panel-heading">
+                        <h3 className="panel-title">Evidence Summary</h3>
+                    </div>
+                    <div className="panel-body">
+                        <p>
+                            {provisional && provisional.evidenceSummary && provisional.evidenceSummary.length ?
+                                provisional.evidenceSummary : 'No summary is provided.'}
+                        </p>
                     </div>
                 </div>
             </div>
