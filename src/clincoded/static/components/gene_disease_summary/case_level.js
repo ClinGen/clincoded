@@ -7,13 +7,17 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            caseLevelEvidenceList: this.props.caseLevelEvidenceList
+            caseLevelEvidenceList: this.props.caseLevelEvidenceList,
+            hpoTermList: this.props.hpoTermList
         };
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.caseLevelEvidenceList) {
             this.setState({caseLevelEvidenceList: nextProps.caseLevelEvidenceList});
+        }
+        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
+            this.setState({hpoTermList: nextProps.hpoTermList});
         }
     }
 
@@ -54,7 +58,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {evidence.hpoIdInDiagnosis.join(', ')}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {this.state.hpoTermList.join(', ')}</span> : null}
                     {evidence.hpoIdInDiagnosis.length && evidence.termsInDiagnosis.length ? <span>; </span> : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong> {evidence.termsInDiagnosis}</span> : null}
                 </td>
@@ -68,36 +72,60 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.segregationPublishedLodScore ?
                         <span><strong>Published:</strong> {evidence.segregationPublishedLodScore}</span>
                         : 
-                        (evidence.segregationEstimatedLodScore ? <span><strong>Calculated:</strong> {evidence.segregationEstimatedLodScore}</span> : '-')
+                        <span>{evidence.segregationEstimatedLodScore ? <span><strong>Calculated:</strong> {evidence.segregationEstimatedLodScore}</span> : '-'}</span>
                     }
                 </td>
                 <td className="evidence-lod-score-counted">
                     {evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore ? <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span> : '-'}
                 </td>
-                <td className="evidence-previous-testing">
-                    {typeof evidence.previousTesting !== 'undefined' ?
-                        <span>{evidence.previousTesting ? 'Yes' : 'No'}{evidence.previousTestingDescription.length ? <span>. {evidence.previousTestingDescription}</span> : null}</span>
-                        : '-'}
+                <td className="evidence-previous-testing-description">
+                    {evidence.previousTestingDescription}
                 </td>
                 <td className="evidence-detection-methods">
-                    {evidence.genotypingMethods.length ? evidence.genotypingMethods.join(', ') : null}
+                    {evidence.genotypingMethods.length ?
+                        evidence.genotypingMethods.map((method, i) => {
+                            return (
+                                <span key={i}>{i > 0 ? <span>; </span> : null}<strong>Method {i+1}:</strong> {method}</span>
+                            );
+                        })
+                        : null}
                 </td>
                 <td className="evidence-score-status">
                     {<span className={evidence.scoreStatus}>{evidence.scoreStatus}</span>}
                 </td>
                 <td className="evidence-proband-score">
-                    {evidence.scoreStatus !== 'Contradicts' ?
-                        (evidence.modifiedScore ?
-                            <span><strong>{evidence.modifiedScore}</strong> ({evidence.defaultScore})</span>
-                            :
-                            <span><strong>{evidence.defaultScore}</strong> ({evidence.defaultScore})</span>
-                        )
-                        :
-                        <span className={evidence.scoreStatus}>n/a</span>
-                    }
+                    {evidence.variantType.length ?
+                        <span>
+                            {evidence.scoreStatus !== 'Contradicts' ?
+                                <span><strong>{typeof evidence.modifiedScore === 'number' ? evidence.modifiedScore : evidence.defaultScore}</strong>  ({evidence.defaultScore})</span>
+                                :
+                                <span className={evidence.scoreStatus}>n/a</span>
+                            }
+                        </span>
+                        : null}
+                </td>
+                <td className="evidence-score-explanation">
+                    {evidence.scoreExplanation}
                 </td>
             </tr>
         );
+    }
+
+    /**
+     * Method to get the total score of all scored evidence
+     * @param {array} evidenceList - A list of evidence items
+     */
+    getTotalScore(evidenceList) {
+        let allScores = [];
+        evidenceList.forEach(item => {
+            let score;
+            if (item.scoreStatus.indexOf('Score') > -1) {
+                score = typeof item.modifiedScore === 'number' ? item.modifiedScore : item.defaultScore;
+                allScores.push(score);
+            }
+        });
+        const totalScore = allScores.reduce((a, b) => a + b, 0);
+        return totalScore;
     }
 
     render() {
@@ -126,6 +154,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2">Proband methods of detection</th>
                                     <th rowSpan="2">Score status</th>
                                     <th rowSpan="2">Proband score (default)</th>
+                                    <th rowSpan="2">Reason for changed score</th>
                                 </tr>
                                 <tr>
                                     <th># Aff</th>
@@ -138,6 +167,10 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                 {caseLevelEvidenceList.map((item, i) => {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
+                                <tr>
+                                    <td colSpan="14" className="total-score-label">Total score:</td>
+                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(caseLevelEvidenceList)}</td>
+                                </tr>
                             </tbody>
                         </table>
                         :
@@ -152,7 +185,8 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
-    caseLevelEvidenceList: PropTypes.array
+    caseLevelEvidenceList: PropTypes.array,
+    hpoTermList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;
