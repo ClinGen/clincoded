@@ -7,13 +7,17 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            caseControlEvidenceList: this.props.caseControlEvidenceList
+            caseControlEvidenceList: this.props.caseControlEvidenceList,
+            hpoTermList: this.props.hpoTermList
         };
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.caseControlEvidenceList) {
             this.setState({caseControlEvidenceList: nextProps.caseControlEvidenceList});
+        }
+        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
+            this.setState({hpoTermList: nextProps.hpoTermList});
         }
     }
 
@@ -30,7 +34,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 </td>
                 <td className="evidence-disease">
                     <span>{evidence.diseaseTerm}
-                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({evidence.diseasePhenotypes.join(', ')})</span> : null)}</span>
+                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.state.hpoTermList.join(', ')})</span> : null)}</span>
                     </span>
                 </td>
                 <td className="evidence-study-type">
@@ -78,6 +82,21 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
         );
     }
 
+    /**
+     * Method to get the total score of all scored evidence
+     * @param {array} evidenceList - A list of evidence items
+     */
+    getTotalScore(evidenceList) {
+        let allScores = [];
+        evidenceList.forEach(item => {
+            if (typeof item.score === 'number') {
+                allScores.push(item.score);
+            }
+        });
+        const totalScore = allScores.reduce((a, b) => a + b, 0);
+        return totalScore;
+    }
+
     render() {
         const caseControlEvidenceList = this.state.caseControlEvidenceList;
         let self = this;
@@ -115,6 +134,10 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                 {caseControlEvidenceList.map((item, i) => {
                                     return (self.renderCaseControlEvidence(item, i));
                                 })}
+                                <tr>
+                                    <td colSpan="12" className="total-score-label">Total score:</td>
+                                    <td className="total-score-value">{this.getTotalScore(caseControlEvidenceList)}</td>
+                                </tr>
                             </tbody>
                         </table>
                         :
@@ -129,7 +152,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseControl.propTypes = {
-    caseControlEvidenceList: PropTypes.array
+    caseControlEvidenceList: PropTypes.array,
+    hpoTermList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummaryCaseControl;
