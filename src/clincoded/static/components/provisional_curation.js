@@ -137,6 +137,25 @@ var ProvisionalCuration = createReactClass({
         this.loadData();
     },
 
+    componentDidUpdate(prevProps, prevState) {
+        // Need to delay the function call until the DOM is rendered
+        // Only do invoke this call when the referrer is the classification view-only page
+        const referrer = queryKeyValue('referrer', this.props.href);
+        if (referrer && referrer.indexOf('classification-view') > -1) {
+            setTimeout(this.scrollElementIntoView, 500);
+        }
+    },
+
+    /**
+     * Method to show the saved classification data in viewport
+     */
+    scrollElementIntoView() {
+        const element = document.querySelector('#classification-view');
+        if (element) {
+            element.scrollIntoView();
+        }
+    },
+
     submitForm: function(e) {
         // Don't run through HTML submit handler
         e.preventDefault();
@@ -804,6 +823,7 @@ var ProvisionalCuration = createReactClass({
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="5">
+                                                                    <a name="classification-view" id="classification-view"></a>
                                                                     <div className="col-md-12 classification-form-content-wrapper">
                                                                         <div className="col-xs-12 col-sm-6">
                                                                             <div className="altered-classfication">
@@ -824,7 +844,8 @@ var ProvisionalCuration = createReactClass({
                                                                             <div className="altered-classification-reasons">
                                                                                 <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
                                                                                     wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
-                                                                                    clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange} />
+                                                                                    clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
+                                                                                    required={this.state.alteredClassification !== 'No Selection' ? true : false} />
                                                                             </div>
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
