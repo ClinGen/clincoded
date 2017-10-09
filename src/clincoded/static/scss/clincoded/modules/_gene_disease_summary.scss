@@ -42,10 +42,6 @@
         &:last-child {
             border-right: none;
         }
-
-        .Contradicts {
-            color: red;
-        }
     }
 
     .table>tbody>tr>td {
@@ -55,9 +51,32 @@
         &:last-child {
             border-right: none;
         }
+
+        .Contradicts {
+            color: red;
+        }
+    }
+
+    .total-score-label {
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .total-score-value {
+        font-weight: bold;
     }
 
     .evidence-summary {
+        &.panel-header {
+            .record-summary {
+                margin-top: 20px;
+
+                p {
+                    margin-bottom: 0;
+                }
+            }
+        }
+
         &.panel-case-level {
             .evidence-variant {
                 .variant-info {
