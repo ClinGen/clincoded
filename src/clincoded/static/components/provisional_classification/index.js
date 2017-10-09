@@ -130,9 +130,13 @@ const ProvisionalClassification = createReactClass({
     },
 
     componentDidUpdate(prevProps, prevState) {
+        // Need to delay the function call until the DOM is rendered
         setTimeout(this.scrollElementIntoView, 500);
     },
 
+    /**
+     * Method to show the saved classification data in viewport
+     */
     scrollElementIntoView() {
         const element = document.querySelector('#classification-view');
         if (element) {
@@ -481,7 +485,7 @@ const ProvisionalClassification = createReactClass({
     },
 
     editClassification(e) {
-        window.location.href = '/provisional-curation/?gdm=' + this.state.gdm.uuid + '&edit=yes';
+        window.location.href = '/provisional-curation/?gdm=' + this.state.gdm.uuid + '&edit=yes&referrer=classification-view';
     },
 
     viewEvidenceSummary(e) {
@@ -778,8 +782,8 @@ const ProvisionalClassification = createReactClass({
                                     </Panel>
                                 </PanelGroup>
                                 <div className='modal-footer'>
-                                    <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Curation Central <i className="icon icon-briefcase"></i></button>
-                                    <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Classification <i className="icon icon-pencil"></i></button>
+                                    <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
+                                    <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
                                     <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
                                 </div>
                             </div>
