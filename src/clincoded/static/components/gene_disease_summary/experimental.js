@@ -51,6 +51,23 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
         );
     }
 
+    /**
+     * Method to get the total score of all scored evidence
+     * @param {array} evidenceList - A list of evidence items
+     */
+    getTotalScore(evidenceList) {
+        let allScores = [];
+        evidenceList.forEach(item => {
+            let score;
+            if (item.scoreStatus.indexOf('Score') > -1) {
+                score = typeof item.modifiedScore === 'number' ? item.modifiedScore : item.defaultScore;
+                allScores.push(score);
+            }
+        });
+        const totalScore = allScores.reduce((a, b) => a + b, 0);
+        return totalScore;
+    }
+
     render() {
         const experimentalEvidenceList = this.state.experimentalEvidenceList;
         let self = this;
@@ -77,6 +94,10 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                 {experimentalEvidenceList.map((item, i) => {
                                     return (self.renderExperimentalEvidence(item, i));
                                 })}
+                                <tr>
+                                    <td colSpan="4" className="total-score-label">Total score:</td>
+                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(experimentalEvidenceList)}</td>
+                                </tr>
                             </tbody>
                         </table>
                         :
