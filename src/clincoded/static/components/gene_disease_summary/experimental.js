@@ -65,11 +65,23 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
             }
         });
         const totalScore = allScores.reduce((a, b) => a + b, 0);
-        return totalScore;
+        return parseFloat(totalScore).toFixed(2);
+    }
+
+    /**
+     * Sort table rows given a list of evidence and column name
+     */
+    sortListbyColName(evidenceList, colName) {
+        let sortedList = [];
+        if (evidenceList.length) {
+            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() > y[colName].toLowerCase());
+        }
+        return sortedList;
     }
 
     render() {
         const experimentalEvidenceList = this.state.experimentalEvidenceList;
+        let sortedEvidenceList = this.sortListbyColName(experimentalEvidenceList, 'evidenceType');
         let self = this;
 
         return (
@@ -78,7 +90,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Experimental Evidence</h3>
                     </div>
-                    {experimentalEvidenceList && experimentalEvidenceList.length ?
+                    {sortedEvidenceList && sortedEvidenceList.length ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -91,12 +103,12 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {experimentalEvidenceList.map((item, i) => {
+                                {sortedEvidenceList.map((item, i) => {
                                     return (self.renderExperimentalEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="4" className="total-score-label">Total score:</td>
-                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(experimentalEvidenceList)}</td>
+                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
                         </table>
