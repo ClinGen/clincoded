@@ -58,9 +58,8 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {this.state.hpoTermList.join(', ')}</span> : null}
-                    {evidence.hpoIdInDiagnosis.length && evidence.termsInDiagnosis.length ? <span>; </span> : null}
-                    {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong> {evidence.termsInDiagnosis}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.state.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
+                    {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
                 <td className="evidence-segregation-num-affected">
                     {evidence.segregationNumAffected ? evidence.segregationNumAffected : '-'}
@@ -125,11 +124,23 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
             }
         });
         const totalScore = allScores.reduce((a, b) => a + b, 0);
-        return totalScore;
+        return parseFloat(totalScore).toFixed(2);
+    }
+
+    /**
+     * Sort table rows given a list of evidence and column name
+     */
+    sortListbyColName(evidenceList, colName) {
+        let sortedList = [];
+        if (evidenceList.length) {
+            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() > y[colName].toLowerCase());
+        }
+        return sortedList;
     }
 
     render() {
         const caseLevelEvidenceList = this.state.caseLevelEvidenceList;
+        let sortedEvidenceList = this.sortListbyColName(caseLevelEvidenceList, 'variantType');
         let self = this;
 
         return (
@@ -138,7 +149,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Genetic Evidence: Case Level (variants, segregation)</h3>
                     </div>
-                    {caseLevelEvidenceList && caseLevelEvidenceList.length ?
+                    {sortedEvidenceList && sortedEvidenceList.length ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -164,12 +175,12 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {caseLevelEvidenceList.map((item, i) => {
+                                {sortedEvidenceList.map((item, i) => {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="14" className="total-score-label">Total score:</td>
-                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(caseLevelEvidenceList)}</td>
+                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
                         </table>
