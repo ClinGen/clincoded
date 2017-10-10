@@ -667,7 +667,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTermList={this.state.caseControlHpoTermList} />
                 <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                 <div className="pdf-download-wrapper">
-                    <button className="btn btn-primary pull-right" onClick={this.handlePrintPDF}>Download PDF Summary</button>
+                    <button className="btn btn-default btn-inline-spacer" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
+                    <button className="btn btn-primary btn-inline-spacer pull-right" onClick={this.handlePrintPDF}>Print PDF</button>
                     <br /><div>&nbsp;</div><br />
                 </div>
             </div>
