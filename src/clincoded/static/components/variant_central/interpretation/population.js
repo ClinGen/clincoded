@@ -681,14 +681,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // const variantPage = pageVariant.chrom + ':' + pageVariant.pos + ' ' + pageVariant['alleles'][0] + '/' + pageVariant['alleles'][1];
             return (
                 <h3 className="panel-title">PAGE: {nc_genomic} (GRCh37)
-                    <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><span>(PAGE Study)</span></a>
+                    <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><i className="icon icon-info-circle"></i> <span>PAGE Study</span></a>
+                    {/* **Keep for next release when PAGE data is available on GGV portal**
                     <a className="panel-subtitle pull-right" href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">See data in GGV</a>
+                    */}
                 </h3>
             );
         } else {
             return (
                 <h3 className="panel-title">PAGE: {nc_genomic} (GRCh37)
-                    <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><span>(PAGE Study)</span></a>
+                    <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><i className="icon icon-info-circle"></i> <span>PAGE Study</span></a>
                 </h3>
             );
         }
@@ -700,7 +702,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             const variantExac = exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt;
             const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
             return (
-                <h3 className="panel-title">ExAC {variantExac}
+                <h3 className="panel-title">ExAC {variantExac} (GRCh37)
                     <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                     <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC</a>
                 </h3>
@@ -720,7 +722,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             const variantTGenomes = tGenomes._extra.name + ' ' + tGenomes._extra.var_class;
             const linkoutEnsembl = external_url_map['EnsemblPopulationPage'] + tGenomes._extra.name;
             return (
-                <h3 className="panel-title">1000 Genomes: {variantTGenomes}
+                <h3 className="panel-title">1000 Genomes: {variantTGenomes} (GRCh38)
                     <a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
                     <a className="panel-subtitle pull-right" href={linkoutEnsembl} target="_blank">See data in Ensembl</a>
                 </h3>
@@ -740,7 +742,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             const variantEsp = esp._extra.rsid + '; ' + esp._extra.chrom + '.' + esp._extra.hg19_start + '; Alleles ' + esp._extra.ref + '>' + esp._extra.alt;
             const linkoutEsp = dbxref_prefix_map['ESP_EVS'] + 'searchBy=rsID&target=' + esp._extra.rsid + '&x=0&y=0';
             return (
-                <h3 className="panel-title">Exome Sequencing Project (ESP): {variantEsp}
+                <h3 className="panel-title">Exome Sequencing Project (ESP): {variantEsp} (GRCh37)
                     <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                     <a className="panel-subtitle pull-right" href={linkoutEsp} target="_blank">See data in ESP</a>
                 </h3>
@@ -777,7 +779,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (data) {
             let alleleData = this.parseAlleleMyVariant(data);
             if (Object.keys(alleleData).length) {
-                variantgnomAD = alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt;
+                variantgnomAD = alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt + ' (GRCh37)';
             }
         }
         return (
@@ -859,7 +861,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                         : null}
 
                     <div className="bs-callout bs-callout-info clearfix">
-                        <h4>Subpopulation with Highest Minor Allele Frequency <span className="header-note">(Note: this calculation does not currently include PAGE study minor allele data)</span></h4>
+                        <h4>Subpopulation with Highest Minor Allele Frequency</h4>
+                        <p className="header-note">(Note: this calculation does not currently include PAGE study minor allele data)</p>
                         <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of ExAC, 1000 Genomes, and ESP shown below.</p>
                         <div className="clearfix">
                             <div className="bs-callout-content-container">
@@ -967,7 +970,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             {this.state.loading_pageData ? showActivityIndicator('Retrieving data... ') : null}
                             {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. <a href="http://popgen.uchicago.edu/ggv/" target="_blank">Search PAGE</a> for this variant.</span>
+                                    <span>Data is currently only returned for single nucleotide variants. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
                                 </div>
                                 :
                                 <div>
@@ -992,7 +995,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         </div>
                                         :
                                         <div className="panel-body">
-                                            <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank">Search PAGE</a> for this variant.</span>
+                                            <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
                                         </div>
                                     }
                                 </div>
