@@ -36,9 +36,8 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong> {this.state.hpoTermList.join(', ')}</span> : null}
-                    {evidence.hpoIdInDiagnosis.length && evidence.termsInDiagnosis.length ? <span>; </span> : null}
-                    {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong> {evidence.termsInDiagnosis}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.state.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
+                    {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
                 <td className="evidence-segregation-num-affected">
                     {evidence.segregationNumAffected}
@@ -78,11 +77,25 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
             }
         });
         const totalScore = allScores.reduce((a, b) => a + b, 0);
-        return totalScore;
+        return parseFloat(totalScore).toFixed(2);
+    }
+
+    /**
+     * Sort table rows given a list of evidence and column name
+     */
+    sortListbyColName(evidenceList, colName) {
+        let sortedList = [];
+        if (evidenceList.length) {
+            sortedList = evidenceList.sort((x, y) =>
+                x['segregationPublishedLodScore'] ? x['segregationPublishedLodScore'] : x['segregationEstimatedLodScore'] - y['segregationPublishedLodScore'] ? y['segregationPublishedLodScore'] : y['segregationEstimatedLodScore']
+            );
+        }
+        return sortedList;
     }
 
     render() {
         const segregationEvidenceList = this.state.segregationEvidenceList;
+        let sortedEvidenceList = this.sortListbyColName(segregationEvidenceList);
         let self = this;
 
         return (
@@ -91,7 +104,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Genetic Evidence: Case Level (family segregation information without proband data)</h3>
                     </div>
-                    {segregationEvidenceList && segregationEvidenceList.length ?
+                    {sortedEvidenceList && sortedEvidenceList.length ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -105,12 +118,12 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {segregationEvidenceList.map((item, i) => {
+                                {sortedEvidenceList.map((item, i) => {
                                     return (self.renderSegregationEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="5" className="total-score-label">Total score:</td>
-                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(segregationEvidenceList)}</td>
+                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
                         </table>
