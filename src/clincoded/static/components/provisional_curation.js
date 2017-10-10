@@ -62,10 +62,12 @@ var ProvisionalCuration = createReactClass({
                 expressionCount: 0, expressionPoints: 0,
                 patientCellsCount: 0, patientCellsPoints: 0,
                 nonPatientCellsCount: 0, nonPatientCellsPoints: 0,
-                animalModelCount: 0, animalModelPoints: 0,
+                nonHumanModelCount: 0, nonHumanModelPoints: 0,
                 cellCultureCount: 0, cellCulturePoints: 0,
-                rescueCount: 0, rescuePoints: 0,
-                rescueEngineeredCount: 0, rescueEngineeredPoints: 0,
+                rescueHumanModelCount: 0, rescueHumanModelPoints: 0,
+                rescueNonHumanModelCount: 0, rescueNonHumanModelPoints: 0,
+                rescueCellCultureCount: 0, rescueCellCulturePoints: 0,
+                rescuePatientCellsCount: 0, rescuePatientCellsPoints: 0,
                 // variables for total counts
                 geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
@@ -394,34 +396,42 @@ var ProvisionalCuration = createReactClass({
                                     scoreTableValues['expressionCount'] += 1;
                                     scoreTableValues['expressionPoints'] += experimentalScore;
                                 } else if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
-                                    if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
-                                        && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Patient cells') {
+                                    if (experimental.functionalAlteration.functionalAlterationType
+                                        && experimental.functionalAlteration.functionalAlterationType === 'Patient cells') {
                                         scoreTableValues['patientCellsCount'] += 1;
                                         scoreTableValues['patientCellsPoints'] += experimentalScore;
-                                    } else if (experimental.functionalAlteration.cellMutationOrEngineeredEquivalent
-                                        && experimental.functionalAlteration.cellMutationOrEngineeredEquivalent === 'Engineered equivalent') {
+                                    } else if (experimental.functionalAlteration.functionalAlterationType
+                                        && experimental.functionalAlteration.functionalAlterationType === 'Non-patient cells') {
                                         scoreTableValues['nonPatientCellsCount'] += 1;
                                         scoreTableValues['nonPatientCellsPoints'] += experimentalScore;
                                     }
                                 } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
-                                    if (experimental.modelSystems.animalOrCellCulture
-                                        && experimental.modelSystems.animalOrCellCulture === 'Animal model') {
-                                        scoreTableValues['animalModelCount'] += 1;
-                                        scoreTableValues['animalModelPoints'] += experimentalScore;
-                                    } else if (experimental.modelSystems.animalOrCellCulture
-                                        && experimental.modelSystems.animalOrCellCulture === 'Engineered equivalent') {
+                                    if (experimental.modelSystems.modelSystemsType
+                                        && experimental.modelSystems.modelSystemsType === 'Non-human model organism') {
+                                        scoreTableValues['nonHumanModelCount'] += 1;
+                                        scoreTableValues['nonHumanModelPoints'] += experimentalScore;
+                                    } else if (experimental.modelSystems.modelSystemsType
+                                        && experimental.modelSystems.modelSystemsType === 'Cell culture model') {
                                         scoreTableValues['cellCultureCount'] += 1;
                                         scoreTableValues['cellCulturePoints'] += experimentalScore;
                                     }
                                 } else if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
-                                    if (experimental.rescue.patientCellOrEngineeredEquivalent
-                                        && experimental.rescue.patientCellOrEngineeredEquivalent === 'Patient cells') {
-                                        scoreTableValues['rescueCount'] += 1;
-                                        scoreTableValues['rescuePoints'] += experimentalScore;
-                                    } else if (experimental.rescue.patientCellOrEngineeredEquivalent
-                                        && experimental.rescue.patientCellOrEngineeredEquivalent === 'Engineered equivalent') {
-                                        scoreTableValues['rescueEngineeredCount'] += 1;
-                                        scoreTableValues['rescueEngineeredPoints'] += experimentalScore;
+                                    if (experimental.rescue.rescueType
+                                        && experimental.rescue.rescueType === 'Human') {
+                                        scoreTableValues['rescueHumanModelCount'] += 1;
+                                        scoreTableValues['rescueHumanModelPoints'] += experimentalScore;
+                                    } else if (experimental.rescue.rescueType
+                                        && experimental.rescue.rescueType === 'Non-human model organism') {
+                                        scoreTableValues['rescueNonHumanModelCount'] += 1;
+                                        scoreTableValues['rescueNonHumanModelPoints'] += experimentalScore;
+                                    } else if (experimental.rescue.rescueType
+                                        && experimental.rescue.rescueType === 'Cell culture model') {
+                                        scoreTableValues['rescueCellCultureCount'] += 1;
+                                        scoreTableValues['rescueCellCulturePoints'] += experimentalScore;
+                                    } else if (experimental.rescue.rescueType
+                                        && experimental.rescue.rescueType === 'Patient cells') {
+                                        scoreTableValues['rescuePatientCellsCount'] += 1;
+                                        scoreTableValues['rescuePatientCellsPoints'] += experimentalScore;
                                     }
                                 }
                             } else if (score.scoreStatus === 'Contradicts') {
@@ -519,7 +529,8 @@ var ProvisionalCuration = createReactClass({
         tempPoints = scoreTableValues['patientCellsPoints'] + scoreTableValues['nonPatientCellsPoints'];
         scoreTableValues['functionalAlterationPointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION;
 
-        tempPoints = scoreTableValues['animalModelPoints'] + scoreTableValues['cellCulturePoints'] + scoreTableValues['rescuePoints'] + scoreTableValues['rescueEngineeredPoints'];
+        tempPoints = scoreTableValues['nonHumanModelPoints'] + scoreTableValues['cellCulturePoints'] + scoreTableValues['rescueHumanModelPoints'] + scoreTableValues['rescueNonHumanModelPoints']
+                    + scoreTableValues['rescueCellCulturePoints'] + scoreTableValues['rescuePatientCellsPoints'];
         scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
 
         tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
@@ -654,7 +665,7 @@ var ProvisionalCuration = createReactClass({
                                                                 <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td rowSpan="10" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
+                                                                <td rowSpan="12" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
                                                                 <td colSpan="3" rowSpan="3" className="header">Functional</td>
                                                                 <td>Biochemical Functions</td>
                                                                 <td>{scoreTableValues['biochemicalFunctionCount']}</td>
@@ -673,37 +684,48 @@ var ProvisionalCuration = createReactClass({
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="3" rowSpan="2" className="header">Functional Alteration</td>
-                                                                <td>Patient Cells</td>
+                                                                <td>Patient cells</td>
                                                                 <td>{scoreTableValues['patientCellsCount']}</td>
                                                                 <td>{scoreTableValues['patientCellsPoints']}</td>
                                                                 <td rowSpan="2">{scoreTableValues['functionalAlterationPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Non-patient Cells</td>
+                                                                <td>Non-patient cells</td>
                                                                 <td>{scoreTableValues['nonPatientCellsCount']}</td>
                                                                 <td>{scoreTableValues['nonPatientCellsPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td colSpan="3" rowSpan="4" className="header">Models & Rescue</td>
-                                                                <td>Animal Model</td>
-                                                                <td>{scoreTableValues['animalModelCount']}</td>
-                                                                <td>{scoreTableValues['animalModelPoints']}</td>
-                                                                <td rowSpan="4">{scoreTableValues['modelsRescuePointsCounted']}</td>
+                                                                <td colSpan="3" rowSpan="2" className="header">Models</td>
+                                                                <td>Non-human model organism</td>
+                                                                <td>{scoreTableValues['nonHumanModelCount']}</td>
+                                                                <td>{scoreTableValues['nonHumanModelPoints']}</td>
+                                                                <td rowSpan="6">{scoreTableValues['modelsRescuePointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Cell Culture Model System</td>
+                                                                <td>Cell culture model</td>
                                                                 <td>{scoreTableValues['cellCultureCount']}</td>
                                                                 <td>{scoreTableValues['cellCulturePoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Rescue in Animal Model</td>
-                                                                <td>{scoreTableValues['rescueCount']}</td>
-                                                                <td>{scoreTableValues['rescuePoints']}</td>
+                                                                <td colSpan="3" rowSpan="4" className="header">Rescue</td>
+                                                                <td>Rescue in human</td>
+                                                                <td>{scoreTableValues['rescueHumanModelCount']}</td>
+                                                                <td>{scoreTableValues['rescueHumanModelPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Rescue in Engineered Equivalent</td>
-                                                                <td>{scoreTableValues['rescueEngineeredCount']}</td>
-                                                                <td>{scoreTableValues['rescueEngineeredPoints']}</td>
+                                                                <td>Rescue in non-human model organism</td>
+                                                                <td>{scoreTableValues['rescueNonHumanModelCount']}</td>
+                                                                <td>{scoreTableValues['rescueNonHumanModelPoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Rescue in cell culture model</td>
+                                                                <td>{scoreTableValues['rescueCellCultureCount']}</td>
+                                                                <td>{scoreTableValues['rescueCellCulturePoints']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Rescue in patient cells</td>
+                                                                <td>{scoreTableValues['rescuePatientCellsCount']}</td>
+                                                                <td>{scoreTableValues['rescuePatientCellsPoints']}</td>
                                                             </tr>
                                                             <tr className="header separator-below">
                                                                 <td colSpan="6">Experimental Evidence Total</td>

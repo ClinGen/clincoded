@@ -2883,6 +2883,24 @@ table.login-users-interpretations {
             margin-bottom: 6px;
         }
     }
+
+    .rescue-observed-group {
+        div {
+            display: block;
+            position: relative;
+
+            dd {
+                left: 275px;
+                position: relative;
+            }
+        }
+
+        div:last-child {
+            dd {
+                left: 208px;
+            }
+        }
+    }
 }
 
 .panel.case-control-evidence-score,
@@ -2997,7 +3015,7 @@ table.login-users-interpretations {
 
                 li {
                     display: table-cell;
-                    
+
                     &:nth-child(even) {
                         padding: 0 10px;
                     }
@@ -3056,12 +3074,12 @@ table.login-users-interpretations {
 
 .feedback-message.isVisible {
     opacity: 1;
-    visibility: visible; 
+    visibility: visible;
 }
 
 .feedback-message.isHidden {
     opacity: 0;
-    visibility: hidden; 
+    visibility: hidden;
 }
 
 /**
