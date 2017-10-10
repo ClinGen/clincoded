@@ -94,11 +94,23 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
             }
         });
         const totalScore = allScores.reduce((a, b) => a + b, 0);
-        return totalScore;
+        return parseFloat(totalScore).toFixed(2);
+    }
+
+    /**
+     * Sort table rows given a list of evidence and column name
+     */
+    sortListbyColName(evidenceList, colName) {
+        let sortedList = [];
+        if (evidenceList.length) {
+            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() > y[colName].toLowerCase());
+        }
+        return sortedList;
     }
 
     render() {
         const caseControlEvidenceList = this.state.caseControlEvidenceList;
+        let sortedEvidenceList = this.sortListbyColName(caseControlEvidenceList, 'studyType');
         let self = this;
 
         return (
@@ -107,7 +119,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Genetic Evidence: Case-Control</h3>
                     </div>
-                    {caseControlEvidenceList && caseControlEvidenceList.length ?
+                    {sortedEvidenceList && sortedEvidenceList.length ?
                         <table className="table">
                             <thead>
                                 <tr>
@@ -131,12 +143,12 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {caseControlEvidenceList.map((item, i) => {
+                                {sortedEvidenceList.map((item, i) => {
                                     return (self.renderCaseControlEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="12" className="total-score-label">Total score:</td>
-                                    <td className="total-score-value">{this.getTotalScore(caseControlEvidenceList)}</td>
+                                    <td className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
                         </table>
