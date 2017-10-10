@@ -682,9 +682,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             return (
                 <h3 className="panel-title">PAGE: {nc_genomic} (GRCh37)
                     <a href="#credit-pagestudy" className="credit-pagestudy" title="pagestudy.org"><i className="icon icon-info-circle"></i> <span>PAGE Study</span></a>
-                    {/* **Keep for next release when PAGE data is available on GGV portal**
-                    <a className="panel-subtitle pull-right" href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">See data in GGV</a>
-                    */}
+                    <a className="panel-subtitle pull-right" href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">GGV Browser</a>
                 </h3>
             );
         } else {
