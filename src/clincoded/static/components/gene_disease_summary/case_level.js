@@ -133,7 +133,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     sortListbyColName(evidenceList, colName) {
         let sortedList = [];
         if (evidenceList.length) {
-            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() > y[colName].toLowerCase());
+            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() !== y[colName].toLowerCase() ? x[colName].toLowerCase() < y[colName].toLowerCase() ? -1 : 1 : 0);
         }
         return sortedList;
     }
