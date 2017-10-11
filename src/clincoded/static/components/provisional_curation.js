@@ -268,11 +268,13 @@ var ProvisionalCuration = createReactClass({
 
     handleChange: function(ref, e) {
         if (ref === 'alteredClassification') {
-            this.setState({alteredClassification: this.refs[ref].getValue()}, () => {
+            this.setState({
+                alteredClassification: this.refs[ref].getValue(),
+                resetAlteredClassification: false
+            }, () => {
                 // Remove highlighting of modified classification selection dropdown menu
                 // when the selected option is changed
                 document.querySelector('.altered-classification select').classList.remove('form-control-danger');
-                this.setState({resetAlteredClassification: false});
             });
         } else if (ref === 'reasons') {
             this.setState({reasons: this.refs[ref].getValue()}, () => {
