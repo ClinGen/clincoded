@@ -12,3 +12,11 @@ def provisionalClassification_1_2(value, system):
         value['contradictingEvidence']['proband'] = False
         value['contradictingEvidence']['caseControl'] = False
         value['contradictingEvidence']['experimental'] = False
+
+
+@upgrade_step('provisionalClassification', '2', '3')
+def provisionalClassification_2_3(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1414#issuecomment-335916100
+    if 'alteredClassification' in value:
+        if value['alteredClassification'] == 'No Selection':
+            value['alteredClassification'] = 'No Modification'
