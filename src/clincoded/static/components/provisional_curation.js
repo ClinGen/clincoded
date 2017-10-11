@@ -36,7 +36,7 @@ var ProvisionalCuration = createReactClass({
             //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
             autoClassification: 'No Classification',
-            alteredClassification: 'No Selection',
+            alteredClassification: 'No Modification',
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
@@ -45,6 +45,7 @@ var ProvisionalCuration = createReactClass({
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
             },
+            resetAlteredClassification: false,
             scoreTableValues: {
                 // variables for autosomal dominant data
                 probandOtherVariantCount: 0, probandOtherVariantPoints: 0, probandOtherVariantPointsCounted: 0,
@@ -144,6 +145,15 @@ var ProvisionalCuration = createReactClass({
         if (referrer && referrer.indexOf('classification-view') > -1) {
             setTimeout(this.scrollElementIntoView, 500);
         }
+        // Highlight the modified classification dropdown menu
+        // if there is a svaed classifition
+        if (Object.keys(this.state.provisional).length && document.querySelector('.altered-classification select')) {
+            document.querySelector('.altered-classification select').classList.add('form-control-danger');
+        }
+    },
+
+    componentWillUnmount() {
+        this.setState({resetAlteredClassification: false});
     },
 
     /**
@@ -178,9 +188,13 @@ var ProvisionalCuration = createReactClass({
 
             // check required item (reasons)
             var formErr = false;
-            if (!newProvisional.reasons && newProvisional.alteredClassification !== 'No Selection') {
+            if (!newProvisional.reasons && newProvisional.alteredClassification !== 'No Modification') {
                 formErr = true;
                 this.setFormErrors('reasons', 'Required when changing classification.');
+            }
+            if (newProvisional.autoClassification === newProvisional.alteredClassification) {
+                formErr = true;
+                this.setFormErrors('alteredClassification', 'Modified classification should be different from calculated classification');
             }
             if (!formErr) {
                 var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
@@ -247,7 +261,11 @@ var ProvisionalCuration = createReactClass({
 
     handleChange: function(ref, e) {
         if (ref === 'alteredClassification') {
-            this.setState({alteredClassification: this.refs[ref].getValue()});
+            this.setState({alteredClassification: this.refs[ref].getValue()}, () => {
+                // Remove highlighting of modified classification selection dropdown menu
+                // when the selected option is changed
+                document.querySelector('.altered-classification select').classList.remove('form-control-danger');
+            });
         } else if (ref === 'reasons') {
             this.setState({reasons: this.refs[ref].getValue()});
         } else if (ref === 'classification-evidence-summary') {
@@ -596,7 +614,16 @@ var ProvisionalCuration = createReactClass({
         } else if (totalPoints > 11 && totalPoints <= 18 && replicatedOverTime) {
             autoClassification = "Definitive";
         }
-        this.setState({autoClassification: autoClassification});
+        this.setState({autoClassification: autoClassification}, () => {
+            // Reset modified classification state to 'No Modification'
+            // if the new and current calculated classification is the same
+            if (this.state.alteredClassification === this.state.autoClassification) {
+                this.setState({
+                    alteredClassification: 'No Modification',
+                    resetAlteredClassification: true
+                });
+            }
+        });
     },
 
     render: function() {
@@ -616,7 +643,7 @@ var ProvisionalCuration = createReactClass({
         let provisional = this.state.provisional;
         let currentClassification = 'None';
         if (provisional.last_modified) {
-            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
+            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Modification') {
                 currentClassification = provisional.alteredClassification;
             } else {
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
@@ -636,9 +663,17 @@ var ProvisionalCuration = createReactClass({
                                         <Panel title="Calculated Classification Matrix" open>
                                             <div className="form-group">
                                                 <div className="summary-provisional-classification-description">
-                                                    The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
-                                                    button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
-                                                    will then represent the new "Last Saved Summary & Provisional Classification".
+                                                    {Object.keys(provisional).length ?
+                                                        <p className="alert alert-warning">
+                                                            <strong>Note:</strong> The calculated values below are based on the set of saved evidence and accompanying scores that existed when the "View Classification Matrix" button was clicked.
+                                                            To save a Classification for this Gene Disease Record based on this evidence, please see the section below. Otherwise, click "Cancel" below.
+                                                        </p>
+                                                        :
+                                                        <p className="alert alert-warning">
+                                                            <strong>Note:</strong> The Classification Matrix below was re-calculated based on the current saved evidence and accompanying scores when you navigated to this page by clicking the "View Classification Matrix" button on the record page.
+                                                            To save a new Classification for this Gene Disease based on this current evidence, please see the "Save Classification" section below. Otherwise, click "Cancel".
+                                                        </p>
+                                                    }
                                                 </div>
                                                 <div className="summary-matrix-wrapper">
                                                     <table className="summary-matrix">
@@ -774,6 +809,19 @@ var ProvisionalCuration = createReactClass({
                                                     </table>
                                                     <strong>*</strong> &ndash; Combined LOD Score
                                                 </div>
+                                                <div>
+                                                    {Object.keys(provisional).length ?
+                                                        <p className="alert alert-danger">
+                                                            <strong>Important!</strong> The above matrix represents the points based on the current evidence and its scores and could be different from the scored evidence used in the Last Saved Classification, below.
+                                                            When saving a new Classification, please be certain to first make desired changes to any of the fields below based on the new "Current Calculated Classification."                                                        
+                                                        </p>
+                                                        :
+                                                        <p className="alert alert-info">
+                                                            <strong>Heads up!</strong> The Classification Matrix above was re-calculated based on the current saved evidence and accompanying scores when you navigated to this page by clicking the "View Classification Matrix" button on the record page.
+                                                            To save a new Classification based on this current evidence, please fill in the fields below and click "Save". Otherwise, click "Cancel".
+                                                        </p>
+                                                    }
+                                                </div>
                                                 <div className="provisional-classification-wrapper">
                                                     <table className="summary-matrix">
                                                         <tbody>
@@ -826,12 +874,13 @@ var ProvisionalCuration = createReactClass({
                                                                     <a name="classification-view" id="classification-view"></a>
                                                                     <div className="col-md-12 classification-form-content-wrapper">
                                                                         <div className="col-xs-12 col-sm-6">
-                                                                            <div className="altered-classfication">
+                                                                            <div className="altered-classification">
                                                                                 <Input type="select" ref="alteredClassification"
                                                                                     label={<strong>Modify <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                                    error={this.getFormError('alteredClassification')} clearError={this.clrFormErrors.bind(null, 'alteredClassification')}
                                                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                                                                                     defaultValue={this.state.alteredClassification} handleChange={this.handleChange}>
-                                                                                    <option value="No Selection">No Selection</option>
+                                                                                    <option value="No Modification">No Modification</option>
                                                                                     {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
                                                                                     {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
                                                                                     {autoClassification === 'Moderate' ? null : <option value="Moderate">Moderate</option>}
@@ -840,12 +889,20 @@ var ProvisionalCuration = createReactClass({
                                                                                     <option value="Refuted">Refuted</option>
                                                                                     <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
                                                                                 </Input>
+                                                                                {this.state.resetAlteredClassification ?
+                                                                                    <div className="altered-classification-reset-warning">
+                                                                                        <div className="col-sm-7 col-sm-offset-5 alert alert-danger">
+                                                                                            <strong>Important!</strong> Modified classification has been reset because it is the same as the current calculated classification.
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    : null}
                                                                             </div>
                                                                             <div className="altered-classification-reasons">
                                                                                 <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
                                                                                     wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
                                                                                     clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
-                                                                                    required={this.state.alteredClassification !== 'No Selection' ? true : false} />
+                                                                                    required={this.state.alteredClassification !== 'No Modification' ? true : false}
+                                                                                    customErrorMsg="Required when changing classification" />
                                                                             </div>
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
