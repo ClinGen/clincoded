@@ -927,11 +927,11 @@
     padding-right: 10px;
 }
 
-.summary-provisional-classification-description {
-    margin-bottom: 20px;
-}
-
 .summary-provisional-classification-wrapper {
+    .panel-std {
+        padding-top:20px;
+    }
+
     .modal-footer {
         padding-left: 0;
         padding-right: 0;
@@ -956,6 +956,10 @@
         text-align: center;
         vertical-align: middle;
         border: solid 1px #000;
+
+        .form-error {
+            text-align: left;
+        }
     }
 
     .bg-gray {
@@ -1016,6 +1020,18 @@
 
         .control-label {
             padding-top: 0;
+        }
+
+        .altered-classification {
+            .form-control-danger {
+                border-color: #d9534f;
+            }
+
+            .altered-classification-reset-warning {
+                margin-top: -15px;
+                margin-left: 17px;
+                text-align: left;
+            }
         }
 
         .classification-status {
