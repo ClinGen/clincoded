@@ -145,10 +145,17 @@ var ProvisionalCuration = createReactClass({
         if (referrer && referrer.indexOf('classification-view') > -1) {
             setTimeout(this.scrollElementIntoView, 500);
         }
-        // Highlight the modified classification dropdown menu
-        // if there is a svaed classifition
-        if (Object.keys(this.state.provisional).length && document.querySelector('.altered-classification select')) {
-            document.querySelector('.altered-classification select').classList.add('form-control-danger');
+        // Highlight the modified classification dropdown menu and
+        // its explanation text field if there is a svaed classifition
+        if (Object.keys(this.state.provisional).length) {
+            const alteredClassificationMenu = document.querySelector('.altered-classification select');
+            const alteredClassificationReasonField = document.querySelector('.altered-classification-reasons textarea');
+            if (alteredClassificationMenu) {
+                alteredClassificationMenu.classList.add('form-control-danger');
+            }
+            if (alteredClassificationReasonField && this.state.reasons) {
+                alteredClassificationReasonField.classList.add('form-control-danger');
+            }
         }
     },
 
@@ -267,7 +274,11 @@ var ProvisionalCuration = createReactClass({
                 document.querySelector('.altered-classification select').classList.remove('form-control-danger');
             });
         } else if (ref === 'reasons') {
-            this.setState({reasons: this.refs[ref].getValue()});
+            this.setState({reasons: this.refs[ref].getValue()}, () => {
+                // Remove highlighting of modified classification selection dropdown menu
+                // when the selected option is changed
+                document.querySelector('.altered-classification-reasons textarea').classList.remove('form-control-danger');
+            });
         } else if (ref === 'classification-evidence-summary') {
             this.setState({evidenceSummary: this.refs[ref].getValue()});
         } else if (ref === 'classification-status') {
