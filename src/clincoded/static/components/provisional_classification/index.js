@@ -528,9 +528,10 @@ const ProvisionalClassification = createReactClass({
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
                                         <div className="form-group">
                                             <div className="summary-provisional-classification-description">
-                                                The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
-                                                button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
-                                                will then represent the new "Last Saved Summary & Provisional Classification".
+                                                <p className="alert alert-warning">
+                                                    <strong>Note:</strong> The calculated values below are based on the set of saved evidence and accompanying scores that existed when the "View Classification Matrix" button was clicked.
+                                                    To save a Classification for this Gene Disease Record based on this evidence, please see the section below. Otherwise, click "Cancel" below.
+                                                </p>
                                             </div>
                                             <div className="summary-matrix-wrapper">
                                                 <table className="summary-matrix">
@@ -666,7 +667,13 @@ const ProvisionalClassification = createReactClass({
                                                 </table>
                                                 <strong>*</strong> &ndash; Combined LOD Score
                                             </div>
-                                            <div className=".provisional-classification-wrapper">
+                                            <div>
+                                                <p className="alert alert-info">
+                                                    <strong>Heads up!</strong> The Last Saved Classification below is based on the matrix above. You can edit this Classification based on the same Matrix,
+                                                    view the Evidence Summary page for it, or return to the Record Curation page.
+                                                </p>
+                                            </div>
+                                            <div className="provisional-classification-wrapper">
                                                 <table className="summary-matrix">
                                                     <tbody>
                                                         <tr className="header large bg-gray">
