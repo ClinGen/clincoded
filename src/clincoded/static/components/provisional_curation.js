@@ -272,6 +272,7 @@ var ProvisionalCuration = createReactClass({
                 // Remove highlighting of modified classification selection dropdown menu
                 // when the selected option is changed
                 document.querySelector('.altered-classification select').classList.remove('form-control-danger');
+                this.setState({resetAlteredClassification: false});
             });
         } else if (ref === 'reasons') {
             this.setState({reasons: this.refs[ref].getValue()}, () => {
