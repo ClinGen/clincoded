@@ -28,7 +28,7 @@ const ProvisionalClassification = createReactClass({
             //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
             autoClassification: 'No Classification',
-            alteredClassification: 'No Selection',
+            alteredClassification: 'No Modification',
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
@@ -509,7 +509,7 @@ const ProvisionalClassification = createReactClass({
         let provisional = this.state.provisional;
         let currentClassification = 'None';
         if (provisional.last_modified) {
-            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
+            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Modification') {
                 currentClassification = provisional.alteredClassification;
             } else {
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
@@ -527,12 +527,6 @@ const ProvisionalClassification = createReactClass({
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
                                         <div className="form-group">
-                                            <div className="summary-provisional-classification-description">
-                                                <p className="alert alert-warning">
-                                                    <strong>Note:</strong> The calculated values below are based on the set of saved evidence and accompanying scores that existed when the "View Classification Matrix" button was clicked.
-                                                    To save a Classification for this Gene Disease Record based on this evidence, please see the section below. Otherwise, click "Cancel" below.
-                                                </p>
-                                            </div>
                                             <div className="summary-matrix-wrapper">
                                                 <table className="summary-matrix">
                                                     <tbody>
@@ -667,10 +661,11 @@ const ProvisionalClassification = createReactClass({
                                                 </table>
                                                 <strong>*</strong> &ndash; Combined LOD Score
                                             </div>
-                                            <div>
-                                                <p className="alert alert-info">
-                                                    <strong>Heads up!</strong> The Last Saved Classification below is based on the matrix above. You can edit this Classification based on the same Matrix,
-                                                    view the Evidence Summary page for it, or return to the Record Curation page.
+                                            <div className="summary-provisional-classification-description">
+                                                <p className="alert alert-warning">
+                                                    <i className="icon icon-exclamation-circle"></i> The Total Points shown above is based on the the set of saved evidence and accompanying scores that existed
+                                                    when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section
+                                                    below. Otherwise, click "Cancel" to return to your previous page.
                                                 </p>
                                             </div>
                                             <div className="provisional-classification-wrapper">
@@ -726,7 +721,7 @@ const ProvisionalClassification = createReactClass({
                                                                         <div className="altered-classfication">
                                                                             <dl className="inline-dl clearfix">
                                                                                 <dt>
-                                                                                    <span>Modify <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</span>
+                                                                                    <span>Modify Calculated <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</span>
                                                                                 </dt>
                                                                                 <dd>
                                                                                     {this.state.alteredClassification}
@@ -784,6 +779,12 @@ const ProvisionalClassification = createReactClass({
                                                         </tr>
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                            <div>
+                                                <p className="alert alert-info">
+                                                    <i className="icon icon-info-circle"></i> The Last Saved Classification (above) is based on the above Classification Matrix. You may edit it by selecting "Edit Classification,"
+                                                    click "Evidence Summary" to view all evidence associated with it, or return to the record by clicking "Record Curation page."
+                                                </p>
                                             </div>
                                         </div>
                                     </Panel>
