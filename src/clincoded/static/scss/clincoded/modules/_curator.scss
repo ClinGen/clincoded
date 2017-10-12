@@ -928,6 +928,10 @@
 }
 
 .summary-provisional-classification-wrapper {
+    .form-group {
+        margin-bottom: 0;
+    }
+    
     .panel-std {
         padding-top:20px;
     }
@@ -940,7 +944,7 @@
 
 .summary-matrix-wrapper, 
 .provisional-classification-wrapper {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .summary-matrix {
@@ -1024,8 +1028,11 @@
 
         .altered-classification,
         .altered-classification-reasons {
-            .form-control-danger {
-                border-color: #d9534f;
+            .form-control-info {
+                border-color: #50b7ec;
+                -webkit-box-shadow: 0px 0px 10px 0px rgba(125,200,239,0.75);
+                -moz-box-shadow: 0px 0px 10px 0px rgba(125,200,239,0.75);
+                box-shadow: 0px 0px 10px 0px rgba(125,200,239,0.75);
             }
 
             .altered-classification-reset-warning {
