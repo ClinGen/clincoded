@@ -666,7 +666,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTermList={this.state.segregationHpoTermList} />
                 <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTermList={this.state.caseControlHpoTermList} />
                 <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
-                <p className="alert alert-info">
+                <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".
                 </p>
                 <div className="pdf-download-wrapper">
