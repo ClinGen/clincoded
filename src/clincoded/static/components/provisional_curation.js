@@ -151,10 +151,10 @@ var ProvisionalCuration = createReactClass({
             const alteredClassificationMenu = document.querySelector('.altered-classification select');
             const alteredClassificationReasonField = document.querySelector('.altered-classification-reasons textarea');
             if (alteredClassificationMenu) {
-                alteredClassificationMenu.classList.add('form-control-danger');
+                alteredClassificationMenu.classList.add('form-control-info');
             }
             if (alteredClassificationReasonField && this.state.reasons) {
-                alteredClassificationReasonField.classList.add('form-control-danger');
+                alteredClassificationReasonField.classList.add('form-control-info');
             }
         }
     },
@@ -274,13 +274,13 @@ var ProvisionalCuration = createReactClass({
             }, () => {
                 // Remove highlighting of modified classification selection dropdown menu
                 // when the selected option is changed
-                document.querySelector('.altered-classification select').classList.remove('form-control-danger');
+                document.querySelector('.altered-classification select').classList.remove('form-control-info');
             });
         } else if (ref === 'reasons') {
             this.setState({reasons: this.refs[ref].getValue()}, () => {
                 // Remove highlighting of modified classification selection dropdown menu
                 // when the selected option is changed
-                document.querySelector('.altered-classification-reasons textarea').classList.remove('form-control-danger');
+                document.querySelector('.altered-classification-reasons textarea').classList.remove('form-control-info');
             });
         } else if (ref === 'classification-evidence-summary') {
             this.setState({evidenceSummary: this.refs[ref].getValue()});
@@ -676,19 +676,6 @@ var ProvisionalCuration = createReactClass({
                                     <PanelGroup accordion>
                                         <Panel title="Calculated Classification Matrix" open>
                                             <div className="form-group">
-                                                <div className="summary-provisional-classification-description">
-                                                    {Object.keys(provisional).length ?
-                                                        <p className="alert alert-warning">
-                                                            <strong>Note:</strong> The calculated values below are based on the set of saved evidence and accompanying scores that existed when the "View Classification Matrix" button was clicked.
-                                                            To save a Classification for this Gene Disease Record based on this evidence, please see the section below. Otherwise, click "Cancel" below.
-                                                        </p>
-                                                        :
-                                                        <p className="alert alert-warning">
-                                                            <strong>Note:</strong> The Classification Matrix below was re-calculated based on the current saved evidence and accompanying scores when you navigated to this page by clicking the "View Classification Matrix" button on the record page.
-                                                            To save a new Classification for this Gene Disease based on this current evidence, please see the "Save Classification" section below. Otherwise, click "Cancel".
-                                                        </p>
-                                                    }
-                                                </div>
                                                 <div className="summary-matrix-wrapper">
                                                     <table className="summary-matrix">
                                                         <tbody>
@@ -823,16 +810,18 @@ var ProvisionalCuration = createReactClass({
                                                     </table>
                                                     <strong>*</strong> &ndash; Combined LOD Score
                                                 </div>
-                                                <div>
+                                                <div className="summary-provisional-classification-description">
                                                     {Object.keys(provisional).length ?
-                                                        <p className="alert alert-danger">
-                                                            <strong>Important!</strong> The above matrix represents the points based on the current evidence and its scores and could be different from the scored evidence used in the Last Saved Classification, below.
-                                                            When saving a new Classification, please be certain to first make desired changes to any of the fields below based on the new "Current Calculated Classification."                                                        
+                                                        <p className="alert alert-warning">
+                                                            <i className="icon icon-exclamation-circle"></i> The Total Points shown above is based on the the set of saved evidence and accompanying scores that existed when
+                                                            the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
+                                                            Otherwise, click "Cancel" to return to your previous page.
                                                         </p>
                                                         :
-                                                        <p className="alert alert-info">
-                                                            <strong>Heads up!</strong> The Classification Matrix above was re-calculated based on the current saved evidence and accompanying scores when you navigated to this page by clicking the "View Classification Matrix" button on the record page.
-                                                            To save a new Classification based on this current evidence, please fill in the fields below and click "Save". Otherwise, click "Cancel".
+                                                        <p className="alert alert-warning">
+                                                            <i className="icon icon-exclamation-circle"></i> The above Classification Matrix was calculated based on the current evidence and accompanying scores saved in the database
+                                                            when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification based on this current evidence, please fill in
+                                                            the fields below and click "Save". Otherwise, click "Cancel".
                                                         </p>
                                                     }
                                                 </div>
@@ -890,7 +879,7 @@ var ProvisionalCuration = createReactClass({
                                                                         <div className="col-xs-12 col-sm-6">
                                                                             <div className="altered-classification">
                                                                                 <Input type="select" ref="alteredClassification"
-                                                                                    label={<strong>Modify <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                                    label={<strong>Modify Calculated <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
                                                                                     error={this.getFormError('alteredClassification')} clearError={this.clrFormErrors.bind(null, 'alteredClassification')}
                                                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                                                                                     defaultValue={this.state.alteredClassification} handleChange={this.handleChange}>
@@ -903,13 +892,6 @@ var ProvisionalCuration = createReactClass({
                                                                                     <option value="Refuted">Refuted</option>
                                                                                     <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
                                                                                 </Input>
-                                                                                {this.state.resetAlteredClassification ?
-                                                                                    <div className="altered-classification-reset-warning">
-                                                                                        <div className="col-sm-7 col-sm-offset-5 alert alert-danger">
-                                                                                            <strong>Important!</strong> Modified classification has been reset because it is the same as the current calculated classification.
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    : null}
                                                                             </div>
                                                                             <div className="altered-classification-reasons">
                                                                                 <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
@@ -917,6 +899,15 @@ var ProvisionalCuration = createReactClass({
                                                                                     clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
                                                                                     required={this.state.alteredClassification !== 'No Modification' ? true : false}
                                                                                     customErrorMsg="Required when changing classification" />
+                                                                                {this.state.resetAlteredClassification ?
+                                                                                    <div className="altered-classification-reset-warning">
+                                                                                        <div className="col-sm-7 col-sm-offset-5 alert alert-danger">
+                                                                                            <i className="icon icon-exclamation-triangle"></i> This value has been reset to "No Modification" as the Calculated Classification based on the new
+                                                                                            Total Points is now equivalent to your last saved Classification value. Click "Save" to save the Calculated Classification value, or modify to a new
+                                                                                            value and click "Save."
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    : null}
                                                                             </div>
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
@@ -950,6 +941,20 @@ var ProvisionalCuration = createReactClass({
                                                             </tr>
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                                <div>
+                                                    {Object.keys(provisional).length ?
+                                                        <p className="alert alert-danger">
+                                                            <i className="icon icon-exclamation-triangle"></i> If you would like to 1) save the new "Calculated Classification" highlighted in blue or 2) change your Last Saved Classification
+                                                            value based on this new "Calculated Classification" value, make sure to edit the highlighted fields and click Save. You may also choose to mark your Classification as Provisional.                                                       
+                                                        </p>
+                                                        :
+                                                        <p className="alert alert-info">
+                                                            <i className="icon icon-info-circle"></i> The above Classification Matrix was calculated based on the current evidence and accompanying scores saved in the database
+                                                            when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification based on this current evidence, please fill in
+                                                            the fields above and click "Save". Otherwise, click "Cancel".
+                                                        </p>
+                                                    }
                                                 </div>
                                             </div>
                                         </Panel>
