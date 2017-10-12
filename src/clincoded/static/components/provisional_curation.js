@@ -813,9 +813,8 @@ var ProvisionalCuration = createReactClass({
                                                 <div className="summary-provisional-classification-description">
                                                     {Object.keys(provisional).length ?
                                                         <p className="alert alert-warning">
-                                                            <i className="icon icon-exclamation-circle"></i> The Total Points shown above is based on the the set of saved evidence and accompanying scores that existed when
-                                                            the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
-                                                            Otherwise, click "Cancel" to return to your previous page.
+                                                            <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
+                                                            when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
                                                         </p>
                                                         :
                                                         <p className="alert alert-warning">
@@ -901,7 +900,7 @@ var ProvisionalCuration = createReactClass({
                                                                                     customErrorMsg="Required when changing classification" />
                                                                                 {this.state.resetAlteredClassification ?
                                                                                     <div className="altered-classification-reset-warning">
-                                                                                        <div className="col-sm-7 col-sm-offset-5 alert alert-danger">
+                                                                                        <div className="alert alert-danger">
                                                                                             <i className="icon icon-exclamation-triangle"></i> This value has been reset to "No Modification" as the Calculated Classification based on the new
                                                                                             Total Points is now equivalent to your last saved Classification value. Click "Save" to save the Calculated Classification value, or modify to a new
                                                                                             value and click "Save."
@@ -944,9 +943,9 @@ var ProvisionalCuration = createReactClass({
                                                 </div>
                                                 <div>
                                                     {Object.keys(provisional).length ?
-                                                        <p className="alert alert-danger">
-                                                            <i className="icon icon-exclamation-triangle"></i> If you would like to 1) save the new "Calculated Classification" highlighted in blue or 2) change your Last Saved Classification
-                                                            value based on this new "Calculated Classification" value, make sure to edit the highlighted fields and click Save. You may also choose to mark your Classification as Provisional.                                                       
+                                                        <p className="alert alert-info">
+                                                            <i className="icon icon-info-circle"></i> Click Save to save the Calculated Classification (highlighted in blue) without modification, or modify the
+                                                            Classification value in the pull-down and hit Save. You may also choose to mark your Classification as Provisional.                                                      
                                                         </p>
                                                         :
                                                         <p className="alert alert-info">
