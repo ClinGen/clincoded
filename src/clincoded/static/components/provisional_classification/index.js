@@ -663,9 +663,8 @@ const ProvisionalClassification = createReactClass({
                                             </div>
                                             <div className="summary-provisional-classification-description">
                                                 <p className="alert alert-warning">
-                                                    <i className="icon icon-exclamation-circle"></i> The Total Points shown above is based on the the set of saved evidence and accompanying scores that existed
-                                                    when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section
-                                                    below. Otherwise, click "Cancel" to return to your previous page.
+                                                    <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
+                                                    when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
                                                 </p>
                                             </div>
                                             <div className="provisional-classification-wrapper">
@@ -782,8 +781,8 @@ const ProvisionalClassification = createReactClass({
                                             </div>
                                             <div>
                                                 <p className="alert alert-info">
-                                                    <i className="icon icon-info-circle"></i> The Last Saved Classification (above) is based on the above Classification Matrix. You may edit it by selecting "Edit Classification,"
-                                                    click "Evidence Summary" to view all evidence associated with it, or return to the record by clicking "Record Curation page."
+                                                    <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
+                                                    associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
                                                 </p>
                                             </div>
                                         </div>
