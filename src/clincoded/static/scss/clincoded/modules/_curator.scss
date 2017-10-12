@@ -928,6 +928,16 @@
 }
 
 .summary-provisional-classification-wrapper {
+    .form-std {
+        .alert-warning {
+            color: #8a6d3b;
+        }
+
+        .alert-info {
+            color: #31708f;
+        }
+    }
+
     .panel-std {
         padding-top:20px;
     }
@@ -1032,8 +1042,7 @@
             }
 
             .altered-classification-reset-warning {
-                margin-top: -15px;
-                margin-left: 17px;
+                margin-top: -10px;
                 text-align: left;
             }
         }
