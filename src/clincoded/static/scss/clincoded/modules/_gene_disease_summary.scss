@@ -1,0 +1,127 @@
+.gene-disease-evidence-summary-wrapper {
+    background-color: #fff;
+    margin-left: 30px;
+    margin-right: 30px;
+
+    .window-close-btn-wrapper {
+        text-align: right;
+        margin: 15px 0 0 0;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .panel {
+        @include border-radius(4px);
+    }
+
+    .btn {
+        @include border-radius(4px);
+    }
+
+    .panel-body {
+        dl {
+            margin-bottom: 0;
+        }
+    }
+
+    .panel-header,
+    .panel-case-level,
+    .panel-case-level-segregation,
+    .panel-case-control,
+    .panel-experimental {
+        margin-bottom: 20px;
+    }
+
+    .table>thead>tr>th {
+        text-align: center;
+        vertical-align: middle;
+        border-right: 1px solid #ddd;
+
+        &:last-child {
+            border-right: none;
+        }
+    }
+
+    .table>tbody>tr>td {
+        vertical-align: middle;
+        border-right: 1px solid #ddd;
+
+        &:last-child {
+            border-right: none;
+        }
+
+        .Contradicts {
+            color: red;
+        }
+    }
+
+    .total-score-label {
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .total-score-value {
+        font-weight: bold;
+    }
+
+    .print-info-note {
+        color: #878787;
+        text-align: right;
+    }
+
+    .pdf-download-wrapper {
+        text-align: right;
+        margin-bottom: 30px;
+    }
+
+    .evidence-summary {
+        &.panel-header {
+            .record-summary {
+                margin-top: 20px;
+
+                p {
+                    margin-bottom: 0;
+                }
+            }
+        }
+
+        &.panel-case-level {
+            .evidence-variant {
+                .variant-info {
+                    margin: 6px 0;
+                }
+            }
+        }
+
+        &.panel-experimental {
+            .evidence-category {
+                width: 12%
+            }
+
+            .evidence-score-status {
+                width: 6%;
+            }
+
+            .evidence-score {
+                width: 10%;
+            }
+
+            .evidence-reference,
+            .evidence-explanation,
+            .evidence-score-explanation {
+                width: 24%;
+            }
+
+            .panel-footer {
+                background-color: #eaf8ff;
+                color: #8c8c8c;
+    
+                p {
+                    margin: 2px 0;
+                }
+            }
+        }
+    }
+}

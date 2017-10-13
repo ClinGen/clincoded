@@ -325,7 +325,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                             {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
                                                 <GdmDisease gdm={gdm} updateDiseaseObj={this.updateDiseaseObj} error={this.state.diseaseError}
                                                     clearErrorInParent={this.clearErrorInParent} session={this.props.session} />
-                                            : null}
+                                                : null}
                                         </span>
                                         <span>&nbsp;
                                             {this.props.linkGdm ?
@@ -343,43 +343,35 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                         <tr>
                                             <td>
                                                 <div className="provisional-title">
-                                                    <strong>Last Saved Summary & Provisional Classification</strong>
+                                                    <strong>Classification</strong>
                                                 </div>
                                                 { provisionalExist ?
-                                                        <div>
-                                                            <div className="provisional-data-left">
-                                                                <span>
-                                                                    Last Saved Summary<br />
-                                                                    Date Generated: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                                </span>
-                                                            </div>
-                                                            <div className="provisional-data-center">
-                                                                <span>
-                                                                    Calculated Score (Classification): {provisional.totalScore} ({provisional.autoClassification})<br />
-                                                                    Modified Provisional Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
-                                                                    { summaryPage ?
-                                                                        null
-                                                                        :
-                                                                        <span>&nbsp;&nbsp;[<a href={'/provisional-curation/?gdm=' + gdm.uuid + '&edit=yes'}><strong>Edit Classification</strong></a>]</span>
-                                                                    }
-                                                                </span>
-                                                            </div>
+                                                    <div>
+                                                        <div className="provisional-data-left">
+                                                            <span className="header-classification-item">Curator: {provisional.submitted_by.title}</span>
+                                                            {provisional.classificationStatus ? <span className="header-classification-item">Status: {provisional.classificationStatus}</span> : null}
                                                         </div>
+                                                        <div className="provisional-data-center">
+                                                            <span className="header-classification-item">
+                                                                Calculated Classification: {provisional.totalScore} ({provisional.autoClassification})
+                                                            </span>
+                                                            <span className="header-classification-item">
+                                                                Modified Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
+                                                            </span>
+                                                            <span className="header-classification-item">Last Saved: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                        </div>
+                                                    </div>
                                                     :
-                                                        <div className="provisional-data-left"><span>None</span></div>
+                                                    <div className="provisional-data-left"><span>None</span></div>
                                                 }
                                             </td>
                                             <td className="button-box" rowSpan="2">
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + '&calculate=yes'}>
-                                                            { provisionalExist ? 'Generate New Summary' : 'Generate Summary' }
-                                                        </a>
+                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalExist ? '&edit=yes' : '&calculate=yes')}>View Classification Matrix</a>
                                                         : null
                                                     )
-                                                    :
-                                                    null
-                                                }
+                                                    : null}
                                             </td>
                                         </tr>
                                         <tr style={{height:'10px'}}></tr>
@@ -1298,7 +1290,6 @@ var CuratorRecordHeader = createReactClass({
                 <div className="curation-data-curator">
                     {gdm ?
                         <dl className="inline-dl clearfix">
-                            <dt>Status: </dt><dd>{gdm.gdm_status === 'Summary/Provisional Classifications' ? 'In progress' : gdm.gdm_status}</dd>
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {participants && participants.length && latestRecord ?
                                 <div>
@@ -2296,7 +2287,8 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification", "reasons", "active"
+    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
+    "classificationStatus", "evidenceSummary", "reasons", "active"
 ];
 
 function flattenProvisional(provisional) {

@@ -1,5 +1,6 @@
 language: python
 sudo: false
+dist: precise
 cache:
   directories:
     - eggs
@@ -16,6 +17,10 @@ env:
     - secure: "TJYx9N1ZqFPTt5IBhc7GRQNEr5d7HlhRzXv8UnWCT1OSW4j1AHhXJ2Uql4tIUx0frwrSySCOMx+PFtg0vvf0iYOAR4jNl+/cgLV/6JgtnuGiKG3Pwyu7r3ED0I2v0ZV2jSVGAd0VW5/l4Wq7ZFRaPb6YQHKQ6HIhM+4CXaITT3Gg5+Q/ELCMTuxYqG0kFmRAuu+qsJYOFrbxvGuELhlRuYsSGKJj95YuJO2ImHLbbhwyERUPsVtZPk3om10TAT3o+nNqfy+CZNTmi7jusYcdOO/OJ8CDD/CM9bBnr65TQZix6ThTDT0wsGDYQiIgopWiu+reAkDAvI1zkOZcFHket7On1lC6eBATSTg1NZOV+aaSTJsyZzGH8qjGgOhsnIqTwrQ5/IphzzuORnpP2L1x0njYTssAM7F4xeCmlrLohzEsp2GLVacZE13kwZc1HLcldxM8deTtksoQxEZxFa6m4awOuBZqDTyAYUaf8BKv1YBGeNUxuUBe0e7o9AyS8cuOBfDaZ0/8I2hMgW2oXK6r+Gj8oZCaY1eY02b+E2LOZIiRiHxSjwMmi9TgySuQDWCjnv7Mqi3cWFiMshXNdPwASe0uRG1vskNwXJR9iBumvHPWcKUtb+LAGfSGAHfTnmWex3xcsDfLC6lgmxp/ZWWcUNJ1I38TIaoR0LLeU+k+DSg="
     - secure: "XWASp1gWawQ7OjIuSnsjxPouHn97c/Kuexpm6lWMR+99Twgq/B/0MN2OshLFD5jD0zI/XCJ1Imd3mo4dyVGU1jh3fUrrzAGPEq9Zd/ziCk9TmFR714bfMnfnhrk8nZL4P3QDLqBQS949rcufDwoHwnUVTBpysRBk35UuiCA47IcUHr0bTyGvoL/E+whHWj/mEExRv2SIalfTnL2GJ8HcDDfNi15BmFNzfhTMPWdAUBoPfRUY1p5ESczwlYjS73alwVHfrLSS5QuymGDETjdyzeKfkKK1m328mB6HVNL8hsYb7ANlZrt6GBCWLDR6nHWCZo1faWBhO1uch0uNRY+mDZu1bq8POeB8dZaBebtdmRx7cTut4+4FpkI4d841uE/ICGmvRUhgaEswDe1pEMjSK8kiXi+q2YNQsplRxhf/fznKuhZ0xUhdOa+jxhi61SNFseDlkKhV3eKw/WrPAXPbBEooz4SINv1Ry6lxVqra17RfhoTyJ6jOAGGGHi7RSHSOsxXuig39d9SoUKjGyOyaHZkmlCgDkL+Za7DFtml0RCRITnuUv9pYxy6fIjbqG0W6B63FhKGa89E5YaJj/B5pZa5QkGOkLQVIayICHQDsLkq3mAFFq5C1rjd0d0LdbnbSCOt/c3mHk1sh9tHhGBB3d8ognp9rnA/g7GGBzwyM0xU="
     - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
+    # found workaround at https://github.com/travis-ci/travis-ci/issues/5246#issuecomment-245897470
+    # do not load /etc/boto.cfg with Python 3 incompatible plugin
+    # https://github.com/travis-ci/travis-ci/issues/5246#issuecomment-166460882
+    - BOTO_CONFIG=/doesnotexist
 matrix:
   include:
     - python: "3.4"

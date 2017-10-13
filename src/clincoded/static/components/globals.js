@@ -191,6 +191,7 @@ module.exports.external_url_map = {
     'Mondo': 'https://www.ebi.ac.uk/ols/ontologies/mondo',
     'MondoSearch': 'https://www.ebi.ac.uk/ols/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/',
     'MondoApi': 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/',
+    'HPOApi': 'https://www.ebi.ac.uk/ols/api/ontologies/hp/terms?iri=http://purl.obolibrary.org/obo/',
     'dbSNP': 'https://www.ncbi.nlm.nih.gov/snp/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
     'CARallele': '//reg.genome.network/allele/',
