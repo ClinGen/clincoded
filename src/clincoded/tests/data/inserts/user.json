@@ -3250,5 +3250,35 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "rsiegert@mgh.harvard.edu",
+        "first_name": "Rebecca",
+        "last_name": "Seigert",
+        "uuid": "251f62a7-99e4-4524-b4f4-d9038cd0fd44",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "cwj112719@gmail.com",
+        "first_name": "Chen",
+        "last_name": "Chen",
+        "uuid": "cc6a3abe-71f5-49d7-b81f-60b1ccfc2ebf",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
