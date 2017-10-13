@@ -3250,5 +3250,95 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "rsiegert@mgh.harvard.edu",
+        "first_name": "Rebecca",
+        "last_name": "Seigert",
+        "uuid": "251f62a7-99e4-4524-b4f4-d9038cd0fd44",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "cwj112719@gmail.com",
+        "first_name": "Chen",
+        "last_name": "Chen",
+        "uuid": "cc6a3abe-71f5-49d7-b81f-60b1ccfc2ebf",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "bwulf@stanford.edu",
+        "first_name": "Bryan",
+        "last_name": "Wulf",
+        "uuid": "8619a82f-f7aa-44fe-98b5-9c9dd5caf6e0",
+        "groups": [
+            "admin"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "bryan.wulf@stanford.edu",
+        "first_name": "Bryan",
+        "last_name": "Wulf",
+        "uuid": "3e337f6c-6475-4621-bd63-d795518646b0",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "svemula@cmh.edu",
+        "first_name": "Satya",
+        "last_name": "Vemula",
+        "uuid": "b1672e3c-c366-4c49-8f74-cb13ed645edd",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "scharlap@stanford.edu",
+        "first_name": "Steven",
+        "last_name": "Charlap",
+        "uuid": "6f292baa-1e47-421b-89f6-541810ce893c",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
