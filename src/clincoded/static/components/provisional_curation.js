@@ -811,18 +811,10 @@ var ProvisionalCuration = createReactClass({
                                                     <strong>*</strong> &ndash; Combined LOD Score
                                                 </div>
                                                 <div className="summary-provisional-classification-description">
-                                                    {Object.keys(provisional).length ?
-                                                        <p className="alert alert-warning">
-                                                            <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
-                                                            when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
-                                                        </p>
-                                                        :
-                                                        <p className="alert alert-warning">
-                                                            <i className="icon icon-exclamation-circle"></i> The above Classification Matrix was calculated based on the current evidence and accompanying scores saved in the database
-                                                            when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification based on this current evidence, please fill in
-                                                            the fields below and click "Save". Otherwise, click "Cancel".
-                                                        </p>
-                                                    }
+                                                    <p className="alert alert-warning">
+                                                        <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
+                                                        when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
+                                                    </p>
                                                 </div>
                                                 <div className="provisional-classification-wrapper">
                                                     <table className="summary-matrix">
