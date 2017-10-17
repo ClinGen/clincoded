@@ -61,7 +61,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             {provisional ?
                                 <div>
                                     <dt>Date classification saved:</dt>
-                                    <dd className="classificationSaved">{provisional ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                    <dd className="classificationSaved">{provisional.last_modified ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
                                 </div>
                                 : null}
                             <dt>Disease:</dt>
