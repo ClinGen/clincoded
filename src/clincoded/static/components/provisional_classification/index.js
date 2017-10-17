@@ -489,7 +489,7 @@ const ProvisionalClassification = createReactClass({
     },
 
     viewEvidenceSummary(e) {
-        window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid);
+        window.location.href = '/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid;
     },
 
     render() {
