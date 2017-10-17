@@ -638,7 +638,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {*} e - Window event
      */
     handleWindowClose(e) {
-        e.preventDefault(e);
+        e.preventDefault();
         window.close();
     },
 
@@ -647,7 +647,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {*} e - Window event
      */
     handlePrintPDF(e) {
-        e.preventDefault(e);
+        e.preventDefault();
         window.print();
     },
 
