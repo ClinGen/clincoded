@@ -8,10 +8,15 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
         super(props);
         this.state = {
             caseControlEvidenceList: this.props.caseControlEvidenceList,
-            hpoTermList: this.props.hpoTermList
+            hpoTermList: this.props.hpoTermList,
+            mounted: false
         };
     }
 
+    componentDidMount() {
+        this.setState({mounted: true});
+    }
+    /*
     componentWillReceiveProps(nextProps) {
         if (nextProps.caseControlEvidenceList) {
             this.setState({caseControlEvidenceList: nextProps.caseControlEvidenceList});
@@ -20,7 +25,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
             this.setState({hpoTermList: nextProps.hpoTermList});
         }
     }
-
+    */
     /**
      * Method to render individual table row of the logged-in user's scored evidence
      * @param {object} evidence - scored evidence and its associated case-control evidence
@@ -34,7 +39,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 </td>
                 <td className="evidence-disease">
                     <span>{evidence.diseaseTerm}
-                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.state.hpoTermList.join(', ')})</span> : null)}</span>
+                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.props.hpoTermList.join(', ')})</span> : null)}</span>
                     </span>
                 </td>
                 <td className="evidence-study-type">
@@ -109,8 +114,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     }
 
     render() {
-        const caseControlEvidenceList = this.state.caseControlEvidenceList;
-        let sortedEvidenceList = this.sortListbyColName(caseControlEvidenceList, 'studyType');
+        const caseControlEvidenceList = this.props.caseControlEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseControlEvidenceList, 'studyType') : caseControlEvidenceList;
         let self = this;
 
         return (
