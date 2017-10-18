@@ -96,7 +96,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                     <th>Reference</th>
                                     <th>Explanation</th>
                                     <th>Score status</th>
-                                    <th>Score (default score)</th>
+                                    <th>Points (default points)</th>
                                     <th>Reason for changed score</th>
                                 </tr>
                             </thead>
@@ -105,7 +105,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                     return (self.renderExperimentalEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="4" className="total-score-label">Total score:</td>
+                                    <td colSpan="4" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
