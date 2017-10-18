@@ -7,18 +7,12 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            caseControlEvidenceList: this.props.caseControlEvidenceList,
-            hpoTermList: this.props.hpoTermList
+            mounted: false
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.caseControlEvidenceList) {
-            this.setState({caseControlEvidenceList: nextProps.caseControlEvidenceList});
-        }
-        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
-            this.setState({hpoTermList: nextProps.hpoTermList});
-        }
+    componentDidMount() {
+        this.setState({mounted: true});
     }
 
     /**
@@ -34,7 +28,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 </td>
                 <td className="evidence-disease">
                     <span>{evidence.diseaseTerm}
-                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.state.hpoTermList.join(', ')})</span> : null)}</span>
+                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.props.hpoTermList.join(', ')})</span> : null)}</span>
                     </span>
                 </td>
                 <td className="evidence-study-type">
@@ -53,14 +47,14 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                     {evidence.comments}
                 </td>
                 <td className="evidence-statistics-case-cohort-numberWithVariant">
-                    {evidence.caseCohort_numberWithVariant ? evidence.caseCohort_numberWithVariant : null}
-                    {evidence.caseCohort_numberWithVariant && evidence.caseCohort_numberAllGenotypedSequenced ? <span>/</span> : null}
-                    {evidence.caseCohort_numberAllGenotypedSequenced ? evidence.caseCohort_numberAllGenotypedSequenced : null}
+                    {typeof evidence.caseCohort_numberWithVariant === 'number' ? evidence.caseCohort_numberWithVariant : null}
+                    {typeof evidence.caseCohort_numberWithVariant === 'number' && evidence.caseCohort_numberAllGenotypedSequenced ? <span>/</span> : null}
+                    {typeof evidence.caseCohort_numberAllGenotypedSequenced === 'number' ? evidence.caseCohort_numberAllGenotypedSequenced : null}
                 </td>
                 <td className="evidence-statistics-control-cohort-numberWithVariant">
-                    {evidence.controlCohort_numberWithVariant ? evidence.controlCohort_numberWithVariant : null}
-                    {evidence.controlCohort_numberWithVariant && evidence.controlCohort_numberAllGenotypedSequenced ? <span>/</span> : null}
-                    {evidence.controlCohort_numberAllGenotypedSequenced ? evidence.controlCohort_numberAllGenotypedSequenced : null}
+                    {typeof evidence.controlCohort_numberWithVariant === 'number' ? evidence.controlCohort_numberWithVariant : null}
+                    {typeof evidence.controlCohort_numberWithVariant === 'number' && typeof evidence.controlCohort_numberAllGenotypedSequenced === 'number' ? <span>/</span> : null}
+                    {typeof evidence.controlCohort_numberAllGenotypedSequenced === 'number' ? evidence.controlCohort_numberAllGenotypedSequenced : null}
                 </td>
                 <td className="evidence-statistics-value">
                     {evidence.statisticValueType ? <strong>{evidence.statisticValueType}: </strong> : null}
@@ -109,8 +103,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     }
 
     render() {
-        const caseControlEvidenceList = this.state.caseControlEvidenceList;
-        let sortedEvidenceList = this.sortListbyColName(caseControlEvidenceList, 'studyType');
+        const caseControlEvidenceList = this.props.caseControlEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseControlEvidenceList, 'studyType') : caseControlEvidenceList;
         let self = this;
 
         return (
@@ -130,7 +124,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                     <th colSpan="2">Power</th>
                                     <th rowSpan="2">Bias confounding</th>
                                     <th colSpan="5">Statistics</th>
-                                    <th rowSpan="2">Score</th>
+                                    <th rowSpan="2">Points</th>
                                 </tr>
                                 <tr>
                                     <th># of cases genotyped/sequenced</th>
@@ -147,7 +141,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                     return (self.renderCaseControlEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="12" className="total-score-label">Total score:</td>
+                                    <td colSpan="12" className="total-score-label">Total points:</td>
                                     <td className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
