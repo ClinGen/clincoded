@@ -7,14 +7,12 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            experimentalEvidenceList: this.props.experimentalEvidenceList
+            mounted: false
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.experimentalEvidenceList) {
-            this.setState({experimentalEvidenceList: nextProps.experimentalEvidenceList});
-        }
+    componentDidMount() {
+        this.setState({mounted: true});
     }
 
     /**
@@ -80,8 +78,8 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
     }
 
     render() {
-        const experimentalEvidenceList = this.state.experimentalEvidenceList;
-        let sortedEvidenceList = this.sortListbyColName(experimentalEvidenceList, 'evidenceType');
+        const experimentalEvidenceList = this.props.experimentalEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(experimentalEvidenceList, 'evidenceType') : experimentalEvidenceList;
         let self = this;
 
         return (
