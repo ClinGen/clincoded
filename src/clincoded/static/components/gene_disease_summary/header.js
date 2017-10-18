@@ -7,24 +7,10 @@ import { external_url_map } from '../globals';
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            gdm: this.props.gdm,
-            provisional: this.props.provisional
-        };
-    }
-
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.gdm) {
-            this.setState({gdm: nextProps.gdm});
-        }
-        if (nextProps.provisional) {
-            this.setState({provisional: nextProps.provisional});
-        }
     }
 
     render() {
-        const gdm = this.state.gdm;
-        const provisional = this.state.provisional;
+        const { gdm, provisional } = this.props;
         // Expecting the required fields of a GDM to always have values:
         // e.g. gene, disease, mode of inheritance
         const gene = gdm && gdm.gene, disease = gdm && gdm.disease;
@@ -61,7 +47,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             {provisional ?
                                 <div>
                                     <dt>Date classification saved:</dt>
-                                    <dd className="classificationSaved">{provisional ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                    <dd className="classificationSaved">{provisional.last_modified ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
                                 </div>
                                 : null}
                             <dt>Disease:</dt>

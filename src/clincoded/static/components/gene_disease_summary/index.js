@@ -429,10 +429,10 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                             caseControlEvidence['pubYear'] = pubDate[1];
                                             caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
                                             caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
-                                            caseControlEvidence['caseCohort_numberWithVariant'] = caseControl.caseCohort.numberWithVariant ? caseControl.caseCohort.numberWithVariant : null;
-                                            caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = caseControl.caseCohort.numberAllGenotypedSequenced ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
-                                            caseControlEvidence['controlCohort_numberWithVariant'] = caseControl.controlCohort.numberWithVariant ? caseControl.controlCohort.numberWithVariant : null;
-                                            caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = caseControl.controlCohort.numberAllGenotypedSequenced ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
+                                            caseControlEvidence['caseCohort_numberWithVariant'] = typeof caseControl.caseCohort.numberWithVariant === 'number' ? caseControl.caseCohort.numberWithVariant : null;
+                                            caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = typeof caseControl.caseCohort.numberAllGenotypedSequenced === 'number' ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
+                                            caseControlEvidence['controlCohort_numberWithVariant'] = typeof caseControl.controlCohort.numberWithVariant === 'number' ? caseControl.controlCohort.numberWithVariant : null;
+                                            caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = typeof caseControl.controlCohort.numberAllGenotypedSequenced === 'number' ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
                                             caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
                                             caseControlEvidence['explanationForDifference'] = caseControl.explanationForDifference ? caseControl.explanationForDifference : '';
                                             caseControlEvidence['statisticValueType'] = caseControl.statisticalValues[0].valueType ? caseControl.statisticalValues[0].valueType : '';
@@ -638,7 +638,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {*} e - Window event
      */
     handleWindowClose(e) {
-        e.preventDefault(e);
         window.close();
     },
 
@@ -647,7 +646,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {*} e - Window event
      */
     handlePrintPDF(e) {
-        e.preventDefault(e);
         window.print();
     },
 

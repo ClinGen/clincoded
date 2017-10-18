@@ -7,18 +7,12 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            segregationEvidenceList: this.props.segregationEvidenceList,
-            hpoTermList: this.props.hpoTermList
+            mounted: false
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.segregationEvidenceList) {
-            this.setState({segregationEvidenceList: nextProps.segregationEvidenceList});
-        }
-        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
-            this.setState({hpoTermList: nextProps.hpoTermList});
-        }
+    componentDidMount() {
+        this.setState({mounted: true});
     }
 
     /**
@@ -36,7 +30,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.state.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.props.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
                 <td className="evidence-segregation-num-affected">
@@ -94,8 +88,8 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
     }
 
     render() {
-        const segregationEvidenceList = this.state.segregationEvidenceList;
-        let sortedEvidenceList = this.sortListbyColName(segregationEvidenceList);
+        const segregationEvidenceList = this.props.segregationEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(segregationEvidenceList) : segregationEvidenceList;
         let self = this;
 
         return (
@@ -122,7 +116,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     return (self.renderSegregationEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="5" className="total-score-label">Total score:</td>
+                                    <td colSpan="5" className="total-score-label">Total LOD score:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>

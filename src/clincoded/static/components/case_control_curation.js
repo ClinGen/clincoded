@@ -1342,15 +1342,15 @@ function GroupPower(groupType) {
             }
             ****/}
             <Input type="number" inputClassName="integer-only" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'}
-                value={group && group.numberWithVariant ? group.numberWithVariant : ''}
+                value={group && typeof group.numberWithVariant === 'number' ? group.numberWithVariant : ''}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" inputClassName="integer-only" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'}
-                value={group && group.numberAllGenotypedSequenced ? group.numberAllGenotypedSequenced : ''}
+                value={group && typeof group.numberAllGenotypedSequenced === 'number' ? group.numberAllGenotypedSequenced : ''}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} handleChange={this.handleChange}
-                value={group && group.alleleFrequency ? group.alleleFrequency : ''}
+                value={group && typeof group.alleleFrequency === 'number' ? group.alleleFrequency : ''}
                 error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
         </div>

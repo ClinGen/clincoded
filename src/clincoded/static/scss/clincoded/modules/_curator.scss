@@ -1065,31 +1065,11 @@
             }
 
             input[type="checkbox"] {
+                font-size: 30px;
                 margin-top: 0;
                 position: relative;
-                top: 3px;
+                top: 5px;
                 left: -15px;
-                visibility: hidden;
-
-                &:after,
-                &:checked:after {
-                    font-family: FontAwesome;
-                    font-size: 120%;
-                    display: inline-block;
-                    visibility: visible;
-                }
-
-                &:after {
-                    content: "\f096";
-                }
-
-                &:checked:after {
-                    content: "\f14a";
-                }
-
-                &[disabled] {
-                    color: #bbb;
-                }
             }
         }
 
