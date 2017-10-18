@@ -7,8 +7,6 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            caseControlEvidenceList: this.props.caseControlEvidenceList,
-            hpoTermList: this.props.hpoTermList,
             mounted: false
         };
     }
@@ -16,16 +14,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     componentDidMount() {
         this.setState({mounted: true});
     }
-    /*
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.caseControlEvidenceList) {
-            this.setState({caseControlEvidenceList: nextProps.caseControlEvidenceList});
-        }
-        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
-            this.setState({hpoTermList: nextProps.hpoTermList});
-        }
-    }
-    */
+
     /**
      * Method to render individual table row of the logged-in user's scored evidence
      * @param {object} evidence - scored evidence and its associated case-control evidence
