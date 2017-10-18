@@ -158,7 +158,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2">Proband previous testing</th>
                                     <th rowSpan="2">Proband methods of detection</th>
                                     <th rowSpan="2">Score status</th>
-                                    <th rowSpan="2">Proband score (default)</th>
+                                    <th rowSpan="2">Proband points (default points)</th>
                                     <th rowSpan="2">Reason for changed score</th>
                                 </tr>
                                 <tr>
@@ -173,7 +173,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="14" className="total-score-label">Total score:</td>
+                                    <td colSpan="14" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
