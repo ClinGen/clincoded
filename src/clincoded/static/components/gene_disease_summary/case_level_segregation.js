@@ -116,7 +116,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     return (self.renderSegregationEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="5" className="total-score-label">Total score:</td>
+                                    <td colSpan="5" className="total-score-label">Total LOD score:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
