@@ -7,18 +7,12 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            caseLevelEvidenceList: this.props.caseLevelEvidenceList,
-            hpoTermList: this.props.hpoTermList
+            mounted: false
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.caseLevelEvidenceList) {
-            this.setState({caseLevelEvidenceList: nextProps.caseLevelEvidenceList});
-        }
-        if (nextProps.hpoTermList && nextProps.hpoTermList.length) {
-            this.setState({hpoTermList: nextProps.hpoTermList});
-        }
+    componentDidMount() {
+        this.setState({mounted: true});
     }
 
     /**
@@ -58,7 +52,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.state.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.props.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
                 <td className="evidence-segregation-num-affected">
@@ -139,8 +133,8 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     }
 
     render() {
-        const caseLevelEvidenceList = this.state.caseLevelEvidenceList;
-        let sortedEvidenceList = this.sortListbyColName(caseLevelEvidenceList, 'variantType');
+        const caseLevelEvidenceList = this.props.caseLevelEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseLevelEvidenceList, 'variantType') : caseLevelEvidenceList;
         let self = this;
 
         return (
