@@ -10,6 +10,7 @@ import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
+import { ClassificationDefinition } from './provisional_classification/definition';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -35,12 +36,16 @@ var ProvisionalCuration = createReactClass({
             //assessments: null,  // list of all assessments, must be nul initially.
             totalScore: null,
             autoClassification: 'No Classification',
-            alteredClassification: 'No Selection',
+            alteredClassification: 'No Modification',
             replicatedOverTime: false,
-            reasons: "",
+            reasons: '',
+            classificationStatus: 'In progress',
+            classificationStatusChecked: false,
+            evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
             },
+            resetAlteredClassification: false,
             scoreTableValues: {
                 // variables for autosomal dominant data
                 probandOtherVariantCount: 0, probandOtherVariantPoints: 0, probandOtherVariantPointsCounted: 0,
@@ -111,7 +116,9 @@ var ProvisionalCuration = createReactClass({
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
-                        break;
+                        stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
+                        stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
+                        stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
             }
@@ -131,6 +138,41 @@ var ProvisionalCuration = createReactClass({
         this.loadData();
     },
 
+    componentDidUpdate(prevProps, prevState) {
+        // Need to delay the function call until the DOM is rendered
+        // Only do invoke this call when the referrer is the classification view-only page
+        const referrer = queryKeyValue('referrer', this.props.href);
+        if (referrer && referrer.indexOf('classification-view') > -1) {
+            setTimeout(this.scrollElementIntoView, 500);
+        }
+        // Highlight the modified classification dropdown menu and
+        // its explanation text field if there is a svaed classifition
+        if (Object.keys(this.state.provisional).length) {
+            const alteredClassificationMenu = document.querySelector('.altered-classification select');
+            const alteredClassificationReasonField = document.querySelector('.altered-classification-reasons textarea');
+            if (alteredClassificationMenu) {
+                alteredClassificationMenu.classList.add('form-control-info');
+            }
+            if (alteredClassificationReasonField && this.state.reasons) {
+                alteredClassificationReasonField.classList.add('form-control-info');
+            }
+        }
+    },
+
+    componentWillUnmount() {
+        this.setState({resetAlteredClassification: false});
+    },
+
+    /**
+     * Method to show the saved classification data in viewport
+     */
+    scrollElementIntoView() {
+        const element = document.querySelector('#classification-view');
+        if (element) {
+            element.scrollIntoView();
+        }
+    },
+
     submitForm: function(e) {
         // Don't run through HTML submit handler
         e.preventDefault();
@@ -148,12 +190,18 @@ var ProvisionalCuration = createReactClass({
             newProvisional.reasons = this.state.reasons;
             newProvisional.replicatedOverTime = this.state.replicatedOverTime;
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
+            newProvisional.classificationStatus = this.state.classificationStatus;
+            newProvisional.evidenceSummary = this.state.evidenceSummary;
 
             // check required item (reasons)
             var formErr = false;
-            if (!newProvisional.reasons && newProvisional.alteredClassification !== 'No Selection') {
+            if (!newProvisional.reasons && newProvisional.alteredClassification !== 'No Modification') {
                 formErr = true;
                 this.setFormErrors('reasons', 'Required when changing classification.');
+            }
+            if (newProvisional.autoClassification === newProvisional.alteredClassification) {
+                formErr = true;
+                this.setFormErrors('alteredClassification', 'Modified classification should be different from calculated classification');
             }
             if (!formErr) {
                 var backUrl = '/curation-central/?gdm=' + this.state.gdm.uuid;
@@ -172,7 +220,7 @@ var ProvisionalCuration = createReactClass({
                         this.recordHistory('modify', provisionalClassification, meta);
 
                         this.resetAllFormValues();
-                        window.history.go(-1);
+                        window.location.href = '/provisional-classification/?gdm=' + this.state.gdm.uuid;
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = : %o', e);
                     });
@@ -202,7 +250,7 @@ var ProvisionalCuration = createReactClass({
                         });
                     }).then(savedGdm => {
                         this.resetAllFormValues();
-                        window.history.go(-1);
+                        window.location.href = '/provisional-classification/?gdm=' + this.state.gdm.uuid;
                     }).catch(function(e) {
                         console.log('PROVISIONAL GENERATION ERROR = %o', e);
                     });
@@ -220,9 +268,30 @@ var ProvisionalCuration = createReactClass({
 
     handleChange: function(ref, e) {
         if (ref === 'alteredClassification') {
-            this.setState({alteredClassification: this.refs[ref].getValue()});
+            this.setState({
+                alteredClassification: this.refs[ref].getValue(),
+                resetAlteredClassification: false
+            }, () => {
+                // Remove highlighting of modified classification selection dropdown menu
+                // when the selected option is changed
+                document.querySelector('.altered-classification select').classList.remove('form-control-info');
+            });
         } else if (ref === 'reasons') {
-            this.setState({reasons: this.refs[ref].getValue()});
+            this.setState({reasons: this.refs[ref].getValue()}, () => {
+                // Remove highlighting of modified classification selection dropdown menu
+                // when the selected option is changed
+                document.querySelector('.altered-classification-reasons textarea').classList.remove('form-control-info');
+            });
+        } else if (ref === 'classification-evidence-summary') {
+            this.setState({evidenceSummary: this.refs[ref].getValue()});
+        } else if (ref === 'classification-status') {
+            this.setState({classificationStatusChecked: !this.state.classificationStatusChecked}, () => {
+                if (this.state.classificationStatusChecked) {
+                    this.setState({classificationStatus: 'Provisional'});
+                } else {
+                    this.setState({classificationStatus: 'In progress'});
+                }
+            });
         }
     },
 
@@ -559,7 +628,16 @@ var ProvisionalCuration = createReactClass({
         } else if (totalPoints > 11 && totalPoints <= 18 && replicatedOverTime) {
             autoClassification = "Definitive";
         }
-        this.setState({autoClassification: autoClassification});
+        this.setState({autoClassification: autoClassification}, () => {
+            // Reset modified classification state to 'No Modification'
+            // if the new and current calculated classification is the same
+            if (this.state.alteredClassification === this.state.autoClassification) {
+                this.setState({
+                    alteredClassification: 'No Modification',
+                    resetAlteredClassification: true
+                });
+            }
+        });
     },
 
     render: function() {
@@ -579,7 +657,7 @@ var ProvisionalCuration = createReactClass({
         let provisional = this.state.provisional;
         let currentClassification = 'None';
         if (provisional.last_modified) {
-            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Selection') {
+            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Modification') {
                 currentClassification = provisional.alteredClassification;
             } else {
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
@@ -588,24 +666,17 @@ var ProvisionalCuration = createReactClass({
         return (
             <div>
                 { show_clsfctn === 'display' ?
-                    Classification.call()
+                    <div>{ClassificationDefinition()}</div>
                     :
                     ( gdm ?
                         <div>
                             <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
-                            <div className="container">
+                            <div className="container summary-provisional-classification-wrapper">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <PanelGroup accordion>
-                                        <Panel title="New Summary & Provisional Classification" open>
+                                        <Panel title="Calculated Classification Matrix" open>
                                             <div className="form-group">
-                                                <div>
-                                                    The calculated values below are based on the set of saved evidence that existed when the "Generate New Summary"
-                                                    button was clicked. To save these values and the calculated or selected Classification, click "Save" below - they
-                                                    will then represent the new "Last Saved Summary & Provisional Classification".
-                                                </div>
-                                                <div><span>&nbsp;</span></div>
-                                                <br />
-                                                <div className="container">
+                                                <div className="summary-matrix-wrapper">
                                                     <table className="summary-matrix">
                                                         <tbody>
                                                             <tr className="header large bg-gray separator-below">
@@ -739,9 +810,13 @@ var ProvisionalCuration = createReactClass({
                                                     </table>
                                                     <strong>*</strong> &ndash; Combined LOD Score
                                                 </div>
-                                                <br />
-
-                                                <div className="container">
+                                                <div className="summary-provisional-classification-description">
+                                                    <p className="alert alert-warning">
+                                                        <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
+                                                        when the "View Classification Matrix" button was clicked. To save a Classification for this Gene Disease Record based on this evidence, please see the section below.
+                                                    </p>
+                                                </div>
+                                                <div className="provisional-classification-wrapper">
                                                     <table className="summary-matrix">
                                                         <tbody>
                                                             <tr className="header large bg-gray">
@@ -790,35 +865,64 @@ var ProvisionalCuration = createReactClass({
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="5">
-                                                                    <Input type="select" ref="alteredClassification"
-                                                                        label={<strong>Modify Provisional&nbsp;<a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
-                                                                        labelClassName="col-sm-3 control-label" handleChange={this.handleChange}
-                                                                        wrapperClassName="col-sm-9" defaultValue={this.state.alteredClassification}
-                                                                        groupClassName="form-group">
-                                                                        <option value="No Selection">No Selection</option>
-                                                                        {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
-                                                                        {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
-                                                                        {autoClassification === 'Moderate' ? null : <option value="Moderate">Moderate</option>}
-                                                                        {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
-                                                                        <option value="Disputed">Disputed</option>
-                                                                        <option value="Refuted">Refuted</option>
-                                                                        <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
-                                                                    </Input>
-                                                                </td>
-                                                            </tr>
-                                                            <tr className="separator-below">
-                                                                <td colSpan="5">
-                                                                    <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-3 control-label"
-                                                                        wrapperClassName="col-sm-9" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
-                                                                        clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange} />
+                                                                    <a name="classification-view" id="classification-view"></a>
+                                                                    <div className="col-md-12 classification-form-content-wrapper">
+                                                                        <div className="col-xs-12 col-sm-6">
+                                                                            <div className="altered-classification">
+                                                                                <Input type="select" ref="alteredClassification"
+                                                                                    label={<strong>Modify Calculated <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</strong>}
+                                                                                    error={this.getFormError('alteredClassification')} clearError={this.clrFormErrors.bind(null, 'alteredClassification')}
+                                                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                                                                                    defaultValue={this.state.alteredClassification} handleChange={this.handleChange}>
+                                                                                    <option value="No Modification">No Modification</option>
+                                                                                    {autoClassification === 'Definitive' ? null : <option value="Definitive">Definitive</option>}
+                                                                                    {autoClassification === 'Strong' ? null : <option value="Strong">Strong</option>}
+                                                                                    {autoClassification === 'Moderate' ? null : <option value="Moderate">Moderate</option>}
+                                                                                    {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
+                                                                                    <option value="Disputed">Disputed</option>
+                                                                                    <option value="Refuted">Refuted</option>
+                                                                                    <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
+                                                                                </Input>
+                                                                            </div>
+                                                                            <div className="altered-classification-reasons">
+                                                                                <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
+                                                                                    wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
+                                                                                    clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
+                                                                                    required={this.state.alteredClassification !== 'No Modification' ? true : false}
+                                                                                    customErrorMsg="Required when changing classification" />
+                                                                                {this.state.resetAlteredClassification ?
+                                                                                    <div className="altered-classification-reset-warning">
+                                                                                        <div className="alert alert-danger">
+                                                                                            <i className="icon icon-exclamation-triangle"></i> This value has been reset to "No Modification" as the Calculated Classification based on the new
+                                                                                            Total Points is now equivalent to your last saved Classification value. Click "Save" to save the Calculated Classification value, or modify to a new
+                                                                                            value and click "Save."
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    : null}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="col-xs-12 col-sm-6">
+                                                                            <div className="classification-status">
+                                                                                <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
+                                                                                <Input type="checkbox" ref="classification-status" checked={this.state.classificationStatusChecked} handleChange={this.handleChange}
+                                                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" />
+                                                                            </div>
+                                                                            <div className="classification-evidence-summary">
+                                                                                <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
+                                                                                    value={this.state.evidenceSummary} handleChange={this.handleChange}
+                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="5"
+                                                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                             <tr className="total-row header">
-                                                                <td colSpan="2">Current Saved Provisional Classification</td>
+                                                                <td colSpan="2">Last Saved Summary Classification</td>
                                                                 <td colSpan="4">
                                                                     {currentClassification == 'None' ?
                                                                         <span>{currentClassification}</span>
-                                                                    :
+                                                                        :
                                                                         <div>{currentClassification}
                                                                             <br />
                                                                             <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
@@ -828,6 +932,20 @@ var ProvisionalCuration = createReactClass({
                                                             </tr>
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                                <div>
+                                                    {Object.keys(provisional).length ?
+                                                        <p className="alert alert-info">
+                                                            <i className="icon icon-info-circle"></i> Click Save to save the Calculated Classification (highlighted in blue) without modification, or modify the
+                                                            Classification value in the pull-down and hit Save. You may also choose to mark your Classification as Provisional.                                                      
+                                                        </p>
+                                                        :
+                                                        <p className="alert alert-info">
+                                                            <i className="icon icon-info-circle"></i> The above Classification Matrix was calculated based on the current evidence and accompanying scores saved in the database
+                                                            when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification based on this current evidence, please fill in
+                                                            the fields above and click "Save". Otherwise, click "Cancel".
+                                                        </p>
+                                                    }
                                                 </div>
                                             </div>
                                         </Panel>
@@ -849,141 +967,6 @@ var ProvisionalCuration = createReactClass({
 });
 
 curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
-
-// Generate Classification Description page for url ../provisional-curation/?gdm=GDMId&classification=display
-var Classification = function() {
-    return (
-        <div className="container classification-cell">
-            <h1>Clinical Validity Classifications</h1>
-            <div className="classificationTable">
-                <table>
-                    <tbody>
-                        <tr className="greyRow">
-                            <td colSpan='2' className="titleCell">Evidence Level</td>
-                            <td className="titleCell">Evidence Description</td>
-                        </tr>
-                        <tr>
-                            <td rowSpan='7' className="verticalCell">
-                                <div className="verticalContent spptEvd">
-                                    Supportive&nbsp;Evidence
-                                </div>
-                            </td>
-                            <td className="levelCell">DEFINITIVE</td>
-                            <td>
-                                The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
-                                diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
-                                that contradicts the role of the gene in the specified disease.
-                            </td>
-                        </tr>
-                        <tr className="narrow-line"></tr>
-                        <tr>
-                            <td className="levelCell">STRONG</td>
-                            <td>
-                                The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
-                                <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
-                                <ul>
-                                    <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing
-                                    evidence for disease causality&sup1;</li>
-                                    <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
-                                </ul>
-                                In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.
-                            </td>
-                        </tr>
-                        <tr className="narrow-line"></tr>
-                        <tr>
-                            <td className="levelCell">MODERATE</td>
-                            <td>
-                                There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:
-                                <ul>
-                                    <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                                    <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
-                                </ul>
-                                The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged
-                                that contradicts the role of the gene in the noded disease.
-                            </td>
-                        </tr>
-                        <tr className="narrow-line"></tr>
-                        <tr>
-                            <td className="levelCell">LIMITED</td>
-                            <td>
-                                There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:
-                                <ul>
-                                    <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
-                                    <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
-                                    <li>Limited experimental data&sup2; supporting the gene-disease association</li>
-                                </ul>
-                                The role of this gene in  disease may not have been independently reported, but no convincing evidence has emerged that
-                                contradicts the role of the gene in the noted disease.
-                            </td>
-                        </tr>
-                        <tr className="narrow-line"></tr>
-                        <tr>
-                            <td colSpan="2" className="levelCell">NO REPORTED<br />EVIDENCE</td>
-                            <td>
-                                No evidence reported for a causal role in disease. These genes might be &#34;candidate&#34; genes based on animal models or implication
-                                in pathways known to be involved in human diseases, but no reports have implicated the gene in human disease cases.
-                            </td>
-                        </tr>
-                        <tr className="narrow-line"></tr>
-                        <tr>
-                            <td className="verticalCell">
-                                <div className="verticalContent cntrdctEvd">
-                                    Contradictory&nbsp;Evidence
-                                </div>
-                            </td>
-                            <td className="levelCell">
-                                CONFLICTING<br />EVIDENCE<br />REPORTED
-                            </td>
-                            <td>
-                                Although there has been an assertion of a gene-disease association, conflicting evidence for the role of this gene in disease has arisen
-                                since the time of the initial report indicating a disease association. Depending on the quantity and quality of evidence disputing the
-                                association, the gene/disease association may be further defined by the following two sub-categories:
-                                <ol className="olTitle">
-                                    <li type="1">
-                                        Disputed
-                                        <ol className="olContent">
-                                            <li type="a">
-                                                Convincing evidence <i>disputing</i> a role for this gene in this disease has arisen since the initial report identifying an
-                                                association between the gene and disease.
-                                            </li>
-                                            <li type="a">
-                                                Refuting evidence need not outweigh existing evidence supporting the gene:disease association.
-                                            </li>
-                                        </ol>
-                                    </li>
-                                    <li type="1">
-                                        Refuted
-                                        <ol className="olContent">
-                                            <li type="a">
-                                                Evidence refuting the role of the gene in the specified disease has been reported and significantly outweighs any evidence
-                                                supporting the role.
-                                            </li>
-                                            <li type="a">
-                                                This designation is to be applied at the discretion of clinical domain experts after thorough review of available evidence
-                                            </li>
-                                        </ol>
-                                    </li>
-                                </ol>
-                            </td>
-                        </tr>
-                        <tr className="greyRow">
-                            <td colSpan="3" className="levelCell">NOTES</td>
-                        </tr>
-                        <tr>
-                            <td colSpan="3">
-                                <p>
-                                    &sup1;Variants that have evidence to disrupt function and/or have other strong genetic and population data (e.g. <i>de novo</i>&nbsp;
-                                    occurrence, absence in controls, etc) can be used as evidence in support of a variant&#39;s causality in this framework.
-                                </p>
-                                <p>&sup2;Examples of appropriate types of supporting experimental data based on those outlined in MacArthur et al. 2014.</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};
 
 // Description of 4 leves of classification in summary table
 // the below 4 functions are not being used anywhere. Commenting out for backup
