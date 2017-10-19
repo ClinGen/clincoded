@@ -30,6 +30,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         href_url: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
         getSelectedTab: PropTypes.func,
+        ext_pageData: PropTypes.object,
         ext_myVariantInfo: PropTypes.object,
         ext_ensemblVariation: PropTypes.object,
         ext_ensemblHgvsVEP: PropTypes.array,
@@ -45,6 +46,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_clinvarSCV: PropTypes.bool,
         loading_ensemblHgvsVEP: PropTypes.bool,
         loading_ensemblVariation: PropTypes.bool,
+        loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_myGeneInfo: PropTypes.bool,
         setCalculatedPathogenicity: PropTypes.func,
@@ -56,6 +58,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             variantData: this.props.variantData,
             interpretation: this.props.interpretation,
             ext_myGeneInfo: this.props.ext_myGeneInfo,
+            ext_pageData: this.props.ext_pageData,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
@@ -71,6 +74,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_clinvarSCV: this.props.loading_clinvarSCV,
             loading_ensemblHgvsVEP: this.props.loading_ensemblHgvsVEP,
             loading_ensemblVariation: this.props.loading_ensemblVariation,
+            loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_myGeneInfo: this.props.loading_myGeneInfo,
             //remember current tab/subtab so user will land on that tab when interpretation starts
@@ -84,6 +88,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         this.setState({variantData: nextProps.variantData, interpretation: nextProps.interpretation});
         if (nextProps.ext_myGeneInfo) {
             this.setState({ext_myGeneInfo: nextProps.ext_myGeneInfo});
+        }
+        if (nextProps.ext_pageData) {
+            this.setState({ext_pageData: nextProps.ext_pageData});
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
@@ -118,6 +125,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
+            loading_pageData: nextProps.loading_pageData,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_ensemblVariation: nextProps.loading_ensemblVariation,
             loading_ensemblHgvsVEP: nextProps.loading_ensemblHgvsVEP,
@@ -177,10 +185,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationPopulation data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation} />
                     </div>
