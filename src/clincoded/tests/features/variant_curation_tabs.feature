@@ -153,7 +153,7 @@ Feature: Variant Curation Tabs
         Then I should see "NC_000007"
         When I press the button "Save and View Evidence"
         And I wait for 2 seconds
-        Then I should see "NM_000492.3:c.4_53+69del119ins299"
+        Then I should see "No transcripts found for this allele"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -168,10 +168,10 @@ Feature: Variant Curation Tabs
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 1 seconds
-        Then I should see "ENSG00000001626"
+        Then I should see "cystic fibrosis transmembrane conductance regulator"
         When I press the tab "Basic Information"
         And I wait for 1 seconds
-        Then I should see "NM_000492.3:c.4_53+69del119ins299"
+        Then I should see "No transcripts found for this allele"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "All users may register for our demo version of the ClinGen interfaces"
