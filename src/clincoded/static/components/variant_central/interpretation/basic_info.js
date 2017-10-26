@@ -541,7 +541,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-heading"><h3 className="panel-title">ClinVar Primary Transcript</h3></div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarEutils ? showActivityIndicator('Retrieving data... ') : null}
-                        {(primary_transcript && primary_transcript.nucleotide) ?
+                        {(primary_transcript && primary_transcript.nucleotide) && ensembl_data.length ?
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -577,12 +577,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
+                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
+                                <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
+                                : null}
                         </h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
-                        {(this.state.hasHgvsGRCh38 && GRCh38) ?
+                        {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -600,7 +602,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in RefSeq. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
+                                <span>No RefSeq transcripts found for this allele in Ensembl. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -609,12 +611,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
+                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
+                                <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
+                                : null}
                         </h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
-                        {(this.state.hasHgvsGRCh38 && GRCh38) ?
+                        {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -632,7 +636,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No data was found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
+                                <span>No transcripts found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
                             </div>
                         }
                     </div>
