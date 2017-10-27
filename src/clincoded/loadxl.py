@@ -18,7 +18,6 @@ ORDER = [
     'document',
     'image',
     'gene',
-    'orphaPhenotype',
     'disease',
     'article',
     'assessment',
