@@ -77,7 +77,7 @@ Note: These will all be installed locally for the application and should never c
 
 Step 1b: Run buildout::
 
-    $ python3.4 bootstrap.py -v 2.3.1 --setuptools-version 15.2
+    $ python3.4 bootstrap.py -v 2.9.5 --setuptools-version 15.2
     $ bin/buildout -c buildout-dev.cfg
 
 If you see a clang error like this::
