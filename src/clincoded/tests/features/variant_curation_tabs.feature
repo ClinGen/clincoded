@@ -142,13 +142,13 @@ Feature: Variant Curation Tabs
         When I visit "/select-variant/"
         And I wait for 1 seconds
         Then I should see "Search and Select Variant"
-        When I select "ClinVar Variation ID" from dropdown "form-control"
+        When I select "ClinGen Allele Registry ID (CA ID)" from dropdown "form-control"
         And I wait for 1 seconds
-        And I press "Add ClinVar ID"
+        And I press "Add CA ID"
         And I wait for an element with the css selector ".modal-open" to load
-        Then I should see "Enter ClinVar VariationID"
+        Then I should see "Enter CA ID"
         When I fill in the css element field "input.form-control" with "CA645372267"
-        And I press "Retrieve from ClinVar"
+        And I press "Retrieve from ClinGen Allele Registry"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NC_000012"
         When I press the button "Save and View Evidence"
