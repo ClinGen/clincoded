@@ -147,13 +147,13 @@ Feature: Variant Curation Tabs
         And I press "Add ClinVar ID"
         And I wait for an element with the css selector ".modal-open" to load
         Then I should see "Enter ClinVar VariationID"
-        When I fill in the css element field "input.form-control" with "53981"
+        When I fill in the css element field "input.form-control" with "CA645372267"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NC_000007"
+        Then I should see "NC_000012"
         When I press the button "Save and View Evidence"
         And I wait for 2 seconds
-        Then I should see "No transcripts found for this allele"
+        Then I should see "NM_000277.1:c.836_837delinsTG"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -168,10 +168,10 @@ Feature: Variant Curation Tabs
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 1 seconds
-        Then I should see "cystic fibrosis transmembrane conductance regulator"
+        Then I should see "ENSG00000171759"
         When I press the tab "Basic Information"
         And I wait for 1 seconds
-        Then I should see "No transcripts found for this allele"
+        Then I should see "NM_000277.1:c.836_837delinsTG"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "All users may register for our demo version of the ClinGen interfaces"
