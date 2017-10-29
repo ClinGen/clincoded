@@ -424,7 +424,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     renderClinvarTranscriptMessage: function(clinvarId) {
         if (clinvarId) {
             return (
-                <span>No ClinVar Primary Transcript was found for ClinVar VariationID <a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinvarId} target="_blank">{clinvarId}</a>.</span>
+                <span>Unable to return ClinVar Primary Transcript for ClinVar VariationID <a href={'http://www.ncbi.nlm.nih.gov/clinvar/variation/' + clinvarId} target="_blank">{clinvarId}</a>.</span>
             );
         } else {
             return (
@@ -602,7 +602,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No RefSeq transcripts found for this allele in Ensembl. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
+                                <span>Unable to return RefSeq transcripts for this allele. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
                             </div>
                         }
                     </div>
@@ -636,7 +636,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>No transcripts found for this allele in Ensembl. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
+                                <span>Unable to return Ensembl transcripts for this allele. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
                             </div>
                         }
                     </div>
