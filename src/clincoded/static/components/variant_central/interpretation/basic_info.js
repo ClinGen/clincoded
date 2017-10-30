@@ -602,7 +602,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>Unable to return RefSeq transcripts for this allele. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for this variant.</span>
+                                <span>Unable to return RefSeq transcripts for this allele. <a href="http://www.ncbi.nlm.nih.gov/refseq/" target="_blank" rel="noopener noreferrer">Search RefSeq</a> for transcripts.</span>
                             </div>
                         }
                     </div>
@@ -636,7 +636,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             </table>
                             :
                             <div className="panel-body">
-                                <span>Unable to return Ensembl transcripts for this allele. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for this variant.</span>
+                                <span>Unable to return Ensembl transcripts for this allele. <a href="http://www.ensembl.org/Homo_sapiens/Info/Index" target="_blank" rel="noopener noreferrer">Search Ensembl</a> for transcripts.</span>
                             </div>
                         }
                     </div>
