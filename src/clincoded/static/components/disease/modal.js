@@ -34,7 +34,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
         return {
             diseaseId: this.props.diseaseId, // Value for disease id input field (types of 'text' or 'textarea')
             diseaseTerm: this.props.diseaseTerm, // Name of the disease
-            diseaseOntology: this.props.diseaseOntology, // Orphanet, DOID, OMIM, NCIt, etc.
+            diseaseOntology: this.props.diseaseOntology, // Orphanet, DOID, OMIM, NCIt, EFO and MONDO
             diseaseDescription: this.props.diseaseDescription, // Description/definition of the disease
             phenotypes: this.props.phenotypes, // HPO IDs
             synonyms: this.props.synonyms, // Disease synonyms
@@ -373,7 +373,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
     renderMondoInstructions() {
         return (
             <span>
-                Enter the term "id" for the desired MonDO disease term (Orphanet, DOID, OMIM and NCIt id's allowed). <span className="label-note">To find the term "id:"</span>
+                Enter the term "id" for the desired MonDO disease term (Orphanet, DOID, OMIM, NCIt, EFO and MONDO id's allowed). <span className="label-note">To find the term "id:"</span>
                 <ol>
                     <li>
                         <span className="label-note">
@@ -403,7 +403,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     label={this.renderMondoInstructions()}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
                     labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
-                    inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:100800 OR NCIT:C4089" required />
+                    inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:303800, NCIT:C4089, EFO:1000643, OR MOMDO:0000218" required />
                 <Input type="button-button" title="Retrieve from OLS" 
                     inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right btn-query-ols"} 
                     clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
@@ -526,7 +526,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
 function validateDiseaseIdInput(id) {
     // validating the field for user-entered disease id
     let valid = this.validateDefault();
-    let errMsg = 'Enter a valid OMIM, Orphanet, DOID or NCIt ID';
+    let errMsg = 'Enter a valid Orphanet, DOID, OMIM, NCIt, EFO or MONDO ID';
 
     if (valid) {
         if (id && id.length) {
@@ -537,10 +537,10 @@ function validateDiseaseIdInput(id) {
                 this.setFormErrors('diseaseId', errMsg);
             }
             /**
-             * Disallow IDs except Orphanet, DOID, OMIM AND NCIt
+             * Disallow IDs except Orphanet, DOID, OMIM, NCIt, EFO and MONDO
              */
-            let valid_pattern = /^(orphanet|doid|omim|ncit)/i;
-            let multi_instance_pattern = /(orphanet|doid|omim|ncit)/ig;
+            let valid_pattern = /^(orphanet|doid|omim|ncit|efo|mondo)/i;
+            let multi_instance_pattern = /(orphanet|doid|omim|ncit|efo|mondo)/ig;
             if (!id.match(valid_pattern) || id.match(multi_instance_pattern).length > 1) {
                 valid = false;
                 this.setFormErrors('diseaseId', errMsg);
