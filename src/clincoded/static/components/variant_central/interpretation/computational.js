@@ -27,7 +27,15 @@ const validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
 const computationStatic = {
     conservation: {
         _order: ['phylop7way', 'phylop20way', 'phastconsp7way', 'phastconsp20way', 'gerp', 'siphy'],
-        _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'}
+        _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'},
+        _url: {
+            'phylop7way': 'http://compgen.cshl.edu/phast/index.php',
+            'phylop20way': 'http://compgen.cshl.edu/phast/index.php',
+            'phastconsp7way': 'http://compgen.cshl.edu/phast/index.php',
+            'phastconsp20way': 'http://compgen.cshl.edu/phast/index.php',
+            'gerp': 'http://mendel.stanford.edu/SidowLab/downloads/gerp/',
+            'siphy': 'http://www.broadinstitute.org/mammals/2x/siphy_hg19/'
+        }
     },
     other_predictors: {
         _order: ['sift', 'polyphen2_hdiv', 'polyphen2_hvar', 'lrt', 'mutationtaster', 'mutationassessor', 'fathmm', 'provean', 'metasvm', 'metalr', 'cadd', 'fathmm_mkl', 'fitcons'],
@@ -40,16 +48,61 @@ const computationStatic = {
             'mutationassessor': 'MutationAssessor',
             'fathmm': 'FATHMM',
             'provean': 'PROVEAN',
-            'metasvm': 'MetaSVM (meta-predictor)',
-            'metalr': 'MetaLR (meta-predictor)',
-            'cadd': 'CADD (meta-predictor)',
+            'metasvm': 'MetaSVM',
+            'metalr': 'MetaLR',
+            'cadd': 'CADD',
             'fathmm_mkl': 'FATHMM-MKL',
             'fitcons': 'fitCons'
+        },
+        _type: {
+            'metasvm': ' (meta-predictor)',
+            'metalr': ' (meta-predictor)',
+            'cadd': ' (meta-predictor)'
+        },
+        _url: {
+            'sift': 'http://sift.bii.a-star.edu.sg/sift-bin/contact.pl',
+            'polyphen2_hdiv': 'http://genetics.bwh.harvard.edu/pph2/',
+            'polyphen2_hvar': 'http://genetics.bwh.harvard.edu/pph2/',
+            'lrt': 'http://www.genetics.wustl.edu/jflab/lrt_query.html',
+            'mutationtaster': 'http://www.mutationtaster.org/',
+            'mutationassessor': 'http://mutationassessor.org/',
+            'fathmm': 'http://fathmm.biocompute.org.uk/',
+            'provean': 'http://provean.jcvi.org/index.php',
+            'metasvm': 'https://sites.google.com/site/jpopgen/dbNSFP',
+            'metalr': 'https://sites.google.com/site/jpopgen/dbNSFP',
+            'cadd': 'http://cadd.gs.washington.edu/',
+            'fathmm_mkl': 'http://fathmm.biocompute.org.uk/',
+            'fitcons': 'http://compgen.bscb.cornell.edu/fitCons/'
+        },
+        _pathoThreshold: {
+            'sift': '<0.049',
+            'polyphen2_hdiv': '--',
+            'polyphen2_hvar': '>0.447',
+            'lrt': '--',
+            'mutationtaster': '>0.5',
+            'mutationassessor': '>1.935',
+            'fathmm': '<-1.51',
+            'provean': '<-2.49',
+            'metasvm': '>0',
+            'metalr': '>0.5',
+            'cadd': '>19 (inferred)',
+            'fathmm_mkl': '--',
+            'fitcons': '--'
         }
     },
     clingen: {
         _order: ['revel', 'cftr'],
-        _labels: {'revel': 'REVEL', 'cftr': 'CFTR'}
+        _labels: {'revel': 'REVEL', 'cftr': 'CFTR'},
+        _type: {
+            'revel': ' (meta-predictor)'
+        },
+        _url: {
+            'revel': 'https://sites.google.com/site/revelgenomics/about'
+        },
+        _pathoThreshold: {
+            'revel': '>0.5',
+            'cftr': '--'
+        }
     }
 };
 
@@ -317,14 +370,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             return (
                 <tr key={key}>
                     <td>
-                        {(rowName === 'REVEL') ?
-                            <span><a href="https://sites.google.com/site/revelgenomics/about" target="_blank" rel="noopener noreferrer">{rowName}</a> (meta-predictor)</span> 
-                            : 
-                            <span>{rowName} (meta-predictor)</span>
+                        {clingenPredStatic._url[key] ?
+                            <span><a href={clingenPredStatic._url[key]} target="_blank" rel="noopener noreferrer">{rowName}</a>{clingenPredStatic._type[key]}</span>
+                            :
+                            <span>{rowName + clingenPredStatic._type[key]}</span>
                         }
                     </td>
                     <td>{clingenPred[key].score_range}</td>
                     <td>{clingenPred[key].score ? clingenPred[key].score : 'No data found'}</td>
+                    <td>{clingenPredStatic._pathoThreshold[key]}</td>
                     <td>{clingenPred[key].prediction}</td>
                 </tr>
             );
@@ -337,9 +391,16 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         // Both 'source name' and 'score range' have static values
         return (
             <tr key={key}>
-                <td>{rowName}</td>
+                <td>
+                    {otherPredStatic._url[key] ?
+                        <span><a href={otherPredStatic._url[key]} target="_blank" rel="noopener noreferrer">{rowName}</a>{otherPredStatic._type[key]}</span>
+                        :
+                        <span>{rowName + otherPredStatic._type[key]}</span>
+                    }
+                </td>
                 <td>{otherPred[key].score_range}</td>
                 <td>{otherPred[key].score ? (Array.isArray(otherPred[key].score) ? otherPred[key].score.join(', ') : otherPred[key].score) : '--'}</td>
+                <td>{otherPredStatic._pathoThreshold[key]}</td>
                 <td>{otherPred[key].prediction ? otherPred[key].prediction : '--'}</td>
             </tr>
         );
@@ -351,7 +412,13 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         // 'source name' has static values
         return (
             <tr key={key}>
-                <td>{rowName}</td>
+                <td>
+                    {conservationStatic._url[key] ?
+                        <a href={conservationStatic._url[key]} target="_blank" rel="noopener noreferrer">{rowName}</a>
+                        :
+                        rowName
+                    }
+                </td>
                 <td>{conservation[key] ? conservation[key] : '--'}</td>
             </tr>
         );
@@ -484,6 +551,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                             <th>Source</th>
                                                             <th>Score Range</th>
                                                             <th>Score</th>
+                                                            <th>Pathogenicity Threshold</th>
                                                             <th>Prediction</th>
                                                         </tr>
                                                     </thead>
@@ -519,6 +587,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                             <th>Source</th>
                                                             <th>Score Range</th>
                                                             <th>Score</th>
+                                                            <th>Pathogenicity Threshold</th>
                                                             <th>Prediction</th>
                                                         </tr>
                                                     </thead>
