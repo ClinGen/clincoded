@@ -403,7 +403,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     label={this.renderMondoInstructions()}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
                     labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
-                    inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:303800, NCIT:C4089, EFO:1000643, OR MOMDO:0000218" required />
+                    inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:303800, NCIT:C4089, EFO:0005577, OR MONDO:0000218" required />
                 <Input type="button-button" title="Retrieve from OLS" 
                     inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right btn-query-ols"} 
                     clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
