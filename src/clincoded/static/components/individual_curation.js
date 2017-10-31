@@ -1357,7 +1357,7 @@ function IndividualVariantInfo() {
                                 <option value="No">No</option>
                                 <option value="Not Specified">Not Specified</option>
                             </Input>
-                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individual has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
                                 defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1365,7 +1365,7 @@ function IndividualVariantInfo() {
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Input>
-                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above <i>de novo</i> question is yes, is the variant maternity and paternity confirmed?</span>}
                                 defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1468,7 +1468,7 @@ function IndividualVariantInfo() {
                                 <option value="No">No</option>
                                 <option value="Not Specified">Not Specified</option>
                             </Input>
-                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individual has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
                                 defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1476,7 +1476,7 @@ function IndividualVariantInfo() {
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Input>
-                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above <i>de novo</i> question is yes, is the variant maternity and paternity confirmed?</span>}
                                 defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1917,14 +1917,14 @@ const IndividualViewer = createReactClass({
 
                                     <div>
                                         <dl className="dl-horizontal">
-                                            <dt>If the individuals has one variant, is it <i>de novo</i> OR If the individual has 2 variants, is at least one <i>de novo</i>?</dt>
+                                            <dt>If the individual has one variant, is it <i>de novo</i> OR If the individual has 2 variants, is at least one <i>de novo</i>?</dt>
                                             <dd>{individual.denovo}</dd>
                                         </dl>
                                     </div>
 
                                     <div>
                                         <dl className="dl-horizontal">
-                                            <dt>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</dt>
+                                            <dt>If the answer to the above <i>de novo</i> question is yes, is the variant maternity and paternity confirmed?</dt>
                                             <dd>{individual.maternityPaternityConfirmed}</dd>
                                         </dl>
                                     </div>
