@@ -138,7 +138,7 @@
         ],
         "uuid": "e10d0bb8-7f3a-4c91-85a5-19d1ea0d79c3",
         "term": "pleuropulmonary blastoma",
-        "diseaseId": "OMIM_601200",
+        "diseaseId": "Orphanet_64742",
         "description": "A malignant neoplasm affecting the lungs and/or the pleura. Pleuropulmonary blastoma is seen in children. Microscopically, the tumor may show features of chondrosarcoma, leiomyosarcoma, rhabdomyosarcoma, liposarcoma, or undifferentiated sarcoma. In approximately 25% of patients with pleuropulmonary blastoma, there are other lesions or neoplasms that may affect patients or their families, including lung or kidney cysts, and ovarian or testicular neoplasms. Heterozygous germline mutations in DICER1 gene have been identified in families harboring pleuropulmonary blastomas.",
         "ontology": "OMIM",
         "synonyms": [
