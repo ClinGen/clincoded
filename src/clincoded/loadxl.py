@@ -18,6 +18,7 @@ ORDER = [
     'document',
     'image',
     'gene',
+    'orphaPhenotype',
     'disease',
     'article',
     'assessment',
@@ -510,6 +511,9 @@ PHASE1_PIPELINES = {
     ],
     'publication': [
         remove_keys('datasets'),
+    ],
+    'orphaPhenotype': [
+        remove_keys('active', "schema_version"),
     ],
     'annotation': [
         remove_keys('active', "schema_version"),
