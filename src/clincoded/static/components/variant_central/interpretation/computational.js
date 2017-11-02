@@ -16,6 +16,7 @@ import { findDiffKeyValuesMixin } from './shared/find_diff';
 import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
 import { parseKeyValue } from '../helpers/parse_key_value';
+import PopOverComponent from '../../../libs/bootstrap/popover';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
@@ -34,7 +35,7 @@ const computationStatic = {
             'phastconsp7way': 'http://compgen.cshl.edu/phast/index.php',
             'phastconsp20way': 'http://compgen.cshl.edu/phast/index.php',
             'gerp': 'http://mendel.stanford.edu/SidowLab/downloads/gerp/',
-            'siphy': 'http://www.broadinstitute.org/mammals/2x/siphy_hg19/'
+            'siphy': 'http://portals.broadinstitute.org/genome_bio/siphy/index.html'
         }
     },
     other_predictors: {
@@ -138,7 +139,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 },
                 other_predictors: {
                     sift: {score_range: '--', score: null, prediction: null},
-                    polyphen2_hdiv: {score_range: '--', score: null, prediction: null},
+                    polyphen2_hdiv: {score_range: '0 to 1', score: null, prediction: null},
                     polyphen2_hvar: {score_range: '0 to 1', score: null, prediction: null},
                     lrt: {score_range: '0 to 1', score: null, prediction: null},
                     mutationtaster: {score_range: '0 to 1', score: null, prediction: null},
@@ -147,9 +148,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     provean: {score_range: '-14 to +14', score: null, prediction: null},
                     metasvm: {score_range: '-2 to +3', score: null, prediction: null},
                     metalr: {score_range: '0 to 1', score: null, prediction: null},
-                    cadd: {score_range: '-7.535 to 35.789', score: null, prediction: null},
+                    cadd: {score_range: '-7.535 to 35.789', score: null, prediction: 'higher score = higher pathogenicity'},
                     fathmm_mkl: {score_range: '--', score: null, prediction: null},
-                    fitcons: {score_range: '0 to 1', score: null, prediction: null}
+                    fitcons: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity'}
                 },
                 clingen: {
                     revel: {score_range: '0 to 1', score: null, prediction: 'higher score = higher pathogenicity', visible: true},
@@ -588,7 +589,128 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                             <th>Score Range</th>
                                                             <th>Score</th>
                                                             <th>Pathogenicity Threshold</th>
-                                                            <th>Prediction</th>
+                                                            <th>Prediction
+                                                                <PopOverComponent popOverWrapperClass="popover-predictors-prediction-help"
+                                                                    popOverStyleClass="prediction-help-window" actuatorTitle={<span className="icon icon-info-circle"></span>}
+                                                                    popOverRef={ref => (this.popover = ref)}>
+                                                                    <table className="table">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th className="predictor-column">Predictor</th>
+                                                                                <th className="letter-code-column">Letter Code</th>
+                                                                                <th className="prediction-column">Prediction</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td rowSpan="2" className="predictor-column">SIFT</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">T</td>
+                                                                                <td className="prediction-column">Tolerated</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="3" className="predictor-column">PolyPhen2-HDIV<br/><br/>PolyPhen2-HVAR</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Probably Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">P</td>
+                                                                                <td className="prediction-column">Possibly Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">B</td>
+                                                                                <td className="prediction-column">Benign</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="3" className="predictor-column">LRT</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Deleterious</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">N</td>
+                                                                                <td className="prediction-column">Neutral</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">U</td>
+                                                                                <td className="prediction-column">Unknown</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="4" className="predictor-column">MutationTaster</td>
+                                                                                <td className="letter-code-column">A</td>
+                                                                                <td className="prediction-column">Disease Causing (automatic)</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Disease Causing</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">P</td>
+                                                                                <td className="prediction-column">Polymorphism (automatic)</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">N</td>
+                                                                                <td className="prediction-column">Polymorphism</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="4" className="predictor-column">MutationAssessor</td>
+                                                                                <td className="letter-code-column">H</td>
+                                                                                <td className="prediction-column">High (predicted functional)</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">M</td>
+                                                                                <td className="prediction-column">Medium (predicted functional)</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">L</td>
+                                                                                <td className="prediction-column">Low (predicted non functional)</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">N</td>
+                                                                                <td className="prediction-column">Neutral</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="2" className="predictor-column">FATHMM</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">T</td>
+                                                                                <td className="prediction-column">Tolerated</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="2" className="predictor-column">PROVEAN</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">N</td>
+                                                                                <td className="prediction-column">Neutral</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="2" className="predictor-column">METASVM</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">T</td>
+                                                                                <td className="prediction-column">Tolerated</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td rowSpan="2" className="predictor-column">METALR</td>
+                                                                                <td className="letter-code-column">D</td>
+                                                                                <td className="prediction-column">Damaging</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td className="letter-code-column">T</td>
+                                                                                <td className="prediction-column">Tolerated</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </PopOverComponent>
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
