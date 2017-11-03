@@ -40,10 +40,12 @@ export function getHgvsNotation(variant, assembly, omitChrString) {
     }
 
     /**
-     * Handle 'deletion' genomic GRCh38 HGVS (compliant with VEP)
-     * The ensembl vep/human rest api only accepts the identifier up to the 'del' marker
-     * in the hgvs string, such as in 'chr7:g.117120152_117120270del119ins299'
-     * 
+     * 'chr7:g.117120152_117120270del119ins299' !== 'chr7:g.117120152_117120270del'
+     * ----------------------------------------------------------------------------
+     * 'chr7:g.117120152_117120270del119ins299' is an 'Indel' variant, while 
+     * 'chr7:g.117120152_117120270del' is a 'Deletion' variant.
+     * So we should not alter the genomic GRCh38 HGVS for ensembl vep/human Rest API.
+     * ----------------------------------------------------------------------------
      * Also handle 'deletion' genomic GRCh37 HGVS (compliant with myvariant.info)
      * The myvariant.info api only accepts the identifier up to the 'del' marker
      * if the 'variationType' is 'Deletion' (e.g. 'chr7:g.117188858delG').
@@ -51,11 +53,7 @@ export function getHgvsNotation(variant, assembly, omitChrString) {
      * the 'variationType' is 'Indel' (e.g. 'chr7:g.117120152_117120270del119ins299'),
      * or 'Insertion' (e.g. 'chr7:g.117175364_117175365insT').
      */
-    if (assembly === 'GRCh38') {
-        if (hgvs && hgvs.indexOf('del') > 0) {
-            hgvs = hgvs.substring(0, hgvs.indexOf('del') + 3);
-        }
-    } else if (assembly === 'GRCh37') {
+    if (assembly === 'GRCh37') {
         if (variant.variationType && variant.variationType === 'Deletion') {
             if (hgvs && hgvs.indexOf('del') > 0) {
                 hgvs = hgvs.substring(0, hgvs.indexOf('del') + 3);
