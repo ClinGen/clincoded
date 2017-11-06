@@ -6,9 +6,8 @@
         ],
         "uuid": "80635629-f3c1-4a48-b63e-0db849e8e354",
         "term": "achondroplasia",
-        "diseaseId": "OMIM_100800",
+        "diseaseId": "MONDO_0007037",
         "description": "Achondroplasia is the most common form of chondrodysplasia, characterized by rhizomelia, exaggerated lumbar lordosis, brachydactyly, and macrocephaly with frontal bossing and midface hypoplasia.",
-        "ontology": "OMIM",
         "synonyms": [
             "Achondroplastic physique",
             "Chondrodystrophia",
@@ -22,9 +21,8 @@
         ],
         "uuid": "e623cfdd-400c-4c6d-bd9f-c0fedf630e6b",
         "term": "Fanconi anemia",
-        "diseaseId": "DOID_13636",
+        "diseaseId": "MONDO_0019391",
         "description": "Fanconi anemia (FA) is a hereditary DNA repair disorder characterized by progressive pancytopenia with bone marrow failure, variable congenital malformations and predisposition to develop hematological or solid tumors.",
-        "ontology": "DOID",
         "synonyms": [
             "Fanconi pancytopenia",
             "Fanconi panmyelopathy",
@@ -38,9 +36,8 @@
         ],
         "uuid": "f8c8525c-adf9-4fda-8e86-a30832347edd",
         "term": "Neurofibromatosis type 2",
-        "diseaseId": "OMIM_101000",
+        "diseaseId": "MONDO_0007039",
         "description": "Neurofibromatosis type 2 (NF2) is a tumor-prone disorder characterized by the development of multiple schwannomas and meningiomas.",
-        "ontology": "OMIM",
         "synonyms": [
             "Bilateral acoustic neurofibromatosis",
             "NF2",
@@ -55,9 +52,8 @@
         ],
         "uuid": "88ddad2b-4849-4546-ad75-af157b2d4a1b",
         "term": "T-B+ severe combined immunodeficiency due to CD3delta/CD3epsilon/CD3zeta",
-        "diseaseId": "Orphanet_169160",
+        "diseaseId": "MONDO_0015703",
         "description": "",
-        "ontology": "ORPHANET",
         "synonyms": [
             "T-B+ SCID due to CD3delta/CD3epsilon/CD3zeta"
         ]
@@ -69,9 +65,8 @@
         ],
         "uuid": "657cb29e-63b6-4416-b613-557aa18ac765",
         "term": "non-syndromic X-linked intellectual disability",
-        "diseaseId": "DOID_0050776",
-        "description": "A non-syndromic intellectual disability characterized by a X-linked inheritance pattern.",
-        "ontology": "DOID",
+        "diseaseId": "MONDO_0019181",
+        "description": "Nonspecific X-linked intellectual deficiencies (MRX) belong to the family of sex-linked intellectual deficiencies (XLMR). In contrast to syndromic or specific X-linked intellectual deficiencies (MRXS), which also present with associated physical, neurological and/or psychiatric manifestations, intellectual deficiency is the only symptom of MRX.",
         "synonyms": [
             "non-specific X-linked mental retardation",
             "X-linked non-specific intellectual disability",
@@ -85,9 +80,8 @@
         ],
         "uuid": "aa217d94-5e04-4144-af5d-0b49e9dba754",
         "term": "Cobblestone lissencephaly without muscular or ocular involvement",
-        "diseaseId": "OMIM_615191",
-        "description": "See http://www.omim.org/entry/615191",
-        "ontology": "OMIM",
+        "diseaseId": "MONDO_0014077",
+        "description": "Cobblestone lissencephaly without muscular or ocular involvement is a form of cobblestone lissencephaly characterized by a constellation of brain malformations which can either exist alone or in conjunction with minimal muscular and ocular abnormalities. The clinical features of the disease include severe developmental delay, increased head circumference, hydrocephalus and seizures.",
         "synonyms": [
             "Lissencephaly type 2 without muscular or eye involvement",
             "Lissencephaly type 2 without muscular or ocular involvement",
@@ -102,9 +96,8 @@
         ],
         "uuid": "c5694e37-cd5b-42a3-b6db-e3fb6a629e63",
         "term": "Aneurysm-osteoarthritis syndrome",
-        "diseaseId": "OMIM_613795",
+        "diseaseId": "MONDO_0013426",
         "description": "",
-        "ontology": "OMIM",
         "synonyms": [
             "AOS",
             "Loeys-Dietz Syndrome type 3"
@@ -117,9 +110,8 @@
         ],
         "uuid": "82e69bcc-91c5-4a66-8293-3befc7445966",
         "term": "von Hippel-Lindau disease",
-        "diseaseId": "OMIM_193300",
+        "diseaseId": "MONDO_0008667",
         "description": "Von Hippel-Lindau disease (VHL) is a familial cancer predisposition syndrome associated with a variety of malignant and benign neoplasms, most frequently retinal, cerebellar, and spinal hemangioblastoma, renal cell carcinoma (RCC), and pheochromocytoma.",
-        "ontology": "OMIM",
         "synonyms": [
             "von Hippel-Lindau syndrome",
             "Von Hippel-Lindau syndrome (VHL)",
@@ -138,9 +130,8 @@
         ],
         "uuid": "e10d0bb8-7f3a-4c91-85a5-19d1ea0d79c3",
         "term": "pleuropulmonary blastoma",
-        "diseaseId": "Orphanet_64742",
+        "diseaseId": "MONDO_0011014",
         "description": "A malignant neoplasm affecting the lungs and/or the pleura. Pleuropulmonary blastoma is seen in children. Microscopically, the tumor may show features of chondrosarcoma, leiomyosarcoma, rhabdomyosarcoma, liposarcoma, or undifferentiated sarcoma. In approximately 25% of patients with pleuropulmonary blastoma, there are other lesions or neoplasms that may affect patients or their families, including lung or kidney cysts, and ovarian or testicular neoplasms. Heterozygous germline mutations in DICER1 gene have been identified in families harboring pleuropulmonary blastomas.",
-        "ontology": "OMIM",
         "synonyms": [
             "Pleuropulmonary Blastoma",
             "pleuropulmonary blastoma",
@@ -155,9 +146,8 @@
         ],
         "uuid": "028c938f-0a1c-4aa1-bd02-4c574d2f58e2",
         "term": "Loeys-Dietz syndrome",
-        "diseaseId": "DOID_0050466",
-        "description": "An autosomal dominant aneurysm with multisystem abnormalities caused by increased TGF-BETA signaling due to mutations in type I or II of TGF-BETA RECEPTOR. Additional craniofacial features include CLEFT PALATE; CRANIOSYNOSTOSIS; HYPERTELORISM; or bifid uvula. Phenotypes closely resemble MARFAN SYNDROME; Marfanoid craniosynostosis syndrome (Shprintzen-Goldberg syndrome); and EHLERS-DANLOS SYNDROME.",
-        "ontology": "DOID",
+        "diseaseId": "MONDO_0018954",
+        "description": "Loeys-Dietz syndrome is a rare genetic connective tissue disorder characterized by a broad spectrum of craniofacial, vascular and skeletal manifestations with four genetic subtypes described forming a clinical continuum.",
         "synonyms": [
             "Aortic aneurysm syndrome due to TGF-beta receptors anomalies"
         ]
