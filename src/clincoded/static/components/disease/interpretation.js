@@ -39,7 +39,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
             diseaseObj: this.props.diseaseObj,
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -76,14 +75,13 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
     setDiseaseObjectStates(disease) {
         if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}); }
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}); }
         if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
         if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
         if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
-    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
 
         if (diseaseId) {
@@ -96,10 +94,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
         if (term) {
             diseaseObj['term'] = term;
             this.setState({diseaseTerm: term});
-        }
-        if (ontology) {
-            diseaseObj['ontology'] = ontology;
-            this.setState({diseaseOntology: ontology});
         }
         if (description) {
             diseaseObj['description'] = description;
@@ -262,7 +256,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
         this.setState({
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -328,7 +321,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
     render() {
         let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
-        let diseaseOntology = this.state.diseaseOntology;
         let diseaseDescription = this.state.diseaseDescription;
         let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
         let phenotypes = this.state.phenotypes;
@@ -343,7 +335,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                             addDiseaseModalBtn={addDiseaseModalBtn}
                             diseaseId={diseaseId}
                             diseaseTerm={diseaseTerm}
-                            diseaseOntology={diseaseOntology}
                             diseaseDescription={diseaseDescription}
                             diseaseFreeTextConfirm={diseaseFreeTextConfirm}
                             phenotypes={phenotypes}
@@ -352,7 +343,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                             addDiseaseModalBtnLayoutClass=" evidence-disease pull-right"
                         />
                     </div>
-                :
+                    :
                     <div className="delete-disease-button">
                         {this.renderDeleteDiseaseBtn()}
                     </div>
