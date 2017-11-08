@@ -61,7 +61,7 @@ const computationStatic = {
             'cadd': ' (meta-predictor)'
         },
         _url: {
-            'sift': 'http://sift.bii.a-star.edu.sg/sift-bin/contact.pl',
+            'sift': 'http://sift.bii.a-star.edu.sg/',
             'polyphen2_hdiv': 'http://genetics.bwh.harvard.edu/pph2/',
             'polyphen2_hvar': 'http://genetics.bwh.harvard.edu/pph2/',
             'lrt': 'http://www.genetics.wustl.edu/jflab/lrt_query.html',
