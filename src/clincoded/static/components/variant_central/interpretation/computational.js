@@ -614,11 +614,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                                             <tr>
                                                                                 <td rowSpan="3" className="predictor-column">PolyPhen2-HDIV<br/><br/>PolyPhen2-HVAR</td>
                                                                                 <td className="letter-code-column">D</td>
-                                                                                <td className="prediction-column">Probably Damaging</td>
+                                                                                <td className="prediction-column">probably Damaging</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">P</td>
-                                                                                <td className="prediction-column">Possibly Damaging</td>
+                                                                                <td className="prediction-column">Possibly damaging</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">B</td>
@@ -640,19 +640,19 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                                             <tr>
                                                                                 <td rowSpan="4" className="predictor-column">MutationTaster</td>
                                                                                 <td className="letter-code-column">A</td>
-                                                                                <td className="prediction-column">Disease Causing (automatic)</td>
+                                                                                <td className="prediction-column">disease causing Automatic</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">D</td>
-                                                                                <td className="prediction-column">Disease Causing</td>
+                                                                                <td className="prediction-column">Disease causing</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">P</td>
-                                                                                <td className="prediction-column">Polymorphism (automatic)</td>
+                                                                                <td className="prediction-column">Polymorphism automatic</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">N</td>
-                                                                                <td className="prediction-column">Polymorphism</td>
+                                                                                <td className="prediction-column">polymorphism</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td rowSpan="4" className="predictor-column">MutationAssessor</td>
@@ -665,7 +665,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">L</td>
-                                                                                <td className="prediction-column">Low (predicted non functional)</td>
+                                                                                <td className="prediction-column">Low (predicted non-functional)</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td className="letter-code-column">N</td>
