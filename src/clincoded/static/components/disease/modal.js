@@ -370,7 +370,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     </li>
                     <li>
                         <span className="label-note">
-                            Once you have selected the term, enter its MONDO ID (the term "id" at the bottom of the "Term info" box on the right hand side of the OLS term page
+                            Once you have selected the term, enter its MONDO ID (the "id" at the bottom of the "Term info" box on the right hand side of the OLS term page
                             (e.g. <a href={external_url_map['MondoSearch'] + 'MONDO_0016587'} target="_blank">MONDO:0016587</a>).
                         </span>
                     </li>
@@ -400,7 +400,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     this.renderResourceResult()
                     :
                     <div className="disease-freetext-confirm-input-group clearfix">
-                        <p className="alert alert-warning">Note: We strongly encourage use of an allowed MonDO ontology term and therefore specific database identifier for a disease. If you have searched and
+                        <p className="alert alert-warning">Note: We strongly encourage use of an allowed MONDO ontology term and therefore specific database identifier for a disease. If you have searched and
                             there is no appropriate database identifier you may contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and/or
                             create a term using free text.</p>
                         <div className="panel panel-default">
