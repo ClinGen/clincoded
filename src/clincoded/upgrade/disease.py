@@ -231,9 +231,10 @@ def disease_1_2(value, system):
             value['term'] = 'nephrotic syndrome, type 4'
             value['description'] = ''
         if value['diseaseId'] == 'OMIM_261600':
-            value['diseaseId'] = 'MONDO_0009861'
-            value['term'] = 'phenylketonuria'
-            value['description'] = 'Phenylketonuria (PKU) is the most common inborn error of amino acid metabolism and is characterized by mild to severe mental disability in untreated patients.'
+            value['diseaseId'] = 'MONDO_0006094'
+            value['term'] = 'Askin tumor'
+            value['description'] = 'A primitive neuroectodermal tumor (small round blue cell tumor) of the thorax which can involve the periosteum, thoracic wall and/or pleura though it spares the lung parenchyma.'
+            value['synonyms'] = ['Askin\'s Tumor', 'PNET of Thoracopulmonary Region', 'Askin\'s tumor', 'Askin Tumor', 'Peripheral Neuroectodermal Tumor of Thoracopulmonary Region', 'Small Cell Tumor of Thoracopulmonary Region']
         if value['diseaseId'] == 'OMIM_268000':
             value['diseaseId'] = 'MONDO_0019200'
             value['term'] = 'retinitis pigmentosa'
