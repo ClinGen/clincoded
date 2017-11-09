@@ -20,7 +20,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
         addDiseaseModalBtn: PropTypes.object.isRequired,
         diseaseId: PropTypes.string,
         diseaseTerm: PropTypes.string,
-        diseaseOntology: PropTypes.string,
         diseaseDescription: PropTypes.string,
         diseaseFreeTextConfirm: PropTypes.bool,
         phenotypes: PropTypes.array,
@@ -34,7 +33,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
         return {
             diseaseId: this.props.diseaseId, // Value for disease id input field (types of 'text' or 'textarea')
             diseaseTerm: this.props.diseaseTerm, // Name of the disease
-            diseaseOntology: this.props.diseaseOntology, // Orphanet, DOID, OMIM, NCIt, etc.
             diseaseDescription: this.props.diseaseDescription, // Description/definition of the disease
             phenotypes: this.props.phenotypes, // HPO IDs
             synonyms: this.props.synonyms, // Disease synonyms
@@ -102,11 +100,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                 }
             });
         }
-        if (nextProps.diseaseOntology) {
-            this.setState({diseaseOntology: nextProps.diseaseOntology});
-        } else {
-            this.setState({diseaseOntology: null});
-        }
         if (nextProps.diseaseDescription) {
             this.setState({diseaseDescription: nextProps.diseaseDescription, hasFreeTextDiseaseDescription: true});
         } else {
@@ -162,7 +155,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     diseaseId: this.props.diseaseId,
                     diseaseTerm: this.props.diseaseTerm,
                     diseaseDescription: this.props.diseaseDescription,
-                    diseaseOntology: this.props.diseaseOntology,
                     phenotypes: this.props.phenotypes,
                     synonyms: this.props.synonyms,
                     diseaseFreeTextConfirm: this.props.diseaseFreeTextConfirm,
@@ -194,7 +186,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
             diseaseFreeTextConfirm: !this.state.diseaseFreeTextConfirm,
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             phenotypes: [],
             synonyms: [],
@@ -297,7 +288,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     this.props.passDataToParent(
                         'FREETEXT:' + generateUUID(), // Set free text disease id
                         this.state.diseaseTerm,
-                        null, // No ontology for free text
                         this.state.diseaseDescription,
                         [], // No synonyms for free text
                         this.state.phenotypes,
@@ -310,14 +300,12 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
             let diseaseId = this.state.diseaseId;
             this.setState({
                 diseaseTerm: this.state.tempResource['label'] ? this.state.tempResource['label'] : null,
-                diseaseOntology: diseaseId ? diseaseId.substr(0, diseaseId.indexOf(':')).toUpperCase() : null,
                 diseaseDescription: this.state.tempResource['annotation']['definition'] ? this.state.tempResource['annotation']['definition'][0] : null,
                 synonyms: this.state.tempResource['annotation']['has_exact_synonym'] ? this.state.tempResource['annotation']['has_exact_synonym'] : []
             }, () => {
                 this.props.passDataToParent(
                     this.state.diseaseId,
                     this.state.diseaseTerm,
-                    this.state.diseaseOntology,
                     this.state.diseaseDescription,
                     this.state.synonyms,
                     null, // No phenotypes (applicable to free text only)
@@ -373,17 +361,17 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
     renderMondoInstructions() {
         return (
             <span>
-                Enter the term "id" for the desired MonDO disease term (Orphanet, DOID, OMIM and NCIt id's allowed). <span className="label-note">To find the term "id:"</span>
+                Enter a MONDO ID below. To find the desired MONDO ID:
                 <ol>
                     <li>
                         <span className="label-note">
-                            Search for disease name (term) in MonDO using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
+                            Search for the desired MONDO term using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
                         </span>
                     </li>
                     <li>
                         <span className="label-note">
-                            Once you have selected the term, locate the term "id" at the bottom of the "Term info" box displayed on the right hand side of the OLS term page
-                            (e.g. <a href={external_url_map['MondoSearch'] + 'Orphanet_93545'} target="_blank">Orphanet:93545</a>).
+                            Once you have selected the term, enter its MONDO ID (the "id" at the bottom of the "Term info" box on the right hand side of the OLS term page
+                            (e.g. <a href={external_url_map['MondoSearch'] + 'MONDO_0016587'} target="_blank">MONDO:0016587</a>).
                         </span>
                     </li>
                 </ol>
@@ -403,7 +391,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     label={this.renderMondoInstructions()}
                     error={this.getFormError("diseaseId")} clearError={this.clrFormErrors.bind(null, "diseaseId")}
                     labelClassName="col-sm-12 control-label" wrapperClassName="col-sm-12" groupClassName="form-group resource-input clearfix"
-                    inputClassName="disease-id-input" placeholder="e.g. Orphanet:93545, DOID:0050776, OMIM:100800 OR NCIT:C4089" required />
+                    inputClassName="disease-id-input" placeholder="e.g. MONDO:0016587" required />
                 <Input type="button-button" title="Retrieve from OLS" 
                     inputClassName={(this.state.queryResourceDisabled ? "btn-default" : "btn-primary") + " pull-right btn-query-ols"} 
                     clickHandler={this.queryResource} submitBusy={this.state.queryResourceBusy} inputDisabled={this.state.queryResourceDisabled}/>
@@ -412,7 +400,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                     this.renderResourceResult()
                     :
                     <div className="disease-freetext-confirm-input-group clearfix">
-                        <p className="alert alert-warning">Note: We strongly encourage use of an allowed MonDO ontology term and therefore specific database identifier for a disease. If you have searched and
+                        <p className="alert alert-warning">Note: We strongly encourage use of an allowed MONDO ontology term and therefore specific database identifier for a disease. If you have searched and
                             there is no appropriate database identifier you may contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> and/or
                             create a term using free text.</p>
                         <div className="panel panel-default">
@@ -468,7 +456,6 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                 diseaseId: '',
                 diseaseTerm: null,
                 diseaseDescription: null,
-                diseaseOntology: null,
                 phenotypes: [],
                 synonyms: [],
                 diseaseFreeTextConfirm: false,
@@ -526,21 +513,21 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
 function validateDiseaseIdInput(id) {
     // validating the field for user-entered disease id
     let valid = this.validateDefault();
-    let errMsg = 'Enter a valid OMIM, Orphanet, DOID or NCIt ID';
+    let errMsg = 'Enter a valid MONDO ID';
 
     if (valid) {
         if (id && id.length) {
             // Expect a semicolon (':') in the id and it is not at the start of the id string
-            // Such as 'DOID:7081' or 'Orphanet:777'
+            // Such as 'MONDO:0016587'
             if (id.indexOf(':') < 0 || id.match(/:/g).length > 1) {
                 valid = false;
                 this.setFormErrors('diseaseId', errMsg);
             }
             /**
-             * Disallow IDs except Orphanet, DOID, OMIM AND NCIt
+             * Allow MONDO IDs only
              */
-            let valid_pattern = /^(orphanet|doid|omim|ncit)/i;
-            let multi_instance_pattern = /(orphanet|doid|omim|ncit)/ig;
+            let valid_pattern = /^mondo/i;
+            let multi_instance_pattern = /mondo/ig;
             if (!id.match(valid_pattern) || id.match(multi_instance_pattern).length > 1) {
                 valid = false;
                 this.setFormErrors('diseaseId', errMsg);
