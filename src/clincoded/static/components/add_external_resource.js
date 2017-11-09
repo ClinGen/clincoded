@@ -390,17 +390,6 @@ function pubmedValidateForm() {
     var valid = this.validateDefault();
     var formInput = this.getFormValue('resourceId');
 
-    // Valid if input has a prefix like "PMID:" (which is removed before validation continues)
-    if (valid && formInput.match(/^PMID\s*:/i)) {
-        formInput = formInput.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
-
-        if (!formInput) {
-            valid = false;
-            this.setFormErrors('resourceId', 'Please include a PMID');
-            this.setState({submitBusy: false});
-        }
-    }
-
     // valid if input isn't zero-filled
     if (valid && formInput.match(/^0+$/)) {
         valid = false;
@@ -416,7 +405,7 @@ function pubmedValidateForm() {
     // valid if the input only has numbers
     if (valid && !formInput.match(/^[0-9]*$/)) {
         valid = false;
-        this.setFormErrors('resourceId', 'PMID should contain only numbers');
+        this.setFormErrors('resourceId', 'Only numbers allowed');
         this.setState({submitBusy: false});
     }
     // valid if parent object is GDM and input isn't already associated with it
@@ -450,9 +439,7 @@ function pubmedQueryResource() {
     if (pubmedValidateForm.call(this)) {
         var url = external_url_map['PubMedSearch'];
         var data;
-
-        // Remove possible prefix like "PMID:" before sending queries
-        var id = this.state.inputValue.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+        var id = this.state.inputValue;
         this.getRestData('/articles/' + id).then(article => {
             // article already exists in db
             this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
