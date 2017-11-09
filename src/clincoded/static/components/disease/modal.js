@@ -361,16 +361,16 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
     renderMondoInstructions() {
         return (
             <span>
-                Enter the term "id" for the desired MonDO disease term (MONDO id's allowed). <span className="label-note">To find the term "id:"</span>
+                Enter a MONDO ID below. To find the desired MONDO ID:
                 <ol>
                     <li>
                         <span className="label-note">
-                            Search for disease name (term) in MonDO using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
+                            Search for the desired MONDO term using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
                         </span>
                     </li>
                     <li>
                         <span className="label-note">
-                            Once you have selected the term, locate the term "id" at the bottom of the "Term info" box displayed on the right hand side of the OLS term page
+                            Once you have selected the term, enter its MONDO ID (the term "id" at the bottom of the "Term info" box on the right hand side of the OLS term page
                             (e.g. <a href={external_url_map['MondoSearch'] + 'MONDO_0016587'} target="_blank">MONDO:0016587</a>).
                         </span>
                     </li>
