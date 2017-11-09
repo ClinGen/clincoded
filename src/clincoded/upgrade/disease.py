@@ -94,10 +94,6 @@ def disease_1_2(value, system):
             value['diseaseId'] = 'MONDO_0019507'
             value['term'] = 'amelogenesis imperfecta'
             value['description'] = 'Amelogenesis imperfecta (AI) represents a group of developmental conditions affecting the structure and clinical appearance of the enamel of all or nearly all the teeth in a more or less equal manner, and which may be associated with morphologic or biochemical changes elsewhere in the body.'
-        if value['diseaseId'] == 'DOID_2481':
-            value['diseaseId'] = 'MONDO_0016021'
-            value['term'] = 'early infantile epileptic encephalopathy'
-            value['description'] = 'Early infantile epileptic encephalopathy (EIEE), or Ohtahara syndrome, is one of the most severe forms of age-related epileptic encephalopathies, characterized by the onset of tonic spasms within the first 3 months of life that can be generalized or lateralized, independent of the sleep cycle and that can occur hundreds of times per day, leading to psychomotor impairment and death.'
         if value['diseaseId'] == 'DOID_2729':
             value['diseaseId'] = 'MONDO_0015780'
             value['term'] = 'dyskeratosis congenita'
