@@ -447,10 +447,6 @@ def disease_1_2(value, system):
             value['diseaseId'] = 'MONDO_0015442'
             value['term'] = 'hereditary breast and ovarian cancer syndrome'
             value['description'] = ''
-        if value['diseaseId'] == 'Orphanet_154':
-            value['diseaseId'] = 'MONDO_0014100'
-            value['term'] = 'dilated cardiomyopathy 1KK'
-            value['description'] = 'A dilated cardiomyopathy that has_material_basis_in mutation in the MYPN gene on chromosome 10q21.'
         if value['diseaseId'] == 'Orphanet_169147':
             value['diseaseId'] = 'MONDO_0015699'
             value['term'] = 'immunodeficiency due to a classical component pathway complement deficiency'
