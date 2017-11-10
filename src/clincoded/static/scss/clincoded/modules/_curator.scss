@@ -1519,10 +1519,16 @@
                 .prediction-help-window {
                     font-size: 80%;
                     font-weight: normal;
-                    left: -235px;
+                    left: -500px;
                     line-height: 80%;
+                    top: -60px;
                     width: 400px;
                     z-index: 999;
+
+                    .closePopOver {
+                        font-size: 125%;
+                        top: 4px;
+                    }
 
                     .table th,
                     .table td {
