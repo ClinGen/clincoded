@@ -238,7 +238,7 @@ const GroupDisease = module.exports.GroupDisease = createReactClass({
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
                     <span>Disease(s) in Common:
                         {this.state.required ? <span className="required-field"> *</span> : null}
-                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span>
+                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MONDO</a> using OLS</span>
                     </span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">

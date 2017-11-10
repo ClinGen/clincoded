@@ -365,7 +365,7 @@ const DiseaseModal = module.exports.DiseaseModal = createReactClass({
                 <ol>
                     <li>
                         <span className="label-note">
-                            Search for the desired MONDO term using the <a href={external_url_map['Mondo']} target="_blank">OLS MonDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
+                            Search for the desired MONDO term using the <a href={external_url_map['Mondo']} target="_blank">OLS MONDO</a> Search [<a href="/static/help/MonDO-search-help.pdf" target="_blank">Help</a>].
                         </span>
                     </li>
                     <li>
