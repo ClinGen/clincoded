@@ -207,7 +207,7 @@ const ProvisionalClassification = createReactClass({
             PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
             OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
             AUTOSOMAL_RECESSIVE: 12,
-            SEGREGATION: 7,
+            SEGREGATION: 3,
             CASE_CONTROL: 12,
             FUNCTIONAL: 2,
             FUNCTIONAL_ALTERATION: 2,
