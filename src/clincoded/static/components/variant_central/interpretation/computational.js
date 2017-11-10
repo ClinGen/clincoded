@@ -552,7 +552,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                             <th>Source</th>
                                                             <th>Score Range</th>
                                                             <th>Score</th>
-                                                            <th>Pathogenicity Threshold</th>
+                                                            <th>Impact Threshold</th>
                                                             <th>Prediction</th>
                                                         </tr>
                                                     </thead>
@@ -588,7 +588,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                                             <th>Source</th>
                                                             <th>Score Range</th>
                                                             <th>Score</th>
-                                                            <th>Pathogenicity Threshold</th>
+                                                            <th>Impact Threshold</th>
                                                             <th>Prediction
                                                                 <PopOverComponent popOverWrapperClass="popover-predictors-prediction-help"
                                                                     popOverStyleClass="prediction-help-window" actuatorTitle={<span className="icon icon-info-circle"></span>}
