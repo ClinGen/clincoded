@@ -1632,6 +1632,12 @@ function FamilySegregation() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
+            <div className="col-sm-7 col-sm-offset-5 lod-score-inclusion-note">
+                <p className="alert alert-warning">
+                    <i className="icon icon-exclamation-circle"></i> For X-linked and autosomal dominant conditions, only include families with 4 or more segregations in the final calculation.
+                    For autosomal recessive conditions, only include families with at least 3 affected individuals. See the Gene Curation SOP for additional details.
+                </p>
+            </div>
             <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5"
                 value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
