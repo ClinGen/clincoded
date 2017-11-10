@@ -960,6 +960,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </div>
                         }
                     </div>
+                    {/* Temporarily suppressing PAGE data table display until service api access issue is resolved
                     <div className="panel panel-info datasource-PAGE">
                         <div className="panel-heading">
                             {this.renderPageHeader(this.state.hasPageData, this.state.loading_pageData, pageVariant, singleNucleotide)}
@@ -1000,6 +1001,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             }
                         </div>
                     </div>
+                    */}
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
                             {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes, singleNucleotide)}
