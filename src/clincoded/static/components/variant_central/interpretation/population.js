@@ -1091,7 +1091,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
                 : null}
 
-                {renderDataCredit('pagestudy')}
+                {/* renderDataCredit('pagestudy') */}
 
                 {renderDataCredit('myvariant')}
 
