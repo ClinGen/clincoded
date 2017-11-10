@@ -1509,7 +1509,44 @@
             .computational .datasource-clingen .table td,
             .computational .datasource-other .table th,
             .computational .datasource-other .table td {
-                width: 25%;
+                width: 20%;
+            }
+
+            .computational .datasource-other .popover-predictors-prediction-help {
+                display: inline-block;
+                margin-left: 8px;
+
+                .prediction-help-window {
+                    font-size: 80%;
+                    font-weight: normal;
+                    left: -500px;
+                    line-height: 80%;
+                    top: -60px;
+                    width: 400px;
+                    z-index: 999;
+
+                    .closePopOver {
+                        font-size: 125%;
+                        top: 4px;
+                    }
+
+                    .table th,
+                    .table td {
+                        line-height: 80%;
+                    }
+
+                    .predictor-column {
+                        width: 25%;
+                    }
+
+                    .letter-code-column {
+                        width: 25%;
+                    }
+
+                    .prediction-column {
+                        width: 50%;
+                    }
+                }
             }
 
             .computational .datasource-conservation .table th,
