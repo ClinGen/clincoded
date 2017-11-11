@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "variant": {
             "title": "Variant",
@@ -172,6 +172,10 @@
         },
         "disease.term": {
             "title": "Disease Term",
+            "type": "string"
+        },
+        "disease.description": {
+            "title": "Disease Definition",
             "type": "string"
         },
         "modeInheritance": {

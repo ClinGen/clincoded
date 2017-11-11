@@ -31,6 +31,7 @@ var VariantCurationHub = createReactClass({
             summaryVisible: false,
             selectedTab: queryKeyValue('tab', this.props.href),
             variantObj: null,
+            ext_pageData: null,
             ext_myVariantInfo: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
@@ -49,6 +50,7 @@ var VariantCurationHub = createReactClass({
             loading_clinvarSCV: true,
             loading_ensemblHgvsVEP: true,
             loading_ensemblVariation: true,
+            loading_pageData: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
             calculated_pathogenicity: null,
@@ -93,6 +95,7 @@ var VariantCurationHub = createReactClass({
             this.setState({variantObj: response});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
+            // this.fetchPageData(this.state.variantObj); // Temporarily suppressing PAGE data table display until service api access issue is resolved
             this.fetchMyVariantInfo(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
@@ -329,6 +332,29 @@ var VariantCurationHub = createReactClass({
         }
     },
 
+    /**
+     * Retrieve data from PAGE data
+     * @param {object} variant - The variant data object
+     */
+    fetchPageData(variant) {
+        if (variant) {
+            let hgvs_notation = getHgvsNotation(variant, 'GRCh37', true);
+            let hgvsParts = hgvs_notation.split(':');
+            let position = hgvsParts[1].replace(/[^\d]/g, '');
+            let pageDataVariantId = hgvsParts[0] + ':' + position;
+            if (pageDataVariantId) {
+                this.getRestData(external_url_map['PAGE'] + pageDataVariantId).then(response => {
+                    this.setState({ext_pageData: response, loading_pageData: false});
+                }).catch(err => {
+                    this.setState({loading_pageData: false});
+                    console.log('Page Data Fetch Error=: %o', err);
+                });
+            } else {
+                this.setState({loading_pageData: false});
+            }
+        }
+    },
+
     // Retrieve codon data from ClinVar Esearch given Eutils/ClinVar response
     handleCodonEsearch: function(response) {
         let aminoAcidLocation = response.allele.ProteinChange;
@@ -418,6 +444,7 @@ var VariantCurationHub = createReactClass({
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={my_gene_info}
+                            ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
@@ -433,6 +460,7 @@ var VariantCurationHub = createReactClass({
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_pageData={this.state.loading_pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}

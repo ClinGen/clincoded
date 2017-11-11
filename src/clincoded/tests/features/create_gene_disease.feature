@@ -11,14 +11,14 @@ Feature: Create Gene Disease
         And I press "Disease"
         And I wait for an element with the css selector ".modal-open" to load
         Then I should see an element with the css selector ".disease-id-input" within 2 seconds
-        When I fill in the css element field "input.form-control.disease-id-input" with "OMIM:601200"
+        When I fill in the css element field "input.form-control.disease-id-input" with "MONDO:0000214"
         And I wait for 1 seconds
         And I press "Retrieve from OLS"
         Then I should see an element with the css selector ".resource-metadata" within 5 seconds
-        Then I should see "pleuropulmonary blastoma"
+        Then I should see "Hypermanganesemia with dystonia"
         When I press the button "Save"
         And I wait for 2 seconds
-        Then I should see "pleuropulmonary blastoma (OMIM:601200)"
+        Then I should see "Hypermanganesemia with dystonia (MONDO:0000214)"
         When I fill in "hgncgene" with "DICER1"
 
         #
@@ -59,14 +59,14 @@ Feature: Create Gene Disease
         And I press "Disease"
         And I wait for an element with the css selector ".modal-open" to load
         Then I should see an element with the css selector ".disease-id-input" within 2 seconds
-        When I fill in the css element field "input.form-control.disease-id-input" with "OMIM:601200"
+        When I fill in the css element field "input.form-control.disease-id-input" with "MONDO:0000214"
         And I wait for 1 seconds
         And I press "Retrieve from OLS"
         Then I should see an element with the css selector ".resource-metadata" within 5 seconds
-        Then I should see "pleuropulmonary blastoma"
+        Then I should see "Hypermanganesemia with dystonia"
         When I press the button "Save"
         And I wait for 2 seconds
-        Then I should see "pleuropulmonary blastoma (OMIM:601200)"
+        Then I should see "Hypermanganesemia with dystonia (MONDO:0000214)"
         When I fill in "hgncgene" with "DICER1"
         And I select "Autosomal dominant inheritance (HP:0000006)" from dropdown "form-control modeOfInheritance"
         And I click the element with the css selector ".btn-default"

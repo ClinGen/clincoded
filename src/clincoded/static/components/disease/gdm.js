@@ -30,7 +30,6 @@ const GdmDisease = module.exports.GdmDisease = createReactClass({
             error: this.props.error,
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -67,14 +66,13 @@ const GdmDisease = module.exports.GdmDisease = createReactClass({
     setDiseaseObjectStates(disease) {
         if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}) ;}
-        disease.ontology ? this.setState({diseaseOntology: disease.ontology}) : this.setState({diseaseOntology: null});
         disease.description ? this.setState({diseaseDescription: disease.description}) : this.setState({diseaseDescription: null});
         if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
         if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
         disease.freetext ? this.setState({diseaseFreeTextConfirm: disease.freetext}) : this.setState({diseaseFreeTextConfirm: false});
     },
 
-    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
         this.setState({error: null}, () => {
             this.props.clearErrorInParent();
@@ -89,13 +87,6 @@ const GdmDisease = module.exports.GdmDisease = createReactClass({
         if (term) {
             diseaseObj['term'] = term;
             this.setState({diseaseTerm: term});
-        }
-        if (ontology) {
-            diseaseObj['ontology'] = ontology;
-            this.setState({diseaseOntology: ontology});
-        } else {
-            if (diseaseObj['ontology']) { delete diseaseObj['ontology']; }
-            this.setState({diseaseOntology: null});
         }
         if (description) {
             diseaseObj['description'] = description;
@@ -147,7 +138,6 @@ const GdmDisease = module.exports.GdmDisease = createReactClass({
     render() {
         let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
-        let diseaseOntology = this.state.diseaseOntology;
         let diseaseDescription = this.state.diseaseDescription;
         let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
         let phenotypes = this.state.phenotypes;
@@ -159,7 +149,7 @@ const GdmDisease = module.exports.GdmDisease = createReactClass({
         return (
             <div className="form-group add-disease-group">
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
-                    <span>{inputLabel}<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span></span>
+                    <span>{inputLabel}<span className="required-field"> *</span><span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MONDO</a> using OLS</span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseTerm || error ? "disease-name col-sm-8" : "disease-name"}>
@@ -175,7 +165,6 @@ const GdmDisease = module.exports.GdmDisease = createReactClass({
                         addDiseaseModalBtn={addDiseaseModalBtn}
                         diseaseId={diseaseId}
                         diseaseTerm={diseaseTerm}
-                        diseaseOntology={diseaseOntology}
                         diseaseDescription={diseaseDescription}
                         diseaseFreeTextConfirm={diseaseFreeTextConfirm}
                         phenotypes={phenotypes}
