@@ -1,0 +1,32 @@
+[
+    {
+        "uuid": "dea630c5-e458-42cd-841f-02a9a5ac1dab",
+        "affiliationId": "10001",
+        "affiliation_abbreviation": "Bustamante Group 1",
+        "affiliation_fullname": "Bustamante ClinGen Test Group 1"
+    },
+    {
+        "uuid": "d9769e13-cbc5-4204-8d18-8721b1b7ba67",
+        "affiliationId": "10002",
+        "affiliation_abbreviation": "Bustamante Group 2",
+        "affiliation_fullname": "Bustamante ClinGen Test Group 2"
+    },
+    {
+        "uuid": "2ba3e298-4145-42fc-9da1-a0d237dfd4d4",
+        "affiliationId": "10003",
+        "affiliation_abbreviation": "Selina Lab",
+        "affiliation_fullname": "Selina Dwight Laboratory"
+    },
+    {
+        "uuid": "bd379073-ae5f-4e84-9d9f-89e871013b48",
+        "affiliationId": "10004",
+        "affiliation_abbreviation": "Matt Lab",
+        "affiliation_fullname": "Mathew Wright Laboratory"
+    },
+    {
+        "uuid": "5dbc308c-20d9-4ae8-9e44-9a886b2e244b",
+        "affiliationId": "10005",
+        "affiliation_abbreviation": "RG Color Blind Group",
+        "affiliation_fullname": "Red-Creen Color Blindness Working Group"
+    }
+]
