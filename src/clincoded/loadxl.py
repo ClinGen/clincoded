@@ -10,6 +10,7 @@ logger = logging.getLogger('clincoded')
 logger.setLevel(logging.INFO)  # doesn't work to shut off sqla INFO
 
 ORDER = [
+    'affiliation',
     'user',
     'award',
     'lab',
