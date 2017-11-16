@@ -208,6 +208,36 @@ class Article(Item):
 
 
 @collection(
+    name='affiliations',
+    unique_key='affiliation:uuid',
+    properties={
+        'Title': 'Affiliations',
+        'description': 'List of affiliations stored locally'
+    })
+class Affiliation(Item):
+    item_type = 'affiliation'
+    schema = load_schema('clincoded:schemas/affiliation.json')
+    name_key = 'uuid'
+    embedded = [
+        'associatedUsers'
+    ]
+    rev = {
+        'associatedUsers': ('user', 'affiliation')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated Users",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "user.affiliation",
+        },
+    })
+    def associatedUsers(self, request, associatedUsers):
+        return paths_filtered_by_status(request, associatedUsers)
+
+
+@collection(
     name='variants',
     unique_key='variant:uuid',
     properties={
