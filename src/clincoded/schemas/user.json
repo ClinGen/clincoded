@@ -51,6 +51,16 @@
                 "linkTo": "lab"
             }
         },
+        "affiliation": {
+            "title": "Curator Affiliations",
+            "description": "The affiliation(s) that the user is associated with.",
+            "type": "array",
+            "items": {
+                "title": "Affiliation ID",
+                "type": "string",
+                "linkTo": "affiliation"
+            }
+        },
         "groups": {
             "title": "Groups",
             "description": "Additional access control groups",
