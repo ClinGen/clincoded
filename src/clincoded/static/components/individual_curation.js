@@ -1236,11 +1236,11 @@ function IndividualDemographics() {
                 <option disabled="disabled"></option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
+                <option value="Unknown">Unknown</option>
                 <option value="Intersex">Intersex</option>
                 <option value="MTF/Transwoman/Transgender Female">MTF/Transwoman/Transgender Female</option>
                 <option value="FTM/Transman/Transgender Male">FTM/Transman/Transgender Male</option>
                 <option value="Ambiguous">Ambiguous</option>
-                <option value="Unknown">Unknown</option>
                 <option value="Other">Other</option>
             </Input>
             {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}
