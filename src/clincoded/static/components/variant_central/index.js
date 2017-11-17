@@ -95,7 +95,9 @@ var VariantCurationHub = createReactClass({
             this.setState({variantObj: response});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
-            // this.fetchPageData(this.state.variantObj); // Temporarily suppressing PAGE data table display until service api access issue is resolved
+            if (!this.props.demoVersion) {
+                this.fetchPageData(this.state.variantObj);
+            }
             this.fetchMyVariantInfo(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
@@ -342,8 +344,9 @@ var VariantCurationHub = createReactClass({
             let hgvsParts = hgvs_notation.split(':');
             let position = hgvsParts[1].replace(/[^\d]/g, '');
             let pageDataVariantId = hgvsParts[0] + ':' + position;
+            let ServiceApi = require('../../service_api.js').ServiceApi;
             if (pageDataVariantId) {
-                this.getRestData(external_url_map['PAGE'] + pageDataVariantId).then(response => {
+                this.getRestData(external_url_map['PAGE'] + pageDataVariantId + '?access_key=' + ServiceApi.access_key).then(response => {
                     this.setState({ext_pageData: response, loading_pageData: false});
                 }).catch(err => {
                     this.setState({loading_pageData: false});
@@ -464,7 +467,8 @@ var VariantCurationHub = createReactClass({
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
-                            selectedTab={selectedTab} />
+                            selectedTab={selectedTab}
+                            demoVersion={this.props.demoVersion} />
                     </div>
                     :
                     <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity}
