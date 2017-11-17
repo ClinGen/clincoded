@@ -50,7 +50,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_myVariantInfo: PropTypes.bool,
         loading_myGeneInfo: PropTypes.bool,
         setCalculatedPathogenicity: PropTypes.func,
-        selectedTab: PropTypes.string
+        selectedTab: PropTypes.string,
+        demoVersion: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -192,7 +193,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
-                            loading_ensemblVariation={this.state.loading_ensemblVariation} />
+                            loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            demoVersion={this.props.demoVersion} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'predictors' ?
