@@ -209,7 +209,7 @@ class Article(Item):
 
 @collection(
     name='affiliations',
-    unique_key='affiliation:uuid',
+    unique_key='affiliation:affiliationId',
     properties={
         'Title': 'Affiliations',
         'description': 'List of affiliations stored locally'
@@ -217,7 +217,7 @@ class Article(Item):
 class Affiliation(Item):
     item_type = 'affiliation'
     schema = load_schema('clincoded:schemas/affiliation.json')
-    name_key = 'uuid'
+    name_key = 'affiliationId'
     embedded = [
         'associatedUsers'
     ]
