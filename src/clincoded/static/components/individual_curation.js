@@ -105,7 +105,7 @@ const IndividualCuration = createReactClass({
         }
     },
 
-    // Handle a click on a copy phenotype button
+    // Handle a click on a copy phenotype/demographics button
     handleClick: function(obj, item, e) {
         e.preventDefault(); e.stopPropagation();
         var hpoIds = '';
@@ -119,6 +119,18 @@ const IndividualCuration = createReactClass({
             }
             if (obj.termsInDiagnosis) {
                 this.refs['phenoterms'].setValue(obj.termsInDiagnosis);
+            }
+        } else if (item === 'demographics') {
+            if (obj.countryOfOrigin) {
+                this.refs['country'].setValue(obj.countryOfOrigin);
+            }
+
+            if (obj.ethnicity) {
+                this.refs['ethnicity'].setValue(obj.ethnicity);
+            }
+
+            if (obj.race) {
+                this.refs['race'].setValue(obj.race);
             }
         }
     },
@@ -1190,6 +1202,29 @@ const LabelPhenoTerms = bool => {
  */
 function IndividualDemographics() {
     let individual = this.state.individual;
+    let associatedParentObj;
+    let associatedParentName = '';
+    let hasParentDemographics = false;
+
+    // Retrieve associated "parent" as an array (check for family first, then group)
+    if (this.state.family) {
+        associatedParentObj = [this.state.family];
+        associatedParentName = 'Family';
+    } else if (individual && individual.associatedFamilies && individual.associatedFamilies.length) {
+        associatedParentObj = individual.associatedFamilies;
+        associatedParentName = 'Family';
+    } else if (this.state.group) {
+        associatedParentObj = [this.state.group];
+        associatedParentName = 'Group';
+    } else if (individual && individual.associatedGroups && individual.associatedGroups.length) {
+        associatedParentObj = individual.associatedGroups;
+        associatedParentName = 'Group';
+    }
+
+    // Check if associated "parent" has any demographics data
+    if (associatedParentObj && (associatedParentObj[0].countryOfOrigin || associatedParentObj[0].ethnicity || associatedParentObj[0].race)) {
+        hasParentDemographics = true;
+    }
 
     return (
         <div className="row">
@@ -1208,6 +1243,7 @@ function IndividualDemographics() {
                 <option value="Unknown">Unknown</option>
                 <option value="Other">Other</option>
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none"
                 value={individual && individual.countryOfOrigin ? individual.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1217,6 +1253,7 @@ function IndividualDemographics() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Ethnicity Associated with ' + associatedParentName + ':', associatedParentObj[0].ethnicity) : null}
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none"
                 value={individual && individual.ethnicity ? individual.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1226,6 +1263,7 @@ function IndividualDemographics() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Race Associated with ' + associatedParentName + ':', associatedParentObj[0].race) : null}
             <Input type="select" ref="race" label="Race:" defaultValue="none"
                 value={individual && individual.race ? individual.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1239,6 +1277,11 @@ function IndividualDemographics() {
                 <option value="Mixed">Mixed</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasParentDemographics ?
+                <Input type="button" ref="copyparentdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-default btn-last btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
+                    clickHandler={this.handleClick.bind(this, associatedParentObj[0], 'demographics')} />
+                : null}
             <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
             <div className="demographics-age-range">
                 <Input type="select" ref="agetype" label="Type:" defaultValue="none"

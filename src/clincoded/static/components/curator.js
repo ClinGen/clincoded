@@ -2530,6 +2530,22 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
     );
 };
 
+// Render a single item of evidence data (demographics, methods, etc.) from a "parent" group or family
+export function renderParentEvidence(label, value) {
+    return (
+        <div>
+            <div className="form-group">
+                <div className="col-sm-5">
+                    <strong className="pull-right">{label}</strong>
+                </div>
+                <div className="col-sm-7">
+                    {value ? <span>{value}</span> : null}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // Generic render method for the yellow warning message box
 export function renderWarning(context) {
     return (

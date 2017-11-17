@@ -258,6 +258,35 @@ var FamilyCuration = createReactClass({
         }
     },
 
+    // Handle a click on a copy demographics button
+    handleCopyGroupDemographics(e) {
+        e.preventDefault(); e.stopPropagation();
+        var associatedGroups;
+
+        // Retrieve associated group as an array
+        if (this.state.group) {
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            associatedGroups = this.state.family.associatedGroups;
+        }
+
+        // Copy demographics data from associated group to form fields
+        // When displaying associated group data (as part of rendering the family form), only one group is
+        // considered.  So, only that same group (the first) is used here.  Also, the demographics form
+        // fields are drop-down lists (single selection), so only one value is needed for each field.
+        if (associatedGroups[0].countryOfOrigin) {
+            this.refs['country'].setValue(associatedGroups[0].countryOfOrigin);
+        }
+
+        if (associatedGroups[0].ethnicity) {
+            this.refs['ethnicity'].setValue(associatedGroups[0].ethnicity);
+        }
+
+        if (associatedGroups[0].race) {
+            this.refs['race'].setValue(associatedGroups[0].race);
+        }
+    },
+
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
     calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
         let estimatedLodScore = null;
@@ -1517,9 +1546,24 @@ const LabelPhenoTerms = bool => {
  */
 function FamilyDemographics() {
     let family = this.state.family;
+    let associatedGroups;
+    let hasGroupDemographics = false;
+
+    // Retrieve associated group as an array
+    if (this.state.group) {
+        associatedGroups = [this.state.group];
+    } else if (family && family.associatedGroups && family.associatedGroups.length) {
+        associatedGroups = family.associatedGroups;
+    }
+
+    // Check if associated group has any demographics data
+    if (associatedGroups && (associatedGroups[0].countryOfOrigin || associatedGroups[0].ethnicity || associatedGroups[0].race)) {
+        hasGroupDemographics = true;
+    }
 
     return (
         <div className="row">
+            {hasGroupDemographics ? curator.renderParentEvidence('Country of Origin Associated with Group:', associatedGroups[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin ? family.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1528,6 +1572,7 @@ function FamilyDemographics() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
+            {hasGroupDemographics ? curator.renderParentEvidence('Ethnicity Associated with Group:', associatedGroups[0].ethnicity) : null}
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity ? family.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1536,6 +1581,7 @@ function FamilyDemographics() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasGroupDemographics ? curator.renderParentEvidence('Race Associated with Group:', associatedGroups[0].race) : null}
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race ? family.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1548,6 +1594,11 @@ function FamilyDemographics() {
                 <option value="Mixed">Mixed</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasGroupDemographics ?
+                <Input type="button" ref="copygroupdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-default btn-last btn-sm" title="Copy Demographics from Associated Group"
+                    clickHandler={this.handleCopyGroupDemographics} />
+                : null}
         </div>
     );
 }
