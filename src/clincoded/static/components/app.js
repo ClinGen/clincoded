@@ -7,6 +7,9 @@ import { content_views } from './globals';
 import { Auth0, HistoryAndTriggers } from './mixins';
 import { NavbarMixin, Nav, Navbar, NavItem } from '../libs/bootstrap/navigation';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
+import { RestMixin } from './rest';
+import AffiliationModal from './affiliation/modal';
+const AffiliationsList = require('./affiliation/affiliations.json');
 
 var routes = {
     'curator': require('./curator').Curator
@@ -31,7 +34,7 @@ var portal = {
 
 // Renders HTML common to all pages.
 var App = module.exports = createReactClass({
-    mixins: [Auth0, HistoryAndTriggers],
+    mixins: [Auth0, HistoryAndTriggers, RestMixin],
 
     triggers: {
         demo: 'triggerAutoLogin',
@@ -59,7 +62,11 @@ var App = module.exports = createReactClass({
             errors: [],
             portal: portal,
             demoWarning: demoWarning,
-            productionWarning: productionWarning
+            productionWarning: productionWarning,
+            tempAffiliation: null, // Placeholder when user selects an option in the affiliation dropdown
+            affiliation: {}, // Confirmed affiliation when user selects to continue in the modal
+            buttonDisabled: true,
+            isAffiliationModalOpen: true
         };
     },
 
@@ -73,9 +80,88 @@ var App = module.exports = createReactClass({
         return name;
     },
 
+    /**
+     * Method to set states when the affiliation selection is changed
+     * @param {event} e - Selection change event
+     */
+    handleOnChange(e) {
+        this.setState({
+            tempAffiliation: e.target.value !== 'Individual' ? JSON.parse(e.target.value) : {},
+            buttonDisabled: false
+        });
+    },
+
+    createCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    },
+
+    toggleAffiliationModal() {
+        this.setState({
+            affiliation: this.state.tempAffiliation,
+            isAffiliationModalOpen: !this.state.isAffiliationModalOpen
+        }, () => {
+            this.createCookie('affiliation', JSON.stringify(this.state.affiliation));
+            this.setState({tempAffiliation: null});
+        });
+    },
+
+    /**
+     * Method to trim affiliation URIs and return an array of IDs
+     * @param {array} affiliations - List of affiliation URIs
+     */
+    getAffiliationIds(affiliations) {
+        let idArray = [];
+        affiliations.forEach(item => {
+            let id = item.substr(14, 5);
+            idArray.push(id);
+        });
+        return idArray;
+    },
+
+    getUserAffiliations(affiliationIds, staticAffiliations) {
+        let affiliationArray = [];
+        affiliationIds.forEach(id=> {
+            for (let affiliation of staticAffiliations) {
+                if (affiliation.affiliation_id === id) {
+                    affiliationArray.push(affiliation);
+                }
+            }
+        });
+        return affiliationArray;
+    },
+
+    renderAffiliationModal(affiliations) {
+        let affiliationIds = this.getAffiliationIds(affiliations);
+        let userAffiliations = this.getUserAffiliations(affiliationIds, AffiliationsList);
+        return (
+            <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
+                buttonDisabled={this.state.buttonDisabled}>
+                <div className="affiliation-modal-body">
+                    <h2>Continue as an individual or as a member of an affiliation.</h2>
+                    <select className="form-control" defaultValue="none" onChange={this.handleOnChange}>
+                        <option value="none" disabled="disabled">Select</option>
+                        <option value="" disabled="disabled"></option>
+                        <option value="Individual">Individual</option>
+                        {userAffiliations.map((affiliation, i) => {
+                            return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_abbreviation}</option>;
+                        })}
+                    </select>
+                </div>
+            </AffiliationModal>
+        );
+    },
+
     render: function() {
         var content;
         var context = this.state.context;
+        let session = this.state.session;
+        let user_properties = session && session.user_properties;
         var href_url = url.parse(this.state.href);
         // Switching between collections may leave component in place
         var key = context && context['@id'];
@@ -86,9 +172,9 @@ var App = module.exports = createReactClass({
         if (context) {
             var ContentView = content_views.lookup(context, current_action);
             content = <ContentView {...this.props} context={context} href={this.state.href}
-                loadingComplete={this.state.loadingComplete} session={this.state.session}
+                loadingComplete={this.state.loadingComplete} session={session}
                 portal={this.state.portal} navigate={this.navigate} href_url={href_url}
-                demoVersion={this.state.demoWarning} />;
+                demoVersion={this.state.demoWarning} affiliation={this.state.affiliation} />;
         }
         var errors = this.state.errors.map(function (error) {
             return <div className="alert alert-error"></div>;
@@ -115,6 +201,8 @@ var App = module.exports = createReactClass({
             }
         }
 
+        let affiliation_cookie = this.state.affiliation_cookie;
+
         return (
             <html lang="en">
                 <head>
@@ -134,13 +222,16 @@ var App = module.exports = createReactClass({
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
-                        <Header session={this.state.session} href={this.props.href} />
+                        <Header session={this.state.session} href={this.props.href} affiliation={this.state.affiliation} />
                         {this.state.demoWarning ?
-                        <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
-                        : null}
+                            <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                            : null}
                         {this.state.productionWarning ?
-                        <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
-                        : null}
+                            <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
+                            : null}
+                        {user_properties && user_properties.affiliation && user_properties.affiliation.length && !affiliation_cookie ?
+                            this.renderAffiliationModal(user_properties.affiliation)
+                            : null}
                         {content}
                     </div>
                 </body>
