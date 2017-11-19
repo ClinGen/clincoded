@@ -106,7 +106,8 @@
         ],
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-12T22:47:10.000000+00:00"
+        "date_created": "2015-07-12T22:47:10.000000+00:00",
+        "affiliation": "10001"
     },
     {
         "uuid": "25c6a663-18fa-11e5-8554-60f81dc5b05a",
@@ -158,7 +159,8 @@
         ],
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-19T22:47:10.000000+00:00"
+        "date_created": "2015-07-19T22:47:10.000000+00:00",
+        "affiliation": "10002"
     },
     {
         "uuid": "a20e9182-18fa-11e5-96d1-60f81dc5b05a",
@@ -220,7 +222,8 @@
         ],
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-16T22:47:10.000000+00:00"
+        "date_created": "2015-07-16T22:47:10.000000+00:00",
+        "affiliation": "10001"
     },
     {
         "uuid": "ab9a37ba-18fa-11e5-bad8-60f81dc5b05a",
@@ -246,6 +249,7 @@
         },
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-06-14T22:47:10.000000+00:00"
+        "date_created": "2015-06-14T22:47:10.000000+00:00",
+        "affiliation": "10001"
     }
 ]
