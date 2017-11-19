@@ -26,7 +26,8 @@ var Dashboard = createReactClass({
             historiesLoading: true,
             gdmList: [],
             vciInterpList: [],
-            histories: []
+            histories: [],
+            evidenceList: []
         };
     },
 
@@ -53,9 +54,7 @@ var Dashboard = createReactClass({
         this.getRestDatas([
             '/search/?type=gdm&submitted_by.uuid=' + session.user_properties.uuid,
             '/search/?type=interpretation&submitted_by.uuid=' + session.user_properties.uuid
-        ],
-            null)
-        .then(data => {
+        ], null).then(data => {
             var gdmURLs = [], gdmList = [],
                 vciInterpURLs = [], vciInterpList = [];
             // go through GDM results and get their data
@@ -101,10 +100,38 @@ var Dashboard = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
+    getEvidenceData(affiliation) {
+        // get 10 gdms and VCI interpretations created by user
+        this.getRestDatas([
+            '/search/?type=family&affiliation=' + affiliation.affiliation_id
+        ], null).then(data => {
+            var evidenceURLs = [], evidenceList = [];
+            // go through evidence results (e.g. group, family, individual, case-control, experimental)
+            evidenceURLs = data[0]['@graph'].map(res => { return res['@id']; });
+            if (evidenceURLs.length > 0) {
+                this.getRestDatas(evidenceURLs, null, true).then(evidenceRecords => {
+                    evidenceRecords.map(evidence => {
+                        evidenceList.push({
+                            uuid: evidence.uuid,
+                            annotationUuid: evidence.associatedAnnotations[0].uuid,
+                            gdmUuid: evidence.associatedAnnotations[0].associatedGdm[0].uuid,
+                            label: evidence.label,
+                            date_created: evidence.date_created
+                        });
+                    });
+                    this.setState({evidenceList: evidenceList});
+                });
+            }
+        }).catch(parseAndLogError.bind(undefined, 'putRequest'));
+    },
+
     componentDidMount: function() {
         if (this.props.session.user_properties) {
             this.setUserData(this.props.session.user_properties);
             this.getData(this.props.session);
+        }
+        if (this.props.affiliation) {
+            this.getEvidenceData(this.props.affiliation);
         }
         this.getHistories(this.props.session.user_properties, 10).then(histories => {
             if (histories) {
@@ -123,6 +150,9 @@ var Dashboard = createReactClass({
                 }
             });
         }
+        if (nextProps.affiliation && !_.isEqual(nextProps.affiliation, this.props.affiliation)) {
+            this.getEvidenceData(nextProps.affiliation);
+        }
     },
 
     render: function() {
@@ -130,6 +160,9 @@ var Dashboard = createReactClass({
             <div className="container">
                 <h1>Welcome, {this.state.userName}!</h1>
                 <h4>Your status: {this.state.userStatus}</h4>
+                {(this.props.affiliation && Object.keys(this.props.affiliation).length) ?
+                    <div className="alert alert-info">You have signed in as a member of the <strong>{this.props.affiliation.affiliation_fullname}</strong></div>
+                    : null}
                 <div className="row">
                     <div className="col-md-6">
                         <Panel panelClassName="panel-dashboard">
@@ -222,6 +255,30 @@ var Dashboard = createReactClass({
                                 : <li>You have not created any Gene-Disease-Mode of Inheritance entries.</li>}
                             </div>
                         </Panel>
+
+                        <Panel panelClassName="panel-dashboard">
+                            <h3>Evidence records associated with your affiliation</h3>
+                            <div className="panel-content-wrapper">
+                                {this.state.evidenceList.length > 0 ?
+                                    <ul>
+                                        {this.state.evidenceList.map(item => {
+                                            return (
+                                                <a key={item.uuid} className="block-link" href={"/family-curation/?editsc&gdm=" + item.gdmUuid + "&evidence=" + item.annotationUuid + "&family=" + item.uuid}>
+                                                    <li key={item.uuid}>
+                                                        <div><span className="block-link-color title-ellipsis"><strong>{item.label}</strong></span></div>
+                                                        <span className="block-link-no-color">
+                                                            <strong>Creation Date</strong>: {moment(item.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                                                    </li>
+                                                </a>
+                                            );
+                                        })}
+                                    </ul>
+                                    :
+                                    <li>No evidence records found associated with your affiliation.</li>
+                                }
+                            </div>
+                        </Panel>
+
                     </div>
                 </div>
             </div>
