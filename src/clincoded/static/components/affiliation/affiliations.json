@@ -1,0 +1,27 @@
+[
+    {
+        "affiliation_id": "10001",
+        "affiliation_abbreviation": "Bustamante Group 1",
+        "affiliation_fullname": "Bustamante ClinGen Test Group 1"
+    },
+    {
+        "affiliation_id": "10002",
+        "affiliation_abbreviation": "Bustamante Group 2",
+        "affiliation_fullname": "Bustamante ClinGen Test Group 2"
+    },
+    {
+        "affiliation_id": "10003",
+        "affiliation_abbreviation": "Selina Lab",
+        "affiliation_fullname": "Selina Dwight Laboratory"
+    },
+    {
+        "affiliation_id": "10004",
+        "affiliation_abbreviation": "Matt Lab",
+        "affiliation_fullname": "Mathew Wright Laboratory"
+    },
+    {
+        "affiliation_id": "10005",
+        "affiliation_abbreviation": "RG Color Blind Group",
+        "affiliation_fullname": "Red-Creen Color Blindness Working Group"
+    }
+]
