@@ -93,13 +93,21 @@ module.exports.Auth0 = {
         // Define loadingComplete and session here so they are available to mixin, as well as main app
         return {
             loadingComplete: false,
-            session: {}
+            session: {},
+            affiliation_cookie: null
         };
     },
 
     componentDidMount: function() {
         this.extractSessionCookie();
         this.setState({loadingComplete: true});
+        if (this.getCookie('affiliation')) {
+            let affiliationCookie = this.getCookie('affiliation');
+            this.setState({
+                affiliation_cookie: JSON.parse(affiliationCookie),
+                affiliation: JSON.parse(affiliationCookie),
+            });
+        }
         if (window.Auth0Lock !== undefined) {
             // CHANGEME
             this.lock = new window.Auth0Lock(
@@ -140,6 +148,12 @@ module.exports.Auth0 = {
                 "title": "Home"
             };
             this.setState({context: auth0_not_found});
+        }
+    },
+
+    componentWillUnmount() {
+        if (this.getCookie('affiliation')) {
+            this.deleteCookie('affiliation');
         }
     },
 
@@ -209,6 +223,31 @@ module.exports.Auth0 = {
         this.setState({context: login_failure, loadingComplete: true});
     },
 
+    setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    },
+
+    getCookie(name) {
+        let nameEQ = name + "=";
+        let ca = document.cookie.split(';');
+        for(let i=0;i < ca.length;i++) {
+            let c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    },
+
+    deleteCookie(name) {
+        this.setCookie(name, "", -1);
+    },
+
     handleAuth0Login: function (authResult, retrying) {
         // method that handles what happens after Auth0 Lock modal interaction.
         // most of this logic was in triggerLogin previously
@@ -222,13 +261,11 @@ module.exports.Auth0 = {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({accessToken: accessToken})
-        })
-        .then(response => {
+        }).then(response => {
             this.lock.hide();
             if (!response.ok) throw response;
             return response.json();
-        })
-        .then(session => {
+        }).then(session => {
             this.setState({session: session});
             // Login was successful, so forward user to dashboard or target URI as necessary
             var next_url = window.location.href;
@@ -264,17 +301,18 @@ module.exports.Auth0 = {
 
         this.fetch('/logout?redirect=false', {
             headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
+        }).then(response => {
             if (!response.ok) throw response;
             return response.json();
-        })
-        .then(data => {
+        }).then(data => {
             this.DISABLE_POPSTATE = true;
             var old_path = window.location.pathname + window.location.search;
             window.location.assign('/#logged-out');
             if (old_path == '/') {
                 window.location.reload();
+            }
+            if (this.getCookie('affiliation')) {
+                this.deleteCookie('affiliation');
             }
         }, err => {
             parseError(err).then(data => {
