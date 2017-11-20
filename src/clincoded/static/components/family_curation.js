@@ -2155,20 +2155,26 @@ const FamilyViewer = createReactClass({
                                     <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Entire gene sequenced</dt>
-                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.entireGeneSequenced === true || method.entireGeneSequenced === false) ?
+                                    <div>
+                                        <dt>Entire gene sequenced</dt>
+                                        <dd>{method.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Copy number assessed</dt>
-                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.copyNumberAssessed === true || method.copyNumberAssessed === false) ?
+                                    <div>
+                                        <dt>Copy number assessed</dt>
+                                        <dd>{method.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Specific mutations genotyped</dt>
-                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.specificMutationsGenotyped === true || method.specificMutationsGenotyped === false) ?
+                                    <div>
+                                        <dt>Specific mutations genotyped</dt>
+                                        <dd>{method.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
                                 <div>
                                     <dt>Description of genotyping method</dt>
