@@ -15,6 +15,7 @@ module.exports = {
     // 'caseControl' is boolean value if this is a method for case-control.
     render: function(method, family, caseControl, prefix) {
         let headerLabel;
+        let specificMutationPlaceholder = 'Note any aspects of the genotyping method that may impact the strength of this evidence. For example: Was the entire gene sequenced, or were a few specific variants genotyped? Was copy number assessed?';
         if (prefix === 'caseCohort_') {
             headerLabel = 'CASE';
         }
@@ -71,33 +72,9 @@ module.exports = {
                     <option value="Sanger sequencing">Sanger sequencing</option>
                     <option value="Whole genome shotgun sequencing">Whole genome shotgun sequencing</option>
                 </Input>
-                <Input type="select" ref={prefix ? prefix + 'entiregene' : 'entiregene'} label="Entire gene sequenced?:" defaultValue="none"
-                    value={curator.booleanToDropdown(method.entireGeneSequenced)} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
-                    groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                </Input>
-                <Input type="select" ref={prefix ? prefix + 'copyassessed' : 'copyassessed'} label="Copy number assessed?:" defaultValue="none"
-                    value={curator.booleanToDropdown(method.copyNumberAssessed)} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
-                    groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                </Input>
-                <Input type="select" ref={prefix ? prefix + 'mutationsgenotyped' : 'mutationsgenotyped'} label="Specific mutations genotyped?:" 
-                    defaultValue="none" value={curator.booleanToDropdown(method.specificMutationsGenotyped)}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    <option value="none">No Selection</option>
-                    <option disabled="disabled"></option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                </Input>
                 <Input type="textarea" ref={prefix ? prefix + 'specificmutation' : 'specificmutation'} label="Description of genotyping method:"
-                    rows="5" value={method.specificMutationsGenotypedMethod} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
-                    groupClassName="form-group" />
+                    rows="5" value={method.specificMutationsGenotypedMethod} placeholder={specificMutationPlaceholder} labelClassName="col-sm-5 control-label"
+                    wrapperClassName="col-sm-7" groupClassName="form-group" />
                 {family ?
                     <Input type="textarea" ref={prefix ? prefix + 'additionalinfomethod' : 'additionalinfomethod'} label="Additional Information about Family Method:"
                         rows="8" value={method.additionalInformation} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
@@ -131,18 +108,6 @@ module.exports = {
             newMethod.genotypingMethods = _([value1, value2]).filter(function(val) {
                 return val !== 'none';
             });
-        }
-        value1 = this.getFormValue(prefix ? prefix + 'entiregene' : 'entiregene');
-        if (value1 !== 'none') {
-            newMethod.entireGeneSequenced = value1 === 'Yes';
-        }
-        value1 = this.getFormValue(prefix ? prefix + 'copyassessed' : 'copyassessed');
-        if (value1 !== 'none') {
-            newMethod.copyNumberAssessed = value1 === 'Yes';
-        }
-        value1 = this.getFormValue(prefix ? prefix + 'mutationsgenotyped' : 'mutationsgenotyped');
-        if (value1 !== 'none') {
-            newMethod.specificMutationsGenotyped = value1 === 'Yes';
         }
         value1 = this.getFormValue(prefix ? prefix + 'specificmutation' : 'specificmutation');
         if (value1) {
