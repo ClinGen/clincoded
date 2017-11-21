@@ -1243,6 +1243,9 @@ function IndividualDemographics() {
                 <option value="Ambiguous">Ambiguous</option>
                 <option value="Other">Other</option>
             </Input>
+            <div className="col-sm-7 col-sm-offset-5 sex-field-note">
+                <div className="alert alert-info">Select "Unknown" if information not provided in publication.</div>
+            </div>
             {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none"
                 value={individual && individual.countryOfOrigin ? individual.countryOfOrigin : 'none'}
