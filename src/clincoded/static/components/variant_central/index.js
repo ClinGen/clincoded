@@ -95,9 +95,7 @@ var VariantCurationHub = createReactClass({
             this.setState({variantObj: response});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
-            if (!this.props.demoVersion) {
-                this.fetchPageData(this.state.variantObj);
-            }
+            this.fetchPageData(this.state.variantObj);
             this.fetchMyVariantInfo(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
@@ -344,9 +342,8 @@ var VariantCurationHub = createReactClass({
             let hgvsParts = hgvs_notation.split(':');
             let position = hgvsParts[1].replace(/[^\d]/g, '');
             let pageDataVariantId = hgvsParts[0] + ':' + position;
-            let ServiceApi = require('../../service_api.js').ServiceApi;
             if (pageDataVariantId) {
-                this.getRestData(external_url_map['PAGE'] + pageDataVariantId + '?access_key=' + ServiceApi.access_key).then(response => {
+                this.getRestData(external_url_map['PAGE'] + pageDataVariantId).then(response => {
                     this.setState({ext_pageData: response, loading_pageData: false});
                 }).catch(err => {
                     this.setState({loading_pageData: false});

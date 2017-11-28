@@ -961,48 +961,46 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </div>
                         }
                     </div>
-                    {!this.props.demoVersion ?
-                        <div className="panel panel-info datasource-PAGE">
-                            <div className="panel-heading">
-                                {this.renderPageHeader(this.state.hasPageData, this.state.loading_pageData, pageVariant, singleNucleotide)}
-                            </div>
-                            <div className="panel-content-wrapper">
-                                {this.state.loading_pageData ? showActivityIndicator('Retrieving data... ') : null}
-                                {!singleNucleotide ?
-                                    <div className="panel-body">
-                                        <span>Data is currently only returned for single nucleotide variants. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
-                                    </div>
-                                    :
-                                    <div>
-                                        {this.state.hasPageData ?
-                                            <div>
-                                                <table className="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Population</th>
-                                                            <th>Allele Number</th>
-                                                            <th colSpan="2">Allele Frequency</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {pageData.length ?
-                                                            pageData.map((item, i) => {
-                                                                return (this.renderPageRow(item, i));
-                                                            })
-                                                            : null}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            :
-                                            <div className="panel-body">
-                                                <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
+                    <div className="panel panel-info datasource-PAGE">
+                        <div className="panel-heading">
+                            {this.renderPageHeader(this.state.hasPageData, this.state.loading_pageData, pageVariant, singleNucleotide)}
                         </div>
-                        : null}
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_pageData ? showActivityIndicator('Retrieving data... ') : null}
+                            {!singleNucleotide ?
+                                <div className="panel-body">
+                                    <span>Data is currently only returned for single nucleotide variants. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
+                                </div>
+                                :
+                                <div>
+                                    {this.state.hasPageData ?
+                                        <div>
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Population</th>
+                                                        <th>Allele Number</th>
+                                                        <th colSpan="2">Allele Frequency</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {pageData.length ?
+                                                        pageData.map((item, i) => {
+                                                            return (this.renderPageRow(item, i));
+                                                        })
+                                                        : null}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        :
+                                        <div className="panel-body">
+                                            <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                     <div className="panel panel-info datasource-1000G">
                         <div className="panel-heading">
                             {this.renderTGenomesHeader(this.state.hasTGenomesData, this.state.loading_ensemblVariation, tGenomes, singleNucleotide)}
@@ -1092,7 +1090,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
 
-                {!this.props.demoVersion ? renderDataCredit('pagestudy') : null}
+                {renderDataCredit('pagestudy')}
 
                 {renderDataCredit('myvariant')}
 
