@@ -23,5 +23,10 @@
         "affiliation_id": "10005",
         "affiliation_abbreviation": "RG Color Blind Group",
         "affiliation_fullname": "Red-Creen Color Blindness Working Group"
+    },
+    {
+        "affiliation_id": "10006",
+        "affiliation_abbreviation": "NICHD U24",
+        "affiliation_fullname": "NICHD U24 Working Group"
     }
 ]
