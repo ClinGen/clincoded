@@ -26,7 +26,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
         editKey: PropTypes.string,
         updateInterpretationObj: PropTypes.func,
         calculatedAssertion: PropTypes.string,
-        provisionalPathogenicity: PropTypes.string
+        provisionalPathogenicity: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -81,6 +82,11 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
         var selectedTab = queryKeyValue('tab', window.location.href),
             selectedSubtab = queryKeyValue('subtab', window.location.href);
         var newInterpretationObj = {variant: variantObj.uuid};
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            newInterpretationObj.affiliation = this.props.affiliation.affiliation_id;
+        }
         this.postRestData('/interpretations/', newInterpretationObj).then(interpretation => {
             var newInterpretationUuid = interpretation['@graph'][0].uuid;
             var meta = {
