@@ -19,7 +19,8 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         data: PropTypes.object, // ClinVar data payload
         interpretationUuid: PropTypes.string,
         interpretation: PropTypes.object,
-        session: PropTypes.object
+        session: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -43,12 +44,14 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     },
 
     // Sort interpretation array, and move current user's as the first element
-    getInterpretations: function(data, session) {
-        let myInterpretation = null;
+    getInterpretations: function(data, session, affiliation) {
+        let myInterpretation = null, affiliatedInterpretation = null;
         let otherInterpretations = [];
         if (data && data.associatedInterpretations && data.associatedInterpretations.length) {
             for (let interpretation of data.associatedInterpretations) {
-                if (interpretation.submitted_by.uuid === session.user_properties.uuid) {
+                if (interpretation.affiliation && affiliation && interpretation.affiliation === affiliation.affiliation_id) {
+                    affiliatedInterpretation = interpretation;
+                } else if (interpretation.submitted_by.uuid === session.user_properties.uuid) {
                     myInterpretation = interpretation;
                 } else {
                     otherInterpretations.push(interpretation);
@@ -56,6 +59,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
             }
         }
         return {
+            affiliatedInterpretation: affiliatedInterpretation,
             myInterpretation: myInterpretation,
             otherInterpretations: otherInterpretations
         };
@@ -64,7 +68,8 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     goToInterpretationPage: function(e) {
         e.preventDefault(); e.stopPropagation();
 
-        let uuid = this.getInterpretations(this.props.data, this.props.session).myInterpretation.uuid;
+        let interpretationData = this.getInterpretations(this.props.data, this.props.session, this.props.affiliation);
+        let uuid = interpretationData.affiliatedInterpretation ? interpretationData.affiliatedInterpretation.uuid : interpretationData.myInterpretation.uuid;
         let selectedTab = queryKeyValue('tab', window.location.href);
         let selectedSubtab = queryKeyValue('subtab', window.location.href);
         let url = '/variant-central/?edit=true&variant=' + this.props.data.uuid + '&interpretation=' + uuid + (selectedTab ? '&tab=' + selectedTab : '') + (selectedSubtab ? '&subtab=' + selectedSubtab : '');
@@ -72,14 +77,16 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     },
 
     render: function() {
-        var variant = this.props.data;
-        var session = this.props.session;
-        var recordHeader = this.props.recordHeader;
-        var interpretationUuid = this.state.interpretationUuid;
+        let variant = this.props.data;
+        let session = this.props.session;
+        let recordHeader = this.props.recordHeader;
+        let interpretationUuid = this.state.interpretationUuid;
+        let affiliation = this.props.affiliation;
 
-        let sortedInterpretations = variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session) : null;
+        let sortedInterpretations = variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? this.getInterpretations(variant, session, affiliation) : null;
         let myInterpretation = this.state.interpretation ? this.state.interpretation
-            : (sortedInterpretations && sortedInterpretations.myInterpretation ? sortedInterpretations.myInterpretation : null);
+            : (sortedInterpretations && sortedInterpretations.affiliatedInterpretation ? sortedInterpretations.affiliatedInterpretation
+                : (sortedInterpretations && sortedInterpretations.myInterpretation ? sortedInterpretations.myInterpretation : null));
         let otherInterpretations = sortedInterpretations && sortedInterpretations.otherInterpretations.length ? sortedInterpretations.otherInterpretations : null;
         let calculatedPathogenicity = this.state.calculatedPathogenicity ? this.state.calculatedPathogenicity
             : (myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ? myInterpretation.provisional_variant[0].autoClassification : 'None');
@@ -110,7 +117,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                                     {myInterpretation.disease.description}
                                                                 </PopOverComponent>
                                                             </span>
-                                                        : null}
+                                                            : null}
                                                         )
                                                     </span>
                                                     :
@@ -121,7 +128,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                                 actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
                                                                 {myInterpretation.disease.phenotypes.join(', ')}
                                                             </PopOverComponent>
-                                                        : null}
+                                                            : null}
                                                         {myInterpretation.disease.description && myInterpretation.disease.description.length ?
                                                             <span>{myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
                                                                 <PopOverComponent popOverWrapperClass="interpretation-disease-description"
@@ -129,7 +136,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                                     {myInterpretation.disease.description}
                                                                 </PopOverComponent>
                                                             </span>
-                                                        : null}
+                                                            : null}
                                                         )
                                                     </span>
                                                 }
@@ -170,8 +177,8 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                 }
                                                 <span className="no-broken-item">{myInterpretation.submitted_by.title},</span>&nbsp;
                                                 <span className="no-broken-item"><i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
-                                                {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                    ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
+                                                    {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
+                                                        ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
                                                 <span className="no-broken-item">
                                                     last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 </span>
