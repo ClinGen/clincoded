@@ -434,13 +434,14 @@ var VariantCurationHub = createReactClass({
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
                     interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} />
+                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} affiliation={this.props.affiliation} />
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
                         <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
-                            calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity} />
+                            calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity}
+                            affiliation={this.props.affiliation} />
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={my_gene_info}
