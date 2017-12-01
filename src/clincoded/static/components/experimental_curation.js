@@ -1241,6 +1241,14 @@ var ExperimentalCuration = createReactClass({
                     }
                 }
 
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!newExperimental.affiliation) {
+                        newExperimental.affiliation = this.props.affiliation.affiliation_id;
+                    }
+                }
+
                 // Get variant uuid's if they were added via the modals
                 for (var j = 0; j < this.state.variantCount; j++) {
                     // Grab the values from the variant form panel

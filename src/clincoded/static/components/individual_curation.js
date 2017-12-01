@@ -730,6 +730,14 @@ const IndividualCuration = createReactClass({
             }
         }
 
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!newIndividual.affiliation) {
+                newIndividual.affiliation = this.props.affiliation.affiliation_id;
+            }
+        }
+
         return newIndividual;
     },
 

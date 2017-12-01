@@ -421,6 +421,14 @@ var GroupCuration = createReactClass({
                         newGroup.additionalInformation = value;
                     }
 
+                    // Add affiliation if the user is associated with an affiliation
+                    // and if the data object has no affiliation
+                    if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                        if (!newGroup.affiliation) {
+                            newGroup.affiliation = this.props.affiliation.affiliation_id;
+                        }
+                    }
+
                     // Either update or create the group object in the DB
                     if (this.state.group) {
                         // We're editing a group. PUT the new group object to the DB to update the existing one.

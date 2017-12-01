@@ -824,6 +824,14 @@ const CaseControlCuration = createReactClass({
                         newCaseControl.scores = scoreArray;
                     }
 
+                    // Add affiliation if the user is associated with an affiliation
+                    // and if the data object has no affiliation
+                    if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                        if (!newCaseControl.affiliation) {
+                            newCaseControl.affiliation = this.props.affiliation.affiliation_id;
+                        }
+                    }
+
                     /*************************************************************/
                     /* Either update or create the case-control object in the DB */
                     /*************************************************************/

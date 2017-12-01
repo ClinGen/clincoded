@@ -1070,6 +1070,14 @@ var FamilyCuration = createReactClass({
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
 
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!newFamily.affiliation) {
+                newFamily.affiliation = this.props.affiliation.affiliation_id;
+            }
+        }
+
         // Fill in the segregation fields to the family, if there was a form (no form if assessed)
         this.createSegregation(newFamily, familyVariants, familyAssessments);
 
