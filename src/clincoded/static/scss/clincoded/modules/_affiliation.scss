@@ -5,7 +5,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 999;
+    z-index: 9999;
 }
 
 .affiliation-modal-overlay {
@@ -52,6 +52,19 @@
         .affiliation-modal-footer button {
             border-radius: 4px;
             font-size: 1.2rem;
+        }
+    }
+}
+
+.affiliation-utility-container {
+    margin-top: 5px;
+
+    .alert {
+        padding: 10px 15px;
+        text-align: right;
+
+        span {
+            margin-left: 18px;
         }
     }
 }
