@@ -18,7 +18,8 @@
         "assessments": [
             "74c8f168-2bfb-4b08-8f3a-6ba8ccf71259",
             "299dc3c4-7dd2-48fc-9213-03f94d1873e9"
-        ]
+        ],
+        "affiliation": "10001"
     },
     {
         "uuid": "e3d2683c-93f9-4d7d-8007-f5819a4f0fb3",
@@ -60,7 +61,8 @@
         },
         "assessments": [
             "bddf2659-4122-414a-8382-81f04b16a66d"
-        ]
+        ],
+        "affiliation": "10003"
     },
     {
         "uuid": "6be668d4-2a6e-11e5-804a-60f81dc5b05a",
@@ -84,7 +86,8 @@
                 "geneImplicatedWithDisease": true,
                 "evidenceInPaper": "Paragraph 21-30, page 55"
             }
-        }
+        },
+        "affiliation": "10002"
     },
     {
         "uuid": "9bb72f27-8ad8-4fc7-a2a6-03810088ddf1",
@@ -136,7 +139,8 @@
         ],
         "assessments": [
             "5a5cefba-2a4c-11e5-9f97-60f81dc5b05a"
-        ]
+        ],
+        "affiliation": "10004"
     },
     {
         "uuid": "ca353d87-2cb8-11e5-85c1-60f81dc5b05a",
@@ -156,7 +160,8 @@
         },
         "variants": [
             "e9f9a6d7-2685-11e5-8e9c-60f81dc5b05a"
-        ]
+        ],
+        "affiliation": "10001"
     },
     {
         "uuid": "d06dae6b-2cb8-11e5-8e3e-60f81dc5b05a",
@@ -184,6 +189,7 @@
         "assessments": [
             "a4aeb035-0a9c-41e0-9963-1deeb4e1301d",
             "39738201-96b3-4bdd-94d8-99a57a8eea71"
-        ]
+        ],
+        "affiliation": "10002"
     }
 ]

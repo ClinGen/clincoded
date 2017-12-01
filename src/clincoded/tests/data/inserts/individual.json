@@ -31,7 +31,8 @@
         "proband": false,
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-15T22:47:10.000000+00:00"
+        "date_created": "2015-07-15T22:47:10.000000+00:00",
+        "affiliation": "10001"
     },
     {
         "uuid": "6f762e73-1910-11e5-998f-60f81dc5b05a",
@@ -65,7 +66,8 @@
         "proband": true,
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-14T12:47:10.000000+00:00"
+        "date_created": "2015-07-14T12:47:10.000000+00:00",
+        "affiliation": "10002"
     },
     {
         "uuid": "7997f687-1910-11e5-a066-60f81dc5b05a",
@@ -92,7 +94,8 @@
         "proband": false,
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-11T22:47:10.000000+00:00"
+        "date_created": "2015-07-11T22:47:10.000000+00:00",
+        "affiliation": "10003"
     },
     {
         "uuid": "8395c173-1910-11e5-8c7c-60f81dc5b05a",
@@ -122,7 +125,8 @@
         "proband": false,
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-10T22:47:10.000000+00:00"
+        "date_created": "2015-07-10T22:47:10.000000+00:00",
+        "affiliation": "10004"
     },
     {
         "uuid": "8e204451-1910-11e5-a206-60f81dc5b05a",
@@ -148,7 +152,8 @@
         "proband": true,
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-02-14T22:47:10.000000+00:00"
+        "date_created": "2015-02-14T22:47:10.000000+00:00",
+        "affiliation": "10005"
     },
     {
         "uuid": "95df0123-1910-11e5-bf07-60f81dc5b05a",
@@ -174,7 +179,8 @@
         "proband": false,
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-03-09T22:47:10.000000+00:00"
+        "date_created": "2015-03-09T22:47:10.000000+00:00",
+        "affiliation": "10001"
     },
     {
         "uuid": "446140ed-902d-429b-8a6b-855154e68185",
@@ -203,7 +209,8 @@
         "proband": true,
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-03-09T22:47:10.000000+00:00"
+        "date_created": "2015-03-09T22:47:10.000000+00:00",
+        "affiliation": "10002"
     },
     {
         "uuid": "fd7ca9bb-5beb-4dde-95c9-80b54f9ad702",
@@ -232,7 +239,8 @@
         "proband": true,
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-09-19T08:35:18.000000+00:00",
-        "date_created": "2015-09-09T22:47:10.000000+00:00"
+        "date_created": "2015-09-09T22:47:10.000000+00:00",
+        "affiliation": "10003"
     },
     {
         "uuid": "201aa720-636f-458b-97b4-cbb5336d4978",
@@ -261,6 +269,7 @@
         "proband": true,
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-23T08:35:18.000000+00:00",
-        "date_created": "2015-08-09T22:47:10.000000+00:00"
+        "date_created": "2015-08-09T22:47:10.000000+00:00",
+        "affiliation": "10004"
     }
 ]
