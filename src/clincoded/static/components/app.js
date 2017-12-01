@@ -229,6 +229,17 @@ var App = module.exports = createReactClass({
                         {this.state.productionWarning ?
                             <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
                             : null}
+                        {(this.state.affiliation && Object.keys(this.state.affiliation).length && affiliation_cookie) ?
+                            <div className="container affiliation-utility-container">
+                                <div className="alert alert-info">
+                                    <span className="curator-name">Curator: <strong>{user_properties.title}</strong></span>
+                                    <span className="curator-affiliation">Affiliation: <strong>{this.state.affiliation.affiliation_fullname}</strong></span>
+                                    <span className="change-affiliation-button">
+                                        <button type="button" className="btn btn-primary" onClick={this.renderAffiliationModal.bind(null, user_properties.affiliation)}>Change Affiliation</button>
+                                    </span>
+                                </div>
+                            </div>
+                            : null}
                         {user_properties && user_properties.affiliation && user_properties.affiliation.length && !affiliation_cookie ?
                             this.renderAffiliationModal(user_properties.affiliation)
                             : null}
