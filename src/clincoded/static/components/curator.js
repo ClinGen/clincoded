@@ -1998,7 +1998,7 @@ var groupSimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdI
     "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "totalNumberIndividuals", "numberOfIndividualsWithFamilyInformation",
     "numberOfIndividualsWithoutFamilyInformation", "numberOfIndividualsWithVariantInCuratedGene", "numberOfIndividualsWithoutVariantInCuratedGene",
     "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created", "numberWithVariant", "numberAllGenotypedSequenced",
-    "alleleFrequency"
+    "alleleFrequency", "affiliation"
 ];
 
 function flattenGroup(group) {
@@ -2052,7 +2052,7 @@ function flattenGroup(group) {
 
 
 var familySimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
-    "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created"
+    "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created", "affiliation"
 ];
 
 function flattenFamily(family) {
@@ -2115,7 +2115,7 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
     "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed",
-    "recessiveZygosity"
+    "recessiveZygosity", "affiliation"
 ];
 
 function flattenIndividual(individual) {
@@ -2155,7 +2155,7 @@ function flattenIndividual(individual) {
 
 
 var experimentalSimpleProps = ["label", "evidenceType", "biochemicalFunction", "proteinInteractions", "expression",
-    "functionalAlteration", "modelSystems", "rescue"
+    "functionalAlteration", "modelSystems", "rescue", "affiliation"
 ];
 
 function flattenExperimental(experimental) {
@@ -2327,7 +2327,7 @@ var caseControlSimpleProps = [
     "label", "studyType", "detectionMethod", "statisticalValues", "pValue", "confidenceIntervalFrom", "confidenceIntervalTo",
     "diseaseHistoryEvaluated", "demographicInfoMatched", "geneticAncestryMatched", "factorOfGeneticAncestryNotMatched",
     "factorOfDemographicInfoMatched", "differInVariables", "explanationForDemographicMatched", "explanationForDiseaseHistoryEvaluation",
-    "explanationForGeneticAncestryNotMatched", "comments", "date_created"
+    "explanationForGeneticAncestryNotMatched", "comments", "date_created", "affiliation"
 ];
 
 function flattenCaseControl(casecontrol) {
@@ -2351,7 +2351,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective", "affiliation"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
