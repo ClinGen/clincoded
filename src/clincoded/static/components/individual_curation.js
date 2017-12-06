@@ -882,6 +882,18 @@ const IndividualCuration = createReactClass({
             }
         }
 
+        // Retrieve methods data of "parent" evidence (assuming only one "parent", either a family or a group)
+        var parentEvidenceMethod;
+        var parentEvidenceName = '';
+
+        if (families && families.length) {
+            parentEvidenceMethod = (families[0].method && Object.keys(families[0].method).length) ? families[0].method : null;
+            parentEvidenceName = 'Family';
+        } else if (groups && groups.length) {
+            parentEvidenceMethod = (groups[0].method && Object.keys(groups[0].method).length) ? groups[0].method : null;
+            parentEvidenceName = 'Group';
+        }
+
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
         // family object read in.
@@ -946,7 +958,7 @@ const IndividualCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title={LabelPanelTitle(individual, 'Methods')} open>
-                                                {methods.render.call(this, method)}
+                                                {methods.render.call(this, method, 'individual', '', parentEvidenceMethod, parentEvidenceName)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>

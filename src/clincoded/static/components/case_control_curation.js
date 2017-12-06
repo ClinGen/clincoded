@@ -1006,7 +1006,7 @@ const CaseControlCuration = createReactClass({
                                                 {GroupName.call(this, 'case-cohort')}
                                                 {GroupCommonDiseases.call(this, 'case-cohort')}
                                                 {GroupDemographics.call(this, 'case-cohort')}
-                                                {methods.render.call(this, caseGroupMethod, false, true, 'caseCohort_')}
+                                                {methods.render.call(this, caseGroupMethod, 'case-control', 'caseCohort_')}
                                                 {GroupPower.call(this, 'case-cohort')}
                                                 {GroupAdditional.call(this, 'case-cohort')}
                                             </Panel>
@@ -1018,7 +1018,7 @@ const CaseControlCuration = createReactClass({
                                                 {GroupName.call(this, 'control-cohort')}
                                                 {GroupCommonDiseases.call(this, 'control-cohort')}
                                                 {GroupDemographics.call(this, 'control-cohort')}
-                                                {methods.render.call(this, controlGroupMethod, false, true, 'controlCohort_')}
+                                                {methods.render.call(this, controlGroupMethod, 'case-control', 'controlCohort_')}
                                                 {GroupPower.call(this, 'control-cohort')}
                                                 {GroupAdditional.call(this, 'control-cohort')}
                                             </Panel>

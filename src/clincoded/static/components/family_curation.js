@@ -1282,6 +1282,10 @@ var FamilyCuration = createReactClass({
         }
         //var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
+        // Retrieve methods data of "parent" evidence (assuming "parent" can only be a group and there can be only one)
+        var parentEvidenceMethod = (groups && groups.length && groups[0].method && Object.keys(groups[0].method).length) ? groups[0].method : null;
+        var parentEvidenceName = 'Group';
+
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
         // family object read in.
@@ -1338,7 +1342,7 @@ var FamilyCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Methods" open>
-                                                {methods.render.call(this, method, true)}
+                                                {methods.render.call(this, method, 'family', '', parentEvidenceMethod, parentEvidenceName)}
                                             </Panel>
                                         </PanelGroup>
 

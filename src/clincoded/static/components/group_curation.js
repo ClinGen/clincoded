@@ -566,7 +566,7 @@ var GroupCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Group — Methods" open>
-                                                {methods.render.call(this, method)}
+                                                {methods.render.call(this, method, 'group')}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
