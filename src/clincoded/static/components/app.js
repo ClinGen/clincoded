@@ -65,7 +65,7 @@ var App = module.exports = createReactClass({
             productionWarning: productionWarning,
             tempAffiliation: null, // Placeholder when user selects an option in the affiliation dropdown
             affiliation: {}, // Confirmed affiliation when user selects to continue in the modal
-            buttonDisabled: true,
+            affiliationModalButtonDisabled: true,
             isAffiliationModalOpen: false
         };
     },
@@ -87,7 +87,7 @@ var App = module.exports = createReactClass({
     handleOnChange(e) {
         this.setState({
             tempAffiliation: e.target.value !== 'Individual' ? JSON.parse(e.target.value) : {},
-            buttonDisabled: false
+            affiliationModalButtonDisabled: false
         });
     },
 
@@ -141,7 +141,7 @@ var App = module.exports = createReactClass({
         let userAffiliations = this.getUserAffiliations(affiliationIds, AffiliationsList);
         return (
             <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
-                buttonDisabled={this.state.buttonDisabled}>
+                buttonDisabled={this.state.affiliationModalButtonDisabled}>
                 <div className="affiliation-modal-body">
                     <h2>Continue as an individual or as a member of an affiliation.</h2>
                     <select className="form-control" defaultValue="none" onChange={this.handleOnChange}>
