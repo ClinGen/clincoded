@@ -107,6 +107,8 @@ module.exports.Auth0 = {
                 affiliation_cookie: JSON.parse(affiliationCookie),
                 affiliation: JSON.parse(affiliationCookie),
             });
+        } else {
+            this.setState({isAffiliationModalOpen: true});
         }
         if (window.Auth0Lock !== undefined) {
             // CHANGEME
