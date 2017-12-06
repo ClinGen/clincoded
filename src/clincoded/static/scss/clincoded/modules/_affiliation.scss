@@ -57,14 +57,20 @@
 }
 
 .affiliation-utility-container {
-    margin-top: 8px;
+    background-color: #2697d1;
 
-    .alert {
-        padding: 10px 15px;
+    .affiliation-utility {
+        color: #fff;
+        padding: 6px 15px;
         text-align: right;
 
         span {
             margin-left: 18px;
+        }
+
+        button {
+            border-radius: 4px;
+            font-weight: 500;
         }
     }
 }
