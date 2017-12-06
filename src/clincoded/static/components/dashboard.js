@@ -515,7 +515,7 @@ var Dashboard = createReactClass({
                                 <li className="list-group-item"><a href="/gdm/">View list of all Gene-Disease Records</a></li>
                             </ul>
                         </div>
-                        <div className="panel panel-info">
+                        <div className="panel panel-warning">
                             <div className="panel-heading">
                                 <h3 className="panel-title">Your Recent History</h3>
                             </div>
