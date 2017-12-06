@@ -35,7 +35,6 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
             error: this.props.error,
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -77,14 +76,13 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
     setDiseaseObjectStates(disease) {
         if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}); }
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}); }
         if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
         if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
         if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
-    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
         this.setState({error: null}, () => {
             this.props.clearErrorInParent('family');
@@ -99,10 +97,6 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
         if (term) {
             diseaseObj['term'] = term;
             this.setState({diseaseTerm: term});
-        }
-        if (ontology) {
-            diseaseObj['ontology'] = ontology;
-            this.setState({diseaseOntology: ontology});
         }
         if (description) {
             diseaseObj['description'] = description;
@@ -227,7 +221,6 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
     handleCopyDiseaseStates(disease, diseaseObj) {
         if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}, () => { diseaseObj['diseaseId'] = disease.diseaseId; }); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}, () => { diseaseObj['term'] = disease.term; }); }
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}, () => { diseaseObj['ontology'] = disease.ontology; }); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}, () => { diseaseObj['description'] = disease.description; }); }
         if (disease.synonyms && disease.synonyms.length) { this.setState({synonyms: disease.synonyms}, () => { diseaseObj['synonyms'] = disease.synonyms; }); }
         if (disease.phenotypes && disease.phenotypes.length) { this.setState({phenotypes: disease.phenotypes}, () => { diseaseObj['phenotypes'] = disease.phenotypes; }); }
@@ -242,7 +235,6 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
         this.setState({
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -259,7 +251,6 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
     render() {
         let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
-        let diseaseOntology = this.state.diseaseOntology;
         let diseaseDescription = this.state.diseaseDescription;
         let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
         let phenotypes = this.state.phenotypes;
@@ -270,7 +261,7 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
         return (
             <div className="form-group add-disease-group">
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
-                    <span>Disease(s) in Common for Family:<span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span></span>
+                    <span>Disease(s) in Common for Family:<span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MONDO</a> using OLS</span></span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
                     <div ref="diseaseName" className={diseaseTerm ? "disease-name col-sm-9" : (error ? "disease-name error pull-left" : "disease-name")}>
@@ -293,7 +284,6 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
                                     addDiseaseModalBtn={addDiseaseModalBtn}
                                     diseaseId={diseaseId}
                                     diseaseTerm={diseaseTerm}
-                                    diseaseOntology={diseaseOntology}
                                     diseaseDescription={diseaseDescription}
                                     diseaseFreeTextConfirm={diseaseFreeTextConfirm}
                                     phenotypes={phenotypes}
@@ -303,7 +293,7 @@ const FamilyDisease = module.exports.FamilyDisease = createReactClass({
                                 />
                             </li>
                         </ul>
-                    :
+                        :
                         <div className="delete-disease-button">
                             <a className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
                                 <span>Disease<i className="icon icon-trash-o"></i></span>

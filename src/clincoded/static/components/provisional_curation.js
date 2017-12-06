@@ -358,7 +358,7 @@ var ProvisionalCuration = createReactClass({
             PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
             OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
             AUTOSOMAL_RECESSIVE: 12,
-            SEGREGATION: 7,
+            SEGREGATION: 3,
             CASE_CONTROL: 12,
             FUNCTIONAL: 2,
             FUNCTIONAL_ALTERATION: 2,
@@ -560,21 +560,7 @@ var ProvisionalCuration = createReactClass({
             scoreTableValues['segregationPointsCounted'] = 2.5;
         } else if (scoreTableValues['segregationPoints'] >= 1.5 && scoreTableValues['segregationPoints'] <= 1.74) {
             scoreTableValues['segregationPointsCounted'] = 3;
-        } else if (scoreTableValues['segregationPoints'] >= 1.75 && scoreTableValues['segregationPoints'] <= 1.99) {
-            scoreTableValues['segregationPointsCounted'] = 3.5;
-        } else if (scoreTableValues['segregationPoints'] >= 2 && scoreTableValues['segregationPoints'] <= 2.49) {
-            scoreTableValues['segregationPointsCounted'] = 4;
-        } else if (scoreTableValues['segregationPoints'] >= 2.5 && scoreTableValues['segregationPoints'] <= 2.99) {
-            scoreTableValues['segregationPointsCounted'] = 4.5;
-        } else if (scoreTableValues['segregationPoints'] >= 3 && scoreTableValues['segregationPoints'] <= 3.49) {
-            scoreTableValues['segregationPointsCounted'] = 5;
-        } else if (scoreTableValues['segregationPoints'] >= 3.5 && scoreTableValues['segregationPoints'] <= 3.99) {
-            scoreTableValues['segregationPointsCounted'] = 5.5;
-        } else if (scoreTableValues['segregationPoints'] >= 4 && scoreTableValues['segregationPoints'] <= 4.49) {
-            scoreTableValues['segregationPointsCounted'] = 6;
-        } else if (scoreTableValues['segregationPoints'] >= 4.5 && scoreTableValues['segregationPoints'] <= 4.99) {
-            scoreTableValues['segregationPointsCounted'] = 6.5;
-        } else if (scoreTableValues['segregationPoints'] >= 5) {
+        } else if (scoreTableValues['segregationPoints'] >= 1.75) {
             scoreTableValues['segregationPointsCounted'] = MAX_SCORE_CONSTANTS.SEGREGATION;
         }
 
