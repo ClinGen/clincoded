@@ -66,7 +66,7 @@ var App = module.exports = createReactClass({
             tempAffiliation: null, // Placeholder when user selects an option in the affiliation dropdown
             affiliation: {}, // Confirmed affiliation when user selects to continue in the modal
             buttonDisabled: true,
-            isAffiliationModalOpen: true
+            isAffiliationModalOpen: false
         };
     },
 
@@ -157,6 +157,12 @@ var App = module.exports = createReactClass({
         );
     },
 
+    showAffiliationModal(affiliation) {
+        this.setState({isAffiliationModalOpen: true}, () => {
+            this.renderAffiliationModal(affiliation);
+        });
+    },
+
     render: function() {
         var content;
         var context = this.state.context;
@@ -230,12 +236,11 @@ var App = module.exports = createReactClass({
                             <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
                             : null}
                         {user_properties && user_properties.affiliation && this.state.affiliation && Object.keys(this.state.affiliation).length ?
-                            <div className="container affiliation-utility-container">
-                                <div className="alert alert-info">
-                                    <span className="curator-name">Curator: <strong>{user_properties.title}</strong></span>
+                            <div className="affiliation-utility-container">
+                                <div className="container affiliation-utility">
                                     <span className="curator-affiliation">Affiliation: <strong>{this.state.affiliation.affiliation_fullname}</strong></span>
                                     <span className="change-affiliation-button">
-                                        <button type="button" className="btn btn-primary" onClick={this.renderAffiliationModal.bind(null, user_properties.affiliation)}>Change Affiliation</button>
+                                        <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal.bind(null, user_properties.affiliation)}>Change Affiliation</button>
                                     </span>
                                 </div>
                             </div>
