@@ -40,7 +40,6 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
             required: this.props.required,
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -86,14 +85,13 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
     setDiseaseObjectStates(disease) {
         if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}); }
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}); }
         if (disease.synonyms) { this.setState({synonyms: disease.synonyms}); }
         if (disease.phenotypes) { this.setState({phenotypes: disease.phenotypes}); }
         if (disease.freetext) { this.setState({diseaseFreeTextConfirm: disease.freetext}); }
     },
 
-    passDataToParent(diseaseId, term, ontology, description, synonyms, phenotypes, freetext) {
+    passDataToParent(diseaseId, term, description, synonyms, phenotypes, freetext) {
         let diseaseObj = this.state.diseaseObj;
         this.setState({error: null}, () => {
             this.props.clearErrorInParent();
@@ -108,10 +106,6 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
         if (term) {
             diseaseObj['term'] = term;
             this.setState({diseaseTerm: term});
-        }
-        if (ontology) {
-            diseaseObj['ontology'] = ontology;
-            this.setState({diseaseOntology: ontology});
         }
         if (description) {
             diseaseObj['description'] = description;
@@ -263,7 +257,6 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
     handleCopyDiseaseStates(disease, diseaseObj) {
         if (disease.diseaseId) { this.setState({diseaseId: disease.diseaseId}, () => { diseaseObj['diseaseId'] = disease.diseaseId; }); }
         if (disease.term) { this.setState({diseaseTerm: disease.term}, () => { diseaseObj['term'] = disease.term; }); }
-        if (disease.ontology) { this.setState({diseaseOntology: disease.ontology}, () => { diseaseObj['ontology'] = disease.ontology; }); }
         if (disease.description) { this.setState({diseaseDescription: disease.description}, () => { diseaseObj['description'] = disease.description; }); }
         if (disease.synonyms && disease.synonyms.length) { this.setState({synonyms: disease.synonyms}, () => { diseaseObj['synonyms'] = disease.synonyms; }); }
         if (disease.phenotypes && disease.phenotypes.length) { this.setState({phenotypes: disease.phenotypes}, () => { diseaseObj['phenotypes'] = disease.phenotypes; }); }
@@ -279,7 +272,6 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
         this.setState({
             diseaseId: '',
             diseaseTerm: null,
-            diseaseOntology: null,
             diseaseDescription: null,
             synonyms: [],
             phenotypes: [],
@@ -296,7 +288,6 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
     render() {
         let diseaseId = this.state.diseaseId;
         let diseaseTerm = this.state.diseaseTerm;
-        let diseaseOntology = this.state.diseaseOntology;
         let diseaseDescription = this.state.diseaseDescription;
         let diseaseFreeTextConfirm = this.state.diseaseFreeTextConfirm;
         let phenotypes = this.state.phenotypes;
@@ -309,7 +300,7 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
                 <label htmlFor="add-disease" className="col-sm-5 control-label">
                     <span>Disease for individual{this.props.probandLabel}:
                         {this.state.required ? <span className="required-field"> *</span> : null}
-                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MonDO</a> using OLS</span>
+                        <span className="control-label-note">Search <a href={external_url_map['Mondo']} target="_blank">MONDO</a> using OLS</span>
                     </span>
                 </label>
                 <div className="col-sm-7 add-disease inline-button-wrapper clearfix" id="add-disease">
@@ -333,7 +324,6 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
                                     addDiseaseModalBtn={addDiseaseModalBtn}
                                     diseaseId={diseaseId}
                                     diseaseTerm={diseaseTerm}
-                                    diseaseOntology={diseaseOntology}
                                     diseaseDescription={diseaseDescription}
                                     diseaseFreeTextConfirm={diseaseFreeTextConfirm}
                                     phenotypes={phenotypes}

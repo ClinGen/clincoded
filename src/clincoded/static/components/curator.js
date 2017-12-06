@@ -105,14 +105,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                     // Update disease object properties
                     flattenDiseaseObj['diseaseId'] = diseaseObj['diseaseId'];
                     flattenDiseaseObj['term'] = diseaseObj['term'];
-                    // Update ontology if any
-                    if (diseaseObj['ontology']) {
-                        flattenDiseaseObj['ontology'] = diseaseObj['ontology'];
-                    } else {
-                        if ('ontology' in flattenDiseaseObj) {
-                            delete flattenDiseaseObj['ontology'];
-                        }
-                    }
                     // Update description (if any)
                     if (diseaseObj['description']) {
                         flattenDiseaseObj['description'] = diseaseObj['description'];

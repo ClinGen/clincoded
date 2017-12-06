@@ -21,7 +21,7 @@ Feature: Generics
         And I should see "severe combined"
         When I visit "/interpretations/"
         Then I should see "NM_000111"
-        When I fill in "filterTerm" with "0050466"
+        When I fill in "filterTerm" with "0018954"
         Then I should not see "May 10"
         Then I should see "Loeys-Dietz syndrome"
 

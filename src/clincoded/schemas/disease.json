@@ -1,7 +1,7 @@
 {
     "title": "Diseases",
     "id": "/profiles/disease.json",
-    "description": "Schema for storing disease data of various terminologies (e.g. Orphanet, DOID, OMIM, NCIt, or free text).",
+    "description": "Schema for storing disease data of various terminologies (e.g. MONDO or free text).",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["diseaseId", "term"],
@@ -15,11 +15,11 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "diseaseId": {
             "title": "Unique identifier of disease term",
-            "description": "Disease term identifier consisting of the prefix (e.g. DOID:) followed by number.",
+            "description": "Disease term identifier consisting of the prefix (e.g. MONDO:) followed by number.",
             "type": "string",
             "default": "",
             "uniqueKey": "disease:diseaseId"
@@ -33,12 +33,6 @@
         "description": {
             "title": "Disease description",
             "description": "Ontology term description for the disease terms.",
-            "type":  "string",
-            "default": ""
-        },
-        "ontology": {
-            "title": "Ontology for the disease identifier",
-            "description": "Name for the ontology used, such as ORPHA, DOID, OMIM, or NCIt, etc.",
             "type":  "string",
             "default": ""
         },
