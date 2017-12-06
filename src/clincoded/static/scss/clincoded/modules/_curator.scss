@@ -734,6 +734,7 @@
 }
 
 .demographics-copy,
+.methods-copy,
 .orphanet-copy {
     margin-top: -15px;
 
@@ -3142,6 +3143,20 @@ table.login-users-interpretations {
                     vertical-align: text-bottom;
                 }
             }
+        }
+    }
+
+    .form-group.parent-evidence {
+        .col-sm-5 {
+            text-align: right;
+
+            span {
+                font-weight: bold;
+            }
+        }
+
+        .col-sm-7 {
+            padding-top: 1px;
         }
     }
 }

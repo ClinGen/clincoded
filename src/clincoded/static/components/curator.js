@@ -2534,9 +2534,9 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
 export function renderParentEvidence(label, value) {
     return (
         <div>
-            <div className="form-group">
+            <div className="form-group parent-evidence">
                 <div className="col-sm-5">
-                    <strong className="pull-right">{label}</strong>
+                    <span>{label}</span>
                 </div>
                 <div className="col-sm-7">
                     {value ? <span>{value}</span> : null}
