@@ -23,6 +23,13 @@ const PmidSummary = curator.PmidSummary;
 var CurationCentral = createReactClass({
     mixins: [RestMixin, CurationMixin, CuratorHistory],
 
+    propTypes: {
+        href_url: PropTypes.object,
+        session: PropTypes.object,
+        affiliation: PropTypes.object,
+        href: PropTypes.string
+    },
+
     getInitialState: function() {
         return {
             currPmid: queryKeyValue('pmid', this.props.href),
@@ -141,14 +148,16 @@ var CurationCentral = createReactClass({
         });
         var currArticle = annotation ? annotation.article : null;
 
+        let affiliation = this.props.affiliation;
+
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} affiliation={affiliation} />
                 <div className="container">
                     <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
                     <div className="row curation-content">
                         <div className="col-md-3">
-                            <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange} currGdm={gdm}
+                            <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
                                 protocol={this.props.href_url.protocol} updateGdmArticles={this.updateGdmArticles} currGdm={gdm} />
                         </div>
                         <div className="col-md-6">
@@ -162,15 +171,15 @@ var CurationCentral = createReactClass({
                                             <h4>Abstract</h4>
                                             <p>{currArticle.abstract}</p>
                                         </div>
-                                    : null}
+                                        : null}
                                 </div>
-                            : null}
+                                : null}
                         </div>
                         {currArticle ?
                             <div className="col-md-3">
-                                <CurationPalette gdm={gdm} annotation={annotation} session={session} />
+                                <CurationPalette gdm={gdm} annotation={annotation} session={session} affiliation={affiliation} />
                             </div>
-                        : null}
+                            : null}
                     </div>
                 </div>
             </div>
@@ -193,7 +202,7 @@ class BetaNote extends Component {
                     <div className="beta-note">
                         <p>PMID:{annotation.article.pmid} added by {annotation.submitted_by.title}.</p>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
