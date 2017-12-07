@@ -957,7 +957,7 @@ class GroupViewer extends Component {
                                 <div>
                                     <dt># individuals with variant in gene being curated</dt>
                                     <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                                </div>ClinVarSearch
+                                </div>
 
                                 <div>
                                     <dt># individuals without variant in gene being curated</dt>
