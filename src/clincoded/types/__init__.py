@@ -215,6 +215,7 @@ class Article(Item):
     ]
 
 
+'''
 @collection(
     name='affiliations',
     unique_key='affiliation:affiliationId',
@@ -243,6 +244,7 @@ class Affiliation(Item):
     })
     def associatedUsers(self, request, associatedUsers):
         return paths_filtered_by_status(request, associatedUsers)
+'''
 
 
 @collection(
