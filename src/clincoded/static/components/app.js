@@ -124,21 +124,23 @@ var App = module.exports = createReactClass({
         return idArray;
     },
 
-    getUserAffiliations(affiliationIds, staticAffiliations) {
+    getUserAffiliations(affiliations, staticAffiliations) {
         let affiliationArray = [];
-        affiliationIds.forEach(id=> {
-            for (let affiliation of staticAffiliations) {
-                if (affiliation.affiliation_id === id) {
-                    affiliationArray.push(affiliation);
+        if (affiliations.length) {
+            affiliations.forEach(id=> {
+                for (let affiliation of staticAffiliations) {
+                    if (affiliation.affiliation_id === id) {
+                        affiliationArray.push(affiliation);
+                    }
                 }
-            }
-        });
+            });
+        }
         return affiliationArray;
     },
 
     renderAffiliationModal(affiliations) {
-        let affiliationIds = this.getAffiliationIds(affiliations);
-        let userAffiliations = this.getUserAffiliations(affiliationIds, AffiliationsList);
+        // let affiliationIds = this.getAffiliationIds(affiliations);
+        let userAffiliations = this.getUserAffiliations(affiliations, AffiliationsList);
         return (
             <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
                 buttonDisabled={this.state.affiliationModalButtonDisabled}>
