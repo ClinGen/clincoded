@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, content_views, userMatch, truncateString, external_url_map } from './globals';
+import { curator_page, content_views, userMatch, affiliationMatch, truncateString, external_url_map } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
@@ -13,6 +13,7 @@ import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
 import { GdmDisease } from './disease';
+import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -72,7 +73,8 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         omimId: PropTypes.string, // OMIM ID to display
         updateOmimId: PropTypes.func, // Function to call when OMIM ID changes
         linkGdm: PropTypes.bool, // whether or not to link GDM text back to GDM
-        pmid: PropTypes.string
+        pmid: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState() {
@@ -228,17 +230,20 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         this.setState({diseaseError: null});
     },
 
+    viewEvidenceSummary(e) {
+        window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var disease = gdm && gdm.disease;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var summaryPage = this.props.summaryPage ? true : false;
-
-        var provisional;
-        var provisionalExist = false;
         var summaryButton = true;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
+
+        let affiliation = this.props.affiliation;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
@@ -248,15 +253,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
-            if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                for (i in gdm.provisionalClassifications) {
-                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
-                        provisionalExist = true;
-                        provisional = gdm.provisionalClassifications[i];
-                        break;
-                    }
-                }
-            }
+            let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
@@ -337,20 +334,20 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                 <div className="provisional-title">
                                                     <strong>Classification</strong>
                                                 </div>
-                                                { provisionalExist ?
+                                                { provisionalClassification.provisionalExist ?
                                                     <div>
                                                         <div className="provisional-data-left">
-                                                            <span className="header-classification-item">Curator: {provisional.submitted_by.title}</span>
-                                                            {provisional.classificationStatus ? <span className="header-classification-item">Status: {provisional.classificationStatus}</span> : null}
+                                                            <span className="header-classification-item">Curator: {provisionalClassification.provisional.submitted_by.title}</span>
+                                                            {provisionalClassification.provisional.classificationStatus ? <span className="header-classification-item">Status: {provisionalClassification.provisional.classificationStatus}</span> : null}
                                                         </div>
                                                         <div className="provisional-data-center">
                                                             <span className="header-classification-item">
-                                                                Calculated Classification: {provisional.totalScore} ({provisional.autoClassification})
+                                                                Calculated Classification: {provisionalClassification.provisional.totalScore} ({provisionalClassification.provisional.autoClassification})
                                                             </span>
                                                             <span className="header-classification-item">
-                                                                Modified Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
+                                                                Modified Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? 'None' : provisionalClassification.provisional.alteredClassification}
                                                             </span>
-                                                            <span className="header-classification-item">Last Saved: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                            <span className="header-classification-item">Last Saved: {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                                                         </div>
                                                     </div>
                                                     :
@@ -358,9 +355,12 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                 }
                                             </td>
                                             <td className="button-box" rowSpan="2">
+                                                { !summaryPage ?
+                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></a>
+                                                    : null}
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalExist ? '&edit=yes' : '&calculate=yes')}>View Classification Matrix</a>
+                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
                                                         : null
                                                     )
                                                     : null}
@@ -654,24 +654,27 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
     propTypes: {
         annotation: PropTypes.object.isRequired, // Current annotation that owns the article
         gdm: PropTypes.object.isRequired, // Current GDM that owns the given annotation
-        session: PropTypes.object // Session object
+        session: PropTypes.object, // Session object
+        affiliation: PropTypes.object // Affiliation object
     },
 
     render: function() {
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var curatorMatch = false;
+        var curatorMatch = false, affiliationMatch = false;
         var groupUrl = '/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var familyUrl = '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var individualUrl = '/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var caseControlUrl = '/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var experimentalUrl = '/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
+        let affiliation = this.props.affiliation;
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
+                affiliationMatch = group && affiliationMatch(group.submitted_by, session);
                 curatorMatch = group && userMatch(group.submitted_by, session);
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
