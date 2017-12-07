@@ -46,9 +46,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         // Remove header and notice bar (if any) from DOM
         let siteHeader = document.querySelector('.site-header');
         siteHeader.setAttribute('style', 'display:none');
-        let noticeBar = document.querySelector('.notice-bar');
-        if (noticeBar) {
-            noticeBar.setAttribute('style', 'display:none');
+        let affiliationUtilityBar = document.querySelector('.affiliation-utility-container');
+        if (affiliationUtilityBar) {
+            affiliationUtilityBar.setAttribute('style', 'display:none');
         }
     },
 
