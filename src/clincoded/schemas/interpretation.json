@@ -134,7 +134,7 @@
         },
         "affiliation": {
             "title": "Affiliation",
-            "description": "The affiliation this evidence is associated with.",
+            "description": "The affiliation this interpretation is associated with.",
             "type": "string"
         }
     },
