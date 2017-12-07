@@ -55,10 +55,9 @@
             "title": "Curator Affiliations",
             "description": "The affiliation(s) that the user is associated with.",
             "type": "array",
+            "default": [],
             "items": {
-                "title": "Affiliation ID",
-                "type": "string",
-                "linkTo": "affiliation"
+                "type": "string"
             }
         },
         "groups": {
