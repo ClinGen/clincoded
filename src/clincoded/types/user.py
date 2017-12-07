@@ -39,9 +39,6 @@ from contentbase import (
 class User(Item):
     item_type = 'user'
     schema = load_schema('clincoded:schemas/user.json')
-    embedded = [
-        'affiliation'
-    ]
 
     @calculated_property(schema={
         "title": "Title",
@@ -66,7 +63,7 @@ def user_details_view(context, request):
 def user_basic_view(context, request):
     properties = item_view_object(context, request)
     filtered = {}
-    for key in ['@id', '@type', 'uuid', 'lab', 'title', 'email', 'first_name', 'last_name', 'affiliation']:
+    for key in ['@id', '@type', 'uuid', 'lab', 'title', 'email', 'first_name', 'last_name']:
         try:
             filtered[key] = properties[key]
         except KeyError:
