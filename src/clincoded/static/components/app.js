@@ -112,18 +112,10 @@ var App = module.exports = createReactClass({
     },
 
     /**
-     * Method to trim affiliation URIs and return an array of IDs
-     * @param {array} affiliations - List of affiliation URIs
+     * Method to return affiliation data given an array of IDs
+     * @param {array} affiliations - List of affiliation IDs
+     * @param {array} affiliations - List of affiliation data objects
      */
-    getAffiliationIds(affiliations) {
-        let idArray = [];
-        affiliations.forEach(item => {
-            let id = item.substr(14, 5);
-            idArray.push(id);
-        });
-        return idArray;
-    },
-
     getUserAffiliations(affiliations, staticAffiliations) {
         let affiliationArray = [];
         if (affiliations.length) {
@@ -139,7 +131,6 @@ var App = module.exports = createReactClass({
     },
 
     renderAffiliationModal(affiliations) {
-        // let affiliationIds = this.getAffiliationIds(affiliations);
         let userAffiliations = this.getUserAffiliations(affiliations, AffiliationsList);
         return (
             <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
@@ -240,7 +231,7 @@ var App = module.exports = createReactClass({
                         {user_properties && user_properties.affiliation && this.state.affiliation && Object.keys(this.state.affiliation).length ?
                             <div className="affiliation-utility-container">
                                 <div className="container affiliation-utility">
-                                    <span className="curator-affiliation">Affiliation: <strong>{this.state.affiliation.affiliation_fullname}</strong></span>
+                                    <span className="curator-affiliation">Affiliation: {this.state.affiliation.affiliation_fullname}</span>
                                     <span className="change-affiliation-button">
                                         <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal.bind(null, user_properties.affiliation)}>Change Affiliation</button>
                                     </span>
