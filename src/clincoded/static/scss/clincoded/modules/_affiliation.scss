@@ -57,7 +57,7 @@
 }
 
 .affiliation-utility-container {
-    background-color: #2697d1;
+    background-color: #000041;
 
     .affiliation-utility {
         color: #fff;
@@ -68,9 +68,15 @@
             margin-left: 18px;
         }
 
+        .curator-affiliation {
+            font-size: 16px;
+            line-height: 30px;
+        }
+
         button {
             border-radius: 4px;
             font-weight: 500;
+            margin-top: -4px;
         }
     }
 }
