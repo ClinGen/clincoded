@@ -12,6 +12,7 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { showActivityIndicator } from './activity_indicator';
 import { findNonEmptyArray } from '../libs/helpers/find_array';
+import * as curator from './curator';
 
 var fetched = require('./fetched');
 
@@ -35,12 +36,10 @@ var Dashboard = createReactClass({
             gdmList: [],
             vciInterpList: [],
             histories: [],
-            affiliatedGroupEvidence: [],
-            affiliatedFamilyEvidence: [],
-            affiliatedIndividualEvidence: [],
-            affiliatedCaseControlEvidence: [],
-            affiliatedExperimentalEvidence: [],
-            affiliatedInterpretations: []
+            affiliatedGdms: [],
+            affiliatedGdmsLoading: true,
+            affiliatedInterpretations: [],
+            affiliatedInterpretationsLoading: true
         };
     },
 
@@ -120,128 +119,36 @@ var Dashboard = createReactClass({
      */
     getAffiliatedData(affiliation) {
         this.getRestDatas([
-            '/search/?type=group&affiliation=' + affiliation.affiliation_id,
-            '/search/?type=family&affiliation=' + affiliation.affiliation_id,
-            '/search/?type=individual&affiliation=' + affiliation.affiliation_id,
-            '/search/?type=caseControl&affiliation=' + affiliation.affiliation_id,
-            '/search/?type=experimental&affiliation=' + affiliation.affiliation_id,
+            '/search/?type=gdm',
             '/search/?type=interpretation&affiliation=' + affiliation.affiliation_id
         ], null).then(data => {
-            let groupEvidenceURLs = [], affiliatedGroupEvidence = [],
-                familyEvidenceURLs = [], affiliatedFamilyEvidence = [],
-                individualEvidenceURLs = [], affiliatedIndividualEvidence = [],
-                casecontrolEvidenceURLs = [], affiliatedCaseControlEvidence = [],
-                experimentalEvidenceURLs = [], affiliatedExperimentalEvidence = [],
+            let gdmURLs = [], affiliatedGdms = [],
                 interpretationURLs = [], affiliatedInterpretations = [];
-            // Handle group evidence result
-            groupEvidenceURLs = data[0]['@graph'].map(result => { return result['@id']; });
-            if (groupEvidenceURLs.length > 0) {
-                this.getRestDatas(groupEvidenceURLs, null, true).then(evidenceRecords => {
-                    evidenceRecords.map(evidence => {
-                        let annotation = findNonEmptyArray(evidence, 'associatedAnnotations'),
-                            gdm = annotation.associatedGdm[0];
-                        affiliatedGroupEvidence.push({
-                            uuid: evidence.uuid,
-                            annotationUuid: annotation.uuid,
-                            gdmUuid: gdm.uuid,
-                            geneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                            modeOfInheritance: this.cleanHpoName(gdm.modeInheritance),
-                            label: evidence.label,
-                            submitted_by: evidence.submitted_by.title,
-                            date_created: evidence.date_created
+            // Handle gdm result
+            gdmURLs = data[0]['@graph'].map(result => { return result['@id']; });
+            if (gdmURLs.length > 0) {
+                this.getRestDatas(gdmURLs, null, true).then(gdms => {
+                    let affiliatedGdmList = curator.findAffiliatedGdms(gdms, affiliation.affiliation_id);
+                    if (affiliatedGdmList.length) {
+                        affiliatedGdmList.map(affiliatedGdm => {
+                            affiliatedGdms.push({
+                                uuid: affiliatedGdm.uuid,
+                                gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
+                                gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
+                                status: affiliatedGdm.gdm_status,
+                                date_created: affiliatedGdm.date_created
+                            });
                         });
-                    });
-                    this.setState({affiliatedGroupEvidence: affiliatedGroupEvidence});
+                        this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
+                    } else {
+                        this.setState({affiliatedGdmsLoading: false});
+                    }
                 });
-            }
-            // Handle family evidence result
-            familyEvidenceURLs = data[1]['@graph'].map(result => { return result['@id']; });
-            if (familyEvidenceURLs.length > 0) {
-                this.getRestDatas(familyEvidenceURLs, null, true).then(evidenceRecords => {
-                    evidenceRecords.map(evidence => {
-                        let annotation = findNonEmptyArray(evidence, 'associatedAnnotations'),
-                            gdm = annotation.associatedGdm[0];
-                        affiliatedFamilyEvidence.push({
-                            uuid: evidence.uuid,
-                            annotationUuid: annotation.uuid,
-                            gdmUuid: gdm.uuid,
-                            geneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                            modeOfInheritance: this.cleanHpoName(gdm.modeInheritance),
-                            label: evidence.label,
-                            submitted_by: evidence.submitted_by.title,
-                            date_created: evidence.date_created
-                        });
-                    });
-                    this.setState({affiliatedFamilyEvidence: affiliatedFamilyEvidence});
-                });
-            }
-            // Handle individual evidence result
-            individualEvidenceURLs = data[2]['@graph'].map(result => { return result['@id']; });
-            if (individualEvidenceURLs.length > 0) {
-                this.getRestDatas(individualEvidenceURLs, null, true).then(evidenceRecords => {
-                    evidenceRecords.map(evidence => {
-                        let annotation = findNonEmptyArray(evidence, 'associatedAnnotations'),
-                            gdm = annotation.associatedGdm[0];
-                        affiliatedIndividualEvidence.push({
-                            uuid: evidence.uuid,
-                            annotationUuid: annotation.uuid,
-                            gdmUuid: gdm.uuid,
-                            geneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                            modeOfInheritance: this.cleanHpoName(gdm.modeInheritance),
-                            label: evidence.label,
-                            submitted_by: evidence.submitted_by.title,
-                            date_created: evidence.date_created
-                        });
-                    });
-                    this.setState({affiliatedIndividualEvidence: affiliatedIndividualEvidence});
-                });
-            }
-            // Handle case-control evidence result
-            casecontrolEvidenceURLs = data[3]['@graph'].map(result => { return result['@id']; });
-            if (casecontrolEvidenceURLs.length > 0) {
-                this.getRestDatas(casecontrolEvidenceURLs, null, true).then(evidenceRecords => {
-                    evidenceRecords.map(evidence => {
-                        let annotation = findNonEmptyArray(evidence, 'associatedAnnotations'),
-                            gdm = annotation.associatedGdm[0];
-                        affiliatedCaseControlEvidence.push({
-                            uuid: evidence.uuid,
-                            caseCohortUuid: evidence.caseCohort.uuid,
-                            controlCohortUuid: evidence.controlCohort.uuid,
-                            annotationUuid: annotation.uuid,
-                            gdmUuid: gdm.uuid,
-                            geneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                            modeOfInheritance: this.cleanHpoName(gdm.modeInheritance),
-                            label: evidence.label,
-                            submitted_by: evidence.submitted_by.title,
-                            date_created: evidence.date_created
-                        });
-                    });
-                    this.setState({affiliatedCaseControlEvidence: affiliatedCaseControlEvidence});
-                });
-            }
-            // Handle experimental evidence result
-            experimentalEvidenceURLs = data[4]['@graph'].map(result => { return result['@id']; });
-            if (experimentalEvidenceURLs.length > 0) {
-                this.getRestDatas(experimentalEvidenceURLs, null, true).then(evidenceRecords => {
-                    evidenceRecords.map(evidence => {
-                        let annotation = findNonEmptyArray(evidence, 'associatedAnnotations'),
-                            gdm = annotation.associatedGdm[0];
-                        affiliatedExperimentalEvidence.push({
-                            uuid: evidence.uuid,
-                            annotationUuid: annotation.uuid,
-                            gdmUuid: gdm.uuid,
-                            geneDisease: this.cleanGdmGeneDiseaseName(gdm.gene.symbol, gdm.disease.term),
-                            modeOfInheritance: this.cleanHpoName(gdm.modeInheritance),
-                            label: evidence.label,
-                            submitted_by: evidence.submitted_by.title,
-                            date_created: evidence.date_created
-                        });
-                    });
-                    this.setState({affiliatedExperimentalEvidence: affiliatedExperimentalEvidence});
-                });
+            } else {
+                this.setState({affiliatedGdmsLoading: false});
             }
             // Handle interpretations result
-            interpretationURLs = data[5]['@graph'].map(result => { return result['@id']; });
+            interpretationURLs = data[1]['@graph'].map(result => { return result['@id']; });
             if (interpretationURLs.length > 0) {
                 this.getRestDatas(interpretationURLs, null, true).then(interpretationRecords => {
                     interpretationRecords.map(interpretation => {
@@ -254,12 +161,14 @@ var Dashboard = createReactClass({
                             diseaseTerm: interpretation.disease ? interpretation.disease.term : null,
                             modeInheritance: interpretation.modeInheritance ? this.cleanHpoName(interpretation.modeInheritance) : null,
                             status: interpretation.interpretation_status,
-                            submitted_by: interpretation.submitted_by.title,
+                            modified_by: interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title,
                             date_created: interpretation.date_created
                         });
                     });
-                    this.setState({affiliatedInterpretations: affiliatedInterpretations});
+                    this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false});
                 });
+            } else {
+                this.setState({affiliatedInterpretationsLoading: false});
             }
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
@@ -302,14 +211,14 @@ var Dashboard = createReactClass({
      */
     renderIndividualRecords(records) {
         return (
-            <div className="panel panel-info">
+            <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">Your Gene-Disease Records</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.gdmListLoading ? showActivityIndicator('Loading... ') : null}
                     {records.length > 0 ?
-                        <table className="table affiliated-evidence-list">
+                        <table className="table individual-record-list">
                             <thead>
                                 <tr>
                                     <th className="item-name">Gene-Disease Record</th>
@@ -322,8 +231,8 @@ var Dashboard = createReactClass({
                                     return (
                                         <tr key={item.uuid}>
                                             <td>
-                                                <a key={item.uuid} className="affiliated-record-link" href={"/curation-central/?gdm=" + item.uuid}>
-                                                    <div><span className="block-link-color title-ellipsis"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span></div>
+                                                <a key={item.uuid} className="individual-record-link" href={"/curation-central/?gdm=" + item.uuid}>
+                                                    <span className="block-link-color title-ellipsis"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
                                             <td>{item.status}</td>
@@ -344,44 +253,44 @@ var Dashboard = createReactClass({
     /**
      * Method to render affiliated evidence table
      * @param {array} records - Affiliated curation evidence
-     * @param {string} uri - Page location such as /group-curation or /family-curation
-     * @param {string} title - Table title
-     * @param {string} type - Param in links to affiliated evidence
      */
-    renderAffiliatedRecords(records, uri, title, type) {
+    renderAffiliatedGdms(records) {
         return (
-            <div className="panel panel-info">
+            <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">{title} evidence associated with your affiliation</h3>
+                    <h3 className="panel-title">Gene-Disease records associated with your affiliation</h3>
                 </div>
-                <table className="table affiliated-evidence-list">
-                    <thead>
-                        <tr>
-                            <th className="item-name">Name</th>
-                            <th className="item-attribute">Gene-Disease Record</th>
-                            <th className="item-author">Submitted By</th>
-                            <th className="item-timestamp">Creation Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {records.map(item => {
-                            return (
-                                <tr key={item.uuid}>
-                                    <td>
-                                        <a key={item.uuid}
-                                            className="affiliated-record-link"
-                                            href={"/" + uri + "/?editsc&gdm=" + item.gdmUuid + "&evidence=" + item.annotationUuid + "&" + type + "=" + item.uuid + (type === 'casecontrol' ? "&casecohort=" + item.caseCohortUuid + "&controlcohort=" + item.controlCohortUuid : '')}>
-                                            <div><span className="block-link-color title-ellipsis"><strong>{item.label}</strong></span></div>
-                                        </a>
-                                    </td>
-                                    <td><strong>{item.geneDisease}</strong>–<i>{item.modeOfInheritance}</i></td>
-                                    <td>{item.submitted_by}</td>
-                                    <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                <div className="panel-content-wrapper">
+                    {this.state.affiliatedGdmsLoading ? showActivityIndicator('Loading... ') : null}
+                    {records.length > 0 ?
+                        <table className="table affiliated-evidence-list">
+                            <thead>
+                                <tr>
+                                    <th className="item-name">Gene-Disease Record</th>
+                                    <th className="item-status">Status</th>
+                                    <th className="item-timestamp">Creation Date</th>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                {records.map(item => {
+                                    return (
+                                        <tr key={item.uuid}>
+                                            <td>
+                                                <a key={item.uuid} className="affiliated-record-link" href={"/curation-central/?gdm=" + item.uuid}>
+                                                    <span className="block-link-color title-ellipsis"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
+                                                </a>
+                                            </td>
+                                            <td>{item.status}</td>
+                                            <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        :
+                        <div className="panel-body"><p>Your affiliation has not created any Gene-Disease-Mode of Inheritance entries.</p></div>
+                    }
+                </div>
             </div>
         );
     },
@@ -392,19 +301,19 @@ var Dashboard = createReactClass({
      */
     renderIndividualInterpretations(records) {
         return (
-            <div className="panel panel-info">
+            <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">Your Variant Interpretations</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.vciInterpListLoading ? showActivityIndicator('Loading... ') : null}
                     {records.length > 0 ?
-                        <table className="table affiliated-interpretation-list">
+                        <table className="table individual-interpretation-list">
                             <thead>
                                 <tr>
-                                    <th className="item-name">Name</th>
+                                    <th className="item-variant">Variant</th>
                                     <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-author">Status</th>
+                                    <th className="item-status">Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
@@ -414,14 +323,14 @@ var Dashboard = createReactClass({
                                         <tr key={item.uuid}>
                                             <td>
                                                 <a key={item.uuid}
-                                                    className="affiliated-record-link"
+                                                    className="individual-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <div><span className="block-link-color title-ellipsis"><strong>
+                                                    <span className="block-link-color title-ellipsis"><strong>
                                                         {item.clinvarVariantTitle
                                                             ? item.clinvarVariantTitle
                                                             : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
                                                         }
-                                                    </strong></span></div>
+                                                    </strong></span>
                                                 </a>
                                             </td>
                                             <td>{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
@@ -442,47 +351,54 @@ var Dashboard = createReactClass({
 
     /**
      * Method to render affiliated variant interpretations table
-     * @param {array} records - affiliated variant interpretations
+     * @param {array} records - Affiliated variant interpretations
      */
     renderAffiliatedInterpretations(records) {
         return (
-            <div className="panel panel-info">
+            <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">Variant interpretations associated with your affiliation</h3>
                 </div>
-                <table className="table affiliated-interpretation-list">
-                    <thead>
-                        <tr>
-                            <th className="item-name">Name</th>
-                            <th className="item-attribute">Disease/Mode of Inheritance</th>
-                            <th className="item-author">Submitted By</th>
-                            <th className="item-timestamp">Creation Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {records.map(item => {
-                            return (
-                                <tr key={item.uuid}>
-                                    <td>
-                                        <a key={item.uuid}
-                                            className="affiliated-record-link"
-                                            href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                            <div><span className="block-link-color title-ellipsis"><strong>
-                                                {item.clinvarVariantTitle
-                                                    ? item.clinvarVariantTitle
-                                                    : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
-                                                }
-                                            </strong></span></div>
-                                        </a>
-                                    </td>
-                                    <td>{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                    <td>{item.submitted_by}</td>
-                                    <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                <div className="panel-content-wrapper">
+                    {this.state.affiliatedInterpretationsLoading ? showActivityIndicator('Loading... ') : null}
+                    {records.length > 0 ?
+                        <table className="table affiliated-interpretation-list">
+                            <thead>
+                                <tr>
+                                    <th className="item-variant">Variant</th>
+                                    <th className="item-attribute">Disease/Mode of Inheritance</th>
+                                    <th className="item-status">Status</th>
+                                    <th className="item-timestamp">Creation Date</th>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                {records.map(item => {
+                                    return (
+                                        <tr key={item.uuid}>
+                                            <td>
+                                                <a key={item.uuid}
+                                                    className="affiliated-record-link"
+                                                    href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
+                                                    <span className="block-link-color title-ellipsis"><strong>
+                                                        {item.clinvarVariantTitle
+                                                            ? item.clinvarVariantTitle
+                                                            : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
+                                                        }
+                                                    </strong></span>
+                                                </a>
+                                            </td>
+                                            <td>{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
+                                            <td>{item.status}</td>
+                                            <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        :
+                        <div className="panel-body"><p>Your affiliation has not created any variant interpretations.</p></div>
+                    }
+                </div>
             </div>
         );
     },
@@ -515,9 +431,9 @@ var Dashboard = createReactClass({
                                 <li className="list-group-item"><a href="/gdm/">View list of all Gene-Disease Records</a></li>
                             </ul>
                         </div>
-                        <div className="panel panel-warning">
+                        <div className="panel panel-primary">
                             <div className="panel-heading">
-                                <h3 className="panel-title">Your Recent History</h3>
+                                <h3 className="panel-title">Recent History</h3>
                             </div>
                             <div className="panel-content-wrapper">
                                 {this.state.historiesLoading ? showActivityIndicator('Loading... ') : null}
@@ -537,26 +453,12 @@ var Dashboard = createReactClass({
                     </div>
                     {/*/ Right pane /*/}
                     <div className="col-md-8">
-                        {this.renderIndividualInterpretations(this.state.vciInterpList)}
-                        {this.renderIndividualRecords(this.state.gdmList)}
-                        {this.state.affiliatedGroupEvidence.length > 0 ?
-                            this.renderAffiliatedRecords(this.state.affiliatedGroupEvidence, 'group-curation', 'Group', 'group')
-                            : null}
-                        {this.state.affiliatedFamilyEvidence.length > 0 ?
-                            this.renderAffiliatedRecords(this.state.affiliatedFamilyEvidence, 'family-curation', 'Family', 'family')
-                            : null}
-                        {this.state.affiliatedIndividualEvidence.length > 0 ?
-                            this.renderAffiliatedRecords(this.state.affiliatedIndividualEvidence, 'individual-curation', 'Individual', 'individual')
-                            : null}
-                        {this.state.affiliatedCaseControlEvidence.length > 0 ?
-                            this.renderAffiliatedRecords(this.state.affiliatedCaseControlEvidence, 'case-control-curation', 'Case-Control', 'casecontrol')
-                            : null}
-                        {this.state.affiliatedExperimentalEvidence.length > 0 ?
-                            this.renderAffiliatedRecords(this.state.affiliatedExperimentalEvidence, 'experimental-curation', 'Experimental', 'experimental')
-                            : null}
-                        {this.state.affiliatedInterpretations.length > 0 ?
+                        {this.props.affiliation && Object.keys(this.props.affiliation).length ?
                             this.renderAffiliatedInterpretations(this.state.affiliatedInterpretations)
-                            : null}
+                            : this.renderIndividualInterpretations(this.state.vciInterpList)}
+                        {this.props.affiliation && Object.keys(this.props.affiliation).length ?
+                            this.renderAffiliatedGdms(this.state.affiliatedGdms)
+                            : this.renderIndividualRecords(this.state.gdmList)}
                     </div>
                 </div>
             </div>
