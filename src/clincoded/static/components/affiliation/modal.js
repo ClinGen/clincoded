@@ -17,7 +17,10 @@ class AffiliationModal extends Component {
                         <div className="affiliation-modal">
                             {this.props.children}
                             <div className="affiliation-modal-footer">
-                                <button onClick={this.props.onClose} disabled={this.props.buttonDisabled} className="btn btn-primary pull-right">Continue</button>
+                                {this.props.hasCancelButton ?
+                                    <button onClick={this.props.onCancel} className="btn btn-default btn-inline-spacer">Cancel</button>
+                                    : null}
+                                <button onClick={this.props.onClose} disabled={this.props.buttonDisabled} className="btn btn-primary btn-inline-spacer pull-right">Continue</button>
                             </div>
                         </div>
                     </div>
@@ -29,9 +32,11 @@ class AffiliationModal extends Component {
 
 AffiliationModal.propTypes = {
     onClose: PropTypes.func.isRequired,
+    onCancel: PropTypes.func,
     show: PropTypes.bool,
     children: PropTypes.node,
-    buttonDisabled: PropTypes.bool
+    buttonDisabled: PropTypes.bool,
+    hasCancelButton: PropTypes.bool
 };
 
 export default AffiliationModal;
