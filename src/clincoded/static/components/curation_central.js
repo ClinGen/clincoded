@@ -105,6 +105,14 @@ var CurationCentral = createReactClass({
             active: true
         };
 
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!newAnnotationObj.affiliation) {
+                newAnnotationObj.affiliation = this.props.affiliation.affiliation_id;
+            }
+        }
+
         // Post new annotation to the DB. fetch returns a JS promise.
         this.postRestData('/evidence/', newAnnotationObj).then(data => {
             // Save the new annotation; fetch the currently displayed GDM as an object without its embedded
