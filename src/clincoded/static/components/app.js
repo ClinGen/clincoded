@@ -85,12 +85,20 @@ var App = module.exports = createReactClass({
      * @param {event} e - Selection change event
      */
     handleOnChange(e) {
+        let self = {
+            affiliation_id: null,
+            affiliation_abbreviation: 'None',
+            affiliation_fullname: 'None'
+        };
         this.setState({
-            tempAffiliation: e.target.value !== 'Individual' ? JSON.parse(e.target.value) : {},
+            tempAffiliation: e.target.value !== 'self' ? JSON.parse(e.target.value) : self,
             affiliationModalButtonDisabled: false
         });
     },
 
+    /**
+     * Method to create a cookie
+     */
     createCookie(name, value, days) {
         let expires = "";
         if (days) {
@@ -101,14 +109,37 @@ var App = module.exports = createReactClass({
         document.cookie = name + "=" + value + expires + "; path=/";
     },
 
+    /**
+     * Handler to close affiliation modal on continue action.
+     * Sets affiliation state and cookie.
+     */
     toggleAffiliationModal() {
         this.setState({
             affiliation: this.state.tempAffiliation,
             isAffiliationModalOpen: !this.state.isAffiliationModalOpen
         }, () => {
             this.createCookie('affiliation', JSON.stringify(this.state.affiliation));
-            this.setState({tempAffiliation: null});
+            this.setState({
+                tempAffiliation: null,
+                affiliation_cookie: this.state.affiliation,
+                affiliationModalButtonDisabled: true
+            });
         });
+    },
+
+    /**
+     * Handler to close affiliation modal on cancel action
+     */
+    closeAffiliationModal() {
+        this.setState({isAffiliationModalOpen: !this.state.isAffiliationModalOpen});
+    },
+
+    /**
+     * Handler to show affiliation modal on click event
+     * @param {event} e - Button click event
+     */
+    showAffiliationModal(e) {
+        this.setState({isAffiliationModalOpen: true});
     },
 
     /**
@@ -130,17 +161,24 @@ var App = module.exports = createReactClass({
         return affiliationArray;
     },
 
-    renderAffiliationModal(affiliations) {
+    /**
+     * Method to render affiliation modal
+     * @param {array} affiliations - List of affiliation IDs
+     * @param {string} curatorName - The title of the logged-in user
+     */
+    renderAffiliationModal(affiliations, curatorName) {
         let userAffiliations = this.getUserAffiliations(affiliations, AffiliationsList);
         return (
             <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
-                buttonDisabled={this.state.affiliationModalButtonDisabled}>
+                buttonDisabled={this.state.affiliationModalButtonDisabled} onCancel={this.closeAffiliationModal}
+                hasCancelButton={this.state.affiliation && Object.keys(this.state.affiliation).length ? true : false}>
                 <div className="affiliation-modal-body">
-                    <h2>Continue as an individual or as a member of an affiliation.</h2>
+                    <h2>Please select whether you would like to curate as yourself or as part of an affiliation:</h2>
                     <select className="form-control" defaultValue="none" onChange={this.handleOnChange}>
-                        <option value="none" disabled="disabled">Select</option>
-                        <option value="" disabled="disabled"></option>
-                        <option value="Individual">Individual</option>
+                        <option value="none" disabled>Select Affiliation</option>
+                        <option value="" disabled className="divider">-----------------------------------------------------</option>
+                        <option value="self">{curatorName} (curating as yourself)</option>
+                        <option value="" disabled className="divider">-----------------------------------------------------</option>
                         {userAffiliations.map((affiliation, i) => {
                             return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_abbreviation}</option>;
                         })}
@@ -148,12 +186,6 @@ var App = module.exports = createReactClass({
                 </div>
             </AffiliationModal>
         );
-    },
-
-    showAffiliationModal(affiliation) {
-        this.setState({isAffiliationModalOpen: true}, () => {
-            this.renderAffiliationModal(affiliation);
-        });
     },
 
     render: function() {
@@ -233,13 +265,18 @@ var App = module.exports = createReactClass({
                                 <div className="container affiliation-utility">
                                     <span className="curator-affiliation">Affiliation: {this.state.affiliation.affiliation_fullname}</span>
                                     <span className="change-affiliation-button">
-                                        <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal.bind(null, user_properties.affiliation)}>Change Affiliation</button>
+                                        {context.name === 'dashboard' ?
+                                            <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal}>Change Affiliation</button>
+                                            :
+                                            <span><i className="icon icon-lightbulb-o"></i> To change your affiliation, go to <a href='/dashboard/'>Dashboard</a></span>
+                                        }
                                     </span>
                                 </div>
+                                {this.renderAffiliationModal(user_properties.affiliation, user_properties.title)}
                             </div>
                             : null}
                         {user_properties && user_properties.affiliation && user_properties.affiliation.length && !affiliation_cookie ?
-                            this.renderAffiliationModal(user_properties.affiliation)
+                            this.renderAffiliationModal(user_properties.affiliation, user_properties.title)
                             : null}
                         {content}
                     </div>
