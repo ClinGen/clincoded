@@ -674,7 +674,7 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
-                affiliationMatch = group && affiliationMatch(group.submitted_by, session);
+                //affiliationMatch = group && affiliationMatch(group.submitted_by, session);
                 curatorMatch = group && userMatch(group.submitted_by, session);
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
@@ -1347,6 +1347,35 @@ export function findAllParticipants(gdm) {
     return participants;
 }
 
+/**
+ * Return an array of unique GDMs consisting of any affiliated annotations, evidence, scores and classifications
+ * @param {array} gdms - An array of gene-disease records
+ * @param {string} affiliationId - Affiliation ID associated with the logged-in user
+ */
+export function findAffiliatedGdms(gdms, affiliationId) {
+    // Iterate thru all flattened objects in each GDM.
+    // For any objects that have the matching affiliation,
+    // add the parent GDM to the array
+    let affiliatedGdmList = [];
+    gdms.map(gdm => {
+        if (gdm.affiliation && gdm.affiliation === affiliationId) {
+            affiliatedGdmList.push(gdm);
+        }
+        let allObjects = getAllObjects(gdm);
+        allObjects.forEach(object => {
+            if (object.affiliation && object.affiliation === affiliationId) {
+                affiliatedGdmList.push(gdm);
+            }
+        });
+    });
+    // Filtered array that excludes duplicate GDMs
+    let uniqueAffiliatedGdms = _.chain(affiliatedGdmList).uniq(affiliatedGdm => {
+        return affiliatedGdm.uuid;
+    }).sortBy('last_modified').value();
+
+    return uniqueAffiliatedGdms;
+}
+
 // Return the latest added/updated object in the given GDM (e.g. annotation, evidence)
 export function findLatestRecord(gdm) {
     let allObjects = getAllObjects(gdm);
@@ -1503,13 +1532,18 @@ function getAllObjects(gdm) {
             });
         }
     });
+    // Get provisionalClassifications objects
+    let classifications = gdm.provisionalClassifications && gdm.provisionalClassifications.length ? gdm.provisionalClassifications : [];
+    classifications.forEach(classification => {
+        totalObjects.push(filteredObject(classification));
+    });
 
     return totalObjects;
 }
 
 // Method to filter object keys
 function filteredObject(record) {
-    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type'];
+    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type', 'affiliation'];
 
     const filtered = Object.keys(record)
         .filter(key => allowed.includes(key))
