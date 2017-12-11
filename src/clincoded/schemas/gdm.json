@@ -114,6 +114,11 @@
             "description": "Adjective for Mode of Inheritance",
             "type": "string",
             "default": ""
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this gene-disease record is associated with.",
+            "type": "string"
         }
     },
     "columns": {

@@ -86,6 +86,11 @@
             "description": "Boolean switch for using the annotation",
             "type": "boolean",
             "default": true
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this annotation is associated with.",
+            "type": "string"
         }
     },
     "columns": {
