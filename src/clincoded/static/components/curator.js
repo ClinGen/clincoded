@@ -1984,7 +1984,7 @@ function cloneSimpleProps(obj, props) {
 }
 
 
-var annotationSimpleProps = ["active", "date_created"];
+var annotationSimpleProps = ["active", "date_created", "affiliation"];
 
 function flattenAnnotation(annotation) {
     // First copy everything before fixing the special properties
@@ -2238,7 +2238,8 @@ function flattenExperimental(experimental) {
 
 
 var gdmSimpleProps = [
-    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active", "modeInheritanceAdjective"
+    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active",
+    "modeInheritanceAdjective", "affiliation"
 ];
 
 function flattenGdm(gdm) {
