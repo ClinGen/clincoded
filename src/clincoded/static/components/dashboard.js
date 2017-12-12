@@ -406,7 +406,11 @@ var Dashboard = createReactClass({
     render: function() {
         return (
             <div className="container">
-                {this.props.affiliation && Object.keys(this.props.affiliation).length ? null : <h1>Welcome, {this.state.userName}!</h1>}
+                {this.props.affiliation && Object.keys(this.props.affiliation).length ?
+                    <h2>Welcome, {this.props.affiliation.affiliation_fullname}!</h2>
+                    :
+                    <h2>Welcome, {this.state.userName}!</h2>
+                }
                 <div className="row affiliated-records-container">
                     {/*/ Left pane /*/}
                     <div className="col-md-4">
