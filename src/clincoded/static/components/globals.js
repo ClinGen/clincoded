@@ -58,8 +58,8 @@ module.exports.userMatch = function(user, session) {
 
 // Returns true if a record's affiliation matches the user's affiliation
 module.exports.affiliationMatch = function(record, affiliation) {
-    if (record.affiliation && Object.keys(record.affiliation).length && affiliation && Object.keys(affiliation).length) {
-        return record.affiliation.affiliation_id === affiliation.affiliation_id;
+    if (record.affiliation && record.affiliation.length && affiliation && Object.keys(affiliation).length) {
+        return record.affiliation === affiliation.affiliation_id;
     }
     return false;
 };
