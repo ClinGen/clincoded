@@ -662,7 +662,7 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         var gdm = this.props.gdm;
         var annotation = this.props.annotation;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var curatorMatch = false, affiliationMatch = false;
+        var curatorMatch = false;
         var groupUrl = '/group-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var familyUrl = '/family-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var individualUrl = '/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
@@ -670,34 +670,39 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         var experimentalUrl = '/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
         let affiliation = this.props.affiliation;
+        let groupAffiliationMatch = false, familyAffiliationMatch = false, individualAffiliationMatch = false,
+            caseControlAffiliationMatch = false, experimentalAffiliationMatch = false;
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
-                //affiliationMatch = group && affiliationMatch(group.submitted_by, session);
+                groupAffiliationMatch = group && affiliationMatch(group, affiliation);
                 curatorMatch = group && userMatch(group.submitted_by, session);
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var familyGroupRenders = group.familyIncluded.map(family => {
+                        familyAffiliationMatch = family && affiliationMatch(family, affiliation);
                         if (family.individualIncluded) {
                             // Collect up individuals that are direct children of families associated with groups
                             var individualFamilyRenders = family.individualIncluded.map(individual => {
-                                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                                individualAffiliationMatch = individual && affiliationMatch(individual, affiliation);
+                                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, individualAffiliationMatch)}</div>;
                             });
                             individualRenders = individualRenders.concat(individualFamilyRenders);
                         }
-                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, familyAffiliationMatch)}</div>;
                     });
                     familyRenders = familyRenders.concat(familyGroupRenders);
                 }
                 if (group.individualIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var individualGroupRenders = group.individualIncluded.map(individual => {
-                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                        individualAffiliationMatch = individual && affiliationMatch(individual, affiliation);
+                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, individualAffiliationMatch)}</div>;
                     });
                     individualRenders = individualRenders.concat(individualGroupRenders);
                 }
-                return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch)}</div>;
+                return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch, groupAffiliationMatch)}</div>;
             });
             groupRenders = groupRenders.concat(groupAnnotationRenders);
         }
@@ -705,15 +710,17 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of family renders the unassociated families, and individuals that associate with them.
         if (annotation && annotation.families) {
             var familyAnnotationRenders = annotation.families.map(family => {
+                familyAffiliationMatch = family && affiliationMatch(family, affiliation);
                 curatorMatch = family && userMatch(family.submitted_by, session);
                 if (family.individualIncluded) {
                     // Add to individual renders the individuals that are associated with this family
                     var individualFamilyRenders = family.individualIncluded.map(individual => {
-                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
+                        individualAffiliationMatch = individual && affiliationMatch(individual, affiliation);
+                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch, individualAffiliationMatch)}</div>;
                     });
                     individualRenders = individualRenders.concat(individualFamilyRenders);
                 }
-                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, familyAffiliationMatch)}</div>;
             });
             familyRenders = familyRenders.concat(familyAnnotationRenders);
         }
@@ -721,8 +728,9 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of individual renders the unassociated individuals.
         if (annotation && annotation.individuals) {
             var individualAnnotationRenders = annotation.individuals.map(individual => {
+                individualAffiliationMatch = individual && affiliationMatch(individual, affiliation);
                 curatorMatch = individual && userMatch(individual.submitted_by, session);
-                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, individualAffiliationMatch)}</div>;
             });
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
@@ -730,8 +738,9 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of case-control renders
         if (annotation && annotation.caseControlStudies) {
             let caseControlObj = annotation.caseControlStudies.map(caseControl => {
+                caseControlAffiliationMatch = caseControl && affiliationMatch(caseControl, affiliation);
                 curatorMatch = caseControl && userMatch(caseControl.submitted_by, session);
-                return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch)}</div>;
+                return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch, caseControlAffiliationMatch)}</div>;
             });
             caseControlRenders = caseControlRenders.concat(caseControlObj);
         }
@@ -739,8 +748,9 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
+                experimentalAffiliationMatch = experimental && affiliationMatch(experimental, affiliation);
                 curatorMatch = experimental && userMatch(experimental.submitted_by, session);
-                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch, experimentalAffiliationMatch)}</div>;
             });
             experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
         }
@@ -811,9 +821,9 @@ var setPreferredTitle = function(variants) {
 };
 
 // Render a family in the curator palette.
-var renderGroup = function(group, gdm, annotation, curatorMatch) {
-    var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
-    var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+var renderGroup = function(group, gdm, annotation, curatorMatch, evidenceAffiliationMatch) {
+    var familyUrl = evidenceAffiliationMatch || curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+    var individualUrl = evidenceAffiliationMatch || curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
         <div className="panel-evidence-group">
@@ -821,19 +831,19 @@ var renderGroup = function(group, gdm, annotation, curatorMatch) {
             <div className="evidence-curation-info">
                 {group.submitted_by ?
                     <p className="evidence-curation-info">{group.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
-            {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
-            {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
+            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{evidenceAffiliationMatch || curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+            {evidenceAffiliationMatch || curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
+            {evidenceAffiliationMatch || curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
         </div>
     );
 };
 
 // Render a family in the curator palette.
-var renderFamily = function(family, gdm, annotation, curatorMatch) {
-    var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+var renderFamily = function(family, gdm, annotation, curatorMatch, evidenceAffiliationMatch) {
+    var individualUrl = evidenceAffiliationMatch || curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
     // if any of these segregation values exist, the family is assessable
     var familyAssessable = (family && family.segregation && (family.segregation.pedigreeDescription || family.segregation.pedigreeSize
         || family.segregation.numberOfGenerationInPedigree || family.segregation.consanguineousFamily || family.segregation.numberOfCases
@@ -847,7 +857,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             <div className="evidence-curation-info">
                 {family.submitted_by ?
                     <p className="evidence-curation-info">{family.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {family.associatedGroups && family.associatedGroups.length ?
@@ -862,7 +872,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         );
                     })}
                 </div>
-            :
+                :
                 <div>No associations</div>
             }
             {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
@@ -871,18 +881,18 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         <a className="variant-preferred-title" title={setPreferredTitle(family.segregation.variants)}>{family.segregation.variants.length}</a>
                     </span>
                 </div>
-            : null}
+                : null}
             {familyAssessable ?
                 <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View</a>
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
-            {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
-            {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
+            {evidenceAffiliationMatch || curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
+            {evidenceAffiliationMatch || curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
     );
 };
 
 // Render an individual in the curator palette.
-var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
+var renderIndividual = function(individual, gdm, annotation, curatorMatch, evidenceAffiliationMatch) {
     var i = 0;
 
     return (
@@ -891,7 +901,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
                     <p className="evidence-curation-info">{individual.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {(individual.associatedGroups && individual.associatedGroups.length) || (individual.associatedFamilies && individual.associatedFamilies.length) ?
@@ -924,7 +934,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         );
                     })}
                 </div>
-            :
+                :
                 <div>No associations</div>
             }
             {(individual.variants && individual.variants.length) ?
@@ -933,26 +943,28 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         <a className="variant-preferred-title" title={setPreferredTitle(individual.variants)}>{individual.variants.length}</a>
                     </span>
                 </div>
-            : null}
+                : null}
             <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
-            {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+            {evidenceAffiliationMatch || curatorMatch ?
+                <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span>
+                : null}
         </div>
     );
 };
 
 // Render a case-control in the curator palette.
-var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
+var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch, evidenceAffiliationMatch) {
     return (
         <div className="panel-evidence-group">
             <h5><span className="title-ellipsis dotted" title={caseControl.label}>{caseControl.label}</span></h5>
             <div className="evidence-curation-info">
                 {caseControl.submitted_by ?
                     <p className="evidence-curation-info">{caseControl.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
-            {curatorMatch ? <span> | <a href={
+            {evidenceAffiliationMatch || curatorMatch ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
@@ -964,7 +976,7 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
 };
 
 // Render an experimental data in the curator palette.
-var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch, evidenceAffiliationMatch) {
     var i = 0;
     var subtype = '';
     // determine if the evidence type has a subtype, and determine the subtype
@@ -989,7 +1001,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
             <div className="evidence-curation-info">
                 {experimental.submitted_by ?
                     <p className="evidence-curation-info">{experimental.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {(experimental.variants && experimental.variants.length) ?
@@ -998,9 +1010,11 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                         <a className="variant-preferred-title" title={setPreferredTitle(experimental.variants)}>{experimental.variants.length}</a>
                     </span>
                 </div>
-            : null}
+                : null}
             <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Score</a>
-            {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
+            {evidenceAffiliationMatch || curatorMatch ?
+                <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span>
+                : null}
         </div>
     );
 };
