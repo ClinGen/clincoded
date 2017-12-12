@@ -64,7 +64,7 @@ var App = module.exports = createReactClass({
             demoWarning: demoWarning,
             productionWarning: productionWarning,
             tempAffiliation: null, // Placeholder when user selects an option in the affiliation dropdown
-            affiliation: {}, // Confirmed affiliation when user selects to continue in the modal
+            affiliation: null, // Confirmed affiliation when user selects to continue in the modal
             affiliationModalButtonDisabled: true,
             isAffiliationModalOpen: false
         };
@@ -85,13 +85,8 @@ var App = module.exports = createReactClass({
      * @param {event} e - Selection change event
      */
     handleOnChange(e) {
-        let self = {
-            affiliation_id: null,
-            affiliation_abbreviation: 'None',
-            affiliation_fullname: 'None'
-        };
         this.setState({
-            tempAffiliation: e.target.value !== 'self' ? JSON.parse(e.target.value) : self,
+            tempAffiliation: e.target.value !== 'self' ? JSON.parse(e.target.value) : null,
             affiliationModalButtonDisabled: false
         });
     },
@@ -189,14 +184,18 @@ var App = module.exports = createReactClass({
     },
 
     render: function() {
-        var content;
-        var context = this.state.context;
-        let session = this.state.session;
+        let content,
+            context = this.state.context,
+            session = this.state.session;
         let user_properties = session && session.user_properties;
-        var href_url = url.parse(this.state.href);
+        let href_url = url.parse(this.state.href);
         // Switching between collections may leave component in place
-        var key = context && context['@id'];
-        var current_action = this.currentAction();
+        let key = context && context['@id'];
+        let current_action = this.currentAction();
+
+        let affiliation = this.state.affiliation,
+            affiliation_cookie = this.state.affiliation_cookie;
+
         if (!current_action && context.default_page) {
             context = context.default_page;
         }
@@ -205,7 +204,7 @@ var App = module.exports = createReactClass({
             content = <ContentView {...this.props} context={context} href={this.state.href}
                 loadingComplete={this.state.loadingComplete} session={session}
                 portal={this.state.portal} navigate={this.navigate} href_url={href_url}
-                demoVersion={this.state.demoWarning} affiliation={this.state.affiliation} />;
+                demoVersion={this.state.demoWarning} affiliation={affiliation} />;
         }
         var errors = this.state.errors.map(function (error) {
             return <div className="alert alert-error"></div>;
@@ -232,8 +231,6 @@ var App = module.exports = createReactClass({
             }
         }
 
-        let affiliation_cookie = this.state.affiliation_cookie;
-
         return (
             <html lang="en">
                 <head>
@@ -253,17 +250,17 @@ var App = module.exports = createReactClass({
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
-                        <Header session={this.state.session} href={this.props.href} affiliation={this.state.affiliation} />
+                        <Header session={this.state.session} href={this.props.href} affiliation={affiliation} />
                         {this.state.demoWarning ?
                             <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
                             : null}
                         {this.state.productionWarning ?
                             <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
                             : null}
-                        {user_properties && user_properties.affiliation && this.state.affiliation && Object.keys(this.state.affiliation).length ?
+                        {user_properties && user_properties.affiliation && user_properties.affiliation.length ?
                             <div className="affiliation-utility-container">
                                 <div className="container affiliation-utility">
-                                    <span className="curator-affiliation">Affiliation: {this.state.affiliation.affiliation_fullname}</span>
+                                    <span className="curator-affiliation">Affiliation: {affiliation && affiliation.affiliation_fullname ? affiliation.affiliation_fullname : 'None'}</span>
                                     <span className="change-affiliation-button">
                                         {context.name === 'dashboard' ?
                                             <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal}>Change Affiliation</button>
@@ -272,10 +269,9 @@ var App = module.exports = createReactClass({
                                         }
                                     </span>
                                 </div>
-                                {this.renderAffiliationModal(user_properties.affiliation, user_properties.title)}
                             </div>
                             : null}
-                        {user_properties && user_properties.affiliation && user_properties.affiliation.length && !affiliation_cookie ?
+                        {user_properties && user_properties.affiliation && user_properties.affiliation.length ?
                             this.renderAffiliationModal(user_properties.affiliation, user_properties.title)
                             : null}
                         {content}
