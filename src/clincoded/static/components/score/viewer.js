@@ -13,7 +13,8 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
     propTypes: {
         session: PropTypes.object, // Session object passed from parent
         evidence: PropTypes.object, // Individual, Experimental or Case Control
-        otherScores: PropTypes.bool // TRUE if we only want show scores by others
+        otherScores: PropTypes.bool, // TRUE if we only want show scores by others
+        affiliation: PropTypes.object // Affiliation object passed from parent
     },
 
     getInitialState() {
@@ -39,11 +40,16 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
         let validScores = [], filteredScores = [];
         let user = this.props.session && this.props.session.user_properties;
         let otherScores = this.props.otherScores;
+        let affiliation = this.props.affiliation;
 
         if (evidenceScores && evidenceScores.length) {
             if (otherScores) {
                 filteredScores = evidenceScores.filter(score => {
-                    return score.submitted_by.uuid !== user.uuid;
+                    if (affiliation && Object.keys(affiliation).length) {
+                        return !score.affiliation || score.affiliation !== affiliation.affiliation_id;
+                    } else {
+                        return score.submitted_by.uuid !== user.uuid || score.affiliation;
+                    }
                 });
             } else {
                 filteredScores = evidenceScores;
