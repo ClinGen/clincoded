@@ -312,6 +312,9 @@ class GdmAddHistory extends Component {
                 </a>
                 <span> created</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {gdm.affiliation ?
+                    <span>; last edited by {gdm.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

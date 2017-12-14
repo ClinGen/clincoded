@@ -565,6 +565,9 @@ class PathogenicityAddModHistory extends Component {
             <div>
                 <span>Variant <a href={pathogenicityUri}>{history.meta.pathogenicity.variantId}</a> pathogenicity {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {pathogenicity.affiliation ?
+                    <span>; last edited by {pathogenicity.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -599,6 +602,9 @@ class VariantAddHistory extends Component {
             <div>
                 <span>Variant <strong><a href={"/variant-central/?variant=" + variant.uuid}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</a></strong> added</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {variant.affiliation ?
+                    <span>; last edited by {variant.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

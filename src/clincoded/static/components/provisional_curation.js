@@ -1033,6 +1033,7 @@ class ProvisionalAddModHistory extends Component {
         var history = this.props.history;
         var meta = history.meta.provisionalClassification;
         var gdm = meta.gdm;
+        var provisional = history.primary;
 
         return (
             <div>
@@ -1040,6 +1041,9 @@ class ProvisionalAddModHistory extends Component {
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {provisional.affiliation ?
+                    <span>; last edited by {provisional.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -1054,6 +1058,7 @@ class ProvisionalModifyHistory extends Component {
         var history = this.props.history;
         var meta = history.meta.provisionalClassification;
         var gdm = meta.gdm;
+        var provisional = history.primary;
 
         return (
             <div>
@@ -1061,6 +1066,9 @@ class ProvisionalModifyHistory extends Component {
                 <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {provisional.affiliation ?
+                    <span>; last edited by {provisional.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

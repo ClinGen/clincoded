@@ -2363,6 +2363,9 @@ class FamilyAddHistory extends Component {
                     </span>
                 }
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {family.affiliation ?
+                    <span>; last edited by {family.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -2383,6 +2386,9 @@ class FamilyModifyHistory extends Component {
                 Family <a href={family['@id']}>{family.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {family.affiliation ?
+                    <span>; last edited by {family.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -2407,6 +2413,9 @@ class FamilyDeleteHistory extends Component {
                 <span>Family {family.label} deleted</span>
                 <span>{collateralObjects ? ' along with any individuals' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                {family.affiliation ?
+                    <span>; last edited by {family.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
