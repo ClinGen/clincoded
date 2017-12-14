@@ -36,6 +36,11 @@
             "title": "Evidence Summary",
             "description": "Evidence summary for the variant interpretation",
             "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this provisional variant is associated with.",
+            "type": "string"
         }
     },
     "columns": {
