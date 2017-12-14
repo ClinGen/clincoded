@@ -474,7 +474,8 @@ var VariantCurationHub = createReactClass({
                         provisionalPathogenicity={this.state.provisionalPathogenicity}
                         provisionalReason={this.state.provisionalReason}
                         provisionalInterpretation={this.state.provisionalInterpretation}
-                        evidenceSummary={this.state.evidenceSummary} />
+                        evidenceSummary={this.state.evidenceSummary}
+                        affiliation={this.props.affiliation} />
                 }
             </div>
         );
