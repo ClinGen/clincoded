@@ -2332,7 +2332,7 @@ function flattenAssessment(assessment) {
 
 var provisionalSimpleProps = [
     "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
-    "classificationStatus", "evidenceSummary", "reasons", "active"
+    "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation"
 ];
 
 function flattenProvisional(provisional) {
@@ -2343,7 +2343,7 @@ function flattenProvisional(provisional) {
 
 
 var provisionalVariantSimpleProps = [
-    "autoClassification", "alteredClassification", "reasons", "evidenceSummary"
+    "autoClassification", "alteredClassification", "reasons", "evidenceSummary", "affiliation"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {
@@ -2355,7 +2355,7 @@ function flattenProvisionalVariant(provisional_variant) {
 
 var evidenceScoreSimpleProps = [
     "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore",
-    "caseInfoType", "scoreExplanation"
+    "caseInfoType", "scoreExplanation", "affiliation"
 ];
 
 function flattenEvidenceScore(evidencescore) {
