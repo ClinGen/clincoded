@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import CASE_INFO_TYPES from './constants/case_info_types';
-const AffiliationsList = require('../affiliation/affiliations.json');
+import { getAffiliationName } from '../../libs/get_affiliation_name';
 
 var _ = require('underscore');
 
@@ -65,18 +65,6 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
         return validScores;
     },
 
-    getAffiliationName(affiliationId, staticAffiliations) {
-        let affiliationName;
-        if (affiliationId.length) {
-            staticAffiliations.forEach(affiliation => {
-                if (affiliation.affiliation_id === affiliationId) {
-                    affiliationName = affiliation.affiliation_fullname;
-                }
-            });
-        }
-        return affiliationName;
-    },
-
     render() {
         // states
         let evidenceScores = this.state.evidenceScores;
@@ -90,7 +78,7 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
                 {scores.map((item, i) => {
                     return (
                         <div key={i} className="evidence-score-list-viewer">
-                            <h5>Curator: {item.affiliation ? this.getAffiliationName(item.affiliation, AffiliationsList) : item.submitted_by.title}</h5>
+                            <h5>Curator: {item.affiliation ? getAffiliationName(item.affiliation) : item.submitted_by.title}</h5>
                             <div>
                                 {item.scoreStatus && item.scoreStatus !== 'none' && this.props.evidence['@type'][0] !== 'caseControl' ?
                                     <dl className="dl-horizontal">
