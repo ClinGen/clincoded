@@ -189,6 +189,10 @@
         "submitted_by.email": {
             "title": "Creator email",
             "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "type": "string"
         }
     },
     "boost_values": {
