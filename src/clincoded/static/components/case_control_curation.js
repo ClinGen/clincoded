@@ -1041,7 +1041,8 @@ const CaseControlCuration = createReactClass({
                                         <PanelGroup accordion>
                                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
                                                 <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
-                                                session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                    session={session} handleUserScoreObj={this.handleUserScoreObj}
+                                                    affiliation={this.props.affiliation} />
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1049,7 +1050,7 @@ const CaseControlCuration = createReactClass({
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {caseControl ?
                                                 <DeleteButton gdm={gdm} parent={annotation} item={caseControl} pmid={pmid} />
-                                            : null}
+                                                : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </div>
@@ -1057,7 +1058,7 @@ const CaseControlCuration = createReactClass({
                             </div>
                         </div>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -1948,20 +1949,20 @@ var CaseControlViewer = createReactClass({
                                 <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
                                     <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
                                 </Panel>
-                            : null}
+                                : null}
                             {isEvidenceScored || (!isEvidenceScored < 1 && userCaseControl) ?
                                 <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                     <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
-                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={this.props.affiliation} />
                                 </Panel>
-                            : null}
+                                : null}
                             {!isEvidenceScored && !userCaseControl ?
                                 <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                     <div className="row">
                                         <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                     </div>
                                 </Panel>
-                            : null}
+                                : null}
                         </div>
                     </div>
                 </div>
