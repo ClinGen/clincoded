@@ -107,12 +107,13 @@ var ProvisionalCuration = createReactClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
-            // search for provisional owned by login user
+            // search for provisional owned by affiliation or login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
-                for (var i in stateObj.gdm.provisionalClassifications) {
-                    var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
-                    if (owner.uuid === stateObj.user) { // find
-                        stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
+                    let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
+                    let creator = provisionalClassification.submitted_by;
+                    if ((affiliation && affiliation === this.props.affiliation.affiliation_id) || (creator.uuid === stateObj.user)) {
+                        stateObj.provisional = provisionalClassification;
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
@@ -192,6 +193,14 @@ var ProvisionalCuration = createReactClass({
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
             newProvisional.classificationStatus = this.state.classificationStatus;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
+
+            // Add affiliation if the user is associated with an affiliation
+            // and if the data object has no affiliation
+            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                if (!newProvisional.affiliation) {
+                    newProvisional.affiliation = this.props.affiliation.affiliation_id;
+                }
+            }
 
             // check required item (reasons)
             var formErr = false;
