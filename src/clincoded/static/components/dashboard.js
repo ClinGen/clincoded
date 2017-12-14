@@ -215,7 +215,7 @@ var Dashboard = createReactClass({
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">Your Gene-Disease Records</h3>
+                    <h3 className="panel-title">My Gene-Disease Records</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.gdmListLoading ? showActivityIndicator('Loading... ') : null}
@@ -260,7 +260,7 @@ var Dashboard = createReactClass({
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">Gene-Disease records associated with your affiliation</h3>
+                    <h3 className="panel-title">My Affiliation's Gene-Disease Records</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.affiliatedGdmsLoading ? showActivityIndicator('Loading... ') : null}
@@ -305,7 +305,7 @@ var Dashboard = createReactClass({
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">Your Variant Interpretations</h3>
+                    <h3 className="panel-title">My Variant Interpretations</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.vciInterpListLoading ? showActivityIndicator('Loading... ') : null}
@@ -359,7 +359,7 @@ var Dashboard = createReactClass({
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">Variant interpretations associated with your affiliation</h3>
+                    <h3 className="panel-title">My Affiliation's Variant Interpretations</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.affiliatedInterpretationsLoading ? showActivityIndicator('Loading... ') : null}
