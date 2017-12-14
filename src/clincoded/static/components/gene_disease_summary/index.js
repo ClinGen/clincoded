@@ -20,7 +20,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
 
     propTypes: {
         href: PropTypes.string,
-        session: PropTypes.object
+        session: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState() {
@@ -63,10 +64,11 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             }
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
-                for (var i in stateObj.gdm.provisionalClassifications) {
-                    var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
-                    if (owner.uuid === stateObj.user) { // find
-                        stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
+                    let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
+                    let creator = provisionalClassification.submitted_by;
+                    if ((affiliation && affiliation === this.props.affiliation.affiliation_id) || (creator.uuid === stateObj.user)) {
+                        stateObj.provisional = provisionalClassification;
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
@@ -81,14 +83,15 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             const user = this.state.user;
             const gdm = this.state.gdm;
             const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
+            const affiliation = this.props.affiliation;
             // Parse proband evidence and its associated segregation data
-            this.parseCaseLevelEvidence(annotations, user);
+            this.parseCaseLevelEvidence(annotations, user, affiliation);
             // Parse segregation evidence with LOD scores but without proband
-            this.parseCaseLevelSegregationEvidence(annotations, user);
+            this.parseCaseLevelSegregationEvidence(annotations, user, affiliation);
             // Parse case-control evidence and its associated disease data
-            this.parseCaseControlEvidence(annotations, user);
+            this.parseCaseControlEvidence(annotations, user, affiliation);
             // Parse experimental evidence and its associated annotation data
-            this.parseExperimentalEvidence(annotations, user);
+            this.parseExperimentalEvidence(annotations, user, affiliation);
             // Calculate the values for the score table
             // this.calculateScoreTable();
         }).catch(err => {
@@ -134,7 +137,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {array} annotations - a list of annotations in a given gdm
      * @param {string} user - user's uuid
      */
-    parseCaseLevelEvidence(annotations, user) {
+    parseCaseLevelEvidence(annotations, user, affiliation) {
         let caseLevelEvidenceList = this.state.caseLevelEvidenceList;
         /*****************************************************/
         /* Find all proband individuals that had been scored */
@@ -189,7 +192,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             if (proband.scores && proband.scores.length) {
                 proband.scores.forEach(score => {
                     // Only interested in the logged-in user's scores and their associated evidence
-                    if (score.submitted_by.uuid === user) {
+                    if ((score.affiliation && score.affiliation === affiliation.affiliation_id) || score.submitted_by.uuid === user) {
                         if ('scoreStatus' in score && (score.scoreStatus !== 'none' || score.scoreStatus !== '')) {
                             let caseLevelEvidence = {};
                             // Get proband data object given the uuid
@@ -292,7 +295,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {array} annotations - a list of annotations in a given gdm
      * @param {string} user - user's uuid
      */
-    parseCaseLevelSegregationEvidence(annotations, user) {
+    parseCaseLevelSegregationEvidence(annotations, user, affiliation) {
         let segregationEvidenceList = this.state.segregationEvidenceList;
         let segregationTotal = [], tempSegregationScraperValues = [];
         if (annotations.length) {
@@ -322,7 +325,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         
         // Iterate segregations
         segregationTotal.forEach(family => {
-            if (family.submitted_by.uuid === user) {
+            if ((family.affiliation && family.affiliation === affiliation.affiliation_id) || family.submitted_by.uuid === user) {
                 let segregation = family.segregation ? family.segregation : null;
                 if (segregation && (segregation.estimatedLodScore || segregation.publishedLodScore)) {
                     let segregationEvidence = {};
@@ -394,7 +397,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {array} annotations - a list of annotations in a given gdm
      * @param {string} user - user's uuid
      */
-    parseCaseControlEvidence(annotations, user) {
+    parseCaseControlEvidence(annotations, user, affiliation) {
         let caseControlEvidenceList = this.state.caseControlEvidenceList;
         if (annotations.length) {
             annotations.forEach(annotation => {
@@ -406,7 +409,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                         if (caseControl.scores && caseControl.scores.length) {
                             caseControl.scores.forEach(score => {
                                 // Only interested in the logged-in user's scores and their associated evidence
-                                if (score.submitted_by.uuid === user) {
+                                if ((score.affiliation && score.affiliation === affiliation.affiliation_id) || score.submitted_by.uuid === user) {
                                     if ('score' in score && score.score !== 'none') {
                                         let caseControlEvidence = {};
                                         // Get disease data object given the uuid
@@ -469,7 +472,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {array} annotations - a list of annotations in a given gdm
      * @param {string} user - user's uuid
      */
-    parseExperimentalEvidence(annotations, user) {
+    parseExperimentalEvidence(annotations, user, affiliation) {
         let experimentalEvidenceList = this.state.experimentalEvidenceList;
 
         if (annotations.length) {
@@ -482,7 +485,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                         experimental.scores.forEach(score => {
                             let experimentalEvidence = {};
                             // Only interested in the logged-in user's scores and their associated evidence
-                            if (score.submitted_by.uuid === user) {
+                            if ((score.affiliation && score.affiliation === affiliation.affiliation_id) || score.submitted_by.uuid === user) {
                                 if ('scoreStatus' in score && (score.scoreStatus !== 'none' || score.scoreStatus !== '')) {
                                     let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
                                     // Define object key/value pairs
