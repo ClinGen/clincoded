@@ -959,8 +959,9 @@ const IndividualCuration = createReactClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={LabelPanelTitle(individual, 'Score Proband')} panelClassName="proband-evidence-score" open>
-                                                        <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
-                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} />
+                                                        <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
+                                                            variantInfo={variantInfo} session={session} handleUserScoreObj={this.handleUserScoreObj}
+                                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1576,7 +1577,8 @@ const IndividualViewer = createReactClass({
     propTypes: {
         context: PropTypes.object,
         session: PropTypes.object,
-        href: PropTypes.string
+        href: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -1668,6 +1670,8 @@ const IndividualViewer = createReactClass({
         var individual = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
         var userIndividual = user && individual && individual.submitted_by ? user.uuid === individual.submitted_by.uuid : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedIndividual = affiliation && Object.keys(affiliation).length && individual && individual.affiliation ? affiliation.affiliation_id === individual.affiliation : false;
         var method = individual.method;
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
@@ -1956,16 +1960,16 @@ const IndividualViewer = createReactClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                {isEvidenceScored && !userIndividual ?
+                                {isEvidenceScored && (!affiliatedIndividual || !userIndividual) ?
                                     <Panel title={LabelPanelTitleView(individual, 'Other Curator Scores')} panelClassName="panel-data">
-                                        <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
+                                        <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} affiliation={affiliation} />
                                     </Panel>
                                     : null}
-                                {isEvidenceScored || (!isEvidenceScored && userIndividual) ?
+                                {isEvidenceScored || (!isEvidenceScored && affiliatedIndividual) || (!isEvidenceScored && userIndividual) ?
                                     <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} />
+                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
                                     </Panel>
                                     : null}
                                 {!isEvidenceScored && !userIndividual ?
