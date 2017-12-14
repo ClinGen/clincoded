@@ -1583,7 +1583,7 @@ var ExperimentalCuration = createReactClass({
                                                     <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
                                                         <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
                                                             evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError}
-                                                            scoreDisabled={this.state.scoreDisabled} />
+                                                            scoreDisabled={this.state.scoreDisabled} affiliation={this.props.affiliation} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -3295,7 +3295,8 @@ const ExperimentalViewer = createReactClass({
                         {this.cv.gdmUuid && (isEvidenceScored || (!isEvidenceScored && userExperimental)) ?
                             <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
-                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
+                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
+                                    formError={this.state.formError} affiliation={this.props.affiliation} />
                             </Panel>
                             : null}
                         {!isEvidenceScored && !userExperimental ?
