@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { userScore } from './helpers/user_score';
+import { affiliationScore } from './helpers/affiliation_score';
 
 // Render scoring panel in Gene Curation Interface
 var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
@@ -16,7 +17,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         evidenceType: PropTypes.string, // 'Individual', 'Experimental' or 'Case control'
         handleUserScoreObj: PropTypes.func, // Function to call create/update score object
         scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
-        submitBusy: PropTypes.bool // TRUE while the form submit is running
+        submitBusy: PropTypes.bool, // TRUE while the form submit is running
+        affiliation: PropTypes.object // Affiliation object passed from parent
     },
 
     getInitialState() {
@@ -24,7 +26,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
             evidenceScores: [], // One or more scores
             modifiedScore: null, // Score that is selected by curator
             userScoreUuid: null, // Pre-existing logged-in user's score uuuid
-            submitBusy: false // TRUE while form is submitting
+            submitBusy: false, // TRUE while form is submitting
+            scoreAffiliation: null // Affiliation associated with the score
         };
     },
 
@@ -39,11 +42,19 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         // Get evidenceScore object for the logged-in user if exists
         if (evidenceObj && evidenceObj.scores && evidenceObj.scores.length) {
             this.setState({evidenceScores: evidenceObj.scores}, () => {
+                let userAffiliatedScore = this.getUserAffiliatedScore(evidenceObj.scores);
                 let loggedInUserScore = this.getUserScore(evidenceObj.scores);
-                if (loggedInUserScore) {
-                    this.setState({userScoreUuid: loggedInUserScore.uuid});
-                    if (loggedInUserScore.hasOwnProperty('score')) {
-                        let modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null;
+                let matchedScore;
+                if (userAffiliatedScore) {
+                    matchedScore = userAffiliatedScore;
+                    this.setState({scoreAffiliation: this.props.affiliation.affiliation_id});
+                } else {
+                    matchedScore = !loggedInUserScore.affiliation ? loggedInUserScore : null;
+                }
+                if (matchedScore) {
+                    this.setState({userScoreUuid: matchedScore.uuid});
+                    if (matchedScore.hasOwnProperty('score')) {
+                        let modifiedScore = matchedScore.hasOwnProperty('score') ? matchedScore.score.toString() : null;
                         this.setState({modifiedScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null}, () => {
                             this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                             this.updateUserScoreObj();
@@ -77,6 +88,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         let evidenceType = this.props.evidenceType;
         let scoreUuid = this.state.userScoreUuid;
         let evidenceScored = this.props.evidence ? this.props.evidence.uuid : null;
+        let scoreAffiliation = this.state.scoreAffiliation;
 
         let newUserScoreObj = {};
 
@@ -102,6 +114,19 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
 
         // Call parent function to update user object state
         if (Object.keys(newUserScoreObj).length) {
+
+            // Add affiliation to score object
+            // if the user is associated with an affiliation
+            // and if the data object has no affiliation
+            // and only when there is score data to be saved
+            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                if (scoreAffiliation && scoreAffiliation.length) {
+                    newUserScoreObj['affiliation'] = scoreAffiliation;
+                } else {
+                    newUserScoreObj['affiliation'] = this.props.affiliation.affiliation_id;
+                }
+            }
+
             this.props.handleUserScoreObj(newUserScoreObj);
         }
     },
@@ -116,6 +141,18 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         }
 
         return loggedInUserScore;
+    },
+
+    // Find the score associated with the currently logged-in user's affiliation
+    getUserAffiliatedScore(evidenceScores) {
+        let affiliatedScore;
+        let affiliationId = this.props.affiliation && this.props.affiliation.affiliation_id;
+
+        if (evidenceScores && evidenceScores.length) {
+            affiliatedScore = affiliationScore(evidenceScores, affiliationId);
+        }
+
+        return affiliatedScore;
     },
 
     render() {

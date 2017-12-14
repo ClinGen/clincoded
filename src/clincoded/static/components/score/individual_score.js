@@ -9,6 +9,7 @@ import CASE_INFO_TYPES from './constants/case_info_types';
 import { defaultScore } from './helpers/default_score';
 import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
+import { affiliationScore } from './helpers/affiliation_score';
 
 // Render scoring panel in Gene Curation Interface
 const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
@@ -24,7 +25,8 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         submitBusy: PropTypes.bool, // TRUE while the form submit is running
         scoreError: PropTypes.bool, // TRUE if no explanation is given for modified score or no case info type
-        scoreErrorMsg: PropTypes.string // Text string in response to the type of score error
+        scoreErrorMsg: PropTypes.string, // Text string in response to the type of score error
+        affiliation: PropTypes.object // Affiliation object passed from parent
     },
 
     getInitialState() {
@@ -48,7 +50,8 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
             disableScoreStatus: false, // TRUE if Individual evidence has no variants at all
             willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
             scoreError: this.props.scoreError, // TRUE if no explanation is given for modified score or no case info type
-            scoreErrorMsg: this.props.scoreErrorMsg // Text string in response to the type of score error
+            scoreErrorMsg: this.props.scoreErrorMsg, // Text string in response to the type of score error
+            scoreAffiliation: null // Affiliation associated with the score
         };
     },
 
@@ -97,15 +100,23 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         // Get evidenceScore object for the logged-in user if exists
         if (evidenceObj && evidenceObj.scores && evidenceObj.scores.length) {
             this.setState({evidenceScores: evidenceObj.scores}, () => {
+                let userAffiliatedScore = this.getUserAffiliatedScore(evidenceObj.scores);
                 let loggedInUserScore = this.getUserScore(evidenceObj.scores);
-                if (loggedInUserScore) {
-                    this.setState({userScoreUuid: loggedInUserScore.uuid});
+                let matchedScore;
+                if (userAffiliatedScore) {
+                    matchedScore = userAffiliatedScore;
+                    this.setState({scoreAffiliation: this.props.affiliation.affiliation_id});
+                } else {
+                    matchedScore = !loggedInUserScore.affiliation ? loggedInUserScore : null;
+                }
+                if (matchedScore) {
+                    this.setState({userScoreUuid: matchedScore.uuid});
                     // Render or remove the default score, score range, and explanation fields
-                    let scoreStatus = loggedInUserScore.scoreStatus,
-                        caseInfoType = loggedInUserScore.caseInfoType,
-                        defaultScore = loggedInUserScore.calculatedScore,
-                        modifiedScore = loggedInUserScore.hasOwnProperty('score') ? loggedInUserScore.score.toString() : null,
-                        scoreExplanation = loggedInUserScore.scoreExplanation,
+                    let scoreStatus = matchedScore.scoreStatus,
+                        caseInfoType = matchedScore.caseInfoType,
+                        defaultScore = matchedScore.calculatedScore,
+                        modifiedScore = matchedScore.hasOwnProperty('score') ? matchedScore.score.toString() : null,
+                        scoreExplanation = matchedScore.scoreExplanation,
                         calcScoreRange = this.getScoreRange(modeInheritanceType, caseInfoType, parseFloat(defaultScore));
                     /**************************************************************************************/
                     /* Curators are allowed to access the score form fields when the 'Score' is selected, */
@@ -282,6 +293,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         let evidenceType = this.props.evidenceType;
         let scoreUuid = this.state.userScoreUuid;
         let evidenceScored = this.props.evidence ? this.props.evidence.uuid : null;
+        let scoreAffiliation = this.state.scoreAffiliation;
 
         let newUserScoreObj = {};
 
@@ -339,6 +351,19 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
 
         // Call parent function to update user object state
         if (Object.keys(newUserScoreObj).length) {
+
+            // Add affiliation to score object
+            // if the user is associated with an affiliation
+            // and if the data object has no affiliation
+            // and only when there is score data to be saved
+            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                if (scoreAffiliation && scoreAffiliation.length) {
+                    newUserScoreObj['affiliation'] = scoreAffiliation;
+                } else {
+                    newUserScoreObj['affiliation'] = this.props.affiliation.affiliation_id;
+                }
+            }
+
             this.props.handleUserScoreObj(newUserScoreObj);
         }
     },
@@ -389,6 +414,18 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         }
 
         return loggedInUserScore;
+    },
+
+    // Find the score associated with the currently logged-in user's affiliation
+    getUserAffiliatedScore(evidenceScores) {
+        let affiliatedScore;
+        let affiliationId = this.props.affiliation && this.props.affiliation.affiliation_id;
+
+        if (evidenceScores && evidenceScores.length) {
+            affiliatedScore = affiliationScore(evidenceScores, affiliationId);
+        }
+
+        return affiliatedScore;
     },
 
     // Find the default calculated score given the types of
