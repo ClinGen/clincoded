@@ -179,10 +179,11 @@ var Dashboard = createReactClass({
             this.getData(this.props.session);
         }
         // Invoke getAffiliatedData() if there is affiliation data
-        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
-            this.getAffiliatedData(this.props.affiliation);
+        let affiliation = this.props.affiliation;
+        if (affiliation && Object.keys(affiliation).length) {
+            this.getAffiliatedData(affiliation);
         }
-        this.getHistories(this.props.session.user_properties, 10).then(histories => {
+        this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
             if (histories) {
                 this.setState({histories: histories, historiesLoading: false});
             }
@@ -190,10 +191,11 @@ var Dashboard = createReactClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
+        let affiliation = nextProps && nextProps.affiliation;
         if (nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
-            this.getHistories(nextProps.session.user_properties, 10).then(histories => {
+            this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
                 if (histories) {
                     this.setState({histories: histories, historiesLoading: false});
                 }
@@ -403,11 +405,13 @@ var Dashboard = createReactClass({
         );
     },
 
-    render: function() {
+    render() {
+        let affiliation = this.props.affiliation;
+
         return (
             <div className="container">
-                {this.props.affiliation && Object.keys(this.props.affiliation).length ?
-                    <h2>Welcome, {this.props.affiliation.affiliation_fullname}!</h2>
+                {affiliation && Object.keys(affiliation).length ?
+                    <h2>Welcome, {affiliation.affiliation_fullname}!</h2>
                     :
                     <h2>Welcome, {this.state.userName}!</h2>
                 }
@@ -446,7 +450,11 @@ var Dashboard = createReactClass({
                                         {this.state.histories.map(history => {
                                             // Call the history display view based on the primary object
                                             var HistoryView = this.getHistoryView(history);
-                                            return <li key={history.uuid} className="list-group-item"><HistoryView history={history} user={this.props.session && this.props.session.user_properties} /></li>;
+                                            return (
+                                                <li key={history.uuid} className="list-group-item">
+                                                    <HistoryView history={history} user={this.props.session && this.props.session.user_properties} />
+                                                </li>
+                                            );
                                         })}
                                     </ul>
                                     :
@@ -457,10 +465,10 @@ var Dashboard = createReactClass({
                     </div>
                     {/*/ Right pane /*/}
                     <div className="col-md-8">
-                        {this.props.affiliation && Object.keys(this.props.affiliation).length ?
+                        {affiliation && Object.keys(affiliation).length ?
                             this.renderAffiliatedInterpretations(this.state.affiliatedInterpretations)
                             : this.renderIndividualInterpretations(this.state.vciInterpList)}
-                        {this.props.affiliation && Object.keys(this.props.affiliation).length ?
+                        {affiliation && Object.keys(affiliation).length ?
                             this.renderAffiliatedGdms(this.state.affiliatedGdms)
                             : this.renderIndividualRecords(this.state.gdmList)}
                     </div>
