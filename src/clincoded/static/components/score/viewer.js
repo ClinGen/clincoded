@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import CASE_INFO_TYPES from './constants/case_info_types';
-import { userScore } from './helpers/user_score';
+const AffiliationsList = require('../affiliation/affiliations.json');
 
 var _ = require('underscore');
 
@@ -65,50 +65,63 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
         return validScores;
     },
 
+    getAffiliationName(affiliationId, staticAffiliations) {
+        let affiliationName;
+        if (affiliationId.length) {
+            staticAffiliations.forEach(affiliation => {
+                if (affiliation.affiliation_id === affiliationId) {
+                    affiliationName = affiliation.affiliation_fullname;
+                }
+            });
+        }
+        return affiliationName;
+    },
+
     render() {
         // states
         let evidenceScores = this.state.evidenceScores;
 
         // variables
         let scores = this.getOtherScores(evidenceScores);
+        let affiliation = this.props.affiliation;
 
         return (
             <div className="row">
                 {scores.map((item, i) => {
                     return (
                         <div key={i} className="evidence-score-list-viewer">
-                            <h5>Curator: {item.submitted_by.title}</h5>
+                            <h5>Curator: {item.affiliation ? this.getAffiliationName(item.affiliation, AffiliationsList) : item.submitted_by.title}</h5>
                             <div>
                                 {item.scoreStatus && item.scoreStatus !== 'none' && this.props.evidence['@type'][0] !== 'caseControl' ?
                                     <dl className="dl-horizontal">
                                         <dt>Score Status</dt>
                                         <dd>{item.scoreStatus}</dd>
                                     </dl>
-                                : null}
+                                    : null}
                                 {item.caseInfoType ?
                                     <dl className="dl-horizontal">
                                         <dt>Case Information Type</dt>
                                         <dd>{renderCaseInfoType(item.caseInfoType)}</dd>
                                     </dl>
-                                : null}
+                                    : null}
                                 {item.calculatedScore ?
                                     <dl className="dl-horizontal">
                                         <dt>Default Score</dt>
                                         <dd>{item.calculatedScore}</dd>
                                     </dl>
-                                : null}
+                                    : null}
                                 {item.score ?
                                     <dl className="dl-horizontal">
                                         <dt>Changed Score</dt>
                                         <dd>{item.score}</dd>
                                     </dl>
-                                : null}
+                                    : null}
                                 {item.scoreExplanation ?
                                     <dl className="dl-horizontal">
                                         <dt>Reaon(s) for score change</dt>
                                         <dd>{item.scoreExplanation}</dd>
                                     </dl>
-                                : null}
+                                    : null}
                             </div>
                         </div>
                     );
