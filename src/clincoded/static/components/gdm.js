@@ -4,6 +4,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import * as curator from './curator';
 import { content_views, truncateString } from './globals';
+const AffiliationsList = require('./affiliation/affiliations.json');
 
 // Map GDM statuses from
 var statusMappings = {
@@ -67,7 +68,8 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
                     latest_time: latestRecordDate ? moment(latestRecordDate).format('h:mm a') : '',
                     iconClass: iconClass,
                     latestRecord: latestRecord,
-                    date_created: gdm.date_created
+                    date_created: gdm.date_created,
+                    affiliation: gdm.affiliation ? gdm.affiliation : null
                 };
                 gdmObjList.push(gdmObj);
             });
@@ -135,6 +137,18 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
         return this.state.reversed ? -diff : diff;
     },
 
+    getAffiliationName(affiliationId, staticAffiliations) {
+        let affiliationName;
+        if (affiliationId.length) {
+            staticAffiliations.forEach(affiliation => {
+                if (affiliation.affiliation_id === affiliationId) {
+                    affiliationName = affiliation.affiliation_fullname;
+                }
+            });
+        }
+        return affiliationName;
+    },
+
     render() {
         let filteredGdms = this.state.filteredGdms;
         let gdms = filteredGdms && filteredGdms.length ? filteredGdms.sort(this.sortCol) : []; // Pre-sort the GDM list
@@ -165,7 +179,7 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
                                 <div>Mode</div>
                             </div>
                             <div className="table-cell-gdm">
-                                Participants
+                                Contributing Users
                             </div>
                             <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
                                 Last Edited<span className={sortIconClass.last}></span>
@@ -195,7 +209,7 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
                                         <div>{gdm.latest_time}</div>
                                     </div>
                                     <div className="table-cell-gdm">
-                                        <div>{gdm.submitter_last_name}, {gdm.submitter_first_name}</div>
+                                        <div>{gdm.submitter_last_name}, {gdm.submitter_first_name} {gdm.affiliation ? <span>({this.getAffiliationName(gdm.affiliation, AffiliationsList)})</span> : null}</div>
                                     </div>
                                     <div className="table-cell-gdm">
                                         <div>{gdm.created_date}</div>
