@@ -2182,6 +2182,9 @@ class IndividualAddHistory extends Component {
                     </span>
                 }
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {individual.affiliation ?
+                    <span>; last edited by {individual.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -2202,6 +2205,9 @@ class IndividualModifyHistory extends Component {
                 Individual <a href={individual['@id']}>{individual.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {individual.affiliation ?
+                    <span>; last edited by {individual.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -2221,6 +2227,9 @@ class IndividualDeleteHistory extends Component {
             <div>
                 <span>Individual {individual.label} deleted</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                {individual.affiliation ?
+                    <span>; last edited by {individual.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
