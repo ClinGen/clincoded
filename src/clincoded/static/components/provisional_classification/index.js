@@ -20,6 +20,12 @@ const ProvisionalClassification = createReactClass({
 
     queryValues: {},
 
+    propTypes: {
+        href: PropTypes.string,
+        session: PropTypes.object,
+        affiliation: PropTypes.object
+    },
+
     getInitialState() {
         return {
             user: null, // login user uuid
@@ -98,12 +104,13 @@ const ProvisionalClassification = createReactClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
-            // search for provisional owned by login user
+            // search for provisional owned by affiliation or login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
-                for (var i in stateObj.gdm.provisionalClassifications) {
-                    var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
-                    if (owner.uuid === stateObj.user) { // find
-                        stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
+                    let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
+                    let creator = provisionalClassification.submitted_by;
+                    if ((affiliation && affiliation === this.props.affiliation.affiliation_id) || creator.uuid === stateObj.user) {
+                        stateObj.provisional = provisionalClassification;
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
