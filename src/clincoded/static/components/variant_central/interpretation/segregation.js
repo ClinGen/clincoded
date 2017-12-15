@@ -21,7 +21,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         data: PropTypes.object, // ClinVar data payload
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
-        href_url: PropTypes.object
+        href_url: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState() {
@@ -37,6 +38,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     render() {
+        const affiliation = this.props.affiliation;
+
         return (
             <div className="variant-interpretation segregation">
                 <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content" open>
@@ -46,14 +49,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup1} criteria={['BS2']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="observed-in-healthy" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Observed in healthy adult(s))</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content" open>
@@ -63,14 +67,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['PS4']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="case-control" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Case-control)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content" open>
@@ -80,14 +85,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup3} criteria={['BS4', 'PP1']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup3Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segregation-data" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Segregation data)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content" open>
@@ -97,14 +103,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup4} criteria={['PM6', 'PS2']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="de-novo" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content" open>
@@ -114,14 +121,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup5} criteria={['BP2', 'PM3']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup5Update} variantUuid={this.props.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="allele-data" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Alternate mechanism for disease" panelBodyClassName="panel-wide-content" open>
@@ -131,14 +139,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup6} criteria={['BP5']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup6Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="alternate-mechanism" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Alternate mechanism for disease)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content" open>
@@ -148,14 +157,15 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup7} criteria={['PP4']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup7Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
                     <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="specificity-of-phenotype" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Specificity of phenotype)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source" open>
@@ -166,7 +176,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
                                     formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup8Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    disableEvalForm={true} />
+                                    disableEvalForm={true} affiliation={affiliation} />
                             </div>
                         </div>
                         : null}

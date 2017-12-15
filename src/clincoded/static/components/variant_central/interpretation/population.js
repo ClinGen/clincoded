@@ -59,7 +59,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_ensemblVariation: PropTypes.bool,
-        href_url: PropTypes.object
+        href_url: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -835,6 +836,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var singleNucleotide = this.state.ext_singleNucleotide;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+        const affiliation = this.props.affiliation;
 
         return (
             <div className="variant-interpretation population">
@@ -846,7 +848,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     evidenceData={this.state.populationObj} evidenceDataUpdated={populationObjDiffFlag} formChangeHandler={criteriaGroup1Change}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
                         : null}
@@ -1084,7 +1087,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?

@@ -21,7 +21,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         data: PropTypes.object,
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
-        href_url: PropTypes.object
+        href_url: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -39,6 +40,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     },
 
     render: function() {
+        const affiliation = this.props.affiliation;
+
         return (
             <div className="variant-interpretation functional">
                 <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content" open>
@@ -48,14 +51,15 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup1} criteria={['PM1']}
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
-                    : null}
+                        : null}
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="hotspot-functiona-domain" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Hotspot or functional domain)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
                 <PanelGroup accordion><Panel title="Experimental Studies" panelBodyClassName="panel-wide-content" open>
                     {(this.state.data && this.state.interpretation) ?
@@ -64,19 +68,20 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['BS3', 'PS3']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BS3', 'PS3']]}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup2Change}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                    affiliation={affiliation} />
                             </div>
                         </div>
-                    : null}
+                        : null}
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="experimental" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
+                    : null}
             </div>
         );
     }

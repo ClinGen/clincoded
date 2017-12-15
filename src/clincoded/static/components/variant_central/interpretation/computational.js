@@ -121,7 +121,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         ext_clinVarEsearch: PropTypes.object,
         ext_singleNucleotide: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
-        loading_clinvarEsearch: PropTypes.bool
+        loading_clinvarEsearch: PropTypes.bool,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -507,6 +508,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (gRCh37) {
             links_37 = setContextLinks(gRCh37, 'GRCh37');
         }
+        const affiliation = this.props.affiliation;
 
         return (
             <div className="variant-interpretation computational">
@@ -526,7 +528,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
-                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                            affiliation={affiliation} />
                                     </div>
                                 </div>
                                 : null}
@@ -770,7 +773,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
 
                         <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
@@ -780,7 +783,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <CurationInterpretationForm renderedFormContent={criteriaMissense2} criteria={['PM5', 'PS1']}
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaMissense2Update} variantUuid={variant['@id']}
-                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                            affiliation={affiliation} />
                                     </div>
                                 </div>
                                 : null}
@@ -796,7 +800,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -809,7 +813,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <CurationInterpretationForm renderedFormContent={criteriaLof1} criteria={['PVS1']}
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaLof1Update} variantUuid={this.state.data['@id']}
-                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                            affiliation={affiliation} />
                                     </div>
                                 </div>
                                 : null}
@@ -834,7 +839,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -847,7 +852,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <CurationInterpretationForm renderedFormContent={criteriaSilentIntron1} criteria={['BP7']}
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaSilentIntron1Update} variantUuid={this.state.data['@id']}
-                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                            affiliation={affiliation} />
                                     </div>
                                 </div>
                                 : null}
@@ -862,7 +868,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -875,7 +881,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
                                             evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
                                             formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaIndel1Change}
-                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                                            interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                                            affiliation={affiliation} />
                                     </div>
                                 </div>
                                 : null}
@@ -919,7 +926,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
