@@ -54,6 +54,11 @@
             "title": "Experimental Type",
             "description": "Experimental Type",
             "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this classification is associated with.",
+            "type": "string"
         }
     },
     "columns": {
