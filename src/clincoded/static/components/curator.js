@@ -669,7 +669,7 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         var caseControlUrl = '/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var experimentalUrl = '/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
-        let curatorAffiliation = this.props.affiliation && Object.keys(this.props.affiliation).length;
+        let curatorAffiliation = this.props.affiliation;
         let groupAffiliationMatch = false, familyAffiliationMatch = false, individualAffiliationMatch = false,
             caseControlAffiliationMatch = false, experimentalAffiliationMatch = false;
 
