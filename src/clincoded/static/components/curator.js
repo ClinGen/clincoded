@@ -795,14 +795,14 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
                                     <div className="evidence-curation-info">
                                         <p>Curate Variants from the “Gene-Disease Record Variants” section above.</p>
                                     </div>
-                                : null}
+                                    : null}
                                 {variantRenders}
                             </Panel>
-                        :
+                            :
                             <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence"></Panel>
                         }
                     </Panel>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -835,8 +835,8 @@ var renderGroup = function(group, gdm, annotation, curatorMatch, evidenceAffilia
                 <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{evidenceAffiliationMatch || curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
-            {evidenceAffiliationMatch || curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
-            {evidenceAffiliationMatch || curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
+            {evidenceAffiliationMatch || (!group.affiliation && curatorMatch) ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
+            {evidenceAffiliationMatch || (!group.affiliation && curatorMatch) ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
         </div>
     );
 };
@@ -885,8 +885,8 @@ var renderFamily = function(family, gdm, annotation, curatorMatch, evidenceAffil
             {familyAssessable ?
                 <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View</a>
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
-            {evidenceAffiliationMatch || curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
-            {evidenceAffiliationMatch || curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
+            {evidenceAffiliationMatch || (!family.affiliation && curatorMatch) ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
+            {evidenceAffiliationMatch || (!family.affiliation && curatorMatch) ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
         </div>
     );
 };
@@ -945,7 +945,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch, evide
                 </div>
                 : null}
             <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
-            {evidenceAffiliationMatch || curatorMatch ?
+            {evidenceAffiliationMatch || (!individual.affiliation && curatorMatch) ?
                 <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span>
                 : null}
         </div>
@@ -964,7 +964,7 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch, evi
                 <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
-            {evidenceAffiliationMatch || curatorMatch ? <span> | <a href={
+            {evidenceAffiliationMatch || (!caseControl.affiliation && curatorMatch) ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
@@ -1012,7 +1012,7 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch, e
                 </div>
                 : null}
             <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Score</a>
-            {evidenceAffiliationMatch || curatorMatch ?
+            {evidenceAffiliationMatch || (!experimental.affiliation && curatorMatch) ?
                 <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span>
                 : null}
         </div>
@@ -1046,7 +1046,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {variantAssociations ?
@@ -1064,7 +1064,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
                         );
                     })}
                 </div>
-            : null}
+                : null}
         </div>
     );
 };
