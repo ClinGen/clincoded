@@ -141,11 +141,11 @@ var Dashboard = createReactClass({
                         });
                         this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
                     } else {
-                        this.setState({affiliatedGdmsLoading: false});
+                        this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
                     }
                 });
             } else {
-                this.setState({affiliatedGdmsLoading: false});
+                this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
             }
             // Handle interpretations result
             interpretationURLs = data[1]['@graph'].map(result => { return result['@id']; });
@@ -168,7 +168,7 @@ var Dashboard = createReactClass({
                     this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false});
                 });
             } else {
-                this.setState({affiliatedInterpretationsLoading: false});
+                this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false});
             }
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
@@ -202,8 +202,15 @@ var Dashboard = createReactClass({
             });
         }
         // Invoke getAffiliatedData() if there is new affiliation data
-        if (nextProps.affiliation && Object.keys(nextProps.affiliation).length && !_.isEqual(nextProps.affiliation, this.props.affiliation)) {
-            this.getAffiliatedData(nextProps.affiliation);
+        if (affiliation && Object.keys(affiliation).length && !_.isEqual(affiliation, this.props.affiliation)) {
+            this.getAffiliatedData(affiliation);
+            this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
+                if (histories) {
+                    this.setState({histories: histories, historiesLoading: false});
+                } else {
+                    this.setState({histories: [], historiesLoading: false});
+                }
+            });
         }
     },
 
