@@ -116,7 +116,7 @@ var ProvisionalCuration = createReactClass({
             // search for provisional owned by affiliation or login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
                 for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
-                    let curatorAffiliation = this.props.affiliation && Object.keys(this.props.affiliation).length;
+                    let curatorAffiliation = this.props.affiliation;
                     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
                     let creator = provisionalClassification.submitted_by;
                     if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
@@ -326,7 +326,7 @@ var ProvisionalCuration = createReactClass({
         // returns dictionary of relevant items that need to be updated within NewCalculation()
         families.forEach(family => {
             // get segregation of family, but only if it was made by user (may change later - MC)
-            let curatorAffiliation = this.props.affiliation && Object.keys(this.props.affiliation).length;
+            let curatorAffiliation = this.props.affiliation;
             if ((family.affiliation && curatorAffiliation && family.segregation && family.affiliation === curatorAffiliation.affiliation_id)
                 || (!family.affiliation && !curatorAffiliation && family.segregation && family.submitted_by.uuid === user)) {
                 // get lod score of segregation of family
@@ -370,7 +370,7 @@ var ProvisionalCuration = createReactClass({
         let gdm = this.state.gdm;
         let scoreTableValues = this.state.scoreTableValues;
         let contradictingEvidence = this.state.contradictingEvidence;
-        let curatorAffiliation = this.props.affiliation && Object.keys(this.props.affiliation).length;
+        let curatorAffiliation = this.props.affiliation;
 
         const MAX_SCORE_CONSTANTS = {
             VARIANT_IS_DE_NOVO: 12,
