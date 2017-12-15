@@ -1314,6 +1314,8 @@
             "curator"
         ],
         "affiliation": [
+            "10001",
+            "10002",            
             "10005"
         ],
         "job_title": "ClinGen Curator",
@@ -1623,6 +1625,8 @@
             "curator"
         ],
         "affiliation": [
+            "10001",
+            "10002",
             "10005"
         ],
         "job_title": "ClinGen Curator",
@@ -1677,6 +1681,8 @@
             "curator"
         ],
         "affiliation": [
+            "10001",
+            "10002",
             "10005"
         ],
         "job_title": "ClinGen Curator",
