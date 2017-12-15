@@ -28,6 +28,12 @@ var ProvisionalCuration = createReactClass({
 
     queryValues: {},
 
+    propTypes: {
+        href: PropTypes.string,
+        session: PropTypes.object,
+        affiliation: PropTypes.object
+    },
+
     getInitialState: function() {
         return {
             user: null, // login user uuid
