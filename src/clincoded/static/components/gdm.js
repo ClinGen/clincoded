@@ -167,7 +167,7 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
                                 <div>Mode</div>
                             </div>
                             <div className="table-cell-gdm">
-                                Contributing Users
+                                Contributors
                             </div>
                             <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
                                 Last Edited<span className={sortIconClass.last}></span>
