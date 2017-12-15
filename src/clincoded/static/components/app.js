@@ -168,14 +168,14 @@ var App = module.exports = createReactClass({
                 buttonDisabled={this.state.affiliationModalButtonDisabled} onCancel={this.closeAffiliationModal}
                 hasCancelButton={this.state.affiliation && Object.keys(this.state.affiliation).length ? true : false}>
                 <div className="affiliation-modal-body">
-                    <h2>Please select whether you would like to curate as yourself or as part of an affiliation:</h2>
+                    <h2>Please select whether you would like to curate as part of an Affiliation:</h2>
                     <select className="form-control" defaultValue="none" onChange={this.handleOnChange}>
                         <option value="none" disabled>Select Affiliation</option>
                         <option value="" disabled className="divider">-----------------------------------------------------</option>
-                        <option value="self">{curatorName} (curating as yourself)</option>
+                        <option value="self">No Affiliation ({curatorName})</option>
                         <option value="" disabled className="divider">-----------------------------------------------------</option>
                         {userAffiliations.map((affiliation, i) => {
-                            return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_abbreviation}</option>;
+                            return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_fullname}</option>;
                         })}
                     </select>
                 </div>
@@ -265,7 +265,7 @@ var App = module.exports = createReactClass({
                                         {context.name === 'dashboard' ?
                                             <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal}>Change Affiliation</button>
                                             :
-                                            <span><i className="icon icon-lightbulb-o"></i> To change your affiliation, go to <a href='/dashboard/'>Dashboard</a></span>
+                                            <span><i className="icon icon-lightbulb-o"></i> To change your affiliation, go to <a href='/dashboard/'><i className="icon icon-home"></i></a></span>
                                         }
                                     </span>
                                 </div>
