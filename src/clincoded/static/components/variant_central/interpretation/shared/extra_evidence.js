@@ -239,7 +239,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 {!this.props.viewOnly ?
                     <td className="col-md-2">
                         {!this.props.viewOnly && ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
-                            (session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
+                            (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
                             <div>
                                 <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                                 <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
