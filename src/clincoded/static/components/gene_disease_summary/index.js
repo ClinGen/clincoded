@@ -65,7 +65,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
                 for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
-                    let curatorAffiliation = this.props.affiliation && Object.keys(this.props.affiliation).length;
+                    let curatorAffiliation = this.props.affiliation;
                     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
                     let creator = provisionalClassification.submitted_by;
                     if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
@@ -84,7 +84,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             const user = this.state.user;
             const gdm = this.state.gdm;
             const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
-            const curatorAffiliation = this.props.affiliation && Object.keys(this.props.affiliation).length;
+            const curatorAffiliation = this.props.affiliation;
             // Parse proband evidence and its associated segregation data
             this.parseCaseLevelEvidence(annotations, user, curatorAffiliation);
             // Parse segregation evidence with LOD scores but without proband
