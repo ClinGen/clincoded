@@ -35,7 +35,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             experimentalEvidenceList: [],
             probandHpoTermList: [],
             segregationHpoTermList: [],
-            caseControlHpoTermList: []
+            caseControlHpoTermList: [],
+            preview: queryKeyValue('preview', this.props.href),
         };
     },
 
@@ -663,11 +664,16 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className="window-close-btn-wrapper">
                     <button className="btn btn-default" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
                 </div>
-                <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
-                <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTermList={this.state.probandHpoTermList} />
-                <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTermList={this.state.segregationHpoTermList} />
-                <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTermList={this.state.caseControlHpoTermList} />
-                <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
+                <div className="evidence-panel-wrapper">
+                    <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
+                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTermList={this.state.probandHpoTermList} />
+                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTermList={this.state.segregationHpoTermList} />
+                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTermList={this.state.caseControlHpoTermList} />
+                    <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
+                    {this.state.preview && this.state.preview === 'yes' ?
+                        <div className="preview-only-overlay"></div>
+                        : null}
+                </div>
                 <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".
                 </p>
