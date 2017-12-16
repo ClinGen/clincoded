@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
+import { getAffiliationName } from '../../libs/get_affiliation_name';
 
 var _ = require('underscore');
 
@@ -51,7 +52,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
             for (let interpretation of data.associatedInterpretations) {
                 if (interpretation.affiliation && affiliation && interpretation.affiliation === affiliation.affiliation_id) {
                     affiliatedInterpretation = interpretation;
-                } else if (interpretation.submitted_by.uuid === session.user_properties.uuid) {
+                } else if (!interpretation.affiliation && !affiliation && interpretation.submitted_by.uuid === session.user_properties.uuid) {
                     myInterpretation = interpretation;
                 } else {
                     otherInterpretations.push(interpretation);
@@ -175,7 +176,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                     :
                                                     <span>, </span>
                                                 }
-                                                <span className="no-broken-item">{myInterpretation.submitted_by.title},</span>&nbsp;
+                                                <span className="no-broken-item">{myInterpretation.affiliation ? getAffiliationName(myInterpretation.affiliation) : myInterpretation.submitted_by.title},</span>&nbsp;
                                                 <span className="no-broken-item"><i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
                                                     {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
                                                         ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
@@ -212,10 +213,18 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                         :
                                                         ', '
                                                     }
-                                                    <span className="no-broken-item"><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,</span>&nbsp;
+                                                    <span className="no-broken-item">
+                                                        {interpretation.affiliation ?
+                                                            <span>{getAffiliationName(interpretation.affiliation)}</span>
+                                                            :
+                                                            <a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>
+                                                        }
+                                                    </span>
+                                                    <span>,&nbsp;</span>
                                                     <span className="no-broken-item"><i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
-                                                    {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
-                                                        ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
+                                                        {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
+                                                            ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
+                                                    </span>
                                                     last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 </dd>
                                             </dl>
