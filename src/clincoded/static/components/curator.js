@@ -498,14 +498,16 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
     propTypes: {
         gdm: PropTypes.object, // GDM whose collected variants to display
         pmid: PropTypes.string, // PMID of currently selected article
-        session: PropTypes.object // Logged-in session
+        session: PropTypes.object, // Logged-in session
+        affiliation: PropTypes.object
     },
 
-    render: function() {
-        var gdm = this.props.gdm;
-        var pmid = this.props.pmid;
-        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var collectedVariants = collectGdmVariants(gdm);
+    render() {
+        const gdm = this.props.gdm;
+        const pmid = this.props.pmid;
+        let session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
+        let collectedVariants = collectGdmVariants(gdm);
+        const affiliation = this.props.affiliation;
 
         return (
             <div>
@@ -516,7 +518,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
                             var variantName = getVariantTitle(variant);
-                            var userPathogenicity = null;
+                            var userPathogenicity = null, affiliatedPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
                             var matchingPathogenicity;
@@ -531,15 +533,18 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                             });
 
                             if (session && inCurrentGdm) {
-                                userPathogenicity = getPathogenicityFromVariant(gdm, session.user_properties.uuid, variant.uuid);
-                                //userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
+                                userPathogenicity = getPathogenicityFromVariant(gdm, session.user_properties.uuid, variant.uuid, affiliation);
                             }
                             inCurrentGdm = userPathogenicity ? true : false;
+
+                            let variantCurationUrl = '/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid;
+                            variantCurationUrl += affiliation ? '&affiliation=' + affiliation.affiliation_id : (session ? '&user=' + session.user_properties.uuid : '');
+                            variantCurationUrl += userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '';
 
                             return (
                                 <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
                                     <a className={"btn btn-primary btn-xs title-ellipsis" + (inCurrentGdm ? ' assessed' : '')}
-                                        href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
+                                        href={variantCurationUrl}
                                         title={variantName}>
                                         {variantName}
                                         {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
@@ -548,7 +553,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                             );
                         })}
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -760,7 +765,7 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         var allVariants = collectAnnotationVariants(annotation);
         if (Object.keys(allVariants).length) {
             variantRenders = Object.keys(allVariants).map(function(variantId) {
-                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session)}</div>;
+                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session, curatorAffiliation)}</div>;
             });
         }
 
@@ -1032,11 +1037,11 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch, e
 //   gdm: Currently viewed GDM
 //   annotation: Currently selected annotation (paper)
 //   curatorMatch: True if annotation owner matches currently logged-in user
-var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
+var renderVariant = function(variant, gdm, annotation, curatorMatch, session, affiliation) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record with an owner that matches the annotation's owner.
-    var associatedPathogenicity = getPathogenicityFromVariant(gdm, annotation.submitted_by.uuid, variant.uuid);
+    var associatedPathogenicity = getPathogenicityFromVariant(gdm, annotation.submitted_by.uuid, variant.uuid, affiliation);
     //var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
 
     // Get all families and individuals that reference this variant into variantAssociations array of families and individuals
@@ -1609,12 +1614,14 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = createReactClass({
 //    }
 //    return pathogenicity;
 //};
-var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
+var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid, affiliation) {
     var pathogenicity = null;
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-        for (var i in gdm.variantPathogenicity) {
-            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid === variantUuid) {
-                pathogenicity = gdm.variantPathogenicity[i];
+        for (let object of gdm.variantPathogenicity) {
+            if (affiliation && object.affiliation && object.affiliation === affiliation.affiliation_id) {
+                pathogenicity = object;
+            } else if (!affiliation && !object.affiliation && object.submitted_by.uuid === curatorUuid && object.variant.uuid === variantUuid) {
+                pathogenicity = object;
             }
         }
     }
