@@ -2306,7 +2306,7 @@ function flattenGdm(gdm) {
 var pathogenicitySimpleProps = [
     "date_created", "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported",
     "denovoType", "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "supportingExperimental", "comment",
-    "geneImpactType", "allelicSupportGeneImpact", "computationalSupportGeneImpact"
+    "geneImpactType", "allelicSupportGeneImpact", "computationalSupportGeneImpact", "affiliation"
 ];
 
 function flattenPathogenicity(pathogenicity) {
