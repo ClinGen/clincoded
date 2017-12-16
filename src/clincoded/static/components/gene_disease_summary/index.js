@@ -36,7 +36,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             probandHpoTermList: [],
             segregationHpoTermList: [],
             caseControlHpoTermList: [],
-            preview: queryKeyValue('preview', this.props.href),
+            preview: queryKeyValue('preview', this.props.href)
         };
     },
 
