@@ -104,3 +104,9 @@ def experimental_2_3(value, system):
                 value['rescue']['cellCultureFreeText'] = ''
             value['rescue'].pop('engineeredEquivalentCellTypeFreeText', None)
 
+
+@upgrade_step('experimental', '3', '4')
+def experimental_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1507
+    # Add affiliation property and update schema version
+    return
