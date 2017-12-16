@@ -36,7 +36,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         disableEvalForm: PropTypes.bool, // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        session: PropTypes.object
     },
 
     contextTypes: {
@@ -377,7 +378,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
             var meta = {
                 interpretation: {
                     variant: freshInterpretation.variant['@id'],
-                    mode: 'update-eval'
+                    mode: 'update-eval',
+                    modified_by: this.props.session.user_properties.title
                 }
             };
             if (freshInterpretation.disease) {
