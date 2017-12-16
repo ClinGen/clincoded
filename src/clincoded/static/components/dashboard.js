@@ -174,21 +174,26 @@ var Dashboard = createReactClass({
     },
 
     componentDidMount: function() {
+        let affiliation = this.props.affiliation;
         if (this.props.session.user_properties) {
             this.setUserData(this.props.session.user_properties);
             this.getData(this.props.session);
+            this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
+                if (histories) {
+                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    this.setState({histories: filteredHistories, historiesLoading: false});
+                }
+            });
         }
         // Invoke getAffiliatedData() if there is affiliation data
-        let affiliation = this.props.affiliation;
         if (affiliation && Object.keys(affiliation).length) {
             this.getAffiliatedData(affiliation);
+            this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
+                if (histories) {
+                    this.setState({histories: histories, historiesLoading: false});
+                }
+            });
         }
-        this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
-            if (histories) {
-                let filteredHistories = histories.filter(item => !item.primary.affiliation);
-                this.setState({histories: filteredHistories, historiesLoading: false});
-            }
-        });
     },
 
     componentWillReceiveProps: function(nextProps) {
