@@ -49,7 +49,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                     matchedScore = userAffiliatedScore;
                     this.setState({scoreAffiliation: this.props.affiliation.affiliation_id});
                 } else {
-                    matchedScore = !loggedInUserScore.affiliation ? loggedInUserScore : null;
+                    matchedScore = loggedInUserScore && !loggedInUserScore.affiliation ? loggedInUserScore : null;
                 }
                 if (matchedScore) {
                     this.setState({userScoreUuid: matchedScore.uuid});
