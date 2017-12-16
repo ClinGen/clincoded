@@ -264,6 +264,7 @@ class InterpretationModifyHistory extends Component {
     render() {
         const history = this.props.history;
         const interpretation = history.primary,
+            modified_by = history.meta && history.meta.interpretation && history.meta.interpretation.modified_by,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease,
             modeInheritance = history.meta && history.meta.interpretation && history.meta.interpretation.modeInheritance && history.meta.interpretation.modeInheritance.indexOf('(') > -1 ? history.meta.interpretation.modeInheritance.substring(0, history.meta.interpretation.modeInheritance.indexOf('(') - 1) : history.meta.interpretation.modeInheritance;
@@ -274,18 +275,18 @@ class InterpretationModifyHistory extends Component {
                     disease ?
                         <span>Disease <strong>{disease.term}</strong> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                         : <span>Disease association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
-                : null}
+                    : null}
                 {history.meta.interpretation.mode == 'edit-inheritance' ?
                     modeInheritance ?
                         <span>Mode of inheritance <i>{modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                         : <span>Mode of inheritance association removed from Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
-                : null}
+                    : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
                     <span>Evaluation(s) updated for Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
-                : null}
+                    : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {interpretation.affiliation ?
-                    <span>; last edited by {interpretation.modified_by.title}</span>
+                    <span>; last edited by {interpretation.modified_by ? interpretation.modified_by.title : (modified_by ? modified_by : null)}</span>
                     : null}
             </div>
         );
