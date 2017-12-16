@@ -378,8 +378,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
             var meta = {
                 interpretation: {
                     variant: freshInterpretation.variant['@id'],
-                    mode: 'update-eval',
-                    modified_by: this.props.session.user_properties.title
+                    mode: 'update-eval'
                 }
             };
             if (freshInterpretation.disease) {

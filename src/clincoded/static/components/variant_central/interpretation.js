@@ -264,7 +264,6 @@ class InterpretationModifyHistory extends Component {
     render() {
         const history = this.props.history;
         const interpretation = history.primary,
-            modified_by = history.meta && history.meta.interpretation && history.meta.interpretation.modified_by,
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease,
             modeInheritance = history.meta && history.meta.interpretation && history.meta.interpretation.modeInheritance && history.meta.interpretation.modeInheritance.indexOf('(') > -1 ? history.meta.interpretation.modeInheritance.substring(0, history.meta.interpretation.modeInheritance.indexOf('(') - 1) : history.meta.interpretation.modeInheritance;
@@ -286,7 +285,7 @@ class InterpretationModifyHistory extends Component {
                     : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {interpretation.affiliation ?
-                    <span>; last edited by {interpretation.modified_by ? interpretation.modified_by.title : (modified_by ? modified_by : null)}</span>
+                    <span>; last edited by {interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title}</span>
                     : null}
             </div>
         );
