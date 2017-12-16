@@ -231,7 +231,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     },
 
     viewEvidenceSummary(e) {
-        window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
+        window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
     },
 
     render: function() {
@@ -356,7 +356,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                             </td>
                                             <td className="button-box" rowSpan="2">
                                                 { !summaryPage ?
-                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></a>
+                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
                                                     : null}
                                                 { summaryButton ?
                                                     ( !summaryPage ?
@@ -1310,7 +1310,7 @@ var CuratorRecordHeader = createReactClass({
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {participants && participants.length && latestRecord ?
                                 <div>
-                                    <dt>Participants: </dt>
+                                    <dt>Contributors: </dt>
                                     <dd>
                                         {participants.map(function(participant, i) {
                                             return (
