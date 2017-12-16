@@ -1086,6 +1086,7 @@ class Pathogenicity(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'variant',
         'variant.submitted_by',
         'variant.associatedPathogenicities',
