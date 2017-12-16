@@ -22,7 +22,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
         href_url: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        session: PropTypes.object
     },
 
     getInitialState: function() {
@@ -40,7 +41,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     },
 
     render: function() {
-        const affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation, session = this.props.session;
 
         return (
             <div className="variant-interpretation functional">
@@ -52,7 +53,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -69,7 +70,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BS3', 'PS3']]}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup2Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}

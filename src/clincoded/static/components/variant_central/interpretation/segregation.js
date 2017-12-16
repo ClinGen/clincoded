@@ -22,7 +22,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
         href_url: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        session: PropTypes.object
     },
 
     getInitialState() {
@@ -38,7 +39,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     render() {
-        const affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation, session = this.props.session;
 
         return (
             <div className="variant-interpretation segregation">
@@ -50,7 +51,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -68,7 +69,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -86,7 +87,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup3Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -104,7 +105,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -122,7 +123,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup5Update} variantUuid={this.props.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -140,7 +141,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup6Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -158,7 +159,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup7Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -176,7 +177,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
                                     formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaGroup8Change}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    disableEvalForm={true} affiliation={affiliation} />
+                                    disableEvalForm={true} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}

@@ -508,7 +508,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         if (gRCh37) {
             links_37 = setContextLinks(gRCh37, 'GRCh37');
         }
-        const affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation, session = this.props.session;
 
         return (
             <div className="variant-interpretation computational">
@@ -529,7 +529,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} />
+                                            affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -784,7 +784,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaMissense2Update} variantUuid={variant['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} />
+                                            affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -814,7 +814,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaLof1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} />
+                                            affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -853,7 +853,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaSilentIntron1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} />
+                                            affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -882,7 +882,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
                                             formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaIndel1Change}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} />
+                                            affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}

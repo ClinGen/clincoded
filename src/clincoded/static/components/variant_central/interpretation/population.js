@@ -60,7 +60,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         loading_myVariantInfo: PropTypes.bool,
         loading_ensemblVariation: PropTypes.bool,
         href_url: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        session: PropTypes.object
+    
     },
 
     getInitialState: function() {
@@ -836,7 +838,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var singleNucleotide = this.state.ext_singleNucleotide;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
-        const affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation, session = this.props.session;
 
         return (
             <div className="variant-interpretation population">
@@ -849,7 +851,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} />
+                                    affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
