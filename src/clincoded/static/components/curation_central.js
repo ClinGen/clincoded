@@ -162,7 +162,7 @@ var CurationCentral = createReactClass({
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} affiliation={affiliation} />
                 <div className="container">
-                    <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} />
+                    <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} affiliation={affiliation} />
                     <div className="row curation-content">
                         <div className="col-md-3">
                             <PmidSelectionList annotations={gdm && gdm.annotations} currPmid={pmid} currPmidChange={this.currPmidChange}
