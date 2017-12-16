@@ -330,8 +330,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
                 // Add affiliation if the user is associated with an affiliation
                 // and if the data object has no affiliation
                 if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
-                    if (!evaluations[criterion][affiliation]) {
-                        evaluations[criterion][affiliation] = this.props.affiliation.affiliation_id;
+                    if (!evaluations[criterion]['affiliation']) {
+                        evaluations[criterion]['affiliation'] = this.props.affiliation.affiliation_id;
                     }
                 }
 
