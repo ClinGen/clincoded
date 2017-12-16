@@ -107,13 +107,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
         this.setState({diseaseObj: diseaseObj});
     },
 
-    render: function() {
+    render() {
+        const affiliation = this.props.affiliation, session = this.props.session;
         let hasExistingInterpretation = this.props.interpretation ? true : false;
         if (!hasExistingInterpretation) {
             let variant = this.props.variantData;
             if (variant && variant.associatedInterpretations && variant.associatedInterpretations.length) {
                 for (let interpretation of variant.associatedInterpretations) {
-                    if (interpretation.submitted_by.uuid === this.props.session.user_properties.uuid) {
+                    if (affiliation && interpretation.affiliation && interpretation.affiliation === affiliation.affiliation_id) {
+                        hasExistingInterpretation = true;
+                        break;
+                    } else if (!affiliation && !interpretation.affiliation && interpretation.submitted_by.uuid === session.user_properties.uuid) {
                         hasExistingInterpretation = true;
                         break;
                     }
@@ -142,9 +146,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                                 <button className="btn btn-primary pull-right" onClick={this.handleInterpretationEvent}>
                                     Interpretation <i className="icon icon-plus-circle"></i>
                                 </button>
-                                :
-                                null
-                            }
+                                : null}
                         </div>
                     </div>
                 }
