@@ -185,7 +185,8 @@ var Dashboard = createReactClass({
         }
         this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
             if (histories) {
-                this.setState({histories: histories, historiesLoading: false});
+                let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                this.setState({histories: filteredHistories, historiesLoading: false});
             }
         });
     },
@@ -197,7 +198,10 @@ var Dashboard = createReactClass({
             this.getData(nextProps.session);
             this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    this.setState({histories: histories, historiesLoading: false});
+                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    this.setState({histories: filteredHistories, historiesLoading: false});
+                } else {
+                    this.setState({histories: [], historiesLoading: false});
                 }
             });
         }
