@@ -20,7 +20,6 @@ src/clincoded/static/css/
 src/clincoded/static/scss/_variables.original.scss
 src/clincoded/static/build/
 src/clincoded/tests/js/build/
-src/clincoded/static/service_api.js
 +.project
 +.pydevproject
 *.log
