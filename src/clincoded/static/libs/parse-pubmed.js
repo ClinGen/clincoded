@@ -154,6 +154,12 @@ function pubmedDatePublished($PubmedArticle, $Journal){
 function parseDate(day, month, year) {
     // put together the date information for a valid Pubmed-style timestamp
     var pubdate;
+
+    // Remove leading zero from day of month
+    if (day) {
+        day = day.replace(/^0([1-9])$/, '$1');
+    }
+
     if (month && !isNaN(parseFloat(month)) && isFinite(month)) {
         // if the month is in numeric format, switch it over to short alphabet
         month = parseInt(month);
