@@ -59,8 +59,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_ensemblVariation: PropTypes.bool,
-        href_url: PropTypes.object,
-        demoVersion: PropTypes.bool
+        href_url: PropTypes.object
     },
 
     getInitialState: function() {
@@ -836,6 +835,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var singleNucleotide = this.state.ext_singleNucleotide;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+        const session = this.props.session;
 
         return (
             <div className="variant-interpretation population">
@@ -994,7 +994,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         </div>
                                         :
                                         <div className="panel-body">
-                                            <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
+                                            {session && session.user_properties && session.user_properties.email === 'clingen.demo.curator@genome.stanford.edu' ?
+                                                <span>PAGE population data is not available to demo users. Please login or request an account for the ClinGen interfaces by emailing the <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</span>
+                                                :
+                                                <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
+                                            }
                                         </div>
                                     }
                                 </div>
@@ -1080,7 +1084,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             }
                         </div>
                     </div>
-                    <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
+                    <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                         viewOnly={this.state.data && !this.state.interpretation} />
