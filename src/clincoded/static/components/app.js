@@ -237,7 +237,7 @@ var NavbarMain = createReactClass({
 var NavbarUser = createReactClass({
     render: function() {
         var session = this.props.session;
-        var demoLoginEnabled = false;
+        var demoLoginEnabled = true;
         if (/curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname) || /production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
             // check if production or curation URL. Disable demo login if true
             demoLoginEnabled = false;
