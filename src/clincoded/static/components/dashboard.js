@@ -248,13 +248,13 @@ var Dashboard = createReactClass({
                                 {records.map(item => {
                                     return (
                                         <tr key={item.uuid}>
-                                            <td>
+                                            <td className="item-name">
                                                 <a key={item.uuid} className="individual-record-link" href={"/curation-central/?gdm=" + item.uuid}>
-                                                    <span className="block-link-color title-ellipsis"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
+                                                    <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td>{item.status}</td>
-                                            <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
                                 })}
@@ -293,13 +293,13 @@ var Dashboard = createReactClass({
                                 {records.map(item => {
                                     return (
                                         <tr key={item.uuid}>
-                                            <td>
+                                            <td className="item-name">
                                                 <a key={item.uuid} className="affiliated-record-link" href={"/curation-central/?gdm=" + item.uuid}>
-                                                    <span className="block-link-color title-ellipsis"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
+                                                    <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td>{item.status}</td>
-                                            <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
                                 })}
@@ -339,11 +339,11 @@ var Dashboard = createReactClass({
                                 {records.map(item => {
                                     return (
                                         <tr key={item.uuid}>
-                                            <td>
+                                            <td className="item-variant">
                                                 <a key={item.uuid}
                                                     className="individual-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="block-link-color title-ellipsis"><strong>
+                                                    <span className="variant-title"><strong>
                                                         {item.clinvarVariantTitle
                                                             ? item.clinvarVariantTitle
                                                             : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
@@ -351,9 +351,9 @@ var Dashboard = createReactClass({
                                                     </strong></span>
                                                 </a>
                                             </td>
-                                            <td>{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td>{item.status}</td>
-                                            <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                                            <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
+                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
                                 })}
@@ -393,11 +393,11 @@ var Dashboard = createReactClass({
                                 {records.map(item => {
                                     return (
                                         <tr key={item.uuid}>
-                                            <td>
+                                            <td className="item-variant">
                                                 <a key={item.uuid}
                                                     className="affiliated-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="block-link-color title-ellipsis"><strong>
+                                                    <span className="variant-title"><strong>
                                                         {item.clinvarVariantTitle
                                                             ? item.clinvarVariantTitle
                                                             : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
@@ -405,9 +405,9 @@ var Dashboard = createReactClass({
                                                     </strong></span>
                                                 </a>
                                             </td>
-                                            <td>{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td>{item.status}</td>
-                                            <td>{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
+                                            <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
+                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
                                 })}
