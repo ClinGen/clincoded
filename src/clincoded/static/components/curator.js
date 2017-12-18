@@ -839,7 +839,10 @@ var renderGroup = function(group, gdm, annotation, curatorMatch, evidenceAffilia
                     : null}
                 <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{evidenceAffiliationMatch || curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
+            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>
+            {(group.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!group.affiliation && !curatorAffiliation && curatorMatch) ? 
+                <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span>
+                : null}
             {(group.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!group.affiliation && !curatorAffiliation && curatorMatch) ?
                 <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div>
                 : null}
