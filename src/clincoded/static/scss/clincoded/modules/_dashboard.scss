@@ -42,19 +42,31 @@
         }
     }
 
-    .affiliated-evidence-list,
+    .affiliated-evidence-list {
+        margin-bottom: 0;
+
+        .item-name {
+            width: 70%;
+        }
+
+        .item-status,
+        .item-timestamp {
+            width: 15%;
+        }
+    }
+
     .affiliated-interpretation-list {
         margin-bottom: 0;
 
         .item-variant {
-            width: 30%;
+            width: 35%;
         }
 
         .item-attribute {
-            width: 40%;
+            width: 35%;
         }
 
-        .item-author,
+        .item-status,
         .item-timestamp {
             width: 15%;
         }
