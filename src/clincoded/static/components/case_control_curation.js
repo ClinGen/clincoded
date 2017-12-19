@@ -1490,25 +1490,21 @@ var CaseControlViewer = createReactClass({
     render: function() {
         var context = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
-        var userCaseControl = user && context && context.submitted_by ? user.uuid === context.submitted_by.uuid : false;
+        var userCaseControl = user && context && context.submitted_by && user.uuid === context.submitted_by.uuid ? true : false;
         let affiliation = this.props.affiliation;
-        let affiliatedCaseControl = affiliation && Object.keys(affiliation).length && context && context.affiliation ? affiliation.affiliation_id === context.affiliation : false;
+        let affiliatedCaseControl = affiliation && Object.keys(affiliation).length && context && context.affiliation && affiliation.affiliation_id === context.affiliation ? true : false;
         var caseCohort = context.caseCohort;
         var caseCohortMethod = context.caseCohort.method;
         var controlCohort = context.controlCohort;
         var controlCohortMethod = context.controlCohort.method;
-        var evidenceScores = context && context.scores ? context.scores : [];
+        let evidenceScores = context && context.scores && context.scores.length ? context.scores : [];
         let isEvidenceScored = false;
-        if (evidenceScores && evidenceScores.length > 0) {
+        if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                if (scoreObj.hasOwnProperty('score') && scoreObj.score !== 'none') {
                     isEvidenceScored = true;
-                } else {
-                    isEvidenceScored = false;
                 }
             });
-        } else if (evidenceScores && evidenceScores.length < 1) {
-            isEvidenceScored = false;
         }
 
         var tempGdmPmid = curator.findGdmPmidFromObj(context);
@@ -1947,24 +1943,20 @@ var CaseControlViewer = createReactClass({
 
                                 </dl>
                             </Panel>
-                            {isEvidenceScored && (!affiliatedCaseControl || !userCaseControl) ?
-                                <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
-                                    <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} affiliation={affiliation} />
-                                </Panel>
-                                : null}
-                            {isEvidenceScored || (!isEvidenceScored && affiliatedCaseControl) || (!isEvidenceScored && !affiliatedCaseControl && userCaseControl) ?
-                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
-                                    <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
+                            <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
+                                <ScoreViewer evidence={context} otherScores={true} session={this.props.session} affiliation={affiliation} />
+                            </Panel>
+                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                                {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedCaseControl) || (!isEvidenceScored && !affiliation && userCaseControl) ?
+                                    <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session}
                                         handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
-                                </Panel>
-                                : null}
-                            {!isEvidenceScored  && (!affiliatedCaseControl || !userCaseControl) ?
-                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                                    : null}
+                                {!isEvidenceScored  && ((affiliation && !affiliatedCaseControl) || (!affiliation && !userCaseControl)) ?
                                     <div className="row">
                                         <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                     </div>
-                                </Panel>
-                                : null}
+                                    : null}
+                            </Panel>
                         </div>
                     </div>
                 </div>

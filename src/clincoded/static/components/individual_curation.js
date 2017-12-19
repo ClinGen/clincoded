@@ -1669,28 +1669,23 @@ const IndividualViewer = createReactClass({
     render() {
         var individual = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
-        var userIndividual = user && individual && individual.submitted_by ? user.uuid === individual.submitted_by.uuid : false;
+        var userIndividual = user && individual && individual.submitted_by && user.uuid === individual.submitted_by.uuid ? true : false;
         let affiliation = this.props.affiliation;
-        let affiliatedIndividual = affiliation && Object.keys(affiliation).length && individual && individual.affiliation ? affiliation.affiliation_id === individual.affiliation : false;
+        let affiliatedIndividual = affiliation && Object.keys(affiliation).length && individual && individual.affiliation && affiliation.affiliation_id === individual.affiliation ? true : false;
         var method = individual.method;
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        let evidenceScores = individual && individual.scores ? individual.scores : [];
+        let evidenceScores = individual && individual.scores && individual.scores.length ? individual.scores : [];
         let isEvidenceScored = false;
-        if (evidenceScores && evidenceScores.length > 0) {
+        if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
-                } else {
-                    isEvidenceScored = false;
                 }
             });
-        } else if (evidenceScores && evidenceScores.length < 1) {
-            isEvidenceScored = false;
         }
-
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
             groupRenders = family.associatedGroups.map(function(group) {
@@ -1960,25 +1955,21 @@ const IndividualViewer = createReactClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                {isEvidenceScored && (!affiliatedIndividual || !userIndividual) ?
-                                    <Panel title={LabelPanelTitleView(individual, 'Other Curator Scores')} panelClassName="panel-data">
-                                        <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} affiliation={affiliation} />
-                                    </Panel>
-                                    : null}
-                                {isEvidenceScored || (!isEvidenceScored && affiliatedIndividual) || (!isEvidenceScored && affiliatedIndividual && userIndividual) ?
-                                    <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
+                                <Panel title={LabelPanelTitleView(individual, 'Other Curator Scores')} panelClassName="panel-data">
+                                    <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} affiliation={affiliation} />
+                                </Panel>
+                                <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
+                                    {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedIndividual) || (!isEvidenceScored && !affiliation && userIndividual) ?
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
-                                    </Panel>
-                                    : null}
-                                {!isEvidenceScored && (!affiliatedIndividual || !userIndividual) ?
-                                    <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
+                                        : null}
+                                    {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">
                                             <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                         </div>
-                                    </Panel>
-                                    : null}
+                                        : null}
+                                </Panel>
                             </div>
                             : null}
                     </div>
