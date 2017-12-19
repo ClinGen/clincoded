@@ -2765,6 +2765,8 @@ const ExperimentalViewer = createReactClass({
         });
         var user = this.props.session && this.props.session.user_properties;
         var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedExperimental = affiliation && Object.keys(affiliation).length && experimental && experimental.affiliation ? affiliation.affiliation_id === experimental.affiliation : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
         var othersAssessed = false; // TRUE if we own this experimental data, and others have assessed it
         var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
@@ -3287,19 +3289,19 @@ const ExperimentalViewer = createReactClass({
                                 </dl>
                             </Panel>
                             : null}
-                        {isEvidenceScored && !userExperimental ?
+                        {isEvidenceScored && (!affiliatedExperimental || !userExperimental) ?
                             <Panel title="Experimental Data - Other Curator Scores" panelClassName="panel-data">
-                                <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
+                                <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} affiliation={affiliation} />
                             </Panel>
                             : null}
-                        {this.cv.gdmUuid && (isEvidenceScored || (!isEvidenceScored && userExperimental)) ?
+                        {this.cv.gdmUuid && (isEvidenceScored || (!isEvidenceScored && affiliatedExperimental) || (!isEvidenceScored && !affiliatedExperimental && userExperimental)) ?
                             <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
                                     evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                    formError={this.state.formError} affiliation={this.props.affiliation} />
+                                    formError={this.state.formError} affiliation={affiliation} />
                             </Panel>
                             : null}
-                        {!isEvidenceScored && !userExperimental ?
+                        {!isEvidenceScored && (!affiliatedExperimental || !userExperimental) ?
                             <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
                                 <div className="row">
                                     <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>

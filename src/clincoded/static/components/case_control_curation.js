@@ -1491,6 +1491,8 @@ var CaseControlViewer = createReactClass({
         var context = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
         var userCaseControl = user && context && context.submitted_by ? user.uuid === context.submitted_by.uuid : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedCaseControl = affiliation && Object.keys(affiliation).length && context && context.affiliation ? affiliation.affiliation_id === context.affiliation : false;
         var caseCohort = context.caseCohort;
         var caseCohortMethod = context.caseCohort.method;
         var controlCohort = context.controlCohort;
@@ -1945,18 +1947,18 @@ var CaseControlViewer = createReactClass({
 
                                 </dl>
                             </Panel>
-                            {isEvidenceScored && !userCaseControl ?
+                            {isEvidenceScored && (!affiliatedCaseControl || !userCaseControl) ?
                                 <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
-                                    <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
+                                    <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} affiliation={affiliation} />
                                 </Panel>
                                 : null}
-                            {isEvidenceScored || (!isEvidenceScored < 1 && userCaseControl) ?
+                            {isEvidenceScored || (!isEvidenceScored < 1 && affiliatedCaseControl) || (!isEvidenceScored < 1 && !affiliatedCaseControl && userCaseControl) ?
                                 <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                     <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
-                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={this.props.affiliation} />
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
                                 </Panel>
                                 : null}
-                            {!isEvidenceScored && !userCaseControl ?
+                            {!isEvidenceScored  && (!affiliatedCaseControl || !userCaseControl) ?
                                 <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                     <div className="row">
                                         <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>

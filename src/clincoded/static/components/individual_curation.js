@@ -1965,14 +1965,14 @@ const IndividualViewer = createReactClass({
                                         <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} affiliation={affiliation} />
                                     </Panel>
                                     : null}
-                                {isEvidenceScored || (!isEvidenceScored && affiliatedIndividual) || (!isEvidenceScored && userIndividual) ?
+                                {isEvidenceScored || (!isEvidenceScored && affiliatedIndividual) || (!isEvidenceScored && affiliatedIndividual && userIndividual) ?
                                     <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
                                     </Panel>
                                     : null}
-                                {!isEvidenceScored && !userIndividual ?
+                                {!isEvidenceScored && (!affiliatedIndividual || !userIndividual) ?
                                     <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
                                         <div className="row">
                                             <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
