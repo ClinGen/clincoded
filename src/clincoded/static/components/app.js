@@ -260,7 +260,7 @@ var App = module.exports = createReactClass({
                         {user_properties && user_properties.affiliation && user_properties.affiliation.length ?
                             <div className="affiliation-utility-container">
                                 <div className="container affiliation-utility">
-                                    <span className="curator-affiliation">Affiliation: {affiliation && affiliation.affiliation_fullname ? affiliation.affiliation_fullname : 'None'}</span>
+                                    <span className="curator-affiliation">Affiliation: {affiliation && affiliation.affiliation_fullname ? affiliation.affiliation_fullname : <span>No Affiliation ({user_properties.title})</span>}</span>
                                     <span className="change-affiliation-button">
                                         {context.name === 'dashboard' ?
                                             <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal}>Change Affiliation</button>
