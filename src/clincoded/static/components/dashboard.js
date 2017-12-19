@@ -74,13 +74,15 @@ var Dashboard = createReactClass({
             if (gdmURLs.length > 0) {
                 this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
                     gdmResults.map(gdmResult => {
-                        gdmList.push({
-                            uuid: gdmResult.uuid,
-                            gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
-                            gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
-                            status: gdmResult.gdm_status,
-                            date_created: gdmResult.date_created
-                        });
+                        if (!gdmResult.affiliation) {
+                            gdmList.push({
+                                uuid: gdmResult.uuid,
+                                gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
+                                gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
+                                status: gdmResult.gdm_status,
+                                date_created: gdmResult.date_created
+                            });
+                        }
                     });
                     this.setState({gdmList: gdmList, gdmListLoading: false});
                 });
@@ -92,17 +94,19 @@ var Dashboard = createReactClass({
             if (vciInterpURLs.length > 0) {
                 this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
                     vciInterpResults.map(vciInterpResult => {
-                        vciInterpList.push({
-                            uuid: vciInterpResult.uuid,
-                            variantUuid: vciInterpResult.variant.uuid,
-                            clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
-                            hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
-                            hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
-                            diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
-                            modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
-                            status: vciInterpResult.interpretation_status,
-                            date_created: vciInterpResult.date_created
-                        });
+                        if (!vciInterpResult.affiliation) {
+                            vciInterpList.push({
+                                uuid: vciInterpResult.uuid,
+                                variantUuid: vciInterpResult.variant.uuid,
+                                clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
+                                hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
+                                hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
+                                diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
+                                modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
+                                status: vciInterpResult.interpretation_status,
+                                date_created: vciInterpResult.date_created
+                            });
+                        }
                     });
                     this.setState({vciInterpList: vciInterpList, vciInterpListLoading: false});
                 });
@@ -175,7 +179,7 @@ var Dashboard = createReactClass({
 
     componentDidMount: function() {
         let affiliation = this.props.affiliation;
-        if (this.props.session.user_properties) {
+        if (!affiliation && this.props.session.user_properties) {
             this.setUserData(this.props.session.user_properties);
             this.getData(this.props.session);
             this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
@@ -198,7 +202,7 @@ var Dashboard = createReactClass({
 
     componentWillReceiveProps: function(nextProps) {
         let affiliation = nextProps && nextProps.affiliation;
-        if (nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
+        if (!affiliation && nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
             this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
@@ -423,6 +427,8 @@ var Dashboard = createReactClass({
 
     render() {
         let affiliation = this.props.affiliation;
+        // FIXME: Temporarily suppress history items for adding PMIDs as articles are affiliation-agnostic
+        let filteredHistories = this.state.histories.filter(history => !history.meta.article);
 
         return (
             <div className="container">
@@ -461,7 +467,7 @@ var Dashboard = createReactClass({
                             </div>
                             <div className="panel-content-wrapper">
                                 {this.state.historiesLoading ? showActivityIndicator('Loading... ') : null}
-                                {this.state.histories.length ?
+                                {filteredHistories.length ?
                                     <ul className="list-group">
                                         {this.state.histories.map(history => {
                                             // Call the history display view based on the primary object
