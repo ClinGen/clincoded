@@ -202,7 +202,19 @@ var Dashboard = createReactClass({
 
     componentWillReceiveProps: function(nextProps) {
         let affiliation = nextProps && nextProps.affiliation;
-        if (!affiliation && nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
+        if (nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
+            this.setUserData(nextProps.session.user_properties);
+            this.getData(nextProps.session);
+            this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
+                if (histories) {
+                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    this.setState({histories: filteredHistories, historiesLoading: false});
+                } else {
+                    this.setState({histories: [], historiesLoading: false});
+                }
+            });
+        }
+        if (!affiliation && nextProps.href.indexOf('dashboard') > -1 && _.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
             this.setUserData(nextProps.session.user_properties);
             this.getData(nextProps.session);
             this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
@@ -427,8 +439,8 @@ var Dashboard = createReactClass({
 
     render() {
         let affiliation = this.props.affiliation;
-        // FIXME: Temporarily suppress history items for adding PMIDs as articles are affiliation-agnostic
-        let filteredHistories = this.state.histories.filter(history => !history.meta.article);
+        // FIXME: Temporarily suppress history items for adding PMIDs or variants as they are affiliation-agnostic
+        let filteredHistories = this.state.histories.filter(history => !history.primary['@id'].match(/articles|variants/ig));
 
         return (
             <div className="container">
@@ -469,7 +481,7 @@ var Dashboard = createReactClass({
                                 {this.state.historiesLoading ? showActivityIndicator('Loading... ') : null}
                                 {filteredHistories.length ?
                                     <ul className="list-group">
-                                        {this.state.histories.map(history => {
+                                        {filteredHistories.map(history => {
                                             // Call the history display view based on the primary object
                                             var HistoryView = this.getHistoryView(history);
                                             return (
