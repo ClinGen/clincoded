@@ -835,6 +835,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var singleNucleotide = this.state.ext_singleNucleotide;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+        const session = this.props.session;
 
         return (
             <div className="variant-interpretation population">
@@ -978,7 +979,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                                 <thead>
                                                     <tr>
                                                         <th>Population</th>
-                                                        <th>Observation Count</th>
+                                                        <th>Allele Number</th>
                                                         <th colSpan="2">Allele Frequency</th>
                                                     </tr>
                                                 </thead>
@@ -993,7 +994,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                         </div>
                                         :
                                         <div className="panel-body">
-                                            <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
+                                            {session && session.user_properties && session.user_properties.email === 'clingen.demo.curator@genome.stanford.edu' ?
+                                                <span>PAGE population data is not available to demo users. Please login or request an account for the ClinGen interfaces by emailing the <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</span>
+                                                :
+                                                <span>No population data was found for this allele in PAGE. <a href="http://popgen.uchicago.edu/ggv/" target="_blank" rel="noopener noreferrer">Search GGV</a> for this variant.</span>
+                                            }
                                         </div>
                                     }
                                 </div>
@@ -1012,27 +1017,27 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </div>
                                 :
                                 <div>
-                                {this.state.hasTGenomesData ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Population</th>
-                                                <th colSpan="2">Allele Frequency (count)</th>
-                                                <th colSpan="3">Genotype Frequency (count)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
-                                            {tGenomesStatic._order.map(key => {
-                                                return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
-                                            })}
-                                        </tbody>
-                                    </table>
-                                    :
-                                    <div className="panel-body">
-                                        <span>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
-                                    </div>
-                                }
+                                    {this.state.hasTGenomesData ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Population</th>
+                                                    <th colSpan="2">Allele Frequency (count)</th>
+                                                    <th colSpan="3">Genotype Frequency (count)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {this.renderTGenomesRow('_tot', tGenomes, tGenomesStatic, 'ALL')}
+                                                {tGenomesStatic._order.map(key => {
+                                                    return (this.renderTGenomesRow(key, tGenomes, tGenomesStatic));
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        :
+                                        <div className="panel-body">
+                                            <span>No population data was found for this allele in 1000 Genomes. <a href={external_url_map['1000GenomesHome']} target="_blank">Search 1000 Genomes</a> for this variant.</span>
+                                        </div>
+                                    }
                                 </div>
                             }
                         </div>
@@ -1049,37 +1054,37 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </div>
                                 :
                                 <div>
-                                {this.state.hasEspData ?
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Population</th>
-                                                <th colSpan="2">Allele Count</th>
-                                                <th colSpan="3">Genotype Count</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {espStatic._order.map(key => {
-                                                return (this.renderEspRow(key, esp, espStatic));
-                                            })}
-                                            {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
-                                        </tbody>
-                                        <tfoot>
-                                            <tr className="count">
-                                                <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                    :
-                                    <div className="panel-body">
-                                        <span>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
-                                    </div>
-                                }
+                                    {this.state.hasEspData ?
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Population</th>
+                                                    <th colSpan="2">Allele Count</th>
+                                                    <th colSpan="3">Genotype Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {espStatic._order.map(key => {
+                                                    return (this.renderEspRow(key, esp, espStatic));
+                                                })}
+                                                {this.renderEspRow('_tot', esp, espStatic, 'All Allele', 'count')}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr className="count">
+                                                    <td colSpan="6">Average Sample Read Depth: {esp._extra.avg_sample_read}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        :
+                                        <div className="panel-body">
+                                            <span>No population data was found for this allele in ESP. <a href={external_url_map['ESPHome']} target="_blank">Search ESP</a> for this variant.</span>
+                                        </div>
+                                    }
                                 </div>
                             }
                         </div>
                     </div>
-                    <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={this.props.session}
+                    <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                         viewOnly={this.state.data && !this.state.interpretation} />
@@ -1087,7 +1092,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                 {this.state.interpretation ?
                     <CompleteSection interpretation={this.state.interpretation} tabName="population" updateInterpretationObj={this.props.updateInterpretationObj} />
-                : null}
+                    : null}
 
                 {renderDataCredit('pagestudy')}
 

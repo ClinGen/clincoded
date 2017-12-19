@@ -391,12 +391,18 @@ function pubmedValidateForm() {
     var formInput = this.getFormValue('resourceId');
 
     // Valid if input has a prefix like "PMID:" (which is removed before validation continues)
-    if (valid && formInput.match(/^PMID\s*:/i)) {
-        formInput = formInput.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+    if (valid && formInput.match(/:/)) {
+        if (valid && formInput.match(/^PMID\s*:/i)) {
+            formInput = formInput.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
 
-        if (!formInput) {
+            if (!formInput) {
+                valid = false;
+                this.setFormErrors('resourceId', 'Please include a PMID');
+                this.setState({submitBusy: false});
+            }
+        } else {
             valid = false;
-            this.setFormErrors('resourceId', 'Please include a PMID');
+            this.setFormErrors('resourceId', 'Invalid PMID');
             this.setState({submitBusy: false});
         }
     }

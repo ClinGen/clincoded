@@ -153,3 +153,11 @@ def interpretation_2_3(value, system):
             value['disease'] = 'e1fb9424-0a9f-4ce5-a7f5-88a12cb67955'
         if value['disease'] == '7bb7034d-7075-4940-86b8-0233dab3926a':
             value['disease'] = '2cea0443-a548-4f54-a4eb-a5fd581cbdef'
+
+
+@upgrade_step('interpretation', '3', '4')
+def interpretation_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1516
+    if 'disease' in value:
+        if value['disease'] == '05b13ca9-9d70-4e1c-ab12-8a1a83498f33':
+            value['disease'] = '5bbacce3-3ac8-4911-adbb-5e5369cd79e1'
