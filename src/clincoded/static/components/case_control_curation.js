@@ -1952,7 +1952,7 @@ var CaseControlViewer = createReactClass({
                                     <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} affiliation={affiliation} />
                                 </Panel>
                                 : null}
-                            {isEvidenceScored || (!isEvidenceScored < 1 && affiliatedCaseControl) || (!isEvidenceScored < 1 && !affiliatedCaseControl && userCaseControl) ?
+                            {isEvidenceScored || (!isEvidenceScored && affiliatedCaseControl) || (!isEvidenceScored && !affiliatedCaseControl && userCaseControl) ?
                                 <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                     <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
                                         handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
