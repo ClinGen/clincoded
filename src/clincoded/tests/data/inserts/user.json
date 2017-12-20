@@ -1141,11 +1141,6 @@
         "groups": [
             "admin"
         ],
-        "affiliation": [
-            "10001",
-            "10002",
-            "10003"
-        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/j-michael-cherry/",
         "last_name": "Dwight",
@@ -1312,11 +1307,6 @@
         "uuid": "585bfe53-693b-491e-a826-ebfe0fcde1ee",
         "groups": [
             "curator"
-        ],
-        "affiliation": [
-            "10001",
-            "10002",            
-            "10005"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1589,11 +1579,6 @@
         "groups": [
             "admin"
         ],
-        "affiliation": [
-            "10001",
-            "10002",
-            "10004"
-        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -1623,11 +1608,6 @@
         "uuid": "b07fad40-f48f-4edf-bb34-4fe94b32c735",
         "groups": [
             "curator"
-        ],
-        "affiliation": [
-            "10001",
-            "10002",
-            "10005"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1659,12 +1639,6 @@
         "groups": [
             "admin"
         ],
-        "affiliation": [
-            "10001",
-            "10002",
-            "10003",
-            "10004"
-        ],
         "job_title": "Admin",
         "lab": "/labs/j-michael-cherry/",
         "submits_for": [
@@ -1674,29 +1648,9 @@
     },
     {
         "email": "jimmy.zhen@stanford.edu",
-        "first_name": "Jimmee",
+        "first_name": "Jimmy",
         "last_name": "Zhen",
         "uuid": "11db89f3-79b3-43a6-ad38-cd29a5349422",
-        "groups": [
-            "curator"
-        ],
-        "affiliation": [
-            "10001",
-            "10002",
-            "10005"
-        ],
-        "job_title": "ClinGen Curator",
-        "lab": "/labs/curator/",
-        "submits_for": [
-            "/labs/curator/"
-        ],
-        "timezone": "US/Pacific"
-    },
-    {
-        "email": "jimmyz@stanford.edu",
-        "first_name": "Jimmy",
-        "last_name": "Zee",
-        "uuid": "1c572192-0d0f-4df3-a633-dd98efe72718",
         "groups": [
             "curator"
         ],
