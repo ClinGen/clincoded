@@ -1173,11 +1173,11 @@ function IndividualCommonDiseases() {
                 value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Group"
                     clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
                 : null}
             {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Family"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Family"
                     clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
@@ -1269,7 +1269,7 @@ function IndividualDemographics() {
             </div>
             {hasParentDemographics ?
                 <Input type="button" ref="copyparentdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
-                    inputClassName="btn-info btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
+                    inputClassName="btn-copy btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
                     clickHandler={this.handleClick.bind(this, associatedParentObj[0], 'demographics')} />
                 : null}
             {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}

@@ -1513,7 +1513,7 @@ function FamilyCommonDiseases() {
             <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                <Input type="button" ref={(button) => { this.phenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm"
+                <Input type="button" ref={(button) => { this.phenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm"
                     title="Copy all Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupPhenotypes} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
@@ -1577,7 +1577,7 @@ function FamilyDemographics() {
         <div className="row">
             {hasGroupDemographics ?
                 <Input type="button" ref="copygroupdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
-                    inputClassName="btn-info btn-sm" title="Copy Demographics from Associated Group"
+                    inputClassName="btn-copy btn-sm" title="Copy Demographics from Associated Group"
                     clickHandler={this.handleCopyGroupDemographics} />
                 : null}
             {hasGroupDemographics ? curator.renderParentEvidence('Country of Origin Associated with Group:', associatedGroups[0].countryOfOrigin) : null}

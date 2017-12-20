@@ -48,7 +48,7 @@ module.exports = {
             <div className={(isCaseControl) ? 'row section section-method' : 'row'}>
                 {(isCaseControl) ? <h3><i className="icon icon-chevron-right"></i> Methods <span className="label label-group">{headerLabel}</span></h3> : null}
                 {hasParentMethods ?
-                    <Input type="button" ref="copyparentmethods" wrapperClassName="col-sm-7 col-sm-offset-5 methods-copy" inputClassName="btn-info btn-sm"
+                    <Input type="button" ref="copyparentmethods" wrapperClassName="col-sm-7 col-sm-offset-5 methods-copy" inputClassName="btn-copy btn-sm"
                         title={'Copy Methods from Associated ' + parentName} clickHandler={module.exports.copy.bind(this, parentMethod, isCaseControl, prefix)} />
                     : null}
                 {hasParentMethods ? curator.renderParentEvidence('Previous Testing Associated with ' + parentName + ':',

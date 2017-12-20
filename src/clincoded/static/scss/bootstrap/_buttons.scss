@@ -79,6 +79,10 @@
 .btn-danger {
   @include button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
 }
+// Copy appears as blue-green
+.btn-copy {
+  @include button-variant($btn-copy-color, $btn-copy-bg, $btn-copy-border);
+}
 
 
 // Link buttons

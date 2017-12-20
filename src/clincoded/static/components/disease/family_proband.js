@@ -162,7 +162,7 @@ const FamilyProbandDisease = module.exports.FamilyProbandDisease = createReactCl
          */
         return (
             <Input type="button" ref="copyFamilyProbandDisease" title="Copy disease term from Family"
-                wrapperClassName="family-proband-disease-copy" inputClassName="btn-default"
+                wrapperClassName="family-proband-disease-copy" inputClassName="btn-copy"
                 clickHandler={this.handleCopyFamilyProbandDisease} />
         );
     },
