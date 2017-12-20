@@ -951,7 +951,7 @@ var ExperimentalCuration = createReactClass({
 
             if (!formError) {
                 // form passed error checking
-                var newExperimental = {};
+                var newExperimental = this.state.experimental ? curator.flatten(this.state.experimental) : {};
                 var experimentalDataVariants = [];
                 var savedExperimental;
                 newExperimental.label = this.getFormValue('experimentalName');
