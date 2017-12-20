@@ -92,7 +92,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     matchedScore = userAffiliatedScore;
                     this.setState({scoreAffiliation: this.props.affiliation.affiliation_id});
                 } else {
-                    matchedScore = loggedInUserScore && !loggedInUserScore.affiliation ? loggedInUserScore : null;
+                    matchedScore = loggedInUserScore && !loggedInUserScore.affiliation && !this.props.affiliation ? loggedInUserScore : null;
                 }
                 if (matchedScore) {
                     this.setState({userScoreUuid: matchedScore.uuid});
