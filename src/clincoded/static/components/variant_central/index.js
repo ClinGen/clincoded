@@ -103,11 +103,14 @@ var VariantCurationHub = createReactClass({
             this.setState({variantObj: response});
             // ping out external resources (all async)
             this.fetchClinVarEutils(this.state.variantObj);
-            // this.fetchPageData(this.state.variantObj); // Temporarily suppressing PAGE data table display until service api access issue is resolved
             this.fetchMyVariantInfo(this.state.variantObj);
             this.fetchEnsemblVariation(this.state.variantObj);
             this.fetchEnsemblHGVSVEP(this.state.variantObj);
             this.parseVariantType(this.state.variantObj);
+            const session = this.props.session;
+            if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
+                this.fetchPageData(this.state.variantObj);
+            }
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
