@@ -39,8 +39,7 @@
         "uuid": "eab0dd0a-1d05-11e5-8d2d-60f81dc5b05a",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-14T22:47:10.000000+00:00",
-        "affiliation": "10001"
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "label": "CaseGroupAA",
@@ -73,8 +72,7 @@
         "uuid": "e79009fd-2988-11e5-b98a-60f81dc5b05a",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-14T22:47:10.000000+00:00",
-        "affiliation": "10002"
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "label": "CaseGroupShiang",
@@ -121,8 +119,7 @@
         "uuid": "edea98e3-25cc-11e5-9019-60f81dc5b05a",
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-14T22:47:10.000000+00:00",
-        "affiliation": "10003"
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "64df7938-33bc-4789-8e5c-52f45da24006",
@@ -164,8 +161,7 @@
         ],
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2015-08-19T08:35:18.000000+00:00",
-        "date_created": "2015-07-14T22:47:10.000000+00:00",
-        "affiliation": "10004"
+        "date_created": "2015-07-14T22:47:10.000000+00:00"
     },
     {
         "uuid": "342cccda-b3ed-4228-8956-9825b58cd36b",
@@ -203,8 +199,7 @@
         ],
         "submitted_by": "d84302eb-ce02-49c2-9ec0-dac58f490bdf",
         "last_modified": "2016-10-19T08:35:18.000000+00:00",
-        "date_created": "2015-10-18T22:47:10.000000+00:00",
-        "affiliation": "10005"
+        "date_created": "2015-10-18T22:47:10.000000+00:00"
     }
 
 ]
