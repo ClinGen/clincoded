@@ -838,6 +838,14 @@ const CaseControlCuration = createReactClass({
                         newCaseControl.scores = scoreArray;
                     }
 
+                    // Add affiliation if the user is associated with an affiliation
+                    // and if the data object has no affiliation
+                    if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                        if (!newCaseControl.affiliation) {
+                            newCaseControl.affiliation = this.props.affiliation.affiliation_id;
+                        }
+                    }
+
                     /*************************************************************/
                     /* Either update or create the case-control object in the DB */
                     /*************************************************************/
@@ -1047,7 +1055,8 @@ const CaseControlCuration = createReactClass({
                                         <PanelGroup accordion>
                                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
                                                 <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
-                                                session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                    session={session} handleUserScoreObj={this.handleUserScoreObj}
+                                                    affiliation={this.props.affiliation} />
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1055,7 +1064,7 @@ const CaseControlCuration = createReactClass({
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {caseControl ?
                                                 <DeleteButton gdm={gdm} parent={annotation} item={caseControl} pmid={pmid} />
-                                            : null}
+                                                : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </div>
@@ -1063,7 +1072,7 @@ const CaseControlCuration = createReactClass({
                             </div>
                         </div>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -1541,23 +1550,21 @@ var CaseControlViewer = createReactClass({
     render: function() {
         var context = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
-        var userCaseControl = user && context && context.submitted_by ? user.uuid === context.submitted_by.uuid : false;
+        var userCaseControl = user && context && context.submitted_by && user.uuid === context.submitted_by.uuid ? true : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedCaseControl = affiliation && Object.keys(affiliation).length && context && context.affiliation && affiliation.affiliation_id === context.affiliation ? true : false;
         var caseCohort = context.caseCohort;
         var caseCohortMethod = context.caseCohort.method;
         var controlCohort = context.controlCohort;
         var controlCohortMethod = context.controlCohort.method;
-        var evidenceScores = context && context.scores ? context.scores : [];
+        let evidenceScores = context && context.scores && context.scores.length ? context.scores : [];
         let isEvidenceScored = false;
-        if (evidenceScores && evidenceScores.length > 0) {
+        if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                if (scoreObj.hasOwnProperty('score') && scoreObj.score !== 'none') {
                     isEvidenceScored = true;
-                } else {
-                    isEvidenceScored = false;
                 }
             });
-        } else if (evidenceScores && evidenceScores.length < 1) {
-            isEvidenceScored = false;
         }
 
         var tempGdmPmid = curator.findGdmPmidFromObj(context);
@@ -1996,24 +2003,20 @@ var CaseControlViewer = createReactClass({
 
                                 </dl>
                             </Panel>
-                            {isEvidenceScored && !userCaseControl ?
-                                <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
-                                    <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
-                                </Panel>
-                            : null}
-                            {isEvidenceScored || (!isEvidenceScored < 1 && userCaseControl) ?
-                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
-                                    <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
-                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
-                                </Panel>
-                            : null}
-                            {!isEvidenceScored && !userCaseControl ?
-                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                            <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
+                                <ScoreViewer evidence={context} otherScores={true} session={this.props.session} affiliation={affiliation} />
+                            </Panel>
+                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                                {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedCaseControl) || (!isEvidenceScored && !affiliation && userCaseControl) ?
+                                    <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session}
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
+                                    : null}
+                                {!isEvidenceScored  && ((affiliation && !affiliatedCaseControl) || (!affiliation && !userCaseControl)) ?
                                     <div className="row">
                                         <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                     </div>
-                                </Panel>
-                            : null}
+                                    : null}
+                            </Panel>
                         </div>
                     </div>
                 </div>
@@ -2040,6 +2043,9 @@ class CaseControlAddHistory extends Component {
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {caseControl.affiliation ?
+                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -2058,6 +2064,9 @@ class CaseControlModifyHistory extends Component {
                 Case-Control <a href={caseControl['@id']}>{caseControl.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {caseControl.affiliation ?
+                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -2081,6 +2090,9 @@ class CaseControlDeleteHistory extends Component {
                 <span>Case-Control {caseControl.label} deleted</span>
                 <span>{collateralObjects ? ' along with any associated Case Cohort and Control Cohort' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                {caseControl.affiliation ?
+                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

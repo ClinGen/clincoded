@@ -161,3 +161,11 @@ def interpretation_3_4(value, system):
     if 'disease' in value:
         if value['disease'] == '05b13ca9-9d70-4e1c-ab12-8a1a83498f33':
             value['disease'] = '5bbacce3-3ac8-4911-adbb-5e5369cd79e1'
+
+
+@upgrade_step('interpretation', '4', '5')
+def interpretation_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1507
+    # Add affiliation property and update schema version
+    return
+

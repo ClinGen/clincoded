@@ -15,10 +15,10 @@ Feature: Create Gene Disease
         And I wait for 1 seconds
         And I press "Retrieve from OLS"
         Then I should see an element with the css selector ".resource-metadata" within 5 seconds
-        Then I should see "Hypermanganesemia with dystonia"
+        Then I should see "hypermanganesemia with dystonia"
         When I press the button "Save"
         And I wait for 2 seconds
-        Then I should see "Hypermanganesemia with dystonia (MONDO:0000214)"
+        Then I should see "hypermanganesemia with dystonia (MONDO:0000214)"
         When I fill in "hgncgene" with "DICER1"
 
         #
@@ -63,10 +63,10 @@ Feature: Create Gene Disease
         And I wait for 1 seconds
         And I press "Retrieve from OLS"
         Then I should see an element with the css selector ".resource-metadata" within 5 seconds
-        Then I should see "Hypermanganesemia with dystonia"
+        Then I should see "hypermanganesemia with dystonia"
         When I press the button "Save"
         And I wait for 2 seconds
-        Then I should see "Hypermanganesemia with dystonia (MONDO:0000214)"
+        Then I should see "hypermanganesemia with dystonia (MONDO:0000214)"
         When I fill in "hgncgene" with "DICER1"
         And I select "Autosomal dominant inheritance (HP:0000006)" from dropdown "form-control modeOfInheritance"
         And I click the element with the css selector ".btn-default"

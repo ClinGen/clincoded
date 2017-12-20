@@ -20,7 +20,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         provisionalPathogenicity: PropTypes.string,
         provisionalReason: PropTypes.string,
         provisionalInterpretation: PropTypes.bool,
-        evidenceSummary: PropTypes.string
+        evidenceSummary: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState() {
@@ -308,6 +309,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 if (this.state.provisionalPathogenicity) {
                     provisionalObj['alteredClassification'] = this.state.provisionalPathogenicity;
                     provisionalObj['reason'] = this.state.provisionalReason;
+                }
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!provisionalObj.affiliation) {
+                        provisionalObj.affiliation = this.props.affiliation.affiliation_id;
+                    }
                 }
 
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {

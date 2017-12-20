@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import CASE_INFO_TYPES from './constants/case_info_types';
-import { userScore } from './helpers/user_score';
+import { getAffiliationName } from '../../libs/get_affiliation_name';
 
 var _ = require('underscore');
 
@@ -13,7 +13,8 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
     propTypes: {
         session: PropTypes.object, // Session object passed from parent
         evidence: PropTypes.object, // Individual, Experimental or Case Control
-        otherScores: PropTypes.bool // TRUE if we only want show scores by others
+        otherScores: PropTypes.bool, // TRUE if we only want show scores by others
+        affiliation: PropTypes.object // Affiliation object passed from parent
     },
 
     getInitialState() {
@@ -39,11 +40,16 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
         let validScores = [], filteredScores = [];
         let user = this.props.session && this.props.session.user_properties;
         let otherScores = this.props.otherScores;
+        let affiliation = this.props.affiliation;
 
         if (evidenceScores && evidenceScores.length) {
             if (otherScores) {
                 filteredScores = evidenceScores.filter(score => {
-                    return score.submitted_by.uuid !== user.uuid;
+                    if (affiliation && Object.keys(affiliation).length) {
+                        return !score.affiliation || score.affiliation !== affiliation.affiliation_id;
+                    } else {
+                        return score.submitted_by.uuid !== user.uuid || score.affiliation;
+                    }
                 });
             } else {
                 filteredScores = evidenceScores;
@@ -65,48 +71,53 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
 
         // variables
         let scores = this.getOtherScores(evidenceScores);
+        let affiliation = this.props.affiliation;
 
         return (
             <div className="row">
-                {scores.map((item, i) => {
-                    return (
-                        <div key={i} className="evidence-score-list-viewer">
-                            <h5>Curator: {item.submitted_by.title}</h5>
-                            <div>
-                                {item.scoreStatus && item.scoreStatus !== 'none' && this.props.evidence['@type'][0] !== 'caseControl' ?
-                                    <dl className="dl-horizontal">
-                                        <dt>Score Status</dt>
-                                        <dd>{item.scoreStatus}</dd>
-                                    </dl>
-                                : null}
-                                {item.caseInfoType ?
-                                    <dl className="dl-horizontal">
-                                        <dt>Case Information Type</dt>
-                                        <dd>{renderCaseInfoType(item.caseInfoType)}</dd>
-                                    </dl>
-                                : null}
-                                {item.calculatedScore ?
-                                    <dl className="dl-horizontal">
-                                        <dt>Default Score</dt>
-                                        <dd>{item.calculatedScore}</dd>
-                                    </dl>
-                                : null}
-                                {item.score ?
-                                    <dl className="dl-horizontal">
-                                        <dt>Changed Score</dt>
-                                        <dd>{item.score}</dd>
-                                    </dl>
-                                : null}
-                                {item.scoreExplanation ?
-                                    <dl className="dl-horizontal">
-                                        <dt>Reaon(s) for score change</dt>
-                                        <dd>{item.scoreExplanation}</dd>
-                                    </dl>
-                                : null}
+                {scores.length ?
+                    scores.map((item, i) => {
+                        return (
+                            <div key={i} className="evidence-score-list-viewer">
+                                <h5>Curator: {item.affiliation ? getAffiliationName(item.affiliation) : item.submitted_by.title}</h5>
+                                <div>
+                                    {item.scoreStatus && item.scoreStatus !== 'none' && this.props.evidence['@type'][0] !== 'caseControl' ?
+                                        <dl className="dl-horizontal">
+                                            <dt>Score Status</dt>
+                                            <dd>{item.scoreStatus}</dd>
+                                        </dl>
+                                        : null}
+                                    {item.caseInfoType ?
+                                        <dl className="dl-horizontal">
+                                            <dt>Case Information Type</dt>
+                                            <dd>{renderCaseInfoType(item.caseInfoType)}</dd>
+                                        </dl>
+                                        : null}
+                                    {item.calculatedScore ?
+                                        <dl className="dl-horizontal">
+                                            <dt>Default Score</dt>
+                                            <dd>{item.calculatedScore}</dd>
+                                        </dl>
+                                        : null}
+                                    {item.score ?
+                                        <dl className="dl-horizontal">
+                                            <dt>Changed Score</dt>
+                                            <dd>{item.score}</dd>
+                                        </dl>
+                                        : null}
+                                    {item.scoreExplanation ?
+                                        <dl className="dl-horizontal">
+                                            <dt>Reaon(s) for score change</dt>
+                                            <dd>{item.scoreExplanation}</dd>
+                                        </dl>
+                                        : null}
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                    :
+                    <span className="other-score-status-note">This evidence has not been scored by other curators.</span>
+                }
             </div>
         );
     },

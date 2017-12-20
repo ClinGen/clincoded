@@ -35,7 +35,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         criteriaCrossCheck: PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
-        disableEvalForm: PropTypes.bool // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
+        disableEvalForm: PropTypes.bool, // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
+        affiliation: PropTypes.object,
+        session: PropTypes.object
     },
 
     contextTypes: {
@@ -325,6 +327,15 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
                 if (evidenceResult) {
                     evaluations[criterion][this.state.evidenceType] = evidenceResult;
                 }
+
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!evaluations[criterion]['affiliation']) {
+                        evaluations[criterion]['affiliation'] = this.props.affiliation.affiliation_id;
+                    }
+                }
+
                 if (criterion in existingEvaluationUuids) {
                     evaluationPromises.push(this.putRestData('/evaluation/' + existingEvaluationUuids[criterion], evaluations[criterion]));
                 } else {

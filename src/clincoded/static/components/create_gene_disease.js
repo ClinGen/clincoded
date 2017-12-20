@@ -160,6 +160,14 @@ var CreateGeneDisease = createReactClass({
                             newGdm['modeInheritanceAdjective'] = adjective;
                         }
 
+                        // Add affiliation if the user is associated with an affiliation
+                        // and if the data object has no affiliation
+                        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                            if (!newGdm.affiliation) {
+                                newGdm.affiliation = this.props.affiliation.affiliation_id;
+                            }
+                        }
+
                         // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
                         // of the new GDM in the query string.
                         return this.postRestData('/gdm/', newGdm).then(data => {
@@ -304,6 +312,9 @@ class GdmAddHistory extends Component {
                 </a>
                 <span> created</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {gdm.affiliation ?
+                    <span>; last edited by {gdm.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

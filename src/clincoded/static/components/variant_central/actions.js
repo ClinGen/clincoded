@@ -26,7 +26,8 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
         editKey: PropTypes.string,
         updateInterpretationObj: PropTypes.func,
         calculatedAssertion: PropTypes.string,
-        provisionalPathogenicity: PropTypes.string
+        provisionalPathogenicity: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -81,6 +82,11 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
         var selectedTab = queryKeyValue('tab', window.location.href),
             selectedSubtab = queryKeyValue('subtab', window.location.href);
         var newInterpretationObj = {variant: variantObj.uuid};
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            newInterpretationObj.affiliation = this.props.affiliation.affiliation_id;
+        }
         this.postRestData('/interpretations/', newInterpretationObj).then(interpretation => {
             var newInterpretationUuid = interpretation['@graph'][0].uuid;
             var meta = {
@@ -101,13 +107,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
         this.setState({diseaseObj: diseaseObj});
     },
 
-    render: function() {
+    render() {
+        const affiliation = this.props.affiliation, session = this.props.session;
         let hasExistingInterpretation = this.props.interpretation ? true : false;
         if (!hasExistingInterpretation) {
             let variant = this.props.variantData;
             if (variant && variant.associatedInterpretations && variant.associatedInterpretations.length) {
                 for (let interpretation of variant.associatedInterpretations) {
-                    if (interpretation.submitted_by.uuid === this.props.session.user_properties.uuid) {
+                    if (affiliation && interpretation.affiliation && interpretation.affiliation === affiliation.affiliation_id) {
+                        hasExistingInterpretation = true;
+                        break;
+                    } else if (!affiliation && !interpretation.affiliation && interpretation.submitted_by.uuid === session.user_properties.uuid) {
                         hasExistingInterpretation = true;
                         break;
                     }
@@ -136,9 +146,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                                 <button className="btn btn-primary pull-right" onClick={this.handleInterpretationEvent}>
                                     Interpretation <i className="icon icon-plus-circle"></i>
                                 </button>
-                                :
-                                null
-                            }
+                                : null}
                         </div>
                     </div>
                 }

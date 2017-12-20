@@ -64,27 +64,35 @@ class Disease(Item):
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.submitted_by',
+        'associatedGroups.modified_by',
         'associatedGroups.familyIncluded',
         'associatedGroups.familyIncluded.commonDiagnosis',
         'associatedGroups.familyIncluded.submitted_by',
+        'associatedGroups.familyIncluded.modified_by',
         'associatedGroups.familyIncluded.individualIncluded',
         'associatedGroups.familyIncluded.individualIncluded.diagnosis',
         'associatedGroups.familyIncluded.individualIncluded.submitted_by',
+        'associatedGroups.familyIncluded.individualIncluded.modified_by',
         'associatedGroups.individualIncluded',
         'associatedGroups.individualIncluded.diagnosis',
         'associatedGroups.individualIncluded.submitted_by',
+        'associatedGroups.individualIncluded.modified_by',
         'associatedFamilies',
         'associatedFamilies.commonDiagnosis',
         'associatedFamilies.submitted_by',
+        'associatedFamilies.modified_by',
         'associatedFamilies.individualIncluded',
         'associatedFamilies.individualIncluded.diagnosis',
         'associatedFamilies.individualIncluded.submitted_by',
+        'associatedFamilies.individualIncluded.modified_by',
         'associatedIndividuals',
         'associatedIndividuals.diagnosis',
         'associatedIndividuals.submitted_by',
+        'associatedIndividuals.modified_by',
         'associatedInterpretations',
         'associatedInterpretations.disease',
-        'associatedInterpretations.submitted_by'
+        'associatedInterpretations.submitted_by',
+        'associatedInterpretations.modified_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'disease'),
@@ -207,6 +215,38 @@ class Article(Item):
     ]
 
 
+'''
+@collection(
+    name='affiliations',
+    unique_key='affiliation:affiliationId',
+    properties={
+        'Title': 'Affiliations',
+        'description': 'List of affiliations stored locally'
+    })
+class Affiliation(Item):
+    item_type = 'affiliation'
+    schema = load_schema('clincoded:schemas/affiliation.json')
+    name_key = 'affiliationId'
+    embedded = [
+        'associatedUsers'
+    ]
+    rev = {
+        'associatedUsers': ('user', 'affiliation')
+    }
+
+    @calculated_property(schema={
+        "title": "Associated Users",
+        "type": "array",
+        "items": {
+            "type": ['string', 'object'],
+            "linkFrom": "user.affiliation",
+        },
+    })
+    def associatedUsers(self, request, associatedUsers):
+        return paths_filtered_by_status(request, associatedUsers)
+'''
+
+
 @collection(
     name='variants',
     unique_key='variant:uuid',
@@ -227,12 +267,14 @@ class Variant(Item):
         'associatedPathogenicities.submitted_by',
         'associatedInterpretations',
         'associatedInterpretations.submitted_by',
+        'associatedInterpretations.modified_by',
         'associatedInterpretations.disease',
         'associatedInterpretations.transcripts',
         'associatedInterpretations.proteins',
         'associatedInterpretations.provisional_variant',
         'associatedInterpretations.extra_evidence_list',
         'associatedInterpretations.extra_evidence_list.submitted_by',
+        'associatedInterpretations.extra_evidence_list.modified_by',
         'associatedInterpretations.extra_evidence_list.articles',
         'associatedInterpretations.extra_evidence_list.articles.submitted_by'
     ]
@@ -333,6 +375,7 @@ class Gdm(Item):
         'variantPathogenicity.assessments.submitted_by',
         'provisionalClassifications',
         'provisionalClassifications.submitted_by',
+        'provisionalClassifications.modified_by',
         'annotations',
         'annotations.article',
         'annotations.article.submitted_by',
@@ -340,15 +383,15 @@ class Gdm(Item):
         'annotations.groups',
         'annotations.groups.commonDiagnosis',
         'annotations.groups.submitted_by',
+        'annotations.groups.modified_by',
         'annotations.groups.otherGenes',
         'annotations.groups.otherPMIDs',
         'annotations.groups.otherPMIDs.submitted_by',
-        # 'annotations.groups.statistic',
-        # 'annotations.groups.statistic.variants',
         'annotations.groups.familyIncluded',
         'annotations.groups.familyIncluded.associatedGroups',
         'annotations.groups.familyIncluded.commonDiagnosis',
         'annotations.groups.familyIncluded.submitted_by',
+        'annotations.groups.familyIncluded.modified_by',
         'annotations.groups.familyIncluded.otherPMIDs',
         'annotations.groups.familyIncluded.otherPMIDs.submitted_by',
         'annotations.groups.familyIncluded.segregation.variants',
@@ -364,6 +407,7 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.individualIncluded.associatedFamilies.associatedGroups',
         'annotations.groups.familyIncluded.individualIncluded.diagnosis',
         'annotations.groups.familyIncluded.individualIncluded.submitted_by',
+        'annotations.groups.familyIncluded.individualIncluded.modified_by',
         'annotations.groups.familyIncluded.individualIncluded.variants',
         'annotations.groups.familyIncluded.individualIncluded.variants.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.variants.associatedPathogenicities',
@@ -373,10 +417,12 @@ class Gdm(Item):
         'annotations.groups.familyIncluded.individualIncluded.otherPMIDs.submitted_by',
         'annotations.groups.familyIncluded.individualIncluded.scores',
         'annotations.groups.familyIncluded.individualIncluded.scores.submitted_by',
+        'annotations.groups.familyIncluded.individualIncluded.scores.modified_by',
         'annotations.groups.individualIncluded',
         'annotations.groups.individualIncluded.associatedGroups',
         'annotations.groups.individualIncluded.diagnosis',
         'annotations.groups.individualIncluded.submitted_by',
+        'annotations.groups.individualIncluded.modified_by',
         'annotations.groups.individualIncluded.variants',
         'annotations.groups.individualIncluded.variants.submitted_by',
         'annotations.groups.individualIncluded.variants.associatedPathogenicities',
@@ -386,11 +432,12 @@ class Gdm(Item):
         'annotations.groups.individualIncluded.otherPMIDs.submitted_by',
         'annotations.groups.individualIncluded.scores',
         'annotations.groups.individualIncluded.scores.submitted_by',
-        # 'annotations.groups.control',
+        'annotations.groups.individualIncluded.scores.modified_by',
         'annotations.families',
         'annotations.families.associatedGroups',
         'annotations.families.commonDiagnosis',
         'annotations.families.submitted_by',
+        'annotations.families.modified_by',
         'annotations.families.otherPMIDs',
         'annotations.families.otherPMIDs.submitted_by',
         'annotations.families.segregation.variants',
@@ -406,6 +453,7 @@ class Gdm(Item):
         'annotations.families.individualIncluded.associatedFamilies.associatedGroups',
         'annotations.families.individualIncluded.diagnosis',
         'annotations.families.individualIncluded.submitted_by',
+        'annotations.families.individualIncluded.modified_by',
         'annotations.families.individualIncluded.variants',
         'annotations.families.individualIncluded.variants.submitted_by',
         'annotations.families.individualIncluded.variants.associatedPathogenicities',
@@ -415,12 +463,14 @@ class Gdm(Item):
         'annotations.families.individualIncluded.otherPMIDs.submitted_by',
         'annotations.families.individualIncluded.scores',
         'annotations.families.individualIncluded.scores.submitted_by',
+        'annotations.families.individualIncluded.scores.modified_by',
         'annotations.individuals',
         'annotations.individuals.associatedGroups',
         'annotations.individuals.associatedFamilies',
         'annotations.individuals.associatedFamilies.associatedGroups',
         'annotations.individuals.diagnosis',
         'annotations.individuals.submitted_by',
+        'annotations.individuals.modified_by',
         'annotations.individuals.variants',
         'annotations.individuals.variants.submitted_by',
         'annotations.individuals.variants.associatedPathogenicities',
@@ -430,8 +480,10 @@ class Gdm(Item):
         'annotations.individuals.otherPMIDs.submitted_by',
         'annotations.individuals.scores',
         'annotations.individuals.scores.submitted_by',
+        'annotations.individuals.scores.modified_by',
         'annotations.experimentalData',
         'annotations.experimentalData.submitted_by',
+        'annotations.experimentalData.modified_by',
         'annotations.experimentalData.variants',
         'annotations.experimentalData.variants.associatedPathogenicities',
         'annotations.experimentalData.variants.associatedPathogenicities.associatedGdm',
@@ -444,12 +496,15 @@ class Gdm(Item):
         'annotations.experimentalData.assessments.submitted_by',
         'annotations.experimentalData.scores',
         'annotations.experimentalData.scores.submitted_by',
+        'annotations.experimentalData.scores.modified_by',
         'annotations.caseControlStudies',
         'annotations.caseControlStudies.submitted_by',
+        'annotations.caseControlStudies.modified_by',
         'annotations.caseControlStudies.caseCohort',
         'annotations.caseControlStudies.controlCohort',
         'annotations.caseControlStudies.scores',
-        'annotations.caseControlStudies.scores.submitted_by'
+        'annotations.caseControlStudies.scores.submitted_by',
+        'annotations.caseControlStudies.scores.modified_by'
     ]
 
     @calculated_property(schema={
@@ -523,11 +578,13 @@ class Annotation(Item):
         'groups',
         'groups.commonDiagnosis',
         'groups.submitted_by',
+        'groups.modified_by',
         'groups.otherGenes',
         'groups.otherPMIDs',
         'groups.otherPMIDs.submitted_by',
         'groups.familyIncluded.commonDiagnosis',
         'groups.familyIncluded.submitted_by',
+        'groups.familyIncluded.modified_by',
         'groups.familyIncluded.otherPMIDs',
         'groups.familyIncluded.otherPMIDs.submitted_by',
         'groups.familyIncluded.segregation.variants',
@@ -537,25 +594,30 @@ class Annotation(Item):
         'groups.familyIncluded.individualIncluded',
         'groups.familyIncluded.individualIncluded.diagnosis',
         'groups.familyIncluded.individualIncluded.submitted_by',
+        'groups.familyIncluded.individualIncluded.modified_by',
         'groups.familyIncluded.individualIncluded.variants',
         'groups.familyIncluded.individualIncluded.variants.submitted_by',
         'groups.familyIncluded.individualIncluded.otherPMIDs',
         'groups.familyIncluded.individualIncluded.otherPMIDs.submitted_by',
         'groups.familyIncluded.individualIncluded.scores',
         'groups.familyIncluded.individualIncluded.scores.submitted_by',
+        'groups.familyIncluded.individualIncluded.scores.modified_by',
         'groups.individualIncluded',
         'groups.individualIncluded.diagnosis',
         'groups.individualIncluded.submitted_by',
+        'groups.individualIncluded.modified_by',
         'groups.individualIncluded.variants',
         'groups.individualIncluded.variants.submitted_by',
         'groups.individualIncluded.otherPMIDs',
         'groups.individualIncluded.otherPMIDs.submitted_by',
         'groups.individualIncluded.scores',
         'groups.individualIncluded.scores.submitted_by',
+        'groups.individualIncluded.scores.modified_by',
         'families',
         'families.associatedGroups',
         'families.commonDiagnosis',
         'families.submitted_by',
+        'families.modified_by',
         'families.otherPMIDs',
         'families.otherPMIDs.submitted_by',
         'families.segregation.variants',
@@ -565,25 +627,30 @@ class Annotation(Item):
         'families.individualIncluded',
         'families.individualIncluded.diagnosis',
         'families.individualIncluded.submitted_by',
+        'families.individualIncluded.modified_by',
         'families.individualIncluded.variants',
         'families.individualIncluded.variants.submitted_by',
         'families.individualIncluded.otherPMIDs',
         'families.individualIncluded.otherPMIDs.submitted_by',
         'families.individualIncluded.scores',
         'families.individualIncluded.scores.submitted_by',
+        'families.individualIncluded.scores.modified_by',
         'individuals',
         'individuals.associatedGroups',
         'individuals.associatedFamilies',
         'individuals.diagnosis',
         'individuals.submitted_by',
+        'individuals.modified_by',
         'individuals.variants',
         'individuals.variants.submitted_by',
         'individuals.otherPMIDs',
         'individuals.otherPMIDs.submitted_by',
         'individuals.scores',
         'individuals.scores.submitted_by',
+        'individuals.scores.modified_by',
         'experimentalData',
         'experimentalData.submitted_by',
+        'experimentalData.modified_by',
         'experimentalData.variants',
         'experimentalData.variants.submitted_by',
         'experimentalData.biochemicalFunction.geneWithSameFunctionSameDisease.genes',
@@ -593,12 +660,15 @@ class Annotation(Item):
         'experimentalData.assessments.submitted_by',
         'experimentalData.scores',
         'experimentalData.scores.submitted_by',
+        'experimentalData.scores.modified_by',
         'caseControlStudies',
         'caseControlStudies.submitted_by',
+        'caseControlStudies.modified_by',
         'caseControlStudies.caseCohort',
         'caseControlStudies.controlCohort',
         'caseControlStudies.scores',
-        'caseControlStudies.scores.submitted_by'
+        'caseControlStudies.scores.submitted_by',
+        'caseControlStudies.scores.modified_by'
     ]
     rev = {
         'associatedGdm': ('gdm', 'annotations')
@@ -665,19 +735,23 @@ class CaseControl(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'caseCohort',
         'caseCohort.commonDiagnosis',
         'caseCohort.submitted_by',
+        'caseCohort.modified_by',
         'caseCohort.otherGenes',
         'caseCohort.otherPMIDs',
         'caseCohort.otherPMIDs.submitted_by',
         'controlCohort',
         'controlCohort.submitted_by',
+        'controlCohort.modified_by',
         'controlCohort.otherGenes',
         'controlCohort.otherPMIDs',
         'controlCohort.otherPMIDs.submitted_by',
         'scores',
         'scores.submitted_by',
+        'scores.modified_by',
         'associatedAnnotations',
         'associatedAnnotations.article',
         'associatedAnnotations.groups',
@@ -715,13 +789,14 @@ class Group(Item):
     embedded = [
         'commonDiagnosis',
         'submitted_by',
+        'modified_by',
         'otherGenes',
         'otherPMIDs',
         'otherPMIDs.submitted_by',
-        #'statistic',
         'familyIncluded',
         'familyIncluded.commonDiagnosis',
         'familyIncluded.submitted_by',
+        'familyIncluded.modified_by',
         'familyIncluded.otherPMIDs',
         'familyIncluded.otherPMIDs.submitted_by',
         'familyIncluded.segregation.variants',
@@ -731,19 +806,23 @@ class Group(Item):
         'familyIncluded.individualIncluded',
         'familyIncluded.individualIncluded.diagnosis',
         'familyIncluded.individualIncluded.submitted_by',
+        'familyIncluded.individualIncluded.modified_by',
         'familyIncluded.individualIncluded.variants',
         'familyIncluded.individualIncluded.variants.submitted_by',
         'familyIncluded.individualIncluded.otherPMIDs',
         'familyIncluded.individualIncluded.otherPMIDs.submitted_by',
         'familyIncluded.individualIncluded.scores',
         'familyIncluded.individualIncluded.scores.submitted_by',
+        'familyIncluded.individualIncluded.scores.modified_by',
         'individualIncluded',
         'individualIncluded.diagnosis',
         'individualIncluded.submitted_by',
+        'individualIncluded.modified_by',
         'individualIncluded.otherPMIDs',
         'individualIncluded.otherPMIDs.submitted_by',
         'individualIncluded.scores',
         'individualIncluded.scores.submitted_by',
+        'individualIncluded.scores.modified_by',
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
         'associatedAnnotations',
@@ -751,7 +830,6 @@ class Group(Item):
         'associatedAnnotations.associatedGdm',
         'associatedAnnotations.associatedGdm.disease',
         'associatedAnnotations.associatedGdm.gene'
-        #'control'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'groups')
@@ -783,6 +861,7 @@ class Family(Item):
     embedded = [
         'commonDiagnosis',
         'submitted_by',
+        'modified_by',
         'segregation.variants',
         'segregation.variants.submitted_by',
         'segregation.assessments',
@@ -795,10 +874,12 @@ class Family(Item):
         'individualIncluded.associatedGroups',
         'individualIncluded.otherPMIDs',
         'individualIncluded.submitted_by',
+        'individualIncluded.modified_by',
         'individualIncluded.variants',
         'individualIncluded.variants.submitted_by',
         'individualIncluded.scores',
         'individualIncluded.scores.submitted_by',
+        'individualIncluded.scores.modified_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -854,6 +935,7 @@ class Individual(Item):
     embedded = [
         'diagnosis',
         'submitted_by',
+        'modified_by',
         'variants',
         'variants.submitted_by',
         'otherPMIDs',
@@ -862,6 +944,7 @@ class Individual(Item):
         'assessments.submitted_by',
         'scores',
         'scores.submitted_by',
+        'scores.modified_by',
         'associatedGroups',
         'associatedGroups.commonDiagnosis',
         'associatedGroups.associatedAnnotations',
@@ -958,6 +1041,7 @@ class Experimental(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'variants',
         'variants.submitted_by',
         'biochemicalFunction.geneWithSameFunctionSameDisease.genes',
@@ -970,7 +1054,8 @@ class Experimental(Item):
         'assessments',
         'assessments.submitted_by',
         'scores',
-        'scores.submitted_by'
+        'scores.submitted_by',
+        'scores.modified_by'
     ]
     rev = {
         'associatedAnnotations': ('annotation', 'experimentalData')
@@ -1001,6 +1086,7 @@ class Pathogenicity(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'variant',
         'variant.submitted_by',
         'variant.associatedPathogenicities',
@@ -1094,6 +1180,7 @@ class EvidenceScore(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'caseControl_scored',
         'caseControl_scored.associatedAnnotations',
         'caseControl_scored.associatedAnnotations.associatedGdm',
@@ -1160,6 +1247,7 @@ class Provisional(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'gdm_associated'
     ]
     rev = {
@@ -1255,26 +1343,34 @@ class Interpretation(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'variant',
         'variant.associatedInterpretations',
         'variant.associatedInterpretations.submitted_by',
+        'variant.associatedInterpretations.modified_by',
         'genes',
         'disease',
         'transcripts',
         'proteins',
         'evaluations',
         'evaluations.submitted_by',
+        'evaluations.modified_by',
         'evaluations.disease',
         'evaluations.population',
         'evaluations.population.submitted_by',
+        'evaluations.population.modified_by',
         'evaluations.computational',
         'evaluations.computational.submitted_by',
+        'evaluations.computational.modified_by',
         'provisional_variant',
         'provisional_variant.submitted_by',
+        'provisional_variant.modified_by',
         'extra_evidence_list',
         'extra_evidence_list.submitted_by',
+        'extra_evidence_list.modified_by',
         'extra_evidence_list.articles',
-        'extra_evidence_list.articles.submitted_by'
+        'extra_evidence_list.articles.submitted_by',
+        'extra_evidence_list.articles.modified_by'
     ]
 
     @calculated_property(schema={
@@ -1337,6 +1433,7 @@ class ExtraEvidence(Item):
         'variant',
         'articles',
         'submitted_by',
+        'modified_by'
     ]
 
 
@@ -1353,9 +1450,11 @@ class Evaluation(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'variant',
         'variant.associatedInterpretations',
         'variant.associatedInterpretations.submitted_by',
+        'variant.associatedInterpretations.modified_by',
         'disease',
         'population',
         'computational',
@@ -1416,9 +1515,11 @@ class Population(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'variant',
         'variant.associatedInterpretations',
         'variant.associatedInterpretations.submitted_by',
+        'variant.associatedInterpretations.modified_by',
         'evaluation_associated',
         'evaluation_associated.interpretation_associated',
         'evaluation_associated.interpretation_associated.disease'
@@ -1458,10 +1559,13 @@ class Computational(Item):
     schema = load_schema('clincoded:schemas/computational.json')
     name_key = 'uuid'
     embedded = [
+        'submitted_by',
+        'modified_by',
         'variant',
         'disease',
         'variant.associatedInterpretations',
         'variant.associatedInterpretations.submitted_by',
+        'variant.associatedInterpretations.modified_by',
         'evaluation_associated',
         'evaluation_associated.interpretation_associated',
         'evaluation_associated.interpretation_associated.disease'
@@ -1505,10 +1609,12 @@ class Provisional_variant(Item):
     name_key = 'uuid'
     embedded = [
         'submitted_by',
+        'modified_by',
         'interpretation_associated',
         'interpretation_associated.variant',
         'interpretation_associated.variant.associatedInterpretations',
         'interpretation_associated.variant.associatedInterpretations.submitted_by',
+        'interpretation_associated.variant.associatedInterpretations.modified_by',
         'interpretation_associated.variant.associatedInterpretations.disease'
     ]
     rev = {
@@ -1617,6 +1723,8 @@ class History(Item):
     schema = load_schema('clincoded:schemas/curatorHistory.json')
     embedded = [
         'primary',
+        'primary.submitted_by',
+        'primary.modified_by',
         'meta.gdm.gene',
         'meta.gdm.disease',
         'meta.article.gdm',
@@ -1658,4 +1766,5 @@ class History(Item):
         'meta.interpretation.variant',
         'meta.interpretation.disease',
         'submitted_by',
+        'modified_by'
     ]
