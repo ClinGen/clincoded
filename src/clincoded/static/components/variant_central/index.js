@@ -1,5 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import { RestMixin } from '../rest';
@@ -20,6 +21,13 @@ var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_forma
 // Variant Curation Hub
 var VariantCurationHub = createReactClass({
     mixins: [RestMixin],
+
+    propTypes: {
+        href: PropTypes.string,
+        href_url: PropTypes.object,
+        session: PropTypes.object,
+        affiliation: PropTypes.object
+    },
 
     getInitialState: function() {
         return {
@@ -432,18 +440,20 @@ var VariantCurationHub = createReactClass({
         var selectedTab = this.state.selectedTab;
         let calculated_pathogenicity = (this.state.calculated_pathogenicity) ? this.state.calculated_pathogenicity : (this.state.autoClassification ? this.state.autoClassification : null);
         let my_gene_info = (this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : (this.state.ext_myGeneInfo_VEP ? this.state.ext_myGeneInfo_VEP : this.state.ext_myGeneInfo_ClinVar);
+        let affiliation = this.props.affiliation;
 
         return (
             <div>
                 <VariantCurationHeader variantData={variantData} interpretationUuid={interpretationUuid} session={session}
                     interpretation={interpretation} setSummaryVisibility={this.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} />
+                    getSelectedTab={this.getSelectedTab} calculatedPathogenicity={calculated_pathogenicity} affiliation={affiliation} />
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
                         <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
-                            calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity} />
+                            calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity}
+                            affiliation={affiliation} />
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             ext_myGeneInfo={my_gene_info}
@@ -467,7 +477,7 @@ var VariantCurationHub = createReactClass({
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
-                            selectedTab={selectedTab} />
+                            selectedTab={selectedTab} affiliation={affiliation} />
                     </div>
                     :
                     <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity}
@@ -476,7 +486,8 @@ var VariantCurationHub = createReactClass({
                         provisionalPathogenicity={this.state.provisionalPathogenicity}
                         provisionalReason={this.state.provisionalReason}
                         provisionalInterpretation={this.state.provisionalInterpretation}
-                        evidenceSummary={this.state.evidenceSummary} />
+                        evidenceSummary={this.state.evidenceSummary}
+                        affiliation={affiliation} />
                 }
             </div>
         );

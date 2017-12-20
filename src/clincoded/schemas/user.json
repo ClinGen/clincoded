@@ -13,7 +13,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "email": {
             "title": "Email",
@@ -49,6 +49,15 @@
                 "comment": "See lab.json for available identifiers.",
                 "type": "string",
                 "linkTo": "lab"
+            }
+        },
+        "affiliation": {
+            "title": "Curator Affiliations",
+            "description": "The affiliation(s) that the user is associated with.",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
             }
         },
         "groups": {

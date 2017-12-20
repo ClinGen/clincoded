@@ -22,3 +22,10 @@ def user_3_4(value, system):
         'wrightmw@stanford.edu',  # Matt
     ]:
         value['groups'] = ['curator']
+
+
+@upgrade_step('user', '4', '5')
+def user_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1507
+    # Add affiliation property and update schema version
+    return

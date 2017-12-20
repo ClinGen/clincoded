@@ -951,7 +951,7 @@ var ExperimentalCuration = createReactClass({
 
             if (!formError) {
                 // form passed error checking
-                var newExperimental = {};
+                var newExperimental = this.state.experimental ? curator.flatten(this.state.experimental) : {};
                 var experimentalDataVariants = [];
                 var savedExperimental;
                 newExperimental.label = this.getFormValue('experimentalName');
@@ -1238,6 +1238,14 @@ var ExperimentalCuration = createReactClass({
                     const RES_evidenceInPaper = this.getFormValue('evidenceInPaper');
                     if (RES_evidenceInPaper) {
                         newExperimental.rescue.evidenceInPaper = RES_evidenceInPaper;
+                    }
+                }
+
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!newExperimental.affiliation) {
+                        newExperimental.affiliation = this.props.affiliation.affiliation_id;
                     }
                 }
 
@@ -1575,7 +1583,7 @@ var ExperimentalCuration = createReactClass({
                                                     <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
                                                         <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
                                                             evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError}
-                                                            scoreDisabled={this.state.scoreDisabled} />
+                                                            scoreDisabled={this.state.scoreDisabled} affiliation={this.props.affiliation} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -2756,7 +2764,9 @@ const ExperimentalViewer = createReactClass({
             }
         });
         var user = this.props.session && this.props.session.user_properties;
-        var userExperimental = user && experimental && experimental.submitted_by ? user.uuid === experimental.submitted_by.uuid : false;
+        var userExperimental = user && experimental && experimental.submitted_by && user.uuid === experimental.submitted_by.uuid ? true : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedExperimental = affiliation && Object.keys(affiliation).length && experimental && experimental.affiliation && affiliation.affiliation_id === experimental.affiliation ? true : false;
         var experimentalUserAssessed = false; // TRUE if logged-in user doesn't own the experimental data, but the experimental data's owner assessed it
         var othersAssessed = false; // TRUE if we own this experimental data, and others have assessed it
         var updateMsg = this.state.updatedAssessment ? 'Assessment updated to ' + this.state.updatedAssessment : '';
@@ -2780,16 +2790,12 @@ const ExperimentalViewer = createReactClass({
 
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
         let isEvidenceScored = false;
-        if (evidenceScores && evidenceScores.length > 0) {
+        if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
-                } else {
-                    isEvidenceScored = false;
                 }
             });
-        } else if (evidenceScores && evidenceScores.length < 1) {
-            isEvidenceScored = false;
         }
         let experimentalEvidenceType = this.state.experimentalEvidenceType;
         let modelSystems_phenotypeHPOObserved = experimental.modelSystems.phenotypeHPOObserved ? experimental.modelSystems.phenotypeHPOObserved.split(', ') : [];
@@ -3279,24 +3285,21 @@ const ExperimentalViewer = createReactClass({
                                 </dl>
                             </Panel>
                             : null}
-                        {isEvidenceScored && !userExperimental ?
-                            <Panel title="Experimental Data - Other Curator Scores" panelClassName="panel-data">
-                                <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} />
-                            </Panel>
-                            : null}
-                        {this.cv.gdmUuid && (isEvidenceScored || (!isEvidenceScored && userExperimental)) ?
-                            <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
+                        <Panel title="Experimental Data - Other Curator Scores" panelClassName="panel-data">
+                            <ScoreViewer evidence={experimental} otherScores={true} session={this.props.session} affiliation={affiliation} />
+                        </Panel>
+                        <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
+                            {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedExperimental) || (!isEvidenceScored && !affiliation && userExperimental) ?
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
-                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} formError={this.state.formError} />
-                            </Panel>
-                            : null}
-                        {!isEvidenceScored && !userExperimental ?
-                            <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score-viewer" open>
+                                    evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
+                                    formError={this.state.formError} affiliation={affiliation} />
+                                : null}
+                            {!isEvidenceScored && ((affiliation && !affiliatedExperimental) || (!affiliation && !userExperimental)) ?
                                 <div className="row">
                                     <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                 </div>
-                            </Panel>
-                            : null}
+                                : null}
+                        </Panel>
                     </div>
                 </div>
             </div>
@@ -3324,6 +3327,9 @@ class ExperimentalAddHistory extends Component {
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {experimental.affiliation ?
+                    <span>; last edited by {experimental.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -3345,6 +3351,9 @@ class ExperimentModifyHistory extends Component {
                 Experimental data <a href={experimental['@id']}>{experimental.label}</a>
                 <span> ({experimental.evidenceType}) modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {experimental.affiliation ?
+                    <span>; last edited by {experimental.modified_by.title}</span>
+                    : null}
             </div>
         );
     }
@@ -3365,6 +3374,9 @@ class ExperimentDeleteHistory extends Component {
             <div>
                 <span>Experimental data {experimental.label} deleted</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {experimental.affiliation ?
+                    <span>; last edited by {experimental.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

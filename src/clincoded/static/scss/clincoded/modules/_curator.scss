@@ -849,9 +849,14 @@
     }
 
     .button-box {
-        width: 200px;
+        width: auto;
+        padding-left: 15px;
         text-align: right;
         vertical-align: middle;
+
+        .btn .icon {
+            color: #fff;
+        }
     }
 
     .provisional-title {

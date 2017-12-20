@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "gene": {
             "title": "HGNC Symbol",
@@ -114,6 +114,11 @@
             "description": "Adjective for Mode of Inheritance",
             "type": "string",
             "default": ""
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this gene-disease record is associated with.",
+            "type": "string"
         }
     },
     "columns": {
@@ -183,6 +188,10 @@
         },
         "submitted_by.email": {
             "title": "Creator email",
+            "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
             "type": "string"
         }
     },

@@ -133,6 +133,15 @@
             "linkTo": "user",
             "serverDefault": "userid",
             "permission": "import_items"
+        },
+        "modified_by": {
+            "rdfs:subPropertyOf": "dc:creator",
+            "title": "Modified by",
+            "comment": "Do not submit, value is assigned by the server. The user that created the object.",
+            "type": "string",
+            "linkTo": "user",
+            "serverDefault": "userid",
+            "permission": "import_items"
         }
     },
     "references": {
@@ -152,7 +161,7 @@
     "attribution": {
         "lab": {
             "title": "Lab",
-             "description": "Lab associated with the submission.",
+            "description": "Lab associated with the submission.",
             "comment": "See lab.json for list of available identifiers.",
             "type": "string",
             "linkTo": "lab",

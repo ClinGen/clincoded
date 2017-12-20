@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { external_url_map } from '../globals';
+import { getAffiliationName } from '../../libs/get_affiliation_name';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -29,7 +30,13 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                     <div className="panel-body">
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Classification owner:</dt>
-                            <dd className="summaryOwnerName">{provisional && provisional.submitted_by ? provisional.submitted_by.title : null}</dd>
+                            <dd className="summaryOwnerName">
+                                {provisional.affiliation ?
+                                    getAffiliationName(provisional.affiliation)
+                                    :
+                                    (provisional && provisional.submitted_by ? provisional.submitted_by.title : null)
+                                }
+                            </dd>
                             <dt>Calculated classification:</dt>
                             <dd className="classificationSaved">{provisional ? provisional.autoClassification : null}</dd>
                             <dt>Modified classification:</dt>

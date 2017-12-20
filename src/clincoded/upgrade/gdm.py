@@ -157,3 +157,10 @@ def gdm_3_4(value, system):
         value['disease'] = 'e1fb9424-0a9f-4ce5-a7f5-88a12cb67955'
     if value['disease'] == '7bb7034d-7075-4940-86b8-0233dab3926a':
         value['disease'] = '2cea0443-a548-4f54-a4eb-a5fd581cbdef'
+
+
+@upgrade_step('gdm', '4', '5')
+def gdm_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1507
+    # Add affiliation property and update schema version
+    return
