@@ -47,6 +47,10 @@ module.exports = {
         return (
             <div className={(isCaseControl) ? 'row section section-method' : 'row'}>
                 {(isCaseControl) ? <h3><i className="icon icon-chevron-right"></i> Methods <span className="label label-group">{headerLabel}</span></h3> : null}
+                {hasParentMethods ?
+                    <Input type="button" ref="copyparentmethods" wrapperClassName="col-sm-7 col-sm-offset-5 methods-copy" inputClassName="btn-info btn-sm"
+                        title={'Copy Methods from Associated ' + parentName} clickHandler={module.exports.copy.bind(this, parentMethod, isCaseControl, prefix)} />
+                    : null}
                 {hasParentMethods ? curator.renderParentEvidence('Previous Testing Associated with ' + parentName + ':',
                     (parentMethod.previousTesting === true ? 'Yes' : (parentMethod.previousTesting === false ? 'No' : ''))) : null}
                 <Input type="select" ref={prefix ? prefix + 'prevtesting' : 'prevtesting'} label="Previous Testing:" defaultValue="none"
@@ -104,10 +108,6 @@ module.exports = {
                 <Input type="textarea" ref={prefix ? prefix + 'specificmutation' : 'specificmutation'} label="Description of genotyping method:"
                     rows="5" value={method.specificMutationsGenotypedMethod} placeholder={specificMutationPlaceholder} labelClassName="col-sm-5 control-label"
                     wrapperClassName="col-sm-7" groupClassName="form-group" />
-                {hasParentMethods ?
-                    <Input type="button" ref="copyparentmethods" wrapperClassName="col-sm-7 col-sm-offset-5 methods-copy" inputClassName="btn-default btn-last btn-sm"
-                        title={'Copy Methods from Associated ' + parentName} clickHandler={module.exports.copy.bind(this, parentMethod, isCaseControl, prefix)} />
-                    : null}
                 {isFamily ?
                     <Input type="textarea" ref={prefix ? prefix + 'additionalinfomethod' : 'additionalinfomethod'} label="Additional Information about Family Method:"
                         rows="8" value={method.additionalInformation} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7"
