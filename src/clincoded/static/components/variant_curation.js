@@ -315,6 +315,8 @@ var VariantCuration = createReactClass({
             });
         }
 
+        let affiliation = this.props.affiliation;
+
         return (
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} pmid={this.queryValues.pmid} />
@@ -326,7 +328,7 @@ var VariantCuration = createReactClass({
                         : null}
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
-                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
+                        {affiliation ? <h2>{'Curator: ' + affiliation.affiliation_fullname}</h2> : (curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null)}
                         <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
                             <h2>
