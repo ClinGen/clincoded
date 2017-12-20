@@ -1144,20 +1144,20 @@ function IndividualCommonDiseases() {
                 diseaseObj={this.state.diseaseObj} error={this.state.diseaseError}
                 probandLabel={probandLabel} required={this.state.proband_selected} />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Individual', 'hpo')
+                curator.renderPhenotype(associatedGroups, 'Individual', 'hpo', 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo') : curator.renderPhenotype(null, 'Individual', 'hpo')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo', 'Family') : curator.renderPhenotype(null, 'Individual', 'hpo')
                 )
             }
             <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Individual', 'ft')
+                curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'ft') : curator.renderPhenotype(null, 'Individual', 'ft')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'ft', 'Family') : curator.renderPhenotype(null, 'Individual', 'ft')
                 )
             }
             <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2"
@@ -1256,8 +1256,13 @@ function IndividualDemographics() {
                 <option value="Other">Other</option>
             </Input>
             <div className="col-sm-7 col-sm-offset-5 sex-field-note">
-                <div className="alert alert-info">Select "Unknown" if information not provided in publication.</div>
+                <div className="alert alert-info">Select "Unknown" for "Sex" if information not provided in publication.</div>
             </div>
+            {hasParentDemographics ?
+                <Input type="button" ref="copyparentdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-info btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
+                    clickHandler={this.handleClick.bind(this, associatedParentObj[0], 'demographics')} />
+                : null}
             {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none"
                 value={individual && individual.countryOfOrigin ? individual.countryOfOrigin : 'none'}
@@ -1292,11 +1297,6 @@ function IndividualDemographics() {
                 <option value="Mixed">Mixed</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            {hasParentDemographics ?
-                <Input type="button" ref="copyparentdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
-                    inputClassName="btn-default btn-last btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
-                    clickHandler={this.handleClick.bind(this, associatedParentObj[0], 'demographics')} />
-                : null}
             <h4 className="col-sm-7 col-sm-offset-5">Age</h4>
             <div className="demographics-age-range">
                 <Input type="select" ref="agetype" label="Type:" defaultValue="none"
