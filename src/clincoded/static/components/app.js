@@ -171,9 +171,9 @@ var App = module.exports = createReactClass({
                     <h2>Please select whether you would like to curate as part of an Affiliation:</h2>
                     <select className="form-control" defaultValue="none" onChange={this.handleOnChange}>
                         <option value="none" disabled>Select Affiliation</option>
-                        <option value="" disabled className="divider">-----------------------------------------------------</option>
+                        <option value="" disabled className="divider">--------------------------------------------------------------</option>
                         <option value="self">No Affiliation ({curatorName})</option>
-                        <option value="" disabled className="divider">-----------------------------------------------------</option>
+                        <option value="" disabled className="divider">--------------------------------------------------------------</option>
                         {userAffiliations.map((affiliation, i) => {
                             return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_fullname}</option>;
                         })}
