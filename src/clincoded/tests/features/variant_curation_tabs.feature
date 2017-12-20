@@ -20,8 +20,8 @@ Feature: Variant Curation Tabs
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NM_007294.3(BRCA1):c.5266dupC (p.Gln1756Profs)"
         When I press the button "Save and View Evidence"
-        And I wait for 2 seconds
-        Then I should see "NC_000017.11:g.43057065dupG"
+        And I wait for 5 seconds
+        Then I should see "reviewed by expert panel"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -35,11 +35,11 @@ Feature: Variant Curation Tabs
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
-        And I wait for 1 seconds
-        Then I should see "ENSG00000012048"
+        And I wait for 2 seconds
+        Then I should see "BRCA1"
         When I press the tab "Basic Information"
-        And I wait for 1 seconds
-        Then I should see "NM_007294.3:c.5266dupC"
+        And I wait for 2 seconds
+        Then I should see "reviewed by expert panel"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "All users may register for our demo version of the ClinGen interfaces"
@@ -64,8 +64,8 @@ Feature: Variant Curation Tabs
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NC_000007"
         When I press the button "Save and View Evidence"
-        And I wait for 2 seconds
-        Then I should see "NM_000492.3:c.1373delG"
+        And I wait for 5 seconds
+        Then I should see "criteria provided, single submitter"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -79,11 +79,11 @@ Feature: Variant Curation Tabs
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
-        And I wait for 1 seconds
-        Then I should see "ENSG00000001626"
+        And I wait for 2 seconds
+        Then I should see "CFTR"
         When I press the tab "Basic Information"
-        And I wait for 1 seconds
-        Then I should see "NM_000492.3:c.1373delG"
+        And I wait for 2 seconds
+        Then I should see "criteria provided, single submitter"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "All users may register for our demo version of the ClinGen interfaces"
@@ -108,8 +108,8 @@ Feature: Variant Curation Tabs
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NC_000007"
         When I press the button "Save and View Evidence"
-        And I wait for 2 seconds
-        Then I should see "NM_000492.3:c.642_643insT"
+        And I wait for 5 seconds
+        Then I should see "no assertion provided"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -123,11 +123,11 @@ Feature: Variant Curation Tabs
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
-        And I wait for 1 seconds
-        Then I should see "ENSG00000001626"
+        And I wait for 2 seconds
+        Then I should see "CFTR"
         When I press the tab "Basic Information"
-        And I wait for 1 seconds
-        Then I should see "NM_000492.3:c.642_643insT"
+        And I wait for 2 seconds
+        Then I should see "no assertion provided"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "All users may register for our demo version of the ClinGen interfaces"
@@ -147,13 +147,13 @@ Feature: Variant Curation Tabs
         And I press "Add CA ID"
         And I wait for an element with the css selector ".modal-open" to load
         Then I should see "Enter CA ID"
-        When I fill in the css element field "input.form-control" with "CA645372267"
+        When I fill in the css element field "input.form-control" with "231244"
         And I press "Retrieve from ClinGen Allele Registry"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NC_000012"
+        Then I should see "NC_000013"
         When I press the button "Save and View Evidence"
-        And I wait for 2 seconds
-        Then I should see "NM_000277.1:c.836_837delinsTG"
+        And I wait for 5 seconds
+        Then I should see "criteria provided, multiple submitters, no conflicts"
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
@@ -167,11 +167,11 @@ Feature: Variant Curation Tabs
         And I wait for 1 seconds
         Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
-        And I wait for 1 seconds
-        Then I should see "ENSG00000171759"
+        And I wait for 2 seconds
+        Then I should see "BRCA2"
         When I press the tab "Basic Information"
-        And I wait for 1 seconds
-        Then I should see "NM_000277.1:c.836_837delinsTG"
+        And I wait for 2 seconds
+        Then I should see "criteria provided, multiple submitters, no conflicts"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
         Then I should see "All users may register for our demo version of the ClinGen interfaces"
