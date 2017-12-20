@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "totalScore": {
             "title": "Total Score",
@@ -88,6 +88,11 @@
             "description": "Boolean switch for usage",
             "type": "boolean",
             "default": true
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this classification is associated with.",
+            "type": "string"
         }
     },
     "columns": {

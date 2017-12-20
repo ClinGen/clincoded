@@ -53,11 +53,15 @@ module.exports = {
     // as an array to the console once the histories get retrieved.
     //
     // this.getHistories(5).then(histories => { console.log('Item: %o', histories); });
-    getHistories: function(user, limit, showHidden) {
+    getHistories: function(user, limit, showHidden, affiliation) {
         if (!showHidden) {
             showHidden = 0;
         }
-        if (user) {
+        if (affiliation && Object.keys(affiliation).length) {
+            return this.getRestData('/histories/?primary.affiliation=' + affiliation.affiliation_id + (limit ? '&limit=' + limit : '') + (showHidden == 'all' ? '' : '&hidden=' + showHidden)).then(data => {
+                return data['@graph'];
+            });
+        } else if (user) {
             return this.getRestData('/histories/?submitted_by.uuid=' + user.uuid + (limit ? '&limit=' + limit : '') + (showHidden == 'all' ? '' : '&hidden=' + showHidden)).then(data => {
                 return data['@graph'];
             });

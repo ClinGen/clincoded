@@ -18,7 +18,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = createReactCl
         setSummaryVisibility: PropTypes.func,
         summaryVisible: PropTypes.bool,
         getSelectedTab: PropTypes.func,
-        calculatedPathogenicity: PropTypes.string
+        calculatedPathogenicity: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -60,13 +61,15 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = createReactCl
                     <div className="row equal-height">
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
-                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation} session={session} calculatedPathogenicity={calculatedPathogenicity} />
+                        <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation}
+                            session={session} calculatedPathogenicity={calculatedPathogenicity} affiliation={this.props.affiliation} />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">
-                            <strong>Warning:</strong> Your variant is not associated with a GRCh37 genomic representation. This will currently limit some of the population and predictive evidence retrieved for this variant.
+                            <strong>Warning:</strong> Your variant is not associated with a GRCh37 genomic representation. This will
+                            currently limit some of the population and predictive evidence retrieved for this variant.
                         </div>
-                    : null}
+                        : null}
                 </div>
             </div>
         );

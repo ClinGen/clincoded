@@ -20,3 +20,10 @@ def provisionalClassification_2_3(value, system):
     if 'alteredClassification' in value:
         if value['alteredClassification'] == 'No Selection':
             value['alteredClassification'] = 'No Modification'
+
+
+@upgrade_step('provisionalClassification', '3', '4')
+def provisionalClassification_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1507
+    # Add affiliation property and update schema version
+    return
