@@ -7,6 +7,9 @@ import { content_views } from './globals';
 import { Auth0, HistoryAndTriggers } from './mixins';
 import { NavbarMixin, Nav, Navbar, NavItem } from '../libs/bootstrap/navigation';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
+import { RestMixin } from './rest';
+import AffiliationModal from './affiliation/modal';
+const AffiliationsList = require('./affiliation/affiliations.json');
 
 var routes = {
     'curator': require('./curator').Curator
@@ -31,7 +34,7 @@ var portal = {
 
 // Renders HTML common to all pages.
 var App = module.exports = createReactClass({
-    mixins: [Auth0, HistoryAndTriggers],
+    mixins: [Auth0, HistoryAndTriggers, RestMixin],
 
     triggers: {
         demo: 'triggerAutoLogin',
@@ -59,7 +62,11 @@ var App = module.exports = createReactClass({
             errors: [],
             portal: portal,
             demoWarning: demoWarning,
-            productionWarning: productionWarning
+            productionWarning: productionWarning,
+            tempAffiliation: null, // Placeholder when user selects an option in the affiliation dropdown
+            affiliation: null, // Confirmed affiliation when user selects to continue in the modal
+            affiliationModalButtonDisabled: true,
+            isAffiliationModalOpen: false
         };
     },
 
@@ -73,22 +80,131 @@ var App = module.exports = createReactClass({
         return name;
     },
 
+    /**
+     * Method to set states when the affiliation selection is changed
+     * @param {event} e - Selection change event
+     */
+    handleOnChange(e) {
+        this.setState({
+            tempAffiliation: e.target.value !== 'self' ? JSON.parse(e.target.value) : null,
+            affiliationModalButtonDisabled: false
+        });
+    },
+
+    /**
+     * Method to create a cookie
+     */
+    createCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    },
+
+    /**
+     * Handler to close affiliation modal on continue action.
+     * Sets affiliation state and cookie.
+     */
+    toggleAffiliationModal() {
+        this.setState({
+            affiliation: this.state.tempAffiliation,
+            isAffiliationModalOpen: !this.state.isAffiliationModalOpen
+        }, () => {
+            this.createCookie('affiliation', JSON.stringify(this.state.affiliation));
+            this.setState({
+                tempAffiliation: null,
+                affiliation_cookie: this.state.affiliation,
+                affiliationModalButtonDisabled: true
+            });
+        });
+    },
+
+    /**
+     * Handler to close affiliation modal on cancel action
+     */
+    closeAffiliationModal() {
+        this.setState({isAffiliationModalOpen: !this.state.isAffiliationModalOpen});
+    },
+
+    /**
+     * Handler to show affiliation modal on click event
+     * @param {event} e - Button click event
+     */
+    showAffiliationModal(e) {
+        this.setState({isAffiliationModalOpen: true});
+    },
+
+    /**
+     * Method to return affiliation data given an array of IDs
+     * @param {array} affiliations - List of affiliation IDs
+     * @param {array} affiliations - List of affiliation data objects
+     */
+    getUserAffiliations(affiliations, staticAffiliations) {
+        let affiliationArray = [];
+        if (affiliations.length) {
+            affiliations.forEach(id=> {
+                for (let affiliation of staticAffiliations) {
+                    if (affiliation.affiliation_id === id) {
+                        affiliationArray.push(affiliation);
+                    }
+                }
+            });
+        }
+        return affiliationArray;
+    },
+
+    /**
+     * Method to render affiliation modal
+     * @param {array} affiliations - List of affiliation IDs
+     * @param {string} curatorName - The title of the logged-in user
+     */
+    renderAffiliationModal(affiliations, curatorName) {
+        let userAffiliations = this.getUserAffiliations(affiliations, AffiliationsList);
+        return (
+            <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
+                buttonDisabled={this.state.affiliationModalButtonDisabled} onCancel={this.closeAffiliationModal}
+                hasCancelButton={this.state.affiliation && Object.keys(this.state.affiliation).length ? true : false}>
+                <div className="affiliation-modal-body">
+                    <h2>Please select whether you would like to curate as part of an Affiliation:</h2>
+                    <select className="form-control" defaultValue="none" onChange={this.handleOnChange}>
+                        <option value="none" disabled>Select Affiliation</option>
+                        <option value="" disabled className="divider">--------------------------------------------------------------</option>
+                        <option value="self">No Affiliation ({curatorName})</option>
+                        <option value="" disabled className="divider">--------------------------------------------------------------</option>
+                        {userAffiliations.map((affiliation, i) => {
+                            return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_fullname}</option>;
+                        })}
+                    </select>
+                </div>
+            </AffiliationModal>
+        );
+    },
+
     render: function() {
-        var content;
-        var context = this.state.context;
-        var href_url = url.parse(this.state.href);
+        let content,
+            context = this.state.context,
+            session = this.state.session;
+        let user_properties = session && session.user_properties;
+        let href_url = url.parse(this.state.href);
         // Switching between collections may leave component in place
-        var key = context && context['@id'];
-        var current_action = this.currentAction();
+        let key = context && context['@id'];
+        let current_action = this.currentAction();
+
+        let affiliation = this.state.affiliation,
+            affiliation_cookie = this.state.affiliation_cookie;
+
         if (!current_action && context.default_page) {
             context = context.default_page;
         }
         if (context) {
             var ContentView = content_views.lookup(context, current_action);
             content = <ContentView {...this.props} context={context} href={this.state.href}
-                loadingComplete={this.state.loadingComplete} session={this.state.session}
+                loadingComplete={this.state.loadingComplete} session={session}
                 portal={this.state.portal} navigate={this.navigate} href_url={href_url}
-                demoVersion={this.state.demoWarning} />;
+                demoVersion={this.state.demoWarning} affiliation={affiliation} />;
         }
         var errors = this.state.errors.map(function (error) {
             return <div className="alert alert-error"></div>;
@@ -134,13 +250,30 @@ var App = module.exports = createReactClass({
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
-                        <Header session={this.state.session} href={this.props.href} />
+                        <Header session={this.state.session} href={this.props.href} affiliation={affiliation} />
                         {this.state.demoWarning ?
-                        <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
-                        : null}
+                            <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                            : null}
                         {this.state.productionWarning ?
-                        <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
-                        : null}
+                            <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
+                            : null}
+                        {user_properties && user_properties.affiliation && user_properties.affiliation.length ?
+                            <div className="affiliation-utility-container">
+                                <div className="container affiliation-utility">
+                                    <span className="curator-affiliation">Affiliation: {affiliation && affiliation.affiliation_fullname ? affiliation.affiliation_fullname : <span>No Affiliation ({user_properties.title})</span>}</span>
+                                    <span className="change-affiliation-button">
+                                        {context.name === 'dashboard' ?
+                                            <button type="button" className="btn btn-default btn-sm" onClick={this.showAffiliationModal}>Change Affiliation</button>
+                                            :
+                                            <span><i className="icon icon-lightbulb-o"></i> To change your affiliation, go to <a href='/dashboard/'><i className="icon icon-home"></i></a></span>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                            : null}
+                        {user_properties && user_properties.affiliation && user_properties.affiliation.length ?
+                            this.renderAffiliationModal(user_properties.affiliation, user_properties.title)
+                            : null}
                         {content}
                     </div>
                 </body>

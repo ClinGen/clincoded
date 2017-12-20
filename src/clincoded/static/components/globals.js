@@ -56,6 +56,14 @@ module.exports.userMatch = function(user, session) {
     return false;
 };
 
+// Returns true if a record's affiliation matches the user's affiliation
+module.exports.affiliationMatch = function(record, affiliation) {
+    if (record.affiliation && record.affiliation.length && affiliation && Object.keys(affiliation).length) {
+        return record.affiliation === affiliation.affiliation_id;
+    }
+    return false;
+};
+
 // Trancate the given string to the given number of characters, but pull the truncation back to
 // the word boundary before the truncation point.
 module.exports.truncateString = function (str, len) {

@@ -25,8 +25,8 @@ Feature: Select Variant
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NC_000015"
         When I press the button "Save and View Evidence"
-        And I wait for 2 seconds
-        Then I should see "NM_005902.3:c.-28C>T"
+        And I wait for 5 seconds
+        Then I should see "criteria provided, multiple submitters, no conflicts"
         When I press the button "Interpretation "
         And I wait for 1 seconds
         Then I should see "Variant Interpretation Record"
@@ -54,7 +54,7 @@ Feature: Select Variant
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
         Then I should see "NC_000003.12:g.184957468G>A"
         When I press the button "Save and View Evidence"
-        And I wait for 10 seconds
+        And I wait for 5 seconds
         Then I should see "Evidence View"
         Then I should see " rs566967979"
         When I press "Logout ClinGen Test Curator"
