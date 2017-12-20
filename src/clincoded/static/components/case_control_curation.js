@@ -1673,20 +1673,26 @@ var CaseControlViewer = createReactClass({
                                             <dd>{caseCohortMethod && caseCohortMethod.genotypingMethods && caseCohortMethod.genotypingMethods.join(', ')}</dd>
                                         </div>
 
-                                        <div>
-                                            <dt>Entire gene sequenced</dt>
-                                            <dd>{caseCohortMethod ? (caseCohortMethod.entireGeneSequenced === true ? 'Yes' : (caseCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {caseCohortMethod && (caseCohortMethod.entireGeneSequenced === true || caseCohortMethod.entireGeneSequenced === false) ?
+                                            <div>
+                                                <dt>Entire gene sequenced</dt>
+                                                <dd>{caseCohortMethod.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Copy number assessed</dt>
-                                            <dd>{caseCohortMethod ? (caseCohortMethod.copyNumberAssessed === true ? 'Yes' : (caseCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {caseCohortMethod && (caseCohortMethod.copyNumberAssessed === true || caseCohortMethod.copyNumberAssessed === false) ?
+                                            <div>
+                                                <dt>Copy number assessed</dt>
+                                                <dd>{caseCohortMethod.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Specific mutations genotyped</dt>
-                                            <dd>{caseCohortMethod ? (caseCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (caseCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {caseCohortMethod && (caseCohortMethod.specificMutationsGenotyped === true || caseCohortMethod.specificMutationsGenotyped === false) ?
+                                            <div>
+                                                <dt>Specific mutations genotyped</dt>
+                                                <dd>{caseCohortMethod.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
                                         <div>
                                             <dt>Description of genotyping method</dt>
@@ -1723,20 +1729,26 @@ var CaseControlViewer = createReactClass({
                                             <dd>{controlCohortMethod && controlCohortMethod.genotypingMethods && controlCohortMethod.genotypingMethods.join(', ')}</dd>
                                         </div>
 
-                                        <div>
-                                            <dt>Entire gene sequenced</dt>
-                                            <dd>{controlCohortMethod ? (controlCohortMethod.entireGeneSequenced === true ? 'Yes' : (controlCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {controlCohortMethod && (controlCohortMethod.entireGeneSequenced === true || controlCohortMethod.entireGeneSequenced === false) ?
+                                            <div>
+                                                <dt>Entire gene sequenced</dt>
+                                                <dd>{controlCohortMethod.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Copy number assessed</dt>
-                                            <dd>{controlCohortMethod ? (controlCohortMethod.copyNumberAssessed === true ? 'Yes' : (controlCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {controlCohortMethod && (controlCohortMethod.copyNumberAssessed === true || controlCohortMethod.copyNumberAssessed === false) ?
+                                            <div>
+                                                <dt>Copy number assessed</dt>
+                                                <dd>{controlCohortMethod.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Specific mutations genotyped</dt>
-                                            <dd>{controlCohortMethod ? (controlCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (controlCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {controlCohortMethod && (controlCohortMethod.specificMutationsGenotyped === true || controlCohortMethod.specificMutationsGenotyped === false) ?
+                                            <div>
+                                                <dt>Specific mutations genotyped</dt>
+                                                <dd>{controlCohortMethod.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
                                         <div>
                                             <dt>Description of genotyping method</dt>
