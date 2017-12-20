@@ -1567,6 +1567,11 @@ function FamilyDemographics() {
 
     return (
         <div className="row">
+            {hasGroupDemographics ?
+                <Input type="button" ref="copygroupdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-info btn-sm" title="Copy Demographics from Associated Group"
+                    clickHandler={this.handleCopyGroupDemographics} />
+                : null}
             {hasGroupDemographics ? curator.renderParentEvidence('Country of Origin Associated with Group:', associatedGroups[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin ? family.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1598,11 +1603,6 @@ function FamilyDemographics() {
                 <option value="Mixed">Mixed</option>
                 <option value="Unknown">Unknown</option>
             </Input>
-            {hasGroupDemographics ?
-                <Input type="button" ref="copygroupdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
-                    inputClassName="btn-default btn-last btn-sm" title="Copy Demographics from Associated Group"
-                    clickHandler={this.handleCopyGroupDemographics} />
-                : null}
         </div>
     );
 }
