@@ -131,10 +131,10 @@ var NavItem = module.exports.NavItem = createReactClass({
             this.setState({dropdownActive: !this.state.dropdownActive});
         } else if (e.target === this.refs.menu_item_gene_curation) {
             this.setState({dropdownActive: false});
-            window.open('/static/help/clingen-gene-curation-help.pdf');
+            window.open('https://github.com/ClinGen/clincoded/wiki/GCI-Curation-Help');
         } else if (e.target === this.refs.menu_item_variant_curation) {
             this.setState({dropdownActive: false});
-            window.open('/static/help/clingen-variant-curation-help.pdf');
+            window.open('https://github.com/ClinGen/clincoded/wiki/VCI-Curation-Help');
         } else if (e.target === this.refs.menu_item_contact_helpdesk) {
             this.setState({dropdownActive: false});
             location.href = 'mailto:clingen-helpdesk@lists.stanford.edu';

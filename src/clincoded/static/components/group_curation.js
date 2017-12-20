@@ -1067,7 +1067,7 @@ class GroupAddHistory extends Component {
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {group.affiliation ?
-                    <span>; last edited by {group.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -1089,7 +1089,7 @@ class GroupModifyHistory extends Component {
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {group.affiliation ?
-                    <span>; last edited by {group.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -1115,7 +1115,7 @@ class GroupDeleteHistory extends Component {
                 <span>{collateralObjects ? ' along with any associated families and individuals' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                 {group.affiliation ?
-                    <span>; last edited by {group.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
                     : null}
             </div>
         );

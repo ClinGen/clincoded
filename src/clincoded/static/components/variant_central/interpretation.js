@@ -250,7 +250,7 @@ class InterpretationAddHistory extends Component {
                 <span>Interpretation added to Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {interpretation.affiliation ?
-                    <span>; last edited by {interpretation.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {interpretation.modified_by.title}</span>
                     : null}
             </div>
         );
