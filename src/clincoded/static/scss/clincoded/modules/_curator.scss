@@ -733,10 +733,17 @@
     margin-bottom: -5px;
 }
 
-.demographics-copy,
-.methods-copy,
 .orphanet-copy {
     margin-top: -15px;
+
+    input[type=button] {
+        margin-left: -3px;
+    }
+}
+
+.demographics-copy,
+.methods-copy {
+    margin-bottom: 15px;
 
     input[type=button] {
         margin-left: -3px;
