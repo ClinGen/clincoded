@@ -1,32 +1,77 @@
 [
     {
         "affiliation_id": "10001",
-        "affiliation_abbreviation": "Bustamante Group 1",
-        "affiliation_fullname": "Bustamante ClinGen Test Group 1"
+        "affiliation_abbreviation": "CV-KCNQ1-EP",
+        "affiliation_fullname": "ClinGen Cardiovascular KCNQ1 Expert Panel"
     },
     {
         "affiliation_id": "10002",
-        "affiliation_abbreviation": "Bustamante Group 2",
-        "affiliation_fullname": "Bustamante ClinGen Test Group 2"
+        "affiliation_abbreviation": "CV-CMP-EP",
+        "affiliation_fullname": "ClinGen Cardiovascular Cardiomyopathy Expert Panel"
     },
     {
         "affiliation_id": "10003",
-        "affiliation_abbreviation": "Selina Lab",
-        "affiliation_fullname": "Selina Dwight Laboratory"
+        "affiliation_abbreviation": "CV-DCM-EP",
+        "affiliation_fullname": "ClinGen Cardiovascular Dilated Cardiomyopathy Expert Panel"
     },
     {
         "affiliation_id": "10004",
-        "affiliation_abbreviation": "Matt Lab",
-        "affiliation_fullname": "Mathew Wright Laboratory"
+        "affiliation_abbreviation": "CV-FH-EP",
+        "affiliation_fullname": "ClinGen Familial Hypercholesterolemia Expert Panel"
     },
     {
         "affiliation_id": "10005",
-        "affiliation_abbreviation": "RG Color Blind Group",
-        "affiliation_fullname": "Red-Creen Color Blindness Working Group"
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Epilepsy Working Group"
     },
     {
         "affiliation_id": "10006",
-        "affiliation_abbreviation": "NICHD U24",
-        "affiliation_fullname": "NICHD U24 Working Group"
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Intellectual Disability & Autism Working Group"
+    },
+    {
+        "affiliation_id": "10007",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Hearing Loss Working Group"
+    },
+    {
+        "affiliation_id": "10008",
+        "affiliation_abbreviation": "HLWG",
+        "affiliation_fullname": "ClinGen Hypertrophic Cardiomyopathy Working Group"
+    },
+    {
+        "affiliation_id": "10009",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Storage Diseases Working Group"
+    },
+    {
+        "affiliation_id": "10010",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Fatty Acid Oxidation Disorders Working Group"
+    },
+    {
+        "affiliation_id": "10011",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Aminoacidopathies Working Group"
+    },
+    {
+        "affiliation_id": "10012",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen PTEN Expert Panel"
+    },
+    {
+        "affiliation_id": "10013",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen TP53 Working Group"
+    },
+    {
+        "affiliation_id": "10014",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen CDH1 Working Group"
+    },
+    {
+        "affiliation_id": "10015",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen PAH Working Group"
     }
 ]
