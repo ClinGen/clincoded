@@ -1984,7 +1984,7 @@ class CaseControlAddHistory extends Component {
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {caseControl.affiliation ?
-                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {caseControl.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -2005,7 +2005,7 @@ class CaseControlModifyHistory extends Component {
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {caseControl.affiliation ?
-                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {caseControl.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -2031,7 +2031,7 @@ class CaseControlDeleteHistory extends Component {
                 <span>{collateralObjects ? ' along with any associated Case Cohort and Control Cohort' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                 {caseControl.affiliation ?
-                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {caseControl.modified_by.title}</span>
                     : null}
             </div>
         );

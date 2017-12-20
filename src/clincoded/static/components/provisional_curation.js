@@ -1055,7 +1055,7 @@ class ProvisionalAddModHistory extends Component {
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {provisional.affiliation ?
-                    <span>; last edited by {provisional.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {provisional.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -1080,7 +1080,7 @@ class ProvisionalModifyHistory extends Component {
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {provisional.affiliation ?
-                    <span>; last edited by {provisional.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {provisional.modified_by.title}</span>
                     : null}
             </div>
         );
