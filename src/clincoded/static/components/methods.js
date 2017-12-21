@@ -11,11 +11,14 @@ import * as curator from './curator';
 // with <method>.call(this).
 module.exports = {
 
-    // Render a Methods panel.
-    // evidenceType: type of evidence being curated (group, family, individual or case-control)
-    // prefix: prefix to default form field names (only necessary for case-control)
-    // parentMethod: methods data of "parent" evidence (e.g. a family's associated group)
-    // parentName: name of "parent" evidence (Group or Family)
+    /**
+     * Render a Methods panel.
+     * @param {object} method - Methods data of evidence being curated.
+     * @param {string} evidenceType - Type of evidence being curated (group, family, individual or case-control).
+     * @param {string} prefix - Prefix to default form field names (only necessary for case-control).
+     * @param {object} parentMethod - Methods data of "parent" evidence (e.g. a family's associated group).
+     * @param {string} parentName - Name of "parent" evidence (Group or Family).
+     */
     render: function(method, evidenceType, prefix, parentMethod, parentName) {
         let isFamily = false;
         let isCaseControl = false;
