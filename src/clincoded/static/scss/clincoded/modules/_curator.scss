@@ -750,6 +750,22 @@
     }
 }
 
+.btn-copy {
+    background-color: #5bc0de;
+    border-color: darken(#5bc0de, 5%);
+    color: #fff;
+
+    &:active, &:focus, &:hover {
+        background-color: darken(#5bc0de, 10%);
+        border-color: darken(darken(#5bc0de, 5%), 12%);
+        color: #fff;
+    }
+
+    &:active {
+        background-image: none;
+    }
+}
+
 .form-row-helper {
     input[type=checkbox] {
         margin-top: 11px;
