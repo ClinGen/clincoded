@@ -123,7 +123,7 @@ var Dashboard = createReactClass({
      */
     getAffiliatedData(affiliation) {
         this.getRestDatas([
-            '/search/?type=gdm',
+            '/search/?type=gdm&affiliation=' + affiliation.affiliation_id,
             '/search/?type=interpretation&affiliation=' + affiliation.affiliation_id
         ], null).then(data => {
             let gdmURLs = [], affiliatedGdms = [],
