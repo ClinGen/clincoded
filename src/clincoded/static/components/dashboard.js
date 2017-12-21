@@ -132,21 +132,16 @@ var Dashboard = createReactClass({
             gdmURLs = data[0]['@graph'].map(result => { return result['@id']; });
             if (gdmURLs.length > 0) {
                 this.getRestDatas(gdmURLs, null, true).then(gdms => {
-                    let affiliatedGdmList = curator.findAffiliatedGdms(gdms, affiliation.affiliation_id);
-                    if (affiliatedGdmList.length) {
-                        affiliatedGdmList.map(affiliatedGdm => {
-                            affiliatedGdms.push({
-                                uuid: affiliatedGdm.uuid,
-                                gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
-                                gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
-                                status: affiliatedGdm.gdm_status,
-                                date_created: affiliatedGdm.date_created
-                            });
+                    gdms.map(affiliatedGdm => {
+                        affiliatedGdms.push({
+                            uuid: affiliatedGdm.uuid,
+                            gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
+                            gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
+                            status: affiliatedGdm.gdm_status,
+                            date_created: affiliatedGdm.date_created
                         });
-                        this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
-                    } else {
-                        this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
-                    }
+                    });
+                    this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
                 });
             } else {
                 this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
