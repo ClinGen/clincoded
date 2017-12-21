@@ -776,7 +776,7 @@ var FamilyCuration = createReactClass({
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases.map(disease => { return disease; });
-                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, this);
+                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, this.props.affiliation, this);
                     }
 
                     // Family doesn't have any variants

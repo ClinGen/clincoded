@@ -725,7 +725,7 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
                     });
                     individualRenders = individualRenders.concat(individualFamilyRenders);
                 }
-                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, familyAffiliationMatch)}</div>;
+                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, familyAffiliationMatch, curatorAffiliation)}</div>;
             });
             familyRenders = familyRenders.concat(familyAnnotationRenders);
         }

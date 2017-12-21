@@ -123,7 +123,7 @@ var Dashboard = createReactClass({
      */
     getAffiliatedData(affiliation) {
         this.getRestDatas([
-            '/search/?type=gdm',
+            '/search/?type=gdm&affiliation=' + affiliation.affiliation_id,
             '/search/?type=interpretation&affiliation=' + affiliation.affiliation_id
         ], null).then(data => {
             let gdmURLs = [], affiliatedGdms = [],
@@ -132,21 +132,16 @@ var Dashboard = createReactClass({
             gdmURLs = data[0]['@graph'].map(result => { return result['@id']; });
             if (gdmURLs.length > 0) {
                 this.getRestDatas(gdmURLs, null, true).then(gdms => {
-                    let affiliatedGdmList = curator.findAffiliatedGdms(gdms, affiliation.affiliation_id);
-                    if (affiliatedGdmList.length) {
-                        affiliatedGdmList.map(affiliatedGdm => {
-                            affiliatedGdms.push({
-                                uuid: affiliatedGdm.uuid,
-                                gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
-                                gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
-                                status: affiliatedGdm.gdm_status,
-                                date_created: affiliatedGdm.date_created
-                            });
+                    gdms.map(affiliatedGdm => {
+                        affiliatedGdms.push({
+                            uuid: affiliatedGdm.uuid,
+                            gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
+                            gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
+                            status: affiliatedGdm.gdm_status,
+                            date_created: affiliatedGdm.date_created
                         });
-                        this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
-                    } else {
-                        this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
-                    }
+                    });
+                    this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
                 });
             } else {
                 this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
@@ -292,7 +287,7 @@ var Dashboard = createReactClass({
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">My Affiliation's Gene-Disease Records</h3>
+                    <h3 className="panel-title">My Affiliation's Gene-Disease Records *</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.affiliatedGdmsLoading ? showActivityIndicator('Loading... ') : null}
@@ -391,7 +386,7 @@ var Dashboard = createReactClass({
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">My Affiliation's Variant Interpretations</h3>
+                    <h3 className="panel-title">My Affiliation's Variant Interpretations *</h3>
                 </div>
                 <div className="panel-content-wrapper">
                     {this.state.affiliatedInterpretationsLoading ? showActivityIndicator('Loading... ') : null}
@@ -505,6 +500,14 @@ var Dashboard = createReactClass({
                         {affiliation && Object.keys(affiliation).length ?
                             this.renderAffiliatedGdms(this.state.affiliatedGdms)
                             : this.renderIndividualRecords(this.state.gdmList)}
+                        {affiliation && Object.keys(affiliation).length ?
+                            <div className="alert alert-info">
+                                <strong>* Variant interpretations and Gene-Disease records created by this Affiliation.</strong> To create a new
+                                Variant Interpretation or Gene-Disease record, use the menu items in the top header. To find an
+                                existing Interpretation or Gene-Disease record not created by this Affiliation, use the View All
+                                options under "Tools" and filter by desired gene, variant, or disease.
+                            </div>
+                            : null}
                     </div>
                 </div>
             </div>
