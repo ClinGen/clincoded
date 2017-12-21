@@ -55,8 +55,10 @@ const CaseControlCuration = createReactClass({
             groupName: '', // Currently entered name of the group
             caseCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             controlCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
-            caseAlleleFreqDisplay: null,
-            controlAlleleFreqDisplay: null,
+            caseNumWithVariant: null,
+            caseNumAllGenotyped: null,
+            controlNumWithVariant: null,
+            controlNumAllGenotyped: null,
             statisticOtherType: 'collapsed',
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
@@ -146,14 +148,14 @@ const CaseControlCuration = createReactClass({
                 if (stateObj.caseGroup['commonDiagnosis'] && stateObj.caseGroup['commonDiagnosis'].length > 0) {
                     this.setState({diseaseObj: stateObj.caseGroup['commonDiagnosis'][0]});
                 }
-                this.setState({caseAlleleFreqDisplay: renderAlleleFrequency(stateObj.caseGroup.numberWithVariant,
-                    stateObj.caseGroup.numberAllGenotypedSequenced, stateObj.caseGroup.alleleFrequency)});
+                this.setState({caseNumWithVariant: stateObj.caseGroup.numberWithVariant});
+                this.setState({caseNumAllGenotyped: stateObj.caseGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.controlGroup) {
                 stateObj.controlCohort_genotyping2Disabled = !(stateObj.controlGroup.method && stateObj.controlGroup.method.genotypingMethods && stateObj.controlGroup.method.genotypingMethods.length);
                 this.setState({controlGroupName: stateObj.controlGroup.label});
-                this.setState({controlAlleleFreqDisplay: renderAlleleFrequency(stateObj.controlGroup.numberWithVariant,
-                    stateObj.controlGroup.numberAllGenotypedSequenced, stateObj.controlGroup.alleleFrequency)});
+                this.setState({controlNumWithVariant: stateObj.controlGroup.numberWithVariant});
+                this.setState({controlNumAllGenotyped: stateObj.controlGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.caseControl) {
                 this.setState({caseControlName: stateObj.caseControl.label});
@@ -194,17 +196,17 @@ const CaseControlCuration = createReactClass({
                 this.clrFormErrors('diseaseError');
             });
         }
-        if (ref === 'caseCohort_numGroupVariant' || ref === 'caseCohort_numGroupGenotyped') {
-            let numGroupVariantVal = parseInt(this.refs['caseCohort_numGroupVariant'].getValue(), 10);
-            let numGroupGenotypedVal = parseInt(this.refs['caseCohort_numGroupGenotyped'].getValue(), 10);
-
-            this.setState({caseAlleleFreqDisplay: renderAlleleFrequency(numGroupVariantVal, numGroupGenotypedVal)});
+        if (ref === 'caseCohort_numGroupVariant') {
+            this.setState({caseNumWithVariant: parseInt(this.refs[ref].getValue(), 10)});
         }
-        if (ref === 'controlCohort_numGroupVariant' || ref === 'controlCohort_numGroupGenotyped') {
-            let numGroupVariantVal = parseInt(this.refs['controlCohort_numGroupVariant'].getValue(), 10);
-            let numGroupGenotypedVal = parseInt(this.refs['controlCohort_numGroupGenotyped'].getValue(), 10);
-
-            this.setState({controlAlleleFreqDisplay: renderAlleleFrequency(numGroupVariantVal, numGroupGenotypedVal)});
+        if (ref === 'caseCohort_numGroupGenotyped') {
+            this.setState({caseNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'controlCohort_numGroupVariant') {
+            this.setState({controlNumWithVariant: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'controlCohort_numGroupGenotyped') {
+            this.setState({controlNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
         }
     },
 
@@ -1370,7 +1372,7 @@ function GroupPower(groupType) {
         type = 'Case';
         numGroupVariant = 'caseCohort_numGroupVariant';
         numGroupGenotyped = 'caseCohort_numGroupGenotyped';
-        alleleFreqDisplay = this.state.caseAlleleFreqDisplay;
+        alleleFreqDisplay = renderAlleleFrequency(this.state.caseNumWithVariant, this.state.caseNumAllGenotyped);
         headerLabel = 'CASE';
         group = this.state.caseGroup;
     }
@@ -1379,7 +1381,7 @@ function GroupPower(groupType) {
         controlGroupType = 'controlCohort_controlGroupType';
         numGroupVariant = 'controlCohort_numGroupVariant';
         numGroupGenotyped = 'controlCohort_numGroupGenotyped';
-        alleleFreqDisplay = this.state.controlAlleleFreqDisplay;
+        alleleFreqDisplay = renderAlleleFrequency(this.state.controlNumWithVariant, this.state.controlNumAllGenotyped);
         headerLabel = 'CONTROL';
         group = this.state.controlGroup;
     }
