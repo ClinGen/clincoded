@@ -2077,7 +2077,7 @@ const LabelPanelTitleView = (individual, labelText, hasVariant) => {
  * @param {object} zygosity 
  * @param {object} context 
  */
-export function makeStarterIndividual(label, diseases, variants, zygosity, context) {
+export function makeStarterIndividual(label, diseases, variants, zygosity, affiliation, context) {
     let newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
@@ -2087,6 +2087,8 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, conte
         newIndividual.variants = variants;
     }
     if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
+
+    if (affiliation) { newIndividual.affiliation = affiliation.affiliation_id; }
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {
