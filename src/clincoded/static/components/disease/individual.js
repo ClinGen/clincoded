@@ -171,19 +171,19 @@ const IndividualDisease = module.exports.IndividualDisease = createReactClass({
         if (group && !family) {
             return (
                 <Input type="button" ref="copyGroupDisease" title="Copy disease term from Associated Group"
-                    wrapperClassName="group-disease-copy" inputClassName="btn-default"
+                    wrapperClassName="group-disease-copy" inputClassName="btn-copy"
                     clickHandler={this.handleCopyGroupDisease} />
             );
         } else if (family && family.commonDiagnosis && family.commonDiagnosis.length) {
             return (
                 <Input type="button" ref="copyFamilyDisease" title="Copy disease term from Associated Family"
-                    wrapperClassName="family-disease-copy" inputClassName="btn-default"
+                    wrapperClassName="family-disease-copy" inputClassName="btn-copy"
                     clickHandler={this.handleCopyFamilyDisease} />
             );
         } else {
             return (
                 <Input type="button" ref="copyGdmDisease" title="Copy disease term from Gene-Disease Record"
-                    wrapperClassName="gdm-disease-copy" inputClassName="btn-default"
+                    wrapperClassName="gdm-disease-copy" inputClassName="btn-copy"
                     clickHandler={this.handleCopyGdmDisease} />
             );
         }

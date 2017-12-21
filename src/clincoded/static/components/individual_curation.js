@@ -105,7 +105,7 @@ const IndividualCuration = createReactClass({
         }
     },
 
-    // Handle a click on a copy phenotype button
+    // Handle a click on a copy phenotype/demographics button
     handleClick: function(obj, item, e) {
         e.preventDefault(); e.stopPropagation();
         var hpoIds = '';
@@ -119,6 +119,18 @@ const IndividualCuration = createReactClass({
             }
             if (obj.termsInDiagnosis) {
                 this.refs['phenoterms'].setValue(obj.termsInDiagnosis);
+            }
+        } else if (item === 'demographics') {
+            if (obj.countryOfOrigin) {
+                this.refs['country'].setValue(obj.countryOfOrigin);
+            }
+
+            if (obj.ethnicity) {
+                this.refs['ethnicity'].setValue(obj.ethnicity);
+            }
+
+            if (obj.race) {
+                this.refs['race'].setValue(obj.race);
             }
         }
     },
@@ -878,6 +890,18 @@ const IndividualCuration = createReactClass({
             }
         }
 
+        // Retrieve methods data of "parent" evidence (assuming only one "parent", either a family or a group)
+        var parentEvidenceMethod;
+        var parentEvidenceName = '';
+
+        if (families && families.length) {
+            parentEvidenceMethod = (families[0].method && Object.keys(families[0].method).length) ? families[0].method : null;
+            parentEvidenceName = 'Family';
+        } else if (groups && groups.length) {
+            parentEvidenceMethod = (groups[0].method && Object.keys(groups[0].method).length) ? groups[0].method : null;
+            parentEvidenceName = 'Group';
+        }
+
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
         // family object read in.
@@ -942,7 +966,7 @@ const IndividualCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title={LabelPanelTitle(individual, 'Methods')} open>
-                                                {methods.render.call(this, method)}
+                                                {methods.render.call(this, method, 'individual', '', parentEvidenceMethod, parentEvidenceName)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -1129,31 +1153,31 @@ function IndividualCommonDiseases() {
                 diseaseObj={this.state.diseaseObj} error={this.state.diseaseError}
                 probandLabel={probandLabel} required={this.state.proband_selected} />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Individual', 'hpo')
+                curator.renderPhenotype(associatedGroups, 'Individual', 'hpo', 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo') : curator.renderPhenotype(null, 'Individual', 'hpo')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo', 'Family') : curator.renderPhenotype(null, 'Individual', 'hpo')
                 )
             }
             <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Individual', 'ft')
+                curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'ft') : curator.renderPhenotype(null, 'Individual', 'ft')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'ft', 'Family') : curator.renderPhenotype(null, 'Individual', 'ft')
                 )
             }
             <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2"
                 value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Group"
                     clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
                 : null}
             {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Family"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Family"
                     clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
@@ -1199,6 +1223,29 @@ const LabelPhenoTerms = bool => {
  */
 function IndividualDemographics() {
     let individual = this.state.individual;
+    let associatedParentObj;
+    let associatedParentName = '';
+    let hasParentDemographics = false;
+
+    // Retrieve associated "parent" as an array (check for family first, then group)
+    if (this.state.family) {
+        associatedParentObj = [this.state.family];
+        associatedParentName = 'Family';
+    } else if (individual && individual.associatedFamilies && individual.associatedFamilies.length) {
+        associatedParentObj = individual.associatedFamilies;
+        associatedParentName = 'Family';
+    } else if (this.state.group) {
+        associatedParentObj = [this.state.group];
+        associatedParentName = 'Group';
+    } else if (individual && individual.associatedGroups && individual.associatedGroups.length) {
+        associatedParentObj = individual.associatedGroups;
+        associatedParentName = 'Group';
+    }
+
+    // Check if associated "parent" has any demographics data
+    if (associatedParentObj && (associatedParentObj[0].countryOfOrigin || associatedParentObj[0].ethnicity || associatedParentObj[0].race)) {
+        hasParentDemographics = true;
+    }
 
     return (
         <div className="row">
@@ -1210,13 +1257,22 @@ function IndividualDemographics() {
                 <option disabled="disabled"></option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
+                <option value="Unknown">Unknown</option>
                 <option value="Intersex">Intersex</option>
                 <option value="MTF/Transwoman/Transgender Female">MTF/Transwoman/Transgender Female</option>
                 <option value="FTM/Transman/Transgender Male">FTM/Transman/Transgender Male</option>
                 <option value="Ambiguous">Ambiguous</option>
-                <option value="Unknown">Unknown</option>
                 <option value="Other">Other</option>
             </Input>
+            <div className="col-sm-7 col-sm-offset-5 sex-field-note">
+                <div className="alert alert-info">Select "Unknown" for "Sex" if information not provided in publication.</div>
+            </div>
+            {hasParentDemographics ?
+                <Input type="button" ref="copyparentdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-copy btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
+                    clickHandler={this.handleClick.bind(this, associatedParentObj[0], 'demographics')} />
+                : null}
+            {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none"
                 value={individual && individual.countryOfOrigin ? individual.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1226,6 +1282,7 @@ function IndividualDemographics() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Ethnicity Associated with ' + associatedParentName + ':', associatedParentObj[0].ethnicity) : null}
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none"
                 value={individual && individual.ethnicity ? individual.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1235,6 +1292,7 @@ function IndividualDemographics() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Race Associated with ' + associatedParentName + ':', associatedParentObj[0].race) : null}
             <Input type="select" ref="race" label="Race:" defaultValue="none"
                 value={individual && individual.race ? individual.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1837,20 +1895,26 @@ const IndividualViewer = createReactClass({
                                     <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Entire gene sequenced</dt>
-                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.entireGeneSequenced === true || method.entireGeneSequenced === false) ?
+                                    <div>
+                                        <dt>Entire gene sequenced</dt>
+                                        <dd>{method.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Copy number assessed</dt>
-                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.copyNumberAssessed === true || method.copyNumberAssessed === false) ?
+                                    <div>
+                                        <dt>Copy number assessed</dt>
+                                        <dd>{method.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Specific mutations genotyped</dt>
-                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.specificMutationsGenotyped === true || method.specificMutationsGenotyped === false) ?
+                                    <div>
+                                        <dt>Specific mutations genotyped</dt>
+                                        <dd>{method.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
                                 <div>
                                     <dt>Description of genotyping method</dt>

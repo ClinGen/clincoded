@@ -162,7 +162,7 @@ const GroupDisease = module.exports.GroupDisease = createReactClass({
     renderCopyDiseaseButton() {
         return (
             <Input type="button" ref="copyGdmDisease" title="Copy disease term from Gene-Disease Record"
-                wrapperClassName="gdm-disease-copy" inputClassName="btn-default"
+                wrapperClassName="gdm-disease-copy" inputClassName="btn-copy"
                 clickHandler={this.handleCopyGdmDisease} inputDisabled={this.props.inputDisabled} />
         );
     },
