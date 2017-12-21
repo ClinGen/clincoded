@@ -618,7 +618,7 @@ class VariantAddHistory extends Component {
                 <span>Variant <strong><a href={"/variant-central/?variant=" + variant.uuid}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</a></strong> added</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {variant.affiliation ?
-                    <span>; last edited by {variant.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {variant.modified_by.title}</span>
                     : null}
             </div>
         );
