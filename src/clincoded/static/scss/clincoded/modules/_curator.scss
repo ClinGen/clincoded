@@ -2770,6 +2770,17 @@ table.login-users-interpretations {
                 display: none;
             }
         }
+
+        &.section-power .form-group.allele-frequency {
+            .col-sm-5 {
+                padding-right: 0;
+                text-align: right;
+
+                span {
+                    font-weight: bold;
+                }
+            }
+        }
     }
 
     .section:first-child {

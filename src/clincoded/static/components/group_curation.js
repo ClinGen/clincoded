@@ -826,12 +826,14 @@ var GroupAdditional = function() {
                 value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">
-                Note: Any variants associated with probands that will be counted towards the Classification are not
-                captured at the Group level - variants and their association with probands are required to be captured
-                at the Family or Individual level. Once you submit the Group information, you will be prompted to enter
-                Family/Individual information.
-            </p>
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-info">
+                    Note: Any variants associated with probands that will be counted towards the Classification are not
+                    captured at the Group level - variants and their association with probands are required to be captured
+                    at the Family or Individual level. Once you submit the Group information, you will be prompted to enter
+                    Family/Individual information.
+                </p>
+            </div>
         </div>
     );
 };
@@ -1073,7 +1075,7 @@ class GroupAddHistory extends Component {
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {group.affiliation ?
-                    <span>; last edited by {group.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -1095,7 +1097,7 @@ class GroupModifyHistory extends Component {
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {group.affiliation ?
-                    <span>; last edited by {group.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -1121,7 +1123,7 @@ class GroupDeleteHistory extends Component {
                 <span>{collateralObjects ? ' along with any associated families and individuals' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                 {group.affiliation ?
-                    <span>; last edited by {group.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
                     : null}
             </div>
         );

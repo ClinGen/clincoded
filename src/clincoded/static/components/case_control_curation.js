@@ -55,6 +55,10 @@ const CaseControlCuration = createReactClass({
             groupName: '', // Currently entered name of the group
             caseCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             controlCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
+            caseNumWithVariant: null,
+            caseNumAllGenotyped: null,
+            controlNumWithVariant: null,
+            controlNumAllGenotyped: null,
             statisticOtherType: 'collapsed',
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
@@ -144,10 +148,14 @@ const CaseControlCuration = createReactClass({
                 if (stateObj.caseGroup['commonDiagnosis'] && stateObj.caseGroup['commonDiagnosis'].length > 0) {
                     this.setState({diseaseObj: stateObj.caseGroup['commonDiagnosis'][0]});
                 }
+                this.setState({caseNumWithVariant: stateObj.caseGroup.numberWithVariant});
+                this.setState({caseNumAllGenotyped: stateObj.caseGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.controlGroup) {
                 stateObj.controlCohort_genotyping2Disabled = !(stateObj.controlGroup.method && stateObj.controlGroup.method.genotypingMethods && stateObj.controlGroup.method.genotypingMethods.length);
                 this.setState({controlGroupName: stateObj.controlGroup.label});
+                this.setState({controlNumWithVariant: stateObj.controlGroup.numberWithVariant});
+                this.setState({controlNumAllGenotyped: stateObj.controlGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.caseControl) {
                 this.setState({caseControlName: stateObj.caseControl.label});
@@ -187,6 +195,18 @@ const CaseControlCuration = createReactClass({
             this.setState({diseaseError: null, diseaseRequired: false}, () => {
                 this.clrFormErrors('diseaseError');
             });
+        }
+        if (ref === 'caseCohort_numGroupVariant') {
+            this.setState({caseNumWithVariant: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'caseCohort_numGroupGenotyped') {
+            this.setState({caseNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'controlCohort_numGroupVariant') {
+            this.setState({controlNumWithVariant: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'controlCohort_numGroupGenotyped') {
+            this.setState({controlNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
         }
     },
 
@@ -592,23 +612,21 @@ const CaseControlCuration = createReactClass({
                     if (this.getFormValue(prefix + 'numGroupVariant')) {
                         newCaseGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
                     } else {
-                        if ('numberWithVariant' in newControlGroup) {
+                        if ('numberWithVariant' in newCaseGroup) {
                             delete newCaseGroup['numberWithVariant'];
                         }
                     }
                     if (this.getFormValue(prefix + 'numGroupGenotyped')) {
                         newCaseGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
                     } else {
-                        if ('numberAllGenotypedSequenced' in newControlGroup) {
+                        if ('numberAllGenotypedSequenced' in newCaseGroup) {
                             delete newCaseGroup['numberAllGenotypedSequenced'];
                         }
                     }
-                    if (this.getFormValue(prefix + 'calcAlleleFreq')) {
-                        newCaseGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
-                    } else {
-                        if ('alleleFrequency' in newControlGroup) {
-                            delete newCaseGroup['alleleFrequency'];
-                        }
+                    if ((newCaseGroup.numberWithVariant || newCaseGroup.numberWithVariant === 0) && newCaseGroup.numberAllGenotypedSequenced) {
+                        newCaseGroup.alleleFrequency = newCaseGroup.numberWithVariant / newCaseGroup.numberAllGenotypedSequenced;
+                    } else if ('alleleFrequency' in newCaseGroup) {
+                        delete newCaseGroup['alleleFrequency'];
                     }
 
                     /******************************************************/
@@ -722,12 +740,10 @@ const CaseControlCuration = createReactClass({
                             delete newControlGroup['numberAllGenotypedSequenced'];
                         }
                     }
-                    if (this.getFormValue(prefix + 'calcAlleleFreq')) {
-                        newControlGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
-                    } else {
-                        if ('alleleFrequency' in newControlGroup) {
-                            delete newControlGroup['alleleFrequency'];
-                        }
+                    if ((newControlGroup.numberWithVariant || newControlGroup.numberWithVariant === 0) && newControlGroup.numberAllGenotypedSequenced) {
+                        newControlGroup.alleleFrequency = newControlGroup.numberWithVariant / newControlGroup.numberAllGenotypedSequenced;
+                    } else if ('alleleFrequency' in newControlGroup) {
+                        delete newControlGroup['alleleFrequency'];
                     }
 
                     /******************************************************/
@@ -1308,15 +1324,55 @@ function GroupDemographics(groupType) {
     );
 }
 
+// Generate a display version (string) of the allele frequency (preferring fixed-point notation over exponential)
+function displayAlleleFrequency(alleleFrequency) {
+    let alleleFreqDisplay = (alleleFrequency > 0 || alleleFrequency < 0) ? alleleFrequency.toFixed(5) : '0';
+
+    // If there are no non-zero digits when using fixed-point notation (to 5 decimal places), switch to exponential
+    if (alleleFreqDisplay.match(/^0+\.0+$/)) {
+        alleleFreqDisplay = alleleFrequency.toExponential(2);
+
+    // If there are more than 5 digits in the "integer part", switch to exponential
+    } else if (alleleFreqDisplay.match(/^\d{6}/)) {
+        alleleFreqDisplay = alleleFrequency.toExponential(2);
+    }
+
+    return alleleFreqDisplay;
+}
+
+// Generate HTML to display the allele frequency (as a fraction and a decimal number)
+function renderAlleleFrequency(numberWithVariant, numberAllGenotypedSequenced, alleleFrequency) {
+
+    // Check that parameter is a non-zero number (if it's zero, only possible results of division are INF or NaN)
+    if (numberAllGenotypedSequenced > 0 || numberAllGenotypedSequenced < 0) {
+
+        // Check that parameter is a number
+        if (numberWithVariant > 0 || numberWithVariant < 0 || numberWithVariant === 0) {
+
+            // If provided allele frequency is a number, use it
+            let alleleFreqDisplay = (alleleFrequency > 0 || alleleFrequency < 0 || alleleFrequency === 0)
+                ? displayAlleleFrequency(Number(alleleFrequency)) : displayAlleleFrequency(numberWithVariant / numberAllGenotypedSequenced);
+
+            return (
+                <span>
+                    <sup>{numberWithVariant}</sup>&frasl;<sub>{numberAllGenotypedSequenced}</sub> = {alleleFreqDisplay}
+                </span>
+            );
+        }
+    }
+
+    return;
+}
+
 // Group information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupPower(groupType) {
-    let type, controlGroupType, numGroupVariant, numGroupGenotyped, calcAlleleFreq, headerLabel, group;
+    let type, controlGroupType, numGroupVariant, numGroupGenotyped, alleleFreqDisplay, headerLabel, group;
     if (groupType === 'case-cohort') {
         type = 'Case';
         numGroupVariant = 'caseCohort_numGroupVariant';
         numGroupGenotyped = 'caseCohort_numGroupGenotyped';
-        calcAlleleFreq = 'caseCohort_calcAlleleFreq';
+        alleleFreqDisplay = renderAlleleFrequency(this.state.caseNumWithVariant, this.state.caseNumAllGenotyped);
         headerLabel = 'CASE';
         group = this.state.caseGroup;
     }
@@ -1325,7 +1381,7 @@ function GroupPower(groupType) {
         controlGroupType = 'controlCohort_controlGroupType';
         numGroupVariant = 'controlCohort_numGroupVariant';
         numGroupGenotyped = 'controlCohort_numGroupGenotyped';
-        calcAlleleFreq = 'controlCohort_calcAlleleFreq';
+        alleleFreqDisplay = renderAlleleFrequency(this.state.controlNumWithVariant, this.state.controlNumAllGenotyped);
         headerLabel = 'CONTROL';
         group = this.state.controlGroup;
     }
@@ -1351,17 +1407,23 @@ function GroupPower(groupType) {
             }
             ****/}
             <Input type="number" inputClassName="integer-only" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'}
-                value={group && typeof group.numberWithVariant === 'number' ? group.numberWithVariant : ''}
+                handleChange={this.handleChange} value={group && typeof group.numberWithVariant === 'number' ? group.numberWithVariant : ''}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="number" inputClassName="integer-only" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'}
-                value={group && typeof group.numberAllGenotypedSequenced === 'number' ? group.numberAllGenotypedSequenced : ''}
+                handleChange={this.handleChange} value={group && typeof group.numberAllGenotypedSequenced === 'number' ? group.numberAllGenotypedSequenced : ''}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} handleChange={this.handleChange}
-                value={group && typeof group.alleleFrequency === 'number' ? group.alleleFrequency : ''}
-                error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <div>
+                <div className="form-group allele-frequency">
+                    <div className="col-sm-5">
+                        <span>{type + ' Allele Frequency:'}</span>
+                    </div>
+                    <div className="col-sm-7">
+                        {alleleFreqDisplay}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
@@ -1786,7 +1848,7 @@ var CaseControlViewer = createReactClass({
 
                                         <div>
                                             <dt>Case Allele Frequency</dt>
-                                            <dd>{caseCohort.alleleFrequency}</dd>
+                                            <dd>{renderAlleleFrequency(caseCohort.numberWithVariant, caseCohort.numberAllGenotypedSequenced, caseCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
                                 </Panel>
@@ -1806,7 +1868,7 @@ var CaseControlViewer = createReactClass({
 
                                         <div>
                                             <dt>Case Allele Frequency</dt>
-                                            <dd>{controlCohort.alleleFrequency}</dd>
+                                            <dd>{renderAlleleFrequency(controlCohort.numberWithVariant, controlCohort.numberAllGenotypedSequenced, controlCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
                                 </Panel>
@@ -1996,7 +2058,7 @@ class CaseControlAddHistory extends Component {
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {caseControl.affiliation ?
-                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {caseControl.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -2017,7 +2079,7 @@ class CaseControlModifyHistory extends Component {
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {caseControl.affiliation ?
-                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {caseControl.modified_by.title}</span>
                     : null}
             </div>
         );
@@ -2043,7 +2105,7 @@ class CaseControlDeleteHistory extends Component {
                 <span>{collateralObjects ? ' along with any associated Case Cohort and Control Cohort' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                 {caseControl.affiliation ?
-                    <span>; last edited by {caseControl.modified_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {caseControl.modified_by.title}</span>
                     : null}
             </div>
         );
