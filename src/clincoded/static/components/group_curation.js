@@ -1074,9 +1074,6 @@ class GroupAddHistory extends Component {
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
-                {group.affiliation ?
-                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
-                    : null}
             </div>
         );
     }
@@ -1096,9 +1093,6 @@ class GroupModifyHistory extends Component {
                 Group <a href={group['@id']}>{group.label}</a>
                 <span> modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
-                {group.affiliation ?
-                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
-                    : null}
             </div>
         );
     }
@@ -1122,9 +1116,6 @@ class GroupDeleteHistory extends Component {
                 <span>Group {group.label} deleted</span>
                 <span>{collateralObjects ? ' along with any associated families and individuals' : ''}</span>
                 <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                {group.affiliation ?
-                    <span className="last-edited-by-name">; last edited by {group.modified_by.title}</span>
-                    : null}
             </div>
         );
     }
