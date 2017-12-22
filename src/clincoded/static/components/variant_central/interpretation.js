@@ -285,7 +285,7 @@ class InterpretationModifyHistory extends Component {
                     : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
                 {interpretation.affiliation ?
-                    <span>; last edited by {interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title}</span>
+                    <span className="last-edited-by-name">; last edited by {interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title}</span>
                     : null}
             </div>
         );
