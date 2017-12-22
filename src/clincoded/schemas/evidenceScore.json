@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "scoreStatus": {
             "title": "Score Status",
@@ -55,6 +55,11 @@
         "gdmId": {
             "title": "GDM ID",
             "description": "UUID of GDM the scored evidence belonging to",
+            "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this evidence score is associated with.",
             "type": "string"
         }
     },

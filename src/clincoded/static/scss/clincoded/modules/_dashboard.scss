@@ -1,0 +1,78 @@
+.affiliated-records-container {
+    margin-top: 25px;
+    margin-bottom: 25px;
+
+    .panel {
+        border-radius: 4px;
+
+        h3 {
+            font-weight: 500;
+            line-height: 1.1;
+        }
+
+        .list-group {
+            padding-left: 0;
+            
+            .list-group-item {
+                position: relative;
+                display: block;
+                padding: 10px 15px;
+                margin-bottom: -1px;
+                border-bottom: 1px solid #ddd;
+
+                &:last-child {
+                    border-bottom: 0;
+                }
+
+                a.help-doc {
+                    margin-left: 8px;
+            
+                    .icon {
+                        font-size: 16px;
+                        vertical-align: text-top;
+                    }
+
+                    &:after {
+                        content: '';
+                    }
+                }
+            }
+        }
+
+        .panel-body {
+            p {
+                margin: 0;
+            }
+        }
+    }
+
+    .affiliated-evidence-list {
+        margin-bottom: 0;
+
+        .item-name {
+            width: 70%;
+        }
+
+        .item-status,
+        .item-timestamp {
+            width: 15%;
+        }
+    }
+
+    .affiliated-interpretation-list {
+        margin-bottom: 0;
+
+        .item-variant {
+            width: 35%;
+        }
+
+        .item-attribute {
+            width: 35%;
+        }
+
+        .item-status,
+        .item-timestamp {
+            width: 15%;
+        }
+    }
+}

@@ -88,3 +88,10 @@ def group_3_4(value, system):
         value['commonDiagnosis'] = [e.replace('f1500e18-c995-4ccd-9bb8-e4294479ae4c', '9a9d5ff1-10c9-46de-8a95-21f7284fdcf0') for e in value['commonDiagnosis']]
         value['commonDiagnosis'] = [e.replace('89f5994c-c068-416e-a06b-687bba585cd2', 'e1fb9424-0a9f-4ce5-a7f5-88a12cb67955') for e in value['commonDiagnosis']]
         value['commonDiagnosis'] = [e.replace('7bb7034d-7075-4940-86b8-0233dab3926a', '2cea0443-a548-4f54-a4eb-a5fd581cbdef') for e in value['commonDiagnosis']]
+
+
+@upgrade_step('group', '4', '5')
+def group_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1507
+    # Add affiliation property and update schema version
+    return

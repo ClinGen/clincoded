@@ -28,6 +28,12 @@ var ProvisionalCuration = createReactClass({
 
     queryValues: {},
 
+    propTypes: {
+        href: PropTypes.string,
+        session: PropTypes.object,
+        affiliation: PropTypes.object
+    },
+
     getInitialState: function() {
         return {
             user: null, // login user uuid
@@ -107,12 +113,14 @@ var ProvisionalCuration = createReactClass({
                 this.setOmimIdState(stateObj.gdm.omimId);
             }
 
-            // search for provisional owned by login user
+            // search for provisional owned by affiliation or login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
-                for (var i in stateObj.gdm.provisionalClassifications) {
-                    var owner = stateObj.gdm.provisionalClassifications[i].submitted_by;
-                    if (owner.uuid === stateObj.user) { // find
-                        stateObj.provisional = stateObj.gdm.provisionalClassifications[i];
+                for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
+                    let curatorAffiliation = this.props.affiliation;
+                    let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
+                    let creator = provisionalClassification.submitted_by;
+                    if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
+                        stateObj.provisional = provisionalClassification;
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
@@ -192,6 +200,14 @@ var ProvisionalCuration = createReactClass({
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
             newProvisional.classificationStatus = this.state.classificationStatus;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
+
+            // Add affiliation if the user is associated with an affiliation
+            // and if the data object has no affiliation
+            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                if (!newProvisional.affiliation) {
+                    newProvisional.affiliation = this.props.affiliation.affiliation_id;
+                }
+            }
 
             // check required item (reasons)
             var formErr = false;
@@ -310,7 +326,9 @@ var ProvisionalCuration = createReactClass({
         // returns dictionary of relevant items that need to be updated within NewCalculation()
         families.forEach(family => {
             // get segregation of family, but only if it was made by user (may change later - MC)
-            if (family.segregation && family.submitted_by.uuid === user) {
+            let curatorAffiliation = this.props.affiliation;
+            if ((family.affiliation && curatorAffiliation && family.segregation && family.affiliation === curatorAffiliation.affiliation_id)
+                || (!family.affiliation && !curatorAffiliation && family.segregation && family.submitted_by.uuid === user)) {
                 // get lod score of segregation of family
                 if (family.segregation.includeLodScoreInAggregateCalculation) {
                     if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
@@ -352,6 +370,7 @@ var ProvisionalCuration = createReactClass({
         let gdm = this.state.gdm;
         let scoreTableValues = this.state.scoreTableValues;
         let contradictingEvidence = this.state.contradictingEvidence;
+        let curatorAffiliation = this.props.affiliation;
 
         const MAX_SCORE_CONSTANTS = {
             VARIANT_IS_DE_NOVO: 12,
@@ -426,7 +445,8 @@ var ProvisionalCuration = createReactClass({
                 annotation.caseControlStudies.forEach(caseControl => {
                     if (caseControl.scores && caseControl.scores.length) {
                         caseControl.scores.forEach(score => {
-                            if (score.submitted_by.uuid === this.state.user) {
+                            if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id)
+                                || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === this.state.user)) {
                                 if ('score' in score && score.score !== 'none') {
                                     scoreTableValues['caseControlCount'] += 1;
                                     scoreTableValues['caseControlPoints'] += parseFloat(score.score);
@@ -444,7 +464,8 @@ var ProvisionalCuration = createReactClass({
                 if (experimental.scores && experimental.scores.length) {
                     experimental.scores.forEach(score => {
                         // only care about scores made by current user
-                        if (score.submitted_by.uuid === this.state.user) {
+                        if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id)
+                            || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === this.state.user)) {
                             if (score.scoreStatus === 'Score') {
                                 // parse score of experimental
                                 let experimentalScore = 0;
@@ -516,7 +537,8 @@ var ProvisionalCuration = createReactClass({
         // scan probands
         probandTotal.forEach(proband => {
             proband.scores.forEach(score => {
-                if (score.submitted_by.uuid === this.state.user) {
+                if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id)
+                    || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === this.state.user)) {
                     if (score.scoreStatus === 'Score') {
                         // parse proband score
                         let probandScore = 0;
@@ -1024,6 +1046,7 @@ class ProvisionalAddModHistory extends Component {
         var history = this.props.history;
         var meta = history.meta.provisionalClassification;
         var gdm = meta.gdm;
+        var provisional = history.primary;
 
         return (
             <div>
@@ -1045,6 +1068,7 @@ class ProvisionalModifyHistory extends Component {
         var history = this.props.history;
         var meta = history.meta.provisionalClassification;
         var gdm = meta.gdm;
+        var provisional = history.primary;
 
         return (
             <div>

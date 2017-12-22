@@ -50,7 +50,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_myVariantInfo: PropTypes.bool,
         loading_myGeneInfo: PropTypes.bool,
         setCalculatedPathogenicity: PropTypes.func,
-        selectedTab: PropTypes.string
+        selectedTab: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -192,7 +193,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
-                            loading_ensemblVariation={this.state.loading_ensemblVariation} />
+                            loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            affiliation={this.props.affiliation} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'predictors' ?
@@ -204,19 +206,20 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
-                            loading_clinvarEsearch={this.state.loading_clinvarEsearch} />
+                            loading_clinvarEsearch={this.state.loading_clinvarEsearch}
+                            affiliation={this.props.affiliation} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'experimental' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'segregation-case' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'gene-centric' ?
@@ -268,15 +271,15 @@ class InterpretationModifyHistory extends Component {
                     disease ?
                         <span>Disease <strong>{disease.term}</strong> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                         : <span>Disease association removed from Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
-                : null}
+                    : null}
                 {history.meta.interpretation.mode == 'edit-inheritance' ?
                     modeInheritance ?
                         <span>Mode of inheritance <i>{modeInheritance}</i> associated with Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
                         : <span>Mode of inheritance association removed from Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
-                : null}
+                    : null}
                 {history.meta.interpretation.mode == 'update-eval' ?
                     <span>Evaluation(s) updated for Interpretation <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}>{interpretationName}</a></span>
-                : null}
+                    : null}
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );

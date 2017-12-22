@@ -421,6 +421,14 @@ var GroupCuration = createReactClass({
                         newGroup.additionalInformation = value;
                     }
 
+                    // Add affiliation if the user is associated with an affiliation
+                    // and if the data object has no affiliation
+                    if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                        if (!newGroup.affiliation) {
+                            newGroup.affiliation = this.props.affiliation.affiliation_id;
+                        }
+                    }
+
                     // Either update or create the group object in the DB
                     if (this.state.group) {
                         // We're editing a group. PUT the new group object to the DB to update the existing one.
@@ -566,7 +574,7 @@ var GroupCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Group — Methods" open>
-                                                {methods.render.call(this, method)}
+                                                {methods.render.call(this, method, 'group')}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -818,12 +826,14 @@ var GroupAdditional = function() {
                 value={otherpmidsVal} placeholder="e.g. 12089445, 21217753"
                 error={this.getFormError('otherpmids')} clearError={this.clrFormErrors.bind(null, 'otherpmids')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <p className="col-sm-7 col-sm-offset-5">
-                Note: Any variants associated with probands that will be counted towards the Classification are not
-                captured at the Group level - variants and their association with probands are required to be captured
-                at the Family or Individual level. Once you submit the Group information, you will be prompted to enter
-                Family/Individual information.
-            </p>
+            <div className="col-sm-7 col-sm-offset-5">
+                <p className="alert alert-info">
+                    Note: Any variants associated with probands that will be counted towards the Classification are not
+                    captured at the Group level - variants and their association with probands are required to be captured
+                    at the Family or Individual level. Once you submit the Group information, you will be prompted to enter
+                    Family/Individual information.
+                </p>
+            </div>
         </div>
     );
 };
@@ -949,7 +959,7 @@ class GroupViewer extends Component {
                                 <div>
                                     <dt># individuals with variant in gene being curated</dt>
                                     <dd>{context.numberOfIndividualsWithVariantInCuratedGene}</dd>
-                                </div>ClinVarSearch
+                                </div>
 
                                 <div>
                                     <dt># individuals without variant in gene being curated</dt>
@@ -992,20 +1002,26 @@ class GroupViewer extends Component {
                                     <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Entire gene sequenced</dt>
-                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.entireGeneSequenced === true || method.entireGeneSequenced === false) ?
+                                    <div>
+                                        <dt>Entire gene sequenced</dt>
+                                        <dd>{method.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Copy number assessed</dt>
-                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.copyNumberAssessed === true || method.copyNumberAssessed === false) ?
+                                    <div>
+                                        <dt>Copy number assessed</dt>
+                                        <dd>{method.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Specific mutations genotyped</dt>
-                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.specificMutationsGenotyped === true || method.specificMutationsGenotyped === false) ?
+                                    <div>
+                                        <dt>Specific mutations genotyped</dt>
+                                        <dd>{method.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
                                 <div>
                                     <dt>Description of genotyping method</dt>

@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "label": {
             "title": "Label",
@@ -352,6 +352,11 @@
             "description": "boolean switch to set if the group avaliable for curation.",
             "type": "boolean",
             "default": true
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this evidence is associated with.",
+            "type": "string"
         }
     },
     "columns": {

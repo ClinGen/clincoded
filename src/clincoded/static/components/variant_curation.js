@@ -22,6 +22,7 @@ import * as Assessments from './assessment';
 const AssessmentTracker = Assessments.AssessmentTracker;
 const AssessmentPanel = Assessments.AssessmentPanel;
 const AssessmentMixin = Assessments.AssessmentMixin;
+import { getAffiliationName } from '../libs/get_affiliation_name';
 
 var VariantCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
@@ -188,6 +189,13 @@ var VariantCuration = createReactClass({
             } else if (newPathogenicity.comment) {
                 delete newPathogenicity.comment;
             }
+            // Add affiliation if the user is associated with an affiliation
+            // and if the data object has no affiliation
+            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                if (!newPathogenicity.affiliation) {
+                    newPathogenicity.affiliation = this.props.affiliation.affiliation_id;
+                }
+            }
 
             resolve(newPathogenicity);
         });
@@ -276,6 +284,7 @@ var VariantCuration = createReactClass({
         this.queryValues.pathogenicityUuid = queryKeyValue('pathogenicity', this.props.href);
         this.queryValues.session_user = queryKeyValue('user', this.props.href);
         this.queryValues.all = queryKeyValue('all', this.props.href) === "";
+        this.queryValues.affiliation = queryKeyValue('affiliation', this.props.href);
 
         // Get the currently selected annotation from the PMID, converted to the corresponding annotation object.
         var annotation = (gdm && this.queryValues.pmid) ? curator.pmidToAnnotation(gdm, this.queryValues.pmid) : null;
@@ -290,7 +299,11 @@ var VariantCuration = createReactClass({
             _.map(gdm.variantPathogenicity, patho => {
                 var pathoVariant = patho.variant;
                 if (pathoVariant.uuid === variant.uuid) {
-                    if (patho.submitted_by.uuid !== user) {
+                    if (!this.queryValues.affiliation && !patho.affiliation && patho.submitted_by.uuid !== user) {
+                        otherPathogenicityList.push(patho);
+                    } else if (this.queryValues.affiliation && (!patho.affiliation || this.queryValues.affiliation !== patho.affiliation)) {
+                        otherPathogenicityList.push(patho);
+                    } else if (!this.queryValues.affiliation && patho.affiliation) {
                         otherPathogenicityList.push(patho);
                     }
 
@@ -302,6 +315,8 @@ var VariantCuration = createReactClass({
             });
         }
 
+        let affiliation = this.props.affiliation;
+
         return (
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} linkGdm={true} pmid={this.queryValues.pmid} />
@@ -310,10 +325,10 @@ var VariantCuration = createReactClass({
                         <div className="curation-pmid-summary">
                             <PmidSummary article={annotation.article} displayJournal pmidLinkout />
                         </div>
-                    : null}
+                        : null}
                     <div className="viewer-titles">
                         <h1>{(pathogenicity ? 'Edit' : 'Curate') + ' Variant Information'}</h1>
-                        {curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null}
+                        {affiliation ? <h2>{'Curator: ' + affiliation.affiliation_fullname}</h2> : (curatorName ? <h2>{'Curator: ' + curatorName}</h2> : null)}
                         <VariantAssociationsHeader gdm={gdm} variant={variant} />
                         {variant ?
                             <h2>
@@ -325,13 +340,13 @@ var VariantCuration = createReactClass({
                                                 <span className="term-name"> &#x2F;&#x2F; ClinVar Variation ID: </span>
                                                 <span className="term-value"><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></span>
                                             </span>
-                                        : null}
+                                            : null}
                                         {variant.carId ?
                                             <span>
                                                 <span className="term-name"> &#x2F;&#x2F; ClinGen Allele Registry ID: </span>
                                                 <span className="term-value"><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for variant ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></span>
                                             </span>
-                                        : null}
+                                            : null}
                                     </div>
                                     <div>
                                         {variant.clinvarVariantTitle ?
@@ -339,7 +354,7 @@ var VariantCuration = createReactClass({
                                                 <span className="term-name">ClinVar Preferred Title: </span>
                                                 <span className="term-value">{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</span>
                                             </span>
-                                        :
+                                            :
                                             <span>
                                                 <span className="term-name">Genomic HGVS Term: </span>
                                                 <span className="term-value">{variant.hgvsNames && variant.hgvsNames.GRCh38 ? `${variant.hgvsNames.GRCh38} (GRCh38)` : null}</span>
@@ -348,7 +363,7 @@ var VariantCuration = createReactClass({
                                     </div>
                                 </div>
                             </h2>
-                        : null}
+                            : null}
                     </div>
                     <div className="row group-curation-content">
                         <div className="col-sm-12">
@@ -392,14 +407,14 @@ var VariantCuration = createReactClass({
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                         <option value="none">No Selection</option>
                                                         <option disabled="disabled"></option>
-                                                       <option value="Yes">Yes</option>
+                                                        <option value="Yes">Yes</option>
                                                         <option value="No">No</option>
                                                     </Input>
                                                     <Input type="select" ref="supportcomputational" label="Does Computational predictive evidence support gene impact?" defaultValue="none" value={pathogenicity && curator.booleanToDropdown(pathogenicity.computationalSupportGeneImpact)}
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                                         <option value="none">No Selection</option>
                                                         <option disabled="disabled"></option>
-                                                       <option value="Yes">Yes</option>
+                                                        <option value="Yes">Yes</option>
                                                         <option value="No">No</option>
                                                     </Input>
                                                     <Input type="textarea" ref="comments" label="Additional information about variant:" rows="5" value={pathogenicity && pathogenicity.comment}
@@ -436,7 +451,7 @@ var VariantCuration = createReactClass({
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                             {gdm ?
                                                 <a href={'/curation-central/?gdm=' + gdm.uuid + (this.queryValues.pmid ? '&pmid=' + this.queryValues.pmid : '')} className="btn btn-default btn-inline-spacer pull-right">Cancel</a>
-                                            : null}
+                                                : null}
                                         </div>
                                     </Form>
                                     {otherPathogenicityList.length > 0 ?
@@ -445,9 +460,9 @@ var VariantCuration = createReactClass({
                                                 return <VariantCurationView key={pathogenicity.uuid} pathogenicity={pathogenicity} named />;
                                             })}
                                         </div>
-                                    : null}
+                                        : null}
                                 </div>
-                            : null}
+                                : null}
                         </div>
                     </div>
                 </div>
@@ -471,7 +486,7 @@ var VariantCurationView = createReactClass({
         var pathogenicity = this.props.pathogenicity;
         var variant = pathogenicity && pathogenicity.variant;
         var variantTitle = variant ? (variant.clinvarVariantId ? variant.clinvarVariantId : truncateString(variant.otherDescription, 50)) : '';
-        var title = this.props.named ? <h4><span className="panel-title-std">{'Curated by: ' + pathogenicity.submitted_by.title}</span></h4> : <h4><span className="panel-title-std">Evaluation of Pathogenicity</span></h4>;
+        var title = this.props.named ? <h4><span className="panel-title-std">{'Curated by: ' + (pathogenicity.affiliation ? getAffiliationName(pathogenicity.affiliation) : pathogenicity.submitted_by.title)}</span></h4> : <h4><span className="panel-title-std">Evaluation of Pathogenicity</span></h4>;
         var assessments = pathogenicity.assessments && pathogenicity.assessments.length ? pathogenicity.assessments : [];
 
         let impactType = '';
@@ -489,7 +504,7 @@ var VariantCurationView = createReactClass({
                     <Panel title={title} panelClassName="panel-data">
                         {this.props.note ?
                             <p className="alert alert-info">{this.props.note}</p>
-                        : null}
+                            : null}
                         <dl className="dl-horizontal">
                             <div>
                                 <dt>Gene impact for variant</dt>
@@ -522,7 +537,7 @@ var VariantCurationView = createReactClass({
                             </div>
                         </dl>
                     </Panel>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -565,6 +580,9 @@ class PathogenicityAddModHistory extends Component {
             <div>
                 <span>Variant <a href={pathogenicityUri}>{history.meta.pathogenicity.variantId}</a> pathogenicity {history.operationType === 'add' ? <span>added</span> : <span>modified</span>}</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+                {pathogenicity.affiliation ?
+                    <span>; last edited by {pathogenicity.modified_by.title}</span>
+                    : null}
             </div>
         );
     }

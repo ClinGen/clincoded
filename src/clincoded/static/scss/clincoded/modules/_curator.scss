@@ -741,6 +741,31 @@
     }
 }
 
+.demographics-copy,
+.methods-copy {
+    margin-bottom: 15px;
+
+    input[type=button] {
+        margin-left: -3px;
+    }
+}
+
+.btn-copy {
+    background-color: #5bc0de;
+    border-color: darken(#5bc0de, 5%);
+    color: #fff;
+
+    &:active, &:focus, &:hover {
+        background-color: darken(#5bc0de, 10%);
+        border-color: darken(darken(#5bc0de, 5%), 12%);
+        color: #fff;
+    }
+
+    &:active {
+        background-image: none;
+    }
+}
+
 .form-row-helper {
     input[type=checkbox] {
         margin-top: 11px;
@@ -840,9 +865,14 @@
     }
 
     .button-box {
-        width: 200px;
+        width: auto;
+        padding-left: 15px;
         text-align: right;
         vertical-align: middle;
+
+        .btn .icon {
+            color: #fff;
+        }
     }
 
     .provisional-title {
@@ -2740,6 +2770,17 @@ table.login-users-interpretations {
                 display: none;
             }
         }
+
+        &.section-power .form-group.allele-frequency {
+            .col-sm-5 {
+                padding-right: 0;
+                text-align: right;
+
+                span {
+                    font-weight: bold;
+                }
+            }
+        }
     }
 
     .section:first-child {
@@ -2985,6 +3026,12 @@ table.login-users-interpretations {
         }
     }
 
+    .sex-field-note {
+        .alert {
+            margin-top: -15px;
+        }
+    }
+
     .variant-panel .mutalyzer-link {
         margin-bottom: 10px;
     }
@@ -3180,6 +3227,20 @@ table.login-users-interpretations {
                     vertical-align: text-bottom;
                 }
             }
+        }
+    }
+
+    .form-group.parent-evidence {
+        .col-sm-5 {
+            text-align: right;
+
+            span {
+                font-weight: bold;
+            }
+        }
+
+        .col-sm-7 {
+            padding-top: 1px;
         }
     }
 }

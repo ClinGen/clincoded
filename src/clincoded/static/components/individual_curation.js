@@ -105,7 +105,7 @@ const IndividualCuration = createReactClass({
         }
     },
 
-    // Handle a click on a copy phenotype button
+    // Handle a click on a copy phenotype/demographics button
     handleClick: function(obj, item, e) {
         e.preventDefault(); e.stopPropagation();
         var hpoIds = '';
@@ -119,6 +119,18 @@ const IndividualCuration = createReactClass({
             }
             if (obj.termsInDiagnosis) {
                 this.refs['phenoterms'].setValue(obj.termsInDiagnosis);
+            }
+        } else if (item === 'demographics') {
+            if (obj.countryOfOrigin) {
+                this.refs['country'].setValue(obj.countryOfOrigin);
+            }
+
+            if (obj.ethnicity) {
+                this.refs['ethnicity'].setValue(obj.ethnicity);
+            }
+
+            if (obj.race) {
+                this.refs['race'].setValue(obj.race);
             }
         }
     },
@@ -730,6 +742,14 @@ const IndividualCuration = createReactClass({
             }
         }
 
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!newIndividual.affiliation) {
+                newIndividual.affiliation = this.props.affiliation.affiliation_id;
+            }
+        }
+
         return newIndividual;
     },
 
@@ -870,6 +890,18 @@ const IndividualCuration = createReactClass({
             }
         }
 
+        // Retrieve methods data of "parent" evidence (assuming only one "parent", either a family or a group)
+        var parentEvidenceMethod;
+        var parentEvidenceName = '';
+
+        if (families && families.length) {
+            parentEvidenceMethod = (families[0].method && Object.keys(families[0].method).length) ? families[0].method : null;
+            parentEvidenceName = 'Family';
+        } else if (groups && groups.length) {
+            parentEvidenceMethod = (groups[0].method && Object.keys(groups[0].method).length) ? groups[0].method : null;
+            parentEvidenceName = 'Group';
+        }
+
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
         // family object read in.
@@ -934,7 +966,7 @@ const IndividualCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title={LabelPanelTitle(individual, 'Methods')} open>
-                                                {methods.render.call(this, method)}
+                                                {methods.render.call(this, method, 'individual', '', parentEvidenceMethod, parentEvidenceName)}
                                             </Panel>
                                         </PanelGroup>
                                         <PanelGroup accordion>
@@ -951,8 +983,9 @@ const IndividualCuration = createReactClass({
                                             <div>
                                                 <PanelGroup accordion>
                                                     <Panel title={LabelPanelTitle(individual, 'Score Proband')} panelClassName="proband-evidence-score" open>
-                                                        <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual" variantInfo={variantInfo}
-                                                            session={session} handleUserScoreObj={this.handleUserScoreObj} scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} />
+                                                        <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
+                                                            variantInfo={variantInfo} session={session} handleUserScoreObj={this.handleUserScoreObj}
+                                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1120,31 +1153,31 @@ function IndividualCommonDiseases() {
                 diseaseObj={this.state.diseaseObj} error={this.state.diseaseError}
                 probandLabel={probandLabel} required={this.state.proband_selected} />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Individual', 'hpo')
+                curator.renderPhenotype(associatedGroups, 'Individual', 'hpo', 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo') : curator.renderPhenotype(null, 'Individual', 'hpo')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo', 'Family') : curator.renderPhenotype(null, 'Individual', 'hpo')
                 )
             }
             <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                curator.renderPhenotype(associatedGroups, 'Individual', 'ft')
+                curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'ft') : curator.renderPhenotype(null, 'Individual', 'ft')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'ft', 'Family') : curator.renderPhenotype(null, 'Individual', 'ft')
                 )
             }
             <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2"
                 value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Group"
                     clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
                 : null}
             {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm" title="Copy Phenotype from Associated Family"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Family"
                     clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
@@ -1190,6 +1223,29 @@ const LabelPhenoTerms = bool => {
  */
 function IndividualDemographics() {
     let individual = this.state.individual;
+    let associatedParentObj;
+    let associatedParentName = '';
+    let hasParentDemographics = false;
+
+    // Retrieve associated "parent" as an array (check for family first, then group)
+    if (this.state.family) {
+        associatedParentObj = [this.state.family];
+        associatedParentName = 'Family';
+    } else if (individual && individual.associatedFamilies && individual.associatedFamilies.length) {
+        associatedParentObj = individual.associatedFamilies;
+        associatedParentName = 'Family';
+    } else if (this.state.group) {
+        associatedParentObj = [this.state.group];
+        associatedParentName = 'Group';
+    } else if (individual && individual.associatedGroups && individual.associatedGroups.length) {
+        associatedParentObj = individual.associatedGroups;
+        associatedParentName = 'Group';
+    }
+
+    // Check if associated "parent" has any demographics data
+    if (associatedParentObj && (associatedParentObj[0].countryOfOrigin || associatedParentObj[0].ethnicity || associatedParentObj[0].race)) {
+        hasParentDemographics = true;
+    }
 
     return (
         <div className="row">
@@ -1201,13 +1257,22 @@ function IndividualDemographics() {
                 <option disabled="disabled"></option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
+                <option value="Unknown">Unknown</option>
                 <option value="Intersex">Intersex</option>
                 <option value="MTF/Transwoman/Transgender Female">MTF/Transwoman/Transgender Female</option>
                 <option value="FTM/Transman/Transgender Male">FTM/Transman/Transgender Male</option>
                 <option value="Ambiguous">Ambiguous</option>
-                <option value="Unknown">Unknown</option>
                 <option value="Other">Other</option>
             </Input>
+            <div className="col-sm-7 col-sm-offset-5 sex-field-note">
+                <div className="alert alert-info">Select "Unknown" for "Sex" if information not provided in publication.</div>
+            </div>
+            {hasParentDemographics ?
+                <Input type="button" ref="copyparentdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-copy btn-sm" title={'Copy Demographics from Associated ' + associatedParentName}
+                    clickHandler={this.handleClick.bind(this, associatedParentObj[0], 'demographics')} />
+                : null}
+            {hasParentDemographics ? curator.renderParentEvidence('Country of Origin Associated with ' + associatedParentName + ':', associatedParentObj[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none"
                 value={individual && individual.countryOfOrigin ? individual.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1217,6 +1282,7 @@ function IndividualDemographics() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Ethnicity Associated with ' + associatedParentName + ':', associatedParentObj[0].ethnicity) : null}
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none"
                 value={individual && individual.ethnicity ? individual.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1226,6 +1292,7 @@ function IndividualDemographics() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasParentDemographics ? curator.renderParentEvidence('Race Associated with ' + associatedParentName + ':', associatedParentObj[0].race) : null}
             <Input type="select" ref="race" label="Race:" defaultValue="none"
                 value={individual && individual.race ? individual.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1357,7 +1424,7 @@ function IndividualVariantInfo() {
                                 <option value="No">No</option>
                                 <option value="Not Specified">Not Specified</option>
                             </Input>
-                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individual has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
                                 defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1365,7 +1432,7 @@ function IndividualVariantInfo() {
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Input>
-                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above <i>de novo</i> question is yes, is the variant maternity and paternity confirmed?</span>}
                                 defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1468,7 +1535,7 @@ function IndividualVariantInfo() {
                                 <option value="No">No</option>
                                 <option value="Not Specified">Not Specified</option>
                             </Input>
-                            <Input type="select" ref="individualDeNovo" label={<span>If the individuals has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
+                            <Input type="select" ref="individualDeNovo" label={<span>If the individual has one variant, is it <i>de novo</i><br/>OR<br/>If the individual has 2 variants, is at least one <i>de novo</i>?</span>}
                                 defaultValue="none" value={individual && individual.denovo ? individual.denovo : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1476,7 +1543,7 @@ function IndividualVariantInfo() {
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Input>
-                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</span>}
+                            <Input type="select" ref="individualMaternityPaternityConfirmed" label={<span>If the answer to the above <i>de novo</i> question is yes, is the variant maternity and paternity confirmed?</span>}
                                 defaultValue="none" value={individual && individual.maternityPaternityConfirmed ? individual.maternityPaternityConfirmed : 'none'}
                                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                                 <option value="none">No Selection</option>
@@ -1568,7 +1635,8 @@ const IndividualViewer = createReactClass({
     propTypes: {
         context: PropTypes.object,
         session: PropTypes.object,
-        href: PropTypes.string
+        href: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -1659,26 +1727,23 @@ const IndividualViewer = createReactClass({
     render() {
         var individual = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
-        var userIndividual = user && individual && individual.submitted_by ? user.uuid === individual.submitted_by.uuid : false;
+        var userIndividual = user && individual && individual.submitted_by && user.uuid === individual.submitted_by.uuid ? true : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedIndividual = affiliation && Object.keys(affiliation).length && individual && individual.affiliation && affiliation.affiliation_id === individual.affiliation ? true : false;
         var method = individual.method;
         var variants = (individual.variants && individual.variants.length) ? individual.variants : [];
         var i = 0;
         var groupRenders = [];
         var probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
-        let evidenceScores = individual && individual.scores ? individual.scores : [];
+        let evidenceScores = individual && individual.scores && individual.scores.length ? individual.scores : [];
         let isEvidenceScored = false;
-        if (evidenceScores && evidenceScores.length > 0) {
+        if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
-                } else {
-                    isEvidenceScored = false;
                 }
             });
-        } else if (evidenceScores && evidenceScores.length < 1) {
-            isEvidenceScored = false;
         }
-
         // Collect all families to render, as well as groups associated with these families
         var familyRenders = individual.associatedFamilies.map(function(family, j) {
             groupRenders = family.associatedGroups.map(function(group) {
@@ -1830,20 +1895,26 @@ const IndividualViewer = createReactClass({
                                     <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Entire gene sequenced</dt>
-                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.entireGeneSequenced === true || method.entireGeneSequenced === false) ?
+                                    <div>
+                                        <dt>Entire gene sequenced</dt>
+                                        <dd>{method.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Copy number assessed</dt>
-                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.copyNumberAssessed === true || method.copyNumberAssessed === false) ?
+                                    <div>
+                                        <dt>Copy number assessed</dt>
+                                        <dd>{method.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Specific mutations genotyped</dt>
-                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.specificMutationsGenotyped === true || method.specificMutationsGenotyped === false) ?
+                                    <div>
+                                        <dt>Specific mutations genotyped</dt>
+                                        <dd>{method.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
                                 <div>
                                     <dt>Description of genotyping method</dt>
@@ -1917,14 +1988,14 @@ const IndividualViewer = createReactClass({
 
                                     <div>
                                         <dl className="dl-horizontal">
-                                            <dt>If the individuals has one variant, is it <i>de novo</i> OR If the individual has 2 variants, is at least one <i>de novo</i>?</dt>
+                                            <dt>If the individual has one variant, is it <i>de novo</i> OR If the individual has 2 variants, is at least one <i>de novo</i>?</dt>
                                             <dd>{individual.denovo}</dd>
                                         </dl>
                                     </div>
 
                                     <div>
                                         <dl className="dl-horizontal">
-                                            <dt>If the answer to the above question is yes, is the variant maternity and paternity confirmed?</dt>
+                                            <dt>If the answer to the above <i>de novo</i> question is yes, is the variant maternity and paternity confirmed?</dt>
                                             <dd>{individual.maternityPaternityConfirmed}</dd>
                                         </dl>
                                     </div>
@@ -1948,25 +2019,21 @@ const IndividualViewer = createReactClass({
 
                         {(associatedFamily && individual.proband) || (!associatedFamily && individual.proband) ?
                             <div>
-                                {isEvidenceScored && !userIndividual ?
-                                    <Panel title={LabelPanelTitleView(individual, 'Other Curator Scores')} panelClassName="panel-data">
-                                        <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} />
-                                    </Panel>
-                                    : null}
-                                {isEvidenceScored || (!isEvidenceScored && userIndividual) ?
-                                    <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
+                                <Panel title={LabelPanelTitleView(individual, 'Other Curator Scores')} panelClassName="panel-data">
+                                    <ScoreViewer evidence={individual} otherScores={true} session={this.props.session} affiliation={affiliation} />
+                                </Panel>
+                                <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
+                                    {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedIndividual) || (!isEvidenceScored && !affiliation && userIndividual) ?
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} />
-                                    </Panel>
-                                    : null}
-                                {!isEvidenceScored && !userIndividual ?
-                                    <Panel title={LabelPanelTitleView(individual, 'Score Proband')} panelClassName="proband-evidence-score-viewer" open>
+                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
+                                        : null}
+                                    {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">
                                             <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                         </div>
-                                    </Panel>
-                                    : null}
+                                        : null}
+                                </Panel>
                             </div>
                             : null}
                     </div>
@@ -2010,7 +2077,7 @@ const LabelPanelTitleView = (individual, labelText, hasVariant) => {
  * @param {object} zygosity 
  * @param {object} context 
  */
-export function makeStarterIndividual(label, diseases, variants, zygosity, context) {
+export function makeStarterIndividual(label, diseases, variants, zygosity, affiliation, context) {
     let newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
@@ -2020,6 +2087,8 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, conte
         newIndividual.variants = variants;
     }
     if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
+
+    if (affiliation) { newIndividual.affiliation = affiliation.affiliation_id; }
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {

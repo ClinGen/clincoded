@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, content_views, userMatch, truncateString, external_url_map } from './globals';
+import { curator_page, content_views, userMatch, affiliationMatch, truncateString, external_url_map } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
@@ -13,6 +13,7 @@ import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
 import { GdmDisease } from './disease';
+import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -72,7 +73,8 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         omimId: PropTypes.string, // OMIM ID to display
         updateOmimId: PropTypes.func, // Function to call when OMIM ID changes
         linkGdm: PropTypes.bool, // whether or not to link GDM text back to GDM
-        pmid: PropTypes.string
+        pmid: PropTypes.string,
+        affiliation: PropTypes.object
     },
 
     getInitialState() {
@@ -228,17 +230,20 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         this.setState({diseaseError: null});
     },
 
+    viewEvidenceSummary(e) {
+        window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var disease = gdm && gdm.disease;
         var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
         var summaryPage = this.props.summaryPage ? true : false;
-
-        var provisional;
-        var provisionalExist = false;
         var summaryButton = true;
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
+
+        let affiliation = this.props.affiliation;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
@@ -248,15 +253,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             var pmid = this.props.pmid;
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
-            if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
-                for (i in gdm.provisionalClassifications) {
-                    if (userMatch(gdm.provisionalClassifications[i].submitted_by, session)) {
-                        provisionalExist = true;
-                        provisional = gdm.provisionalClassifications[i];
-                        break;
-                    }
-                }
-            }
+            let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
@@ -337,20 +334,20 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                 <div className="provisional-title">
                                                     <strong>Classification</strong>
                                                 </div>
-                                                { provisionalExist ?
+                                                { provisionalClassification.provisionalExist ?
                                                     <div>
                                                         <div className="provisional-data-left">
-                                                            <span className="header-classification-item">Curator: {provisional.submitted_by.title}</span>
-                                                            {provisional.classificationStatus ? <span className="header-classification-item">Status: {provisional.classificationStatus}</span> : null}
+                                                            <span className="header-classification-item">Curator: {provisionalClassification.provisional.submitted_by.title}</span>
+                                                            {provisionalClassification.provisional.classificationStatus ? <span className="header-classification-item">Status: {provisionalClassification.provisional.classificationStatus}</span> : null}
                                                         </div>
                                                         <div className="provisional-data-center">
                                                             <span className="header-classification-item">
-                                                                Calculated Classification: {provisional.totalScore} ({provisional.autoClassification})
+                                                                Calculated Classification: {provisionalClassification.provisional.totalScore} ({provisionalClassification.provisional.autoClassification})
                                                             </span>
                                                             <span className="header-classification-item">
-                                                                Modified Classification: {provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification}
+                                                                Modified Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? 'None' : provisionalClassification.provisional.alteredClassification}
                                                             </span>
-                                                            <span className="header-classification-item">Last Saved: {moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                            <span className="header-classification-item">Last Saved: {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
                                                         </div>
                                                     </div>
                                                     :
@@ -358,9 +355,12 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                 }
                                             </td>
                                             <td className="button-box" rowSpan="2">
+                                                { !summaryPage ?
+                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
+                                                    : null}
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalExist ? '&edit=yes' : '&calculate=yes')}>View Classification Matrix</a>
+                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
                                                         : null
                                                     )
                                                     : null}
@@ -498,14 +498,16 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
     propTypes: {
         gdm: PropTypes.object, // GDM whose collected variants to display
         pmid: PropTypes.string, // PMID of currently selected article
-        session: PropTypes.object // Logged-in session
+        session: PropTypes.object, // Logged-in session
+        affiliation: PropTypes.object
     },
 
-    render: function() {
-        var gdm = this.props.gdm;
-        var pmid = this.props.pmid;
-        var session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
-        var collectedVariants = collectGdmVariants(gdm);
+    render() {
+        const gdm = this.props.gdm;
+        const pmid = this.props.pmid;
+        let session = this.props.session && Object.keys(this.props.session).length ? this.props.session : null;
+        let collectedVariants = collectGdmVariants(gdm);
+        const affiliation = this.props.affiliation;
 
         return (
             <div>
@@ -516,7 +518,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
                             var variantName = getVariantTitle(variant);
-                            var userPathogenicity = null;
+                            var userPathogenicity = null, affiliatedPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
                             var matchingPathogenicity;
@@ -531,15 +533,18 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                             });
 
                             if (session && inCurrentGdm) {
-                                userPathogenicity = getPathogenicityFromVariant(gdm, session.user_properties.uuid, variant.uuid);
-                                //userPathogenicity = getPathogenicityFromVariant(variant, session.user_properties.uuid);
+                                userPathogenicity = getPathogenicityFromVariant(gdm, session.user_properties.uuid, variant.uuid, affiliation);
                             }
                             inCurrentGdm = userPathogenicity ? true : false;
+
+                            let variantCurationUrl = '/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid;
+                            variantCurationUrl += affiliation ? '&affiliation=' + affiliation.affiliation_id : (session ? '&user=' + session.user_properties.uuid : '');
+                            variantCurationUrl += userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '';
 
                             return (
                                 <div className="col-sm-6 col-md-6 col-lg-4" key={variant.uuid}>
                                     <a className={"btn btn-primary btn-xs title-ellipsis" + (inCurrentGdm ? ' assessed' : '')}
-                                        href={'/variant-curation/?all&gdm=' + gdm.uuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid + (session ? '&user=' + session.user_properties.uuid : '') + (userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '')}
+                                        href={variantCurationUrl}
                                         title={variantName}>
                                         {variantName}
                                         {inCurrentGdm ? <i className="icon icon-sticky-note"></i> : null}
@@ -548,7 +553,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                             );
                         })}
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -654,7 +659,8 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
     propTypes: {
         annotation: PropTypes.object.isRequired, // Current annotation that owns the article
         gdm: PropTypes.object.isRequired, // Current GDM that owns the given annotation
-        session: PropTypes.object // Session object
+        session: PropTypes.object, // Session object
+        affiliation: PropTypes.object // Affiliation object
     },
 
     render: function() {
@@ -668,33 +674,40 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         var caseControlUrl = '/case-control-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var experimentalUrl = '/experimental-curation/?gdm=' + gdm.uuid + '&evidence=' + this.props.annotation.uuid;
         var groupRenders = [], familyRenders = [], individualRenders = [], caseControlRenders = [], experimentalRenders = [];
+        let curatorAffiliation = this.props.affiliation;
+        let groupAffiliationMatch = false, familyAffiliationMatch = false, individualAffiliationMatch = false,
+            caseControlAffiliationMatch = false, experimentalAffiliationMatch = false;
 
         // Collect up arrays of group, family, and individual curation palette section renders. Start with groups inside the annnotation.
         if (annotation && annotation.groups) {
             var groupAnnotationRenders = annotation.groups.map(group => {
+                groupAffiliationMatch = group && affiliationMatch(group, curatorAffiliation);
                 curatorMatch = group && userMatch(group.submitted_by, session);
                 if (group.familyIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var familyGroupRenders = group.familyIncluded.map(family => {
+                        familyAffiliationMatch = family && affiliationMatch(family, curatorAffiliation);
                         if (family.individualIncluded) {
                             // Collect up individuals that are direct children of families associated with groups
                             var individualFamilyRenders = family.individualIncluded.map(individual => {
-                                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                                individualAffiliationMatch = individual && affiliationMatch(individual, curatorAffiliation);
+                                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, individualAffiliationMatch, curatorAffiliation)}</div>;
                             });
                             individualRenders = individualRenders.concat(individualFamilyRenders);
                         }
-                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+                        return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, familyAffiliationMatch, curatorAffiliation)}</div>;
                     });
                     familyRenders = familyRenders.concat(familyGroupRenders);
                 }
                 if (group.individualIncluded) {
                     // Collect up family renders that are associated with the group, and individuals that are associated with those families.
                     var individualGroupRenders = group.individualIncluded.map(individual => {
-                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                        individualAffiliationMatch = individual && affiliationMatch(individual, curatorAffiliation);
+                        return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, individualAffiliationMatch, curatorAffiliation)}</div>;
                     });
                     individualRenders = individualRenders.concat(individualGroupRenders);
                 }
-                return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch)}</div>;
+                return <div key={group.uuid}>{renderGroup(group, gdm, annotation, curatorMatch, groupAffiliationMatch, curatorAffiliation)}</div>;
             });
             groupRenders = groupRenders.concat(groupAnnotationRenders);
         }
@@ -702,15 +715,17 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of family renders the unassociated families, and individuals that associate with them.
         if (annotation && annotation.families) {
             var familyAnnotationRenders = annotation.families.map(family => {
+                familyAffiliationMatch = family && affiliationMatch(family, curatorAffiliation);
                 curatorMatch = family && userMatch(family.submitted_by, session);
                 if (family.individualIncluded) {
                     // Add to individual renders the individuals that are associated with this family
                     var individualFamilyRenders = family.individualIncluded.map(individual => {
-                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch)}</div>;
+                        individualAffiliationMatch = individual && affiliationMatch(individual, curatorAffiliation);
+                        return <div key={individual.uuid}>{renderIndividual(individual, this.props.gdm, annotation, curatorMatch, individualAffiliationMatch, curatorAffiliation)}</div>;
                     });
                     individualRenders = individualRenders.concat(individualFamilyRenders);
                 }
-                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch)}</div>;
+                return <div key={family.uuid}>{renderFamily(family, gdm, annotation, curatorMatch, familyAffiliationMatch, curatorAffiliation)}</div>;
             });
             familyRenders = familyRenders.concat(familyAnnotationRenders);
         }
@@ -718,8 +733,9 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of individual renders the unassociated individuals.
         if (annotation && annotation.individuals) {
             var individualAnnotationRenders = annotation.individuals.map(individual => {
+                individualAffiliationMatch = individual && affiliationMatch(individual, curatorAffiliation);
                 curatorMatch = individual && userMatch(individual.submitted_by, session);
-                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch)}</div>;
+                return <div key={individual.uuid}>{renderIndividual(individual, gdm, annotation, curatorMatch, individualAffiliationMatch, curatorAffiliation)}</div>;
             });
             individualRenders = individualRenders.concat(individualAnnotationRenders);
         }
@@ -727,8 +743,9 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of case-control renders
         if (annotation && annotation.caseControlStudies) {
             let caseControlObj = annotation.caseControlStudies.map(caseControl => {
+                caseControlAffiliationMatch = caseControl && affiliationMatch(caseControl, curatorAffiliation);
                 curatorMatch = caseControl && userMatch(caseControl.submitted_by, session);
-                return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch)}</div>;
+                return <div key={caseControl.uuid}>{renderCaseControl(caseControl, gdm, annotation, curatorMatch, caseControlAffiliationMatch, curatorAffiliation)}</div>;
             });
             caseControlRenders = caseControlRenders.concat(caseControlObj);
         }
@@ -736,8 +753,9 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         // Add to the array of experiment renders.
         if (annotation && annotation.experimentalData) {
             var experimentalAnnotationRenders = annotation.experimentalData.map(experimental => {
+                experimentalAffiliationMatch = experimental && affiliationMatch(experimental, curatorAffiliation);
                 curatorMatch = experimental && userMatch(experimental.submitted_by, session);
-                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch)}</div>;
+                return <div key={experimental.uuid}>{renderExperimental(experimental, gdm, annotation, curatorMatch, experimentalAffiliationMatch, curatorAffiliation)}</div>;
             });
             experimentalRenders = experimentalRenders.concat(experimentalAnnotationRenders);
         }
@@ -747,7 +765,7 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
         var allVariants = collectAnnotationVariants(annotation);
         if (Object.keys(allVariants).length) {
             variantRenders = Object.keys(allVariants).map(function(variantId) {
-                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session)}</div>;
+                return <div key={variantId}>{renderVariant(allVariants[variantId], gdm, annotation, curatorMatch, session, curatorAffiliation)}</div>;
             });
         }
 
@@ -782,14 +800,14 @@ var CurationPalette = module.exports.CurationPalette = createReactClass({
                                     <div className="evidence-curation-info">
                                         <p>Curate Variants from the “Gene-Disease Record Variants” section above.</p>
                                     </div>
-                                : null}
+                                    : null}
                                 {variantRenders}
                             </Panel>
-                        :
+                            :
                             <Panel title={<CurationPaletteTitles title="Associated Variants" />} panelClassName="panel-evidence"></Panel>
                         }
                     </Panel>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -808,29 +826,36 @@ var setPreferredTitle = function(variants) {
 };
 
 // Render a family in the curator palette.
-var renderGroup = function(group, gdm, annotation, curatorMatch) {
-    var familyUrl = curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
-    var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+var renderGroup = function(group, gdm, annotation, curatorMatch, evidenceAffiliationMatch, curatorAffiliation) {
+    var familyUrl = evidenceAffiliationMatch || curatorMatch ? ('/family-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+    var individualUrl = evidenceAffiliationMatch || curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
 
     return (
         <div className="panel-evidence-group">
             <h5><span className="title-ellipsis dotted" title={group.label}>{group.label}</span></h5>
             <div className="evidence-curation-info">
                 {group.submitted_by ?
-                    <p className="evidence-curation-info">{group.submitted_by.title}</p>
-                : null}
-                <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                    <p className="evidence-curation-info">Last edited by: {group.modified_by ? group.modified_by.title : group.submitted_by.title}</p>
+                    : null}
+                <p>{moment(group.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
-            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>{curatorMatch ? <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span> : null}
-            {curatorMatch ? <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div> : null}
-            {curatorMatch ? <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div> : null}
+            <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>
+            {(group.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!group.affiliation && !curatorAffiliation && curatorMatch) ? 
+                <span> | <a href={'/group-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&group=' + group.uuid} title="Edit this group">Edit</a></span>
+                : null}
+            {(group.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!group.affiliation && !curatorAffiliation && curatorMatch) ?
+                <div><a href={familyUrl + '&group=' + group.uuid} title="Add a new family associated with this group"> Add new Family to this Group</a></div>
+                : null}
+            {(group.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!group.affiliation && !curatorAffiliation && curatorMatch) ?
+                <div><a href={individualUrl + '&group=' + group.uuid} title="Add a new individual associated with this group"> Add new Individual to this Group</a></div>
+                : null}
         </div>
     );
 };
 
 // Render a family in the curator palette.
-var renderFamily = function(family, gdm, annotation, curatorMatch) {
-    var individualUrl = curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
+var renderFamily = function(family, gdm, annotation, curatorMatch, evidenceAffiliationMatch, curatorAffiliation) {
+    var individualUrl = evidenceAffiliationMatch || curatorMatch ? ('/individual-curation/?gdm=' + gdm.uuid + '&evidence=' + annotation.uuid) : null;
     // if any of these segregation values exist, the family is assessable
     var familyAssessable = (family && family.segregation && (family.segregation.pedigreeDescription || family.segregation.pedigreeSize
         || family.segregation.numberOfGenerationInPedigree || family.segregation.consanguineousFamily || family.segregation.numberOfCases
@@ -843,9 +868,9 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
             <h5><span className="title-ellipsis dotted" title={family.label}>{family.label}</span></h5>
             <div className="evidence-curation-info">
                 {family.submitted_by ?
-                    <p className="evidence-curation-info">{family.submitted_by.title}</p>
-                : null}
-                <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                    <p className="evidence-curation-info">Last edited by: {family.modified_by ? family.modified_by.title : family.submitted_by.title}</p>
+                    : null}
+                <p>{moment(family.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {family.associatedGroups && family.associatedGroups.length ?
                 <div>
@@ -859,7 +884,7 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         );
                     })}
                 </div>
-            :
+                :
                 <div>No associations</div>
             }
             {(family && family.segregation && family.segregation.variants && family.segregation.variants.length) ?
@@ -868,18 +893,22 @@ var renderFamily = function(family, gdm, annotation, curatorMatch) {
                         <a className="variant-preferred-title" title={setPreferredTitle(family.segregation.variants)}>{family.segregation.variants.length}</a>
                     </span>
                 </div>
-            : null}
+                : null}
             {familyAssessable ?
                 <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View/Assess family in a new tab">View</a>
                 : <a href={'/family/' + family.uuid + '/?gdm=' + gdm.uuid} title="View family in a new tab">View</a>}
-            {curatorMatch ? <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span> : null}
-            {curatorMatch ? <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div> : null}
+            {(family.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!family.affiliation && !curatorAffiliation && curatorMatch) ?
+                <span> | <a href={'/family-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&family=' + family.uuid} title="Edit this family">Edit</a></span>
+                : null}
+            {(family.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!family.affiliation && !curatorAffiliation && curatorMatch) ?
+                <div><a href={individualUrl + '&family=' + family.uuid} title="Add a new individual associated with this group">Add new Individual to this Family</a></div>
+                : null}
         </div>
     );
 };
 
 // Render an individual in the curator palette.
-var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
+var renderIndividual = function(individual, gdm, annotation, curatorMatch, evidenceAffiliationMatch, curatorAffiliation) {
     var i = 0;
 
     return (
@@ -887,9 +916,9 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
             <h5><span className="title-ellipsis title-ellipsis-short dotted" title={individual.label}>{individual.label}</span>{individual.proband ? <i className="icon icon-proband"></i> : null}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
-                    <p className="evidence-curation-info">{individual.submitted_by.title}</p>
-                : null}
-                <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                    <p className="evidence-curation-info">Last edited by: {individual.modified_by ? individual.modified_by.title : individual.submitted_by.title}</p>
+                    : null}
+                <p>{moment(individual.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {(individual.associatedGroups && individual.associatedGroups.length) || (individual.associatedFamilies && individual.associatedFamilies.length) ?
                 <div>
@@ -921,7 +950,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         );
                     })}
                 </div>
-            :
+                :
                 <div>No associations</div>
             }
             {(individual.variants && individual.variants.length) ?
@@ -930,26 +959,28 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch) {
                         <a className="variant-preferred-title" title={setPreferredTitle(individual.variants)}>{individual.variants.length}</a>
                     </span>
                 </div>
-            : null}
+                : null}
             <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
-            {curatorMatch ? <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span> : null}
+            {(individual.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!individual.affiliation && !curatorAffiliation && curatorMatch) ?
+                <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span>
+                : null}
         </div>
     );
 };
 
 // Render a case-control in the curator palette.
-var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
+var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch, evidenceAffiliationMatch, curatorAffiliation) {
     return (
         <div className="panel-evidence-group">
             <h5><span className="title-ellipsis dotted" title={caseControl.label}>{caseControl.label}</span></h5>
             <div className="evidence-curation-info">
                 {caseControl.submitted_by ?
-                    <p className="evidence-curation-info">{caseControl.submitted_by.title}</p>
-                : null}
-                <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                    <p className="evidence-curation-info">Last edited by: {caseControl.modified_by ? caseControl.modified_by.title : caseControl.submitted_by.title}</p>
+                    : null}
+                <p>{moment(caseControl.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
-            {curatorMatch ? <span> | <a href={
+            {(caseControl.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!caseControl.affiliation && !curatorAffiliation && curatorMatch) ? <span> | <a href={
                 '/case-control-curation/?editsc&gdm=' + gdm.uuid +
                 '&evidence=' + annotation.uuid +
                 '&casecontrol=' + caseControl.uuid +
@@ -961,7 +992,7 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch) {
 };
 
 // Render an experimental data in the curator palette.
-var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
+var renderExperimental = function(experimental, gdm, annotation, curatorMatch, evidenceAffiliationMatch, curatorAffiliation) {
     var i = 0;
     var subtype = '';
     // determine if the evidence type has a subtype, and determine the subtype
@@ -985,9 +1016,9 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
             {experimental.evidenceType}{subtype}
             <div className="evidence-curation-info">
                 {experimental.submitted_by ?
-                    <p className="evidence-curation-info">{experimental.submitted_by.title}</p>
-                : null}
-                <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                    <p className="evidence-curation-info">Last edited by: {experimental.modified_by ? experimental.modified_by.title : experimental.submitted_by.title}</p>
+                    : null}
+                <p>{moment(experimental.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {(experimental.variants && experimental.variants.length) ?
                 <div>
@@ -995,9 +1026,11 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
                         <a className="variant-preferred-title" title={setPreferredTitle(experimental.variants)}>{experimental.variants.length}</a>
                     </span>
                 </div>
-            : null}
+                : null}
             <a href={'/experimental/' + experimental.uuid + '?gdm=' + gdm.uuid} title="View/Assess experimental data in a new tab">View/Score</a>
-            {curatorMatch ? <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span> : null}
+            {(experimental.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!experimental.affiliation && !curatorAffiliation && curatorMatch) ?
+                <span> | <a href={'/experimental-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&experimental=' + experimental.uuid} title="Edit experimental data">Edit</a></span>
+                : null}
         </div>
     );
 };
@@ -1007,11 +1040,11 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch) {
 //   gdm: Currently viewed GDM
 //   annotation: Currently selected annotation (paper)
 //   curatorMatch: True if annotation owner matches currently logged-in user
-var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
+var renderVariant = function(variant, gdm, annotation, curatorMatch, session, affiliation) {
     var variantCurated = variant.associatedPathogenicities.length > 0;
 
     // Get the pathogenicity record with an owner that matches the annotation's owner.
-    var associatedPathogenicity = getPathogenicityFromVariant(gdm, annotation.submitted_by.uuid, variant.uuid);
+    var associatedPathogenicity = getPathogenicityFromVariant(gdm, annotation.submitted_by.uuid, variant.uuid, affiliation);
     //var associatedPathogenicity = getPathogenicityFromVariant(variant, annotation.submitted_by.uuid);
 
     // Get all families and individuals that reference this variant into variantAssociations array of families and individuals
@@ -1029,7 +1062,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
-                : null}
+                    : null}
                 <p>{moment(variant.date_created).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {variantAssociations ?
@@ -1047,7 +1080,7 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session) {
                         );
                     })}
                 </div>
-            : null}
+                : null}
         </div>
     );
 };
@@ -1285,7 +1318,7 @@ var CuratorRecordHeader = createReactClass({
                             <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
                             {participants && participants.length && latestRecord ?
                                 <div>
-                                    <dt>Participants: </dt>
+                                    <dt>Contributors: </dt>
                                     <dd>
                                         {participants.map(function(participant, i) {
                                             return (
@@ -1342,6 +1375,35 @@ export function findAllParticipants(gdm) {
     }).sortBy('last_name').value();
 
     return participants;
+}
+
+/**
+ * Return an array of unique GDMs consisting of any affiliated annotations, evidence, scores and classifications
+ * @param {array} gdms - An array of gene-disease records
+ * @param {string} affiliationId - Affiliation ID associated with the logged-in user
+ */
+export function findAffiliatedGdms(gdms, affiliationId) {
+    // Iterate thru all flattened objects in each GDM.
+    // For any objects that have the matching affiliation,
+    // add the parent GDM to the array
+    let affiliatedGdmList = [];
+    gdms.map(gdm => {
+        if (gdm.affiliation && gdm.affiliation === affiliationId) {
+            affiliatedGdmList.push(gdm);
+        }
+        let allObjects = getAllObjects(gdm);
+        allObjects.forEach(object => {
+            if (object.affiliation && object.affiliation === affiliationId) {
+                affiliatedGdmList.push(gdm);
+            }
+        });
+    });
+    // Filtered array that excludes duplicate GDMs
+    let uniqueAffiliatedGdms = _.chain(affiliatedGdmList).uniq(affiliatedGdm => {
+        return affiliatedGdm.uuid;
+    }).sortBy('last_modified').value();
+
+    return uniqueAffiliatedGdms;
 }
 
 // Return the latest added/updated object in the given GDM (e.g. annotation, evidence)
@@ -1500,13 +1562,18 @@ function getAllObjects(gdm) {
             });
         }
     });
+    // Get provisionalClassifications objects
+    let classifications = gdm.provisionalClassifications && gdm.provisionalClassifications.length ? gdm.provisionalClassifications : [];
+    classifications.forEach(classification => {
+        totalObjects.push(filteredObject(classification));
+    });
 
     return totalObjects;
 }
 
 // Method to filter object keys
 function filteredObject(record) {
-    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type'];
+    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type', 'affiliation'];
 
     const filtered = Object.keys(record)
         .filter(key => allowed.includes(key))
@@ -1550,12 +1617,14 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = createReactClass({
 //    }
 //    return pathogenicity;
 //};
-var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid) {
+var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid, affiliation) {
     var pathogenicity = null;
     if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
-        for (var i in gdm.variantPathogenicity) {
-            if (gdm.variantPathogenicity[i].submitted_by.uuid === curatorUuid && gdm.variantPathogenicity[i].variant.uuid === variantUuid) {
-                pathogenicity = gdm.variantPathogenicity[i];
+        for (let object of gdm.variantPathogenicity) {
+            if (affiliation && object.affiliation && object.affiliation === affiliation.affiliation_id) {
+                pathogenicity = object;
+            } else if (!affiliation && !object.affiliation && object.submitted_by.uuid === curatorUuid && object.variant.uuid === variantUuid) {
+                pathogenicity = object;
             }
         }
     }
@@ -1947,7 +2016,7 @@ function cloneSimpleProps(obj, props) {
 }
 
 
-var annotationSimpleProps = ["active", "date_created"];
+var annotationSimpleProps = ["active", "date_created", "affiliation"];
 
 function flattenAnnotation(annotation) {
     // First copy everything before fixing the special properties
@@ -1998,7 +2067,7 @@ var groupSimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdI
     "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "totalNumberIndividuals", "numberOfIndividualsWithFamilyInformation",
     "numberOfIndividualsWithoutFamilyInformation", "numberOfIndividualsWithVariantInCuratedGene", "numberOfIndividualsWithoutVariantInCuratedGene",
     "numberOfIndividualsWithVariantInOtherGene", "method", "additionalInformation", "date_created", "numberWithVariant", "numberAllGenotypedSequenced",
-    "alleleFrequency"
+    "alleleFrequency", "affiliation"
 ];
 
 function flattenGroup(group) {
@@ -2052,7 +2121,7 @@ function flattenGroup(group) {
 
 
 var familySimpleProps = ["label", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "numberOfMale", "numberOfFemale", "countryOfOrigin",
-    "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created"
+    "ethnicity", "race", "ageRangeType", "ageRangeFrom", "ageRangeTo", "ageRangeUnit", "method", "additionalInformation", "date_created", "affiliation"
 ];
 
 function flattenFamily(family) {
@@ -2115,7 +2184,7 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
     "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed",
-    "recessiveZygosity"
+    "recessiveZygosity", "affiliation"
 ];
 
 function flattenIndividual(individual) {
@@ -2155,7 +2224,7 @@ function flattenIndividual(individual) {
 
 
 var experimentalSimpleProps = ["label", "evidenceType", "biochemicalFunction", "proteinInteractions", "expression",
-    "functionalAlteration", "modelSystems", "rescue"
+    "functionalAlteration", "modelSystems", "rescue", "date_created", "affiliation"
 ];
 
 function flattenExperimental(experimental) {
@@ -2201,7 +2270,8 @@ function flattenExperimental(experimental) {
 
 
 var gdmSimpleProps = [
-    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active", "modeInheritanceAdjective"
+    "date_created", "modeInheritance", "omimId", "draftClassification", "finalClassification", "active",
+    "modeInheritanceAdjective", "affiliation"
 ];
 
 function flattenGdm(gdm) {
@@ -2246,7 +2316,7 @@ function flattenGdm(gdm) {
 var pathogenicitySimpleProps = [
     "date_created", "consistentWithDiseaseMechanism", "withinFunctionalDomain", "frequencySupportPathogenicity", "previouslyReported",
     "denovoType", "intransWithAnotherVariant", "supportingSegregation", "supportingStatistic", "supportingExperimental", "comment",
-    "geneImpactType", "allelicSupportGeneImpact", "computationalSupportGeneImpact"
+    "geneImpactType", "allelicSupportGeneImpact", "computationalSupportGeneImpact", "affiliation"
 ];
 
 function flattenPathogenicity(pathogenicity) {
@@ -2280,7 +2350,7 @@ function flattenAssessment(assessment) {
 
 var provisionalSimpleProps = [
     "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
-    "classificationStatus", "evidenceSummary", "reasons", "active"
+    "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation"
 ];
 
 function flattenProvisional(provisional) {
@@ -2291,7 +2361,7 @@ function flattenProvisional(provisional) {
 
 
 var provisionalVariantSimpleProps = [
-    "autoClassification", "alteredClassification", "reasons", "evidenceSummary"
+    "autoClassification", "alteredClassification", "reasons", "evidenceSummary", "affiliation"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {
@@ -2303,7 +2373,7 @@ function flattenProvisionalVariant(provisional_variant) {
 
 var evidenceScoreSimpleProps = [
     "score", "evidenceType", "scoreStatus", "evidenceScored", "gdmId", "calculatedScore",
-    "caseInfoType", "scoreExplanation"
+    "caseInfoType", "scoreExplanation", "date_created", "affiliation"
 ];
 
 function flattenEvidenceScore(evidencescore) {
@@ -2327,7 +2397,7 @@ var caseControlSimpleProps = [
     "label", "studyType", "detectionMethod", "statisticalValues", "pValue", "confidenceIntervalFrom", "confidenceIntervalTo",
     "diseaseHistoryEvaluated", "demographicInfoMatched", "geneticAncestryMatched", "factorOfGeneticAncestryNotMatched",
     "factorOfDemographicInfoMatched", "differInVariables", "explanationForDemographicMatched", "explanationForDiseaseHistoryEvaluation",
-    "explanationForGeneticAncestryNotMatched", "comments", "date_created"
+    "explanationForGeneticAncestryNotMatched", "comments", "date_created", "affiliation"
 ];
 
 function flattenCaseControl(casecontrol) {
@@ -2351,7 +2421,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective", "affiliation"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
@@ -2521,6 +2591,22 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
         </div>
     );
 };
+
+// Render a single item of evidence data (demographics, methods, etc.) from a "parent" group or family
+export function renderParentEvidence(label, value) {
+    return (
+        <div>
+            <div className="form-group parent-evidence">
+                <div className="col-sm-5">
+                    <span>{label}</span>
+                </div>
+                <div className="col-sm-7">
+                    {value ? <span>{value}</span> : null}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 // Generic render method for the yellow warning message box
 export function renderWarning(context) {

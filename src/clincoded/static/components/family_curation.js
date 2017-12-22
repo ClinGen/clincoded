@@ -258,6 +258,35 @@ var FamilyCuration = createReactClass({
         }
     },
 
+    // Handle a click on a copy demographics button
+    handleCopyGroupDemographics(e) {
+        e.preventDefault(); e.stopPropagation();
+        var associatedGroups;
+
+        // Retrieve associated group as an array
+        if (this.state.group) {
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            associatedGroups = this.state.family.associatedGroups;
+        }
+
+        // Copy demographics data from associated group to form fields
+        // When displaying associated group data (as part of rendering the family form), only one group is
+        // considered.  So, only that same group (the first) is used here.  Also, the demographics form
+        // fields are drop-down lists (single selection), so only one value is needed for each field.
+        if (associatedGroups[0].countryOfOrigin) {
+            this.refs['country'].setValue(associatedGroups[0].countryOfOrigin);
+        }
+
+        if (associatedGroups[0].ethnicity) {
+            this.refs['ethnicity'].setValue(associatedGroups[0].ethnicity);
+        }
+
+        if (associatedGroups[0].race) {
+            this.refs['race'].setValue(associatedGroups[0].race);
+        }
+    },
+
     // Calculate estimated LOD for Autosomal dominant and Autosomal recessive GDMs
     calculateEstimatedLOD: function(lodCalcMode, numAffected=0, numUnaffected=0, numSegregation=0) {
         let estimatedLodScore = null;
@@ -747,7 +776,7 @@ var FamilyCuration = createReactClass({
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases.map(disease => { return disease; });
-                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, this);
+                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, this.props.affiliation, this);
                     }
 
                     // Family doesn't have any variants
@@ -1070,6 +1099,14 @@ var FamilyCuration = createReactClass({
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
 
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!newFamily.affiliation) {
+                newFamily.affiliation = this.props.affiliation.affiliation_id;
+            }
+        }
+
         // Fill in the segregation fields to the family, if there was a form (no form if assessed)
         this.createSegregation(newFamily, familyVariants, familyAssessments);
 
@@ -1253,6 +1290,10 @@ var FamilyCuration = createReactClass({
         }
         //var is_owner = session && family && (session.user_properties.uuid === family.submitted_by.uuid) ? true : false;
 
+        // Retrieve methods data of "parent" evidence (assuming "parent" can only be a group and there can be only one)
+        var parentEvidenceMethod = (groups && groups.length && groups[0].method && Object.keys(groups[0].method).length) ? groups[0].method : null;
+        var parentEvidenceName = 'Group';
+
         // Get the query strings. Have to do this now so we know whether to render the form or not. The form
         // uses React controlled inputs, so we can only render them the first time if we already have the
         // family object read in.
@@ -1309,7 +1350,7 @@ var FamilyCuration = createReactClass({
                                         </PanelGroup>
                                         <PanelGroup accordion>
                                             <Panel title="Family — Methods" open>
-                                                {methods.render.call(this, method, true)}
+                                                {methods.render.call(this, method, 'family', '', parentEvidenceMethod, parentEvidenceName)}
                                             </Panel>
                                         </PanelGroup>
 
@@ -1472,7 +1513,7 @@ function FamilyCommonDiseases() {
             <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                <Input type="button" ref={(button) => { this.phenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-default btn-last btn-sm"
+                <Input type="button" ref={(button) => { this.phenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm"
                     title="Copy all Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupPhenotypes} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
@@ -1517,9 +1558,29 @@ const LabelPhenoTerms = bool => {
  */
 function FamilyDemographics() {
     let family = this.state.family;
+    let associatedGroups;
+    let hasGroupDemographics = false;
+
+    // Retrieve associated group as an array
+    if (this.state.group) {
+        associatedGroups = [this.state.group];
+    } else if (family && family.associatedGroups && family.associatedGroups.length) {
+        associatedGroups = family.associatedGroups;
+    }
+
+    // Check if associated group has any demographics data
+    if (associatedGroups && (associatedGroups[0].countryOfOrigin || associatedGroups[0].ethnicity || associatedGroups[0].race)) {
+        hasGroupDemographics = true;
+    }
 
     return (
         <div className="row">
+            {hasGroupDemographics ?
+                <Input type="button" ref="copygroupdemographics" wrapperClassName="col-sm-7 col-sm-offset-5 demographics-copy"
+                    inputClassName="btn-copy btn-sm" title="Copy Demographics from Associated Group"
+                    clickHandler={this.handleCopyGroupDemographics} />
+                : null}
+            {hasGroupDemographics ? curator.renderParentEvidence('Country of Origin Associated with Group:', associatedGroups[0].countryOfOrigin) : null}
             <Input type="select" ref="country" label="Country of Origin:" defaultValue="none" value={family && family.countryOfOrigin ? family.countryOfOrigin : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1528,6 +1589,7 @@ function FamilyDemographics() {
                     return <option key={country_code.code} value={country_code.name}>{country_code.name}</option>;
                 })}
             </Input>
+            {hasGroupDemographics ? curator.renderParentEvidence('Ethnicity Associated with Group:', associatedGroups[0].ethnicity) : null}
             <Input type="select" ref="ethnicity" label="Ethnicity:" defaultValue="none" value={family && family.ethnicity ? family.ethnicity : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -1536,6 +1598,7 @@ function FamilyDemographics() {
                 <option value="Not Hispanic or Latino">Not Hispanic or Latino</option>
                 <option value="Unknown">Unknown</option>
             </Input>
+            {hasGroupDemographics ? curator.renderParentEvidence('Race Associated with Group:', associatedGroups[0].race) : null}
             <Input type="select" ref="race" label="Race:" defaultValue="none" value={family && family.race ? family.race : 'none'}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
@@ -2110,20 +2173,26 @@ const FamilyViewer = createReactClass({
                                     <dd>{method && method.genotypingMethods && method.genotypingMethods.join(', ')}</dd>
                                 </div>
 
-                                <div>
-                                    <dt>Entire gene sequenced</dt>
-                                    <dd>{method ? (method.entireGeneSequenced === true ? 'Yes' : (method.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.entireGeneSequenced === true || method.entireGeneSequenced === false) ?
+                                    <div>
+                                        <dt>Entire gene sequenced</dt>
+                                        <dd>{method.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Copy number assessed</dt>
-                                    <dd>{method ? (method.copyNumberAssessed === true ? 'Yes' : (method.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.copyNumberAssessed === true || method.copyNumberAssessed === false) ?
+                                    <div>
+                                        <dt>Copy number assessed</dt>
+                                        <dd>{method.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
-                                <div>
-                                    <dt>Specific mutations genotyped</dt>
-                                    <dd>{method ? (method.specificMutationsGenotyped === true ? 'Yes' : (method.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                </div>
+                                {method && (method.specificMutationsGenotyped === true || method.specificMutationsGenotyped === false) ?
+                                    <div>
+                                        <dt>Specific mutations genotyped</dt>
+                                        <dd>{method.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                    </div>
+                                    : null}
 
                                 <div>
                                     <dt>Description of genotyping method</dt>

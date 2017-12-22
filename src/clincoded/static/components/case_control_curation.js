@@ -55,6 +55,10 @@ const CaseControlCuration = createReactClass({
             groupName: '', // Currently entered name of the group
             caseCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             controlCohort_genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
+            caseNumWithVariant: null,
+            caseNumAllGenotyped: null,
+            controlNumWithVariant: null,
+            controlNumAllGenotyped: null,
             statisticOtherType: 'collapsed',
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
@@ -144,10 +148,14 @@ const CaseControlCuration = createReactClass({
                 if (stateObj.caseGroup['commonDiagnosis'] && stateObj.caseGroup['commonDiagnosis'].length > 0) {
                     this.setState({diseaseObj: stateObj.caseGroup['commonDiagnosis'][0]});
                 }
+                this.setState({caseNumWithVariant: stateObj.caseGroup.numberWithVariant});
+                this.setState({caseNumAllGenotyped: stateObj.caseGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.controlGroup) {
                 stateObj.controlCohort_genotyping2Disabled = !(stateObj.controlGroup.method && stateObj.controlGroup.method.genotypingMethods && stateObj.controlGroup.method.genotypingMethods.length);
                 this.setState({controlGroupName: stateObj.controlGroup.label});
+                this.setState({controlNumWithVariant: stateObj.controlGroup.numberWithVariant});
+                this.setState({controlNumAllGenotyped: stateObj.controlGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.caseControl) {
                 this.setState({caseControlName: stateObj.caseControl.label});
@@ -187,6 +195,18 @@ const CaseControlCuration = createReactClass({
             this.setState({diseaseError: null, diseaseRequired: false}, () => {
                 this.clrFormErrors('diseaseError');
             });
+        }
+        if (ref === 'caseCohort_numGroupVariant') {
+            this.setState({caseNumWithVariant: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'caseCohort_numGroupGenotyped') {
+            this.setState({caseNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'controlCohort_numGroupVariant') {
+            this.setState({controlNumWithVariant: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'controlCohort_numGroupGenotyped') {
+            this.setState({controlNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
         }
     },
 
@@ -592,23 +612,21 @@ const CaseControlCuration = createReactClass({
                     if (this.getFormValue(prefix + 'numGroupVariant')) {
                         newCaseGroup.numberWithVariant = parseInt(this.getFormValue(prefix + 'numGroupVariant'), 10);
                     } else {
-                        if ('numberWithVariant' in newControlGroup) {
+                        if ('numberWithVariant' in newCaseGroup) {
                             delete newCaseGroup['numberWithVariant'];
                         }
                     }
                     if (this.getFormValue(prefix + 'numGroupGenotyped')) {
                         newCaseGroup.numberAllGenotypedSequenced = parseInt(this.getFormValue(prefix + 'numGroupGenotyped'), 10);
                     } else {
-                        if ('numberAllGenotypedSequenced' in newControlGroup) {
+                        if ('numberAllGenotypedSequenced' in newCaseGroup) {
                             delete newCaseGroup['numberAllGenotypedSequenced'];
                         }
                     }
-                    if (this.getFormValue(prefix + 'calcAlleleFreq')) {
-                        newCaseGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
-                    } else {
-                        if ('alleleFrequency' in newControlGroup) {
-                            delete newCaseGroup['alleleFrequency'];
-                        }
+                    if ((newCaseGroup.numberWithVariant || newCaseGroup.numberWithVariant === 0) && newCaseGroup.numberAllGenotypedSequenced) {
+                        newCaseGroup.alleleFrequency = newCaseGroup.numberWithVariant / newCaseGroup.numberAllGenotypedSequenced;
+                    } else if ('alleleFrequency' in newCaseGroup) {
+                        delete newCaseGroup['alleleFrequency'];
                     }
 
                     /******************************************************/
@@ -722,12 +740,10 @@ const CaseControlCuration = createReactClass({
                             delete newControlGroup['numberAllGenotypedSequenced'];
                         }
                     }
-                    if (this.getFormValue(prefix + 'calcAlleleFreq')) {
-                        newControlGroup.alleleFrequency = parseFloat(this.getFormValue(prefix + 'calcAlleleFreq'));
-                    } else {
-                        if ('alleleFrequency' in newControlGroup) {
-                            delete newControlGroup['alleleFrequency'];
-                        }
+                    if ((newControlGroup.numberWithVariant || newControlGroup.numberWithVariant === 0) && newControlGroup.numberAllGenotypedSequenced) {
+                        newControlGroup.alleleFrequency = newControlGroup.numberWithVariant / newControlGroup.numberAllGenotypedSequenced;
+                    } else if ('alleleFrequency' in newControlGroup) {
+                        delete newControlGroup['alleleFrequency'];
                     }
 
                     /******************************************************/
@@ -822,6 +838,14 @@ const CaseControlCuration = createReactClass({
                     }
                     if (scoreArray && scoreArray.length) {
                         newCaseControl.scores = scoreArray;
+                    }
+
+                    // Add affiliation if the user is associated with an affiliation
+                    // and if the data object has no affiliation
+                    if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                        if (!newCaseControl.affiliation) {
+                            newCaseControl.affiliation = this.props.affiliation.affiliation_id;
+                        }
                     }
 
                     /*************************************************************/
@@ -1006,7 +1030,7 @@ const CaseControlCuration = createReactClass({
                                                 {GroupName.call(this, 'case-cohort')}
                                                 {GroupCommonDiseases.call(this, 'case-cohort')}
                                                 {GroupDemographics.call(this, 'case-cohort')}
-                                                {methods.render.call(this, caseGroupMethod, false, true, 'caseCohort_')}
+                                                {methods.render.call(this, caseGroupMethod, 'case-control', 'caseCohort_')}
                                                 {GroupPower.call(this, 'case-cohort')}
                                                 {GroupAdditional.call(this, 'case-cohort')}
                                             </Panel>
@@ -1018,7 +1042,7 @@ const CaseControlCuration = createReactClass({
                                                 {GroupName.call(this, 'control-cohort')}
                                                 {GroupCommonDiseases.call(this, 'control-cohort')}
                                                 {GroupDemographics.call(this, 'control-cohort')}
-                                                {methods.render.call(this, controlGroupMethod, false, true, 'controlCohort_')}
+                                                {methods.render.call(this, controlGroupMethod, 'case-control', 'controlCohort_')}
                                                 {GroupPower.call(this, 'control-cohort')}
                                                 {GroupAdditional.call(this, 'control-cohort')}
                                             </Panel>
@@ -1033,7 +1057,8 @@ const CaseControlCuration = createReactClass({
                                         <PanelGroup accordion>
                                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
                                                 <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
-                                                session={session} handleUserScoreObj={this.handleUserScoreObj} />
+                                                    session={session} handleUserScoreObj={this.handleUserScoreObj}
+                                                    affiliation={this.props.affiliation} />
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1041,7 +1066,7 @@ const CaseControlCuration = createReactClass({
                                             {gdm ? <a href={cancelUrl} className="btn btn-default btn-inline-spacer pull-right">Cancel</a> : null}
                                             {caseControl ?
                                                 <DeleteButton gdm={gdm} parent={annotation} item={caseControl} pmid={pmid} />
-                                            : null}
+                                                : null}
                                             <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                                         </div>
                                     </div>
@@ -1049,7 +1074,7 @@ const CaseControlCuration = createReactClass({
                             </div>
                         </div>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
@@ -1299,15 +1324,55 @@ function GroupDemographics(groupType) {
     );
 }
 
+// Generate a display version (string) of the allele frequency (preferring fixed-point notation over exponential)
+function displayAlleleFrequency(alleleFrequency) {
+    let alleleFreqDisplay = (alleleFrequency > 0 || alleleFrequency < 0) ? alleleFrequency.toFixed(5) : '0';
+
+    // If there are no non-zero digits when using fixed-point notation (to 5 decimal places), switch to exponential
+    if (alleleFreqDisplay.match(/^0+\.0+$/)) {
+        alleleFreqDisplay = alleleFrequency.toExponential(2);
+
+    // If there are more than 5 digits in the "integer part", switch to exponential
+    } else if (alleleFreqDisplay.match(/^\d{6}/)) {
+        alleleFreqDisplay = alleleFrequency.toExponential(2);
+    }
+
+    return alleleFreqDisplay;
+}
+
+// Generate HTML to display the allele frequency (as a fraction and a decimal number)
+function renderAlleleFrequency(numberWithVariant, numberAllGenotypedSequenced, alleleFrequency) {
+
+    // Check that parameter is a non-zero number (if it's zero, only possible results of division are INF or NaN)
+    if (numberAllGenotypedSequenced > 0 || numberAllGenotypedSequenced < 0) {
+
+        // Check that parameter is a number
+        if (numberWithVariant > 0 || numberWithVariant < 0 || numberWithVariant === 0) {
+
+            // If provided allele frequency is a number, use it
+            let alleleFreqDisplay = (alleleFrequency > 0 || alleleFrequency < 0 || alleleFrequency === 0)
+                ? displayAlleleFrequency(Number(alleleFrequency)) : displayAlleleFrequency(numberWithVariant / numberAllGenotypedSequenced);
+
+            return (
+                <span>
+                    <sup>{numberWithVariant}</sup>&frasl;<sub>{numberAllGenotypedSequenced}</sub> = {alleleFreqDisplay}
+                </span>
+            );
+        }
+    }
+
+    return;
+}
+
 // Group information group curation panel. Call with .call(this) to run in the same context
 // as the calling component.
 function GroupPower(groupType) {
-    let type, controlGroupType, numGroupVariant, numGroupGenotyped, calcAlleleFreq, headerLabel, group;
+    let type, controlGroupType, numGroupVariant, numGroupGenotyped, alleleFreqDisplay, headerLabel, group;
     if (groupType === 'case-cohort') {
         type = 'Case';
         numGroupVariant = 'caseCohort_numGroupVariant';
         numGroupGenotyped = 'caseCohort_numGroupGenotyped';
-        calcAlleleFreq = 'caseCohort_calcAlleleFreq';
+        alleleFreqDisplay = renderAlleleFrequency(this.state.caseNumWithVariant, this.state.caseNumAllGenotyped);
         headerLabel = 'CASE';
         group = this.state.caseGroup;
     }
@@ -1316,7 +1381,7 @@ function GroupPower(groupType) {
         controlGroupType = 'controlCohort_controlGroupType';
         numGroupVariant = 'controlCohort_numGroupVariant';
         numGroupGenotyped = 'controlCohort_numGroupGenotyped';
-        calcAlleleFreq = 'controlCohort_calcAlleleFreq';
+        alleleFreqDisplay = renderAlleleFrequency(this.state.controlNumWithVariant, this.state.controlNumAllGenotyped);
         headerLabel = 'CONTROL';
         group = this.state.controlGroup;
     }
@@ -1342,17 +1407,23 @@ function GroupPower(groupType) {
             }
             ****/}
             <Input type="number" inputClassName="integer-only" ref={numGroupVariant} label={'Number of ' + type + 's with variant(s) in the gene in question:'}
-                value={group && typeof group.numberWithVariant === 'number' ? group.numberWithVariant : ''}
+                handleChange={this.handleChange} value={group && typeof group.numberWithVariant === 'number' ? group.numberWithVariant : ''}
                 error={this.getFormError(numGroupVariant)} clearError={this.clrFormErrors.bind(null, numGroupVariant)} placeholder="Number only"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
             <Input type="number" inputClassName="integer-only" ref={numGroupGenotyped} label={'Number of all ' + type + 's genotyped/sequenced:'}
-                value={group && typeof group.numberAllGenotypedSequenced === 'number' ? group.numberAllGenotypedSequenced : ''}
+                handleChange={this.handleChange} value={group && typeof group.numberAllGenotypedSequenced === 'number' ? group.numberAllGenotypedSequenced : ''}
                 error={this.getFormError(numGroupGenotyped)} clearError={this.clrFormErrors.bind(null, numGroupGenotyped)} placeholder="Number only"
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="number" ref={calcAlleleFreq} label={type + ' Allele Frequency:'} handleChange={this.handleChange}
-                value={group && typeof group.alleleFrequency === 'number' ? group.alleleFrequency : ''}
-                error={this.getFormError(calcAlleleFreq)} clearError={this.clrFormErrors.bind(null, calcAlleleFreq)}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required />
+            <div>
+                <div className="form-group allele-frequency">
+                    <div className="col-sm-5">
+                        <span>{type + ' Allele Frequency:'}</span>
+                    </div>
+                    <div className="col-sm-7">
+                        {alleleFreqDisplay}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
@@ -1481,23 +1552,21 @@ var CaseControlViewer = createReactClass({
     render: function() {
         var context = this.props.context;
         var user = this.props.session && this.props.session.user_properties;
-        var userCaseControl = user && context && context.submitted_by ? user.uuid === context.submitted_by.uuid : false;
+        var userCaseControl = user && context && context.submitted_by && user.uuid === context.submitted_by.uuid ? true : false;
+        let affiliation = this.props.affiliation;
+        let affiliatedCaseControl = affiliation && Object.keys(affiliation).length && context && context.affiliation && affiliation.affiliation_id === context.affiliation ? true : false;
         var caseCohort = context.caseCohort;
         var caseCohortMethod = context.caseCohort.method;
         var controlCohort = context.controlCohort;
         var controlCohortMethod = context.controlCohort.method;
-        var evidenceScores = context && context.scores ? context.scores : [];
+        let evidenceScores = context && context.scores && context.scores.length ? context.scores : [];
         let isEvidenceScored = false;
-        if (evidenceScores && evidenceScores.length > 0) {
+        if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus === 'Score' || scoreObj.scoreStatus === 'Review' || scoreObj.scoreStatus === 'Contradicts') {
+                if (scoreObj.hasOwnProperty('score') && scoreObj.score !== 'none') {
                     isEvidenceScored = true;
-                } else {
-                    isEvidenceScored = false;
                 }
             });
-        } else if (evidenceScores && evidenceScores.length < 1) {
-            isEvidenceScored = false;
         }
 
         var tempGdmPmid = curator.findGdmPmidFromObj(context);
@@ -1673,20 +1742,26 @@ var CaseControlViewer = createReactClass({
                                             <dd>{caseCohortMethod && caseCohortMethod.genotypingMethods && caseCohortMethod.genotypingMethods.join(', ')}</dd>
                                         </div>
 
-                                        <div>
-                                            <dt>Entire gene sequenced</dt>
-                                            <dd>{caseCohortMethod ? (caseCohortMethod.entireGeneSequenced === true ? 'Yes' : (caseCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {caseCohortMethod && (caseCohortMethod.entireGeneSequenced === true || caseCohortMethod.entireGeneSequenced === false) ?
+                                            <div>
+                                                <dt>Entire gene sequenced</dt>
+                                                <dd>{caseCohortMethod.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Copy number assessed</dt>
-                                            <dd>{caseCohortMethod ? (caseCohortMethod.copyNumberAssessed === true ? 'Yes' : (caseCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {caseCohortMethod && (caseCohortMethod.copyNumberAssessed === true || caseCohortMethod.copyNumberAssessed === false) ?
+                                            <div>
+                                                <dt>Copy number assessed</dt>
+                                                <dd>{caseCohortMethod.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Specific mutations genotyped</dt>
-                                            <dd>{caseCohortMethod ? (caseCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (caseCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {caseCohortMethod && (caseCohortMethod.specificMutationsGenotyped === true || caseCohortMethod.specificMutationsGenotyped === false) ?
+                                            <div>
+                                                <dt>Specific mutations genotyped</dt>
+                                                <dd>{caseCohortMethod.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
                                         <div>
                                             <dt>Description of genotyping method</dt>
@@ -1723,20 +1798,26 @@ var CaseControlViewer = createReactClass({
                                             <dd>{controlCohortMethod && controlCohortMethod.genotypingMethods && controlCohortMethod.genotypingMethods.join(', ')}</dd>
                                         </div>
 
-                                        <div>
-                                            <dt>Entire gene sequenced</dt>
-                                            <dd>{controlCohortMethod ? (controlCohortMethod.entireGeneSequenced === true ? 'Yes' : (controlCohortMethod.entireGeneSequenced === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {controlCohortMethod && (controlCohortMethod.entireGeneSequenced === true || controlCohortMethod.entireGeneSequenced === false) ?
+                                            <div>
+                                                <dt>Entire gene sequenced</dt>
+                                                <dd>{controlCohortMethod.entireGeneSequenced === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Copy number assessed</dt>
-                                            <dd>{controlCohortMethod ? (controlCohortMethod.copyNumberAssessed === true ? 'Yes' : (controlCohortMethod.copyNumberAssessed === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {controlCohortMethod && (controlCohortMethod.copyNumberAssessed === true || controlCohortMethod.copyNumberAssessed === false) ?
+                                            <div>
+                                                <dt>Copy number assessed</dt>
+                                                <dd>{controlCohortMethod.copyNumberAssessed === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
-                                        <div>
-                                            <dt>Specific mutations genotyped</dt>
-                                            <dd>{controlCohortMethod ? (controlCohortMethod.specificMutationsGenotyped === true ? 'Yes' : (controlCohortMethod.specificMutationsGenotyped === false ? 'No' : '')) : ''}</dd>
-                                        </div>
+                                        {controlCohortMethod && (controlCohortMethod.specificMutationsGenotyped === true || controlCohortMethod.specificMutationsGenotyped === false) ?
+                                            <div>
+                                                <dt>Specific mutations genotyped</dt>
+                                                <dd>{controlCohortMethod.specificMutationsGenotyped === true ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            : null}
 
                                         <div>
                                             <dt>Description of genotyping method</dt>
@@ -1767,7 +1848,7 @@ var CaseControlViewer = createReactClass({
 
                                         <div>
                                             <dt>Case Allele Frequency</dt>
-                                            <dd>{caseCohort.alleleFrequency}</dd>
+                                            <dd>{renderAlleleFrequency(caseCohort.numberWithVariant, caseCohort.numberAllGenotypedSequenced, caseCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
                                 </Panel>
@@ -1787,7 +1868,7 @@ var CaseControlViewer = createReactClass({
 
                                         <div>
                                             <dt>Case Allele Frequency</dt>
-                                            <dd>{controlCohort.alleleFrequency}</dd>
+                                            <dd>{renderAlleleFrequency(controlCohort.numberWithVariant, controlCohort.numberAllGenotypedSequenced, controlCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
                                 </Panel>
@@ -1936,24 +2017,20 @@ var CaseControlViewer = createReactClass({
 
                                 </dl>
                             </Panel>
-                            {isEvidenceScored && !userCaseControl ?
-                                <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
-                                    <ScoreViewer evidence={this.props.context} otherScores={true} session={this.props.session} />
-                                </Panel>
-                            : null}
-                            {isEvidenceScored || (!isEvidenceScored < 1 && userCaseControl) ?
-                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
-                                    <ScoreCaseControl evidence={this.props.context} evidenceType="Case control" session={this.props.session}
-                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} />
-                                </Panel>
-                            : null}
-                            {!isEvidenceScored && !userCaseControl ?
-                                <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                            <Panel title="Case-Control - Other Curator Scores" panelClassName="panel-data case-control-other-scores">
+                                <ScoreViewer evidence={context} otherScores={true} session={this.props.session} affiliation={affiliation} />
+                            </Panel>
+                            <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
+                                {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedCaseControl) || (!isEvidenceScored && !affiliation && userCaseControl) ?
+                                    <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session}
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
+                                    : null}
+                                {!isEvidenceScored  && ((affiliation && !affiliatedCaseControl) || (!affiliation && !userCaseControl)) ?
                                     <div className="row">
                                         <p className="alert alert-warning creator-score-status-note">The creator of this evidence has not yet scored it; once the creator has scored it, the option to score will appear here.</p>
                                     </div>
-                                </Panel>
-                            : null}
+                                    : null}
+                            </Panel>
                         </div>
                     </div>
                 </div>

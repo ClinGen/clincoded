@@ -25,7 +25,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         session: PropTypes.object, // session object
         variant: PropTypes.object, // parent variant object
         interpretation: PropTypes.object, // parent interpretation object
-        updateInterpretationObj: PropTypes.func // function from index.js; this function will pass the updated interpretation object back to index.js
+        updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
+        affiliation: PropTypes.object
     },
 
     contextTypes: {
@@ -87,6 +88,14 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 articles: [this.state.tempEvidence.pmid],
                 evidenceDescription: this.refs['description'].getValue()
             };
+
+            // Add affiliation if the user is associated with an affiliation
+            // and if the data object has no affiliation
+            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                if (!extra_evidence.affiliation) {
+                    extra_evidence.affiliation = this.props.affiliation.affiliation_id;
+                }
+            }
 
             return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
                 // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
@@ -151,6 +160,14 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             evidenceDescription: this.refs['edit-description'].getValue()
         };
 
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!extra_evidence.affiliation) {
+                extra_evidence.affiliation = this.props.affiliation.affiliation_id;
+            }
+        }
+
         this.putRestData(this.refs['edit-target'].getValue(), extra_evidence).then(result => {
             this.recordHistory('modify-hide', result['@graph'][0]).then(addHistory => {
                 // upon successful save, set everything to default state, and trigger updateInterptationObj callback
@@ -211,6 +228,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     },
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
+        let affiliation = this.props.affiliation, session = this.props.session;
         // for rendering the evidence in tabular format
         return (
             <tr key={extra_evidence.uuid}>
@@ -220,15 +238,16 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
                 {!this.props.viewOnly ?
                     <td className="col-md-2">
-                        {!this.props.viewOnly && this.props.session && this.props.session.user_properties && extra_evidence.submitted_by['@id'] === this.props.session.user_properties['@id'] ?
+                        {!this.props.viewOnly && ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
+                            (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
                             <div>
                                 <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                                 <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
                                     clickHandler={() => this.deleteEvidence(extra_evidence)} />
                             </div>
-                        : null}
+                            : null}
                     </td>
-                : null}
+                    : null}
             </tr>
         );
     },
@@ -259,7 +278,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                 submitBusy={this.state.editBusy} inputDisabled={!(this.state.editDescriptionInput && this.state.editDescriptionInput.length > 0)} />
                             {this.state.updateMsg ?
                                 <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                            : null}
+                                : null}
                         </div>
                     </Form>
                 </td>
@@ -298,7 +317,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                 <tr>
                                     <th>Article</th>
                                     <th>Evidence</th>
-                                    <th>Submitted by</th>
+                                    <th>Last edited by</th>
                                     <th>Last edited</th>
                                     {!this.state.viewOnly? <th></th> : null}
                                 </tr>
