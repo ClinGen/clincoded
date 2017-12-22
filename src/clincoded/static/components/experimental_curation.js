@@ -3327,9 +3327,6 @@ class ExperimentalAddHistory extends Component {
                 <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
                 <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
-                {experimental.affiliation ?
-                    <span className="last-edited-by-name">; last edited by {experimental.modified_by.title}</span>
-                    : null}
             </div>
         );
     }
@@ -3351,9 +3348,6 @@ class ExperimentModifyHistory extends Component {
                 Experimental data <a href={experimental['@id']}>{experimental.label}</a>
                 <span> ({experimental.evidenceType}) modified</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
-                {experimental.affiliation ?
-                    <span className="last-edited-by-name">; last edited by {experimental.modified_by.title}</span>
-                    : null}
             </div>
         );
     }
@@ -3374,9 +3368,6 @@ class ExperimentDeleteHistory extends Component {
             <div>
                 <span>Experimental data {experimental.label} deleted</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
-                {experimental.affiliation ?
-                    <span className="last-edited-by-name">; last edited by {experimental.modified_by.title}</span>
-                    : null}
             </div>
         );
     }

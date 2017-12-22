@@ -835,9 +835,9 @@ var renderGroup = function(group, gdm, annotation, curatorMatch, evidenceAffilia
             <h5><span className="title-ellipsis dotted" title={group.label}>{group.label}</span></h5>
             <div className="evidence-curation-info">
                 {group.submitted_by ?
-                    <p className="evidence-curation-info">Last edited by: {group.submitted_by.title}</p>
+                    <p className="evidence-curation-info">Last edited by: {group.modified_by ? group.modified_by.title : group.submitted_by.title}</p>
                     : null}
-                <p>{moment(group.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                <p>{moment(group.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             <a href={'/group/' + group.uuid} title="View group in a new tab">View</a>
             {(group.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!group.affiliation && !curatorAffiliation && curatorMatch) ? 
@@ -868,9 +868,9 @@ var renderFamily = function(family, gdm, annotation, curatorMatch, evidenceAffil
             <h5><span className="title-ellipsis dotted" title={family.label}>{family.label}</span></h5>
             <div className="evidence-curation-info">
                 {family.submitted_by ?
-                    <p className="evidence-curation-info">Last edited by: {family.submitted_by.title}</p>
+                    <p className="evidence-curation-info">Last edited by: {family.modified_by ? family.modified_by.title : family.submitted_by.title}</p>
                     : null}
-                <p>{moment(family.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                <p>{moment(family.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {family.associatedGroups && family.associatedGroups.length ?
                 <div>
@@ -916,9 +916,9 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch, evide
             <h5><span className="title-ellipsis title-ellipsis-short dotted" title={individual.label}>{individual.label}</span>{individual.proband ? <i className="icon icon-proband"></i> : null}</h5>
             <div className="evidence-curation-info">
                 {individual.submitted_by ?
-                    <p className="evidence-curation-info">Last edited by: {individual.submitted_by.title}</p>
+                    <p className="evidence-curation-info">Last edited by: {individual.modified_by ? individual.modified_by.title : individual.submitted_by.title}</p>
                     : null}
-                <p>{moment(individual.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                <p>{moment(individual.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {(individual.associatedGroups && individual.associatedGroups.length) || (individual.associatedFamilies && individual.associatedFamilies.length) ?
                 <div>
@@ -975,9 +975,9 @@ var renderCaseControl = function(caseControl, gdm, annotation, curatorMatch, evi
             <h5><span className="title-ellipsis dotted" title={caseControl.label}>{caseControl.label}</span></h5>
             <div className="evidence-curation-info">
                 {caseControl.submitted_by ?
-                    <p className="evidence-curation-info">Last edited by: {caseControl.submitted_by.title}</p>
+                    <p className="evidence-curation-info">Last edited by: {caseControl.modified_by ? caseControl.modified_by.title : caseControl.submitted_by.title}</p>
                     : null}
-                <p>{moment(caseControl.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                <p>{moment(caseControl.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             <a href={'/casecontrol/' + caseControl.uuid} title="View group in a new tab">View/Score</a>
             {(caseControl.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!caseControl.affiliation && !curatorAffiliation && curatorMatch) ? <span> | <a href={
@@ -1016,9 +1016,9 @@ var renderExperimental = function(experimental, gdm, annotation, curatorMatch, e
             {experimental.evidenceType}{subtype}
             <div className="evidence-curation-info">
                 {experimental.submitted_by ?
-                    <p className="evidence-curation-info">Last edited by: {experimental.submitted_by.title}</p>
+                    <p className="evidence-curation-info">Last edited by: {experimental.modified_by ? experimental.modified_by.title : experimental.submitted_by.title}</p>
                     : null}
-                <p>{moment(experimental.date_created).format('YYYY MMM DD, h:mm a')}</p>
+                <p>{moment(experimental.last_modified).format('YYYY MMM DD, h:mm a')}</p>
             </div>
             {(experimental.variants && experimental.variants.length) ?
                 <div>

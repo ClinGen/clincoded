@@ -291,7 +291,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
         if (interpretation && interpretation.markAsProvisional) {
             return (
                 <ModalComponent modalTitle="Confirm disease deletion" modalClass="modal-default" modalWrapperClass="confirm-interpretation-delete-disease-modal pull-right"
-                    bootstrapBtnClass="btn btn-primary disease-delete " actuatorClass="interpretation-delete-disease-btn" actuatorTitle={<span>Disease<i className="icon icon-trash-o"></i></span>}
+                    bootstrapBtnClass="btn btn-danger disease-delete " actuatorClass="interpretation-delete-disease-btn" actuatorTitle={<span>Disease<i className="icon icon-trash-o"></i></span>}
                     onRef={ref => (this.confirm = ref)}>
                     <div>
                         <div className="modal-body">
