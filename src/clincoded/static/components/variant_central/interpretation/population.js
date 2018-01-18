@@ -72,7 +72,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
             ensembl_exac_allele: {},
-            hasMultiAllelicExacAllele: false, // flag to display message regarding multi-allelic ExAC alleles
             hasExacData: false, // flag to display ExAC table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
@@ -228,7 +227,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let populationObj = this.state.populationObj;
             // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
-                populationObj.exac[key].ac = Array.isArray(response.exac.ac['ac_' + key]) ? response.exac.ac['ac_' + key] : parseInt(response.exac.ac['ac_' + key]);
+                populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
                 populationObj.exac[key].af = populationObj.exac[key].ac / populationObj.exac[key].an;
@@ -244,17 +243,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.exac._extra.ref = response.exac.ref;
             populationObj.exac._extra.alt = response.exac.alt;
             // update populationObj, and set flag indicating that we have ExAC data
-            this.setState({hasExacData: true, populationObj: populationObj}, () => {
-                /**
-                 * If any of the ac (allele count) fields have array values,
-                 * we've got multi-allelic ExAC alleles
-                 */
-                populationStatic.exac._order.map(key => {
-                    if (Array.isArray(this.state.populationObj.exac[key].ac)) {
-                        this.setState({hasMultiAllelicExacAllele: true});
-                    }
-                });
-            });
+            this.setState({hasExacData: true, populationObj: populationObj});
         }
     },
 
@@ -452,27 +441,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
                 linkText = 'View the coverage of this region (+/- 30 bp) in ExAC';
             }
-            /*
-            if (response.clinvar) {
-                // Try 'clinvar' as primary data object
-                let clinvar = response.clinvar;
-                // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
-                if (clinvar.type && clinvar.type === 'single nucleotide variant' && this.state.hasExacData) {
-                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
-                } else {
-                    // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
-                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
-                }
-            } else if (response.cadd) {
-                // Fallback to 'cadd' as alternative data object
-                let cadd = response.cadd;
-                if (cadd.type && cadd.type === 'SNV' && this.state.hasExacData) {
-                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
-                } else {
-                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
-                }
-            }
-            */
         } else {
             // 404 response from myvariant.info
             exacLink = external_url_map['EXACHome'];
@@ -837,7 +805,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var populationObjDiffFlag = this.state.populationObjDiffFlag;
         var singleNucleotide = this.state.ext_singleNucleotide;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
-        const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
         const affiliation = this.props.affiliation, session = this.props.session;
 
         return (
@@ -907,35 +874,25 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 :
                                 <div>
                                     {this.state.hasExacData ?
-                                        <div>
-                                            {!this.state.hasMultiAllelicExacAllele ?
-                                                <table className="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Population</th>
-                                                            <th>Allele Count</th>
-                                                            <th>Allele Number</th>
-                                                            <th>Number of Homozygotes</th>
-                                                            <th>Allele Frequency</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {exacSortedAlleleFrequency.map(key => {
-                                                            return (this.renderExacRow(key, exac, exacStatic));
-                                                        })}
-                                                    </tbody>
-                                                    <tfoot>
-                                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
-                                                    </tfoot>
-                                                </table>
-                                                :
-                                                <div className="panel-body">
-                                                    <span>ExAC data is not currently displayed for this variant as it occurs at a multi-allelic locus and data is sometimes returned
-                                                        for an alternate allele at these loci due to changes in the data structure. This issue is being addressed and will be fixed
-                                                        soon. For the correct allele, <a href={exacDataLinkout} target="_blank">see data in ExAC</a>.</span>
-                                                </div>
-                                            }
-                                        </div>
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Population</th>
+                                                    <th>Allele Count</th>
+                                                    <th>Allele Number</th>
+                                                    <th>Number of Homozygotes</th>
+                                                    <th>Allele Frequency</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {exacSortedAlleleFrequency.map(key => {
+                                                    return (this.renderExacRow(key, exac, exacStatic));
+                                                })}
+                                            </tbody>
+                                            <tfoot>
+                                                {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                            </tfoot>
+                                        </table>
                                         :
                                         <div className="panel-body">
                                             <span>No population data was found for this allele in ExAC. {this.renderExacLinkout(this.props.ext_myVariantInfo)}</span>
