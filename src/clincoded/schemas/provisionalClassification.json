@@ -44,7 +44,8 @@
             "type": "string",
             "enum": [
                 "In progress",
-                "Provisional"
+                "Provisional",
+                "Approved"
             ]
         },
         "evidenceSummary": {
@@ -83,16 +84,36 @@
                 }
             }
         },
+        "affiliation": {
+            "title": "Affiliation",
+            "description": "The affiliation this classification is associated with.",
+            "type": "string"
+        },
+        "approvalSubmitter": {
+            "title": "Approval Submitter",
+            "description": "Curator who entered the approved classification",
+            "type": "string"
+        },
+        "classificationApprover": {
+            "title": "Approved By",
+            "description": "Curator who approved the classification",
+            "type": "string"
+        },
+        "approvalReviewDate": {
+            "title": "Date Reviewed",
+            "description": "Date when the classification was reviewed",
+            "type": "string"
+        },
+        "approvalComment": {
+            "title": "Review Comments",
+            "description": "Review comments for the classification",
+            "type": "string"
+        },
         "active": {
             "title": "Active",
             "description": "Boolean switch for usage",
             "type": "boolean",
             "default": true
-        },
-        "affiliation": {
-            "title": "Affiliation",
-            "description": "The affiliation this classification is associated with.",
-            "type": "string"
         }
     },
     "columns": {
@@ -126,6 +147,26 @@
         },
         "reasons": {
             "title": "Reasons",
+            "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "type": "string"
+        },
+        "approvalSubmitter": {
+            "title": "Approval Submitter",
+            "type": "string"
+        },
+        "classificationApprover": {
+            "title": "Approved By",
+            "type": "string"
+        },
+        "approvalReviewDate": {
+            "title": "Date Reviewed",
+            "type": "string"
+        },
+        "approvalComment": {
+            "title": "Review Comments",
             "type": "string"
         },
         "active": {
