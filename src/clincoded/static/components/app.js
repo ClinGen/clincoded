@@ -243,6 +243,7 @@ var App = module.exports = createReactClass({
                     <script src="https://cdn.auth0.com/js/lock/10.17.0/lock.min.js"></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
+                    <link rel="stylesheet" href="https://unpkg.com/react-day-picker/lib/style.css" />
                     <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
