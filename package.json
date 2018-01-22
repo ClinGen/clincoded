@@ -56,6 +56,7 @@
     "moment": "^2.18.0",
     "node-ckeditor": "^4.3.2",
     "react": "^15.4.0",
+    "react-day-picker": "^7.0.7",
     "react-dom": "^15.4.0",
     "scriptjs": "^2.5.7",
     "shivie8": "^1.0.0",
