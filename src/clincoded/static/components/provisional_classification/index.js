@@ -10,6 +10,7 @@ import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
+import { ClassificationApproval } from './approval';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -794,6 +795,15 @@ const ProvisionalClassification = createReactClass({
                                     <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
                                 </div>
                             </div>
+                            {this.state.classificationStatusChecked ?
+                                <ClassificationApproval
+                                    session={session}
+                                    gdm={gdm}
+                                    classification={currentClassification}
+                                    provisional={provisional}
+                                    affiliation={this.props.affiliation}
+                                />
+                                : null}
                         </div>
                         :
                         null
