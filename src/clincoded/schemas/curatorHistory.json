@@ -328,6 +328,11 @@
                             "title": "Classification",
                             "description": "User-altered provisional classification",
                             "type": "string"
+                        },
+                        "classificationStatus": {
+                            "title": "Classification Provisional Status",
+                            "description": "Flag to mark classification status as provisional",
+                            "type": "string"
                         }
                     }
                 },
