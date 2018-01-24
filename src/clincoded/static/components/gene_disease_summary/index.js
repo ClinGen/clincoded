@@ -268,7 +268,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
-     * Method to loop through families (of GDM or of group) and find all family evidence without proband
+     * Method to loop through families (of GDM or of group) and find all family evidence without proband, or with proband but no score
      * @param {array} families - a list of family evidence
      * @param {array} familyMatched - list of matched family evidence
      */
@@ -279,6 +279,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     if (family.individualIncluded && family.individualIncluded.length) {
                         family.individualIncluded.forEach(individual => {
                             if (!individual.proband || typeof individual.proband === 'undefined') {
+                                familyMatched.push(family);
+                            }
+                            if (individual.proband && (!individual.scores || (individual.scores && !individual.scores.length))) {
                                 familyMatched.push(family);
                             }
                         });

@@ -107,7 +107,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
             <div className="evidence-summary panel-case-level-segregation">
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Genetic Evidence: Case Level (family segregation information without proband data)</h3>
+                        <h3 className="panel-title">Genetic Evidence: Case Level (family segregation information without proband data or scored proband data)</h3>
                     </div>
                     {sortedEvidenceList && sortedEvidenceList.length ?
                         <table className="table">
