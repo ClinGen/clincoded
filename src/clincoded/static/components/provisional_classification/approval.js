@@ -31,7 +31,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             classificationApprover: this.props.provisional && this.props.provisional.classificationApprover ? this.props.provisional.classificationApprover : undefined,
             classificationApprovalSubmitter: this.props.provisional && this.props.provisional.approvalSubmitter ? this.props.provisional.approvalSubmitter : undefined,
             affiliatedMembers: undefined,
-            isApprovalPreview: false,
+            isApprovalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Approved' ? true : false,
             isApprovalEdit: false
         };
     },
@@ -64,11 +64,6 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         }
     },
 
-    handleApproverSelect() {
-        const approver = this.approverInput.getValue();
-        this.setState({classificationApprover: approver});
-    },
-
     handleReviewDateChange(approvalReviewDate) {
         this.setState({approvalReviewDate});
     },
@@ -77,7 +72,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
      * Method to handle previewing classificaiton approval form
      */
     handlePreviewApproval() {
-        let approver = this.approverInput.getValue();
+        let approver = this.approverInput ? this.approverInput.getValue() : this.props.session.user_properties.title;
         let formErr = false;
 
         if (approver && approver !== 'none') {
@@ -85,7 +80,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             this.setState({
                 classificationApprovalSubmitter: this.props.session.user_properties.title,
                 approvalComment: approvalComment.length ? approvalComment : undefined,
-                classificationApproverError: false
+                classificationApprover: approver
             }, () => {
                 this.setState({isApprovalPreview: true});
                 formErr = false;
@@ -144,7 +139,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     render() {
         const approvalSubmitter = this.state.classificationApprovalSubmitter;
         const classificationApprover = this.state.classificationApprover;
-        const approvalReviewDate = this.state.approvalReviewDate ? moment(this.state.approvalReviewDate).format('MM/DD/YYYY') : null;
+        const approvalReviewDate = this.state.approvalReviewDate ? moment(this.state.approvalReviewDate).format('MM/DD/YYYY') : '';
         const approvalComment = this.state.approvalComment;
         const session = this.props.session;
         const provisional = this.props.provisional;
@@ -155,7 +150,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         return (
             <div className="container classification-approval">
                 <PanelGroup>
-                    <Panel title="Approve Classification" panelClassName="panel-data">
+                    <Panel title="Approve Classification" panelClassName="panel-data" open={provisional && provisional.classificationStatus === 'Approved'}>
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             {this.state.isApprovalPreview ?
                                 <div className="classification-approval-preview">
@@ -219,7 +214,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                     <Input type="select" ref={(input) => { this.approverInput = input; }} label="Approver:"
                                                         error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
                                                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                                                        defaultValue={classificationApprover} handleChange={this.handleApproverSelect}>
+                                                        defaultValue={classificationApprover}>
                                                         <option value="none">Select Approver</option>
                                                         <option value="" disabled className="divider"></option>
                                                         {affiliatedMembers.map((member, i) => {
@@ -246,7 +241,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                             parseDate={parseDate}
                                                             placeholder={`${formatDate(new Date())}`}
                                                             dayPickerProps={{
-                                                                selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : null,
+                                                                selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined,
                                                                 disabledDays: {
                                                                     daysOfWeek: [0, 6]
                                                                 }
