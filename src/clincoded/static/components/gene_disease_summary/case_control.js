@@ -35,9 +35,16 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                     <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-disease">
-                    <span>{evidence.diseaseTerm}
-                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.props.hpoTermList.join(', ')})</span> : null)}</span>
-                    </span>
+                    {evidence.diseaseId && evidence.diseaseTerm ?
+                        <span>{evidence.diseaseTerm}
+                            <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.props.hpoTermList.join(', ')})</span> : null)}</span>
+                        </span>
+                        :
+                        <span>
+                            {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.props.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
+                            {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
+                        </span>
+                    }
                 </td>
                 <td className="evidence-study-type">
                     {evidence.studyType}
