@@ -414,50 +414,65 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id) || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === user)) {
                                     if ('score' in score && score.score !== 'none') {
                                         let caseControlEvidence = {};
+
+                                        let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
+                                        // Define object key/value pairs
+                                        caseControlEvidence['authors'] = annotation.article.authors;
+                                        caseControlEvidence['pmid'] = annotation.article.pmid;
+                                        caseControlEvidence['pubYear'] = pubDate[1];
+                                        caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
+                                        caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
+                                        caseControlEvidence['caseCohort_numberWithVariant'] = typeof caseControl.caseCohort.numberWithVariant === 'number' ? caseControl.caseCohort.numberWithVariant : null;
+                                        caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = typeof caseControl.caseCohort.numberAllGenotypedSequenced === 'number' ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
+                                        caseControlEvidence['controlCohort_numberWithVariant'] = typeof caseControl.controlCohort.numberWithVariant === 'number' ? caseControl.controlCohort.numberWithVariant : null;
+                                        caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = typeof caseControl.controlCohort.numberAllGenotypedSequenced === 'number' ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
+                                        caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
+                                        caseControlEvidence['explanationForDifference'] = caseControl.explanationForDifference ? caseControl.explanationForDifference : '';
+                                        caseControlEvidence['statisticValueType'] = caseControl.statisticalValues[0].valueType ? caseControl.statisticalValues[0].valueType : '';
+                                        caseControlEvidence['statisticValueTypeOther'] = caseControl.statisticalValues[0].otherType ? caseControl.statisticalValues[0].otherType : '';
+                                        caseControlEvidence['statisticValue'] = caseControl.statisticalValues[0].value ? caseControl.statisticalValues[0].value : null;
+                                        caseControlEvidence['pValue'] = caseControl.pValue ? caseControl.pValue : null;
+                                        caseControlEvidence['confidenceIntervalFrom'] = caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null;
+                                        caseControlEvidence['confidenceIntervalTo'] = caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null;
+                                        caseControlEvidence['score'] = score.hasOwnProperty('score') ? score.score : null;
                                         // Get disease data object given the uuid
-                                        this.getRestData(caseControl.caseCohort.commonDiagnosis[0]).then(diseaseRestData => {
-                                            return Promise.resolve({annotation, caseControl, score, diseaseRestData});
-                                        }).then(result => {
-                                            const annotation = result.annotation;
-                                            const caseControl = result.caseControl;
-                                            const score = result.score;
-                                            const diseaseRestData = result.diseaseRestData;
+                                        if (caseControl.caseCohort.commonDiagnosis && caseControl.caseCohort.commonDiagnosis.length) {
+                                            this.getRestData(caseControl.caseCohort.commonDiagnosis[0]).then(diseaseRestData => {
+                                                return Promise.resolve({diseaseRestData});
+                                            }).then(result => {
+                                                const diseaseRestData = result.diseaseRestData;
+                                                // Get the HPO terms given a list of HPO IDs
+                                                // FIXME: Set states to trigger re-rendering due to racy ajax calls
+                                                if (diseaseRestData.phenotypes && diseaseRestData.phenotypes.length) {
+                                                    this.getHpoTerm(diseaseRestData.phenotypes, 'case-control');
+                                                }
+                                                caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
+                                                caseControlEvidence['diseaseTerm'] = diseaseRestData.term ? diseaseRestData.term : '';
+                                                caseControlEvidence['diseaseFreetext'] = diseaseRestData.hasOwnProperty('freetext') ? diseaseRestData.freetext : false;
+                                                caseControlEvidence['diseasePhenotypes'] = diseaseRestData.phenotypes && diseaseRestData.phenotypes.length ? diseaseRestData.phenotypes : [];
+                                                // Put object into array
+                                                caseControlEvidenceList.push(caseControlEvidence);
+                                                this.setState({caseControlEvidenceList: caseControlEvidenceList});
+                                            }).catch(err => {
+                                                console.log('Error in fetching rest data =: %o', err);
+                                            });
+                                        } else {
                                             // Get the HPO terms given a list of HPO IDs
                                             // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                                            if (diseaseRestData.phenotypes && diseaseRestData.phenotypes.length) {
-                                                this.getHpoTerm(diseaseRestData.phenotypes, 'case-control');
+                                            if (caseControl.caseCohort.hpoIdInDiagnosis && caseControl.caseCohort.hpoIdInDiagnosis.length) {
+                                                this.getHpoTerm(caseControl.caseCohort.hpoIdInDiagnosis, 'case-control');
                                             }
-                                            let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
-                                            // Define object key/value pairs
-                                            caseControlEvidence['authors'] = annotation.article.authors;
-                                            caseControlEvidence['pmid'] = annotation.article.pmid;
-                                            caseControlEvidence['pubYear'] = pubDate[1];
-                                            caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
-                                            caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
-                                            caseControlEvidence['caseCohort_numberWithVariant'] = typeof caseControl.caseCohort.numberWithVariant === 'number' ? caseControl.caseCohort.numberWithVariant : null;
-                                            caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = typeof caseControl.caseCohort.numberAllGenotypedSequenced === 'number' ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
-                                            caseControlEvidence['controlCohort_numberWithVariant'] = typeof caseControl.controlCohort.numberWithVariant === 'number' ? caseControl.controlCohort.numberWithVariant : null;
-                                            caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = typeof caseControl.controlCohort.numberAllGenotypedSequenced === 'number' ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
-                                            caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
-                                            caseControlEvidence['explanationForDifference'] = caseControl.explanationForDifference ? caseControl.explanationForDifference : '';
-                                            caseControlEvidence['statisticValueType'] = caseControl.statisticalValues[0].valueType ? caseControl.statisticalValues[0].valueType : '';
-                                            caseControlEvidence['statisticValueTypeOther'] = caseControl.statisticalValues[0].otherType ? caseControl.statisticalValues[0].otherType : '';
-                                            caseControlEvidence['statisticValue'] = caseControl.statisticalValues[0].value ? caseControl.statisticalValues[0].value : null;
-                                            caseControlEvidence['pValue'] = caseControl.pValue ? caseControl.pValue : null;
-                                            caseControlEvidence['confidenceIntervalFrom'] = caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null;
-                                            caseControlEvidence['confidenceIntervalTo'] = caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null;
-                                            caseControlEvidence['score'] = score.hasOwnProperty('score') ? score.score : null;
-
-                                            caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
-                                            caseControlEvidence['diseaseTerm'] = diseaseRestData.term ? diseaseRestData.term : '';
-                                            caseControlEvidence['diseaseFreetext'] = diseaseRestData.hasOwnProperty('freetext') ? diseaseRestData.freetext : false;
-                                            caseControlEvidence['diseasePhenotypes'] = diseaseRestData.phenotypes && diseaseRestData.phenotypes.length ? diseaseRestData.phenotypes : [];
+                                            caseControlEvidence['diseaseId'] = null;
+                                            caseControlEvidence['diseaseTerm'] = '';
+                                            caseControlEvidence['diseaseFreetext'] = false;
+                                            caseControlEvidence['diseasePhenotypes'] = [];
+                                            caseControlEvidence['termsInDiagnosis'] = caseControl.caseCohort.termsInDiagnosis && caseControl.caseCohort.termsInDiagnosis.length ? caseControl.caseCohort.termsInDiagnosis : '';
+                                            caseControlEvidence['hpoIdInDiagnosis'] = caseControl.caseCohort.hpoIdInDiagnosis && caseControl.caseCohort.hpoIdInDiagnosis.length ? caseControl.caseCohort.hpoIdInDiagnosis : [];
                                             // Put object into array
                                             caseControlEvidenceList.push(caseControlEvidence);
                                             this.setState({caseControlEvidenceList: caseControlEvidenceList});
-                                        }).catch(err => {
-                                            console.log('Error in fetching rest data =: %o', err);
-                                        });
+                                        }
+                                        
                                     }
                                 }
                             });
