@@ -303,6 +303,10 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                 }
             }
 
+            let provisionalPage = provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus === 'Approved' ? '/provisional-classification/?gdm=' : '/provisional-curation/?gdm=';
+            let provisionalParam = provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus === 'Approved' ? '' : (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes');
+            let provisionalUrl = provisionalPage + gdm.uuid + provisionalParam;
+
             return (
                 <div>
                     <div className="curation-data-title">
@@ -360,7 +364,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     : null}
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
+                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={provisionalUrl}>Classification Matrix <i className="icon icon-table"></i></a>
                                                         : null
                                                     )
                                                     : null}
