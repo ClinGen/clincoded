@@ -21,10 +21,18 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
      * @param {number} key - unique key
      */
     renderSegregationEvidence(evidence, key) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
         return (
             <tr key={key} className="scored-segregation-evidence">
                 <td className="evidence-reference">
-                    <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
+                    <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-ethnicity">
                     {evidence.ethnicity}

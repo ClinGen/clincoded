@@ -21,13 +21,21 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
      * @param {number} key - unique key
      */
     renderExperimentalEvidence(evidence, key) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
         return (
             <tr key={key} className="scored-experimental-evidence">
                 <td className="evidence-category">
                     <strong>{evidence.evidenceType}</strong> {evidence.evidenceSubtype && evidence.evidenceSubtype.length ? <span>{evidence.evidenceSubtype}</span> : null}
                 </td>
                 <td className="evidence-reference">
-                    <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
+                    <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-explanation">
                     {evidence.explanation}

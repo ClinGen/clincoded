@@ -21,6 +21,14 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
      * @param {number} key - unique key
      */
     renderCaseLevelEvidence(evidence, key) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
         return (
             <tr key={key} className="scored-case-level-evidence">
                 <td className="evidence-variant-type">
@@ -40,7 +48,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     })}
                 </td>
                 <td className="evidence-reference">
-                    <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
+                    <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-sex">
                     {evidence.sex}
