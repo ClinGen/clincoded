@@ -235,6 +235,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 caseLevelEvidence['authors'] = annotation.article.authors;
                                 caseLevelEvidence['pmid'] = annotation.article.pmid;
                                 caseLevelEvidence['pubYear'] = pubDate[1];
+                                caseLevelEvidence['label'] = proband.label ? proband.label : '';
                                 caseLevelEvidence['sex'] = proband.sex ? proband.sex : '';
                                 caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
                                 caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
@@ -357,6 +358,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                         segregationEvidence['authors'] = annotation.article.authors;
                         segregationEvidence['pmid'] = annotation.article.pmid;
                         segregationEvidence['pubYear'] = pubDate[1];
+                        segregationEvidence['label'] = family.label ? family.label : '';
                         segregationEvidence['ethnicity'] = family.ethnicity ? family.ethnicity : '';
                         segregationEvidence['hpoIdInDiagnosis'] = family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length ? family.hpoIdInDiagnosis : [];
                         segregationEvidence['termsInDiagnosis'] = family.termsInDiagnosis && family.termsInDiagnosis.length ? family.termsInDiagnosis : '';
@@ -420,6 +422,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                         caseControlEvidence['authors'] = annotation.article.authors;
                                         caseControlEvidence['pmid'] = annotation.article.pmid;
                                         caseControlEvidence['pubYear'] = pubDate[1];
+                                        caseControlEvidence['label'] = caseControl.label ? caseControl.label : '';
                                         caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
                                         caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
                                         caseControlEvidence['caseCohort_numberWithVariant'] = typeof caseControl.caseCohort.numberWithVariant === 'number' ? caseControl.caseCohort.numberWithVariant : null;
@@ -506,6 +509,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 if ('scoreStatus' in score && (score.scoreStatus !== 'none' || score.scoreStatus !== '')) {
                                     let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
                                     // Define object key/value pairs
+                                    experimentalEvidence['label'] = experimental.label ? experimental.label : '';
                                     experimentalEvidence['evidenceType'] = experimental.evidenceType;
                                     experimentalEvidence['evidenceSubtype'] = this.mapEvidenceSubtype(experimental);
                                     experimentalEvidence['pmid'] = annotation.article.pmid;

@@ -31,6 +31,9 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
         }
         return (
             <tr key={key} className="scored-segregation-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-reference">
                     <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
@@ -110,6 +113,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th>Label</th>
                                     <th>Reference</th>
                                     <th>Family ethnicity</th>
                                     <th>Family phenotypes</th>
@@ -124,7 +128,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     return (self.renderSegregationEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="5" className="total-score-label">Total LOD score:</td>
+                                    <td colSpan="6" className="total-score-label">Total LOD score:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>

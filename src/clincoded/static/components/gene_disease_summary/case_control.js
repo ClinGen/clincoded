@@ -31,6 +31,9 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
         }
         return (
             <tr key={key} className="scored-case-control-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-reference">
                     <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
@@ -132,6 +135,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th rowSpan="2">Label</th>
                                     <th rowSpan="2">Reference (PMID)</th>
                                     <th rowSpan="2">Disease (Case)</th>
                                     <th rowSpan="2">Study type</th>
@@ -156,7 +160,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                     return (self.renderCaseControlEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="12" className="total-score-label">Total points:</td>
+                                    <td colSpan="13" className="total-score-label">Total points:</td>
                                     <td className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>

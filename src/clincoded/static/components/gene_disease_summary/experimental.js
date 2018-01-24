@@ -31,6 +31,9 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
         }
         return (
             <tr key={key} className="scored-experimental-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-category">
                     <strong>{evidence.evidenceType}</strong> {evidence.evidenceSubtype && evidence.evidenceSubtype.length ? <span>{evidence.evidenceSubtype}</span> : null}
                 </td>
@@ -100,6 +103,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th>Label</th>
                                     <th>Experimental category</th>
                                     <th>Reference</th>
                                     <th>Explanation</th>
@@ -113,7 +117,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                                     return (self.renderExperimentalEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="4" className="total-score-label">Total points:</td>
+                                    <td colSpan="5" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>

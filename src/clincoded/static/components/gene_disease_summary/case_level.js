@@ -31,6 +31,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
         }
         return (
             <tr key={key} className="scored-case-level-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-variant-type">
                     {evidence.variantType}
                 </td>
@@ -155,6 +158,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th rowSpan="2">Label</th>
                                     <th rowSpan="2">Variant type</th>
                                     <th rowSpan="2">Variant</th>
                                     <th rowSpan="2">Reference</th>
@@ -181,7 +185,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="14" className="total-score-label">Total points:</td>
+                                    <td colSpan="15" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
