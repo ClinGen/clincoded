@@ -1847,7 +1847,7 @@ var CaseControlViewer = createReactClass({
                                         </div>
 
                                         <div>
-                                            <dt>Case Allele Frequency</dt>
+                                            <dt>Case Frequency</dt>
                                             <dd>{renderAlleleFrequency(caseCohort.numberWithVariant, caseCohort.numberAllGenotypedSequenced, caseCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
@@ -1867,7 +1867,7 @@ var CaseControlViewer = createReactClass({
                                         </div>
 
                                         <div>
-                                            <dt>Case Allele Frequency</dt>
+                                            <dt>Case Frequency</dt>
                                             <dd>{renderAlleleFrequency(controlCohort.numberWithVariant, controlCohort.numberAllGenotypedSequenced, controlCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
