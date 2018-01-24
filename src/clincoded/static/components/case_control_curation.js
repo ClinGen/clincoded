@@ -1417,7 +1417,7 @@ function GroupPower(groupType) {
             <div>
                 <div className="form-group allele-frequency">
                     <div className="col-sm-5">
-                        <span>{type + ' Allele Frequency:'}</span>
+                        <span>{type + ' Frequency:'}</span>
                     </div>
                     <div className="col-sm-7">
                         {alleleFreqDisplay}
@@ -1867,7 +1867,7 @@ var CaseControlViewer = createReactClass({
                                         </div>
 
                                         <div>
-                                            <dt>Case Frequency</dt>
+                                            <dt>Control Frequency</dt>
                                             <dd>{renderAlleleFrequency(controlCohort.numberWithVariant, controlCohort.numberAllGenotypedSequenced, controlCohort.alleleFrequency)}</dd>
                                         </div>
                                     </dl>
