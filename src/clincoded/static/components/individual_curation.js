@@ -72,7 +72,11 @@ const IndividualCuration = createReactClass({
 
     // Called by child function props to update user score obj
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj, scoreError: false, scoreErrorMsg: ''});
+        this.setState({userScoreObj: newUserScoreObj}, () => {
+            if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
+                this.setState({scoreError: false, scoreErrorMsg: ''});
+            }
+        });
     },
 
     // Handle value changes in various form fields
@@ -313,7 +317,7 @@ const IndividualCuration = createReactClass({
          */
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
+            if (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({scoreError: true, scoreErrorMsg: 'A reason is required for the changed score.'});
                 return false;
             }
@@ -1650,7 +1654,11 @@ const IndividualViewer = createReactClass({
 
     // Called by child function props to update user score obj
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj});
+        this.setState({userScoreObj: newUserScoreObj}, () => {
+            if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
+                this.setState({scoreError: false, scoreErrorMsg: ''});
+            }
+        });
     },
 
     // Redirect to Curation-Central page

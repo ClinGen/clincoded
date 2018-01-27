@@ -111,7 +111,11 @@ var ExperimentalCuration = createReactClass({
      * Called by child function props to update user score obj
      */
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj});
+        this.setState({userScoreObj: newUserScoreObj}, () => {
+            if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
+                this.setState({formError: false});
+            }
+        });
     },
 
     /**
@@ -839,7 +843,7 @@ var ExperimentalCuration = createReactClass({
         // Make sure there is an explanation for the score selected differently from the default score
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
+            if (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({formError: true});
                 return false;
             }
@@ -2627,7 +2631,11 @@ const ExperimentalViewer = createReactClass({
 
     // Called by child function props to update user score obj
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj});
+        this.setState({userScoreObj: newUserScoreObj}, () => {
+            if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
+                this.setState({formError: false});
+            }
+        });
     },
 
     // Redirect to Curation-Central page
