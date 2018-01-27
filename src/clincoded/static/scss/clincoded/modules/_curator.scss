@@ -3120,6 +3120,17 @@ table.login-users-interpretations {
                 left: 4px;
             }
         }
+
+        .score-alert-message {
+            margin-top: -18px;
+            padding-left: 12px;
+            padding-right: 0;
+
+            .alert-warning {
+                color: #8a6d3b;
+                padding: 10px 15px;
+            }
+        }
     }
 }
 
