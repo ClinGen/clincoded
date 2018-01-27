@@ -51,7 +51,8 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
             willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
             scoreError: this.props.scoreError, // TRUE if no explanation is given for modified score or no case info type
             scoreErrorMsg: this.props.scoreErrorMsg, // Text string in response to the type of score error
-            scoreAffiliation: null // Affiliation associated with the score
+            scoreAffiliation: null, // Affiliation associated with the score
+            priorScoreStatus: undefined // Placeholder score status for clearing explanation text field given the comparison
         };
     },
 
@@ -157,9 +158,11 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     } else {
                         this.setState({
                             showScoreInput: false,
-                            scoreStatus: scoreStatus ? scoreStatus : null
+                            scoreStatus: scoreStatus ? scoreStatus : null,
+                            scoreExplanation: scoreExplanation ? scoreExplanation : null
                         }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus ? scoreStatus : 'none');
+                            this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
                             this.updateUserScoreObj();
                         });
                     }
@@ -184,15 +187,32 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                 this.setState({
                     showScoreInput: true,
                     showCaseInfoTypeOnly: false,
+                    formError: false,
                     updateDefaultScore: true
-                }, () => {this.updateUserScoreObj();});
+                }, () => {
+                    if (selectedScoreStatus === 'Score' && !this.state.caseInfoType) {
+                        this.refs.scoreExplanation.resetValue();
+                    }
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue() && this.state.priorScoreStatus === 'Contradicts') {
+                        this.refs.scoreExplanation.resetValue();
+                        this.setState({priorScoreStatus: undefined});
+                    }
+                    this.updateUserScoreObj();
+                });
             } else if (selectedScoreStatus === 'Supports' || (selectedScoreStatus === 'Review' && modeInheritanceType.length < 1)) {
                 this.setState({
                     showScoreInput: true,
                     showCaseInfoTypeOnly: true
-                }, () => {this.updateUserScoreObj();});
+                }, () => {
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue() && this.state.priorScoreStatus === 'Contradicts') {
+                        this.refs.scoreExplanation.resetValue();
+                        this.setState({priorScoreStatus: undefined});
+                    }
+                    this.updateUserScoreObj();
+                });
             } else {
                 this.setState({
+                    scoreRange: [],
                     showScoreInput: false,
                     showCaseInfoTypeOnly: false,
                     willNotCountScore: false,
@@ -200,8 +220,15 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     defaultScore: null,
                     modifiedScore: null,
                     scoreExplanation: null,
-                    requiredScoreExplanation: false
-                }, () => {this.updateUserScoreObj();});
+                    requiredScoreExplanation: false,
+                    formError: false,
+                    priorScoreStatus: this.state.scoreStatus === 'Contradicts' ? 'Contradicts' : undefined
+                }, () => {
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue()) {
+                        this.refs.scoreExplanation.resetValue();
+                    }
+                    this.updateUserScoreObj();
+                });
             }
         }
     },
@@ -219,7 +246,8 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     defaultScore: calcDefaultScore,
                     modifiedScore: null,
                     scoreExplanation: null,
-                    requiredScoreExplanation: false
+                    requiredScoreExplanation: false,
+                    formError: false
                 }, () => {
                     let calcScoreRange = this.getScoreRange(modeInheritanceType, selectedCaseInfoType, calcDefaultScore);
                     this.setState({scoreRange: calcScoreRange}, () => {
@@ -239,9 +267,12 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     modifiedScore: null,
                     scoreRange: [],
                     scoreExplanation: null,
-                    requiredScoreExplanation: false
+                    requiredScoreExplanation: false,
+                    formError: false
                 }, () => {
-                    this.refs.scoreRange.resetValue();
+                    if (this.refs.scoreRange && this.refs.scoreRange.getValue()) {
+                        this.refs.scoreRange.resetValue();
+                    }
                     this.refs.scoreExplanation.resetValue();
                     this.updateUserScoreObj();
                 });
@@ -276,7 +307,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         if (this.refs.scoreExplanation) {
             // Parse the score explanation entered by the curator
             let scoreExplanation = this.refs.scoreExplanation.getValue();
-            this.setState({scoreExplanation: scoreExplanation}, () => {
+            this.setState({scoreExplanation: scoreExplanation, formError: false}, () => {
                 this.updateUserScoreObj();
             });
         }
@@ -497,10 +528,14 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                         <option value="Contradicts">Contradicts</option>
                     </Input>
                     {disableScoreStatus ?
-                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Proband must be associated with at least one variant to Score this evidence.</p></div>
+                        <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                            <p className="alert alert-warning"><i className="icon icon-info-circle"></i> Proband must be associated with at least one variant to Score this evidence.</p>
+                        </div>
                         : null}
                     {willNotCountScore ?
-                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
+                        <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                            <p className="alert alert-warning"><i className="icon icon-info-circle"></i> This is marked with the status "Review" and will not be included in the final score.</p>
+                        </div>
                         : null}
                     {showScoreInput ?
                         <div>
@@ -529,15 +564,24 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                                             return <option key={i} value={score}>{score}</option>;
                                         })}
                                     </Input>
-                                    <Input type="textarea" ref="scoreExplanation" required={requiredScoreExplanation} inputDisabled={!requiredScoreExplanation}
-                                        label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
-                                        value={scoreExplanation} handleChange={this.handleScoreExplanation}
-                                        error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
-                                        placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
-                                        rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                                    {scoreError ?
-                                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">{this.state.scoreErrorMsg}</p></div>
-                                        : null}
+                                </div>
+                                : null}
+                        </div>
+                        : null}
+                    {scoreStatus !== 'none' ?
+                        <div>
+                            <Input type="textarea" ref="scoreExplanation" required={requiredScoreExplanation} inputDisabled={scoreStatus === 'Score' && caseInfoType === 'none'}
+                                value={scoreExplanation} handleChange={this.handleScoreExplanation}
+                                label={<span>Explanation:{scoreStatus === 'Score' || (scoreStatus === 'Review' && modeInheritanceType.length) ?
+                                    <i>(<strong>Required</strong> when selecting score different from default score)</i>
+                                    : null}</span>}
+                                placeholder={scoreStatus === 'Score' || (scoreStatus === 'Review' && modeInheritanceType.length) ?
+                                    'Note: If you selected a score different from the default score, you must provide a reason for the change here.'
+                                    : null}
+                                rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                            {scoreError ?
+                                <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                                    <p className="alert alert-warning"><i className="icon icon-exclamation-triangle"></i> {this.state.scoreErrorMsg}</p>
                                 </div>
                                 : null}
                         </div>
