@@ -5413,5 +5413,41 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "rkaram@ambrygen.com",
+        "first_name": "Rachid",
+        "last_name": "Karam",
+        "uuid": "e44d05bb-d061-4d6d-8359-95e4d368996c",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10014"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "ischrader@bccancer.bc.ca",
+        "first_name": "Intan",
+        "last_name": "Schrader",
+        "uuid": "28066fd9-dd6c-4277-8e2d-e6f6708d91d6",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10014"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
