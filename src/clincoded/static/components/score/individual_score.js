@@ -22,7 +22,10 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         evidence: PropTypes.object, // Individual, Experimental or Case Control
         modeInheritance: PropTypes.string, // Mode of Inheritance
         evidenceType: PropTypes.string, // 'Individual', 'Experimental' or 'Case Control'
-        variantInfo: PropTypes.object, // Variant count for Individual evidence
+        variantInfo: PropTypes.oneOfType([ // Variant count for Individual evidence: object if on curation form, or array if on view page
+            PropTypes.object,
+            PropTypes.array
+        ]),
         handleUserScoreObj: PropTypes.func, // Function to call create/update score object
         scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         submitBusy: PropTypes.bool, // TRUE while the form submit is running
@@ -469,11 +472,11 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         let gdmUuid = this.props.gdmUuid ? this.props.gdmUuid : '';
         let pmid = this.props.pmid;
         let affiliation = this.props.affiliation;
-        let userUuid = this.props.session.user_properties.uuid;
+        let userUuid = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.uuid : '';
         return (
             <span className="variant-gene-impact-curation-links-wrapper">
                 <strong>Curate Variant's Gene Impact:</strong>
-                {Object.values(variants).map((variant, i) => {
+                {variants.map((variant, i) => {
                     // See if the variant has a pathogenicity curated in the current GDM
                     let userPathogenicity = null, matchingPathogenicity;
                     let inCurrentGdm = _(variant.associatedPathogenicities).find(function(pathogenicity) {
@@ -525,7 +528,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         let disableScoreStatus = this.state.disableScoreStatus;
         let willNotCountScore = this.state.willNotCountScore;
         let scoreError = this.state.scoreError;
-        let variants = this.state.variantInfo;
+        let variants = this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0 ? Object.values(this.state.variantInfo) : (this.state.variantInfo.length ? this.state.variantInfo : []);
 
         // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
         let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
@@ -538,7 +541,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                             The gene impact for each variant associated with this proband must be specified in order to score this proband (see variant(s) and
                             links to curating their gene impact in variant section for this Individual, above).
                             <br />
-                            {variants && Object.keys(variants).length > 0 ? this.renderVariantCurationLinks(variants) : null}
+                            {variants.length ? this.renderVariantCurationLinks(variants) : null}
                         </p>
                     </div>
                     <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue={scoreStatus}
