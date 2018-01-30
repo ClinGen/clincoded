@@ -3229,6 +3229,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10013"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
