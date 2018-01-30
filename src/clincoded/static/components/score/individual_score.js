@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, X_LINKED } from './constants/evidence_types';
 import CASE_INFO_TYPES from './constants/case_info_types';
@@ -10,6 +11,7 @@ import { defaultScore } from './helpers/default_score';
 import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 import { affiliationScore } from './helpers/affiliation_score';
+import { getPathogenicityFromVariant } from '../curator'
 
 // Render scoring panel in Gene Curation Interface
 const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
@@ -26,7 +28,9 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         submitBusy: PropTypes.bool, // TRUE while the form submit is running
         scoreError: PropTypes.bool, // TRUE if no explanation is given for modified score or no case info type
         scoreErrorMsg: PropTypes.string, // Text string in response to the type of score error
-        affiliation: PropTypes.object // Affiliation object passed from parent
+        affiliation: PropTypes.object, // Affiliation object passed from parent
+        gdmUuid: PropTypes.string,
+        pmid: PropTypes.string
     },
 
     getInitialState() {
@@ -461,6 +465,48 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         return calcScoreRange;
     },
 
+    renderVariantCurationLinks(variants) {
+        let gdmUuid = this.props.gdmUuid ? this.props.gdmUuid : '';
+        let pmid = this.props.pmid;
+        let affiliation = this.props.affiliation;
+        let userUuid = this.props.session.user_properties.uuid;
+        return (
+            <span className="variant-gene-impact-curation-links-wrapper">
+                <strong>Curate Variant's Gene Impact:</strong>
+                {Object.values(variants).map((variant, i) => {
+                    // See if the variant has a pathogenicity curated in the current GDM
+                    let userPathogenicity = null, matchingPathogenicity;
+                    let inCurrentGdm = _(variant.associatedPathogenicities).find(function(pathogenicity) {
+                        let matchingGdm = _(pathogenicity.associatedGdm).find(function(associatedGdm) {
+                            return associatedGdm.uuid === gdmUuid;
+                        });
+                        if (matchingGdm) {
+                            matchingPathogenicity = pathogenicity;
+                        }
+                        return !!matchingGdm;
+                    });
+
+                    if (inCurrentGdm) {
+                        userPathogenicity = getPathogenicityFromVariant(gdm, userUuid, variant.uuid, affiliation);
+                    }
+                    inCurrentGdm = userPathogenicity ? true : false;
+
+                    let variantCurationUrl = '/variant-curation/?all&gdm=' + gdmUuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid;
+                    variantCurationUrl += affiliation ? '&affiliation=' + affiliation.affiliation_id : (userUuid ? '&user=' + userUuid : '');
+                    variantCurationUrl += userPathogenicity ? '&pathogenicity=' + userPathogenicity.uuid : '';
+                            
+                    return (
+                        <span key={i} className="variant-gene-impact-curation-link-item">
+                            <a className="variant-gene-impact-curation-link" href={variantCurationUrl} target="_blank">
+                                {variant.clinvarVariantTitle ? <span>{variant.clinvarVariantTitle}</span> : <span>{variant.grch38} (GRCh38)</span>}
+                            </a>
+                        </span>
+                    );
+                })}
+            </span>
+        );
+    },
+
     render() {
         // states
         let evidenceScores = this.state.evidenceScores;
@@ -479,14 +525,22 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         let disableScoreStatus = this.state.disableScoreStatus;
         let willNotCountScore = this.state.willNotCountScore;
         let scoreError = this.state.scoreError;
+        let variants = this.state.variantInfo;
 
         // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
         let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
- 
+
         return (
             <div>
                 <div className="row">
-                    <div><p className="alert alert-warning">The gene impact for each variant associated with this proband must be specified in order to score this proband (see variant(s) and links to curating their gene impact in variant section for this Individual, above).</p></div>
+                    <div>
+                        <p className="alert alert-warning">
+                            The gene impact for each variant associated with this proband must be specified in order to score this proband (see variant(s) and
+                            links to curating their gene impact in variant section for this Individual, above).
+                            <br />
+                            {variants && Object.keys(variants).length > 0 ? this.renderVariantCurationLinks(variants) : null}
+                        </p>
+                    </div>
                     <Input type="select" ref="scoreStatus" label="Select Status:" defaultValue={scoreStatus}
                         value={scoreStatus} handleChange={this.handleScoreStatusChange} inputDisabled={disableScoreStatus}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
