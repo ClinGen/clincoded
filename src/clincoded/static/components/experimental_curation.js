@@ -2186,21 +2186,21 @@ function TypeModelSystems() {
                         <option value="Chimpanzee (Pan troglodytes) 9598">Chimpanzee (Pan troglodytes) 9598</option>
                         <option value="Chlamydomonas (Chlamydomonas reinhardtii) 3055">Chlamydomonas (Chlamydomonas reinhardtii) 3055</option>
                         <option value="Cow (Bos taurus) 9913">Cow (Bos taurus) 9913</option>
-                        <option value="Dog (Canis lupus familaris) 9615">Dog (Canis lupus familaris) 9615</option>
+                        <option value="Dog (Canis lupus familiaris) 9615">Dog (Canis lupus familiaris) 9615</option>
                         <option value="Fission yeast (Schizosaccharomyces pombe) 4896">Fission yeast (Schizosaccharomyces pombe) 4896</option>
                         <option value="Frog (Xenopus) 262014">Frog (Xenopus) 262014</option>
                         <option value="Fruit fly (Drosophila) 7215">Fruit fly (Drosophila) 7215</option>
-                        <option value="Gerbil (Gerbilinae) 10045">Gerbil (Gerbilinae) 10045</option>
+                        <option value="Gerbil (Gerbillinae) 10045">Gerbil (Gerbillinae) 10045</option>
                         <option value="Guinea pig (Cavia porcellus) 10141">Guinea pig (Cavia porcellus) 10141</option>
                         <option value="Hamster (Cricetinae) 10026">Hamster (Cricetinae) 10026</option>
                         <option value="Macaque (Macaca) 9539">Macaque (Macaca) 9539</option>
                         <option value="Mouse (Mus musculus) 10090">Mouse (Mus musculus) 10090</option>
                         <option value="Pig (Sus scrofa) 9823">Pig (Sus scrofa) 9823</option>
-                        <option value="Rabbit (Oryctolagus crunicu) 9986">Rabbit (Oryctolagus crunicu) 9986</option>
+                        <option value="Rabbit (Oryctolagus cuniculus) 9986">Rabbit (Oryctolagus cuniculus) 9986</option>
                         <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
-                        <option value="Round worm (Carnorhabditis elegans) 6239">Round worm (Carnorhabditis elegans) 6239</option>
+                        <option value="Round worm (Caenorhabditis elegans) 6239">Round worm (Caenorhabditis elegans) 6239</option>
                         <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
-                        <option value="Zebrafish (Daanio rerio) 7955">Zebrafish (Daanio rerio) 7955</option>
+                        <option value="Zebrafish (Danio rerio) 7955">Zebrafish (Danio rerio) 7955</option>
                     </Input>
                 </div>
                 : null}
@@ -2341,21 +2341,21 @@ function TypeRescue() {
                         <option value="Chimpanzee (Pan troglodytes) 9598">Chimpanzee (Pan troglodytes) 9598</option>
                         <option value="Chlamydomonas (Chlamydomonas reinhardtii) 3055">Chlamydomonas (Chlamydomonas reinhardtii) 3055</option>
                         <option value="Cow (Bos taurus) 9913">Cow (Bos taurus) 9913</option>
-                        <option value="Dog (Canis lupus familaris) 9615">Dog (Canis lupus familaris) 9615</option>
+                        <option value="Dog (Canis lupus familiaris) 9615">Dog (Canis lupus familiaris) 9615</option>
                         <option value="Fission yeast (Schizosaccharomyces pombe) 4896">Fission yeast (Schizosaccharomyces pombe) 4896</option>
                         <option value="Frog (Xenopus) 262014">Frog (Xenopus) 262014</option>
                         <option value="Fruit fly (Drosophila) 7215">Fruit fly (Drosophila) 7215</option>
-                        <option value="Gerbil (Gerbilinae) 10045">Gerbil (Gerbilinae) 10045</option>
+                        <option value="Gerbil (Gerbillinae) 10045">Gerbil (Gerbillinae) 10045</option>
                         <option value="Guinea pig (Cavia porcellus) 10141">Guinea pig (Cavia porcellus) 10141</option>
                         <option value="Hamster (Cricetinae) 10026">Hamster (Cricetinae) 10026</option>
                         <option value="Macaque (Macaca) 9539">Macaque (Macaca) 9539</option>
                         <option value="Mouse (Mus musculus) 10090">Mouse (Mus musculus) 10090</option>
                         <option value="Pig (Sus scrofa) 9823">Pig (Sus scrofa) 9823</option>
-                        <option value="Rabbit (Oryctolagus crunicu) 9986">Rabbit (Oryctolagus crunicu) 9986</option>
+                        <option value="Rabbit (Oryctolagus cuniculus) 9986">Rabbit (Oryctolagus cuniculus) 9986</option>
                         <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
-                        <option value="Round worm (Carnorhabditis elegans) 6239">Round worm (Carnorhabditis elegans) 6239</option>
+                        <option value="Round worm (Caenorhabditis elegans) 6239">Round worm (Caenorhabditis elegans) 6239</option>
                         <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
-                        <option value="Zebrafish (Daanio rerio) 7955">Zebrafish (Daanio rerio) 7955</option>
+                        <option value="Zebrafish (Danio rerio) 7955">Zebrafish (Danio rerio) 7955</option>
                     </Input>
                 </div>
                 : null}
