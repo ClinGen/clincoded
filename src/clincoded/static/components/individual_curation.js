@@ -2029,7 +2029,8 @@ const IndividualViewer = createReactClass({
                                     {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedIndividual) || (!isEvidenceScored && !affiliation && userIndividual) ?
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
+                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation}
+                                            variantInfo={variants} gdmUuid={tempGdm && tempGdm.uuid ? tempGdm.uuid : null} pmid={tempPmid ? tempPmid : null} />
                                         : null}
                                     {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">
