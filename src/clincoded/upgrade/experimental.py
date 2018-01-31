@@ -110,3 +110,33 @@ def experimental_3_4(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+
+@upgrade_step('experimental', '4', '5')
+def experimental_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1482
+    if 'modelSystems' in value:
+        if 'nonHumanModel' in value['modelSystems']:
+            if value['modelSystems']['nonHumanModel'] == 'Dog (Canis lupus familaris) 9615':
+                value['modelSystems']['nonHumanModel'] = 'Dog (Canis lupus familiaris) 9615'
+            if value['modelSystems']['nonHumanModel'] == 'Gerbil (Gerbilinae) 10045':
+                value['modelSystems']['nonHumanModel'] = 'Gerbil (Gerbillinae) 10045'
+            if value['modelSystems']['nonHumanModel'] == 'Rabbit (Oryctolagus crunicu) 9986':
+                value['modelSystems']['nonHumanModel'] = 'Rabbit (Oryctolagus cuniculus) 9986'
+            if value['modelSystems']['nonHumanModel'] == 'Round worm (Carnorhabditis elegans) 6239':
+                value['modelSystems']['nonHumanModel'] = 'Round worm (Caenorhabditis elegans) 6239'
+            if value['modelSystems']['nonHumanModel'] == 'Zebrafish (Daanio rerio) 7955':
+                value['modelSystems']['nonHumanModel'] = 'Zebrafish (Danio rerio) 7955'
+
+    if 'rescue' in value:
+        if 'nonHumanModel' in value['rescue']:
+            if value['rescue']['nonHumanModel'] == 'Dog (Canis lupus familaris) 9615':
+                value['rescue']['nonHumanModel'] = 'Dog (Canis lupus familiaris) 9615'
+            if value['rescue']['nonHumanModel'] == 'Gerbil (Gerbilinae) 10045':
+                value['rescue']['nonHumanModel'] = 'Gerbil (Gerbillinae) 10045'
+            if value['rescue']['nonHumanModel'] == 'Rabbit (Oryctolagus crunicu) 9986':
+                value['rescue']['nonHumanModel'] = 'Rabbit (Oryctolagus cuniculus) 9986'
+            if value['rescue']['nonHumanModel'] == 'Round worm (Carnorhabditis elegans) 6239':
+                value['rescue']['nonHumanModel'] = 'Round worm (Caenorhabditis elegans) 6239'
+            if value['rescue']['nonHumanModel'] == 'Zebrafish (Daanio rerio) 7955':
+                value['rescue']['nonHumanModel'] = 'Zebrafish (Danio rerio) 7955'
