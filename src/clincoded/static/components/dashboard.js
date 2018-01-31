@@ -55,7 +55,7 @@ var Dashboard = createReactClass({
     setUserData: function(props) {
         // sets the display name and curator status
         this.setState({
-            userName: props.first_name,
+            userName: props.first_name && props.last_name ? props.first_name + ' ' + props.last_name : '',
             userStatus: props.job_title,
             lastLogin: ''
         });
