@@ -3037,6 +3037,10 @@ table.login-users-interpretations {
     .panel-body.panel-std {
         padding-top: 25px;
 
+        .variant-gene-impact-curation-link-item {
+            margin-left: 15px;
+        }
+
         label i {
             display: block;
             font-weight: normal;
@@ -3070,6 +3074,10 @@ table.login-users-interpretations {
 .panel.proband-evidence-score-viewer {
     .panel-body.panel-std {
         padding-top: 25px;
+
+        .variant-gene-impact-curation-link-item {
+            margin-left: 15px;
+        }
 
         label i {
             display: block;
