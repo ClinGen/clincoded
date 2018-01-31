@@ -21,10 +21,21 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
      * @param {number} key - unique key
      */
     renderSegregationEvidence(evidence, key) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
         return (
             <tr key={key} className="scored-segregation-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-reference">
-                    <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
+                    <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-ethnicity">
                     {evidence.ethnicity}
@@ -96,12 +107,13 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
             <div className="evidence-summary panel-case-level-segregation">
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Genetic Evidence: Case Level (family segregation information without proband data)</h3>
+                        <h3 className="panel-title">Genetic Evidence: Case Level (family segregation information without proband data or scored proband data)</h3>
                     </div>
                     {sortedEvidenceList && sortedEvidenceList.length ?
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th>Label</th>
                                     <th>Reference</th>
                                     <th>Family ethnicity</th>
                                     <th>Family phenotypes</th>
@@ -116,7 +128,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     return (self.renderSegregationEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="5" className="total-score-label">Total LOD score:</td>
+                                    <td colSpan="6" className="total-score-label">Total LOD score:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
