@@ -1943,13 +1943,13 @@ function TypeExpression() {
             <p className="col-sm-7 col-sm-offset-5">
                 Search the <a href={external_url_map['Uberon']} target="_blank">Uberon</a> using the OLS.
             </p>
-            <Input type="text" ref="organOfTissue" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(Uberon ID)</span>:</span>}
+            <Input type="text" ref="organOfTissue" label={<span>Organ or tissue relevant to disease <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
                 value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228" inputDisabled={this.cv.othersAssessed}
                 handleChange={this.handleChange} required={!this.state.expressionOT_FreeText}
                 customErrorMsg="Enter Uberon ID and/or free text" />
-            <Input type="textarea" ref="organOfTissueFreeText" label={<span>Organ of tissue relevant to disease, in which gene expression is examined in patient <span className="normal">(free text)</span>:</span>}
+            <Input type="textarea" ref="organOfTissueFreeText" label={<span>Organ or tissue relevant to disease <span className="normal">(free text)</span>:</span>}
                 error={this.getFormError('organOfTissueFreeText')} clearError={this.clrFormErrors.bind(null, 'organOfTissueFreeText')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 value={EXP_organOfTissueFreeText} inputDisabled={this.cv.othersAssessed} row="2"
@@ -2948,12 +2948,12 @@ const ExperimentalViewer = createReactClass({
                             <Panel title="Expression" panelClassName="panel-data">
                                 <dl className="dl-horizontal">
                                     <div>
-                                        <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient</dt>
+                                        <dt>Organ or tissue relevant to disease (Uberon ID)</dt>
                                         <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue.replace(':', '_')} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
                                     </div>
 
                                     <div>
-                                        <dt>Organ of tissue relevant to disease, in which gene expression is examined in patient (free text)</dt>
+                                        <dt>Organ or tissue relevant to disease (free text)</dt>
                                         <dd>{experimental.expression.organOfTissueFreeText ? experimental.expression.organOfTissueFreeText : null}</dd>
                                     </div>
                                 </dl>
