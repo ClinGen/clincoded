@@ -128,9 +128,11 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     } else {
                         this.setState({
                             showScoreInput: false,
-                            scoreStatus: scoreStatus ? scoreStatus : null
+                            scoreStatus: scoreStatus ? scoreStatus : null,
+                            scoreExplanation: scoreExplanation ? scoreExplanation : null
                         }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus ? scoreStatus : 'none');
+                            this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
                             this.updateUserScoreObj();
                         });
                     }
@@ -158,6 +160,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     modifiedScore: null,
                     scoreExplanation: null,
                     requiredScoreExplanation: false,
+                    formError: false,
                     updateDefaultScore: true
                 }, () => {
                     let calcScoreRange = this.getScoreRange(experimentalEvidenceType, calcDefaultScore);
@@ -182,6 +185,9 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     requiredScoreExplanation: false,
                     formError: false
                 }, () => {
+                    if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue()) {
+                        this.refs.scoreExplanation.resetValue();
+                    }
                     this.updateUserScoreObj();
                 });
             }
@@ -422,7 +428,9 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                         <option value="Contradicts">Contradicts</option>
                     </Input>
                     {willNotCountScore ?
-                        <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">Note: This is marked with the status "Review" and will not be included in the final score.</p></div>
+                        <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                            <p className="alert alert-warning"><i className="icon icon-info-circle"></i> This is marked with the status "Review" and will not be included in the final score.</p>
+                        </div>
                         : null}
                     {showScoreInput ?
                         <div>
@@ -440,14 +448,19 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                                     return <option key={i} value={score}>{score}</option>;
                                 })}
                             </Input>
-                            <Input type="textarea" ref="scoreExplanation" required={requiredScoreExplanation} inputDisabled={!requiredScoreExplanation}
-                                label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for selecting different score)</i></span>}
+                        </div>
+                        : null}
+                    {scoreStatus !== 'none' ?
+                        <div>
+                            <Input type="textarea" ref="scoreExplanation" required={requiredScoreExplanation}
+                                label={<span>Explanation:{scoreStatus !== 'Contradicts' ? <i>(<strong>Required</strong> when selecting score different from default score)</i> : null}</span>}
                                 value={scoreExplanation} handleChange={this.handleScoreExplanation}
-                                error={this.getFormError('scoreExplanation')} clearError={this.clrFormErrors.bind(null, 'scoreExplanation')}
                                 placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
                                 rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                             {formError ?
-                                <div className="col-sm-7 col-sm-offset-5"><p className="alert alert-warning">A reason is required for the changed score.</p></div>
+                                <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                                    <p className="alert alert-warning"><i className="icon icon-exclamation-triangle"></i> A reason is required for the changed score.</p>
+                                </div>
                                 : null}
                         </div>
                         : null}
