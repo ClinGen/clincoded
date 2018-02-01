@@ -12,6 +12,7 @@ import { showActivityIndicator } from '../../activity_indicator';
 import { parseKeyValue } from '../helpers/parse_key_value';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
+import { ContextualHelp } from '../../../libs/bootstrap/contextual_help';
 import { findDiffKeyValuesMixin } from './shared/find_diff';
 import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
@@ -874,17 +875,22 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     // Method to render ExAC/gnomAD population table header content
     renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, singleNucleotide, response, datasetName) {
-        let datasetVariant = '';
+        let datasetInfo, datasetVariant = '';
         let datasetLink;
 
         if (datasetCheck) {
-            datasetVariant = dataset._extra.chrom + ':' + dataset._extra.pos + ' ' + dataset._extra.ref + '/' + dataset._extra.alt + ' (GRCh37)';
-        } else {
+            datasetVariant = ' ' + dataset._extra.chrom + ':' + dataset._extra.pos + ' ' + dataset._extra.ref + '/' + dataset._extra.alt + ' (GRCh37)';
+        } else if (response) {
             let alleleData = this.parseAlleleMyVariant(response);
 
             if (Object.keys(alleleData).length) {
-                datasetVariant = alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt + ' (GRCh37)';
+                datasetVariant = ' ' + alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt + ' (GRCh37)';
             }
+        }
+
+        if (datasetName === 'gnomAD') {
+            datasetInfo = <ContextualHelp content="Combined 'Exomes' and 'Genomes' gnomAD data" />;
+            datasetVariant += ' ';
         }
 
         if (datasetCheck && !loading_myVariantInfo && singleNucleotide) {
@@ -894,7 +900,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
 
         return (
-            <h3 className="panel-title">{datasetName} {datasetVariant}
+            <h3 className="panel-title">{datasetName}{datasetVariant}{datasetInfo}
                 <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                 {datasetLink}
             </h3>
