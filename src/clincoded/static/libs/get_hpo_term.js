@@ -17,7 +17,7 @@ class HpoTerms extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            hpoTermList: undefined
+            hpoTermList: null
         };
     }
 
