@@ -132,5 +132,21 @@
                 }
             }
         }
+
+        .hpo-terms-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+
+            .hpo-term-item {
+                span:after {
+                    content: ',';
+                }
+
+                &:last-child span:after {
+                    content: '';
+                }
+            }
+        }
     }
 }
