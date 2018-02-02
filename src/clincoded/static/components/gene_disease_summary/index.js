@@ -237,6 +237,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';
                                 caseLevelEvidence['previousTestingDescription'] = proband.method && proband.method.previousTestingDescription ? proband.method.previousTestingDescription : '';
                                 caseLevelEvidence['genotypingMethods'] = proband.method && proband.method.genotypingMethods && proband.method.genotypingMethods.length ? proband.method.genotypingMethods : [];
+                                caseLevelEvidence['specificMutationsGenotypedMethod'] = proband.method && proband.method.specificMutationsGenotypedMethod ? proband.method.specificMutationsGenotypedMethod : '';
                                 caseLevelEvidence['scoreStatus'] = score.scoreStatus;
                                 caseLevelEvidence['defaultScore'] = score.calculatedScore ? score.calculatedScore : null;
                                 caseLevelEvidence['modifiedScore'] = score.hasOwnProperty('score') ? score.score : null;
