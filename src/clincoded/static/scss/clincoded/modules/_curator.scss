@@ -1506,25 +1506,18 @@
                 color: #333;
             }
 
-            .population .datasource-ExAC .table tfoot td {
-                font-weight: bold;
-            }
-
-            .population .datasource-ExAC .table tbody td,
-            .population .datasource-ExAC .table tfoot td {
-                width: 20%;
-            }
-
+            .population .datasource-ExAC,
             .population .datasource-gnomAD {
-                .panel-body {
-                    .description {
-                        font-style: italic;
-                        margin-bottom: 8px;
-                    }
+                .table tfoot td {
+                    font-weight: bold;
+                }
+            }
 
-                    li {
-                        margin-top: 5px;
-                    }
+            .population .datasource-ExAC,
+            .population .datasource-gnomAD {
+                .table tbody td,
+                .table tfoot td {
+                    width: 20%;
                 }
             }
 
