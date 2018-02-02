@@ -98,9 +98,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                             );
                         })
                         : null}
-                </td>
-                <td className="evidence-genotyping-method-description">
-                    {evidence.specificMutationsGenotypedMethod}
+                    {evidence.specificMutationsGenotypedMethod && evidence.specificMutationsGenotypedMethod.length ?
+                        <span className="genotyping-method-description"><strong>Description of genotyping method:</strong>{evidence.specificMutationsGenotypedMethod}</span>
+                        : null}
                 </td>
                 <td className="evidence-score-status">
                     {<span className={evidence.scoreStatus}>{evidence.scoreStatus}</span>}
@@ -177,7 +177,6 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th colSpan="4">Segregations</th>
                                     <th rowSpan="2">Proband previous testing</th>
                                     <th rowSpan="2">Proband methods of detection</th>
-                                    <th rowSpan="2">Description of genotyping method</th>
                                     <th rowSpan="2">Score status</th>
                                     <th rowSpan="2">Proband points (default points)</th>
                                     <th rowSpan="2">Reason for changed score</th>
@@ -194,7 +193,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="16" className="total-score-label">Total points:</td>
+                                    <td colSpan="15" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
