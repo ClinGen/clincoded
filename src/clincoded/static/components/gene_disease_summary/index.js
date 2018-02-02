@@ -33,9 +33,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             segregationEvidenceList: [],
             caseControlEvidenceList: [],
             experimentalEvidenceList: [],
-            probandHpoTermList: [],
-            segregationHpoTermList: [],
-            caseControlHpoTermList: [],
             preview: queryKeyValue('preview', this.props.href)
         };
     },
@@ -204,11 +201,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 const proband = result.proband;
                                 const score = result.score;
                                 const probandObj = result.probandRestData;
-                                // Get the HPO terms given a list of HPO IDs
-                                // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                                if (proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length) {
-                                    this.getHpoTerm(proband.hpoIdInDiagnosis, 'proband');
-                                }
                                 let annotation = {}, associatedFamily;
                                 // Find the annotation that the proband directly or indirectly belongs to
                                 if (probandObj.associatedAnnotations.length) {
@@ -342,11 +334,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                         const family = result.family;
                         const segregation = result.segregation;
                         const familyObj = result.familyRestData;
-                        // Get the HPO terms given a list of HPO IDs
-                        // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                        if (family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length) {
-                            this.getHpoTerm(family.hpoIdInDiagnosis, 'segregation');
-                        }
                         let annotation = {};
                         // Find the annotation that family directly or indirectly belongs to
                         if (familyObj.associatedAnnotations.length) {
@@ -447,11 +434,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                                 return Promise.resolve({diseaseRestData});
                                             }).then(result => {
                                                 const diseaseRestData = result.diseaseRestData;
-                                                // Get the HPO terms given a list of HPO IDs
-                                                // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                                                if (diseaseRestData.phenotypes && diseaseRestData.phenotypes.length) {
-                                                    this.getHpoTerm(diseaseRestData.phenotypes, 'case-control');
-                                                }
                                                 caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
                                                 caseControlEvidence['diseaseTerm'] = diseaseRestData.term ? diseaseRestData.term : '';
                                                 caseControlEvidence['diseaseFreetext'] = diseaseRestData.hasOwnProperty('freetext') ? diseaseRestData.freetext : false;
@@ -463,11 +445,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                                 console.log('Error in fetching rest data =: %o', err);
                                             });
                                         } else {
-                                            // Get the HPO terms given a list of HPO IDs
-                                            // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                                            if (caseControl.caseCohort.hpoIdInDiagnosis && caseControl.caseCohort.hpoIdInDiagnosis.length) {
-                                                this.getHpoTerm(caseControl.caseCohort.hpoIdInDiagnosis, 'case-control');
-                                            }
                                             caseControlEvidence['diseaseId'] = null;
                                             caseControlEvidence['diseaseTerm'] = '';
                                             caseControlEvidence['diseaseFreetext'] = false;
@@ -478,7 +455,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                             caseControlEvidenceList.push(caseControlEvidence);
                                             this.setState({caseControlEvidenceList: caseControlEvidenceList});
                                         }
-                                        
                                     }
                                 }
                             });
@@ -612,55 +588,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
-     * Method to return the HPO terms from a list of HPO IDs
-     * Dependent on OLS API service to return data
-     * If no data found, simply return the HPO IDs themselves
-     * @param {array} hpoIds - A list of HPO IDs
-     */
-    getHpoTerm(hpoIds, evidenceType) {
-        let hpoTermList = [];
-        hpoIds.forEach(hpo => {
-            let hpoTerm;
-            // Make the OLS REST API call
-            this.getRestData(external_url_map['HPOApi'] + hpo.replace(':', '_')).then(response => {
-                let termLabel = response['_embedded']['terms'][0]['label'];
-                if (termLabel) {
-                    hpoTerm = termLabel;
-                } else {
-                    hpoTerm = hpo + ' (note: term not found)';
-                }
-                hpoTermList.push(hpoTerm);
-                switch (evidenceType) {
-                    case 'proband':
-                        this.setState({probandHpoTermList: hpoTermList});
-                        break;
-                    case 'segregation':
-                        this.setState({segregationHpoTermList: hpoTermList});
-                        break;
-                    case 'case-control':
-                        this.setState({caseControlHpoTermList: hpoTermList});
-                        break;
-                }
-            }).catch(err => {
-                console.warn('Error in fetching HPO data =: %o', err);
-                hpoTerm = hpo + ' (note: term not found)';
-                hpoTermList.push(hpoTerm);
-                switch (evidenceType) {
-                    case 'proband':
-                        this.setState({probandHpoTermList: hpoTermList});
-                        break;
-                    case 'segregation':
-                        this.setState({segregationHpoTermList: hpoTermList});
-                        break;
-                    case 'case-control':
-                        this.setState({caseControlHpoTermList: hpoTermList});
-                        break;
-                }
-            });
-        });
-    },
-
-    /**
      * Method to close current window
      * @param {*} e - Window event
      */
@@ -689,9 +616,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
                     <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
-                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTermList={this.state.probandHpoTermList} />
-                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTermList={this.state.segregationHpoTermList} />
-                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTermList={this.state.caseControlHpoTermList} />
+                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
+                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} />
+                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
                     <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                 </div>
                 <p className="print-info-note">
