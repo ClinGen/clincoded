@@ -102,6 +102,14 @@
                     margin: 6px 0;
                 }
             }
+
+            .evidence-detection-methods {
+                .genotyping-method-description {
+                    strong {
+                        display: block;
+                    }
+                }
+            }
         }
 
         &.panel-experimental {
@@ -129,6 +137,22 @@
     
                 p {
                     margin: 2px 0;
+                }
+            }
+        }
+
+        .hpo-terms-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+
+            .hpo-term-item {
+                span:after {
+                    content: ';';
+                }
+
+                &:last-child span:after {
+                    content: '';
                 }
             }
         }
