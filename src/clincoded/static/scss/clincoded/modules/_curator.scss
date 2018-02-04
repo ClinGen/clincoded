@@ -1519,6 +1519,52 @@
                 .table tfoot td {
                     width: 20%;
                 }
+
+                table.additional-info {
+                    background-color: #eff7fb;
+
+                    tbody td.included-data {
+                        border-top: none;
+                        white-space: nowrap;
+                        width: 10%;
+                    }
+
+                    tbody td.filter {
+                        border-top: none;
+                        width: 90%;
+
+                        ul {
+                            display: inline;
+                            word-break: break-word;
+
+                            li {
+                                border-radius: 3px;
+                                color: #fff;
+                                display: inline;
+                                font-size: 75%;
+                                font-weight: bold;
+                                margin: 0px 3px;
+                                padding: 3px 6px;
+
+                                &.success {
+                                    background-color: #5cb85c;
+                                }
+
+                                &.warning {
+                                    background-color: #f0ad4e;
+                                }
+
+                                &.danger {
+                                    background-color: #d9534f;
+                                }
+                            }
+                        }
+                    }
+
+                    span {
+                        font-weight: bold;
+                    }
+                }
             }
 
             .population .datasource-1000G .table tbody td,
