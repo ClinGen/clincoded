@@ -1506,25 +1506,18 @@
                 color: #333;
             }
 
-            .population .datasource-ExAC .table tfoot td {
-                font-weight: bold;
-            }
-
-            .population .datasource-ExAC .table tbody td,
-            .population .datasource-ExAC .table tfoot td {
-                width: 20%;
-            }
-
+            .population .datasource-ExAC,
             .population .datasource-gnomAD {
-                .panel-body {
-                    .description {
-                        font-style: italic;
-                        margin-bottom: 8px;
-                    }
+                .table tfoot td {
+                    font-weight: bold;
+                }
+            }
 
-                    li {
-                        margin-top: 5px;
-                    }
+            .population .datasource-ExAC,
+            .population .datasource-gnomAD {
+                .table tbody td,
+                .table tfoot td {
+                    width: 20%;
                 }
             }
 
@@ -2016,75 +2009,6 @@
 
 .stand-alone {
     color: $stand-alone;
-}
-
-/**
- * Tooltip Styles for criteria bar
- */
-
-/* Add this attribute to the element that needs a tooltip */
-[data-tooltip] {
-    position: relative;
-    z-index: 2;
-    cursor: pointer;
-}
-
-/* Hide the tooltip content by default */
-[data-tooltip]:before,
-[data-tooltip]:after {
-    visibility: hidden;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Position tooltip above the element */
-[data-tooltip]:before {
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    margin-bottom: 5px;
-    margin-left: -80px;
-    padding: 7px;
-    width: 160px;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    background-color: #000;
-    background-color: hsla(0, 0%, 20%, 0.9);
-    color: #fff;
-    content: attr(data-tooltip);
-    text-align: center;
-    font-size: 12px;
-    font-weight: normal;
-    line-height: 1.2;
-    white-space: normal;
-}
-
-/* Triangle hack to make tooltip look like a speech bubble */
-[data-tooltip]:after {
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    margin-left: -5px;
-    width: 0;
-    border-top: 5px solid #000;
-    border-top: 5px solid hsla(0, 0%, 20%, 0.9);
-    border-right: 5px solid transparent;
-    border-left: 5px solid transparent;
-    content: " ";
-    font-size: 0;
-    line-height: 0;
-}
-
-/* Show tooltip content on hover */
-[data-tooltip]:hover:before,
-[data-tooltip]:hover:after {
-    visibility: visible;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-    opacity: 1;
 }
 
 /* Vertical padding for div */
@@ -3106,6 +3030,10 @@ table.login-users-interpretations {
     .panel-body.panel-std {
         padding-top: 25px;
 
+        .variant-gene-impact-curation-link-item {
+            margin-left: 15px;
+        }
+
         label i {
             display: block;
             font-weight: normal;
@@ -3120,6 +3048,17 @@ table.login-users-interpretations {
                 left: 4px;
             }
         }
+
+        .score-alert-message {
+            margin-top: -18px;
+            padding-left: 12px;
+            padding-right: 0;
+
+            .alert-warning {
+                color: #8a6d3b;
+                padding: 10px 15px;
+            }
+        }
     }
 }
 
@@ -3128,6 +3067,10 @@ table.login-users-interpretations {
 .panel.proband-evidence-score-viewer {
     .panel-body.panel-std {
         padding-top: 25px;
+
+        .variant-gene-impact-curation-link-item {
+            margin-left: 15px;
+        }
 
         label i {
             display: block;

@@ -55,17 +55,17 @@ var Dashboard = createReactClass({
     setUserData: function(props) {
         // sets the display name and curator status
         this.setState({
-            userName: props.first_name,
+            userName: props.first_name && props.last_name ? props.first_name + ' ' + props.last_name : '',
             userStatus: props.job_title,
             lastLogin: ''
         });
     },
 
-    getData: function(session) {
+    getData(user) {
         // get 10 gdms and VCI interpretations created by user
         this.getRestDatas([
-            '/search/?type=gdm&submitted_by.uuid=' + session.user_properties.uuid,
-            '/search/?type=interpretation&submitted_by.uuid=' + session.user_properties.uuid
+            '/search/?type=gdm&submitted_by.uuid=' + user.uuid,
+            '/search/?type=interpretation&submitted_by.uuid=' + user.uuid
         ], null).then(data => {
             var gdmURLs = [], gdmList = [],
                 vciInterpURLs = [], vciInterpList = [];
@@ -172,12 +172,13 @@ var Dashboard = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
-    componentDidMount: function() {
+    componentDidMount() {
+        let user = this.props.session.user_properties;
         let affiliation = this.props.affiliation;
-        if (!affiliation && this.props.session.user_properties) {
-            this.setUserData(this.props.session.user_properties);
-            this.getData(this.props.session);
-            this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
+        if (!affiliation && user) {
+            this.setUserData(user);
+            this.getData(user);
+            this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
                     let filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
@@ -187,7 +188,7 @@ var Dashboard = createReactClass({
         // Invoke getAffiliatedData() if there is affiliation data
         if (affiliation && Object.keys(affiliation).length) {
             this.getAffiliatedData(affiliation);
-            this.getHistories(this.props.session.user_properties, 10, null, affiliation).then(histories => {
+            this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
                     this.setState({histories: histories, historiesLoading: false});
                 }
@@ -195,12 +196,15 @@ var Dashboard = createReactClass({
         }
     },
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
+        let user = nextProps && nextProps.session.user_properties;
         let affiliation = nextProps && nextProps.affiliation;
-        if (nextProps.session.user_properties && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
-            this.setUserData(nextProps.session.user_properties);
-            this.getData(nextProps.session);
-            this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
+        // This 'if' condition is true immediately upon user signing-in
+        // Fetch data associated with the curator only, especially when the curator is not associated with any affiliations
+        if (user && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(user, this.props.session.user_properties)) {
+            this.setUserData(user);
+            this.getData(user);
+            this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
                     let filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
@@ -209,24 +213,26 @@ var Dashboard = createReactClass({
                 }
             });
         }
-        if (!affiliation && nextProps.href.indexOf('dashboard') > -1 && _.isEqual(nextProps.session.user_properties, this.props.session.user_properties)) {
-            this.setUserData(nextProps.session.user_properties);
-            this.getData(nextProps.session);
-            this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
-                if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
-                    this.setState({histories: filteredHistories, historiesLoading: false});
-                } else {
-                    this.setState({histories: [], historiesLoading: false});
-                }
-            });
-        }
-        // Invoke getAffiliatedData() if there is new affiliation data
         if (affiliation && Object.keys(affiliation).length && !_.isEqual(affiliation, this.props.affiliation)) {
+            // Users selects an affiliation, either upon signing-in or from after selecting 'no affiliation'
+            // Invoke getAffiliatedData() to fetch data associated with the affiliation
             this.getAffiliatedData(affiliation);
-            this.getHistories(nextProps.session.user_properties, 10, null, affiliation).then(histories => {
+            this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
                     this.setState({histories: histories, historiesLoading: false});
+                } else {
+                    this.setState({histories: [], historiesLoading: false});
+                }
+            });
+        } else if (!affiliation && !_.isEqual(affiliation, this.props.affiliation)) {
+            // User selects 'no affiliation', either upon signing-in or from  after selecting an affiliation
+            // Fetch data associated with the curator only
+            this.setUserData(user);
+            this.getData(user);
+            this.getHistories(user, 10, null, affiliation).then(histories => {
+                if (histories) {
+                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    this.setState({histories: filteredHistories, historiesLoading: false});
                 } else {
                     this.setState({histories: [], historiesLoading: false});
                 }

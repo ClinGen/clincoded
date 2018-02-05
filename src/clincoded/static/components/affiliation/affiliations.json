@@ -73,5 +73,30 @@
         "affiliation_id": "10015",
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen PAH Working Group"
+    },
+    {
+        "affiliation_id": "10016",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Monogenic Diabetes Expert Panel"
+    },
+    {
+        "affiliation_id": "10017",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Sequence Variant Discrepancy Resolution"
+    },
+    {
+        "affiliation_id": "10018",
+        "affiliation_abbreviation": "UNC",
+        "affiliation_fullname": "UNC Biocuration Core"
+    },
+    {
+        "affiliation_id": "10019",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "Harvard/Geisinger Biocuration Core"
+    },
+    {
+        "affiliation_id": "10020",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Brain Malformations Expert Panel"
     }
 ]

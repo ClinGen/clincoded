@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
+import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
@@ -21,15 +22,40 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
      * @param {number} key - unique key
      */
     renderCaseControlEvidence(evidence, key) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
         return (
             <tr key={key} className="scored-case-control-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-reference">
-                    <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
+                    <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-disease">
-                    <span>{evidence.diseaseTerm}
-                        <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span> : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span>({this.props.hpoTermList.join(', ')})</span> : null)}</span>
-                    </span>
+                    {evidence.diseaseId && evidence.diseaseTerm ?
+                        <span>{evidence.diseaseTerm}
+                            <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span>
+                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br /><strong>HPO term(s):</strong><HpoTerms hpoIds={evidence.diseasePhenotypes} /></span> : null)
+                            }
+                            </span>
+                        </span>
+                        :
+                        <span>
+                            {evidence.hpoIdInDiagnosis.length ?
+                                <span><strong>HPO term(s):</strong>
+                                    <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} />
+                                </span> 
+                                : null}
+                            {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
+                        </span>
+                    }
                 </td>
                 <td className="evidence-study-type">
                     {evidence.studyType}
@@ -117,6 +143,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th rowSpan="2">Label</th>
                                     <th rowSpan="2">Reference (PMID)</th>
                                     <th rowSpan="2">Disease (Case)</th>
                                     <th rowSpan="2">Study type</th>
@@ -141,7 +168,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                     return (self.renderCaseControlEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="12" className="total-score-label">Total points:</td>
+                                    <td colSpan="13" className="total-score-label">Total points:</td>
                                     <td className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
@@ -158,8 +185,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseControl.propTypes = {
-    caseControlEvidenceList: PropTypes.array,
-    hpoTermList: PropTypes.array
+    caseControlEvidenceList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummaryCaseControl;

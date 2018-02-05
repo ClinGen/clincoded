@@ -8,6 +8,7 @@ import url from 'url';
 import { curator_page, history_views, userMatch, queryKeyValue } from '../globals';
 import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
+import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
 import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
 import { ClassificationApproval } from './approval';
@@ -469,7 +470,7 @@ const ProvisionalClassification = createReactClass({
 
     calculateClassifications(totalPoints, replicatedOverTime) {
         let autoClassification = "No Classification";
-        if (totalPoints >= 1 && totalPoints <= 6) {
+        if (totalPoints >= 0.1 && totalPoints <= 6) {
             autoClassification = "Limited";
         } else if (totalPoints > 6 && totalPoints <= 11) {
             autoClassification = "Moderate";
@@ -679,7 +680,7 @@ const ProvisionalClassification = createReactClass({
                                                             <td>Genetic Evidence (0-12 points)</td>
                                                             <td>Experimental Evidence (0-6 points)</td>
                                                             <td>Total Points (0-18 points)</td>
-                                                            <td>Replication Over Time (Yes/No)</td>
+                                                            <td>Replication Over Time (Yes/No) <ContextualHelp content="> 2 pubs w/ convincing evidence over time (>3 yrs)" /></td>
                                                         </tr>
                                                         <tr className="header large bg-gray separator-below">
                                                             <td>Assigned Points</td>
@@ -691,7 +692,7 @@ const ProvisionalClassification = createReactClass({
                                                         <tr className="header large">
                                                             <td colSpan="3" rowSpan="4">Calculated Classification</td>
                                                             <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>LIMITED</td>
-                                                            <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>1-6</td>
+                                                            <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>0.1-6</td>
                                                         </tr>
                                                         <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-emphasis' : null)}>
                                                             <td>MODERATE</td>
