@@ -955,7 +955,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
             // If exome data not provided by myvariant.info, assume there was a "No variant" filter
             if (dataset._extra.hasExomeData) {
-                exomeCheckbox = <i className="icon icon-check-square-o" />;
+                exomeCheckbox = <i className="icon icon-check-circle" />;
 
                 // If filter(s) not provided by myvariant.info, assume there was a "Pass"
                 if (dataset._extra.exome_filter) {
@@ -966,13 +966,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     exomeFilterList.push(<li key="Pass" className="success">Pass</li>);
                 }
             } else {
-                exomeCheckbox = <i className="icon icon-square-o" />;
+                exomeCheckbox = <i className="icon icon-times-circle" />;
                 exomeFilterList.push(<li key="No variant" className="danger">No variant</li>);
             }
 
             // If genome data not provided by myvariant.info, assume there was a "No variant" filter
             if (dataset._extra.hasGenomeData) {
-                genomeCheckbox = <i className="icon icon-check-square-o" />;
+                genomeCheckbox = <i className="icon icon-check-circle" />;
 
                 // If filter(s) not provided by myvariant.info, assume there was a "Pass"
                 if (dataset._extra.genome_filter) {
@@ -983,7 +983,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     genomeFilterList.push(<li key="Pass" className="success">Pass</li>);
                 }
             } else {
-                genomeCheckbox = <i className="icon icon-square-o" />;
+                genomeCheckbox = <i className="icon icon-times-circle" />;
                 genomeFilterList.push(<li key="No variant" className="danger">No variant</li>);
             }
 

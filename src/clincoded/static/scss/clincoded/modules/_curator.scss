@@ -1527,6 +1527,10 @@
                         border-top: none;
                         white-space: nowrap;
                         width: 10%;
+
+                        .icon-times-circle {
+                            color: #888;
+                        }
                     }
 
                     tbody td.filter {
