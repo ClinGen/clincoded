@@ -926,78 +926,85 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
+    // Method to render a single filter status in ExAC/gnomAD population table
+    renderExacGnomadFilter: function(filter, filterKey, filterClass) {
+        return (<li key={filterKey} className={'label label-' + filterClass}>{filter}</li>);
+    },
+
     // Method to render additional information (data sources, filter status) in ExAC/gnomAD population table
+    // If filter(s) not provided by myvariant.info, assume there was a "Pass"; if no data is provided, assume there was a "No variant"
     renderExacGnomadAddlInfo: function(dataset, datasetName) {
         if (datasetName === 'ExAC') {
-            let exacFilterList = [];
-
-            // If filter(s) not provided by myvariant.info, assume there was a "Pass"
-            if (dataset._extra.filter) {
-                dataset._extra.filter.forEach((filter, index) => {
-                    exacFilterList.push(<li key={filter + '-' + index} className="danger">{filter}</li>);
-                });
-            } else {
-                exacFilterList.push(<li key="Pass" className="success">Pass</li>);
-            }
-
             return (
                 <table className="table additional-info">
                     <tbody>
                         <tr>
-                            <td className="filter"><span>Filter:</span> <ul>{exacFilterList}</ul></td>
+                            <td className="filter">
+                                <span>Filter:</span>
+                                <ul>
+                                    {dataset._extra.filter ?
+                                        dataset._extra.filter.map((filter, index) => {
+                                            return (this.renderExacGnomadFilter(filter, (filter + '-' + index), 'danger'));
+                                        })
+                                        :
+                                        this.renderExacGnomadFilter('Pass', 'Pass', 'success')}
+                                </ul>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             );
         } else if (datasetName === 'gnomAD') {
-            let exomeCheckbox, exomeFilterList = [];
-            let genomeCheckbox, genomeFilterList = [];
-
-            // If exome data not provided by myvariant.info, assume there was a "No variant" filter
-            if (dataset._extra.hasExomeData) {
-                exomeCheckbox = <i className="icon icon-check-circle" />;
-
-                // If filter(s) not provided by myvariant.info, assume there was a "Pass"
-                if (dataset._extra.exome_filter) {
-                    dataset._extra.exome_filter.forEach((filter, index) => {
-                        exomeFilterList.push(<li key={filter + '-' + index} className="warning">{filter}</li>);
-                    });
-                } else {
-                    exomeFilterList.push(<li key="Pass" className="success">Pass</li>);
-                }
-            } else {
-                exomeCheckbox = <i className="icon icon-times-circle" />;
-                exomeFilterList.push(<li key="No variant" className="danger">No variant</li>);
-            }
-
-            // If genome data not provided by myvariant.info, assume there was a "No variant" filter
-            if (dataset._extra.hasGenomeData) {
-                genomeCheckbox = <i className="icon icon-check-circle" />;
-
-                // If filter(s) not provided by myvariant.info, assume there was a "Pass"
-                if (dataset._extra.genome_filter) {
-                    dataset._extra.genome_filter.forEach((filter, index) => {
-                        genomeFilterList.push(<li key={filter + '-' + index} className="warning">{filter}</li>);
-                    });
-                } else {
-                    genomeFilterList.push(<li key="Pass" className="success">Pass</li>);
-                }
-            } else {
-                genomeCheckbox = <i className="icon icon-times-circle" />;
-                genomeFilterList.push(<li key="No variant" className="danger">No variant</li>);
-            }
-
             return (
                 <table className="table additional-info">
                     <tbody>
-                        <tr>
-                            <td className="included-data">{exomeCheckbox} <span>Exomes</span></td>
-                            <td className="filter"><span>Filter:</span> <ul>{exomeFilterList}</ul></td>
-                        </tr>
-                        <tr>
-                            <td className="included-data">{genomeCheckbox} <span>Genomes</span></td>
-                            <td className="filter"><span>Filter:</span> <ul>{genomeFilterList}</ul></td>
-                        </tr>
+                        {dataset._extra.hasExomeData ?
+                            <tr>
+                                <td className="included-data"><i className="icon icon-check-circle" /><span>Exomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>
+                                        {dataset._extra.exome_filter ?
+                                            dataset._extra.exome_filter.map((filter, index) => {
+                                                return (this.renderExacGnomadFilter(filter, (filter + '-' + index), 'warning'));
+                                            })
+                                            :
+                                            this.renderExacGnomadFilter('Pass', 'Pass', 'success')}
+                                    </ul>
+                                </td>
+                            </tr>
+                            :
+                            <tr>
+                                <td className="included-data"><i className="icon icon-times-circle" /><span>Exomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>{this.renderExacGnomadFilter('No variant', 'No variant', 'danger')}</ul>
+                                </td>
+                            </tr>
+                        }{dataset._extra.hasGenomeData ?
+                            <tr>
+                                <td className="included-data"><i className="icon icon-check-circle" /><span>Genomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>
+                                        {dataset._extra.genome_filter ?
+                                            dataset._extra.genome_filter.map((filter, index) => {
+                                                return (this.renderExacGnomadFilter(filter, (filter + '-' + index), 'warning'));
+                                            })
+                                            :
+                                            this.renderExacGnomadFilter('Pass', 'Pass', 'success')}
+                                    </ul>
+                                </td>
+                            </tr>
+                            :
+                            <tr>
+                                <td className="included-data"><i className="icon icon-times-circle" /><span>Genomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>{this.renderExacGnomadFilter('No variant', 'No variant', 'danger')}</ul>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             );

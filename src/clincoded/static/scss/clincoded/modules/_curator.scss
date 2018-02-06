@@ -1531,42 +1531,32 @@
                         .icon-times-circle {
                             color: #888;
                         }
+
+                        span {
+                            font-weight: bold;
+                            margin-left: 4px;
+                        }
                     }
 
                     tbody td.filter {
                         border-top: none;
                         width: 90%;
 
+                        span {
+                            font-weight: bold;
+                            margin-right: 4px;
+                        }
+
                         ul {
                             display: inline;
                             word-break: break-word;
 
                             li {
-                                border-radius: 3px;
-                                color: #fff;
-                                display: inline;
-                                font-size: 75%;
-                                font-weight: bold;
                                 margin: 0px 3px;
                                 padding: 3px 6px;
-
-                                &.success {
-                                    background-color: #5cb85c;
-                                }
-
-                                &.warning {
-                                    background-color: #f0ad4e;
-                                }
-
-                                &.danger {
-                                    background-color: #d9534f;
-                                }
+                                white-space: normal;
                             }
                         }
-                    }
-
-                    span {
-                        font-weight: bold;
                     }
                 }
             }
