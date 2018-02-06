@@ -5449,5 +5449,53 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "stheruarumugam@gmail.com",
+        "first_name": "Sivakumaran",
+        "last_name": "Theru Arumugam",
+        "uuid": "51278830-00a4-459d-a0a4-7ea19364da8e",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10007"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "udo.schmidt.us@gmx.de",
+        "first_name": "Udo",
+        "last_name": "Schmidt",
+        "uuid": "26c2ab14-b4e6-4f2b-90b5-d4dd435aa982",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "angela.shogren@gmail.com",
+        "first_name": "Angela",
+        "last_name": "Shogren",
+        "uuid": "9917816d-7ba5-4063-9529-a23205a478c3",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
