@@ -1519,6 +1519,46 @@
                 .table tfoot td {
                     width: 20%;
                 }
+
+                table.additional-info {
+                    background-color: #eff7fb;
+
+                    tbody td.included-data {
+                        border-top: none;
+                        white-space: nowrap;
+                        width: 10%;
+
+                        .icon-times-circle {
+                            color: #888;
+                        }
+
+                        span {
+                            font-weight: bold;
+                            margin-left: 4px;
+                        }
+                    }
+
+                    tbody td.filter {
+                        border-top: none;
+                        width: 90%;
+
+                        span {
+                            font-weight: bold;
+                            margin-right: 4px;
+                        }
+
+                        ul {
+                            display: inline;
+                            word-break: break-word;
+
+                            li {
+                                margin: 0px 3px;
+                                padding: 3px 6px;
+                                white-space: normal;
+                            }
+                        }
+                    }
+                }
             }
 
             .population .datasource-1000G .table tbody td,
