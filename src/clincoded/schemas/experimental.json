@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "label": {
             "title": "Label",
@@ -382,20 +382,20 @@
                         "Chicken (Gallus gallus) 9031",
                         "Chimpanzee (Pan troglodytes) 9598",
                         "Cow (Bos taurus) 9913",
-                        "Dog (Canis lupus familaris) 9615",
+                        "Dog (Canis lupus familiaris) 9615",
                         "Frog (Xenopus) 262014",
                         "Fruit fly (Drosophila) 7215",
-                        "Gerbil (Gerbilinae) 10045",
+                        "Gerbil (Gerbillinae) 10045",
                         "Guinea pig (Cavia porcellus) 10141",
                         "Hamster (Cricetinae) 10026",
                         "Macaque (Macaca) 9539",
                         "Mouse (Mus musculus) 10090",
                         "Pig (Sus scrofa) 9823",
-                        "Rabbit (Oryctolagus crunicu) 9986",
+                        "Rabbit (Oryctolagus cuniculus) 9986",
                         "Rat (Rattus norvegicus) 10116",
-                        "Round worm (Carnorhabditis elegans) 6239",
+                        "Round worm (Caenorhabditis elegans) 6239",
                         "Sheep (Ovis aries) 9940",
-                        "Zebrafish (Daanio rerio) 7955"
+                        "Zebrafish (Danio rerio) 7955"
                     ]
                 },
                 "modelSystemsType": {
@@ -419,21 +419,21 @@
                         "Chimpanzee (Pan troglodytes) 9598",
                         "Chlamydomonas (Chlamydomonas reinhardtii) 3055",
                         "Cow (Bos taurus) 9913",
-                        "Dog (Canis lupus familaris) 9615",
+                        "Dog (Canis lupus familiaris) 9615",
                         "Fission yeast (Schizosaccharomyces pombe) 4896",
                         "Frog (Xenopus) 262014",
                         "Fruit fly (Drosophila) 7215",
-                        "Gerbil (Gerbilinae) 10045",
+                        "Gerbil (Gerbillinae) 10045",
                         "Guinea pig (Cavia porcellus) 10141",
                         "Hamster (Cricetinae) 10026",
                         "Macaque (Macaca) 9539",
                         "Mouse (Mus musculus) 10090",
                         "Pig (Sus scrofa) 9823",
-                        "Rabbit (Oryctolagus crunicu) 9986",
+                        "Rabbit (Oryctolagus cuniculus) 9986",
                         "Rat (Rattus norvegicus) 10116",
-                        "Round worm (Carnorhabditis elegans) 6239",
+                        "Round worm (Caenorhabditis elegans) 6239",
                         "Sheep (Ovis aries) 9940",
-                        "Zebrafish (Daanio rerio) 7955"
+                        "Zebrafish (Danio rerio) 7955"
                     ]
                 },
                 "cellCulture": {
@@ -546,21 +546,21 @@
                         "Chimpanzee (Pan troglodytes) 9598",
                         "Chlamydomonas (Chlamydomonas reinhardtii) 3055",
                         "Cow (Bos taurus) 9913",
-                        "Dog (Canis lupus familaris) 9615",
+                        "Dog (Canis lupus familiaris) 9615",
                         "Fission yeast (Schizosaccharomyces pombe) 4896",
                         "Frog (Xenopus) 262014",
                         "Fruit fly (Drosophila) 7215",
-                        "Gerbil (Gerbilinae) 10045",
+                        "Gerbil (Gerbillinae) 10045",
                         "Guinea pig (Cavia porcellus) 10141",
                         "Hamster (Cricetinae) 10026",
                         "Macaque (Macaca) 9539",
                         "Mouse (Mus musculus) 10090",
                         "Pig (Sus scrofa) 9823",
-                        "Rabbit (Oryctolagus crunicu) 9986",
+                        "Rabbit (Oryctolagus cuniculus) 9986",
                         "Rat (Rattus norvegicus) 10116",
-                        "Round worm (Carnorhabditis elegans) 6239",
+                        "Round worm (Caenorhabditis elegans) 6239",
                         "Sheep (Ovis aries) 9940",
-                        "Zebrafish (Daanio rerio) 7955"
+                        "Zebrafish (Danio rerio) 7955"
                     ]
                 },
                 "cellCulture": {

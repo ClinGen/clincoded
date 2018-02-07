@@ -72,7 +72,11 @@ const IndividualCuration = createReactClass({
 
     // Called by child function props to update user score obj
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj, scoreError: false, scoreErrorMsg: ''});
+        this.setState({userScoreObj: newUserScoreObj}, () => {
+            if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
+                this.setState({scoreError: false, scoreErrorMsg: ''});
+            }
+        });
     },
 
     // Handle value changes in various form fields
@@ -230,7 +234,8 @@ const IndividualCuration = createReactClass({
                                 'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                 'carId': variants[i].carId ? variants[i].carId : null,
                                 'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
-                                'uuid': variants[i].uuid
+                                'uuid': variants[i].uuid,
+                                'associatedPathogenicities': variants[i].associatedPathogenicities && variants[i].associatedPathogenicities.length ? variants[i].associatedPathogenicities : []
                             };
                         }
                     }
@@ -313,7 +318,7 @@ const IndividualCuration = createReactClass({
          */
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
         if (Object.keys(newUserScoreObj).length) {
-            if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
+            if (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
                 this.setState({scoreError: true, scoreErrorMsg: 'A reason is required for the changed score.'});
                 return false;
             }
@@ -765,7 +770,8 @@ const IndividualCuration = createReactClass({
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
                 'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
-                'uuid': data.uuid
+                'uuid': data.uuid,
+                'associatedPathogenicities': data.associatedPathogenicities && data.associatedPathogenicities.length ? data.associatedPathogenicities : []
             };
             variantCount += 1;  // We have one more variant to show
         } else {
@@ -985,7 +991,8 @@ const IndividualCuration = createReactClass({
                                                     <Panel title={LabelPanelTitle(individual, 'Score Proband')} panelClassName="proband-evidence-score" open>
                                                         <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
                                                             variantInfo={variantInfo} session={session} handleUserScoreObj={this.handleUserScoreObj}
-                                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation} />
+                                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation}
+                                                            gdmUuid={gdm && gdm.uuid ? gdm.uuid : null} pmid={pmid ? pmid : null} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1650,7 +1657,11 @@ const IndividualViewer = createReactClass({
 
     // Called by child function props to update user score obj
     handleUserScoreObj: function(newUserScoreObj) {
-        this.setState({userScoreObj: newUserScoreObj});
+        this.setState({userScoreObj: newUserScoreObj}, () => {
+            if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
+                this.setState({scoreError: false, scoreErrorMsg: ''});
+            }
+        });
     },
 
     // Redirect to Curation-Central page
@@ -2026,7 +2037,8 @@ const IndividualViewer = createReactClass({
                                     {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedIndividual) || (!isEvidenceScored && !affiliation && userIndividual) ?
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
+                                            scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation}
+                                            variantInfo={variants} gdmUuid={tempGdm && tempGdm.uuid ? tempGdm.uuid : null} pmid={tempPmid ? tempPmid : null} />
                                         : null}
                                     {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">

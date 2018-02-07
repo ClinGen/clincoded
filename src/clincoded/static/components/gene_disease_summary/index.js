@@ -33,9 +33,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             segregationEvidenceList: [],
             caseControlEvidenceList: [],
             experimentalEvidenceList: [],
-            probandHpoTermList: [],
-            segregationHpoTermList: [],
-            caseControlHpoTermList: [],
             preview: queryKeyValue('preview', this.props.href)
         };
     },
@@ -204,11 +201,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 const proband = result.proband;
                                 const score = result.score;
                                 const probandObj = result.probandRestData;
-                                // Get the HPO terms given a list of HPO IDs
-                                // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                                if (proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length) {
-                                    this.getHpoTerm(proband.hpoIdInDiagnosis, 'proband');
-                                }
                                 let annotation = {}, associatedFamily;
                                 // Find the annotation that the proband directly or indirectly belongs to
                                 if (probandObj.associatedAnnotations.length) {
@@ -235,6 +227,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 caseLevelEvidence['authors'] = annotation.article.authors;
                                 caseLevelEvidence['pmid'] = annotation.article.pmid;
                                 caseLevelEvidence['pubYear'] = pubDate[1];
+                                caseLevelEvidence['label'] = proband.label ? proband.label : '';
                                 caseLevelEvidence['sex'] = proband.sex ? proband.sex : '';
                                 caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
                                 caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
@@ -244,6 +237,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';
                                 caseLevelEvidence['previousTestingDescription'] = proband.method && proband.method.previousTestingDescription ? proband.method.previousTestingDescription : '';
                                 caseLevelEvidence['genotypingMethods'] = proband.method && proband.method.genotypingMethods && proband.method.genotypingMethods.length ? proband.method.genotypingMethods : [];
+                                caseLevelEvidence['specificMutationsGenotypedMethod'] = proband.method && proband.method.specificMutationsGenotypedMethod ? proband.method.specificMutationsGenotypedMethod : '';
                                 caseLevelEvidence['scoreStatus'] = score.scoreStatus;
                                 caseLevelEvidence['defaultScore'] = score.calculatedScore ? score.calculatedScore : null;
                                 caseLevelEvidence['modifiedScore'] = score.hasOwnProperty('score') ? score.score : null;
@@ -267,7 +261,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
-     * Method to loop through families (of GDM or of group) and find all family evidence without proband
+     * Method to loop through families (of GDM or of group) and find all family evidence without proband, or with proband but no score
      * @param {array} families - a list of family evidence
      * @param {array} familyMatched - list of matched family evidence
      */
@@ -278,6 +272,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     if (family.individualIncluded && family.individualIncluded.length) {
                         family.individualIncluded.forEach(individual => {
                             if (!individual.proband || typeof individual.proband === 'undefined') {
+                                familyMatched.push(family);
+                            }
+                            if (individual.proband && (!individual.scores || (individual.scores && !individual.scores.length))) {
                                 familyMatched.push(family);
                             }
                         });
@@ -338,11 +335,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                         const family = result.family;
                         const segregation = result.segregation;
                         const familyObj = result.familyRestData;
-                        // Get the HPO terms given a list of HPO IDs
-                        // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                        if (family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length) {
-                            this.getHpoTerm(family.hpoIdInDiagnosis, 'segregation');
-                        }
                         let annotation = {};
                         // Find the annotation that family directly or indirectly belongs to
                         if (familyObj.associatedAnnotations.length) {
@@ -357,6 +349,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                         segregationEvidence['authors'] = annotation.article.authors;
                         segregationEvidence['pmid'] = annotation.article.pmid;
                         segregationEvidence['pubYear'] = pubDate[1];
+                        segregationEvidence['label'] = family.label ? family.label : '';
                         segregationEvidence['ethnicity'] = family.ethnicity ? family.ethnicity : '';
                         segregationEvidence['hpoIdInDiagnosis'] = family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length ? family.hpoIdInDiagnosis : [];
                         segregationEvidence['termsInDiagnosis'] = family.termsInDiagnosis && family.termsInDiagnosis.length ? family.termsInDiagnosis : '';
@@ -414,50 +407,55 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id) || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === user)) {
                                     if ('score' in score && score.score !== 'none') {
                                         let caseControlEvidence = {};
-                                        // Get disease data object given the uuid
-                                        this.getRestData(caseControl.caseCohort.commonDiagnosis[0]).then(diseaseRestData => {
-                                            return Promise.resolve({annotation, caseControl, score, diseaseRestData});
-                                        }).then(result => {
-                                            const annotation = result.annotation;
-                                            const caseControl = result.caseControl;
-                                            const score = result.score;
-                                            const diseaseRestData = result.diseaseRestData;
-                                            // Get the HPO terms given a list of HPO IDs
-                                            // FIXME: Set states to trigger re-rendering due to racy ajax calls
-                                            if (diseaseRestData.phenotypes && diseaseRestData.phenotypes.length) {
-                                                this.getHpoTerm(diseaseRestData.phenotypes, 'case-control');
-                                            }
-                                            let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
-                                            // Define object key/value pairs
-                                            caseControlEvidence['authors'] = annotation.article.authors;
-                                            caseControlEvidence['pmid'] = annotation.article.pmid;
-                                            caseControlEvidence['pubYear'] = pubDate[1];
-                                            caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
-                                            caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
-                                            caseControlEvidence['caseCohort_numberWithVariant'] = typeof caseControl.caseCohort.numberWithVariant === 'number' ? caseControl.caseCohort.numberWithVariant : null;
-                                            caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = typeof caseControl.caseCohort.numberAllGenotypedSequenced === 'number' ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
-                                            caseControlEvidence['controlCohort_numberWithVariant'] = typeof caseControl.controlCohort.numberWithVariant === 'number' ? caseControl.controlCohort.numberWithVariant : null;
-                                            caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = typeof caseControl.controlCohort.numberAllGenotypedSequenced === 'number' ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
-                                            caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
-                                            caseControlEvidence['explanationForDifference'] = caseControl.explanationForDifference ? caseControl.explanationForDifference : '';
-                                            caseControlEvidence['statisticValueType'] = caseControl.statisticalValues[0].valueType ? caseControl.statisticalValues[0].valueType : '';
-                                            caseControlEvidence['statisticValueTypeOther'] = caseControl.statisticalValues[0].otherType ? caseControl.statisticalValues[0].otherType : '';
-                                            caseControlEvidence['statisticValue'] = caseControl.statisticalValues[0].value ? caseControl.statisticalValues[0].value : null;
-                                            caseControlEvidence['pValue'] = caseControl.pValue ? caseControl.pValue : null;
-                                            caseControlEvidence['confidenceIntervalFrom'] = caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null;
-                                            caseControlEvidence['confidenceIntervalTo'] = caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null;
-                                            caseControlEvidence['score'] = score.hasOwnProperty('score') ? score.score : null;
 
-                                            caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
-                                            caseControlEvidence['diseaseTerm'] = diseaseRestData.term ? diseaseRestData.term : '';
-                                            caseControlEvidence['diseaseFreetext'] = diseaseRestData.hasOwnProperty('freetext') ? diseaseRestData.freetext : false;
-                                            caseControlEvidence['diseasePhenotypes'] = diseaseRestData.phenotypes && diseaseRestData.phenotypes.length ? diseaseRestData.phenotypes : [];
+                                        let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
+                                        // Define object key/value pairs
+                                        caseControlEvidence['authors'] = annotation.article.authors;
+                                        caseControlEvidence['pmid'] = annotation.article.pmid;
+                                        caseControlEvidence['pubYear'] = pubDate[1];
+                                        caseControlEvidence['label'] = caseControl.label ? caseControl.label : '';
+                                        caseControlEvidence['studyType'] = caseControl.studyType ? caseControl.studyType : '';
+                                        caseControlEvidence['detectionMethod'] = caseControl.caseCohort && caseControl.caseCohort.method ? caseControl.caseCohort.method.specificMutationsGenotypedMethod : '';
+                                        caseControlEvidence['caseCohort_numberWithVariant'] = typeof caseControl.caseCohort.numberWithVariant === 'number' ? caseControl.caseCohort.numberWithVariant : null;
+                                        caseControlEvidence['caseCohort_numberAllGenotypedSequenced'] = typeof caseControl.caseCohort.numberAllGenotypedSequenced === 'number' ? caseControl.caseCohort.numberAllGenotypedSequenced : null;
+                                        caseControlEvidence['controlCohort_numberWithVariant'] = typeof caseControl.controlCohort.numberWithVariant === 'number' ? caseControl.controlCohort.numberWithVariant : null;
+                                        caseControlEvidence['controlCohort_numberAllGenotypedSequenced'] = typeof caseControl.controlCohort.numberAllGenotypedSequenced === 'number' ? caseControl.controlCohort.numberAllGenotypedSequenced : null;
+                                        caseControlEvidence['comments'] = caseControl.comments ? caseControl.comments : '';
+                                        caseControlEvidence['explanationForDifference'] = caseControl.explanationForDifference ? caseControl.explanationForDifference : '';
+                                        caseControlEvidence['statisticValueType'] = caseControl.statisticalValues[0].valueType ? caseControl.statisticalValues[0].valueType : '';
+                                        caseControlEvidence['statisticValueTypeOther'] = caseControl.statisticalValues[0].otherType ? caseControl.statisticalValues[0].otherType : '';
+                                        caseControlEvidence['statisticValue'] = caseControl.statisticalValues[0].value ? caseControl.statisticalValues[0].value : null;
+                                        caseControlEvidence['pValue'] = caseControl.pValue ? caseControl.pValue : null;
+                                        caseControlEvidence['confidenceIntervalFrom'] = caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null;
+                                        caseControlEvidence['confidenceIntervalTo'] = caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null;
+                                        caseControlEvidence['score'] = score.hasOwnProperty('score') ? score.score : null;
+                                        // Get disease data object given the uuid
+                                        if (caseControl.caseCohort.commonDiagnosis && caseControl.caseCohort.commonDiagnosis.length) {
+                                            this.getRestData(caseControl.caseCohort.commonDiagnosis[0]).then(diseaseRestData => {
+                                                return Promise.resolve({diseaseRestData});
+                                            }).then(result => {
+                                                const diseaseRestData = result.diseaseRestData;
+                                                caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
+                                                caseControlEvidence['diseaseTerm'] = diseaseRestData.term ? diseaseRestData.term : '';
+                                                caseControlEvidence['diseaseFreetext'] = diseaseRestData.hasOwnProperty('freetext') ? diseaseRestData.freetext : false;
+                                                caseControlEvidence['diseasePhenotypes'] = diseaseRestData.phenotypes && diseaseRestData.phenotypes.length ? diseaseRestData.phenotypes : [];
+                                                // Put object into array
+                                                caseControlEvidenceList.push(caseControlEvidence);
+                                                this.setState({caseControlEvidenceList: caseControlEvidenceList});
+                                            }).catch(err => {
+                                                console.log('Error in fetching rest data =: %o', err);
+                                            });
+                                        } else {
+                                            caseControlEvidence['diseaseId'] = null;
+                                            caseControlEvidence['diseaseTerm'] = '';
+                                            caseControlEvidence['diseaseFreetext'] = false;
+                                            caseControlEvidence['diseasePhenotypes'] = [];
+                                            caseControlEvidence['termsInDiagnosis'] = caseControl.caseCohort.termsInDiagnosis && caseControl.caseCohort.termsInDiagnosis.length ? caseControl.caseCohort.termsInDiagnosis : '';
+                                            caseControlEvidence['hpoIdInDiagnosis'] = caseControl.caseCohort.hpoIdInDiagnosis && caseControl.caseCohort.hpoIdInDiagnosis.length ? caseControl.caseCohort.hpoIdInDiagnosis : [];
                                             // Put object into array
                                             caseControlEvidenceList.push(caseControlEvidence);
                                             this.setState({caseControlEvidenceList: caseControlEvidenceList});
-                                        }).catch(err => {
-                                            console.log('Error in fetching rest data =: %o', err);
-                                        });
+                                        }
                                     }
                                 }
                             });
@@ -491,6 +489,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 if ('scoreStatus' in score && (score.scoreStatus !== 'none' || score.scoreStatus !== '')) {
                                     let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
                                     // Define object key/value pairs
+                                    experimentalEvidence['label'] = experimental.label ? experimental.label : '';
                                     experimentalEvidence['evidenceType'] = experimental.evidenceType;
                                     experimentalEvidence['evidenceSubtype'] = this.mapEvidenceSubtype(experimental);
                                     experimentalEvidence['pmid'] = annotation.article.pmid;
@@ -590,55 +589,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
-     * Method to return the HPO terms from a list of HPO IDs
-     * Dependent on OLS API service to return data
-     * If no data found, simply return the HPO IDs themselves
-     * @param {array} hpoIds - A list of HPO IDs
-     */
-    getHpoTerm(hpoIds, evidenceType) {
-        let hpoTermList = [];
-        hpoIds.forEach(hpo => {
-            let hpoTerm;
-            // Make the OLS REST API call
-            this.getRestData(external_url_map['HPOApi'] + hpo.replace(':', '_')).then(response => {
-                let termLabel = response['_embedded']['terms'][0]['label'];
-                if (termLabel) {
-                    hpoTerm = termLabel;
-                } else {
-                    hpoTerm = hpo + ' (note: term not found)';
-                }
-                hpoTermList.push(hpoTerm);
-                switch (evidenceType) {
-                    case 'proband':
-                        this.setState({probandHpoTermList: hpoTermList});
-                        break;
-                    case 'segregation':
-                        this.setState({segregationHpoTermList: hpoTermList});
-                        break;
-                    case 'case-control':
-                        this.setState({caseControlHpoTermList: hpoTermList});
-                        break;
-                }
-            }).catch(err => {
-                console.warn('Error in fetching HPO data =: %o', err);
-                hpoTerm = hpo + ' (note: term not found)';
-                hpoTermList.push(hpoTerm);
-                switch (evidenceType) {
-                    case 'proband':
-                        this.setState({probandHpoTermList: hpoTermList});
-                        break;
-                    case 'segregation':
-                        this.setState({segregationHpoTermList: hpoTermList});
-                        break;
-                    case 'case-control':
-                        this.setState({caseControlHpoTermList: hpoTermList});
-                        break;
-                }
-            });
-        });
-    },
-
-    /**
      * Method to close current window
      * @param {*} e - Window event
      */
@@ -667,9 +617,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
                     <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
-                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTermList={this.state.probandHpoTermList} />
-                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTermList={this.state.segregationHpoTermList} />
-                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTermList={this.state.caseControlHpoTermList} />
+                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
+                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} />
+                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
                     <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                 </div>
                 <p className="print-info-note">

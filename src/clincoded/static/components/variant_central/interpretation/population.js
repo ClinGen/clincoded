@@ -32,6 +32,10 @@ var populationStatic = {
         _order: ['afr', 'amr', 'sas', 'nfe', 'eas', 'fin', 'oth'],
         _labels: {afr: 'African', amr: 'Latino', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
     },
+    gnomAD: {
+        _order: ['afr', 'amr', 'asj', 'sas', 'nfe', 'eas', 'fin', 'oth'],
+        _labels: {afr: 'African', amr: 'Latino', asj: 'Ashkenazi Jewish', eas: 'East Asian', fin: 'European (Finnish)', nfe: 'European (Non-Finnish)', oth: 'Other', sas: 'South Asian'}
+    },
     tGenomes: {
         _order: ['afr', 'amr', 'eas', 'eur', 'sas', 'espaa', 'espea'],
         _labels: {afr: 'AFR', amr: 'AMR', eas: 'EAS', eur: 'EUR', sas: 'SAS', espaa: 'ESP6500: African American', espea: 'ESP6500: European American'}
@@ -72,8 +76,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             car_id: null, // ClinGen Allele Registry ID
             interpretation: this.props.interpretation,
             ensembl_exac_allele: {},
-            hasMultiAllelicExacAllele: false, // flag to display message regarding multi-allelic ExAC alleles
             hasExacData: false, // flag to display ExAC table
+            hasGnomadData: false, // flag to display gnomAD table
             hasTGenomesData: false,
             hasEspData: false, // flag to display ESP table
             hasPageData: false,
@@ -85,6 +89,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 mafCutoff: 5,
                 exac: {
                     afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                },
+                gnomAD: {
+                    afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 tGenomes: {
                     afr: {ac: {}, af: {}, gc: {}, gf: {}},
@@ -127,6 +134,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (this.props.ext_myVariantInfo) {
             this.parseExacData(this.props.ext_myVariantInfo);
+            this.parseGnomadData(this.props.ext_myVariantInfo);
             this.parseEspData(this.props.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
@@ -154,6 +162,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (nextProps.ext_myVariantInfo) {
             this.parseExacData(nextProps.ext_myVariantInfo);
+            this.parseGnomadData(nextProps.ext_myVariantInfo);
             this.parseEspData(nextProps.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
@@ -179,6 +188,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     componentWillUnmount: function() {
         this.setState({
             hasExacData: false,
+            hasGnomadData: false,
             hasTGenomesData: false,
             hasEspData: false,
             hasPageData: false
@@ -228,7 +238,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let populationObj = this.state.populationObj;
             // get the allele count, allele number, and homozygote count for desired populations
             populationStatic.exac._order.map(key => {
-                populationObj.exac[key].ac = Array.isArray(response.exac.ac['ac_' + key]) ? response.exac.ac['ac_' + key] : parseInt(response.exac.ac['ac_' + key]);
+                populationObj.exac[key].ac = parseInt(response.exac.ac['ac_' + key]);
                 populationObj.exac[key].an = parseInt(response.exac.an['an_' + key]);
                 populationObj.exac[key].hom = parseInt(response.exac.hom['hom_' + key]);
                 populationObj.exac[key].af = populationObj.exac[key].ac / populationObj.exac[key].an;
@@ -243,18 +253,189 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObj.exac._extra.pos = parseInt(response.exac.pos);
             populationObj.exac._extra.ref = response.exac.ref;
             populationObj.exac._extra.alt = response.exac.alt;
+            // get filter information
+            if (response.exac.filter) {
+                if (Array.isArray(response.exac.filter)) {
+                    populationObj.exac._extra.filter = response.exac.filter;
+                } else {
+                    populationObj.exac._extra.filter = [response.exac.filter];
+                }
+            }
             // update populationObj, and set flag indicating that we have ExAC data
-            this.setState({hasExacData: true, populationObj: populationObj}, () => {
-                /**
-                 * If any of the ac (allele count) fields have array values,
-                 * we've got multi-allelic ExAC alleles
-                 */
-                populationStatic.exac._order.map(key => {
-                    if (Array.isArray(this.state.populationObj.exac[key].ac)) {
-                        this.setState({hasMultiAllelicExacAllele: true});
-                    }
-                });
+            this.setState({hasExacData: true, populationObj: populationObj});
+        }
+    },
+
+    // Method to assign gnomAD population data to global population object
+    parseGnomadData: function(response) {
+        let populationObj = this.state.populationObj;
+
+        // Parse gnomAD exome data in myvariant.info response
+        if (response.gnomad_exome && (response.gnomad_exome.ac || response.gnomad_exome.an || response.gnomad_exome.hom)) {
+            let indexHOM = -2;
+            let gnomADExomeAC, gnomADExomeAN, gnomADExomeHOM, gnomADExomeAF;
+
+            populationObj.gnomAD._extra.hasExomeData = true;
+
+            // Possible resulting values for indexHOM (and what each indicates):
+            // -2  - default set above, response data either doesn't exist or isn't in tested format (variant likely isn't multi-allelic),
+            //       so any homozygote numbers would be in response.gnomad_*.hom['hom_' + key] ("default" location)
+            // -1  - response data exists, but current minor allele (response.gnomad_*.alt) not found within it,
+            //       so homozygote numbers are not available
+            // >=0 - response data exists and current minor allele (response.gnomad_*.alt) found within it,
+            //       so homozygote numbers should be in response.gnomad_*.hom['hom_' + key][indexHOM]
+            if (Array.isArray(response.gnomad_exome.alleles) && response.gnomad_exome.hom && Array.isArray(response.gnomad_exome.hom.hom)) {
+                indexHOM = response.gnomad_exome.alleles.indexOf(response.gnomad_exome.alt);
+            }
+
+            // Retrieve allele and homozygote exome data for each population
+            populationStatic.gnomAD._order.map(key => {
+                gnomADExomeAC = response.gnomad_exome.ac ? parseInt(response.gnomad_exome.ac['ac_' + key]) : null;
+                populationObj.gnomAD[key].ac = isNaN(gnomADExomeAC) ? null : gnomADExomeAC;
+
+                gnomADExomeAN = response.gnomad_exome.an ? parseInt(response.gnomad_exome.an['an_' + key]) : null;
+                populationObj.gnomAD[key].an = isNaN(gnomADExomeAN) ? null : gnomADExomeAN;
+
+                if (indexHOM < -1) {
+                    gnomADExomeHOM = response.gnomad_exome.hom ? parseInt(response.gnomad_exome.hom['hom_' + key]) : null;
+                    populationObj.gnomAD[key].hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
+                } else if (indexHOM > -1) {
+                    gnomADExomeHOM = parseInt(response.gnomad_exome.hom['hom_' + key][indexHOM]);
+                    populationObj.gnomAD[key].hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
+                }
+
+                gnomADExomeAF = populationObj.gnomAD[key].ac / populationObj.gnomAD[key].an;
+                populationObj.gnomAD[key].af = isFinite(gnomADExomeAF) ? gnomADExomeAF : null;
             });
+
+            // Retrieve allele and homozygote exome totals
+            gnomADExomeAC = response.gnomad_exome.ac ? parseInt(response.gnomad_exome.ac.ac) : null;
+            populationObj.gnomAD._tot.ac = isNaN(gnomADExomeAC) ? null : gnomADExomeAC;
+
+            gnomADExomeAN = response.gnomad_exome.an ? parseInt(response.gnomad_exome.an.an) : null;
+            populationObj.gnomAD._tot.an = isNaN(gnomADExomeAN) ? null : gnomADExomeAN;
+
+            if (indexHOM < -1) {
+                gnomADExomeHOM = response.gnomad_exome.hom ? parseInt(response.gnomad_exome.hom.hom) : null;
+                populationObj.gnomAD._tot.hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
+            } else if (indexHOM > -1) {
+                gnomADExomeHOM = parseInt(response.gnomad_exome.hom.hom[indexHOM]);
+                populationObj.gnomAD._tot.hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
+            }
+
+            gnomADExomeAF = populationObj.gnomAD._tot.ac / populationObj.gnomAD._tot.an;
+            populationObj.gnomAD._tot.af = isFinite(gnomADExomeAF) ? gnomADExomeAF : null;
+
+            // Retrieve variant information
+            populationObj.gnomAD._extra.chrom = response.gnomad_exome.chrom;
+            populationObj.gnomAD._extra.pos = response.gnomad_exome.pos;
+            populationObj.gnomAD._extra.ref = response.gnomad_exome.ref;
+            populationObj.gnomAD._extra.alt = response.gnomad_exome.alt;
+
+            // Retrieve any available filter information
+            if (response.gnomad_exome.filter) {
+                if (Array.isArray(response.gnomad_exome.filter)) {
+                    populationObj.gnomAD._extra.exome_filter = response.gnomad_exome.filter;
+                } else {
+                    populationObj.gnomAD._extra.exome_filter = [response.gnomad_exome.filter];
+                }
+            }
+        }
+
+        // Parse gnomAD genome data in myvariant.info response
+        if (response.gnomad_genome && (response.gnomad_genome.ac || response.gnomad_genome.an || response.gnomad_genome.hom)) {
+            let indexHOM = -2;
+            let gnomADGenomeAC, gnomADGenomeAN, gnomADGenomeHOM, gnomADGenomeAF;
+
+            populationObj.gnomAD._extra.hasGenomeData = true;
+
+            if (Array.isArray(response.gnomad_genome.alleles) && response.gnomad_genome.hom && Array.isArray(response.gnomad_genome.hom.hom)) {
+                indexHOM = response.gnomad_genome.alleles.indexOf(response.gnomad_genome.alt);
+            }
+
+            // Retrieve allele and homozygote genome data for each population and add it to any corresponding exome data
+            populationStatic.gnomAD._order.map(key => {
+                gnomADGenomeAC = response.gnomad_genome.ac ? parseInt(response.gnomad_genome.ac['ac_' + key]) : null;
+                if (!(isNaN(gnomADGenomeAC) || gnomADGenomeAC == null)) {
+                    populationObj.gnomAD[key].ac += gnomADGenomeAC;
+                }
+
+                gnomADGenomeAN = response.gnomad_genome.an ? parseInt(response.gnomad_genome.an['an_' + key]) : null;
+                if (!(isNaN(gnomADGenomeAN) || gnomADGenomeAN == null)) {
+                    populationObj.gnomAD[key].an += gnomADGenomeAN;
+                }
+
+                if (indexHOM < -1) {
+                    gnomADGenomeHOM = response.gnomad_genome.hom ? parseInt(response.gnomad_genome.hom['hom_' + key]) : null;
+                    if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                        populationObj.gnomAD[key].hom += gnomADGenomeHOM;
+                    }
+                } else if (indexHOM > -1) {
+                    gnomADGenomeHOM = parseInt(response.gnomad_genome.hom['hom_' + key][indexHOM]);
+                    if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                        populationObj.gnomAD[key].hom += gnomADGenomeHOM;
+                    }
+                }
+
+                gnomADGenomeAF = populationObj.gnomAD[key].ac / populationObj.gnomAD[key].an;
+                populationObj.gnomAD[key].af = isFinite(gnomADGenomeAF) ? gnomADGenomeAF : null;
+            });
+
+            // Retrieve allele and homozygote genome totals and add them to any corresponding exome totals
+            gnomADGenomeAC = response.gnomad_genome.ac ? parseInt(response.gnomad_genome.ac.ac) : null;
+            if (!(isNaN(gnomADGenomeAC) || gnomADGenomeAC == null)) {
+                populationObj.gnomAD._tot.ac += gnomADGenomeAC;
+            }
+
+            gnomADGenomeAN = response.gnomad_genome.an ? parseInt(response.gnomad_genome.an.an) : null;
+            if (!(isNaN(gnomADGenomeAN) || gnomADGenomeAN == null)) {
+                populationObj.gnomAD._tot.an += gnomADGenomeAN;
+            }
+
+            if (indexHOM < -1) {
+                gnomADGenomeHOM = response.gnomad_genome.hom ? parseInt(response.gnomad_genome.hom.hom) : null;
+                if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                    populationObj.gnomAD._tot.hom += gnomADGenomeHOM;
+                }
+            } else if (indexHOM > -1) {
+                gnomADGenomeHOM = parseInt(response.gnomad_genome.hom.hom[indexHOM]);
+                if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                    populationObj.gnomAD._tot.hom += gnomADGenomeHOM;
+                }
+            }
+
+            gnomADGenomeAF = populationObj.gnomAD._tot.ac / populationObj.gnomAD._tot.an;
+            populationObj.gnomAD._tot.af = isFinite(gnomADGenomeAF) ? gnomADGenomeAF : null;
+
+            // Retrieve variant information (if not already collected)
+            if (!populationObj.gnomAD._extra.chrom) {
+                populationObj.gnomAD._extra.chrom = response.gnomad_genome.chrom;
+            }
+
+            if (!populationObj.gnomAD._extra.pos) {
+                populationObj.gnomAD._extra.pos = response.gnomad_genome.pos;
+            }
+
+            if (!populationObj.gnomAD._extra.ref) {
+                populationObj.gnomAD._extra.ref = response.gnomad_genome.ref;
+            }
+
+            if (!populationObj.gnomAD._extra.alt) {
+                populationObj.gnomAD._extra.alt = response.gnomad_genome.alt;
+            }
+
+            // Retrieve any available filter information
+            if (response.gnomad_genome.filter) {
+                if (Array.isArray(response.gnomad_genome.filter)) {
+                    populationObj.gnomAD._extra.genome_filter = response.gnomad_genome.filter;
+                } else {
+                    populationObj.gnomAD._extra.genome_filter = [response.gnomad_genome.filter];
+                }
+            }
+        }
+
+        if (populationObj.gnomAD._extra.hasExomeData || populationObj.gnomAD._extra.hasGenomeData) {
+            this.setState({hasGnomadData: true, populationObj: populationObj});
         }
     },
 
@@ -380,6 +561,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     calculateHighestMAF: function() {
         let populationObj = this.state.populationObj;
         let highestMAFObj = {af: 0};
+        // check gnomAD data
+        populationStatic.gnomAD._order.map(pop => {
+            if (populationObj.gnomAD[pop].af > highestMAFObj.af) {
+                highestMAFObj.pop = pop;
+                highestMAFObj.popLabel = populationStatic.gnomAD._labels[pop];
+                highestMAFObj.ac = populationObj.gnomAD[pop].ac;
+                highestMAFObj.ac_tot = populationObj.gnomAD[pop].an;
+                highestMAFObj.source = 'gnomAD';
+                highestMAFObj.af = populationObj.gnomAD[pop].af;
+            }
+        });
         // check against exac data
         populationStatic.exac._order.map(pop => {
             if (populationObj.exac[pop].af && populationObj.exac[pop].af) {
@@ -434,53 +626,44 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         });
     },
 
-    // Method to render external ExAC linkout when no ExAC population data found
-    renderExacLinkout: function(response) {
-        let exacLink, linkText;
-        // If no ExAC population data, construct external linkout for one of the following:
+    // Method to render external ExAC/gnomAD linkout when no relevant population data is found
+    renderExacGnomadLinkout: function(response, datasetName) {
+        let datasetCheck, datasetHomeURLKey, datasetLink, datasetRegionURLKey, linkText;
+        // If no ExAC/gnomAD population data, construct external linkout for one of the following:
         // 1) clinvar/cadd data found & the variant type is substitution
         // 2) clinvar/cadd data found & the variant type is NOT substitution
         // 3) no data returned by myvariant.info
+        switch (datasetName) {
+            case 'ExAC':
+                datasetCheck = this.state.hasExacData;
+                datasetHomeURLKey = 'EXACHome';
+                datasetRegionURLKey = 'ExACRegion';
+            break;
+            case 'gnomAD':
+                datasetCheck = this.state.hasGnomadData;
+                datasetHomeURLKey = 'gnomADHome';
+                datasetRegionURLKey = 'gnomADRegion';
+            break;
+        }
         if (response) {
             let chrom = response.chrom;
             let pos = response.hg19 ? response.hg19.start : (response.clinvar.hg19 ? response.clinvar.hg19.start : response.cadd.hg19.start);
             let regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 : parseInt(response.cadd.hg19.start) - 30);
             let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
             // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
-            // Or there is no ExAC data object in the return myvariant.info JSON response
-            if (!this.state.ext_singleNucleotide || !this.state.hasExacData) {
-                exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
-                linkText = 'View the coverage of this region (+/- 30 bp) in ExAC';
+            // Or there is no ExAC/gnomAD data object in the returned myvariant.info JSON response
+            if (!this.state.ext_singleNucleotide || !datasetCheck) {
+                datasetLink = external_url_map[datasetRegionURLKey] + chrom + '-' + regionStart + '-' + regionEnd;
+                linkText = 'View the coverage of this region (+/- 30 bp) in ' + datasetName;
             }
-            /*
-            if (response.clinvar) {
-                // Try 'clinvar' as primary data object
-                let clinvar = response.clinvar;
-                // Applies to substitution variant (e.g. C>T in which '>' means 'changes to')
-                if (clinvar.type && clinvar.type === 'single nucleotide variant' && this.state.hasExacData) {
-                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + clinvar.ref + '-' + clinvar.alt;
-                } else {
-                    // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
-                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
-                }
-            } else if (response.cadd) {
-                // Fallback to 'cadd' as alternative data object
-                let cadd = response.cadd;
-                if (cadd.type && cadd.type === 'SNV' && this.state.hasExacData) {
-                    exacLink = 'http:' + external_url_map['EXAC'] + chrom + '-' + pos + '-' + cadd.ref + '-' + cadd.alt;
-                } else {
-                    exacLink = external_url_map['ExACRegion'] + chrom + '-' + regionStart + '-' + regionEnd;
-                }
-            }
-            */
         } else {
             // 404 response from myvariant.info
-            exacLink = external_url_map['EXACHome'];
-            linkText = 'Search ExAC';
+            datasetLink = external_url_map[datasetHomeURLKey];
+            linkText = 'Search ' + datasetName;
         }
         return (
             <span>
-                <a href={exacLink} target="_blank">{linkText}</a> for this variant.
+                <a href={datasetLink} target="_blank">{linkText}</a> for this variant.
             </span>
         );
     },
@@ -503,19 +686,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         );
     },
 
-    // method to render a row of data for the ExAC table
-    renderExacRow: function(key, exac, exacStatic, rowNameCustom, className) {
-        let rowName = exacStatic._labels[key];
+    // method to render a row of data for the ExAC/gnomAD table
+    renderExacGnomadRow: function(key, dataset, datasetStatic, rowNameCustom, className) {
+        let rowName = datasetStatic._labels[key];
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
         return (
             <tr key={key} className={className ? className : ''}>
                 <td>{rowName}</td>
-                <td>{exac[key].ac || exac[key].ac === 0 ? exac[key].ac : '--'}</td>
-                <td>{exac[key].an || exac[key].an === 0 ? exac[key].an : '--'}</td>
-                <td>{exac[key].hom || exac[key].hom === 0 ? exac[key].hom : '--'}</td>
-                <td>{exac[key].af || exac[key].af === 0 ? this.parseFloatShort(exac[key].af) : '--'}</td>
+                <td>{dataset[key].ac || dataset[key].ac === 0 ? dataset[key].ac : '--'}</td>
+                <td>{dataset[key].an || dataset[key].an === 0 ? dataset[key].an : '--'}</td>
+                <td>{dataset[key].hom || dataset[key].hom === 0 ? dataset[key].hom : '--'}</td>
+                <td>{dataset[key].af || dataset[key].af === 0 ? this.parseFloatShort(dataset[key].af) : '--'}</td>
             </tr>
         );
     },
@@ -670,6 +853,23 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         return retVal;
     },
 
+    parseAlleleMyVariant(response) {
+        let alleleData = {};
+        let chrom = parseKeyValue(response, 'chrom'),
+            hg19 = parseKeyValue(response, 'hg19'),
+            ref = parseKeyValue(response, 'ref'),
+            alt = parseKeyValue(response, 'alt');
+        if (response) {
+            alleleData = {
+                chrom: (chrom && typeof chrom === 'string') ? chrom : null,
+                pos: (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null,
+                ref: (ref && typeof ref === 'string') ? ref : null,
+                alt: (alt && typeof alt === 'string') ? alt : null
+            };
+        }
+        return alleleData;
+    },
+
     /**
      * Method to render PAGE population table header content
      * @param {boolean} hasPageData - Flag for response from querying PAGE Rest api
@@ -697,23 +897,119 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    // Method to render ExAC population table header content
-    renderExacHeader: function(hasExacData, loading_myVariantInfo, exac, singleNucleotide) {
-        if (hasExacData && !loading_myVariantInfo && singleNucleotide) {
-            const variantExac = exac._extra.chrom + ':' + exac._extra.pos + ' ' + exac._extra.ref + '/' + exac._extra.alt;
-            const linkoutExac = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+    // Method to render ExAC/gnomAD population table header content
+    renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, singleNucleotide, response, datasetName) {
+        let datasetVariant = '';
+        let datasetLink;
+
+        if (datasetCheck) {
+            datasetVariant = ' ' + dataset._extra.chrom + ':' + dataset._extra.pos + ' ' + dataset._extra.ref + '/' + dataset._extra.alt + ' (GRCh37)';
+        } else if (response) {
+            let alleleData = this.parseAlleleMyVariant(response);
+
+            if (Object.keys(alleleData).length) {
+                datasetVariant = ' ' + alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt + ' (GRCh37)';
+            }
+        }
+
+        if (datasetCheck && !loading_myVariantInfo && singleNucleotide) {
+            const datasetVariantURLKey = (datasetName === 'ExAC') ? 'EXAC' : (datasetName === 'gnomAD') ? 'gnomAD' : null;
+            const datasetURL = 'http:' + external_url_map[datasetVariantURLKey] + dataset._extra.chrom + '-' + dataset._extra.pos + '-' + dataset._extra.ref + '-' + dataset._extra.alt;
+            datasetLink = <a className="panel-subtitle pull-right" href={datasetURL} target="_blank">See data in {datasetName}</a>
+        }
+
+        return (
+            <h3 className="panel-title">{datasetName}{datasetVariant}
+                <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                {datasetLink}
+            </h3>
+        );
+    },
+
+    // Method to render a single filter status in ExAC/gnomAD population table
+    renderExacGnomadFilter: function(filter, filterKey, filterClass) {
+        return (<li key={filterKey} className={'label label-' + filterClass}>{filter}</li>);
+    },
+
+    // Method to render additional information (data sources, filter status) in ExAC/gnomAD population table
+    // If filter(s) not provided by myvariant.info, assume there was a "Pass"; if no data is provided, assume there was a "No variant"
+    renderExacGnomadAddlInfo: function(dataset, datasetName) {
+        if (datasetName === 'ExAC') {
             return (
-                <h3 className="panel-title">ExAC {variantExac} (GRCh37)
-                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                    <a className="panel-subtitle pull-right" href={linkoutExac} target="_blank">See data in ExAC</a>
-                </h3>
+                <table className="table additional-info">
+                    <tbody>
+                        <tr>
+                            <td className="filter">
+                                <span>Filter:</span>
+                                <ul>
+                                    {dataset._extra.filter ?
+                                        dataset._extra.filter.map((filter, index) => {
+                                            return (this.renderExacGnomadFilter(filter, (filter + '-' + index), 'danger'));
+                                        })
+                                        :
+                                        this.renderExacGnomadFilter('Pass', 'Pass', 'success')}
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            );
+        } else if (datasetName === 'gnomAD') {
+            return (
+                <table className="table additional-info">
+                    <tbody>
+                        {dataset._extra.hasExomeData ?
+                            <tr>
+                                <td className="included-data"><i className="icon icon-check-circle" /><span>Exomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>
+                                        {dataset._extra.exome_filter ?
+                                            dataset._extra.exome_filter.map((filter, index) => {
+                                                return (this.renderExacGnomadFilter(filter, (filter + '-' + index), 'warning'));
+                                            })
+                                            :
+                                            this.renderExacGnomadFilter('Pass', 'Pass', 'success')}
+                                    </ul>
+                                </td>
+                            </tr>
+                            :
+                            <tr>
+                                <td className="included-data"><i className="icon icon-times-circle" /><span>Exomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>{this.renderExacGnomadFilter('No variant', 'No variant', 'danger')}</ul>
+                                </td>
+                            </tr>
+                        }{dataset._extra.hasGenomeData ?
+                            <tr>
+                                <td className="included-data"><i className="icon icon-check-circle" /><span>Genomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>
+                                        {dataset._extra.genome_filter ?
+                                            dataset._extra.genome_filter.map((filter, index) => {
+                                                return (this.renderExacGnomadFilter(filter, (filter + '-' + index), 'warning'));
+                                            })
+                                            :
+                                            this.renderExacGnomadFilter('Pass', 'Pass', 'success')}
+                                    </ul>
+                                </td>
+                            </tr>
+                            :
+                            <tr>
+                                <td className="included-data"><i className="icon icon-times-circle" /><span>Genomes</span></td>
+                                <td className="filter">
+                                    <span>Filter:</span>
+                                    <ul>{this.renderExacGnomadFilter('No variant', 'No variant', 'danger')}</ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             );
         } else {
-            return (
-                <h3 className="panel-title">ExAC
-                    <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                </h3>
-            );
+            return;
         }
     },
 
@@ -757,51 +1053,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
     },
 
-    parseAlleleMyVariant(response) {
-        let alleleData = {};
-        let chrom = parseKeyValue(response, 'chrom'),
-            hg19 = parseKeyValue(response, 'hg19'),
-            ref = parseKeyValue(response, 'ref'),
-            alt = parseKeyValue(response, 'alt');
-        if (response) {
-            alleleData = {
-                chrom: (chrom && typeof chrom === 'string') ? chrom : null,
-                pos: (hg19 && typeof hg19 === 'object' && hg19.start) ? hg19.start : null,
-                ref: (ref && typeof ref === 'string') ? ref : null,
-                alt: (alt && typeof alt === 'string') ? alt : null
-            };
-        }
-        return alleleData;
-    },
-
-    // Method to render gnomAD population table header content
-    rendergnomADHeader(data) {
-        let variantgnomAD = '';
-        if (data) {
-            let alleleData = this.parseAlleleMyVariant(data);
-            if (Object.keys(alleleData).length) {
-                variantgnomAD = alleleData.chrom + ':' + alleleData.pos + ' ' + alleleData.ref + '/' + alleleData.alt + ' (GRCh37)';
-            }
-        }
-        return (
-            <h3 className="panel-title">{variantgnomAD.length ? 'gnomAD ' + variantgnomAD : 'gnomAD'}</h3>
-        );
-    },
-
-    // Method to render external gnomAD linkouts
-    rendergnomADLinkout(data) {
-        let gnomADLink = external_url_map['gnomADHome'];
-        // 1) clinvar/cadd/vcf data found in myvariant.info
-        // 2) no data returned by myvariant.info
-        if (data) {
-            let alleleData = this.parseAlleleMyVariant(data);
-            if (Object.keys(alleleData).length) {
-                gnomADLink = 'http:' + external_url_map['gnomAD'] + alleleData.chrom + '-' + alleleData.pos + '-' + alleleData.ref + '-' + alleleData.alt;
-            }
-        }
-        return gnomADLink;
-    },
-
     /**
      * Sort population data table by allele frequency from highest to lowest
      */
@@ -825,19 +1076,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     render() {
         var exacStatic = populationStatic.exac,
+            gnomADStatic = populationStatic.gnomAD,
             tGenomesStatic = populationStatic.tGenomes,
             espStatic = populationStatic.esp;
         var highestMAF = this.state.populationObj && this.state.populationObj.highestMAF ? this.state.populationObj.highestMAF : null,
             pageData = this.props.ext_pageData && this.props.ext_pageData.data ? this.props.ext_pageData.data : [], // Get PAGE data from response
             pageVariant = this.props.ext_pageData && this.props.ext_pageData.variant ? this.props.ext_pageData.variant : null, // Get PAGE data from response
             exac = this.state.populationObj && this.state.populationObj.exac ? this.state.populationObj.exac : null, // Get ExAC data from global population object
+            gnomAD = this.state.populationObj && this.state.populationObj.gnomAD ? this.state.populationObj.gnomAD : null, // Get gnomAD data from global population object
             tGenomes = this.state.populationObj && this.state.populationObj.tGenomes ? this.state.populationObj.tGenomes : null,
             esp = this.state.populationObj && this.state.populationObj.esp ? this.state.populationObj.esp : null; // Get ESP data from global population object
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
         var populationObjDiffFlag = this.state.populationObjDiffFlag;
         var singleNucleotide = this.state.ext_singleNucleotide;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
-        const exacDataLinkout = 'http:' + external_url_map['EXAC'] + exac._extra.chrom + '-' + exac._extra.pos + '-' + exac._extra.ref + '-' + exac._extra.alt;
+        let gnomADSortedAlleleFrequency = this.sortObjKeys(gnomAD);
         const affiliation = this.props.affiliation, session = this.props.session;
 
         return (
@@ -866,7 +1119,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <div className="bs-callout bs-callout-info clearfix">
                         <h4>Subpopulation with Highest Minor Allele Frequency</h4>
                         <p className="header-note">(Note: this calculation does not currently include PAGE study minor allele data)</p>
-                        <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of ExAC, 1000 Genomes, and ESP shown below.</p>
+                        <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of gnomAD, ExAC, 1000 Genomes, and ESP shown below.</p>
                         <div className="clearfix">
                             <div className="bs-callout-content-container">
                                 <dl className="inline-dl clearfix">
@@ -894,76 +1147,93 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </div>
                         </div>
                     </div>
-                    <div className="panel panel-info datasource-ExAC">
+                    <div className="panel panel-info datasource-gnomAD">
                         <div className="panel-heading">
-                            {this.renderExacHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide)}
+                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_myVariantInfo, gnomAD, singleNucleotide, this.props.ext_myVariantInfo, 'gnomAD')}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
                             {!singleNucleotide ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. {this.renderExacLinkout(this.props.ext_myVariantInfo)}</span>
+                                    <span>Data is currently only returned for single nucleotide variants. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'gnomAD')}</span>
                                 </div>
                                 :
                                 <div>
-                                    {this.state.hasExacData ?
+                                    {this.state.hasGnomadData ?
                                         <div>
-                                            {!this.state.hasMultiAllelicExacAllele ?
-                                                <table className="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Population</th>
-                                                            <th>Allele Count</th>
-                                                            <th>Allele Number</th>
-                                                            <th>Number of Homozygotes</th>
-                                                            <th>Allele Frequency</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {exacSortedAlleleFrequency.map(key => {
-                                                            return (this.renderExacRow(key, exac, exacStatic));
-                                                        })}
-                                                    </tbody>
-                                                    <tfoot>
-                                                        {this.renderExacRow('_tot', exac, exacStatic, 'Total', 'count')}
-                                                    </tfoot>
-                                                </table>
-                                                :
-                                                <div className="panel-body">
-                                                    <span>ExAC data is not currently displayed for this variant as it occurs at a multi-allelic locus and data is sometimes returned
-                                                        for an alternate allele at these loci due to changes in the data structure. This issue is being addressed and will be fixed
-                                                        soon. For the correct allele, <a href={exacDataLinkout} target="_blank">see data in ExAC</a>.</span>
-                                                </div>
-                                            }
+                                            {this.renderExacGnomadAddlInfo(gnomAD, 'gnomAD')}
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Population</th>
+                                                        <th>Allele Count</th>
+                                                        <th>Allele Number</th>
+                                                        <th>Number of Homozygotes</th>
+                                                        <th>Allele Frequency</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {gnomADSortedAlleleFrequency.map(key => {
+                                                        return (this.renderExacGnomadRow(key, gnomAD, gnomADStatic));
+                                                    })}
+                                                </tbody>
+                                                <tfoot>
+                                                    {this.renderExacGnomadRow('_tot', gnomAD, gnomADStatic, 'Total', 'count')}
+                                                </tfoot>
+                                            </table>
                                         </div>
                                         :
                                         <div className="panel-body">
-                                            <span>No population data was found for this allele in ExAC. {this.renderExacLinkout(this.props.ext_myVariantInfo)}</span>
+                                            <span>No population data was found for this allele in gnomAD. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'gnomAD')}</span>
                                         </div>
                                     }
                                 </div>
                             }
                         </div>
                     </div>
-                    <div className="panel panel-info datasource-gnomAD">
+                    <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading">
-                            {this.rendergnomADHeader(this.props.ext_myVariantInfo)}
+                            {this.renderExacGnomadHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide, this.props.ext_myVariantInfo, 'ExAC')}
                         </div>
-                        {!singleNucleotide ?
-                            <div className="panel-body">
-                                <span>Data is currently only returned for single nucleotide variants. <a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD</a> for this variant.</span>
-                            </div>
-                            :
-                            <div className="panel-body">
-                                <div className="description">
-                                    <span>gnomAD data is not currently available via API or download; however, a direct link to gnomAD is provided whenever possible in addition to a link to gnomAD's home page.</span>
+                        <div className="panel-content-wrapper">
+                            {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
+                            {!singleNucleotide ?
+                                <div className="panel-body">
+                                    <span>Data is currently only returned for single nucleotide variants. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'ExAC')}</span>
                                 </div>
-                                <ul>
-                                    <li><a href={this.rendergnomADLinkout(this.props.ext_myVariantInfo)} target="_blank">Link to this variant in gnomAD</a></li>
-                                    <li><a href={external_url_map['gnomADHome']} target="_blank">Search gnomAD</a></li>
-                                </ul>
-                            </div>
-                        }
+                                :
+                                <div>
+                                    {this.state.hasExacData ?
+                                        <div>
+                                            {this.renderExacGnomadAddlInfo(exac, 'ExAC')}
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Population</th>
+                                                        <th>Allele Count</th>
+                                                        <th>Allele Number</th>
+                                                        <th>Number of Homozygotes</th>
+                                                        <th>Allele Frequency</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {exacSortedAlleleFrequency.map(key => {
+                                                        return (this.renderExacGnomadRow(key, exac, exacStatic));
+                                                    })}
+                                                </tbody>
+                                                <tfoot>
+                                                    {this.renderExacGnomadRow('_tot', exac, exacStatic, 'Total', 'count')}
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                        :
+                                        <div className="panel-body">
+                                            <span>No population data was found for this allele in ExAC. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'ExAC')}</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </div>
                     <div className="panel panel-info datasource-PAGE">
                         <div className="panel-heading">

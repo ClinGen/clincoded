@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
+import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
@@ -21,8 +22,19 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
      * @param {number} key - unique key
      */
     renderCaseLevelEvidence(evidence, key) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
         return (
             <tr key={key} className="scored-case-level-evidence">
+                <td className="evidence-label">
+                    {evidence.label}
+                </td>
                 <td className="evidence-variant-type">
                     {evidence.variantType}
                 </td>
@@ -40,7 +52,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     })}
                 </td>
                 <td className="evidence-reference">
-                    <span>{evidence.authors.join(', ')}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
+                    <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
                 <td className="evidence-sex">
                     {evidence.sex}
@@ -52,7 +64,11 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.ethnicity}
                 </td>
                 <td className="evidence-phenotypes">
-                    {evidence.hpoIdInDiagnosis.length ? <span><strong>HPO term(s):</strong><br />{this.props.hpoTermList.map((term, i) => <span key={i}>{term}<br /></span>)}</span> : null}
+                    {evidence.hpoIdInDiagnosis.length ?
+                        <span><strong>HPO term(s):</strong>
+                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} />
+                        </span> 
+                        : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
                 <td className="evidence-segregation-num-affected">
@@ -81,6 +97,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                 <span key={i}>{i > 0 ? <span>; </span> : null}<strong>Method {i+1}:</strong> {method}</span>
                             );
                         })
+                        : null}
+                    {evidence.specificMutationsGenotypedMethod && evidence.specificMutationsGenotypedMethod.length ?
+                        <span className="genotyping-method-description"><strong>Description of genotyping method:</strong>{evidence.specificMutationsGenotypedMethod}</span>
                         : null}
                 </td>
                 <td className="evidence-score-status">
@@ -147,6 +166,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th rowSpan="2">Label</th>
                                     <th rowSpan="2">Variant type</th>
                                     <th rowSpan="2">Variant</th>
                                     <th rowSpan="2">Reference</th>
@@ -173,7 +193,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="14" className="total-score-label">Total points:</td>
+                                    <td colSpan="15" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
@@ -190,8 +210,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
-    caseLevelEvidenceList: PropTypes.array,
-    hpoTermList: PropTypes.array
+    caseLevelEvidenceList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;
