@@ -252,7 +252,7 @@ var App = module.exports = createReactClass({
                     <div>
                         <Header session={this.state.session} href={this.props.href} affiliation={affiliation} />
                         {this.state.demoWarning ?
-                            <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                            <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Data entered will not be saved upon release of updated versions to the interfaces (roughly once per month). Please contact us at <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a> with any questions</span>} />
                             : null}
                         {this.state.productionWarning ?
                             <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />
