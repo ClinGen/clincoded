@@ -1,6 +1,6 @@
 language: python
 sudo: false
-dist: precise
+dist: trusty
 cache:
   directories:
     - eggs
