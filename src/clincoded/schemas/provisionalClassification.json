@@ -22,6 +22,134 @@
             "type": "number",
             "minimum": 0
         },
+        "classificationPoints": {
+            "title": "Calculated scores and points from the scored evidence",
+            "type": "object",
+            "default": {},
+            "properties": {
+                "evidencePointsTotal": {
+                    "title": "Total Evidence Points",
+                    "description": "Total points calculated from all scored evidence",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "geneticEvidenceTotal": {
+                    "title": "Total Genetic Evidence Points",
+                    "description": "Total points calculated from all scored genetic evidence",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "experimentalEvidenceTotal": {
+                    "title": "Total Experimental Evidence Points",
+                    "description": "Total points calculated from all scored experimental evidence",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "autosomalDominantOrXlinkedDisorder": {
+                    "title": "Autosomal Dominant OR X-linked Disorder",
+                    "description": "Autosomal Dominant OR X-linked Disorder case-level evidence",
+                    "type": "object",
+                    "properties": {
+                        "probandWithOtherVariantTypeWithGeneImpact": {
+                            "title": "Proband With Other Variant Type With Gene Impact",
+                            "description": "Proband with other variant type with some evidence of gene impact",
+                            "type": "object",
+                            "properties": {
+                                "totalPointsGiven": {
+                                    "title": "Proband With Other Variant Type With Gene Impact Total Points Given",
+                                    "description": "Total points given to Proband With Other Variant Type With Gene Impact case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "pointsCounted": {
+                                    "title": "Proband With Other Variant Type With Gene Impact Points Counted",
+                                    "description": "Points counted for Proband With Other Variant Type With Gene Impact case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "probandWithPredictedOrProvenNullVariant": {
+                            "title": "Proband With Predicted Or Proven Null Variant",
+                            "description": "Proband with predicted or proven null variant",
+                            "type": "object",
+                            "properties": {
+                                "totalPointsGiven": {
+                                    "title": "Proband With Predicted Or Proven Null Variant Total Points Given",
+                                    "description": "Total points given to Proband With Predicted Or Proven Null Variant case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "pointsCounted": {
+                                    "title": "Proband With Predicted Or Proven Null Variant Points Counted",
+                                    "description": "Points counted for Proband With Predicted Or Proven Null Variant case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "variantIsDeNovo": {
+                            "title": "Variant Is De Novo",
+                            "description": "Variant is de novo",
+                            "type": "object",
+                            "properties": {
+                                "totalPointsGiven": {
+                                    "title": "Variant Is De Novo Total Points Given",
+                                    "description": "Total points given to Variant Is De Novo case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "pointsCounted": {
+                                    "title": "Variant Is De Novo Points Counted",
+                                    "description": "Points counted for Variant Is De Novo case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        }
+                    }
+                },
+                "autosomalRecessiveDisorder": {
+                    "title": "Autosomal Recessive Disorder",
+                    "description": "Autosomal Recessive Disorder case-level evidence",
+                    "type": "object",
+                    "properties": {
+                        "twoVariantsWithGeneImpactInTrans": {
+                            "title": "Two Variants With Gene Impact In Trans",
+                            "description": "Two variants (not predicted/proven null) with some evidence of gene impact in trans",
+                            "type": "object",
+                            "properties": {
+                                "totalPointsGiven": {
+                                    "title": "Two Variants With Gene Impact In Trans Total Points Given",
+                                    "description": "Total points given to Two Variants With Gene Impact In Trans case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "twoVariantsInTransWithOneDeNovo": {
+                            "title": "Two Variants In Trans With One De Novo",
+                            "description": "Two variants in trans and at least one de novo or a predicted/proven null variant",
+                            "type": "object",
+                            "properties": {
+                                "totalPointsGiven": {
+                                    "title": "Two Variants In Trans With One De Novo Total Points Given",
+                                    "description": "Total points given to Two Variants In Trans With One De Novo case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "pointsCounted": {
+                            "title": "Autosomal Recessive Disorder Points Counted",
+                            "description": "Points counted for Autosomal Recessive Disorder case-level evidence",
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    }
+                }
+            }
+        },
         "autoClassification": {
             "title": "Classification assigned automatically",
             "description": "Classification based on the calculation",
