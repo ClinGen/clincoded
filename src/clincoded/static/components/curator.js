@@ -2353,7 +2353,7 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
+    "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
     "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "approvalSubmitter", "classificationApprover",
     "approvalReviewDate", "approvalComment"
 ];
