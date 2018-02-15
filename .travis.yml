@@ -1,5 +1,5 @@
 language: python
-sudo: false
+sudo: required
 dist: trusty
 cache:
   directories:
@@ -31,7 +31,7 @@ before_install:
   - whereis elasticsearch
   - postgres --version
   - initdb --version
-  #- sudo elasticsearch -v
+  - elasticsearch -v
   - nvm install 6
   - node --version
   - pip install setuptools==15.2
