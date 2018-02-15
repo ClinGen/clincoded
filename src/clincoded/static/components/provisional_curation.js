@@ -193,7 +193,6 @@ var ProvisionalCuration = createReactClass({
             var calculate = queryKeyValue('calculate', this.props.href);
             var edit = queryKeyValue('edit', this.props.href);
             var newProvisional = this.state.provisional.uuid ? curator.flatten(this.state.provisional) : {};
-            newProvisional.totalScore = Number(this.state.totalScore);
             newProvisional.autoClassification = this.state.autoClassification;
             newProvisional.alteredClassification = this.state.alteredClassification;
             newProvisional.reasons = this.state.reasons;
@@ -201,6 +200,61 @@ var ProvisionalCuration = createReactClass({
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
             newProvisional.classificationStatus = this.state.classificationStatus;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
+            // Total points and points counted for all evidence
+            let classificationPoints = {}, scoreTableValues = this.state.scoreTableValues;
+            // Autosomal Dominant OR X-linked Disorder case-level evidence
+            classificationPoints['autosomalDominantOrXlinkedDisorder'] = {};
+            // Proband with other variant type with some evidence of gene impact case information type
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['totalPointsGiven'] = Number(scoreTableValues.probandOtherVariantPoints);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['pointsCounted'] = Number(scoreTableValues.probandOtherVariantPointsCounted);
+            // Proband with predicted or proven null variant case information type
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['totalPointsGiven'] = Number(scoreTableValues.probandNullVariantPoints);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['pointsCounted'] = Number(scoreTableValues.probandNullVariantPointsCounted);
+            // Variant is de novo case information type
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['totalPointsGiven'] = Number(scoreTableValues.variantDenovoPoints);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['pointsCounted'] = Number(scoreTableValues.variantDenovoPointsCounted);
+            // Autosomal Recessive Disorder case-level evidence
+            classificationPoints['autosomalRecessiveDisorder'] = {};
+            // Two variants (not predicted/proven null) with some evidence of gene impact in trans case information type
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans'] = {};
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans']['totalPointsGiven'] = Number(scoreTableValues.twoVariantsNotProvenPoints);
+            // Two variants in trans and at least one de novo or a predicted/proven null variant case information type
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo'] = {};
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['totalPointsGiven'] = Number(scoreTableValues.twoVariantsProvenPoints);
+            // Points counted for Autosomal Recessive Disorder case-level evidence
+            classificationPoints['autosomalRecessiveDisorder']['pointsCounted'] = Number(scoreTableValues.autosomalRecessivePointsCounted);
+            // Segregation case-level evidence
+            classificationPoints['segregation'] = {};
+            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationPoints);
+            classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
+            // Case-Control genetic evidence
+            classificationPoints['caseControl'] = {};
+            classificationPoints['caseControl']['totalPointsGiven'] = Number(scoreTableValues.caseControlPoints);
+            classificationPoints['caseControl']['pointsCounted'] = Number(scoreTableValues.caseControlPointsCounted);
+            // Total points counted for all genetic evidence
+            classificationPoints['geneticEvidenceTotal'] = Number(scoreTableValues.geneticEvidenceTotalPoints);
+            // Function experimental evidence
+            classificationPoints['function'] = {};
+            classificationPoints['function']['totalPointsGiven'] = Number(scoreTableValues.biochemicalFunctionPoints) + Number(scoreTableValues.proteinInteractionsPoints) + Number(scoreTableValues.expressionPoints);
+            classificationPoints['function']['pointsCounted'] = Number(scoreTableValues.functionalPointsCounted);
+            // Functional Alteration experimental evidence
+            classificationPoints['functionalAlteration'] = {};
+            classificationPoints['functionalAlteration']['totalPointsGiven'] = Number(scoreTableValues.patientCellsPoints) + Number(scoreTableValues.nonPatientCellsPoints);
+            classificationPoints['functionalAlteration']['pointsCounted'] = Number(scoreTableValues.functionalAlterationPointsCounted);
+            // Model Systems and Rescue experimental evidence
+            classificationPoints['modelsRescue'] = {};
+            classificationPoints['modelsRescue']['totalPointsGiven'] = Number(scoreTableValues.nonHumanModelPoints) + Number(scoreTableValues.cellCulturePoints) + Number(scoreTableValues.rescueHumanModelPoints)
+                + Number(scoreTableValues.rescueNonHumanModelPoints) + Number(scoreTableValues.rescueCellCulturePoints) + Number(scoreTableValues.rescuePatientCellsPoints);
+            classificationPoints['modelsRescue']['pointsCounted'] = Number(scoreTableValues.modelsRescuePointsCounted);
+            // Total points counted for all experimental evidence
+            classificationPoints['experimentalEvidenceTotal'] = Number(scoreTableValues.experimentalEvidenceTotalPoints);
+            // TOTAL POINTS COUNTED FOR ALL EVIDENCE
+            classificationPoints['evidencePointsTotal'] = Number(this.state.totalScore);
+            // Assign 'classificationPoints' object to 'newProvisional'
+            newProvisional.classificationPoints = Object.assign({}, classificationPoints);
 
             // Add affiliation if the user is associated with an affiliation
             // and if the data object has no affiliation
