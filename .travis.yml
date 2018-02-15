@@ -1,5 +1,5 @@
 language: python
-sudo: required
+sudo: false
 dist: trusty
 cache:
   directories:
@@ -31,7 +31,7 @@ before_install:
   - whereis elasticsearch
   - postgres --version
   - initdb --version
-  - elasticsearch -v
+  - - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/1.7.0/elasticsearch-1.7.0.deb && sudo dpkg -i --force-confnew elasticsearch-1.7.0.deb && sudo service elasticsearch restart
   - nvm install 6
   - node --version
   - pip install setuptools==15.2
