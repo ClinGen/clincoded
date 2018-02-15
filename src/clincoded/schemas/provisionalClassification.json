@@ -345,8 +345,8 @@
             "title": "Last Modified",
             "type": "string"
         },
-        "totalScore": {
-            "title": "Total Score",
+        "classificationPoints.evidencePointsTotal": {
+            "title": "Total Points",
             "type": "number"
         },
         "autoClassification": {
