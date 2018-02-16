@@ -4,7 +4,7 @@
     "id": "/profiles/provisionalClassification.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["totalScore", "autoClassification"],
+    "required": ["classificationPoints", "autoClassification"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
