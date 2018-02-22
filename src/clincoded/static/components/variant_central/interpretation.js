@@ -311,22 +311,6 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
         this.parseInterpretations();
     },
 
-
-    filterInterpretations(searchTerm) {
-        let filteredInterpretations = [];
-        let interpretations = this.props.context['@graph'];
-        if (interpretations && interpretations.length) {
-            interpretations.forEach(interpretation => {
-                if (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) {
-                    if (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional && interpretation.status !== 'deleted') {
-                        filteredInterpretations.push(interpretation);
-                    }
-                }
-            });
-        }
-        console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
-    },
-
     // Method to parse interpretation and form the shape of the data object containing only the properties needed to
     // render each interpretation item in the table. Also as a workaround fix for the failing pytest_bdd assertion on
     // Travis CI, since having the 'moment' date parsing logic in the render() method would still cause
@@ -399,6 +383,20 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
 
             this.filterInterpretations(searchTerm);
         });
+    },
+
+    filterInterpretations(searchTerm) {
+        let interpretations = this.state.allInterpretations;
+        if (interpretations && interpretations.length) {
+            let filteredInterpretations = interpretations.filter(function(interpretation) {
+                return (
+                    (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) &&
+                    (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional) &&
+                    (interpretation.status !== 'deleted')
+                );
+            });
+            console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
+        }
     },
 
     // Handle clicks in the table header for sorting
