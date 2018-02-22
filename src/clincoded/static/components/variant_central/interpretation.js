@@ -6,6 +6,7 @@ import _ from 'underscore';
 import moment from 'moment';
 import * as curator from '../curator';
 import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
+import { RestMixin } from '../rest';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';
@@ -297,6 +298,8 @@ var statusMappings = {
 };
 
 var InterpretationCollection = module.exports.InterpretationCollection = createReactClass({
+    mixins: [RestMixin],
+
     getInitialState() {
         return {
             sortCol: 'variant',
@@ -308,7 +311,26 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
     },
 
     componentDidMount() {
-        this.parseInterpretations();
+        this.filterInterpretations();
+    },
+
+    filterInterpretations() {
+        let interpretations = this.props.context['@graph'];
+        let vciInterpURLs = [];
+        // go through VCI interpretation results and get their data
+        vciInterpURLs = interpretations.map(res => { return res['@id']; });
+        if (vciInterpURLs.length > 0) {
+            this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                let filteredInterpretations = vciInterpResults.filter(function(interpretation) {
+                    return (
+                        (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.indexOf('PAH') > -1) &&
+                        (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional) &&
+                        (interpretation.status === 'in progress')
+                    );
+                });
+                console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
+            });
+        }
     },
 
     // Method to parse interpretation and form the shape of the data object containing only the properties needed to
@@ -383,20 +405,6 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
 
             this.filterInterpretations();
         });
-    },
-
-    filterInterpretations() {
-        let interpretations = this.props.context['@graph'];
-        if (interpretations && interpretations.length) {
-            let filteredInterpretations = interpretations.filter(function(interpretation) {
-                return (
-                    (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.indexOf('PAH') > -1) &&
-                    (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional) &&
-                    (interpretation.status === 'in progress')
-                );
-            });
-            console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
-        }
     },
 
     // Handle clicks in the table header for sorting
