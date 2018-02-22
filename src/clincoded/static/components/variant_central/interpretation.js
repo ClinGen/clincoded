@@ -315,22 +315,25 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
     },
 
     filterInterpretations() {
-        let interpretations = this.props.context['@graph'];
-        let vciInterpURLs = [];
-        // go through VCI interpretation results and get their data
-        vciInterpURLs = interpretations.map(res => { return res['@id']; });
-        if (vciInterpURLs.length > 0) {
-            this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
-                let filteredInterpretations = vciInterpResults.filter(function(interpretation) {
-                    return (
-                        (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.indexOf('PAH') > -1) &&
-                        (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional) &&
-                        (interpretation.status === 'in progress')
-                    );
+        this.getRestData('/search/?type=interpretation&provisional_count=1', null).then(data => {
+            let vciInterpURLs = [];
+            // go through VCI interpretation results and get their data
+            vciInterpURLs = data['@graph'].map(res => { return res['@id']; });
+            if (vciInterpURLs.length > 0) {
+                this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                    let filteredInterpretations = vciInterpResults.filter(function(interpretation) {
+                        return (
+                            (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.indexOf('PAH') > -1) &&
+                            (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional) &&
+                            (interpretation.status === 'in progress')
+                        );
+                    });
+                    console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
                 });
-                console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
-            });
-        }
+            }
+        }).catch(err => {
+            console.log('Filter interpretation error = %', err);
+        });
     },
 
     // Method to parse interpretation and form the shape of the data object containing only the properties needed to
