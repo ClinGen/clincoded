@@ -309,23 +309,22 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
 
     componentDidMount() {
         this.parseInterpretations();
-        this.filterInterpretations();
     },
 
 
-    filterInterpretations() {
+    filterInterpretations(searchTerm) {
         let filteredInterpretations = [];
         let interpretations = this.props.context['@graph'];
         if (interpretations && interpretations.length) {
             interpretations.forEach(interpretation => {
-                if (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.indexOf('PAH') > -1) {
+                if (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) {
                     if (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional && interpretation.status !== 'deleted') {
                         filteredInterpretations.push(interpretation);
                     }
                 }
             });
-            console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
         }
+        console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
     },
 
     // Method to parse interpretation and form the shape of the data object containing only the properties needed to
@@ -397,6 +396,8 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
             } else {
                 this.setState({filteredInterpretations: this.state.allInterpretations});
             }
+
+            this.filterInterpretations(searchTerm);
         });
     },
 
