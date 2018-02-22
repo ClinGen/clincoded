@@ -381,18 +381,18 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                 this.setState({filteredInterpretations: this.state.allInterpretations});
             }
 
-            this.filterInterpretations(searchTerm);
+            this.filterInterpretations();
         });
     },
 
-    filterInterpretations(searchTerm) {
-        let interpretations = this.state.allInterpretations;
+    filterInterpretations() {
+        let interpretations = this.props.context['@graph'];
         if (interpretations && interpretations.length) {
             let filteredInterpretations = interpretations.filter(function(interpretation) {
                 return (
-                    (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) &&
+                    (interpretation.variant && interpretation.variant.clinvarVariantTitle && interpretation.variant.clinvarVariantTitle.indexOf('PAH') > -1) &&
                     (interpretation.hasOwnProperty('markAsProvisional') && interpretation.markAsProvisional) &&
-                    (interpretation.status !== 'deleted')
+                    (interpretation.status === 'in progress')
                 );
             });
             console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
