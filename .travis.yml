@@ -31,7 +31,7 @@ before_install:
   - whereis elasticsearch
   - postgres --version
   - initdb --version
-  - - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.1.deb && sudo service elasticsearch restart
+  - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.1.deb && sudo service elasticsearch restart
   - nvm install 6
   - node --version
   - pip install setuptools==15.2
