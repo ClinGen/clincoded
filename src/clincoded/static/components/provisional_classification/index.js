@@ -11,6 +11,7 @@ import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
 import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
+import { ProvisionalApproval } from './provisional';
 import { ClassificationApproval } from './approval';
 import * as methods from '../methods';
 import * as curator from '../curator';
@@ -40,7 +41,7 @@ const ProvisionalClassification = createReactClass({
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
-            classificationStatusChecked: false,
+            classificationSnapshots: [],
             evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
@@ -76,6 +77,47 @@ const ProvisionalClassification = createReactClass({
                 geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
         };
+    },
+
+    /**
+     * Method to retrieve the updated classification object and pass the updated state as a prop
+     * back to the child components (e.g. provisional, approval).
+     * Called as PropTypes.func in the child components upon the PUT request to update the classification.
+     * @param {string} provisionalId - The '@id' of the (provisional) classification object
+     */
+    updateProvisionalObj(provisionalId) {
+        let provisional = this.state.provisional;
+        this.getRestData(provisionalId).then(result => {
+            this.setState({provisional: result, classificationStatus: result.classificationStatus});
+        });
+    },
+
+    /**
+     * Method to retrieve the given snapshot object and concat with the existing snapshot list.
+     * Then pass the updated state as a prop back to the child components (e.g. provisional, approval).
+     * Called as PropTypes.func in the child components upon saving a new snapshot.
+     * @param {string} snapshotId - The '@id' of the newly saved snapshot object
+     */
+    updateSnapshotList(snapshotId) {
+        let classificationSnapshots = this.state.classificationSnapshots;
+        this.getRestData(snapshotId).then(result => {
+            const newClassificationSnapshots = [result, ...classificationSnapshots];
+            this.setState({classificationSnapshots: newClassificationSnapshots});
+        });
+    },
+
+    /**
+     * Method to get a list of snapshots of a classification, either provisioned or approved,
+     * given the matching UUID of the classificaiton object.
+     * Called only once in the componentDidMount() lifecycle method via the loadData() method.
+     * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
+     */
+    getClassificationSnaphots(provisionalUuid) {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+            this.setState({classificationSnapshots: result['@graph']});
+        }).catch(err => {
+            console.log('Classification Snapshots Fetch Error=: %o', err);
+        });
     },
 
     loadData() {
@@ -118,13 +160,16 @@ const ProvisionalClassification = createReactClass({
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
+                        // stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
                         stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
             }
             stateObj.previousUrl = url;
             this.setState(stateObj);
+            if (stateObj.provisional && stateObj.provisional.uuid) {
+                this.getClassificationSnaphots(stateObj.provisional.uuid);
+            }
 
             return Promise.resolve();
         }).then(result => {
@@ -741,6 +786,7 @@ const ProvisionalClassification = createReactClass({
                                                                         </div>
                                                                     </div>
                                                                     <div className="col-xs-12 col-sm-6">
+                                                                        {/*
                                                                         <div className="classification-status">
                                                                             <dl className="inline-dl clearfix">
                                                                                 <dt>
@@ -751,6 +797,7 @@ const ProvisionalClassification = createReactClass({
                                                                                 </dd>
                                                                             </dl>
                                                                         </div>
+                                                                        */}
                                                                         <div className="classification-evidence-summary">
                                                                             <dl className="inline-dl clearfix">
                                                                                 <dt>
@@ -790,19 +837,49 @@ const ProvisionalClassification = createReactClass({
                                         </div>
                                     </Panel>
                                 </PanelGroup>
-                                <div className='modal-footer'>
-                                    <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
-                                    <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
-                                    <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
-                                </div>
+                                {provisional && this.state.classificationStatus === 'In progress' ?
+                                    <div className='modal-footer'>
+                                        <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
+                                        <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
+                                        <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
+                                    </div>
+                                    : null}
                             </div>
-                            {this.state.classificationStatusChecked ?
+                            {provisional ?
+                                <div className="provisional-approval-content-wrapper">
+                                    {this.state.classificationStatus === 'In progress' ?
+                                        <div className="container">
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once you have saved it as
+                                                Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Classification, archiving the current one, with
+                                                access to its Classification Matrix and Evidence Summary.
+                                            </p>
+                                        </div>
+                                        : null}
+                                    <ProvisionalApproval
+                                        session={session}
+                                        gdm={gdm}
+                                        classification={currentClassification}
+                                        classificationStatus={this.state.classificationStatus}
+                                        provisional={provisional}
+                                        affiliation={this.props.affiliation}
+                                        classificationSnapshots={this.state.classificationSnapshots}
+                                        updateSnapshotList={this.updateSnapshotList}
+                                        updateProvisionalObj={this.updateProvisionalObj}
+                                    />
+                                </div>
+                                : null}
+                            {provisional && provisional.provisionedClassification ?
                                 <ClassificationApproval
                                     session={session}
                                     gdm={gdm}
                                     classification={currentClassification}
+                                    classificationStatus={this.state.classificationStatus}
                                     provisional={provisional}
                                     affiliation={this.props.affiliation}
+                                    classificationSnapshots={this.state.classificationSnapshots}
+                                    updateSnapshotList={this.updateSnapshotList}
+                                    updateProvisionalObj={this.updateProvisionalObj}
                                 />
                                 : null}
                         </div>
