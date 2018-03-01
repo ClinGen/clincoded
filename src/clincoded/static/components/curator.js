@@ -2355,7 +2355,8 @@ function flattenAssessment(assessment) {
 var provisionalSimpleProps = [
     "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
     "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "approvalSubmitter", "classificationApprover",
-    "approvalReviewDate", "approvalComment"
+    "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate", "provisionalComment", "provisionedClassification",
+    "approvedClassification", "publishClassification"
 ];
 
 function flattenProvisional(provisional) {
