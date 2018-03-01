@@ -12,7 +12,7 @@ export function getAffiliationApprover(id) {
     let approvers = [];
     if (id.length) {
         AffiliationsList.forEach(affiliation => {
-            if (affiliation.affiliation_id === id && affiliation.hasOwnProperty['approver']) {
+            if (affiliation.affiliation_id === id && affiliation.approver && affiliation.approver.length) {
                 approvers = affiliation.approver;
             }
         });
