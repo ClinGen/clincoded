@@ -1768,3 +1768,18 @@ class History(Item):
         'submitted_by',
         'modified_by'
     ]
+
+
+@collection(
+    name='snapshots',
+    properties={
+        'title': "Resource history",
+        'description': 'Historical snapshots of resource items (e.g. classification, interpretation)',
+    })
+class Snapshot(Item):
+    item_type = 'snapshot'
+    schema = load_schema('clincoded:schemas/resourceHistory.json')
+    embedded = [
+        'submitted_by',
+        'modified_by'
+    ]
