@@ -77,7 +77,12 @@
     {
         "affiliation_id": "10016",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Monogenic Diabetes Expert Panel"
+        "affiliation_fullname": "ClinGen Monogenic Diabetes Expert Panel",
+        "approver": [
+            "Kristin Maloney",
+            "Toni Pollin",
+            "Linda Jeng"
+        ]
     },
     {
         "affiliation_id": "10017",
@@ -98,5 +103,10 @@
         "affiliation_id": "10020",
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Brain Malformations Expert Panel"
+    },
+    {
+        "affiliation_id": "10021",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen RASopathy Expert Panel"
     }
 ]
