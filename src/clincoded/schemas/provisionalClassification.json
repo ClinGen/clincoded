@@ -315,15 +315,58 @@
             "description": "Curator who approved the classification",
             "type": "string"
         },
+        "approvalDate": {
+            "title": "Approval Date",
+            "description": "Date when the classification was saved as approved",
+            "type": "string"
+        },
         "approvalReviewDate": {
-            "title": "Date Reviewed",
-            "description": "Date when the classification was reviewed",
+            "title": "Approval Review Date",
+            "description": "Date when the classification approval was reviewed",
             "type": "string"
         },
         "approvalComment": {
             "title": "Review Comments",
             "description": "Review comments for the classification",
             "type": "string"
+        },
+        "provisionalSubmitter": {
+            "title": "Provisional Submitter",
+            "description": "Curator who entered the provisional approval",
+            "type": "string"
+        },
+        "provisionalDate": {
+            "title": "Date Provisioned",
+            "description": "Date when the classification was saved as provisional",
+            "type": "string"
+        },
+        "provisionalReviewDate": {
+            "title": "Provisional Review Date",
+            "description": "Date when the provisional classification was reviewed",
+            "type": "string"
+        },
+        "provisionalComment": {
+            "title": "Provisional Comments",
+            "description": "Provisional comments for the classification",
+            "type": "string"
+        },
+        "provisionedClassification": {
+            "title": "Provisioned Classification",
+            "description": "Boolean value for whether the classification has been saved as provisional",
+            "type": "boolean",
+            "default": false
+        },
+        "approvedClassification": {
+            "title": "Approved Classification",
+            "description": "Boolean value for whether the classification has been approved",
+            "type": "boolean",
+            "default": false
+        },
+        "publishClassification": {
+            "title": "Publish Classification",
+            "description": "Boolean value for whether the approved classification has been published to the portal",
+            "type": "boolean",
+            "default": false
         },
         "active": {
             "title": "Active",
@@ -377,13 +420,45 @@
             "title": "Approved By",
             "type": "string"
         },
+        "approvalDate": {
+            "title": "Approval Date",
+            "type": "string"
+        },
         "approvalReviewDate": {
-            "title": "Date Reviewed",
+            "title": "Approval Review Date",
             "type": "string"
         },
         "approvalComment": {
             "title": "Review Comments",
             "type": "string"
+        },
+        "provisionalSubmitter": {
+            "title": "Provisional Submitter",
+            "type": "string"
+        },
+        "provisionalDate": {
+            "title": "Date Provisioned",
+            "type": "string"
+        },
+        "provisionalReviewDate": {
+            "title": "Provisional Review Date",
+            "type": "string"
+        },
+        "provisionalComment": {
+            "title": "Provisional Comments",
+            "type": "string"
+        },
+        "provisionedClassification": {
+            "title": "Provisioned Classification",
+            "type": "boolean"
+        },
+        "approvedClassification": {
+            "title": "Approved Classification",
+            "type": "boolean"
+        },
+        "publishClassification": {
+            "title": "Publish Classification",
+            "type": "boolean"
         },
         "active": {
             "title": "Active",
