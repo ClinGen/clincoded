@@ -47,7 +47,7 @@ var ProvisionalCuration = createReactClass({
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
-            classificationStatusChecked: false,
+            // classificationStatusChecked: false,
             evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
@@ -126,7 +126,7 @@ var ProvisionalCuration = createReactClass({
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
+                        // stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
                         stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
@@ -198,7 +198,18 @@ var ProvisionalCuration = createReactClass({
             newProvisional.reasons = this.state.reasons;
             newProvisional.replicatedOverTime = this.state.replicatedOverTime;
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
-            newProvisional.classificationStatus = this.state.classificationStatus;
+            newProvisional.classificationStatus = 'In progress';
+            newProvisional.provisionedClassification = false;
+            if (newProvisional.provisionalSubmitter) delete newProvisional.provisionalSubmitter;
+            if (newProvisional.provisionalDate) delete newProvisional.provisionalDate;
+            if (newProvisional.provisionalReviewDate) delete newProvisional.provisionalReviewDate;
+            if (newProvisional.provisionalComment) delete newProvisional.provisionalComment;
+            newProvisional.approvedClassification = false;
+            if (newProvisional.approvalSubmitter) delete newProvisional.approvalSubmitter;
+            if (newProvisional.classificationApprover) delete newProvisional.classificationApprover;
+            if (newProvisional.approvalDate) delete newProvisional.approvalDate;
+            if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
+            if (newProvisional.approvalComment) delete newProvisional.approvalComment;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
             // Total points and points counted for all evidence
             let classificationPoints = {}, scoreTableValues = this.state.scoreTableValues;
@@ -355,7 +366,9 @@ var ProvisionalCuration = createReactClass({
             });
         } else if (ref === 'classification-evidence-summary') {
             this.setState({evidenceSummary: this.refs[ref].getValue()});
-        } else if (ref === 'classification-status') {
+        }
+        /*
+        else if (ref === 'classification-status') {
             this.setState({classificationStatusChecked: !this.state.classificationStatusChecked}, () => {
                 if (this.state.classificationStatusChecked) {
                     this.setState({classificationStatus: 'Provisional'});
@@ -364,6 +377,7 @@ var ProvisionalCuration = createReactClass({
                 }
             });
         }
+        */
     },
 
     handleReplicatedOverTime: function() {
@@ -965,15 +979,17 @@ var ProvisionalCuration = createReactClass({
                                                                             </div>
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
+                                                                            {/*
                                                                             <div className="classification-status">
                                                                                 <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
                                                                                 <Input type="checkbox" ref="classification-status" checked={this.state.classificationStatusChecked} handleChange={this.handleChange}
                                                                                     labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" />
                                                                             </div>
+                                                                            */}
                                                                             <div className="classification-evidence-summary">
                                                                                 <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
                                                                                     value={this.state.evidenceSummary} handleChange={this.handleChange}
-                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="5"
+                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="8"
                                                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                                             </div>
                                                                         </div>
