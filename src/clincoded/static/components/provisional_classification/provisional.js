@@ -150,8 +150,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
     renderProvisionalSnapshot(snapshot) {
         if (snapshot.approvalStatus === 'Provisioned' && snapshot.resourceType === 'classification') {
             return (
-                <tr className="provisional-approval-snapshot-item" key={snapshot['@id']}>
-                    <td className="provisional-approval-snapshot-content">
+                <tr className="approval-snapshot-item" key={snapshot['@id']}>
+                    <td className="approval-snapshot-content">
                         {snapshot.resource && snapshot.resource.affiliation ?
                             <dl className="inline-dl clearfix">
                                 <dt><span>ClinGen Affiliation:</span></dt>
@@ -179,7 +179,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                             <dd><span>{snapshot.resource.provisionalComment ? snapshot.resource.provisionalComment : null}</span></dd>
                         </dl>
                     </td>
-                    <td className="provisional-approval-snapshot-buttons">
+                    <td className="approval-snapshot-buttons">
                         <Input type="button" inputClassName="btn-primary" title="Classification Matrix" clickHandler={this.viewSnapshotClassificationMatrix.bind(this, snapshot.uuid)} />
                         <Input type="button" inputClassName="btn-primary" title="Evidence Summary" clickHandler={this.viewSnapshotEvidenceSummary.bind(this, snapshot.uuid)} />
                     </td>
