@@ -14,6 +14,7 @@ import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
 import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
+import { getAffiliationName } from '../libs/get_affiliation_name';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -234,6 +235,16 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
     },
 
+    renderClassificationStatusTag(status) {
+        if (status === 'In progress') {
+            return <span className="label label-warning">IN PROGRESS</span>;
+        } else if (status === 'Provisional') {
+            return <span className="label label-info">PROVISIONAL</span>;
+        } else if (status === 'Approved') {
+            return <span className="label label-success">APPROVED</span>;
+        }
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var disease = gdm && gdm.disease;
@@ -335,30 +346,18 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <div className="provisional-title">
-                                                    <strong>Classification</strong>
+                                                <div className="header-classification">
+                                                    <strong>Classification:</strong>
+                                                    <span className="classification-status">
+                                                        {provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus ?
+                                                            this.renderClassificationStatusTag(provisionalClassification.provisional.classificationStatus)
+                                                            :
+                                                            <span>None</span>
+                                                        }
+                                                    </span>
                                                 </div>
-                                                { provisionalClassification.provisionalExist ?
-                                                    <div>
-                                                        <div className="provisional-data-left">
-                                                            <span className="header-classification-item">Curator: {provisionalClassification.provisional.submitted_by.title}</span>
-                                                            {provisionalClassification.provisional.classificationStatus ? <span className="header-classification-item">Status: {provisionalClassification.provisional.classificationStatus}</span> : null}
-                                                        </div>
-                                                        <div className="provisional-data-center">
-                                                            <span className="header-classification-item">
-                                                                Calculated Classification: {provisionalClassification.provisional.totalScore} ({provisionalClassification.provisional.autoClassification})
-                                                            </span>
-                                                            <span className="header-classification-item">
-                                                                Modified Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? 'None' : provisionalClassification.provisional.alteredClassification}
-                                                            </span>
-                                                            <span className="header-classification-item">Last Saved: {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                        </div>
-                                                    </div>
-                                                    :
-                                                    <div className="provisional-data-left"><span>None</span></div>
-                                                }
                                             </td>
-                                            <td className="button-box" rowSpan="2">
+                                            <td className="button-box">
                                                 { !summaryPage ?
                                                     <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
                                                     : null}
@@ -367,6 +366,40 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                         <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={provisionalUrl}>Classification Matrix <i className="icon icon-table"></i></a>
                                                         : null
                                                     )
+                                                    : null}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan="2">
+                                                {provisionalClassification.provisionalExist ?
+                                                    <div className="header-classification-content">
+                                                        {provisionalClassification.provisional.affiliation ?
+                                                            <div><span className="header-classification-item">Affiliation: <strong>{getAffiliationName(provisionalClassification.provisional.affiliation)}</strong></span></div>
+                                                            :
+                                                            <div><span className="header-classification-item">Curator: {provisionalClassification.provisional.submitted_by.title}</span></div>
+                                                        }
+                                                        {provisionalClassification.provisional.classificationStatus === 'Provisional' ?
+                                                            <div>
+                                                                <span className="header-classification-item">Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
+                                                                <span>[<a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a>]</span>
+                                                            </div>
+                                                            : null}
+                                                        {provisionalClassification.provisional.classificationStatus === 'Approved' ?
+                                                            <div>
+                                                                <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
+                                                                <span>[<a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a>]</span>
+                                                            </div>
+                                                            : null}
+                                                        {provisionalClassification.provisional.alteredClassification === 'No Selection' ?
+                                                            <div>
+                                                                <span className="header-classification-item">Last Saved Classification: {provisionalClassification.provisional.classificationPoints.evidencePointsTotal} ({provisionalClassification.provisional.autoClassification}); no modification from calculated value</span>
+                                                            </div>
+                                                            :
+                                                            <div>
+                                                                <span className="header-classification-item">Last Saved Classification: {provisionalClassification.provisional.alteredClassification}; Modified from Calculated = {provisionalClassification.provisional.classificationPoints.evidencePointsTotal} ({provisionalClassification.provisional.autoClassification}); {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                            </div>
+                                                        }
+                                                    </div>
                                                     : null}
                                             </td>
                                         </tr>
