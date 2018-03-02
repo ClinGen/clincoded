@@ -363,7 +363,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     : null}
                                                 { summaryButton ?
                                                     ( !summaryPage ?
-                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={provisionalUrl}>Classification Matrix <i className="icon icon-table"></i></a>
+                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
                                                         : null
                                                     )
                                                     : null}
