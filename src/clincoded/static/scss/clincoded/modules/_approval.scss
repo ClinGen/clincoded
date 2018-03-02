@@ -1,7 +1,111 @@
-.classification-approval {
-    margin-bottom: 100px;
+/**
+ * Date Picker Input styles
+ */
+.DayPickerInput>input {
+    border-radius: 2px;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    line-height: 1.42857;
+    color: #555;
+    background-image: none;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+}
 
-    .classification-approval-form-content-wrapper {
+/**
+ * Approval button styles
+ */
+.provisional-form-buttons-wrapper,
+.approval-form-buttons-wrapper {
+    margin-bottom: 20px;
+    padding: 0;
+
+    .button-group {
+        text-align: right;
+    }
+}
+
+.provisional-approval.in-progress, .final-approval {
+    margin-bottom: 150px;
+}
+
+/**
+ * Approval snapshot style
+ */
+.provisional-approval-snapshot-list,
+.final-approval-snapshot-list {
+    border: solid 2px #000;
+    margin-bottom: 0;
+
+    tr {
+        border-top: solid 2px #000;
+        border-bottom: solid 2px #000;
+    }
+
+    .approval-snapshot-content {
+        width: 80%;
+
+        dl {
+            margin-bottom: 5px;
+        }
+    }
+
+    .approval-snapshot-buttons {
+        text-align: center;
+        vertical-align: middle;
+        width: 20%;
+
+        input[type="button"] {
+            margin: 8px 0;
+        }
+    }
+}
+
+/**
+ * Provisional approval panel UI styles
+ */
+.provisional-approval {
+    .provisional-form-content-wrapper {
+        padding: 0;
+    
+        .col-sm-4 {
+            padding-left: 0;
+            padding-top: 7px;
+        }
+
+        .col-sm-3, .col-sm-5 {
+            padding-right: 0;
+    
+            label {
+                padding-right: 0;
+            }
+        }
+    }
+
+    .provisional-preview {
+        .provisional-form-content-wrapper {
+            .col-sm-3, .col-sm-5 {
+                padding-top: 7px;
+            }
+        }
+    }
+
+    .provisional-preview-note {
+        margin-bottom: 15px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+/**
+ * Final approval panel UI styles
+ */
+.final-approval {
+    .approval-form-content-wrapper {
         padding: 0;
     
         .col-sm-4 {
@@ -28,44 +132,19 @@
                 }
             }
         }
+    }
 
-        .DayPickerInput>input {
-            border-radius: 2px;
-            font-size: 1rem;
-            display: block;
-            width: 100%;
-            height: 34px;
-            padding: 6px 12px;
-            line-height: 1.42857;
-            color: #555;
-            background-image: none;
-            border: 1px solid #ccc;
-            box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-            transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+    .approval-preview {
+        .approval-form-content-wrapper {
+            .col-sm-3, .col-sm-5 {
+                padding-top: 7px;
+            }
         }
     }
 
-    .classification-approval-form-buttons-wrapper {
-        padding: 0;
-
-        .classification-approval-buttons {
-            text-align: right;
-        }
-
-        .col-sm-6 {
-            padding: 0;
-
-            &:first-child {
-                padding-top: 7px;
-            }
-
-            dl {
-                margin-bottom: 0;
-
-                dd span {
-                    margin-left: 15px;
-                }
-            }
-        }
+    .approval-preview-note {
+        margin-bottom: 15px;
+        padding-top: 7px;
+        padding-bottom: 7px;
     }
 }
