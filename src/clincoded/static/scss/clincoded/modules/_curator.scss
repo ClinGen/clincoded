@@ -865,6 +865,13 @@
         text-align: left;
     }
 
+    h4 {
+        border-bottom: solid 1px #aaa;
+        margin-top: 15px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+    }
+
     .button-box {
         width: auto;
         padding-left: 15px;
@@ -884,7 +891,19 @@
         }
 
         .classification-status {
+            font-size: 1.1em;
             margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
         }
     }
 
