@@ -10,6 +10,7 @@ sudoCommand = ["sudo"]
 def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     args = [
         os.path.join(prefix, 'elasticsearch'),
+        sudoCommand,
         '-f',  # foreground
         '-Des.path.data="%s"' % os.path.join(datadir, 'data'),
         '-Des.path.logs="%s"' % os.path.join(datadir, 'logs'),
@@ -29,7 +30,6 @@ def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     if os.path.exists('/etc/elasticsearch'):
         args.append('-Des.path.conf=/etc/elasticsearch')
     process = subprocess.Popen(
-        sudoCommand,
         args,
         close_fds=True,
         stdout=subprocess.PIPE,
