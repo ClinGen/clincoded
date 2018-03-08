@@ -12,6 +12,8 @@ import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { ContextualHelp } from '../libs/bootstrap/contextual_help';
 import { parseAndLogError } from './mixins';
 import { ClassificationDefinition } from './provisional_classification/definition';
+import ProvisionalSnapshots from './provisional_classification/provisional_snapshots';
+import ApprovalSnapshots from './provisional_classification/approval_snapshots';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -47,7 +49,7 @@ var ProvisionalCuration = createReactClass({
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
-            // classificationStatusChecked: false,
+            classificationSnapshots: [],
             evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
@@ -84,6 +86,20 @@ var ProvisionalCuration = createReactClass({
                 geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
         };
+    },
+
+    /**
+     * Method to get a list of snapshots of a classification, either provisioned or approved,
+     * given the matching UUID of the classificaiton object.
+     * Called only once in the componentDidMount() lifecycle method via the loadData() method.
+     * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
+     */
+    getClassificationSnaphots(provisionalUuid) {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+            this.setState({classificationSnapshots: result['@graph']});
+        }).catch(err => {
+            console.log('Classification Snapshots Fetch Error=: %o', err);
+        });
     },
 
     loadData: function() {
@@ -133,6 +149,9 @@ var ProvisionalCuration = createReactClass({
             }
             stateObj.previousUrl = url;
             this.setState(stateObj);
+            if (stateObj.provisional && stateObj.provisional.uuid) {
+                this.getClassificationSnaphots(stateObj.provisional.uuid);
+            }
 
             return Promise.resolve();
         }).then(result => {
@@ -717,6 +736,26 @@ var ProvisionalCuration = createReactClass({
         });
     },
 
+    getProvisionalSnapshot(snapshots) {
+        let hasProvisionalSnaphot = false;
+        for (let snapshot of snapshots) {
+            if (snapshot.approvalStatus === 'Provisioned' && snapshot.resourceType === 'classification') {
+                hasProvisionalSnaphot = true;
+            }
+        }
+        return hasProvisionalSnaphot;
+    },
+
+    getApprovedSnapshot(snapshots) {
+        let hasApprovedSnaphot = false;
+        for (let snapshot of snapshots) {
+            if (snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification') {
+                hasApprovedSnaphot = true;
+            }
+        }
+        return hasApprovedSnaphot;
+    },
+
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
@@ -740,6 +779,8 @@ var ProvisionalCuration = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
+        const snapshots = this.state.classificationSnapshots;
+
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -747,7 +788,8 @@ var ProvisionalCuration = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={this.props.affiliation} classificationSnapshots={this.state.classificationSnapshots} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <PanelGroup accordion>
@@ -1034,6 +1076,22 @@ var ProvisionalCuration = createReactClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
+                                {/* Render snapshots of all saved provisioned classifications */}
+                                {snapshots && snapshots.length && this.getProvisionalSnapshot(snapshots) ?
+                                    <PanelGroup>
+                                        <Panel title="Saved Provisional Classification(s)" panelClassName="panel-data" open>
+                                            <ProvisionalSnapshots snapshots={snapshots} />
+                                        </Panel>
+                                    </PanelGroup>
+                                    : null}
+                                {/* Render snapshots of all saved approved classifications */}
+                                {snapshots && snapshots.length && this.getApprovedSnapshot(snapshots) ?
+                                    <PanelGroup>
+                                        <Panel title="Saved Approved Classification(s)" panelClassName="panel-data" open>
+                                            <ApprovalSnapshots snapshots={snapshots} />
+                                        </Panel>
+                                    </PanelGroup>
+                                    : null}
                             </div>
                         </div>
                         :
