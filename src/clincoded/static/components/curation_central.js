@@ -27,14 +27,30 @@ var CurationCentral = createReactClass({
         href_url: PropTypes.object,
         session: PropTypes.object,
         affiliation: PropTypes.object,
-        href: PropTypes.string
+        href: PropTypes.string,
+        context: PropTypes.object
     },
 
     getInitialState: function() {
         return {
             currPmid: queryKeyValue('pmid', this.props.href),
-            currGdm: null
+            currGdm: null,
+            classificationSnapshots: []
         };
+    },
+
+    /**
+     * Method to get a list of snapshots of a classification, either provisioned or approved,
+     * given the matching UUID of the classificaiton object.
+     * Called only once in the componentDidMount() lifecycle method via the loadData() method.
+     * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
+     */
+    getClassificationSnaphots(provisionalUuid) {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+            this.setState({classificationSnapshots: result['@graph']});
+        }).catch(err => {
+            console.log('Classification Snapshots Fetch Error=: %o', err);
+        });
     },
 
     // Called when currently selected PMID changes
@@ -60,7 +76,20 @@ var CurationCentral = createReactClass({
     getGdm: function(uuid, pmid) {
         return this.getRestData('/gdm/' + uuid, null, true).then(gdm => {
             // The GDM object successfully retrieved; set the Curator Central component
-            this.setState({currGdm: gdm, currOmimId: gdm.omimId});
+            this.setState({currGdm: gdm, currOmimId: gdm.omimId}, () => {
+                // Search for classification owned by affiliation or login user
+                // And all saved snapshots of this classification
+                if (gdm.provisionalClassifications && gdm.provisionalClassifications.length > 0) {
+                    for (let provisionalClassification of gdm.provisionalClassifications) {
+                        let curatorAffiliation = this.props.affiliation;
+                        let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
+                        let creator = provisionalClassification.submitted_by;
+                        if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === this.props.session.user_properties.uuid)) {
+                            this.getClassificationSnaphots(provisionalClassification.uuid);
+                        }
+                    }
+                }
+            });
             // If a PMID isn't pre-selected from the URL and PMIDs exist, select the first one in the PMID list by default
             if (pmid == undefined && gdm.annotations && gdm.annotations.length > 0) {
                 var annotations = _(gdm.annotations).sortBy(function(annotation) {
@@ -160,7 +189,8 @@ var CurationCentral = createReactClass({
 
         return (
             <div>
-                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} affiliation={affiliation} />
+                <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} affiliation={affiliation}
+                    context={this.props.context} classificationSnapshots={this.state.classificationSnapshots} />
                 <div className="container">
                     <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} affiliation={affiliation} />
                     <div className="row curation-content">
