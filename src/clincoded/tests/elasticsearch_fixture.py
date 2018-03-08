@@ -5,6 +5,8 @@ try:
 except ImportError:
     import subprocess
 
+sudoCommand = "sudo"
+
 def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     args = [
         os.path.join(prefix, 'elasticsearch'),
@@ -27,7 +29,7 @@ def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     if os.path.exists('/etc/elasticsearch'):
         args.append('-Des.path.conf=/etc/elasticsearch')
     process = subprocess.Popen(
-        'sudo',
+        sudoCommand,
         args,
         close_fds=True,
         stdout=subprocess.PIPE,
