@@ -1,5 +1,5 @@
 language: python
-sudo: required
+sudo: false
 dist: trusty
 cache:
   directories:
@@ -7,8 +7,8 @@ cache:
     - .npm
 addons:
   apt:
-    #sources:
-     # - elasticsearch-1.7
+    sources:
+      - elasticsearch-1.7
     packages:
      # - elasticsearch
       - graphviz
