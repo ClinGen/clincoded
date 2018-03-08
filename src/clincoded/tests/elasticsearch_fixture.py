@@ -5,12 +5,12 @@ try:
 except ImportError:
     import subprocess
 
-sudoCommand = ["sudo"]
+#sudoCommand = ["sudo"]
 
 def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     args = [
         os.path.join(prefix, 'elasticsearch'),
-        sudoCommand,
+        'sudo',
         '-f',  # foreground
         '-Des.path.data="%s"' % os.path.join(datadir, 'data'),
         '-Des.path.logs="%s"' % os.path.join(datadir, 'logs'),
