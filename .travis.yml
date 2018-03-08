@@ -10,7 +10,7 @@ addons:
     sources:
       - elasticsearch-1.7
     packages:
-      - elasticsearch
+      - elasticsearch-1.7
       - graphviz
 env:
   global:
