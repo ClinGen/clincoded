@@ -88,7 +88,14 @@ const ProvisionalClassification = createReactClass({
     updateProvisionalObj(provisionalId) {
         let provisional = this.state.provisional;
         this.getRestData(provisionalId).then(result => {
+            // Get an updated copy of the classification object
             this.setState({provisional: result, classificationStatus: result.classificationStatus});
+            return Promise.resolve(result);
+        }).then(data => {
+            // Get an updated copy of the gdm object
+            this.getRestData('/gdm/' + this.state.gdm.uuid).then(gdm => {
+                this.setState({gdm: gdm});
+            });
         });
     },
 
@@ -569,7 +576,8 @@ const ProvisionalClassification = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={this.props.affiliation} classificationSnapshots={this.state.classificationSnapshots} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
