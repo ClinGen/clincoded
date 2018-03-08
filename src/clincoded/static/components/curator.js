@@ -274,15 +274,15 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
      * @param {string} status - The status of a given classification in a GDM
      * @param {boolean} classificationExist - Whether the GDM has a classification owned by the logged-in user or his/her affiliation
      */
-    renderClassificationHeader(status, classificationExist) {
+    renderClassificationHeader(classification) {
         return (
             <div className="header-classification">
                 <strong>Classification:</strong>
                 <span className="classification-status">
-                    {classificationExist && status ?
-                        this.renderClassificationStatusTag(status)
+                    {classification && Object.keys(classification).length ?
+                        this.renderClassificationStatusTag(classification.classificationStatus ? classification.classificationStatus : 'In progress')
                         :
-                        <span>None</span>
+                        <span className="no-classification">None</span>
                     }
                 </span>
             </div>
@@ -303,7 +303,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             if (classificationList && classificationList.length) {
                 if (currClassification && Object.keys(currClassification).length) {
                     otherClassifications = classificationList.filter(classification => {
-                        return classification['@id'] !== currClassification.provisional['@id'];
+                        return classification['@id'] !== currClassification['@id'];
                     });
                 } else {
                     otherClassifications = classificationList;
@@ -334,7 +334,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
-            let otherClassifications = this.getOtherClassifications(gdm, provisionalClassification);
+            let otherClassifications = this.getOtherClassifications(gdm, provisionalClassification.provisional);
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
@@ -418,9 +418,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {provisionalClassification && provisionalClassification.provisionalExist ?
-                                                    this.renderClassificationHeader(provisionalClassification.provisional.classificationStatus, provisionalClassification.provisionalExist)
-                                                    : null}
+                                                {provisionalClassification ? this.renderClassificationHeader(provisionalClassification.provisional) : null}
                                             </td>
                                             <td className="button-box">
                                                 { !summaryPage ?
@@ -475,7 +473,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     {otherClassifications.map(classification => {
                                                         return (
                                                             <div key={classification.uuid} className="other-classification">
-                                                                {this.renderClassificationHeader(classification.classificationStatus, true)}
+                                                                {this.renderClassificationHeader(classification)}
                                                                 <div className="header-classification-content">
                                                                     {classification.affiliation ?
                                                                         <div><span className="header-classification-item">Affiliation: <strong>{getAffiliationName(classification.affiliation)}</strong></span></div>
