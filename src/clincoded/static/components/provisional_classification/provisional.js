@@ -9,6 +9,7 @@ import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import ProvisionalSnapshots from './provisional_snapshots';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -114,78 +115,28 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                 }
             };
             this.recordHistory('modify', provisionalClassification, meta);
-            // Redirect user to the record page
-            // window.location.href = '/curation-central/?gdm=' + this.props.gdm.uuid;
             return Promise.resolve(provisionalClassification);
         }).then(result => {
-            let newSnapshot = {
-                resourceId: result.uuid,
-                resourceType: 'classification',
-                approvalStatus: 'Provisioned',
-                resource: result,
-                resourceParent: this.props.gdm
-            };
-            this.postRestData('/snapshot/', newSnapshot).then(response => {
-                let provisionalSnapshot = response['@graph'][0];
-                this.setState({currProvisionalSnapshot: provisionalSnapshot});
-                this.props.updateSnapshotList(provisionalSnapshot['@id']);
-            }).catch(err => {
-                console.log('Saving provisional snashot error = : %o', err);
+            // get a fresh copy of the gdm object
+            this.getRestData('/gdm/' + this.props.gdm.uuid, null, true).then(newGdm => {
+                let newSnapshot = {
+                    resourceId: result.uuid,
+                    resourceType: 'classification',
+                    approvalStatus: 'Provisioned',
+                    resource: result,
+                    resourceParent: newGdm
+                };
+                this.postRestData('/snapshot/', newSnapshot).then(response => {
+                    let provisionalSnapshot = response['@graph'][0];
+                    this.setState({currProvisionalSnapshot: provisionalSnapshot});
+                    this.props.updateSnapshotList(provisionalSnapshot['@id']);
+                }).catch(err => {
+                    console.log('Saving provisional snashot error = : %o', err);
+                });
             });
         }).catch(err => {
             console.log('Classification provisional submission error = : %o', err);
         });
-    },
-
-    viewSnapshotClassificationMatrix(snapshotUuid, e) {
-        e.preventDefault(); e.stopPropagation();
-        window.open('/provisional-classification/?snapshot=' + snapshotUuid, '_blank');
-    },
-
-    viewSnapshotEvidenceSummary(snapshotUuid, e) {
-        e.preventDefault(); e.stopPropagation();
-        window.open('/gene-disease-evidence-summary/?snapshot=' + snapshotUuid, '_blank');
-    },
-
-    renderProvisionalSnapshot(snapshot) {
-        if (snapshot.approvalStatus === 'Provisioned' && snapshot.resourceType === 'classification') {
-            return (
-                <tr className="approval-snapshot-item" key={snapshot['@id']}>
-                    <td className="approval-snapshot-content">
-                        {snapshot.resource && snapshot.resource.affiliation ?
-                            <dl className="inline-dl clearfix">
-                                <dt><span>ClinGen Affiliation:</span></dt>
-                                <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
-                            </dl>
-                            : null}
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-submitter">
-                            <dt><span>Provisional Classification entered by:</span></dt>
-                            <dd>{snapshot.resource.provisionalSubmitter}</dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-date">
-                            <dt><span>Date saved as Provisional:</span></dt>
-                            <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD") : null}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-review-date">
-                            <dt><span>Date reviewed:</span></dt>
-                            <dd><span>{snapshot.resource.provisionalReviewDate ? formatDate(snapshot.resource.provisionalReviewDate, "YYYY MMM DD") : null}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
-                            <dt><span>Saved classification:</span></dt>
-                            <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
-                            <dt><span>Additional comments:</span></dt>
-                            <dd><span>{snapshot.resource.provisionalComment ? snapshot.resource.provisionalComment : null}</span></dd>
-                        </dl>
-                    </td>
-                    <td className="approval-snapshot-buttons">
-                        <Input type="button" inputClassName="btn-primary" title="Classification Matrix" clickHandler={this.viewSnapshotClassificationMatrix.bind(this, snapshot.uuid)} />
-                        <Input type="button" inputClassName="btn-primary" title="Evidence Summary" clickHandler={this.viewSnapshotEvidenceSummary.bind(this, snapshot.uuid)} />
-                    </td>
-                </tr>
-            );
-        }
     },
 
     render() {
@@ -325,11 +276,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                             : null}
                         {/* Render snapshots of all saved provisioned classifications */}
                         {snapshots && snapshots.length ?
-                            <table className="table provisional-approval-snapshot-list">
-                                <tbody>
-                                    {snapshots.map(snapshot => this.renderProvisionalSnapshot(snapshot))}
-                                </tbody>
-                            </table>
+                            <ProvisionalSnapshots snapshots={snapshots} />
                             : null}
                     </Panel>
                 </PanelGroup>
