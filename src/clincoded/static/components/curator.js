@@ -75,12 +75,15 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         updateOmimId: PropTypes.func, // Function to call when OMIM ID changes
         linkGdm: PropTypes.bool, // whether or not to link GDM text back to GDM
         pmid: PropTypes.string,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        classificationSnapshots: PropTypes.array,
+        context: PropTypes.object
     },
 
     getInitialState() {
         return {
             gdm: this.props.gdm,
+            classificationSnapshots: this.props.classificationSnapshots,
             diseaseObj: {},
             diseaseUuid: null,
             diseaseError: null
@@ -90,6 +93,9 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     componentWillReceiveProps(nextProps) {
         if (nextProps.gdm) {
             this.setState({gdm: nextProps.gdm});
+        }
+        if (nextProps.classificationSnapshots) {
+            this.setState({classificationSnapshots: nextProps.classificationSnapshots});
         }
     },
 
@@ -235,14 +241,77 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
     },
 
+    /**
+     * Method to display classification tag/label in gene-disease record header
+     * @param {string} status - The status of a given classification in a GDM
+     */
     renderClassificationStatusTag(status) {
+        let snapshots = this.state.classificationSnapshots;
+        let filteredSnapshots = [];
+        // Determine whether the classification had been previously approved
+        if (snapshots && snapshots.length) {
+            filteredSnapshots = snapshots.filter(snapshot => {
+                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
+            });
+        }
         if (status === 'In progress') {
             return <span className="label label-warning">IN PROGRESS</span>;
         } else if (status === 'Provisional') {
-            return <span className="label label-info">PROVISIONAL</span>;
+            if (filteredSnapshots.length) {
+                return (
+                    <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
+                );
+            } else {
+                return <span className="label label-info">PROVISIONAL</span>;
+            }
         } else if (status === 'Approved') {
             return <span className="label label-success">APPROVED</span>;
         }
+    },
+
+    /**
+     * Method to render the header of a given classification in the gene-disease record header
+     * @param {string} status - The status of a given classification in a GDM
+     * @param {boolean} classificationExist - Whether the GDM has a classification owned by the logged-in user or his/her affiliation
+     */
+    renderClassificationHeader(status, classificationExist) {
+        return (
+            <div className="header-classification">
+                <strong>Classification:</strong>
+                <span className="classification-status">
+                    {classificationExist && status ?
+                        this.renderClassificationStatusTag(status)
+                        :
+                        <span>None</span>
+                    }
+                </span>
+            </div>
+        );
+    },
+
+    /**
+     * Method to get all other existing classifications (of a gdm) that are not owned by the logged-in user,
+     * or owned by the affiliation that the logged-in user is part of.
+     * @param {object} gdm - The gene-disease record
+     * @param {object} currClassification - The classification owned by the logged-in user or by an affiliation
+     */
+    getOtherClassifications(gdm, currClassification) {
+        const context = this.props.context;
+        let classificationList = gdm && gdm.provisionalClassifications ? gdm.provisionalClassifications : null;
+        let otherClassifications = [];
+        if (context && context.name === 'curation-central') {
+            if (classificationList && classificationList.length) {
+                if (currClassification && Object.keys(currClassification).length) {
+                    otherClassifications = classificationList.filter(classification => {
+                        return classification['@id'] !== currClassification.provisional['@id'];
+                    });
+                } else {
+                    otherClassifications = classificationList;
+                }
+                
+            }
+        }
+        return otherClassifications;
     },
 
     render: function() {
@@ -265,6 +334,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
+            let otherClassifications = this.getOtherClassifications(gdm, provisionalClassification);
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
@@ -314,9 +384,11 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                 }
             }
 
+            /*
             let provisionalPage = provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus === 'Approved' ? '/provisional-classification/?gdm=' : '/provisional-curation/?gdm=';
             let provisionalParam = provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus === 'Approved' ? '' : (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes');
             let provisionalUrl = provisionalPage + gdm.uuid + provisionalParam;
+            */
 
             return (
                 <div>
@@ -346,16 +418,9 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <div className="header-classification">
-                                                    <strong>Classification:</strong>
-                                                    <span className="classification-status">
-                                                        {provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus ?
-                                                            this.renderClassificationStatusTag(provisionalClassification.provisional.classificationStatus)
-                                                            :
-                                                            <span>None</span>
-                                                        }
-                                                    </span>
-                                                </div>
+                                                {provisionalClassification && provisionalClassification.provisionalExist ?
+                                                    this.renderClassificationHeader(provisionalClassification.provisional.classificationStatus, provisionalClassification.provisionalExist)
+                                                    : null}
                                             </td>
                                             <td className="button-box">
                                                 { !summaryPage ?
@@ -381,13 +446,13 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                         {provisionalClassification.provisional.classificationStatus === 'Provisional' ?
                                                             <div>
                                                                 <span className="header-classification-item">Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                <span>[<a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a>]</span>
+                                                                <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a> ]</span>
                                                             </div>
                                                             : null}
                                                         {provisionalClassification.provisional.classificationStatus === 'Approved' ?
                                                             <div>
                                                                 <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                <span>[<a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a>]</span>
+                                                                <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a> ]</span>
                                                             </div>
                                                             : null}
                                                         {provisionalClassification.provisional.alteredClassification === 'No Selection' ?
@@ -403,6 +468,48 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     : null}
                                             </td>
                                         </tr>
+                                        {otherClassifications && otherClassifications.length ?
+                                            <tr>
+                                                <td colSpan="2">
+                                                    <h4>Other Classifications</h4>
+                                                    {otherClassifications.map(classification => {
+                                                        return (
+                                                            <div key={classification.uuid} className="other-classification">
+                                                                {this.renderClassificationHeader(classification.classificationStatus, true)}
+                                                                <div className="header-classification-content">
+                                                                    {classification.affiliation ?
+                                                                        <div><span className="header-classification-item">Affiliation: <strong>{getAffiliationName(classification.affiliation)}</strong></span></div>
+                                                                        :
+                                                                        <div><span className="header-classification-item">Curator: {classification.submitted_by.title}</span></div>
+                                                                    }
+                                                                    {classification.classificationStatus === 'Provisional' ?
+                                                                        <div>
+                                                                            <span className="header-classification-item">Provisional Classification: {classification.alteredClassification === 'No Selection' ? classification.autoClassification : classification.alteredClassification}, saved on {moment(classification.last_modified).format("YYYY MMM DD")}</span>
+                                                                            <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a> ]</span>
+                                                                        </div>
+                                                                        : null}
+                                                                    {classification.classificationStatus === 'Approved' ?
+                                                                        <div>
+                                                                            <span className="header-classification-item">Approved Classification: {classification.alteredClassification === 'No Selection' ? classification.autoClassification : classification.alteredClassification}, saved on {moment(classification.last_modified).format("YYYY MMM DD")}</span>
+                                                                            <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a> ]</span>
+                                                                        </div>
+                                                                        : null}
+                                                                    {classification.alteredClassification === 'No Selection' ?
+                                                                        <div>
+                                                                            <span className="header-classification-item">Last Saved Classification: {classification.classificationPoints.evidencePointsTotal} ({classification.autoClassification}); no modification from calculated value</span>
+                                                                        </div>
+                                                                        :
+                                                                        <div>
+                                                                            <span className="header-classification-item">Last Saved Classification: {classification.alteredClassification}; Modified from Calculated = {classification.classificationPoints.evidencePointsTotal} ({classification.autoClassification}); {moment(classification.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </td>
+                                            </tr>
+                                            : null}
                                         <tr style={{height:'10px'}}></tr>
                                     </tbody>
                                 </table>
