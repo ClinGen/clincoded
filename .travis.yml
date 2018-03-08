@@ -7,10 +7,10 @@ cache:
     - .npm
 addons:
   apt:
-    sources:
-      - elasticsearch-1.7
+    #sources:
+     # - elasticsearch-1.7
     packages:
-      - elasticsearch
+     # - elasticsearch
       - graphviz
 env:
   global:
