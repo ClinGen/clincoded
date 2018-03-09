@@ -1,6 +1,6 @@
 language: python
-sudo: false
-dist: trusty
+sudo: required
+dist: precise 
 cache:
   directories:
     - eggs
@@ -10,7 +10,7 @@ addons:
     sources:
       - elasticsearch-1.7
     packages:
-     # - elasticsearch
+      - elasticsearch
       - graphviz
 env:
   global:
@@ -28,7 +28,7 @@ matrix:
     - python: "3.4"
       env: BROWSER=
 before_install:
-  - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.7.4.deb && sudo dpkg -i --force-confnew elasticsearch-1.7.4.deb
+  3- wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.7.4.deb && sudo dpkg -i --force-confnew elasticsearch-1.7.4.deb
   - whereis elasticsearch
   - postgres --version
   - initdb --version
