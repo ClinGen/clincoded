@@ -48,6 +48,12 @@
                             "description": "Proband with other variant type with some evidence of gene impact",
                             "type": "object",
                             "properties": {
+                                "evidenceCount": {
+                                    "title": "Proband With Other Variant Type With Gene Impact Evidence Count",
+                                    "description": "Number of scored evidence for Proband With Other Variant Type With Gene Impact case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
                                 "totalPointsGiven": {
                                     "title": "Proband With Other Variant Type With Gene Impact Total Points Given",
                                     "description": "Total points given to Proband With Other Variant Type With Gene Impact case information type",
@@ -67,6 +73,12 @@
                             "description": "Proband with predicted or proven null variant",
                             "type": "object",
                             "properties": {
+                                "evidenceCount": {
+                                    "title": "Proband With Predicted Or Proven Null Variant Evidence Count",
+                                    "description": "Number of scored evidence for Proband With Predicted Or Proven Null Variant case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
                                 "totalPointsGiven": {
                                     "title": "Proband With Predicted Or Proven Null Variant Total Points Given",
                                     "description": "Total points given to Proband With Predicted Or Proven Null Variant case information type",
@@ -86,6 +98,12 @@
                             "description": "Variant is de novo",
                             "type": "object",
                             "properties": {
+                                "evidenceCount": {
+                                    "title": "Variant Is De Novo Evidence Count",
+                                    "description": "Number of scored evidence for Variant Is De Novo case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
                                 "totalPointsGiven": {
                                     "title": "Variant Is De Novo Total Points Given",
                                     "description": "Total points given to Variant Is De Novo case information type",
@@ -112,6 +130,12 @@
                             "description": "Two variants (not predicted/proven null) with some evidence of gene impact in trans",
                             "type": "object",
                             "properties": {
+                                "evidenceCount": {
+                                    "title": "Two Variants With Gene Impact In Trans Evidence Count",
+                                    "description": "Number of scored evidence for Two Variants With Gene Impact In Trans case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
                                 "totalPointsGiven": {
                                     "title": "Two Variants With Gene Impact In Trans Total Points Given",
                                     "description": "Total points given to Two Variants With Gene Impact In Trans case information type",
@@ -125,6 +149,12 @@
                             "description": "Two variants in trans and at least one de novo or a predicted/proven null variant",
                             "type": "object",
                             "properties": {
+                                "evidenceCount": {
+                                    "title": "Two Variants In Trans With One De Novo Evidence Count",
+                                    "description": "Number of scored evidence for Two Variants In Trans With One De Novo case information type",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
                                 "totalPointsGiven": {
                                     "title": "Two Variants In Trans With One De Novo Total Points Given",
                                     "description": "Total points given to Two Variants In Trans With One De Novo case information type",
@@ -146,6 +176,12 @@
                     "description": "Segregation case-level evidence",
                     "type": "object",
                     "properties": {
+                        "evidenceCount": {
+                            "title": "Segregation Evidence Count",
+                            "description": "Number of scored evidence for Segregation case-level evidence",
+                            "type": "number",
+                            "minimum": 0
+                        },
                         "totalPointsGiven": {
                             "title": "Segregation Total Points Given",
                             "description": "Total points given to Segregation case-level evidence",
@@ -165,6 +201,12 @@
                     "description": "Case-Control genetic evidence",
                     "type": "object",
                     "properties": {
+                        "evidenceCount": {
+                            "title": "Case-Control Evidence Count",
+                            "description": "Number of scored evidence for Case-Control genetic evidence",
+                            "type": "number",
+                            "minimum": 0
+                        },
                         "totalPointsGiven": {
                             "title": "Case-Control Total Points Given",
                             "description": "Total points given to Case-Control genetic evidence",
@@ -195,6 +237,63 @@
                             "description": "Points counted for Function (Biochemical Functions, Protein Interactions and Expression) experiemental evidence",
                             "type": "number",
                             "minimum": 0
+                        },
+                        "biochemicalFunctions": {
+                            "title": "Biochemical Functions",
+                            "description": "Biochemical Functions in Function experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Biochemical Functions Evidence Count",
+                                    "description": "Number of scored evidence for Biochemical Functions in Function experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Biochemical Functions Total Points Given",
+                                    "description": "Total points given to Biochemical Functions in Function experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "proteinInteractions": {
+                            "title": "Protein Interactions",
+                            "description": "Protein Interactions in Function experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Protein Interactions Evidence Count",
+                                    "description": "Number of scored evidence for Protein Interactions in Function experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Protein Interactions Total Points Given",
+                                    "description": "Total points given to Protein Interactions in Function experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "expression": {
+                            "title": "Expression",
+                            "description": "Expression in Function experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Expression Evidence Count",
+                                    "description": "Number of scored evidence for Expression in Function experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Expression Total Points Given",
+                                    "description": "Total points given to Expression in Function experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
                         }
                     }
                 },
@@ -214,6 +313,44 @@
                             "description": "Points counted for Functional Alteration (Patient cells and Non-patient cells) experiemental evidence",
                             "type": "number",
                             "minimum": 0
+                        },
+                        "patientCells": {
+                            "title": "Patient Cells",
+                            "description": "Patient cells in Functional Alteration experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Patient Cells Evidence Count",
+                                    "description": "Number of scored evidence for Patient cells in Functional Alteration experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Patient Cells Total Points Given",
+                                    "description": "Total points given to Patient cells in Functional Alteration experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "nonPatientCells": {
+                            "title": "Non-patient Cells",
+                            "description": "Non-patient cells in Functional Alteration experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Non-patient Cells Evidence Count",
+                                    "description": "Number of scored evidence for Non-patient cells in Functional Alteration experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Non-patient Cells Total Points Given",
+                                    "description": "Total points given to Non-patient cells in Functional Alteration experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
                         }
                     }
                 },
@@ -233,6 +370,120 @@
                             "description": "Points counted for Model Systems and Rescue (Non-human model organism, Cell culture model, Rescue in human, Rescue in non-human model organism, Rescue in cell culture model and Rescue in patient cells) experiemental evidence",
                             "type": "number",
                             "minimum": 0
+                        },
+                        "modelsNonHuman": {
+                            "title": "Models in non-human model organism",
+                            "description": "Non-human model organism in Models experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Models in non-human model organism evidence count",
+                                    "description": "Number of scored evidence for Non-human model organism in Models experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Models in non-human model organism total points given",
+                                    "description": "Total points given to Non-human model organism in Models experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "modelsCellCulture": {
+                            "title": "Models in cell culture model",
+                            "description": "Cell culture model in Models experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Models in cell culture model evidence count",
+                                    "description": "Number of scored evidence for Cell culture model in Models experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Models in cell culture model total points given",
+                                    "description": "Total points given to Cell culture model in Models experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "rescueHuman": {
+                            "title": "Rescue in human",
+                            "description": "Human in Rescue experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Rescue in human evidence count",
+                                    "description": "Number of scored evidence for Human in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Rescue in human total points given",
+                                    "description": "Total points given to Human in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "rescueNonHuman": {
+                            "title": "Rescue in non-human model organism",
+                            "description": "Non-human model organism in Rescue experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Rescue in non-human model organism evidence count",
+                                    "description": "Number of scored evidence for Non-human model organism in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Rescue in non-human model organism total points given",
+                                    "description": "Total points given to Non-human model organism in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "rescueCellCulture": {
+                            "title": "Rescue in cell culture model",
+                            "description": "Cell culture model in Rescue experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Rescue in cell culture model evidence count",
+                                    "description": "Number of scored evidence for Cell culture model in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Rescue in cell culture model total points given",
+                                    "description": "Total points given to Cell culture model in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "rescuePatientCells": {
+                            "title": "Rescue in patient cells",
+                            "description": "Patient cells in Rescue experiemental evidence",
+                            "type": "object",
+                            "properties": {
+                                "evidenceCount": {
+                                    "title": "Rescue in patient cells evidence count",
+                                    "description": "Number of scored evidence for Patient cells in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                },
+                                "totalPointsGiven": {
+                                    "title": "Rescue in patient cells total points given",
+                                    "description": "Total points given to Patient cells in Rescue experiemental evidence",
+                                    "type": "number",
+                                    "minimum": 0
+                                }
+                            }
                         }
                     }
                 }
