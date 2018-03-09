@@ -236,46 +236,86 @@ var ProvisionalCuration = createReactClass({
             classificationPoints['autosomalDominantOrXlinkedDisorder'] = {};
             // Proband with other variant type with some evidence of gene impact case information type
             classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['evidenceCount'] = Number(scoreTableValues.probandOtherVariantCount);
             classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['totalPointsGiven'] = Number(scoreTableValues.probandOtherVariantPoints);
             classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['pointsCounted'] = Number(scoreTableValues.probandOtherVariantPointsCounted);
             // Proband with predicted or proven null variant case information type
             classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['evidenceCount'] = Number(scoreTableValues.probandNullVariantCount);
             classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['totalPointsGiven'] = Number(scoreTableValues.probandNullVariantPoints);
             classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['pointsCounted'] = Number(scoreTableValues.probandNullVariantPointsCounted);
             // Variant is de novo case information type
             classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['evidenceCount'] = Number(scoreTableValues.variantDenovoCount);
             classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['totalPointsGiven'] = Number(scoreTableValues.variantDenovoPoints);
             classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['pointsCounted'] = Number(scoreTableValues.variantDenovoPointsCounted);
             // Autosomal Recessive Disorder case-level evidence
             classificationPoints['autosomalRecessiveDisorder'] = {};
             // Two variants (not predicted/proven null) with some evidence of gene impact in trans case information type
             classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans'] = {};
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans']['evidenceCount'] = Number(scoreTableValues.twoVariantsNotProvenCount);
             classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans']['totalPointsGiven'] = Number(scoreTableValues.twoVariantsNotProvenPoints);
             // Two variants in trans and at least one de novo or a predicted/proven null variant case information type
             classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo'] = {};
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['evidenceCount'] = Number(scoreTableValues.twoVariantsProvenCount);
             classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['totalPointsGiven'] = Number(scoreTableValues.twoVariantsProvenPoints);
             // Points counted for Autosomal Recessive Disorder case-level evidence
             classificationPoints['autosomalRecessiveDisorder']['pointsCounted'] = Number(scoreTableValues.autosomalRecessivePointsCounted);
             // Segregation case-level evidence
             classificationPoints['segregation'] = {};
+            classificationPoints['segregation']['evidenceCount'] = Number(scoreTableValues.segregationCount);
             classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationPoints);
             classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
             // Case-Control genetic evidence
             classificationPoints['caseControl'] = {};
+            classificationPoints['caseControl']['evidenceCount'] = Number(scoreTableValues.caseControlCount);
             classificationPoints['caseControl']['totalPointsGiven'] = Number(scoreTableValues.caseControlPoints);
             classificationPoints['caseControl']['pointsCounted'] = Number(scoreTableValues.caseControlPointsCounted);
             // Total points counted for all genetic evidence
             classificationPoints['geneticEvidenceTotal'] = Number(scoreTableValues.geneticEvidenceTotalPoints);
             // Function experimental evidence
             classificationPoints['function'] = {};
+            classificationPoints['function']['biochemicalFunctions'] = {};
+            classificationPoints['function']['biochemicalFunctions']['evidenceCount'] = Number(scoreTableValues.biochemicalFunctionCount);
+            classificationPoints['function']['biochemicalFunctions']['totalPointsGiven'] = Number(scoreTableValues.biochemicalFunctionPoints);
+            classificationPoints['function']['proteinInteractions'] = {};
+            classificationPoints['function']['proteinInteractions']['evidenceCount'] = Number(scoreTableValues.proteinInteractionsCount);
+            classificationPoints['function']['proteinInteractions']['totalPointsGiven'] = Number(scoreTableValues.proteinInteractionsPoints);
+            classificationPoints['function']['expression'] = {};
+            classificationPoints['function']['expression']['evidenceCount'] = Number(scoreTableValues.expressionCount);
+            classificationPoints['function']['expression']['totalPointsGiven'] = Number(scoreTableValues.expressionPoints);
             classificationPoints['function']['totalPointsGiven'] = Number(scoreTableValues.biochemicalFunctionPoints) + Number(scoreTableValues.proteinInteractionsPoints) + Number(scoreTableValues.expressionPoints);
             classificationPoints['function']['pointsCounted'] = Number(scoreTableValues.functionalPointsCounted);
             // Functional Alteration experimental evidence
             classificationPoints['functionalAlteration'] = {};
+            classificationPoints['functionalAlteration']['patientCells'] = {};
+            classificationPoints['functionalAlteration']['patientCells']['evidenceCount'] = Number(scoreTableValues.patientCellsCount);
+            classificationPoints['functionalAlteration']['patientCells']['totalPointsGiven'] = Number(scoreTableValues.patientCellsPoints);
+            classificationPoints['functionalAlteration']['nonPatientCells'] = {};
+            classificationPoints['functionalAlteration']['nonPatientCells']['evidenceCount'] = Number(scoreTableValues.nonPatientCellsCount);
+            classificationPoints['functionalAlteration']['nonPatientCells']['totalPointsGiven'] = Number(scoreTableValues.nonPatientCellsPoints);
             classificationPoints['functionalAlteration']['totalPointsGiven'] = Number(scoreTableValues.patientCellsPoints) + Number(scoreTableValues.nonPatientCellsPoints);
             classificationPoints['functionalAlteration']['pointsCounted'] = Number(scoreTableValues.functionalAlterationPointsCounted);
             // Model Systems and Rescue experimental evidence
             classificationPoints['modelsRescue'] = {};
+            classificationPoints['modelsRescue']['modelsNonHuman'] = {};
+            classificationPoints['modelsRescue']['modelsNonHuman']['evidenceCount'] = Number(scoreTableValues.nonHumanModelCount);
+            classificationPoints['modelsRescue']['modelsNonHuman']['totalPointsGiven'] = Number(scoreTableValues.nonHumanModelPoints);
+            classificationPoints['modelsRescue']['modelsCellCulture'] = {};
+            classificationPoints['modelsRescue']['modelsCellCulture']['evidenceCount'] = Number(scoreTableValues.cellCultureCount);
+            classificationPoints['modelsRescue']['modelsCellCulture']['totalPointsGiven'] = Number(scoreTableValues.cellCulturePoints);
+            classificationPoints['modelsRescue']['rescueHuman'] = {};
+            classificationPoints['modelsRescue']['rescueHuman']['evidenceCount'] = Number(scoreTableValues.rescueHumanModelCount);
+            classificationPoints['modelsRescue']['rescueHuman']['totalPointsGiven'] = Number(scoreTableValues.rescueHumanModelPoints);
+            classificationPoints['modelsRescue']['rescueNonHuman'] = {};
+            classificationPoints['modelsRescue']['rescueNonHuman']['evidenceCount'] = Number(scoreTableValues.rescueNonHumanModelCount);
+            classificationPoints['modelsRescue']['rescueNonHuman']['totalPointsGiven'] = Number(scoreTableValues.rescueNonHumanModelPoints);
+            classificationPoints['modelsRescue']['rescueCellCulture'] = {};
+            classificationPoints['modelsRescue']['rescueCellCulture']['evidenceCount'] = Number(scoreTableValues.rescueCellCultureCount);
+            classificationPoints['modelsRescue']['rescueCellCulture']['totalPointsGiven'] = Number(scoreTableValues.rescueCellCulturePoints);
+            classificationPoints['modelsRescue']['rescuePatientCells'] = {};
+            classificationPoints['modelsRescue']['rescuePatientCells']['evidenceCount'] = Number(scoreTableValues.rescuePatientCellsCount);
+            classificationPoints['modelsRescue']['rescuePatientCells']['totalPointsGiven'] = Number(scoreTableValues.rescuePatientCellsPoints);
             classificationPoints['modelsRescue']['totalPointsGiven'] = Number(scoreTableValues.nonHumanModelPoints) + Number(scoreTableValues.cellCulturePoints) + Number(scoreTableValues.rescueHumanModelPoints)
                 + Number(scoreTableValues.rescueNonHumanModelPoints) + Number(scoreTableValues.rescueCellCulturePoints) + Number(scoreTableValues.rescuePatientCellsPoints);
             classificationPoints['modelsRescue']['pointsCounted'] = Number(scoreTableValues.modelsRescuePointsCounted);
