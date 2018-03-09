@@ -13,12 +13,6 @@ class ProvisionalSnapshots extends Component {
         super(props);
     }
 
-    viewSnapshotClassificationMatrix(snapshotId, e) {
-        e.preventDefault(); e.stopPropagation();
-        const snapshotUuid = snapshotId.slice(11, -1);
-        window.open('/provisional-classification/?snapshot=' + snapshotUuid, '_blank');
-    }
-
     viewSnapshotEvidenceSummary(snapshotId, e) {
         e.preventDefault(); e.stopPropagation();
         const snapshotUuid = snapshotId.slice(11, -1);
@@ -62,7 +56,6 @@ class ProvisionalSnapshots extends Component {
                         </dl>
                     </td>
                     <td className="approval-snapshot-buttons">
-                        <Input type="button" inputClassName="btn-primary" title="Classification Matrix" clickHandler={this.viewSnapshotClassificationMatrix.bind(this, snapshot['@id'])} />
                         <Input type="button" inputClassName="btn-primary" title="Evidence Summary" clickHandler={this.viewSnapshotEvidenceSummary.bind(this, snapshot['@id'])} />
                     </td>
                 </tr>
