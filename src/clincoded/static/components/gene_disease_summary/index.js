@@ -9,6 +9,7 @@ import GeneDiseaseEvidenceSummaryCaseLevel from './case_level';
 import GeneDiseaseEvidenceSummarySegregation from './case_level_segregation';
 import GeneDiseaseEvidenceSummaryCaseControl from './case_control';
 import GeneDiseaseEvidenceSummaryExperimental from './experimental';
+import GeneDiseaseEvidenceSummaryClassificationMatrix from './classification_matrix';
 import CASE_INFO_TYPES from '../score/constants/case_info_types';
 
 const GeneDiseaseEvidenceSummary = createReactClass({
@@ -53,12 +54,21 @@ const GeneDiseaseEvidenceSummary = createReactClass({
 
     loadData() {
         const gdmUuid = queryKeyValue('gdm', this.props.href);
-        this.getRestData('/gdm/' + gdmUuid, null, true).then(data => {
+        const snapshotUuid = queryKeyValue('snapshot', this.props.href);
+        let uri;
+        if (gdmUuid) {
+            uri = '/gdm/' + gdmUuid;
+        } else if (snapshotUuid) {
+            uri = '/snapshot/' + snapshotUuid;
+        }
+        this.getRestData(uri).then(data => {
             let stateObj = {};
             stateObj.user = this.props.session.user_properties.uuid;
             // Just to be sure that the response is a gdm object
             if (data['@type'][0] === 'gdm') {
                 stateObj.gdm = data;
+            } else if (data['@type'][0] === 'snapshot') {
+                stateObj.gdm = data.resourceParent;
             }
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
@@ -194,65 +204,55 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id) || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === user)) {
                         if ('scoreStatus' in score && (score.scoreStatus !== 'none' || score.scoreStatus !== '')) {
                             let caseLevelEvidence = {};
-                            // Get proband data object given the uuid
-                            this.getRestData(proband['@id']).then(probandRestData => {
-                                return Promise.resolve({proband, score, probandRestData});
-                            }).then(result => {
-                                const proband = result.proband;
-                                const score = result.score;
-                                const probandObj = result.probandRestData;
-                                let annotation = {}, associatedFamily;
-                                // Find the annotation that the proband directly or indirectly belongs to
-                                if (probandObj.associatedAnnotations.length) {
-                                    annotation = probandObj.associatedAnnotations[0];
-                                } else if (probandObj.associatedGroups.length) {
-                                    if (probandObj.associatedGroups[0].associatedAnnotations.length){
-                                        annotation = probandObj.associatedGroups[0].associatedAnnotations[0];
-                                    }
-                                } else if (probandObj.associatedFamilies.length) {
-                                    associatedFamily = probandObj.associatedFamilies[0];
-                                    if (probandObj.associatedFamilies[0].associatedGroups.length) {
-                                        if (probandObj.associatedFamilies[0].associatedGroups[0].associatedAnnotations.length) {
-                                            annotation = probandObj.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0];
-                                        }
-                                    } else if (probandObj.associatedFamilies[0].associatedAnnotations.length) {
-                                        annotation = probandObj.associatedFamilies[0].associatedAnnotations[0];
-                                    }
+                            let annotation = {}, associatedFamily;
+                            // Find the annotation that the proband directly or indirectly belongs to
+                            if (proband.associatedAnnotations.length) {
+                                annotation = proband.associatedAnnotations[0];
+                            } else if (proband.associatedGroups.length) {
+                                if (proband.associatedGroups[0].associatedAnnotations.length){
+                                    annotation = proband.associatedGroups[0].associatedAnnotations[0];
                                 }
-                                let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
-                                let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
-                                // Define object key/value pairs
-                                caseLevelEvidence['variantType'] = score.caseInfoType && score.caseInfoType.length ? this.mapVariantType(score.caseInfoType) : '';
-                                caseLevelEvidence['variants'] = proband.variants && proband.variants.length ? proband.variants : [];
-                                caseLevelEvidence['authors'] = annotation.article.authors;
-                                caseLevelEvidence['pmid'] = annotation.article.pmid;
-                                caseLevelEvidence['pubYear'] = pubDate[1];
-                                caseLevelEvidence['label'] = proband.label ? proband.label : '';
-                                caseLevelEvidence['sex'] = proband.sex ? proband.sex : '';
-                                caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
-                                caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
-                                caseLevelEvidence['ageUnit'] = proband.ageUnit && proband.ageUnit.length ? proband.ageUnit : '';
-                                caseLevelEvidence['ethnicity'] = proband.ethnicity && proband.ethnicity.length ? proband.ethnicity : '';
-                                caseLevelEvidence['hpoIdInDiagnosis'] = proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length ? proband.hpoIdInDiagnosis : [];
-                                caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';
-                                caseLevelEvidence['previousTestingDescription'] = proband.method && proband.method.previousTestingDescription ? proband.method.previousTestingDescription : '';
-                                caseLevelEvidence['genotypingMethods'] = proband.method && proband.method.genotypingMethods && proband.method.genotypingMethods.length ? proband.method.genotypingMethods : [];
-                                caseLevelEvidence['specificMutationsGenotypedMethod'] = proband.method && proband.method.specificMutationsGenotypedMethod ? proband.method.specificMutationsGenotypedMethod : '';
-                                caseLevelEvidence['scoreStatus'] = score.scoreStatus;
-                                caseLevelEvidence['defaultScore'] = score.calculatedScore ? score.calculatedScore : null;
-                                caseLevelEvidence['modifiedScore'] = score.hasOwnProperty('score') ? score.score : null;
-                                caseLevelEvidence['scoreExplanation'] = score.scoreExplanation && score.scoreExplanation.length ? score.scoreExplanation : '';
-                                caseLevelEvidence['segregationNumAffected'] = segregation && segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
-                                caseLevelEvidence['segregationNumUnaffected'] = segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
-                                caseLevelEvidence['segregationPublishedLodScore'] = segregation && segregation.publishedLodScore ? segregation.publishedLodScore : null;
-                                caseLevelEvidence['segregationEstimatedLodScore'] = segregation && segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
-                                caseLevelEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
-                                // Put object into array
-                                caseLevelEvidenceList.push(caseLevelEvidence);
-                                this.setState({caseLevelEvidenceList: caseLevelEvidenceList});
-                            }).catch(err => {
-                                console.log('Error in fetching rest data =: %o', err);
-                            });
+                            } else if (proband.associatedFamilies.length) {
+                                associatedFamily = proband.associatedFamilies[0];
+                                if (proband.associatedFamilies[0].associatedGroups.length) {
+                                    if (proband.associatedFamilies[0].associatedGroups[0].associatedAnnotations.length) {
+                                        annotation = proband.associatedFamilies[0].associatedGroups[0].associatedAnnotations[0];
+                                    }
+                                } else if (proband.associatedFamilies[0].associatedAnnotations.length) {
+                                    annotation = proband.associatedFamilies[0].associatedAnnotations[0];
+                                }
+                            }
+                            let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
+                            let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
+                            // Define object key/value pairs
+                            caseLevelEvidence['variantType'] = score.caseInfoType && score.caseInfoType.length ? this.mapVariantType(score.caseInfoType) : '';
+                            caseLevelEvidence['variants'] = proband.variants && proband.variants.length ? proband.variants : [];
+                            caseLevelEvidence['authors'] = annotation.article.authors;
+                            caseLevelEvidence['pmid'] = annotation.article.pmid;
+                            caseLevelEvidence['pubYear'] = pubDate[1];
+                            caseLevelEvidence['label'] = proband.label ? proband.label : '';
+                            caseLevelEvidence['sex'] = proband.sex ? proband.sex : '';
+                            caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
+                            caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
+                            caseLevelEvidence['ageUnit'] = proband.ageUnit && proband.ageUnit.length ? proband.ageUnit : '';
+                            caseLevelEvidence['ethnicity'] = proband.ethnicity && proband.ethnicity.length ? proband.ethnicity : '';
+                            caseLevelEvidence['hpoIdInDiagnosis'] = proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length ? proband.hpoIdInDiagnosis : [];
+                            caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';
+                            caseLevelEvidence['previousTestingDescription'] = proband.method && proband.method.previousTestingDescription ? proband.method.previousTestingDescription : '';
+                            caseLevelEvidence['genotypingMethods'] = proband.method && proband.method.genotypingMethods && proband.method.genotypingMethods.length ? proband.method.genotypingMethods : [];
+                            caseLevelEvidence['specificMutationsGenotypedMethod'] = proband.method && proband.method.specificMutationsGenotypedMethod ? proband.method.specificMutationsGenotypedMethod : '';
+                            caseLevelEvidence['scoreStatus'] = score.scoreStatus;
+                            caseLevelEvidence['defaultScore'] = score.calculatedScore ? score.calculatedScore : null;
+                            caseLevelEvidence['modifiedScore'] = score.hasOwnProperty('score') ? score.score : null;
+                            caseLevelEvidence['scoreExplanation'] = score.scoreExplanation && score.scoreExplanation.length ? score.scoreExplanation : '';
+                            caseLevelEvidence['segregationNumAffected'] = segregation && segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
+                            caseLevelEvidence['segregationNumUnaffected'] = segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
+                            caseLevelEvidence['segregationPublishedLodScore'] = segregation && segregation.publishedLodScore ? segregation.publishedLodScore : null;
+                            caseLevelEvidence['segregationEstimatedLodScore'] = segregation && segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
+                            caseLevelEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
+                            // Put object into array
+                            caseLevelEvidenceList.push(caseLevelEvidence);
+                            this.setState({caseLevelEvidenceList: caseLevelEvidenceList});
                         }
                     }
                 });
@@ -328,42 +328,32 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 let segregation = family.segregation ? family.segregation : null;
                 if (segregation && (segregation.estimatedLodScore || segregation.publishedLodScore)) {
                     let segregationEvidence = {};
-                    // Get family data object given the uuid
-                    this.getRestData(family['@id']).then(familyRestData => {
-                        return Promise.resolve({family, segregation, familyRestData});
-                    }).then(result => {
-                        const family = result.family;
-                        const segregation = result.segregation;
-                        const familyObj = result.familyRestData;
-                        let annotation = {};
-                        // Find the annotation that family directly or indirectly belongs to
-                        if (familyObj.associatedAnnotations.length) {
-                            annotation = familyObj.associatedAnnotations[0];
-                        } else if (familyObj.associatedGroups.length) {
-                            if (familyObj.associatedGroups[0].associatedAnnotations.length){
-                                annotation = familyObj.associatedGroups[0].associatedAnnotations[0];
-                            }
+                    let annotation = {};
+                    // Find the annotation that family directly or indirectly belongs to
+                    if (family.associatedAnnotations.length) {
+                        annotation = family.associatedAnnotations[0];
+                    } else if (family.associatedGroups.length) {
+                        if (family.associatedGroups[0].associatedAnnotations.length){
+                            annotation = family.associatedGroups[0].associatedAnnotations[0];
                         }
-                        let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
-                        // Define object key/value pairs
-                        segregationEvidence['authors'] = annotation.article.authors;
-                        segregationEvidence['pmid'] = annotation.article.pmid;
-                        segregationEvidence['pubYear'] = pubDate[1];
-                        segregationEvidence['label'] = family.label ? family.label : '';
-                        segregationEvidence['ethnicity'] = family.ethnicity ? family.ethnicity : '';
-                        segregationEvidence['hpoIdInDiagnosis'] = family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length ? family.hpoIdInDiagnosis : [];
-                        segregationEvidence['termsInDiagnosis'] = family.termsInDiagnosis && family.termsInDiagnosis.length ? family.termsInDiagnosis : '';
-                        segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
-                        segregationEvidence['segregationNumUnaffected'] = segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
-                        segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
-                        segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
-                        segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
-                        // Put object into array
-                        segregationEvidenceList.push(segregationEvidence);
-                        this.setState({segregationEvidenceList: segregationEvidenceList});
-                    }).catch(err => {
-                        console.log('Error in fetching rest data =: %o', err);
-                    });
+                    }
+                    let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
+                    // Define object key/value pairs
+                    segregationEvidence['authors'] = annotation.article.authors;
+                    segregationEvidence['pmid'] = annotation.article.pmid;
+                    segregationEvidence['pubYear'] = pubDate[1];
+                    segregationEvidence['label'] = family.label ? family.label : '';
+                    segregationEvidence['ethnicity'] = family.ethnicity ? family.ethnicity : '';
+                    segregationEvidence['hpoIdInDiagnosis'] = family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length ? family.hpoIdInDiagnosis : [];
+                    segregationEvidence['termsInDiagnosis'] = family.termsInDiagnosis && family.termsInDiagnosis.length ? family.termsInDiagnosis : '';
+                    segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;
+                    segregationEvidence['segregationNumUnaffected'] = segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : null;
+                    segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
+                    segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
+                    segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
+                    // Put object into array
+                    segregationEvidenceList.push(segregationEvidence);
+                    this.setState({segregationEvidenceList: segregationEvidenceList});
                 }
             }
         });
@@ -429,22 +419,15 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                         caseControlEvidence['confidenceIntervalFrom'] = caseControl.confidenceIntervalFrom ? caseControl.confidenceIntervalFrom : null;
                                         caseControlEvidence['confidenceIntervalTo'] = caseControl.confidenceIntervalTo ? caseControl.confidenceIntervalTo : null;
                                         caseControlEvidence['score'] = score.hasOwnProperty('score') ? score.score : null;
-                                        // Get disease data object given the uuid
                                         if (caseControl.caseCohort.commonDiagnosis && caseControl.caseCohort.commonDiagnosis.length) {
-                                            this.getRestData(caseControl.caseCohort.commonDiagnosis[0]).then(diseaseRestData => {
-                                                return Promise.resolve({diseaseRestData});
-                                            }).then(result => {
-                                                const diseaseRestData = result.diseaseRestData;
-                                                caseControlEvidence['diseaseId'] = diseaseRestData.diseaseId ? diseaseRestData.diseaseId : null;
-                                                caseControlEvidence['diseaseTerm'] = diseaseRestData.term ? diseaseRestData.term : '';
-                                                caseControlEvidence['diseaseFreetext'] = diseaseRestData.hasOwnProperty('freetext') ? diseaseRestData.freetext : false;
-                                                caseControlEvidence['diseasePhenotypes'] = diseaseRestData.phenotypes && diseaseRestData.phenotypes.length ? diseaseRestData.phenotypes : [];
-                                                // Put object into array
-                                                caseControlEvidenceList.push(caseControlEvidence);
-                                                this.setState({caseControlEvidenceList: caseControlEvidenceList});
-                                            }).catch(err => {
-                                                console.log('Error in fetching rest data =: %o', err);
-                                            });
+                                            const disease = caseControl.caseCohort.commonDiagnosis[0];
+                                            caseControlEvidence['diseaseId'] = disease.diseaseId ? disease.diseaseId : null;
+                                            caseControlEvidence['diseaseTerm'] = disease.term ? disease.term : '';
+                                            caseControlEvidence['diseaseFreetext'] = disease.hasOwnProperty('freetext') ? disease.freetext : false;
+                                            caseControlEvidence['diseasePhenotypes'] = disease.phenotypes && disease.phenotypes.length ? disease.phenotypes : [];
+                                            // Put object into array
+                                            caseControlEvidenceList.push(caseControlEvidence);
+                                            this.setState({caseControlEvidenceList: caseControlEvidenceList});
                                         } else {
                                             caseControlEvidence['diseaseId'] = null;
                                             caseControlEvidence['diseaseTerm'] = '';
@@ -617,6 +600,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
                     <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
+                    {provisional && Object.keys(provisional).length ?
+                        <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
+                        :null}
                     <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
                     <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} />
                     <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
