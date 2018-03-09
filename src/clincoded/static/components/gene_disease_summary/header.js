@@ -57,6 +57,13 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                                     <dd className="classificationSaved">{provisional.last_modified ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
                                 </div>
                                 : null}
+                            <dt>Replication Over Time:</dt>
+                            <dd className="classification-replicated-over-time">{provisional && provisional.replicatedOverTime ? <span>Yes</span> : <span>No</span>}</dd>
+                            <dt>Contradictory Evidence?</dt>
+                            <dd className="contradictory-evidence">
+                                Proband: <strong>{provisional && provisional.contradictingEvidence && provisional.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : <span>No</span>}</strong>,&nbsp;
+                                Experimental: <strong>{provisional && provisional.contradictingEvidence && provisional.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : <span>No</span>}</strong>
+                            </dd>
                             <dt>Disease:</dt>
                             <dd className="disease-term">{disease && disease.term ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.term}</a> : null}</dd>
                         </dl>
