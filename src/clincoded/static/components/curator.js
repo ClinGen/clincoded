@@ -2504,7 +2504,9 @@ function flattenProvisional(provisional) {
 
 
 var provisionalVariantSimpleProps = [
-    "autoClassification", "alteredClassification", "reasons", "evidenceSummary", "affiliation"
+    "autoClassification", "alteredClassification", "reasons", "evidenceSummary", "affiliation", "classificationStatus",
+    "approvalSubmitter", "classificationApprover", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
+    "provisionalDate", "provisionalComment", "provisionedClassification", "approvedClassification", "publishClassification"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {
@@ -2564,7 +2566,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective", "affiliation"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "modeInheritanceAdjective", "affiliation"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
