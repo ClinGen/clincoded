@@ -70,6 +70,7 @@
  */
 .provisional-approval {
     .provisional-form-content-wrapper {
+        border: none;
         padding: 0;
     
         .col-sm-4 {
@@ -106,6 +107,7 @@
  */
 .final-approval {
     .approval-form-content-wrapper {
+        border: none;
         padding: 0;
     
         .col-sm-4 {
@@ -146,5 +148,31 @@
         margin-bottom: 15px;
         padding-top: 7px;
         padding-bottom: 7px;
+    }
+}
+
+/**
+ * Interpretation approval styles
+ */
+.evaluation-summary {
+    .provisional-interpretation-note {
+        margin-top: 20px;
+    }
+
+    .provisional-approval-panel-content {
+        margin: 0 10px;
+    }
+
+    .final-approval-panel-content {
+        margin: 0 10px;
+    }
+
+    .provisional-form-buttons-wrapper,
+    .approval-form-buttons-wrapper {
+        margin-bottom: 10px;
+    }
+
+    .final-approval {
+        margin-bottom: 10px;
     }
 }
