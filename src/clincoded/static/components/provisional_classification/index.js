@@ -569,6 +569,9 @@ const ProvisionalClassification = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
+        const provisionalPanelTitle = provisional && provisional.classificationStatus !== 'In progress' ? "Saved Provisional Classification(s)" : "Save Classification as Provisional";
+        const approvalPanelTitle = provisional && provisional.approvedClassification ? "Saved Approved Classification(s)" : "Approve Classification";
+
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -864,31 +867,43 @@ const ProvisionalClassification = createReactClass({
                                             </p>
                                         </div>
                                         : null}
-                                    <ProvisionalApproval
-                                        session={session}
-                                        gdm={gdm}
-                                        classification={currentClassification}
-                                        classificationStatus={this.state.classificationStatus}
-                                        provisional={provisional}
-                                        affiliation={this.props.affiliation}
-                                        classificationSnapshots={this.state.classificationSnapshots}
-                                        updateSnapshotList={this.updateSnapshotList}
-                                        updateProvisionalObj={this.updateProvisionalObj}
-                                    />
+                                    <div className={this.state.classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
+                                        <PanelGroup>
+                                            <Panel title={provisionalPanelTitle} panelClassName="panel-data" open>
+                                                <ProvisionalApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={this.state.classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    classificationSnapshots={this.state.classificationSnapshots}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
                                 </div>
                                 : null}
                             {provisional && provisional.provisionedClassification ?
-                                <ClassificationApproval
-                                    session={session}
-                                    gdm={gdm}
-                                    classification={currentClassification}
-                                    classificationStatus={this.state.classificationStatus}
-                                    provisional={provisional}
-                                    affiliation={this.props.affiliation}
-                                    classificationSnapshots={this.state.classificationSnapshots}
-                                    updateSnapshotList={this.updateSnapshotList}
-                                    updateProvisionalObj={this.updateProvisionalObj}
-                                />
+                                <div className="container approval-process final-approval">
+                                    <PanelGroup>
+                                        <Panel title={approvalPanelTitle} panelClassName="panel-data" open>
+                                            <ClassificationApproval
+                                                session={session}
+                                                gdm={gdm}
+                                                classification={currentClassification}
+                                                classificationStatus={this.state.classificationStatus}
+                                                provisional={provisional}
+                                                affiliation={this.props.affiliation}
+                                                classificationSnapshots={this.state.classificationSnapshots}
+                                                updateSnapshotList={this.updateSnapshotList}
+                                                updateProvisionalObj={this.updateProvisionalObj}
+                                            />
+                                        </Panel>
+                                    </PanelGroup>
+                                </div>
                                 : null}
                         </div>
                         :
