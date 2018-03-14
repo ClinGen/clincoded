@@ -1697,7 +1697,7 @@
     .interpretation-record {
         padding: 20px 0;
 
-         h2 {
+        h2 {
             left: 0;
             margin: 0;
             text-align: center;
@@ -1740,6 +1740,27 @@
                 position: fixed;
                 max-width: 300px;
                 z-index: 9999;
+            }
+        }
+    }
+
+    .header-classification {
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
             }
         }
     }
@@ -2422,16 +2443,30 @@ dl.inline-dl {
             .provisional-interpretation-status:first-letter {
                 text-transform: capitalize;
             }
-
-            .modeInheritance {
-                font-style: italic;
-            }
         }
     }
 
     .provisional-static-content-wrapper {
         margin-bottom: 10px;
         padding: 0;
+
+        .provisional-interpretation-status {
+            line-height: 1.8;
+            margin-left: 3px;
+            position: relative;
+            top: -3px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
     }
 
     .provisional-form-content-wrapper {
@@ -2440,6 +2475,11 @@ dl.inline-dl {
         -webkit-border-radius: 2px;
         -moz-border-radius: 2px;
         border-radius: 2px;
+
+        .classification-submit,
+        .classification-edit {
+            margin-top: 10px;
+        }
     }
 
     .evaluation-provision {
@@ -2561,8 +2601,6 @@ dl.inline-dl {
         }
 
         &.evidence-summary {
-            margin-top: 25px;
-
             label {
                 padding-right: 0;
                 padding-top: 0;
