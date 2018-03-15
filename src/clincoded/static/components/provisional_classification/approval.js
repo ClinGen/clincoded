@@ -20,6 +20,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
     propTypes: {
         gdm: PropTypes.object,
+        interpretation: PropTypes.object,
         session: PropTypes.object,
         provisional: PropTypes.object,
         classification: PropTypes.string,
@@ -147,38 +148,80 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 delete newProvisional['approvalComment'];
             }
         }
-        // Update existing provisional data object
-        return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
-            let provisionalClassification = data['@graph'][0];
-            this.props.updateProvisionalObj(provisionalClassification['@id']);
-            // Record classification approval history
-            let meta = {
-                provisionalClassification: {
-                    gdm: this.props.gdm['@id'],
-                    alteredClassification: provisionalClassification.alteredClassification,
-                    classificationStatus: provisionalClassification.classificationStatus
-                }
-            };
-            this.recordHistory('modify', provisionalClassification, meta);
-            return Promise.resolve(provisionalClassification);
-        }).then(result => {
-            let newSnapshot = {
-                resourceId: result.uuid,
-                resourceType: 'classification',
-                approvalStatus: 'Approved',
-                resource: result,
-                resourceParent: this.props.gdm
-            };
-            this.postRestData('/snapshot/', newSnapshot).then(response => {
-                let approvalSnapshot = response['@graph'][0];
-                this.setState({currApprovalSnapshot: approvalSnapshot});
-                this.props.updateSnapshotList(approvalSnapshot['@id']);
+
+        if (this.props.gdm && Object.keys(this.props.gdm).length) {
+            // Update existing provisional data object
+            return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
+                let provisionalClassification = data['@graph'][0];
+                this.props.updateProvisionalObj(provisionalClassification['@id']);
+                // Record classification approval history
+                let meta = {
+                    provisionalClassification: {
+                        gdm: this.props.gdm['@id'],
+                        alteredClassification: provisionalClassification.alteredClassification,
+                        classificationStatus: provisionalClassification.classificationStatus
+                    }
+                };
+                this.recordHistory('modify', provisionalClassification, meta);
+                return Promise.resolve(provisionalClassification);
+            }).then(result => {
+                // get a fresh copy of the gdm object
+                this.getRestData('/gdm/' + this.props.gdm.uuid, null, true).then(newGdm => {
+                    let newSnapshot = {
+                        resourceId: result.uuid,
+                        resourceType: 'classification',
+                        approvalStatus: 'Approved',
+                        resource: result,
+                        resourceParent: newGdm
+                    };
+                    this.postRestData('/snapshot/', newSnapshot).then(response => {
+                        let approvalSnapshot = response['@graph'][0];
+                        this.setState({currApprovalSnapshot: approvalSnapshot});
+                        this.props.updateSnapshotList(approvalSnapshot['@id']);
+                    }).catch(err => {
+                        console.log('Saving approval snapshot error = : %o', err);
+                    });
+                });
             }).catch(err => {
-                console.log('Saving approval snashot error = : %o', err);
+                console.log('Classification approval submission error = : %o', err);
             });
-        }).catch(err => {
-            console.log('Classification approval submission error = : %o', err);
-        });
+        } else if (this.props.interpretation && Object.keys(this.props.interpretation).length) {
+            // Update existing classification data and its parent interpretation
+            return this.putRestData('/provisional-variant/' + this.props.provisional.uuid, newProvisional).then(data => {
+                let provisionalClassification = data['@graph'][0];
+                this.props.updateProvisionalObj(provisionalClassification['@id']);
+                // Record classification approval history
+                let meta = {
+                    provisionalClassification: {
+                        interpretation: this.props.interpretation['@id'],
+                        alteredClassification: provisionalClassification.alteredClassification,
+                        classificationStatus: provisionalClassification.classificationStatus
+                    }
+                };
+                // this.recordHistory('modify', provisionalClassification, meta);
+                return Promise.resolve(provisionalClassification);
+            }).then(result => {
+                // get a fresh copy of the interpretation object
+                this.getRestData('/interpretation/' + this.props.interpretation.uuid, null, true).then(newInterpretation => {
+                    let newSnapshot = {
+                        resourceId: result.uuid,
+                        resourceType: 'interpretation',
+                        approvalStatus: 'Approved',
+                        resource: result,
+                        resourceParent: newInterpretation
+                    };
+                    this.postRestData('/snapshot/', newSnapshot).then(response => {
+                        let approvalSnapshot = response['@graph'][0];
+                        this.setState({currApprovalSnapshot: approvalSnapshot});
+                        this.props.updateSnapshotList(approvalSnapshot['@id']);
+                    }).catch(err => {
+                        console.log('Saving approval snapshot error = : %o', err);
+                    });
+                });
+            }).catch(err => {
+                console.log('Classification approval submission error = : %o', err);
+            });
+        }
     },
 
     render() {
@@ -192,165 +235,166 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
         const affiliationApprovers = this.state.affiliationApprovers;
-        const panelTitle = provisional && provisional.approvedClassification ? "Saved Approved Classification(s)" : "Approve Classification";
         const snapshots = this.state.classificationSnapshots;
+        let snapshotType;
+        if (this.props.gdm && Object.keys(this.props.gdm).length) {
+            snapshotType = 'classification';
+        } else if (this.props.interpretation && Object.keys(this.props.interpretation).length) {
+            snapshotType = 'interpretation';
+        }
 
         return (
-            <div className="container approval-process final-approval">
-                <PanelGroup>
-                    <Panel title={panelTitle} panelClassName="panel-data" open>
-                        {provisional && this.props.classificationStatus !== 'Approved' ?
-                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                {this.state.isApprovalPreview ?
-                                    <div className="approval-preview">
-                                        <div className="col-md-12 approval-form-content-wrapper">
-                                            <div className="col-xs-12 col-sm-4">
-                                                <div className="approval-affiliation">
-                                                    <dl className="inline-dl clearfix">
-                                                        <dt><span>ClinGen Affiliation:</span></dt>
-                                                        <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
-                                                    </dl>
-                                                </div>
-                                                <div className="approval-submitter">
-                                                    <dl className="inline-dl clearfix">
-                                                        <dt><span>Approved Classification entered by:</span></dt>
-                                                        <dd>{approvalSubmitter ? approvalSubmitter : null}</dd>
-                                                    </dl>
-                                                </div>
-                                                <div className="classification-approver">
+            <div className="final-approval-panel-content">
+                {provisional && this.props.classificationStatus !== 'Approved' ?
+                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                        {this.state.isApprovalPreview ?
+                            <div className="approval-preview">
+                                <div className="col-md-12 approval-form-content-wrapper">
+                                    <div className="col-xs-12 col-sm-4">
+                                        <div className="approval-affiliation">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>ClinGen Affiliation:</span></dt>
+                                                <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                            </dl>
+                                        </div>
+                                        <div className="approval-submitter">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Approved Classification entered by:</span></dt>
+                                                <dd>{approvalSubmitter ? approvalSubmitter : null}</dd>
+                                            </dl>
+                                        </div>
+                                        <div className="classification-approver">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Approver:</span></dt>
+                                                <dd>{classificationApprover}</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                    <div className="col-xs-12 col-sm-3">
+                                        <div className="approval-date">
+                                            <dl className="inline-dl clearfix preview-approval-date">
+                                                <dt><span>Date saved as Approved:</span></dt>
+                                                <dd><span>{approvalDate ? formatDate(parseDate(approvalDate), "YYYY MMM DD") : null}</span></dd>
+                                            </dl>
+                                        </div>
+                                        <div className="approval-review-date">
+                                            <dl className="inline-dl clearfix preview-approval-review-date">
+                                                <dt><span>Date reviewed:</span></dt>
+                                                <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                    <div className="col-xs-12 col-sm-5">
+                                        <div className="approval-comments">
+                                            <dl className="inline-dl clearfix preview-approval-comment">
+                                                <dt><span>Additional comments:</span></dt>
+                                                <dd><span>{approvalComment ? approvalComment : null}</span></dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-12 alert alert-warning approval-preview-note"><i className="icon icon-exclamation-circle"></i> This is a Preview; you must Submit.</div>
+                            </div>
+                            :
+                            <div className="approval-edit">
+                                <div className="col-md-12 approval-form-content-wrapper">
+                                    <div className="col-xs-12 col-sm-4">
+                                        <div className="approval-affiliation">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>ClinGen Affiliation:</span></dt>
+                                                <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                            </dl>
+                                        </div>
+                                        <div className="approval-submitter">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Entered by:</span></dt>
+                                                <dd>{approvalSubmitter ? approvalSubmitter : null}</dd>
+                                            </dl>
+                                        </div>
+                                        {affiliation && affiliation.length ?
+                                            <div className="classification-approver">
+                                                {affiliationApprovers && affiliationApprovers.length ?
+                                                    <Input type="select" ref={(input) => { this.approverInput = input; }} label="Approver:"
+                                                        error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
+                                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                                                        defaultValue={classificationApprover}>
+                                                        <option value="none">Select Approver</option>
+                                                        <option value="" disabled className="divider"></option>
+                                                        {affiliationApprovers.map((member, i) => {
+                                                            return <option key={i} value={member}>{member}</option>;
+                                                        })}
+                                                    </Input>
+                                                    :
                                                     <dl className="inline-dl clearfix">
                                                         <dt><span>Approver:</span></dt>
                                                         <dd>{classificationApprover}</dd>
                                                     </dl>
-                                                </div>
+                                                }
                                             </div>
-                                            <div className="col-xs-12 col-sm-3">
-                                                <div className="approval-date">
-                                                    <dl className="inline-dl clearfix preview-approval-date">
-                                                        <dt><span>Date saved as Approved:</span></dt>
-                                                        <dd><span>{approvalDate ? formatDate(parseDate(approvalDate), "YYYY MMM DD") : null}</span></dd>
-                                                    </dl>
-                                                </div>
-                                                <div className="approval-review-date">
-                                                    <dl className="inline-dl clearfix preview-approval-review-date">
-                                                        <dt><span>Date reviewed:</span></dt>
-                                                        <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
-                                                    </dl>
-                                                </div>
-                                            </div>
-                                            <div className="col-xs-12 col-sm-5">
-                                                <div className="approval-comments">
-                                                    <dl className="inline-dl clearfix preview-approval-comment">
-                                                        <dt><span>Additional comments:</span></dt>
-                                                        <dd><span>{approvalComment ? approvalComment : null}</span></dd>
-                                                    </dl>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12 alert alert-warning approval-preview-note"><i className="icon icon-exclamation-circle"></i> This is a Preview; you must Submit.</div>
+                                            : null}
                                     </div>
-                                    :
-                                    <div className="approval-edit">
-                                        <div className="col-md-12 approval-form-content-wrapper">
-                                            <div className="col-xs-12 col-sm-4">
-                                                <div className="approval-affiliation">
-                                                    <dl className="inline-dl clearfix">
-                                                        <dt><span>ClinGen Affiliation:</span></dt>
-                                                        <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
-                                                    </dl>
-                                                </div>
-                                                <div className="approval-submitter">
-                                                    <dl className="inline-dl clearfix">
-                                                        <dt><span>Entered by:</span></dt>
-                                                        <dd>{approvalSubmitter ? approvalSubmitter : null}</dd>
-                                                    </dl>
-                                                </div>
-                                                {affiliation && affiliation.length ?
-                                                    <div className="classification-approver">
-                                                        {affiliationApprovers && affiliationApprovers.length ?
-                                                            <Input type="select" ref={(input) => { this.approverInput = input; }} label="Approver:"
-                                                                error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
-                                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                                                                defaultValue={classificationApprover}>
-                                                                <option value="none">Select Approver</option>
-                                                                <option value="" disabled className="divider"></option>
-                                                                {affiliationApprovers.map((member, i) => {
-                                                                    return <option key={i} value={member}>{member}</option>;
-                                                                })}
-                                                            </Input>
-                                                            :
-                                                            <dl className="inline-dl clearfix">
-                                                                <dt><span>Approver:</span></dt>
-                                                                <dd>{classificationApprover}</dd>
-                                                            </dl>
-                                                        }
-                                                    </div>
-                                                    : null}
-                                            </div>
-                                            <div className="col-xs-12 col-sm-3">
-                                                <div className="approval-review-date">
-                                                    <div className="form-group">
-                                                        <label className="col-sm-5 control-label">Date reviewed:</label>
-                                                        <div className="col-sm-7">
-                                                            <DayPickerInput
-                                                                value={approvalReviewDate}
-                                                                onDayChange={this.handleReviewDateChange}
-                                                                formatDate={formatDate}
-                                                                parseDate={parseDate}
-                                                                placeholder={`${formatDate(new Date())}`}
-                                                                dayPickerProps={{
-                                                                    selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined,
-                                                                    disabledDays: {
-                                                                        daysOfWeek: [0, 6]
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="col-xs-12 col-sm-5">
-                                                <div className="approval-comments">
-                                                    <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
-                                                        label="Additional comments:" value={approvalComment} rows="5"
-                                                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                    <div className="col-xs-12 col-sm-3">
+                                        <div className="approval-review-date">
+                                            <div className="form-group">
+                                                <label className="col-sm-5 control-label">Date reviewed:</label>
+                                                <div className="col-sm-7">
+                                                    <DayPickerInput
+                                                        value={approvalReviewDate}
+                                                        onDayChange={this.handleReviewDateChange}
+                                                        formatDate={formatDate}
+                                                        parseDate={parseDate}
+                                                        placeholder={`${formatDate(new Date())}`}
+                                                        dayPickerProps={{
+                                                            selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined,
+                                                            disabledDays: {
+                                                                daysOfWeek: [0, 6]
+                                                            }
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                }
-                                <div className="col-md-12 approval-form-buttons-wrapper">
-                                    {this.state.isApprovalPreview ?
-                                        <div className="button-group">
-                                            <button type="button" className="btn btn-default btn-inline-spacer"
-                                                onClick={this.handleCancelApproval}>
-                                                Cancel Approval
-                                            </button>
-                                            <button type="button" className="btn btn-info btn-inline-spacer"
-                                                onClick={this.handleEditApproval}>
-                                                Edit <i className="icon icon-pencil"></i>
-                                            </button>
-                                            <button type="submit" className="btn btn-primary btn-inline-spacer pull-right">
-                                                Submit Approval <i className="icon icon-check-square-o"></i>
-                                            </button>
+                                    <div className="col-xs-12 col-sm-5">
+                                        <div className="approval-comments">
+                                            <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
+                                                label="Additional comments:" value={approvalComment} rows="5"
+                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                         </div>
-                                        :
-                                        <div className="button-group">
-                                            <button type="button" className="btn btn-default btn-inline-spacer pull-right"
-                                                onClick={this.handlePreviewApproval}>
-                                                Preview Approval
-                                            </button>
-                                        </div>
-                                    }
+                                    </div>
                                 </div>
-                            </Form>
-                            : null}
-                        {/* Render snapshots of all saved approved classifications */}
-                        {snapshots && snapshots.length ?
-                            <ApprovalSnapshots snapshots={snapshots} />
-                            : null}
-                    </Panel>
-                </PanelGroup>
+                            </div>
+                        }
+                        <div className="col-md-12 approval-form-buttons-wrapper">
+                            {this.state.isApprovalPreview ?
+                                <div className="button-group">
+                                    <button type="button" className="btn btn-default btn-inline-spacer"
+                                        onClick={this.handleCancelApproval}>
+                                        Cancel Approval
+                                    </button>
+                                    <button type="button" className="btn btn-info btn-inline-spacer"
+                                        onClick={this.handleEditApproval}>
+                                        Edit <i className="icon icon-pencil"></i>
+                                    </button>
+                                    <button type="submit" className="btn btn-primary btn-inline-spacer pull-right">
+                                        Submit Approval <i className="icon icon-check-square-o"></i>
+                                    </button>
+                                </div>
+                                :
+                                <div className="button-group">
+                                    <button type="button" className="btn btn-default btn-inline-spacer pull-right"
+                                        onClick={this.handlePreviewApproval}>
+                                        Preview Approval
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </Form>
+                    : null}
+                {/* Render snapshots of all saved approved classifications */}
+                {snapshots && snapshots.length ?
+                    <ApprovalSnapshots snapshots={snapshots} resourceType={snapshotType} />
+                    : null}
             </div>
         );
     }
