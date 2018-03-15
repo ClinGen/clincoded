@@ -34,7 +34,7 @@ Feature: Curation Central
         Then I should see "123456" within 5 seconds
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
     Scenario: Test PMID modal in Curation-central
@@ -55,4 +55,4 @@ Feature: Curation Central
         Then I should not see an element with the css selector ".modal-open"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"

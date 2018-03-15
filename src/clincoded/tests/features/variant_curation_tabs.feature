@@ -86,7 +86,7 @@ Feature: Variant Curation Tabs
         Then I should see "criteria provided, single submitter"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Insertion)
@@ -130,7 +130,7 @@ Feature: Variant Curation Tabs
         Then I should see "no assertion criteria provided"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Indel)
@@ -174,4 +174,4 @@ Feature: Variant Curation Tabs
         Then I should see "criteria provided, single submitter"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"

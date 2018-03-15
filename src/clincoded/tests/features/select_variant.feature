@@ -59,6 +59,6 @@ Feature: Select Variant
         Then I should see " rs566967979"
         When I press "Logout ClinGen Test Curator"
         And I wait for 10 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
