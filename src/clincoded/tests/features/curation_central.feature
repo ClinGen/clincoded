@@ -14,7 +14,7 @@ Feature: Curation Central
         Then I should see "Abstract" within 10 seconds
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "All users may register for our demo version of the ClinGen interfaces"
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
     Scenario: Test OMIM modal in Curation-central
