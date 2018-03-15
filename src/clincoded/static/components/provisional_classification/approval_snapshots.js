@@ -13,18 +13,22 @@ class ApprovalSnapshots extends Component {
         super(props);
     }
 
-    viewSnapshotEvidenceSummary(snapshotId, e) {
+    viewSnapshotSummary(snapshotId, type, e) {
         e.preventDefault(); e.stopPropagation();
         const snapshotUuid = snapshotId.slice(11, -1);
-        window.open('/gene-disease-evidence-summary/?snapshot=' + snapshotUuid, '_blank');
+        if (type === 'classification') {
+            window.open('/gene-disease-evidence-summary/?snapshot=' + snapshotUuid, '_blank');
+        } else if (type === 'interpretation') {
+            window.open('/variant-interpretation-summary/?snapshot=' + snapshotUuid, '_blank');
+        }
     }
 
     /**
      * Method to render provisioned classification snapshots in table rows
      * @param {object} snapshot - A saved copy of a provisioned classification and its parent GDM
      */
-    renderApprovalSnapshot(snapshot) {
-        if (snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification') {
+    renderApprovalSnapshot(snapshot, type) {
+        if (snapshot.approvalStatus === 'Approved' && snapshot.resourceType === type) {
             return (
                 <tr className="approval-snapshot-item" key={snapshot['@id']}>
                     <td className="approval-snapshot-content">
@@ -53,7 +57,7 @@ class ApprovalSnapshots extends Component {
                             <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
                         </dl>
                         <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
-                            <dt><span>Saved Classification:</span></dt>
+                            <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
                             <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
                         </dl>
                         <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
@@ -62,7 +66,7 @@ class ApprovalSnapshots extends Component {
                         </dl>
                     </td>
                     <td className="approval-snapshot-buttons">
-                        <Input type="button" inputClassName="btn-primary" title="Evidence Summary" clickHandler={this.viewSnapshotEvidenceSummary.bind(this, snapshot.uuid)} />
+                        <Input type="button" inputClassName="btn-primary" title="View Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                     </td>
                 </tr>
             );
@@ -70,12 +74,12 @@ class ApprovalSnapshots extends Component {
     }
 
     render() {
-        const { snapshots } = this.props;
+        const { snapshots, resourceType } = this.props;
 
         return (
             <table className="table final-approval-snapshot-list">
                 <tbody>
-                    {snapshots.map(snapshot => this.renderApprovalSnapshot(snapshot))}
+                    {snapshots.map(snapshot => this.renderApprovalSnapshot(snapshot, resourceType))}
                 </tbody>
             </table>
         );
@@ -83,7 +87,8 @@ class ApprovalSnapshots extends Component {
 }
 
 ApprovalSnapshots.propTypes = {
-    snapshots: PropTypes.array
+    snapshots: PropTypes.array,
+    resourceType: PropTypes.string
 };
 
 export default ApprovalSnapshots;
