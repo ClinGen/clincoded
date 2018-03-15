@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { queryKeyValue, external_url_map } from '../globals';
-import { RestMixin } from '../rest';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 
 var _ = require('underscore');
@@ -13,27 +12,27 @@ import PopOverComponent from '../../libs/bootstrap/popover';
 
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = createReactClass({
-    mixins: [RestMixin],
-
     propTypes: {
         calculatedPathogenicity: PropTypes.string,
         data: PropTypes.object, // ClinVar data payload
         interpretationUuid: PropTypes.string,
         interpretation: PropTypes.object,
         session: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        classificationSnapshots: PropTypes.array
     },
 
-    getInitialState: function() {
+    getInitialState() {
         return {
             variant: this.props.data,
             calculatedPathogenicity: this.props.calculatedPathogenicity,
             interpretationUuid: this.props.interpretationUuid,
-            interpretation: this.props.interpretation ? this.props.interpretation : null // parent interpretation object
+            interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
+            classificationSnapshots: this.props.classificationSnapshots,
         };
     },
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
         // this block is for handling props and states when props (external data) is updated after the initial load/rendering
         // when props are updated, update the parent interpreatation object, if applicable
         if (typeof nextProps.interpretation !== undefined && !_.isEqual(nextProps.interpretation, this.props.interpretation)) {
@@ -42,10 +41,13 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         if (typeof nextProps.calculatedPathogenicity !== undefined && nextProps.calculatedPathogenicity !== this.props.calculatedPathogenicity) {
             this.setState({calculatedPathogenicity: nextProps.calculatedPathogenicity});
         }
+        if (nextProps.classificationSnapshots) {
+            this.setState({classificationSnapshots: nextProps.classificationSnapshots});
+        }
     },
 
     // Sort interpretation array, and move current user's as the first element
-    getInterpretations: function(data, session, affiliation) {
+    getInterpretations(data, session, affiliation) {
         let myInterpretation = null, affiliatedInterpretation = null;
         let otherInterpretations = [];
         if (data && data.associatedInterpretations && data.associatedInterpretations.length) {
@@ -66,7 +68,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         };
     },
 
-    goToInterpretationPage: function(e) {
+    goToInterpretationPage(e) {
         e.preventDefault(); e.stopPropagation();
 
         let interpretationData = this.getInterpretations(this.props.data, this.props.session, this.props.affiliation);
@@ -77,7 +79,54 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         window.location.href = url;
     },
 
-    render: function() {
+    /**
+     * Method to display classification tag/label in the interpretation header
+     * @param {string} status - The status of a given classification in an interpretation
+     */
+    renderClassificationStatusTag(status) {
+        let snapshots = this.state.classificationSnapshots;
+        let filteredSnapshots = [];
+        // Determine whether the classification had been previously approved
+        if (snapshots && snapshots.length) {
+            filteredSnapshots = snapshots.filter(snapshot => {
+                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
+            });
+        }
+        if (status === 'In progress') {
+            return <span className="label label-warning">IN PROGRESS</span>;
+        } else if (status === 'Provisional') {
+            if (filteredSnapshots.length) {
+                return (
+                    <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
+                );
+            } else {
+                return <span className="label label-info">PROVISIONAL</span>;
+            }
+        } else if (status === 'Approved') {
+            return <span className="label label-success">APPROVED</span>;
+        }
+    },
+
+    /**
+     * Method to render the header of a given classification in the interpretation header
+     * @param {object} classification - A given classification in an interpretation
+     */
+    renderClassificationHeader(classification) {
+        return (
+            <div className="header-classification">
+                <strong>Status:</strong>
+                <span className="classification-status">
+                    {classification && classification[0].classificationStatus ?
+                        this.renderClassificationStatusTag(classification[0].classificationStatus)
+                        :
+                        this.renderClassificationStatusTag('In progress')
+                    }
+                </span>
+            </div>
+        );
+    },
+
+    render() {
         let variant = this.props.data;
         let session = this.props.session;
         let recordHeader = this.props.recordHeader;
@@ -148,12 +197,10 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                     </div>
                                     <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
                                     <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
-                                    <div><strong>Status:</strong> <i>{myInterpretation.markAsProvisional ? 'Provisional ' : 'In Progress '}</i></div>
+                                    {this.renderClassificationHeader(myInterpretation.provisional_variant)}
                                     <div><strong>Last Edited:</strong> {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
                                 </div>
-                                :
-                                null
-                            }
+                                : null}
                         </div>
                         :
                         <div className="clearfix">
@@ -177,12 +224,14 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                     <span>, </span>
                                                 }
                                                 <span className="no-broken-item">{myInterpretation.affiliation ? getAffiliationName(myInterpretation.affiliation) : myInterpretation.submitted_by.title},</span>&nbsp;
-                                                <span className="no-broken-item"><i>{myInterpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
-                                                    {myInterpretation.markAsProvisional && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                        ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i></span>
+                                                <span className="no-broken-item">
+                                                    <i>{myInterpretation.provisional_variant && myInterpretation.provisional_variant[0].alteredClassification ?
+                                                        ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
+                                                </span>
                                                 <span className="no-broken-item">
                                                     last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 </span>
+                                                {this.renderClassificationHeader(myInterpretation.provisional_variant)}
                                             </td>
                                             <td className="icon-box">
                                                 <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
@@ -192,9 +241,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                         </tr>
                                     </tbody>
                                 </table>
-                                :
-                                null
-                            }
+                                : null}
                             {otherInterpretations && otherInterpretations.length ?
                                 <div className="col-lg-12 other-users-interpretations">
                                     {otherInterpretations.map(function(interpretation, i) {
@@ -221,19 +268,18 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                         }
                                                     </span>
                                                     <span>,&nbsp;</span>
-                                                    <span className="no-broken-item"><i>{interpretation.markAsProvisional ? 'Provisional Interpretation' : 'In progress'}
-                                                        {interpretation.markAsProvisional && interpretation.provisional_variant[0].alteredClassification ?
+                                                    <span className="no-broken-item">
+                                                        <i>{interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
                                                             ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
                                                     </span>
                                                     last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                    {this.renderClassificationHeader(interpretation.provisional_variant)}
                                                 </dd>
                                             </dl>
                                         );
                                     })}
                                 </div>
-                                :
-                                null
-                            }
+                                : null}
                         </div>
                     }
                 </div>
