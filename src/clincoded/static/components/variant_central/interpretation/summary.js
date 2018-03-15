@@ -39,7 +39,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             provisionalPathogenicity: this.props.provisionalPathogenicity,
             provisionalReason: this.props.provisionalReason,
             evidenceSummary: this.props.evidenceSummary,
-            disabledCheckbox: false,
             disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
             alertMsg: null, // status message for Save/Update button
@@ -149,35 +148,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     <span>{modeInheritance + adjective}</span>
                 );
             }
-        }
-    },
-
-    // Method to set the boolean value to the 'markAsProvisional' property
-    // in the event in which the associated disease is deleted while either
-    // the calculated or modified pathogenicity are 'Likely Pathogenic' or 'Pathogenic'
-    handleProvisionalCheckBox(pathogenicity) {
-        if (!this.props.interpretation.disease) {
-            let assertion = this.props.calculatedAssertion;
-            if (assertion === 'Likely pathogenic' || assertion === 'Pathogenic') {
-                if(pathogenicity === 'Benign' ||
-                    pathogenicity === 'Likely benign' ||
-                    pathogenicity === 'Uncertain significance') {
-                    this.setState({disabledCheckbox: false});
-                } else {
-                    this.props.setProvisionalEvaluation('provisional-interpretation', false);
-                    this.setState({disabledCheckbox: true});
-                }
-            } else {
-                if(pathogenicity === 'Likely pathogenic' ||
-                    pathogenicity === 'Pathogenic') {
-                    this.props.setProvisionalEvaluation('provisional-interpretation', false);
-                    this.setState({disabledCheckbox: true});
-                } else {
-                    this.setState({disabledCheckbox: false});
-                }
-            }
-        } else {
-            this.setState({disabledCheckbox: false});
         }
     },
 
@@ -304,7 +274,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         if (interpretation) {
             // Flattened interpretation object
             let flatInterpretationObj = curator.flatten(interpretation);
-            if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
+            if (!interpretation.provisional_variant || (interpretation.provisional_variant && !interpretation.provisional_variant.length)) {
                 // Configure 'provisional-variant' object properties
                 // Use case #1: user makes pathogenicity modification and saves the interpretation classification
                 // Use case #2: user saves the interpretation classification without any modification
@@ -363,7 +333,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     // Configure 'provisional-variant' object properties
                     // Use case #1: user updates pathogenicity modification and saves the interpretation classification
                     // Use case #2: user removes pre-existing modification and updates the form
-                    flatProvisionalVariantObj['classificationStatus'] = this.state.classificationStatus;
+                    flatProvisionalVariantObj['classificationStatus'] = 'In progress';
                     flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
                     // If evidence summary is not nil, save it as well
                     if (this.state.evidenceSummary && this.state.evidenceSummary.length) {
@@ -445,7 +415,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         let provisionalStatus = null;
         let provisionalPathogenicity = this.state.provisionalPathogenicity ? this.state.provisionalPathogenicity : 'none';
         let provisionalReason = this.state.provisionalReason ? this.state.provisionalReason : '';
-        let disabledCheckbox = this.state.disabledCheckbox;
         let disabledFormSumbit = this.state.disabledFormSumbit;
         let evidenceSummary = this.state.evidenceSummary ? this.state.evidenceSummary : '';
 
@@ -525,22 +494,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                 </div>
                                             </div>
                                             <div className="col-xs-12 col-sm-6">
-                                                {/*
-                                                <div className="evaluation-provision provisional-interpretation">
-                                                    <div>
-                                                        <PopOverComponent popOverWrapperClass="popover-provisional-status-help" popOverStyleClass="alert alert-info"
-                                                            actuatorTitle={<i className="icon icon-question-circle"></i>} popOverRef={ref => (this.popover = ref)}>
-                                                            <span>
-                                                                An interpretation can still be edited after it's marked "Provisional." If the Interpretation is "Likely Pathogenic" or "Pathogenic,"
-                                                                it must be associated with a disease before it can be marked as "Provisional."
-                                                            </span>
-                                                        </PopOverComponent>
-                                                        <span>Mark status as "Provisional Interpretation" <i>(optional)</i>:</span>
-                                                        <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation}
-                                                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
-                                                    </div>
-                                                </div>
-                                                */}
                                                 <div className="evaluation-provision evidence-summary">
                                                     <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
                                                         value={evidenceSummary} handleChange={this.handleChange}
