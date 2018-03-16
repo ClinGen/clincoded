@@ -54,6 +54,17 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         if (nextProps.classificationSnapshots) {
             this.setState({classificationSnapshots: nextProps.classificationSnapshots});
         }
+        if (this.props.interpretation && Object.keys(this.props.interpretation).length) {
+            if (nextProps.provisional) {
+                this.setState({
+                    approvalDate: nextProps.provisional.approvalDate,
+                    approvalReviewDate: nextProps.provisional.approvalReviewDate,
+                    approvalComment: nextProps.provisional.approvalComment,
+                    approvalSubmitter: nextProps.provisional.approvalSubmitter,
+                    classificationApprover: nextProps.provisional.classificationApprover
+                });
+            }
+        }
     },
 
     getAffiliationApprovers() {
