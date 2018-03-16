@@ -1120,7 +1120,7 @@ var ProvisionalCuration = createReactClass({
                                 {snapshots && snapshots.length && this.getProvisionalSnapshot(snapshots) ?
                                     <PanelGroup>
                                         <Panel title="Saved Provisional Classification(s)" panelClassName="panel-data" open>
-                                            <ProvisionalSnapshots snapshots={snapshots} />
+                                            <ProvisionalSnapshots snapshots={snapshots} resourceType='classification' />
                                         </Panel>
                                     </PanelGroup>
                                     : null}
@@ -1128,7 +1128,7 @@ var ProvisionalCuration = createReactClass({
                                 {snapshots && snapshots.length && this.getApprovedSnapshot(snapshots) ?
                                     <PanelGroup>
                                         <Panel title="Saved Approved Classification(s)" panelClassName="panel-data" open>
-                                            <ApprovalSnapshots snapshots={snapshots} />
+                                            <ApprovalSnapshots snapshots={snapshots} resourceType='classification' />
                                         </Panel>
                                     </PanelGroup>
                                     : null}
