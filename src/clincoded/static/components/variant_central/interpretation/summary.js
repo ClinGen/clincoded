@@ -355,6 +355,18 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                             delete flatProvisionalVariantObj['reason'];
                         }
                     }
+                    // Reset provisional and approval data whenever the evaluation is changed/updated
+                    flatProvisionalVariantObj['provisionedClassification'] = false;
+                    if (flatProvisionalVariantObj['provisionalSubmitter']) delete flatProvisionalVariantObj['provisionalSubmitter'];
+                    if (flatProvisionalVariantObj['provisionalDate']) delete flatProvisionalVariantObj['provisionalDate'];
+                    if (flatProvisionalVariantObj['provisionalReviewDate']) delete flatProvisionalVariantObj['provisionalReviewDate'];
+                    if (flatProvisionalVariantObj['provisionalComment']) delete flatProvisionalVariantObj['provisionalComment'];
+                    flatProvisionalVariantObj['approvedClassification'] = false;
+                    if (flatProvisionalVariantObj['approvalSubmitter']) delete flatProvisionalVariantObj['approvalSubmitter'];
+                    if (flatProvisionalVariantObj['classificationApprover']) delete flatProvisionalVariantObj['classificationApprover'];
+                    if (flatProvisionalVariantObj['approvalDate']) delete flatProvisionalVariantObj['approvalDate'];
+                    if (flatProvisionalVariantObj['approvalReviewDate']) delete flatProvisionalVariantObj['approvalReviewDate'];
+                    if (flatProvisionalVariantObj['approvalComment']) delete flatProvisionalVariantObj['approvalComment'];
                     return Promise.resolve(flatProvisionalVariantObj);
                 }).then(newProvisionalVariantObj => {
                     this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, newProvisionalVariantObj).then(response => {
@@ -365,7 +377,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                             autoClassification: response['@graph'][0]['autoClassification'],
                             modifiedPathogenicity: response['@graph'][0]['alteredClassification']
                         });
-                        this.props.updateInterpretationObj();
+                        this.props.updateProvisionalObj(response['@graph'][0]['@id']);
                     }).catch(err => {
                         this.setState({submitBusy: false});
                         console.log(err);
