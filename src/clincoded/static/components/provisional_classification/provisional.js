@@ -47,6 +47,16 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         if (nextProps.classificationSnapshots) {
             this.setState({classificationSnapshots: nextProps.classificationSnapshots});
         }
+        if (this.props.interpretation && Object.keys(this.props.interpretation).length) {
+            if (nextProps.provisional) {
+                this.setState({
+                    provisionalDate: nextProps.provisional.provisionalDate,
+                    provisionalReviewDate: nextProps.provisional.provisionalReviewDate,
+                    provisionalComment: nextProps.provisional.provisionalComment,
+                    provisionalSubmitter: nextProps.provisional.provisionalSubmitter
+                });
+            }
+        }
     },
 
     handleProvisionalReviewDateChange(provisionalReviewDate) {
