@@ -108,7 +108,7 @@ var VariantCurationHub = createReactClass({
             this.setState({classification: result, classificationStatus: result.classificationStatus});
             return Promise.resolve(result);
         }).then(data => {
-            // Get an updated copy of the gdm object
+            // Get an updated copy of the interpretation object
             this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
                 this.setState({interpretation: interpretation});
             });
