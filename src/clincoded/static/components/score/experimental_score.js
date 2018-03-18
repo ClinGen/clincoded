@@ -132,7 +132,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                             scoreExplanation: scoreExplanation ? scoreExplanation : null
                         }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus ? scoreStatus : 'none');
-                            this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
+                            if (this.refs.scoreExplanation) this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
                             this.updateUserScoreObj();
                         });
                     }
