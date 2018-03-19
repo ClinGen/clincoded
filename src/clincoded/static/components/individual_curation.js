@@ -1009,7 +1009,7 @@ const IndividualCuration = createReactClass({
                                                         <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
                                                             variantInfo={variantInfo} session={session} handleUserScoreObj={this.handleUserScoreObj}
                                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation}
-                                                            gdmUuid={gdm && gdm.uuid ? gdm.uuid : null} pmid={pmid ? pmid : null} />
+                                                            gdm={gdm} pmid={pmid ? pmid : null} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1665,11 +1665,23 @@ const IndividualViewer = createReactClass({
 
     getInitialState: function() {
         return {
+            gdmUuid: queryKeyValue('gdm', this.props.href),
+            gdm: null,
             userScoreObj: {}, // Logged-in user's score object
             submitBusy: false, // True while form is submitting
             scoreError: false,
             scoreErrorMsg: ''
         };
+    },
+
+    componentDidMount() {
+        if (this.state.gdmUuid) {
+            return this.getRestData('/gdm/' + this.state.gdmUuid).then(gdm => {
+                this.setState({gdm: gdm});
+            }).catch(err => {
+                console.log('Fetching gdm error =: %o', err);
+            });
+        }
     },
 
     // Called by child function props to update user score obj
@@ -2095,7 +2107,7 @@ const IndividualViewer = createReactClass({
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation}
-                                            variantInfo={variants} gdmUuid={tempGdm && tempGdm.uuid ? tempGdm.uuid : null} pmid={tempPmid ? tempPmid : null} />
+                                            variantInfo={variants} gdm={this.state.gdm} pmid={tempPmid ? tempPmid : null} />
                                         : null}
                                     {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">
