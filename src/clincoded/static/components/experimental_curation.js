@@ -1309,7 +1309,8 @@ var ExperimentalCuration = createReactClass({
                     /*************************************************************/
                     /* Either update or create the score status object in the DB */
                     /*************************************************************/
-                    if (Object.keys(newUserScoreObj).length) {
+                    if (Object.keys(newUserScoreObj).length && newUserScoreObj.scoreStatus) {
+                        // Update and create score object when the score object has the scoreStatus key/value pair
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -1321,6 +1322,22 @@ var ExperimentalCuration = createReactClass({
                                     // Add the new score to array
                                     evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
+                    } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.scoreStatus) {
+                        // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                        // Then delete the score entry from the score list associated with the evidence
+                        if (this.state.userScoreObj.uuid) {
+                            newUserScoreObj['status'] = 'deleted';
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                evidenceScores.forEach(score => {
+                                    if (score === modifiedScoreObj['@graph'][0]['@id']) {
+                                        let index = evidenceScores.indexOf(score);
+                                        evidenceScores.splice(index, 1);
+                                    }
+                                });
+                                // Return the evidence score array without the deleted object
                                 return Promise.resolve(evidenceScores);
                             });
                         }
@@ -2663,39 +2680,79 @@ const ExperimentalViewer = createReactClass({
             /***********************************************************/
             /* Either update or create the user score object in the DB */
             /***********************************************************/
-            if (this.state.userScoreObj.uuid) {
-                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                    this.setState({submitBusy: false});
-                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
-            } else {
-                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
-                    let newScoreObjectUuid = null;
-                    if (newScoreObject) {
-                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
-                    }
-                    return Promise.resolve(newScoreObjectUuid);
-                }).then(newScoreObjectUuid => {
-                    return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
-                        // flatten both context and fresh experimental
-                        let newExperimental = curator.flatten(experimental);
-                        let freshFlatExperimental = curator.flatten(freshExperimental);
-                        // take only the scores from the fresh experimental to not overwrite changes
-                        // in newExperimental
-                        newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
-                        // push new score uuid to newExperimental's scores list
-                        newExperimental.scores.push(newScoreObjectUuid);
-
-                        return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
-                            this.setState({submitBusy: false});
-                            return Promise.resolve(updatedExperimentalObj['@graph'][0]);
-                        });
+            if (newUserScoreObj.scoreStatus) {
+                // Update and create score object when the score object has the scoreStatus key/value pair
+                if (this.state.userScoreObj.uuid) {
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                    }).then(data => {
+                        this.handlePageRedirect();
                     });
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
+                } else {
+                    return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                        let newScoreObjectUuid = null;
+                        if (newScoreObject) {
+                            newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(newScoreObjectUuid);
+                    }).then(newScoreObjectUuid => {
+                        return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
+                            // flatten both context and fresh experimental
+                            let newExperimental = curator.flatten(experimental);
+                            let freshFlatExperimental = curator.flatten(freshExperimental);
+                            // take only the scores from the fresh experimental to not overwrite changes
+                            // in newExperimental
+                            newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
+                            // push new score uuid to newExperimental's scores list
+                            newExperimental.scores.push(newScoreObjectUuid);
+
+                            return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
+            } else if (!newUserScoreObj.scoreStatus) {
+                // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                // Then delete the score entry from the score list associated with the evidence
+                if (this.state.userScoreObj.uuid) {
+                    newUserScoreObj['status'] = 'deleted';
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        let modifiedScoreObjectUuid = null;
+                        if (modifiedScoreObj) {
+                            modifiedScoreObjectUuid = modifiedScoreObj['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(modifiedScoreObjectUuid);
+                    }).then(modifiedScoreObjectUuid => {
+                        return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
+                            // flatten both context and fresh experimental
+                            let newExperimental = curator.flatten(experimental);
+                            let freshFlatExperimental = curator.flatten(freshExperimental);
+                            // take only the scores from the fresh experimental to not overwrite changes
+                            // in newExperimental
+                            newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
+                            // push new score uuid to newIndividual's scores list
+                            if (newExperimental.scores.length) {
+                                newExperimental.scores.forEach(score => {
+                                    if (score === modifiedScoreObjectUuid) {
+                                        let index = newExperimental.scores.indexOf(score);
+                                        newExperimental.scores.splice(index, 1);
+                                    }
+                                });
+                            }
+                            return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
             }
         }
     },
@@ -2800,7 +2857,7 @@ const ExperimentalViewer = createReactClass({
         let isEvidenceScored = false;
         if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
+                if (scoreObj.scoreStatus && scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
                 }
             });
