@@ -1352,10 +1352,12 @@ var ExperimentalCuration = createReactClass({
                         newExperimental.variants = experimentalDataVariants;
                     }
 
-                    // If we add a new score, add it to the experimental object
-                    if (scoreArray && scoreArray.length) {
-                        newExperimental.scores = scoreArray;
-                    }
+                    // The scoreArray may contain:
+                    // 1. One new score
+                    // 2. New score and other curators' scores
+                    // 3. No new score but an updated score
+                    // 4. No score after the curator deletes the only score in the array
+                    newExperimental.scores = scoreArray;
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
