@@ -777,10 +777,11 @@ const CaseControlCuration = createReactClass({
                     /*****************************************************/
                     let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
-                    if (Object.keys(newUserScoreObj).length) {
+                    if (Object.keys(newUserScoreObj).length && newUserScoreObj.hasOwnProperty('score')) {
                         /*************************************************************/
                         /* Either update or create the case-control object in the DB */
                         /*************************************************************/
+                        // Update and create score object when the score object has the score key/value pair
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -792,6 +793,22 @@ const CaseControlCuration = createReactClass({
                                     // Add the new score to array
                                     evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
+                    } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.hasOwnProperty('score')) {
+                        // If an existing score object has no score key/value pair, the user likely removed score
+                        // Then delete the score entry from the score list associated with the evidence
+                        if (this.state.userScoreObj.uuid) {
+                            newUserScoreObj['status'] = 'deleted';
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                evidenceScores.forEach(score => {
+                                    if (score === modifiedScoreObj['@graph'][0]['@id']) {
+                                        let index = evidenceScores.indexOf(score);
+                                        evidenceScores.splice(index, 1);
+                                    }
+                                });
+                                // Return the evidence score array without the deleted object
                                 return Promise.resolve(evidenceScores);
                             });
                         }
@@ -1506,11 +1523,12 @@ var CaseControlViewer = createReactClass({
         /*****************************************************/
         let newUserScoreObj = Object.keys(this.state.userScoreObj).length ? this.state.userScoreObj : {};
 
-        if (Object.keys(newUserScoreObj).length) {
+        if (Object.keys(newUserScoreObj).length && newUserScoreObj.hasOwnProperty('score')) {
             this.setState({submitBusy: true});
             /***********************************************************/
             /* Either update or create the user score object in the DB */
             /***********************************************************/
+            // Update and create score object when the score object has the scoreStatus key/value pair
             if (this.state.userScoreObj.uuid) {
                 return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                     this.setState({submitBusy: false});
@@ -1536,6 +1554,43 @@ var CaseControlViewer = createReactClass({
                         // push new score uuid to newIndividual's scores list
                         newCaseControl.scores.push(newScoreObjectUuid);
 
+                        return this.putRestData('/casecontrol/' + caseControl.uuid, newCaseControl).then(updatedCaseControlObj => {
+                            this.setState({submitBusy: false});
+                            return Promise.resolve(updatedCaseControlObj['@graph'][0]);
+                        });
+                    });
+                }).then(data => {
+                    this.handlePageRedirect();
+                });
+            }
+        } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.hasOwnProperty('score')) {
+            // If an existing score object has no score key/value pair, the user likely removed score
+            // Then delete the score entry from the score list associated with the evidence
+            if (this.state.userScoreObj.uuid) {
+                newUserScoreObj['status'] = 'deleted';
+                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                    let modifiedScoreObjectUuid = null;
+                    if (modifiedScoreObj) {
+                        modifiedScoreObjectUuid = modifiedScoreObj['@graph'][0]['@id'];
+                    }
+                    return Promise.resolve(modifiedScoreObjectUuid);
+                }).then(modifiedScoreObjectUuid => {
+                    return this.getRestData('/casecontrol/' + caseControl.uuid, null, true).then(freshCaseControl => {
+                        // flatten both context and fresh case-control
+                        let newCaseControl = curator.flatten(caseControl);
+                        let freshFlatCaseControl = curator.flatten(freshCaseControl);
+                        // take only the scores from the fresh case-control to not overwrite changes
+                        // in newCaseControl
+                        newCaseControl.scores = freshFlatCaseControl.scores ? freshFlatCaseControl.scores : [];
+                        // push new score uuid to newIndividual's scores list
+                        if (newCaseControl.scores.length) {
+                            newCaseControl.scores.forEach(score => {
+                                if (score === modifiedScoreObjectUuid) {
+                                    let index = newCaseControl.scores.indexOf(score);
+                                    newCaseControl.scores.splice(index, 1);
+                                }
+                            });
+                        }
                         return this.putRestData('/casecontrol/' + caseControl.uuid, newCaseControl).then(updatedCaseControlObj => {
                             this.setState({submitBusy: false});
                             return Promise.resolve(updatedCaseControlObj['@graph'][0]);
