@@ -19,9 +19,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = createReactCl
         summaryVisible: PropTypes.bool,
         getSelectedTab: PropTypes.func,
         calculatedPathogenicity: PropTypes.string,
-        affiliation: PropTypes.object,
-        ext_ensemblHgvsVEP: PropTypes.array,
-        ext_myGeneInfo: PropTypes.object
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -56,8 +54,7 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = createReactCl
                     <div className="container">
                         <Title data={variant} interpretation={interpretation} interpretationUuid={interpretationUuid}
                             setSummaryVisibility={this.props.setSummaryVisibility} summaryVisible={this.state.summaryVisible}
-                            getSelectedTab={this.props.getSelectedTab} selectedTab={this.props.selectedTab}
-                            ext_ensemblHgvsVEP={this.props.ext_ensemblHgvsVEP} ext_myGeneInfo={this.props.ext_myGeneInfo} />
+                            getSelectedTab={this.props.getSelectedTab} selectedTab={this.props.selectedTab} />
                     </div>
                 </div>
                 <div className="container curation-data curation-variant">

@@ -16,9 +16,7 @@ var Title = module.exports.Title = createReactClass({
         interpretation: PropTypes.object,
         setSummaryVisibility: PropTypes.func,
         summaryVisible: PropTypes.bool,
-        getSelectedTab: PropTypes.func,
-        ext_ensemblHgvsVEP: PropTypes.array,
-        ext_myGeneInfo: PropTypes.object
+        getSelectedTab: PropTypes.func
     },
 
     getInitialState: function() {
@@ -37,41 +35,6 @@ var Title = module.exports.Title = createReactClass({
         this.setState({
             summaryVisible: nextProps.summaryVisible
         });
-    },
-
-    renderVariantTitle(variant, ensemblTranscripts, myGeneInfo) {
-        let variantTitle;
-        if (variant && variant.clinvarVariantTitle) {
-            variantTitle = variant.clinvarVariantTitle;
-        } else if (ensemblTranscripts && ensemblTranscripts.length) {
-            variantTitle = this.getCanonicalTranscript(ensemblTranscripts);
-        } else if (variant && variant.hgvsNames && Object.keys(variant.hgvsNames).length && !variantTitle) {
-            variantTitle = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38+' (GRCh38)': (variant.carId ? variant.carId : 'A preferred title is not available');
-        }
-        return (
-            <span className="header-variant-title-wrapper">
-                <span className="header-variant-title">{variantTitle}</span>
-                {myGeneInfo && myGeneInfo.symbol ?
-                    <span className="header-gene-symbol">Gene: {myGeneInfo.symbol}</span>
-                    : null}
-            </span>
-        );
-    },
-
-    // Get the canonical transcript provided by RefSeq in Ensembl response
-    getCanonicalTranscript(ensemblTranscripts) {
-        let transcript;
-        for (let item of ensemblTranscripts) {
-            // Only if nucleotide transcripts exist
-            if (item.hgvsc && item.source === 'RefSeq' && item.canonical && item.canonical === 1) {
-                transcript = item.hgvsc;
-                if (item.hgvsp) {
-                    let proteinChange = item.hgvsp.split(':')[1];
-                    transcript += ' (' + proteinChange + ')';
-                }
-            }
-        }
-        return transcript;
     },
 
     renderSubtitle: function(interpretation, variant) {
@@ -127,18 +90,27 @@ var Title = module.exports.Title = createReactClass({
         }
     },
 
-    render() {
-        const variant = this.props.data;
-        const interpretation = this.state.interpretation;
-        let ensemblTranscripts = this.props.ext_ensemblHgvsVEP && this.props.ext_ensemblHgvsVEP.length && this.props.ext_ensemblHgvsVEP[0].transcript_consequences ?
-            this.props.ext_ensemblHgvsVEP[0].transcript_consequences : [];
-        let myGeneInfo = this.props.ext_myGeneInfo ? this.props.ext_myGeneInfo : null;
-        let calculatePatho_button = this.props.interpretationUuid ? true : false;
-        let summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
+    render: function() {
+        var variant = this.props.data;
+        var interpretation = this.state.interpretation;
+
+        var variantTitle = (variant && variant.clinvarVariantTitle) ? variant.clinvarVariantTitle : null;
+        if (variant && !variantTitle && variant.hgvsNames && variant.hgvsNames != {}) {
+            variantTitle = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38+' (GRCh38)': (variant.carId ? variant.carId : null);
+        } else if (!variantTitle) {
+            variantTitle = 'A preferred title is not available';
+        }
+
+        var calculatePatho_button = false;
+        if (this.props.interpretationUuid) {
+            calculatePatho_button = true;
+        }
+
+        const summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
 
         return (
             <div>
-                <h1>{this.renderVariantTitle(variant, ensemblTranscripts, myGeneInfo)}{this.props.children}</h1>
+                <h1>{variantTitle}{this.props.children}</h1>
                 <h2>{this.renderSubtitle(interpretation, variant)}</h2>
                 {variant && calculatePatho_button ?
                     <div className="btn-vertical-space">
@@ -149,7 +121,7 @@ var Title = module.exports.Title = createReactClass({
                             </div>
                         </div>
                     </div>
-                    : null}
+                : null}
             </div>
         );
     }
