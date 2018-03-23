@@ -1874,7 +1874,9 @@
             "curator"
         ],
         "affiliation": [
-            "10012"
+            "10012",
+            "10013",
+            "10014"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -2172,7 +2174,9 @@
             "curator"
         ],
         "affiliation": [
-            "10012"
+            "10012",
+            "10013",
+            "10014"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -5001,6 +5005,7 @@
             "curator"
         ],
         "affiliation": [
+            "10014",
             "10023"
         ],
         "job_title": "ClinGen Curator",
