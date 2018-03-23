@@ -574,11 +574,11 @@ var ProvisionalCuration = createReactClass({
         });
 
         // calculate segregation counted points
-        scoreTableValues['segregationPoints'] = Math.round((scoreTableValues['segregationPoints'] + 0.00001) * 100) / 100;
-        if (scoreTableValues['segregationPoints'] >= 0.75 && scoreTableValues['segregationPoints'] <= 0.99) {
+        scoreTableValues['segregationPoints'] = this.classificationMathRound(scoreTableValues['segregationPoints']);
+        if (scoreTableValues['segregationPoints'] >= 0.72 && scoreTableValues['segregationPoints'] <= 0.99) {
             scoreTableValues['segregationPointsCounted'] = 1;
         } else if (scoreTableValues['segregationPoints'] >= 1 && scoreTableValues['segregationPoints'] <= 1.24) {
-            scoreTableValues['segregationPointsCounted'] = .5;
+            scoreTableValues['segregationPointsCounted'] = 1.5;
         } else if (scoreTableValues['segregationPoints'] >= 1.25 && scoreTableValues['segregationPoints'] <= 1.49) {
             scoreTableValues['segregationPointsCounted'] = 2.5;
         } else if (scoreTableValues['segregationPoints'] >= 1.5 && scoreTableValues['segregationPoints'] <= 1.74) {
@@ -590,12 +590,17 @@ var ProvisionalCuration = createReactClass({
         // calculate other counted points
         let tempPoints = 0;
 
+        scoreTableValues['probandOtherVariantPoints'] = this.classificationMathRound(scoreTableValues['probandOtherVariantPoints']);
         scoreTableValues['probandOtherVariantPointsCounted'] = scoreTableValues['probandOtherVariantPoints'] < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT ? scoreTableValues['probandOtherVariantPoints'] : MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
 
+        scoreTableValues['probandNullVariantPoints'] = this.classificationMathRound(scoreTableValues['probandNullVariantPoints']);
         scoreTableValues['probandNullVariantPointsCounted'] = scoreTableValues['probandNullVariantPoints'] < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT ? scoreTableValues['probandNullVariantPoints'] : MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
 
+        scoreTableValues['variantDenovoPoints'] = this.classificationMathRound(scoreTableValues['variantDenovoPoints']);
         scoreTableValues['variantDenovoPointsCounted'] = scoreTableValues['variantDenovoPoints'] < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO ? scoreTableValues['variantDenovoPoints'] : MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
 
+        scoreTableValues['twoVariantsProvenPoints'] = this.classificationMathRound(scoreTableValues['twoVariantsProvenPoints']);
+        scoreTableValues['twoVariantsNotProvenPoints'] = this.classificationMathRound(scoreTableValues['twoVariantsNotProvenPoints']);
         tempPoints = scoreTableValues['twoVariantsProvenPoints'] + scoreTableValues['twoVariantsNotProvenPoints'];
         scoreTableValues['autosomalRecessivePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE ? tempPoints : MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE;
 
@@ -612,15 +617,15 @@ var ProvisionalCuration = createReactClass({
         scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
 
         tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
-        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? parseFloat(tempPoints).toFixed(2) : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
+        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? this.classificationMathRound(tempPoints) : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
 
         tempPoints = scoreTableValues['functionalPointsCounted'] + scoreTableValues['functionalAlterationPointsCounted'] + scoreTableValues['modelsRescuePointsCounted'];
-        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? parseFloat(tempPoints).toFixed(2) : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
+        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? this.classificationMathRound(tempPoints) : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
 
-        let totalScore = parseFloat(scoreTableValues['geneticEvidenceTotalPoints']) + parseFloat(scoreTableValues['experimentalEvidenceTotalPoints']);
+        let totalScore = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
 
         // set scoreTabValues state
-        this.setState({totalScore: parseFloat(totalScore).toFixed(2), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
+        this.setState({totalScore: this.classificationMathRound(totalScore), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
 
         // set classification
         this.calculateClassifications(totalScore, this.state.replicatedOverTime);
@@ -647,6 +652,25 @@ var ProvisionalCuration = createReactClass({
                 });
             }
         });
+    },
+
+    /**
+     * Simple Math.round method
+     */
+    classificationMathRound(number) {
+        return Math.round((number + 0.00001) * 100) / 100;
+    },
+
+    /**
+     * Precision Math.round method
+     * Example: this.precisionMathRound(0.30000000004, 2) // Result: 0.3
+     * Example: this.precisionMathRound(0.35000000004, 2) // Result: 0.35
+     */
+    precisionMathRound(number, precision) {
+        let factor = Math.pow(10, precision);
+        let tempNumber = number * factor;
+        let roundedTempNumber = Math.round(tempNumber);
+        return roundedTempNumber / factor;
     },
 
     render: function() {

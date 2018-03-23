@@ -98,5 +98,25 @@
         "affiliation_id": "10020",
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Brain Malformations Expert Panel"
+    },
+    {
+        "affiliation_id": "10021",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen RASopathy Expert Panel"
+    },
+    {
+        "affiliation_id": "10022",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Rett Angelman Expert Panel"
+    },
+    {
+        "affiliation_id": "10023",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Hereditary Cancer Gene Curation Working Group"
+    },
+    {
+        "affiliation_id": "10024",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "BCM-Education"
     }
 ]

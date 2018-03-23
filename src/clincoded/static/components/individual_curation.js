@@ -516,7 +516,8 @@ const IndividualCuration = createReactClass({
                     /*************************************************************/
                     /* Either update or create the score status object in the DB */
                     /*************************************************************/
-                    if (Object.keys(newUserScoreObj).length) {
+                    if (Object.keys(newUserScoreObj).length && newUserScoreObj.scoreStatus) {
+                        // Update and create score object when the score object has the scoreStatus key/value pair
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -528,6 +529,22 @@ const IndividualCuration = createReactClass({
                                     // Add the new score to array
                                     evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
+                    } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.scoreStatus) {
+                        // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                        // Then delete the score entry from the score list associated with the evidence
+                        if (this.state.userScoreObj.uuid) {
+                            newUserScoreObj['status'] = 'deleted';
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                evidenceScores.forEach(score => {
+                                    if (score === modifiedScoreObj['@graph'][0]['@id']) {
+                                        let index = evidenceScores.indexOf(score);
+                                        evidenceScores.splice(index, 1);
+                                    }
+                                });
+                                // Return the evidence score array without the deleted object
                                 return Promise.resolve(evidenceScores);
                             });
                         }
@@ -992,7 +1009,7 @@ const IndividualCuration = createReactClass({
                                                         <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
                                                             variantInfo={variantInfo} session={session} handleUserScoreObj={this.handleUserScoreObj}
                                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation}
-                                                            gdmUuid={gdm && gdm.uuid ? gdm.uuid : null} pmid={pmid ? pmid : null} />
+                                                            gdm={gdm} pmid={pmid ? pmid : null} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1648,11 +1665,23 @@ const IndividualViewer = createReactClass({
 
     getInitialState: function() {
         return {
+            gdmUuid: queryKeyValue('gdm', this.props.href),
+            gdm: null,
             userScoreObj: {}, // Logged-in user's score object
             submitBusy: false, // True while form is submitting
             scoreError: false,
             scoreErrorMsg: ''
         };
+    },
+
+    componentDidMount() {
+        if (this.state.gdmUuid) {
+            return this.getRestData('/gdm/' + this.state.gdmUuid).then(gdm => {
+                this.setState({gdm: gdm});
+            }).catch(err => {
+                console.log('Fetching gdm error =: %o', err);
+            });
+        }
     },
 
     // Called by child function props to update user score obj
@@ -1697,39 +1726,79 @@ const IndividualViewer = createReactClass({
             /***********************************************************/
             /* Either update or create the user score object in the DB */
             /***********************************************************/
-            if (this.state.userScoreObj.uuid) {
-                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                    this.setState({submitBusy: false});
-                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
-            } else {
-                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
-                    let newScoreObjectUuid = null;
-                    if (newScoreObject) {
-                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
-                    }
-                    return Promise.resolve(newScoreObjectUuid);
-                }).then(newScoreObjectUuid => {
-                    return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
-                        // flatten both context and fresh individual
-                        let newIndividual = curator.flatten(individual);
-                        let freshFlatIndividual = curator.flatten(freshIndividual);
-                        // take only the scores from the fresh individual to not overwrite changes
-                        // in newIndividual
-                        newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
-                        // push new score uuid to newIndividual's scores list
-                        newIndividual.scores.push(newScoreObjectUuid);
-
-                        return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
-                            this.setState({submitBusy: false});
-                            return Promise.resolve(updatedIndividualObj['@graph'][0]);
-                        });
+            if (newUserScoreObj.scoreStatus) {
+                // Update and create score object when the score object has the scoreStatus key/value pair
+                if (this.state.userScoreObj.uuid) {
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                    }).then(data => {
+                        this.handlePageRedirect();
                     });
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
+                } else {
+                    return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                        let newScoreObjectUuid = null;
+                        if (newScoreObject) {
+                            newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(newScoreObjectUuid);
+                    }).then(newScoreObjectUuid => {
+                        return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                            // flatten both context and fresh individual
+                            let newIndividual = curator.flatten(individual);
+                            let freshFlatIndividual = curator.flatten(freshIndividual);
+                            // take only the scores from the fresh individual to not overwrite changes
+                            // in newIndividual
+                            newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                            // push new score uuid to newIndividual's scores list
+                            newIndividual.scores.push(newScoreObjectUuid);
+
+                            return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
+            } else if (!newUserScoreObj.scoreStatus) {
+                // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                // Then delete the score entry from the score list associated with the evidence
+                if (this.state.userScoreObj.uuid) {
+                    newUserScoreObj['status'] = 'deleted';
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        let modifiedScoreObjectUuid = null;
+                        if (modifiedScoreObj) {
+                            modifiedScoreObjectUuid = modifiedScoreObj['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(modifiedScoreObjectUuid);
+                    }).then(modifiedScoreObjectUuid => {
+                        return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                            // flatten both context and fresh individual
+                            let newIndividual = curator.flatten(individual);
+                            let freshFlatIndividual = curator.flatten(freshIndividual);
+                            // take only the scores from the fresh individual to not overwrite changes
+                            // in newIndividual
+                            newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                            // push new score uuid to newIndividual's scores list
+                            if (newIndividual.scores.length) {
+                                newIndividual.scores.forEach(score => {
+                                    if (score === modifiedScoreObjectUuid) {
+                                        let index = newIndividual.scores.indexOf(score);
+                                        newIndividual.scores.splice(index, 1);
+                                    }
+                                });
+                            }
+                            return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
             }
         }
     },
@@ -1750,7 +1819,7 @@ const IndividualViewer = createReactClass({
         let isEvidenceScored = false;
         if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
+                if (scoreObj.scoreStatus && scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
                 }
             });
@@ -2038,7 +2107,7 @@ const IndividualViewer = createReactClass({
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation}
-                                            variantInfo={variants} gdmUuid={tempGdm && tempGdm.uuid ? tempGdm.uuid : null} pmid={tempPmid ? tempPmid : null} />
+                                            variantInfo={variants} gdm={this.state.gdm} pmid={tempPmid ? tempPmid : null} />
                                         : null}
                                     {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">
