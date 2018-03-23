@@ -17,6 +17,8 @@ import { CurationInterpretationFunctional } from './interpretation/functional';
 import { CurationInterpretationSegregation } from './interpretation/segregation';
 import { CurationInterpretationGeneSpecific } from './interpretation/gene_specific';
 
+import { getAffiliationName } from '../../libs/get_affiliation_name';
+
 // Import pathogenicity calculator
 import { PathogenicityCalculator } from './interpretation/shared/calculator';
 
@@ -311,7 +313,22 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
     },
 
     componentDidMount() {
-        this.filterInterpretations();
+        // this.filterInterpretations();
+        this.parseInterpretations();
+    },
+
+    componentDidUpdate(prevProps, prevState) {
+        // Remove header and notice bar (if any) from DOM
+        let siteHeader = document.querySelector('.site-header');
+        siteHeader.setAttribute('style', 'display:none');
+        let demoNoticeBar = document.querySelector('.notice-bar');
+        if (demoNoticeBar) {
+            demoNoticeBar.setAttribute('style', 'display:none');
+        }
+        let affiliationUtilityBar = document.querySelector('.affiliation-utility-container');
+        if (affiliationUtilityBar) {
+            affiliationUtilityBar.setAttribute('style', 'display:none');
+        }
     },
 
     filterInterpretations() {
@@ -342,46 +359,42 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
     // the python test to fail in the build.
     parseInterpretations() {
         let interpretationObjList = [];
-        let interpretationObj = {};
-        let interpretations = this.props.context['@graph'];
-        if (interpretations && interpretations.length) {
-            interpretations.forEach(interpretation => {
-                let latestEvaluation = interpretation && this.findLatestEvaluations(interpretation);
-                let statusString = statusMappings[interpretation.interpretation_status].cssClass; // Convert status string to CSS class
-                let iconClass = 'icon gdm-status-icon-' + statusString;
-                // Directly passing the date string into the moment() method still cause the test to fail.
-                // The workaround of passing the date string into the 'new Date()' constructor first appears
-                // to be able to fix the failing pytest_bdd assertion on Travis CI.
-                // http://stackoverflow.com/questions/38251763/moment-js-to-convert-date-string-into-date#answers
-                let interpretationCreatedDate = new Date(interpretation.date_created);
-                let latestEvaluationDate = latestEvaluation ? new Date(latestEvaluation.date_created) : '';
-
-                interpretationObj = {
-                    interpretation_uuid: interpretation.uuid,
-                    interpretation_status: interpretation.interpretation_status,
-                    variantUuid: interpretation.variant.uuid,
-                    clinvarVariantId: interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null,
-                    clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
-                    carId: interpretation.variant.carId ? interpretation.variant.carId : null,
-                    grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
-                    diseaseId: interpretation.disease && interpretation.disease.diseaseId ? interpretation.disease.diseaseId : null,
-                    disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
-                    modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
-                    submitter_last_name: interpretation.submitted_by.last_name,
-                    submitter_first_name: interpretation.submitted_by.first_name,
-                    created_date: moment(interpretationCreatedDate).format('YYYY MMM DD'),
-                    created_time: moment(interpretationCreatedDate).format('h:mm a'),
-                    latest_date: latestEvaluation ? moment(latestEvaluationDate).format('YYYY MMM DD') : '',
-                    latest_time: latestEvaluation ? moment(latestEvaluationDate).format('h:mm a') : '',
-                    iconClass: iconClass,
-                    latestEvaluation: latestEvaluation,
-                    date_created: interpretation.date_created
-                };
-                interpretationObjList.push(interpretationObj);
-            });
-            // Set the initial states upon component mounted
-            this.setState({allInterpretations: interpretationObjList, filteredInterpretations: interpretationObjList});
-        }
+        // let interpretations = this.props.context['@graph'];
+        this.getRestData('/search/?type=interpretation', null).then(interpretations => {
+            let interpretationObj = {};
+            if (interpretations['@graph'] && interpretations['@graph'].length) {
+                interpretations['@graph'].forEach(interpretation => {
+                    if (interpretation.status !== 'deleted') {
+                        let allRecordOwners = findAllParticipants(interpretation);
+                        let participants = allRecordOwners ? allRecordOwners.map(owner => { return owner.title; }).join(', ') : '';
+    
+                        interpretationObj = {
+                            interpretation_uuid: interpretation.uuid,
+                            interpretation_status: interpretation.interpretation_status,
+                            variantUuid: interpretation.variant.uuid,
+                            clinvarVariantId: interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null,
+                            clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
+                            carId: interpretation.variant.carId ? interpretation.variant.carId : null,
+                            grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
+                            diseaseId: interpretation.disease && interpretation.disease.diseaseId ? interpretation.disease.diseaseId : null,
+                            disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
+                            modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
+                            participants: participants,
+                            submitter_last_name: interpretation.submitted_by.last_name,
+                            submitter_first_name: interpretation.submitted_by.first_name,
+                            evaluations: interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : [],
+                            extra_evidence_list: interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : [],
+                            provisional_variant: interpretation.provisional_variant && interpretation.provisional_variant.length ? interpretation.provisional_variant : []
+                        };
+                        interpretationObjList.push(interpretationObj);
+                    }
+                });
+                // Set the initial states upon component mounted
+                this.setState({allInterpretations: interpretationObjList, filteredInterpretations: interpretationObjList});
+            }
+        }).catch(err => {
+            console.log('Parsing interpretation error = %', err);
+        });
     },
 
     // Method to handle user input to filter/unfilter interpretations
@@ -487,79 +500,63 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         return (
-            <div className="container">
-                <div className="row gdm-header">
-                    <div className="col-sm-12 col-md-8">
-                        <h1>All Interpretations</h1>
-                    </div>
-                    <div className="col-md-1"></div>
-                    <div className="col-sm-12 col-md-3">
-                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Variant or Disease"
-                            value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
-                    </div>
-                </div>
-                <InterpretationStatusLegend />
-                <div className="table-responsive">
-                    <div className="table-gdm">
-                        <div className="table-header-gdm">
-                            <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
-                                <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
-                            </div>
-                            <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'variant')}>
-                                <div>Variant Preferred Title<span className={sortIconClass.variant}></span></div>
-                                <div>Variant ID(s)</div>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'disease')}>
-                                Disease<span className={sortIconClass.disease}></span>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'moi')}>
-                                Mode of Inheritance<span className={sortIconClass.moi}></span>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'last')}>
-                                Last Edited<span className={sortIconClass.last}></span>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'creator')}>
-                                Creator<span className={sortIconClass.creator}></span>
-                            </div>
-                            <div className="table-cell-gdm tcell-sortable" onClick={this.sortDir.bind(null, 'created')}>
-                                Created<span className={sortIconClass.created}></span>
-                            </div>
+            <div className="table-responsive">
+                <h2>Interpretations</h2>
+                <div className="table-gdm">
+                    <div className="table-header-gdm">
+                        <div className="table-cell-gdm">
+                            Variant ID(s)
                         </div>
-                        {interpretations && interpretations.length ? interpretations.map(interpretation => {
-                            return (
-                                <a className="table-row-gdm" href={'/variant-central/?variant=' + interpretation.variantUuid} key={interpretation.interpretation_uuid}>
-                                    <div className="table-cell-gdm-status">
-                                        <span className={interpretation.iconClass} title={interpretation.interpretation_status}></span>
-                                    </div>
-                                    <div className="table-cell-gdm-main">
-                                        <div>{interpretation.clinvarVariantTitle ? interpretation.clinvarVariantTitle : interpretation.grch38}</div>
-                                        <div>
-                                            {interpretation.clinvarVariantId ? <span>ClinVar Variation ID: <strong>{interpretation.clinvarVariantId}</strong></span> : null}
-                                            {interpretation.clinvarVariantId && interpretation.carId ? " // " : null}
-                                            {interpretation.carId ? <span>ClinGen Allele Registry ID: <strong>{interpretation.carId}</strong></span> : null}
-                                        </div>
-                                    </div>
-                                    <div className="table-cell-gdm">
-                                        {interpretation.disease_term ? <span>{interpretation.disease_term} ({interpretation.diseaseId.replace('_', ':')})</span> : null}
-                                    </div>
-                                    <div className="table-cell-gdm">
-                                        {interpretation.modeInheritance ? interpretation.modeInheritance : null}
-                                    </div>
-                                    <div className="table-cell-gdm">
-                                        <div>{interpretation.latest_date}</div>
-                                        <div>{interpretation.latest_time}</div>
-                                    </div>
-                                    <div className="table-cell-gdm">
-                                        <div>{interpretation.submitter_last_name}, {interpretation.submitter_first_name}</div>
-                                    </div>
-                                    <div className="table-cell-gdm">
-                                        <div>{interpretation.created_date}</div>
-                                        <div>{interpretation.created_time}</div>
-                                    </div>
-                                </a>
-                            );
-                        }) : null}
+                        <div className="table-cell-gdm">
+                            Variant Title
+                        </div>
+                        <div className="table-cell-gdm">
+                            Disease ID
+                        </div>
+                        <div className="table-cell-gdm">
+                            Disease Term
+                        </div>
+                        <div className="table-cell-gdm">
+                            Mode of Inheritance
+                        </div>
+                        <div className="table-cell-gdm">
+                            Creator
+                        </div>
+                        <div className="table-cell-gdm">
+                            Participants
+                        </div>
                     </div>
+                    {interpretations && interpretations.length ? interpretations.map((interpretation, i) => {
+                        return (
+                            <div key={i} className="table-row-gdm">
+                                <div className="table-cell-gdm">
+                                    <div>
+                                        {interpretation.clinvarVariantId ? <span>ClinVar Variation ID: <strong>{interpretation.clinvarVariantId}</strong></span> : null}
+                                        {interpretation.clinvarVariantId && interpretation.carId ? "; " : null}
+                                        {interpretation.carId ? <span>ClinGen Allele Registry ID: <strong>{interpretation.carId}</strong></span> : null}
+                                    </div>
+                                </div>
+                                <div className="table-cell-gdm">
+                                    <div>{interpretation.clinvarVariantTitle ? interpretation.clinvarVariantTitle : interpretation.grch38}</div>
+                                </div>
+                                <div className="table-cell-gdm">
+                                    {interpretation.diseaseId ? <span>{interpretation.diseaseId.replace('_', ':')}</span> : null}
+                                </div>
+                                <div className="table-cell-gdm">
+                                    {interpretation.disease_term ? <span>{interpretation.disease_term}</span> : null}
+                                </div>
+                                <div className="table-cell-gdm">
+                                    {interpretation.modeInheritance ? <span>{interpretation.modeInheritance}</span> : null}
+                                </div>
+                                <div className="table-cell-gdm">
+                                    <div>{interpretation.submitter_last_name}, {interpretation.submitter_first_name} {interpretation.affiliation ? <span>({getAffiliationName(interpretation.affiliation)})</span> : null}</div>
+                                </div>
+                                <div className="table-cell-gdm">
+                                    <div>{interpretation.participants}</div>
+                                </div>
+                            </div>
+                        );
+                    }) : null}
                 </div>
             </div>
         );
@@ -589,4 +586,56 @@ class InterpretationStatusLegend extends Component {
             </div>
         );
     }
+}
+
+// Return an array of (evaluations, extra_evidence, classification aka provisional_variant)
+// submitted_by objects sorted by last name given the interpretation.
+function findAllParticipants(interpreatation) {
+    let allObjects = getAllObjects(interpreatation);
+
+    let submitters = allObjects.map(object => {
+        return object.submitted_by;
+    });
+
+    let participants = _.chain(submitters).uniq(submitter => {
+        return submitter.uuid;
+    }).sortBy('last_name').value();
+
+    return participants;
+}
+
+// Method to filter object keys
+function filteredObject(record) {
+    const allowed = ['date_created', 'last_modified', 'submitted_by', '@type', 'affiliation'];
+
+    const filtered = Object.keys(record)
+        .filter(key => allowed.includes(key))
+        .reduce((obj, key) => {
+            obj[key] = record[key];
+            return obj;
+        }, {});
+
+    return filtered;
+}
+
+// Return all record objects flattened in an array,
+// including annotations, evidence, scores
+function getAllObjects(interpretation) {
+    let totalObjects = [];
+    // loop through gdms
+    let evaluations = interpretation.evaluations && interpretation.evaluations.length ? interpretation.evaluations : [];
+    evaluations.forEach(evaluation => {
+        totalObjects.push(filteredObject(evaluation));
+    });
+    let extraEvidenceList = interpretation.extra_evidence_list && interpretation.extra_evidence_list.length ? interpretation.extra_evidence_list : [];
+    extraEvidenceList.forEach(evidence => {
+        totalObjects.push(filteredObject(evidence));
+    });
+    // Get provisionalClassifications objects
+    let classifications = interpretation.provisional_variant && interpretation.provisional_variant.length ? interpretation.provisional_variant : [];
+    classifications.forEach(classification => {
+        totalObjects.push(filteredObject(classification));
+    });
+
+    return totalObjects;
 }
