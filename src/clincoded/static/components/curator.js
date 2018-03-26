@@ -1101,7 +1101,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch, evide
                     </span>
                 </div>
                 : null}
-            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
+            <a href={'/individual/' + individual.uuid + '?gdm=' + gdm.uuid} title="View individual in a new tab">View/Score</a>
             {(individual.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!individual.affiliation && !curatorAffiliation && curatorMatch) ?
                 <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span>
                 : null}
@@ -1746,23 +1746,12 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = createReactClass({
 });
 
 
-// Get the pathogenicity made by the curator with the given user UUID from the given variant.
-//var getPathogenicityFromVariant = function(variant, curatorUuid) {
-//  var pathogenicity = null;
-
-//    if (variant && variant.associatedPathogenicities.length > 0) {
-//        // At this point, we know the variant has a curation (pathogenicity)
-//        pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
-//            return pathogenicity.submitted_by.uuid === curatorUuid;
-//        });
-//    }
-//    return pathogenicity;
-//};
-var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid, affiliation) {
+// Get the pathogenicity made by the curator with the given user UUID from the given variant
+export function getPathogenicityFromVariant(gdm, curatorUuid, variantUuid, affiliation) {
     var pathogenicity = null;
-    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+    if (gdm && gdm.variantPathogenicity && gdm.variantPathogenicity.length) {
         for (let object of gdm.variantPathogenicity) {
-            if (affiliation && object.affiliation && object.affiliation === affiliation.affiliation_id) {
+            if (affiliation && object.affiliation && object.affiliation === affiliation.affiliation_id && object.variant.uuid === variantUuid) {
                 pathogenicity = object;
             } else if (!affiliation && !object.affiliation && object.submitted_by.uuid === curatorUuid && object.variant.uuid === variantUuid) {
                 pathogenicity = object;
@@ -1770,7 +1759,7 @@ var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = f
         }
     }
     return pathogenicity;
-};
+}
 
 
 // Collect references to all families and individuals within an annotation that reference the given variant
