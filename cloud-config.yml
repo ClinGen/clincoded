@@ -204,12 +204,10 @@ write_files:
   content: |
     #TEMP changed to 2g for testing
     #ES_HEAP_SIZE=4g
-    
     if test "%(BACKUPDB)s" = "s3_data"
     then
      ES_HEAP_SIZE=8g
     fi
-
     ES_HEAP_SIZE=2g
 
 - path: /etc/postgresql/9.4/main/custom.conf
