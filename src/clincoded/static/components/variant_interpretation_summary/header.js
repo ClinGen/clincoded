@@ -102,7 +102,7 @@ class VariantInterpretationSummaryHeader extends Component {
                             <dd className="classificationSaved">{classification ? classification.autoClassification : null}</dd>
                             <dt>Modified Pathogenicity:</dt>
                             <dd className="classificationModified">
-                                {classification && classification.alteredClassification ? (classification.alteredClassification === 'No Selection' ? 'None' : classification.alteredClassification) : null}
+                                {classification && classification.alteredClassification ? (classification.alteredClassification === 'No Selection' ? 'None' : classification.alteredClassification) : 'None'}
                             </dd>
                             <dt>Reason for modified pathogenicity:</dt>
                             <dd className="classificationModifiedReason">
@@ -119,7 +119,7 @@ class VariantInterpretationSummaryHeader extends Component {
                                 </div>
                                 : null}
                             <dt>Disease:</dt>
-                            <dd className="disease-term">{disease && disease.term ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.term}</a> : null}</dd>
+                            <dd className="disease-term">{disease && disease.term ? <a href={external_url_map['MondoSearch'] + disease.diseaseId} target="_blank">{disease.term}</a> : 'None'}</dd>
                             <dt>Mode of Inheritance:</dt>
                             <dd className="modeInheritance">{this.renderSelectedModeInheritance(interpretation)}</dd>
                         </dl>
