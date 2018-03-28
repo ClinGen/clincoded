@@ -60,7 +60,7 @@ class ProvisionalSnapshots extends Component {
                         </dl>
                     </td>
                     <td className="approval-snapshot-buttons">
-                        <Input type="button" inputClassName="btn-primary" title="View Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                        <Input type="button" inputClassName="btn-primary" title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                     </td>
                 </tr>
             );
