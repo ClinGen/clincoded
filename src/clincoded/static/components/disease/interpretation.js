@@ -26,8 +26,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
         hasAssociatedDisease: PropTypes.bool,
         editKey: PropTypes.string,
         updateInterpretationObj: PropTypes.func,
-        calculatedAssertion: PropTypes.string,
-        provisionalPathogenicity: PropTypes.string,
         diseaseObj: PropTypes.object,
         updateDiseaseObj: PropTypes.func,
         session: PropTypes.object
@@ -213,15 +211,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                 // If the interpretation has an existing disease, delete it
                 if ('disease' in flatInterpretation) {
                     delete flatInterpretation['disease'];
-                    let provisionalPathogenicity = this.props.provisionalPathogenicity;
-                    let calculatedAssertion = this.props.calculatedAssertion;
-                    if (provisionalPathogenicity === 'Likely pathogenic' || provisionalPathogenicity === 'Pathogenic') {
-                        // flatInterpretation['markAsProvisional'] = false;
-                    } else if (!provisionalPathogenicity) {
-                        if (calculatedAssertion === 'Likely pathogenic' || calculatedAssertion === 'Pathogenic' ) {
-                            // flatInterpretation['markAsProvisional'] = false;
-                        }
-                    }
 
                     // Update the intepretation object partially with the new disease property value
                     this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
