@@ -45,6 +45,9 @@ var AddCurator = createReactClass({
             var firstName = this.getFormValue('first_name');
             var lastName = this.getFormValue('last_name');
             var curatorEmail = this.getFormValue('curator_email');
+            let curatorAffiliation = this.getFormValue('curator_affiliation');
+            let newStr = curatorAffiliation.replace(/\s/g,'');
+            let affiliation = newStr.split(',');
 
             // First see if there's a matching record, and give an error if there is.
 
@@ -63,7 +66,8 @@ var AddCurator = createReactClass({
                         job_title: "ClinGen Curator",
                         lab: '/labs/curator/',
                         submits_for: ['/labs/curator/'],
-                        timezone: 'US/Pacific'
+                        timezone: 'US/Pacific',
+                        affiliation: affiliation && affiliation.length ? affiliation : []
                     };
                     return this.postRestData('/users/', newUser).then(data => {
                         return Promise.resolve(data['@graph'][0]);
@@ -110,6 +114,10 @@ var AddCurator = createReactClass({
                                 <Input type="email" ref="curator_email" label="Email Address" handleChange={this.handleChange}
                                     error={this.getFormError('curator_email')} clearError={this.clrFormErrors.bind(null, 'curator_email')}
                                     labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
+                                <Input type="text" ref="curator_affiliation" label="Affiliation(s)" handleChange={this.handleChange}
+                                    error={this.getFormError('curator_affiliation')} clearError={this.clrFormErrors.bind(null, 'curator_affiliation')}
+                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group"
+                                    placeholder="Separate ids with commas (e.g. 10001, 10002, 10003)" />
                                 <div className="curation-submit clearfix">
                                     <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save" submitBusy={this.state.submitBusy} />
                                     <div className={submitErrClass}>{this.state.errorMsg}</div>
