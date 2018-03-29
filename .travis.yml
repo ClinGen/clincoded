@@ -4,7 +4,7 @@
 #     https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received has some info on the issue and what
 #     can be done to help
 language: python
-sudo: false
+sudo: required
 dist: trusty
 cache:
   directories:
