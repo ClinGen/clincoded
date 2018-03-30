@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 
@@ -56,11 +57,19 @@ class ApprovalSnapshots extends Component {
                             <dt><span>Date reviewed:</span></dt>
                             <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
                         </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
+                        <dl className="inline-dl clearfix snapshot-final-approval-classification">
                             <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
                             <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
                         </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
+                        <dl className="inline-dl clearfix snapshot-final-approval-disease">
+                            <dt><span>Disease:</span></dt>
+                            <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
+                        </dl>
+                        <dl className="inline-dl clearfix snapshot-final-approval-modeInheritance">
+                            <dt><span>Mode of Inheritance:</span></dt>
+                            <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
+                        </dl>
+                        <dl className="inline-dl clearfix snapshot-final-approval-comment">
                             <dt><span>Additional comments:</span></dt>
                             <dd><span>{snapshot.resource.approvalComment ? snapshot.resource.approvalComment : null}</span></dd>
                         </dl>

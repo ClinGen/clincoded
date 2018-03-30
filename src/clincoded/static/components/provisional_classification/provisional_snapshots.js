@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 
@@ -53,6 +54,14 @@ class ProvisionalSnapshots extends Component {
                         <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
                             <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
                             <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
+                        </dl>
+                        <dl className="inline-dl clearfix snapshot-provisional-approval-disease">
+                            <dt><span>Disease:</span></dt>
+                            <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
+                        </dl>
+                        <dl className="inline-dl clearfix snapshot-provisional-approval-modeInheritance">
+                            <dt><span>Mode of Inheritance:</span></dt>
+                            <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
                         </dl>
                         <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
                             <dt><span>Additional comments:</span></dt>
