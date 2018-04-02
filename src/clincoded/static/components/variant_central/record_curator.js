@@ -28,7 +28,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
             calculatedPathogenicity: this.props.calculatedPathogenicity,
             interpretationUuid: this.props.interpretationUuid,
             interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
-            classificationSnapshots: this.props.classificationSnapshots,
+            classificationSnapshots: this.props.classificationSnapshots
         };
     },
 
@@ -89,7 +89,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
             filteredSnapshots = snapshots.filter(snapshot => {
-                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
+                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'interpretation';
             });
         }
         if (status === 'In progress') {
