@@ -120,7 +120,7 @@ const ProvisionalClassification = createReactClass({
      * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
      */
     getClassificationSnaphots(provisionalUuid) {
-        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid, null, true).then(result => {
             this.setState({classificationSnapshots: result['@graph']});
         }).catch(err => {
             console.log('Classification Snapshots Fetch Error=: %o', err);
