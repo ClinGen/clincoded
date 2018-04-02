@@ -86,7 +86,7 @@ class ProvisionalSnapshots extends Component {
         const { snapshots, resourceType } = this.props;
 
         return (
-            <div className="provisional-approval-snapshot-list panel panel-default">
+            <div className="provisional-approval-snapshot-list panel panel-default clearfix">
                 <ul className="list-group">
                     {snapshots.map(snapshot => this.renderProvisionalSnapshot(snapshot, resourceType))}
                 </ul>

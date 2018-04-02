@@ -211,7 +211,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         return (
             <div className="provisional-approval-panel-content">
                 {provisional && this.props.classificationStatus === 'In progress' && this.props.shouldProvisionClassification ?
-                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std clearfix">
+                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                         {this.state.isProvisionalPreview ?
                             <div className="provisional-preview">
                                 <div className="col-md-12 provisional-form-content-wrapper">

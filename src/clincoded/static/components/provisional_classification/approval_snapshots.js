@@ -92,7 +92,7 @@ class ApprovalSnapshots extends Component {
         const { snapshots, resourceType } = this.props;
 
         return (
-            <div className="final-approval-snapshot-list panel panel-default">
+            <div className="final-approval-snapshot-list panel panel-default clearfix">
                 <ul className="list-group">
                     {snapshots.map(snapshot => this.renderApprovalSnapshot(snapshot, resourceType))}
                 </ul>
