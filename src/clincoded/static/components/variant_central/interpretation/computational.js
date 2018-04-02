@@ -233,6 +233,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 break;
             }
         }
+        
     },
 
     /**
@@ -529,7 +530,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            affiliation={affiliation} session={session}/>
                                     </div>
                                 </div>
                                 : null}
@@ -964,6 +965,10 @@ function criteriaMissense1() {
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
                 false
             )}
+                <div className="bs-callout-info">
+                    <p></p>
+                    <center><p className="header-note">View ExAC Constraint Scores on the Gene-centric tab</p></center>
+                </div>
         </div>
     );
 }
