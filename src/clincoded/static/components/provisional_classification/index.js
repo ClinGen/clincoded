@@ -571,6 +571,8 @@ const ProvisionalClassification = createReactClass({
         }
         const provisionalPanelTitle = provisional && provisional.classificationStatus !== 'In progress' ? "Saved Provisional Classification(s)" : "Save Classification as Provisional";
         const approvalPanelTitle = provisional && provisional.approvedClassification ? "Saved Approved Classification(s)" : "Approve Classification";
+        let provisionalSnapshots = this.state.classificationSnapshots.length ? this.state.classificationSnapshots.filter(snapshot => snapshot.resourceType === 'interpretation' && snapshot.approvalStatus === 'Provisioned') : [];
+        let approvalSnapshots = this.state.classificationSnapshots.length ? this.state.classificationSnapshots.filter(snapshot => snapshot.resourceType === 'interpretation' && snapshot.approvalStatus === 'Approved') : [];
 
         return (
             <div>
@@ -887,7 +889,7 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                 </div>
                                 : null}
-                            {provisional && provisional.provisionedClassification ?
+                            {provisional && (provisional.provisionedClassification || approvalSnapshots.length) ?
                                 <div className="container approval-process final-approval">
                                     <PanelGroup>
                                         <Panel title={approvalPanelTitle} panelClassName="panel-data" open>
