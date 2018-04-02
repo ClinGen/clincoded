@@ -880,6 +880,7 @@ const ProvisionalClassification = createReactClass({
                                                     classificationSnapshots={this.state.classificationSnapshots}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
+                                                    shouldProvisionClassification={this.state.classificationStatus === 'In progress' ? true : false}
                                                 />
                                             </Panel>
                                         </PanelGroup>
