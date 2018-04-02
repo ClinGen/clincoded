@@ -26,6 +26,7 @@ def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     ]
     # elasticsearch.deb setup
     if os.path.exists('/etc/elasticsearch'):
+        #args.append('sudo')
         args.append('-Des.path.conf=/etc/elasticsearch')
     process = subprocess.Popen(
         args,

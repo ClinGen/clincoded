@@ -1,5 +1,10 @@
+#So far i have added a wget so that Travis gets the corret elasticsearch version, 
+#     with packages: - elasticsearch commented out it will no longer attempt to install 5.5
+#     currently it fails the travis test due to no output for 10 mins. 
+#     https://docs.travis-ci.com/user/common-build-problems/#Build-times-out-because-no-output-was-received has some info on the issue and what
+#     can be done to help
 language: python
-sudo: false
+sudo: required
 dist: precise
 cache:
   directories:
