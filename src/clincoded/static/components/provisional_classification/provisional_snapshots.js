@@ -31,47 +31,53 @@ class ProvisionalSnapshots extends Component {
     renderProvisionalSnapshot(snapshot, type) {
         if (snapshot.approvalStatus === 'Provisioned' && snapshot.resourceType === type) {
             return (
-                <tr className="approval-snapshot-item" key={snapshot['@id']}>
-                    <td className="approval-snapshot-content">
-                        {snapshot.resource && snapshot.resource.affiliation ?
-                            <dl className="inline-dl clearfix">
-                                <dt><span>ClinGen Affiliation:</span></dt>
-                                <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
-                            </dl>
-                            : null}
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-submitter">
-                            <dt><span>Provisional Classification entered by:</span></dt>
-                            <dd>{snapshot.resource.provisionalSubmitter}</dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-date">
-                            <dt><span>Date saved as Provisional:</span></dt>
-                            <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD") : null}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-review-date">
-                            <dt><span>Date reviewed:</span></dt>
-                            <dd><span>{snapshot.resource.provisionalReviewDate ? formatDate(snapshot.resource.provisionalReviewDate, "YYYY MMM DD") : null}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
-                            <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
-                            <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-disease">
-                            <dt><span>Disease:</span></dt>
-                            <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-modeInheritance">
-                            <dt><span>Mode of Inheritance:</span></dt>
-                            <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
-                            <dt><span>Additional comments:</span></dt>
-                            <dd><span>{snapshot.resource.provisionalComment ? snapshot.resource.provisionalComment : null}</span></dd>
-                        </dl>
-                    </td>
-                    <td className="approval-snapshot-buttons">
-                        <Input type="button" inputClassName="btn-primary" title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
-                    </td>
-                </tr>
+                <li className="approval-snapshot-item list-group-item" key={snapshot['@id']}>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td className="approval-snapshot-content">
+                                    {snapshot.resource && snapshot.resource.affiliation ?
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>ClinGen Affiliation:</span></dt>
+                                            <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
+                                        </dl>
+                                        : null}
+                                    <dl className="inline-dl clearfix snapshot-provisional-approval-submitter">
+                                        <dt><span>Provisional Classification entered by:</span></dt>
+                                        <dd>{snapshot.resource.provisionalSubmitter}</dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-provisional-approval-date">
+                                        <dt><span>Date saved as Provisional:</span></dt>
+                                        <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD") : null}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-provisional-review-date">
+                                        <dt><span>Date reviewed:</span></dt>
+                                        <dd><span>{snapshot.resource.provisionalReviewDate ? formatDate(snapshot.resource.provisionalReviewDate, "YYYY MMM DD") : null}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
+                                        <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
+                                        <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-provisional-approval-disease">
+                                        <dt><span>Disease:</span></dt>
+                                        <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-provisional-approval-modeInheritance">
+                                        <dt><span>Mode of Inheritance:</span></dt>
+                                        <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
+                                        <dt><span>Additional comments:</span></dt>
+                                        <dd><span>{snapshot.resource.provisionalComment ? snapshot.resource.provisionalComment : null}</span></dd>
+                                    </dl>
+                                </td>
+                                <td className="approval-snapshot-buttons">
+                                    <Input type="button" inputClassName="btn-primary" title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
             );
         }
     }
@@ -80,11 +86,11 @@ class ProvisionalSnapshots extends Component {
         const { snapshots, resourceType } = this.props;
 
         return (
-            <table className="table provisional-approval-snapshot-list">
-                <tbody>
+            <div className="provisional-approval-snapshot-list panel panel-default">
+                <ul className="list-group">
                     {snapshots.map(snapshot => this.renderProvisionalSnapshot(snapshot, resourceType))}
-                </tbody>
-            </table>
+                </ul>
+            </div>
         );
     }
 }

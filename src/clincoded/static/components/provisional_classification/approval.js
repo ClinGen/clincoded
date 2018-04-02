@@ -257,7 +257,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         return (
             <div className="final-approval-panel-content">
                 {provisional && this.props.classificationStatus === 'Provisional' ?
-                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std clearfix">
                         {this.state.isApprovalPreview ?
                             <div className="approval-preview">
                                 <div className="col-md-12 approval-form-content-wrapper">

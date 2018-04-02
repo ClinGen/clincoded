@@ -31,53 +31,59 @@ class ApprovalSnapshots extends Component {
     renderApprovalSnapshot(snapshot, type) {
         if (snapshot.approvalStatus === 'Approved' && snapshot.resourceType === type) {
             return (
-                <tr className="approval-snapshot-item" key={snapshot['@id']}>
-                    <td className="approval-snapshot-content">
-                        {snapshot.resource && snapshot.resource.affiliation ?
-                            <dl className="inline-dl clearfix">
-                                <dt><span>ClinGen Affiliation:</span></dt>
-                                <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
-                            </dl>
-                            : null}
-                        <dl className="inline-dl clearfix snapshot-final-approval-submitter">
-                            <dt><span>Approved Classification entered by:</span></dt>
-                            <dd>{snapshot.resource.approvalSubmitter}</dd>
-                        </dl>
-                        {snapshot.resource && snapshot.resource.classificationApprover ?
-                            <dl className="inline-dl clearfix snapshot-final-approval-classification-approver">
-                                <dt><span>Approver:</span></dt>
-                                <dd>{snapshot.resource.classificationApprover}</dd>
-                            </dl>
-                            : null}
-                        <dl className="inline-dl clearfix snapshot-final-approval-date">
-                            <dt><span>Date saved as Approved:</span></dt>
-                            <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD") : null}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-final-review-date">
-                            <dt><span>Date reviewed:</span></dt>
-                            <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-final-approval-classification">
-                            <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
-                            <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-final-approval-disease">
-                            <dt><span>Disease:</span></dt>
-                            <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-final-approval-modeInheritance">
-                            <dt><span>Mode of Inheritance:</span></dt>
-                            <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
-                        </dl>
-                        <dl className="inline-dl clearfix snapshot-final-approval-comment">
-                            <dt><span>Additional comments:</span></dt>
-                            <dd><span>{snapshot.resource.approvalComment ? snapshot.resource.approvalComment : null}</span></dd>
-                        </dl>
-                    </td>
-                    <td className="approval-snapshot-buttons">
-                        <Input type="button" inputClassName="btn-primary" title="View Approved Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
-                    </td>
-                </tr>
+                <li className="approval-snapshot-item list-group-item" key={snapshot['@id']}>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td className="approval-snapshot-content">
+                                    {snapshot.resource && snapshot.resource.affiliation ?
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>ClinGen Affiliation:</span></dt>
+                                            <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
+                                        </dl>
+                                        : null}
+                                    <dl className="inline-dl clearfix snapshot-final-approval-submitter">
+                                        <dt><span>Approved Classification entered by:</span></dt>
+                                        <dd>{snapshot.resource.approvalSubmitter}</dd>
+                                    </dl>
+                                    {snapshot.resource && snapshot.resource.classificationApprover ?
+                                        <dl className="inline-dl clearfix snapshot-final-approval-classification-approver">
+                                            <dt><span>Approver:</span></dt>
+                                            <dd>{snapshot.resource.classificationApprover}</dd>
+                                        </dl>
+                                        : null}
+                                    <dl className="inline-dl clearfix snapshot-final-approval-date">
+                                        <dt><span>Date saved as Approved:</span></dt>
+                                        <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD") : null}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-final-review-date">
+                                        <dt><span>Date reviewed:</span></dt>
+                                        <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-final-approval-classification">
+                                        <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
+                                        <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-final-approval-disease">
+                                        <dt><span>Disease:</span></dt>
+                                        <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-final-approval-modeInheritance">
+                                        <dt><span>Mode of Inheritance:</span></dt>
+                                        <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix snapshot-final-approval-comment">
+                                        <dt><span>Additional comments:</span></dt>
+                                        <dd><span>{snapshot.resource.approvalComment ? snapshot.resource.approvalComment : null}</span></dd>
+                                    </dl>
+                                </td>
+                                <td className="approval-snapshot-buttons">
+                                    <Input type="button" inputClassName="btn-primary" title="View Approved Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
             );
         }
     }
@@ -86,11 +92,11 @@ class ApprovalSnapshots extends Component {
         const { snapshots, resourceType } = this.props;
 
         return (
-            <table className="table final-approval-snapshot-list">
-                <tbody>
+            <div className="final-approval-snapshot-list panel panel-default">
+                <ul className="list-group">
                     {snapshots.map(snapshot => this.renderApprovalSnapshot(snapshot, resourceType))}
-                </tbody>
-            </table>
+                </ul>
+            </div>
         );
     }
 }
