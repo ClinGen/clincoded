@@ -27,7 +27,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         affiliation: PropTypes.object, // User's affiliation
         classificationSnapshots: PropTypes.array,
         updateSnapshotList: PropTypes.func,
-        updateProvisionalObj: PropTypes.func
+        updateProvisionalObj: PropTypes.func,
+        shouldProvisionClassification: PropTypes.bool
     },
 
     getInitialState() {
@@ -195,6 +196,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const provisionalReviewDate = this.state.provisionalReviewDate ? moment(this.state.provisionalReviewDate).format('MM/DD/YYYY') : '';
         const provisionalComment = this.state.provisionalComment;
         const session = this.props.session;
+        const interpretation = this.props.interpretation;
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
@@ -202,13 +204,13 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         let snapshotType;
         if (this.props.gdm && Object.keys(this.props.gdm).length) {
             snapshotType = 'classification';
-        } else if (this.props.interpretation && Object.keys(this.props.interpretation).length) {
+        } else if (interpretation && Object.keys(interpretation).length) {
             snapshotType = 'interpretation';
         }
 
         return (
             <div className="provisional-approval-panel-content">
-                {provisional && this.props.classificationStatus === 'In progress' ?
+                {provisional && this.props.classificationStatus === 'In progress' && this.props.shouldProvisionClassification ?
                     <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                         {this.state.isProvisionalPreview ?
                             <div className="provisional-preview">
