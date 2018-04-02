@@ -16,7 +16,7 @@ export function renderSelectedModeInheritance(object) {
         }
     }
     return (
-        <span>{moi && moi.length ? this.renderModeInheritanceLink(moi, moiAdjective) : 'None'}</span>
+        <span>{moi && moi.length ? renderModeInheritanceLink(moi, moiAdjective) : 'None'}</span>
     );
 }
 
