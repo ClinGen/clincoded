@@ -599,7 +599,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 </div>
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
-                    <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
+                    {!this.state.preview ?
+                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
+                        : <div className="spacer">&nbsp;</div>}
                     {provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
                         :null}
