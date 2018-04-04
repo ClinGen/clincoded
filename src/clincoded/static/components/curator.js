@@ -465,49 +465,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     : null}
                                             </td>
                                         </tr>
-                                        {otherClassifications && otherClassifications.length ?
-                                            <tr>
-                                                <td colSpan="2">
-                                                    <h4>Other Classifications</h4>
-                                                    {otherClassifications.map(classification => {
-                                                        return (
-                                                            <div key={classification.uuid} className="other-classification">
-                                                                {this.renderClassificationHeader(classification)}
-                                                                <div className="header-classification-content">
-                                                                    {classification.affiliation ?
-                                                                        <div><span className="header-classification-item">Affiliation: <strong>{getAffiliationName(classification.affiliation)}</strong></span></div>
-                                                                        :
-                                                                        <div><span className="header-classification-item">Curator: {classification.submitted_by.title}</span></div>
-                                                                    }
-                                                                    {classification.classificationStatus === 'Provisional' ?
-                                                                        <div>
-                                                                            <span className="header-classification-item">Provisional Classification: {classification.alteredClassification === 'No Selection' ? classification.autoClassification : classification.alteredClassification}, saved on {moment(classification.last_modified).format("YYYY MMM DD")}</span>
-                                                                            <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a> ]</span>
-                                                                        </div>
-                                                                        : null}
-                                                                    {classification.classificationStatus === 'Approved' ?
-                                                                        <div>
-                                                                            <span className="header-classification-item">Approved Classification: {classification.alteredClassification === 'No Selection' ? classification.autoClassification : classification.alteredClassification}, saved on {moment(classification.last_modified).format("YYYY MMM DD")}</span>
-                                                                            <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a> ]</span>
-                                                                        </div>
-                                                                        : null}
-                                                                    {classification.alteredClassification === 'No Selection' ?
-                                                                        <div>
-                                                                            <span className="header-classification-item">Last Saved Classification: {classification.classificationPoints.evidencePointsTotal} ({classification.autoClassification}); no modification from calculated value</span>
-                                                                        </div>
-                                                                        :
-                                                                        <div>
-                                                                            <span className="header-classification-item">Last Saved Classification: {classification.alteredClassification}; Modified from Calculated = {classification.classificationPoints.evidencePointsTotal} ({classification.autoClassification}); {moment(classification.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </td>
-                                            </tr>
-                                            : null}
-                                        <tr style={{height:'10px'}}></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -517,7 +474,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                         <div className="row equal-height">
                             <GeneRecordHeader gene={gene} />
                             <DiseaseRecordHeader gdm={gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
-                            <CuratorRecordHeader gdm={gdm} />
+                            <CuratorRecordHeader gdm={gdm} otherClassifications={otherClassifications} />
                         </div>
                     </div>
                 </div>
@@ -1443,13 +1400,26 @@ var AddOmimIdModal = createReactClass({
 // Display the curator data of the curation data
 var CuratorRecordHeader = createReactClass({
     propTypes: {
-        gdm: PropTypes.object // GDM with curator data to display
+        gdm: PropTypes.object, // GDM with curator data to display
+        otherClassifications: PropTypes.array
     },
 
-    render: function() {
-        var gdm = this.props.gdm;
-        var participants = findAllParticipants(gdm);
-        var latestRecord = gdm && findLatestRecord(gdm);
+    render() {
+        const gdm = this.props.gdm;
+        const otherClassifications = this.props.otherClassifications;
+        const participants = findAllParticipants(gdm);
+        const latestRecord = gdm && findLatestRecord(gdm);
+        // Concat owners into an array (with affiliation or not) of all other classifications
+        let otherClassificationOwners = [];
+        if (otherClassifications && otherClassifications.length) {
+            for (let item of otherClassifications) {
+                if (item.affiliation) {
+                    otherClassificationOwners.push(getAffiliationName(item.affiliation));
+                } else {
+                    otherClassificationOwners.push(item.submitted_by.title);
+                }
+            }
+        }
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -1472,10 +1442,16 @@ var CuratorRecordHeader = createReactClass({
                                     </dd>
                                     <dt>Last edited: </dt>
                                     <dd><a href={'mailto:' + latestRecord.submitted_by.email}>{latestRecord.submitted_by.title}</a> — {moment(latestRecord.last_modified).format('YYYY MMM DD, h:mm a')}</dd>
+                                    {otherClassificationOwners.length ?
+                                        <div>
+                                            <dt>Other classifications by: </dt>
+                                            <dd>{otherClassificationOwners.join(', ')}</dd>
+                                        </div>
+                                        : null}
                                 </div>
-                            : null}
+                                : null}
                         </dl>
-                    : null}
+                        : null}
                 </div>
             </div>
         );
