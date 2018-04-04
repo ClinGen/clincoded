@@ -630,7 +630,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         {sortedSnapshotList.length ?
                             <div className="panel panel-info snapshot-list">
                                 <div className="panel-heading">
-                                    <h3 className="panel-title">Saved Provisonal and Approved Interpretation(s)</h3>
+                                    <h3 className="panel-title">Saved Provisional and Approved Interpretation(s)</h3>
                                 </div>
                                 <div className="panel-body">
                                     <CurationSnapshots snapshots={sortedSnapshotList} />
