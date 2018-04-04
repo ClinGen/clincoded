@@ -13,6 +13,7 @@ import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
 import { ProvisionalApproval } from './provisional';
 import { ClassificationApproval } from './approval';
+import CurationSnapshots from './snapshots';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -120,7 +121,7 @@ const ProvisionalClassification = createReactClass({
      * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
      */
     getClassificationSnaphots(provisionalUuid) {
-        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid, null, true).then(result => {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
             this.setState({classificationSnapshots: result['@graph']});
         }).catch(err => {
             console.log('Classification Snapshots Fetch Error=: %o', err);
@@ -546,6 +547,14 @@ const ProvisionalClassification = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
     },
 
+    sortListbyColName(snapshots, colName) {
+        let sortedList = [];
+        if (snapshots.length) {
+            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
+        }
+        return sortedList;
+    },
+
     render() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
@@ -569,10 +578,7 @@ const ProvisionalClassification = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
-        const provisionalPanelTitle = provisional && provisional.classificationStatus !== 'In progress' ? "Saved Provisional Classification(s)" : "Save Classification as Provisional";
-        const approvalPanelTitle = provisional && provisional.approvedClassification ? "Saved Approved Classification(s)" : "Approve Classification";
-        let provisionalSnapshots = this.state.classificationSnapshots.length ? this.state.classificationSnapshots.filter(snapshot => snapshot.resourceType === 'classification' && snapshot.approvalStatus === 'Provisioned') : [];
-        let approvalSnapshots = this.state.classificationSnapshots.length ? this.state.classificationSnapshots.filter(snapshot => snapshot.resourceType === 'classification' && snapshot.approvalStatus === 'Approved') : [];
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
 
         return (
             <div>
@@ -858,20 +864,18 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                     : null}
                             </div>
-                            {provisional ?
+                            {provisional && this.state.classificationStatus === 'In progress' ?
                                 <div className="provisional-approval-content-wrapper">
-                                    {this.state.classificationStatus === 'In progress' ?
-                                        <div className="container">
-                                            <p className="alert alert-info">
-                                                <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once you have saved it as
-                                                Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Classification, archiving the current one, with
-                                                access to its Classification Matrix and Evidence Summary.
-                                            </p>
-                                        </div>
-                                        : null}
+                                    <div className="container">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once you have saved it as
+                                            Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Classification, archiving the current one, with
+                                            access to its Classification Matrix and Evidence Summary.
+                                        </p>
+                                    </div>
                                     <div className={this.state.classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
                                         <PanelGroup>
-                                            <Panel title={provisionalPanelTitle} panelClassName="panel-data" open>
+                                            <Panel title="Save Classification as Provisional" panelClassName="panel-data" open>
                                                 <ProvisionalApproval
                                                     session={session}
                                                     gdm={gdm}
@@ -879,20 +883,18 @@ const ProvisionalClassification = createReactClass({
                                                     classificationStatus={this.state.classificationStatus}
                                                     provisional={provisional}
                                                     affiliation={this.props.affiliation}
-                                                    classificationSnapshots={this.state.classificationSnapshots}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
-                                                    shouldProvisionClassification={this.state.classificationStatus === 'In progress' ? true : false}
                                                 />
                                             </Panel>
                                         </PanelGroup>
                                     </div>
                                 </div>
                                 : null}
-                            {provisional && (provisional.provisionedClassification || approvalSnapshots.length) ?
+                            {provisional && provisional.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
                                 <div className="container approval-process final-approval">
                                     <PanelGroup>
-                                        <Panel title={approvalPanelTitle} panelClassName="panel-data" open>
+                                        <Panel title="Approve Classification" panelClassName="panel-data" open>
                                             <ClassificationApproval
                                                 session={session}
                                                 gdm={gdm}
@@ -900,10 +902,18 @@ const ProvisionalClassification = createReactClass({
                                                 classificationStatus={this.state.classificationStatus}
                                                 provisional={provisional}
                                                 affiliation={this.props.affiliation}
-                                                classificationSnapshots={this.state.classificationSnapshots}
                                                 updateSnapshotList={this.updateSnapshotList}
                                                 updateProvisionalObj={this.updateProvisionalObj}
                                             />
+                                        </Panel>
+                                    </PanelGroup>
+                                </div>
+                                : null}
+                            {sortedSnapshotList.length ?
+                                <div className="container snapshot-list">
+                                    <PanelGroup>
+                                        <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
+                                            <CurationSnapshots snapshots={sortedSnapshotList} />
                                         </Panel>
                                     </PanelGroup>
                                 </div>
