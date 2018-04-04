@@ -14,6 +14,26 @@
     border: 1px solid #ccc;
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
     transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+
+    &::placeholder {
+        color: #ccc;
+    }
+
+    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+        color: #ccc;
+    }
+
+    &::-moz-placeholder { /* Firefox 19+ */
+        color: #ccc;
+    }
+    
+    &:-ms-input-placeholder { /* IE 10+ */
+        color: #ccc;
+    }
+
+    &:-moz-placeholder { /* Firefox 18- */
+        color: #ccc;
+    }
 }
 
 /**
