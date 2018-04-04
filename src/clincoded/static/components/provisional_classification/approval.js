@@ -290,7 +290,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-md-12 alert alert-warning approval-preview-note"><i className="icon icon-exclamation-circle"></i> This is a Preview; you must Submit.</div>
+                            <div className="col-md-12 alert alert-warning approval-preview-note">
+                                <i className="icon icon-exclamation-circle"></i> This is a Preview; you must Submit.
+                                {this.props.interpretation && Object.keys(this.props.interpretation).length ?
+                                    <strong>Approving an Interpretation does not submit it to ClinVar.</strong>
+                                    : null}
+                            </div>
                         </div>
                         :
                         <div className="approval-edit">
