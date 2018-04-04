@@ -120,7 +120,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         classificationStatus: provisionalClassification.classificationStatus
                     }
                 };
-                this.recordHistory('modify', provisionalClassification, meta);
+                // this.recordHistory('modify', provisionalClassification, meta);
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
                 // get a fresh copy of the gdm object
