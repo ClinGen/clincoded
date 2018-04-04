@@ -89,6 +89,14 @@ class CurationSnapshots extends Component {
         return buttonClass;
     }
 
+    renderProvisionalSnapshotApprovalLink(snapshot, index) {
+        let gdm = snapshot.resourceParent;
+        let pathname = window.location.pathname;
+        if (index.toString() === "0" && pathname.indexOf('provisional-curation') > -1) {
+            return <span className="approve-provisional-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>Approve this Saved Provisional</a> ]</span>;
+        }
+    }
+
     /**
      * Method to render snapshots in table rows
      * @param {object} snapshot - A saved copy of a provisioned/approved classification and its parent GDM/Interpretation
@@ -142,6 +150,7 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderProvisionalSnapshotStatusIcon(index)}
+                                    {snapshot.resourceParent && snapshot.resourceParent['@type'][0] === 'gdm' ? this.renderProvisionalSnapshotApprovalLink(snapshot, index) : null}
                                     <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
