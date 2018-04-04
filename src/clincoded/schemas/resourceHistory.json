@@ -89,6 +89,10 @@
             "title": "Primary object information",
             "type": "object"
         },
+        "associatedSnapshot": {
+            "title": "Associated snapshot object",
+            "type": "object"
+        },
         "date_created": {
             "title": "Creation Date",
             "type": "string"
