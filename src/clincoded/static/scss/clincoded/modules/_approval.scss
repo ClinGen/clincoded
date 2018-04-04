@@ -73,13 +73,40 @@
 
     .approval-snapshot-buttons {
         padding: 14px 18px;
+        position: relative;
         text-align: center;
-        vertical-align: middle;
+        vertical-align: bottom;
         width: 20%;
 
         input[type="button"] {
             margin: 8px 0;
         }
+
+        .btn-default {
+            background-color: #aaa;
+            color: #fff;
+
+            &:hover {
+                background-color: #777;
+            }
+        }
+
+        .snapshot-current-icon,
+        .snapshot-archive-icon {
+            font-size: 1.3rem;
+            position: absolute;
+            top: -3px;
+            right: 5px;
+        }
+
+        .snapshot-current-icon {
+            color: #82c91e;
+        }
+
+        .snapshot-archive-icon {
+            color: #aaa;
+        }
+
     }
 }
 
