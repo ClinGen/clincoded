@@ -2,117 +2,211 @@
     {
         "affiliation_id": "10001",
         "affiliation_abbreviation": "CV-KCNQ1-EP",
-        "affiliation_fullname": "ClinGen Cardiovascular KCNQ1 Expert Panel"
+        "affiliation_fullname": "ClinGen Cardiovascular KCNQ1 Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Lisa Kurtz",
+            "Michael Gollob"
+        ]
     },
     {
         "affiliation_id": "10002",
         "affiliation_abbreviation": "CV-CMP-EP",
-        "affiliation_fullname": "ClinGen Cardiovascular Cardiomyopathy Expert Panel"
+        "affiliation_fullname": "ClinGen Cardiovascular Cardiomyopathy Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Birgit Funke",
+            "Lisa Kurtz",
+            "Melissa Kelly"
+        ]
     },
     {
         "affiliation_id": "10003",
         "affiliation_abbreviation": "CV-DCM-EP",
-        "affiliation_fullname": "ClinGen Cardiovascular Dilated Cardiomyopathy Expert Panel"
+        "affiliation_fullname": "ClinGen Cardiovascular Dilated Cardiomyopathy Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Cindy James",
+            "Jan Jongbloed",
+            "Lisa Kurtz",
+            "Peter van Tintelen",
+            "Ray Hershberger"
+        ]
     },
     {
         "affiliation_id": "10004",
         "affiliation_abbreviation": "CV-FH-EP",
-        "affiliation_fullname": "ClinGen Familial Hypercholesterolemia Expert Panel"
+        "affiliation_fullname": "ClinGen Familial Hypercholesterolemia Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Lisa Kurtz",
+            "Mafalda Bourbon"
+        ]
     },
     {
         "affiliation_id": "10005",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Epilepsy Working Group"
+        "affiliation_fullname": "ClinGen Epilepsy Working Group",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10006",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Intellectual Disability & Autism Working Group"
+        "affiliation_fullname": "ClinGen Intellectual Disability & Autism Working Group",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10007",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Hearing Loss Working Group"
+        "affiliation_fullname": "ClinGen Hearing Loss Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Ahmad Tayoun",
+            "Heidi Rehm",
+            "Sami Amr"
+        ]
     },
     {
         "affiliation_id": "10008",
         "affiliation_abbreviation": "HLWG",
-        "affiliation_fullname": "ClinGen Hypertrophic Cardiomyopathy Working Group"
+        "affiliation_fullname": "ClinGen Hypertrophic Cardiomyopathy Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Courtney Thaxton",
+            "Jen McGlaughon",
+            "Jenny Goldstein"
+        ]
     },
     {
         "affiliation_id": "10009",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Storage Diseases Working Group"
+        "affiliation_fullname": "ClinGen Storage Diseases Working Group",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10010",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Fatty Acid Oxidation Disorders Working Group"
+        "affiliation_fullname": "ClinGen Fatty Acid Oxidation Disorders Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Heather Baudet",
+            "Jen McGlaughon"
+        ]
     },
     {
         "affiliation_id": "10011",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Aminoacidopathies Working Group"
+        "affiliation_fullname": "ClinGen Aminoacidopathies Working Group",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10012",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen PTEN Expert Panel"
+        "affiliation_fullname": "ClinGen PTEN Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Jessica Mester"
+        ]
     },
     {
         "affiliation_id": "10013",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen TP53 Working Group"
+        "affiliation_fullname": "ClinGen TP53 Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Jessica Mester",
+            "Kristy Lee",
+            "Tina Pesaran"
+        ]
     },
     {
         "affiliation_id": "10014",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen CDH1 Working Group"
+        "affiliation_fullname": "ClinGen CDH1 Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Intan Schrader",
+            "Jessica Mester",
+            "Kristy Lee",
+            "Rachid Karam",
+            "Tina Pesaran",
+            "Xi Luo"
+        ]
     },
     {
         "affiliation_id": "10015",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen PAH Working Group"
+        "affiliation_fullname": "ClinGen PAH Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Amanda Thomas",
+            "Diane Zastrow"
+        ]
     },
     {
         "affiliation_id": "10016",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Monogenic Diabetes Expert Panel"
+        "affiliation_fullname": "ClinGen Monogenic Diabetes Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Kristin Maloney",
+            "Linda Jeng",
+            "Toni Pollin"
+        ]
     },
     {
         "affiliation_id": "10017",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Sequence Variant Discrepancy Resolution"
+        "affiliation_fullname": "ClinGen Sequence Variant Discrepancy Resolution",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10018",
         "affiliation_abbreviation": "UNC",
-        "affiliation_fullname": "UNC Biocuration Core"
+        "affiliation_fullname": "UNC Biocuration Core",
+        "publish_approval": true,
+        "approver": [
+            "Courtney Thaxton",
+            "Jen McGlaughon",
+            "Jenny Goldstein"
+        ]
     },
     {
         "affiliation_id": "10019",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "Harvard/Geisinger Biocuration Core"
+        "affiliation_fullname": "Harvard/Geisinger Biocuration Core",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10020",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Brain Malformations Expert Panel"
+        "affiliation_fullname": "ClinGen Brain Malformations Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Annapurna Poduri",
+            "Tim Yu"
+        ]
     },
     {
         "affiliation_id": "10021",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen RASopathy Expert Panel"
+        "affiliation_fullname": "ClinGen RASopathy Expert Panel",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10022",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Rett Angelman Expert Panel"
+        "affiliation_fullname": "ClinGen Rett Angelman Expert Panel",
+        "publish_approval": true
     },
     {
         "affiliation_id": "10023",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Hereditary Cancer Gene Curation Working Group"
+        "affiliation_fullname": "ClinGen Hereditary Cancer Gene Curation Working Group",
+        "publish_approval": true,
+        "approver": [
+            "Sharon Plon"
+        ]
     },
     {
         "affiliation_id": "10024",
