@@ -21,7 +21,6 @@
  */
 .provisional-form-buttons-wrapper,
 .approval-form-buttons-wrapper {
-    margin-bottom: 20px;
     padding: 0;
 
     .button-group {
@@ -29,29 +28,37 @@
     }
 }
 
-.provisional-approval.in-progress, .final-approval {
-    margin-bottom: 100px;
+.provisional-approval.in-progress {
+    margin-bottom: 10px;
 }
 
 /**
  * Approval snapshot style
  */
-.provisional-approval-snapshot-list,
-.final-approval-snapshot-list {
+.snapshot-list.panel {
+    border-radius: 4px;
     margin-bottom: 0;
 
     .list-group {
         list-style: none;
         padding-left: 0;
-    }
 
-    .list-group-item {
-        table {
-            width: 100%;
-        }
-
-        &:first-child {
-            background-color: #e2e2e2;
+        .list-group-item {
+            background-color: #fff;
+            border-bottom: solid 1px #e1e1e1;
+            padding: 15px 15px 13px 25px;
+    
+            table {
+                width: 100%;
+    
+                dl {
+                    margin-bottom: 5px;
+                }
+            }
+    
+            &:last-child {
+                border-bottom: none;
+            }
         }
     }
 
