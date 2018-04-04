@@ -847,12 +847,14 @@ const ProvisionalClassification = createReactClass({
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div>
-                                                <p className="alert alert-info">
-                                                    <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
-                                                    associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
-                                                </p>
-                                            </div>
+                                            {provisional && this.state.classificationStatus === 'In progress' ?
+                                                <div>
+                                                    <p className="alert alert-info">
+                                                        <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
+                                                        associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
+                                                    </p>
+                                                </div>
+                                                : null}
                                         </div>
                                     </Panel>
                                 </PanelGroup>
