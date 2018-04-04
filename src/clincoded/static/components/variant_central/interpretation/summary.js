@@ -518,7 +518,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-md-12 classification-submit">
+                                            <div className="col-md-12 classification-submit clearfix">
+                                                <div className="classification-submit-note pull-left">
+                                                    <i className="icon icon-info-circle"></i> An Interpretation will remain In Progress until Saved as Provisional.
+                                                </div>
                                                 <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
                                                     submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
                                             </div>
@@ -568,9 +571,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                     <div>
                                         <div className="provisional-interpretation-note">
                                             <p className="alert alert-info">
-                                                <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you are ready to send it for Review. Once you have saved it as
-                                                Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current one, with
-                                                access to its Evaluation Summary.
+                                                <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you have finished all your evaluations and wish to mark it as complete. Once
+                                                you have saved it as Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current
+                                                one, with access to its Evaluation Summary.
                                             </p>
                                         </div>
                                         <div className="panel panel-info approval-process provisional-approval">
