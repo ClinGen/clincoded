@@ -598,10 +598,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                     : null}
                                 {this.state.classificationStatus === 'In progress' && !shouldProvisionClassification ?
                                     <div className="provisional-interpretation-note">
-                                        <p className="alert alert-danger">
-                                            <i className="icon icon-exclamation-circle"></i> You can not save this Interpretation as provisional without an associated disease when either the
-                                            Modified Pathogenicity is "Pathogenic" or "Likely pathogenic", or the Calculated Pathogenicty is "Pathogenic" or "Likely pathogenic" (if no modification
-                                            is made to the Calculated Pathogenicty).
+                                        <p className="alert alert-warning">
+                                            <i className="icon icon-exclamation-circle"></i> The option to save an Interpretation as Provisional will not appear when the saved calculated or modified value
+                                            is "Likely Pathogenic" or "Pathogenic" and there is no associated disease.
                                         </p>
                                     </div>
                                     : null}
