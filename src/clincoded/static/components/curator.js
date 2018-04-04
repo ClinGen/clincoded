@@ -448,8 +448,14 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                             : null}
                                                         {provisionalClassification.provisional.classificationStatus === 'Approved' ?
                                                             <div>
-                                                                <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a> ]</span>
+                                                                <div>
+                                                                    <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
+                                                                    <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a> ]</span>
+                                                                </div>
+                                                                <div>
+                                                                    <span className="header-classification-item">Last Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
+                                                                    <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a> ]</span>
+                                                                </div>
                                                             </div>
                                                             : null}
                                                         {provisionalClassification.provisional.alteredClassification === 'No Selection' ?
