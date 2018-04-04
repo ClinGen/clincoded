@@ -10,6 +10,20 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         super(props);
     }
 
+    /**
+     * Method to display classification tag/label in the evidence summary header
+     * @param {string} status - The status of a given classification in an interpretation
+     */
+    renderClassificationStatusTag(status) {
+        if (status === 'In progress') {
+            return <span className="label label-warning">IN PROGRESS</span>;
+        } else if (status === 'Provisional') {
+            return <span className="label label-info">PROVISIONAL</span>;
+        } else if (status === 'Approved') {
+            return <span className="label label-success">APPROVED</span>;
+        }
+    }
+
     render() {
         const { gdm, provisional } = this.props;
         // Expecting the required fields of a GDM to always have values:
@@ -50,7 +64,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Classification status:</dt>
-                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? provisional.classificationStatus : null}</dd>
+                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? this.renderClassificationStatusTag(provisional.classificationStatus) : null}</dd>
                             {provisional ?
                                 <div>
                                     <dt>Date classification saved:</dt>
