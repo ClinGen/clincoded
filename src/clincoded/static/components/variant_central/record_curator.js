@@ -197,7 +197,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                     </div>
                                     <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
                                     <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
-                                    {this.renderClassificationHeader(myInterpretation.provisional_variant)}
+                                    {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
                                     <div><strong>Last Edited:</strong> {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
                                 </div>
                                 : null}
@@ -231,7 +231,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                 <span className="no-broken-item">
                                                     last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                 </span>
-                                                {this.renderClassificationHeader(myInterpretation.provisional_variant)}
+                                                {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
                                             </td>
                                             <td className="icon-box">
                                                 <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
@@ -273,7 +273,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                             ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
                                                     </span>
                                                     last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                    {this.renderClassificationHeader(interpretation.provisional_variant)}
+                                                    {interpretation.provisional_variant ? this.renderClassificationHeader(interpretation.provisional_variant) : null}
                                                 </dd>
                                             </dl>
                                         );
