@@ -48,6 +48,20 @@
             "title": "The parent object of the resource item",
             "description": "Snapshot of the entire parent object of the resource item",
             "type": "object"
+        },
+        "associatedSnapshot": {
+            "title": "Associated snapshot object",
+            "description": "Another snapshot that is paired with this one (e.g. approval with its targeted provisional)",
+            "type": "object"
+        },
+        "primary": {
+            "title": "Primary object",
+            "description": "Reference to the primary resource object at the current state",
+            "type": "string",
+            "linkTo": [
+                "provisionalClassification",
+                "provisional_variant"
+            ]
         }
     },
     "columns": {
@@ -70,6 +84,10 @@
         "approvalStatus": {
             "title": "Approval Status",
             "type": "string"
+        },
+        "primary": {
+            "title": "Primary object information",
+            "type": "object"
         },
         "date_created": {
             "title": "Creation Date",
