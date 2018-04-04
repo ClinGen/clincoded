@@ -12,8 +12,7 @@ import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { ContextualHelp } from '../libs/bootstrap/contextual_help';
 import { parseAndLogError } from './mixins';
 import { ClassificationDefinition } from './provisional_classification/definition';
-import ProvisionalSnapshots from './provisional_classification/provisional_snapshots';
-import ApprovalSnapshots from './provisional_classification/approval_snapshots';
+import CurationSnapshots from './provisional_classification/snapshots';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -781,26 +780,6 @@ var ProvisionalCuration = createReactClass({
         });
     },
 
-    getProvisionalSnapshot(snapshots) {
-        let hasProvisionalSnaphot = false;
-        for (let snapshot of snapshots) {
-            if (snapshot.approvalStatus === 'Provisioned' && snapshot.resourceType === 'classification') {
-                hasProvisionalSnaphot = true;
-            }
-        }
-        return hasProvisionalSnaphot;
-    },
-
-    getApprovedSnapshot(snapshots) {
-        let hasApprovedSnaphot = false;
-        for (let snapshot of snapshots) {
-            if (snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification') {
-                hasApprovedSnaphot = true;
-            }
-        }
-        return hasApprovedSnaphot;
-    },
-
     /**
      * Simple Math.round method
      */
@@ -818,6 +797,14 @@ var ProvisionalCuration = createReactClass({
         let tempNumber = number * factor;
         let roundedTempNumber = Math.round(tempNumber);
         return roundedTempNumber / factor;
+    },
+
+    sortListbyColName(snapshots, colName) {
+        let sortedList = [];
+        if (snapshots.length) {
+            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
+        }
+        return sortedList;
     },
 
     render: function() {
@@ -843,7 +830,7 @@ var ProvisionalCuration = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
-        const snapshots = this.state.classificationSnapshots;
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
 
         return (
             <div>
@@ -1140,21 +1127,14 @@ var ProvisionalCuration = createReactClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
-                                {/* Render snapshots of all saved provisioned classifications */}
-                                {snapshots && snapshots.length && this.getProvisionalSnapshot(snapshots) ?
-                                    <PanelGroup>
-                                        <Panel title="Saved Provisional Classification(s)" panelClassName="panel-data" open>
-                                            <ProvisionalSnapshots snapshots={snapshots} resourceType='classification' />
-                                        </Panel>
-                                    </PanelGroup>
-                                    : null}
-                                {/* Render snapshots of all saved approved classifications */}
-                                {snapshots && snapshots.length && this.getApprovedSnapshot(snapshots) ?
-                                    <PanelGroup>
-                                        <Panel title="Saved Approved Classification(s)" panelClassName="panel-data" open>
-                                            <ApprovalSnapshots snapshots={snapshots} resourceType='classification' />
-                                        </Panel>
-                                    </PanelGroup>
+                                {sortedSnapshotList.length ?
+                                    <div className="snapshot-list">
+                                        <PanelGroup>
+                                            <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
+                                                <CurationSnapshots snapshots={sortedSnapshotList} />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
                                     : null}
                             </div>
                         </div>
