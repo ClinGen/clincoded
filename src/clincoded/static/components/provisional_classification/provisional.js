@@ -270,10 +270,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                                                     parseDate={parseDate}
                                                     placeholder={`${formatDate(new Date())}`}
                                                     dayPickerProps={{
-                                                        selectedDays: provisionalReviewDate ? parseDate(provisionalReviewDate) : undefined,
-                                                        disabledDays: {
-                                                            daysOfWeek: [0, 6]
-                                                        }
+                                                        selectedDays: provisionalReviewDate ? parseDate(provisionalReviewDate) : undefined
                                                     }}
                                                 />
                                             </div>

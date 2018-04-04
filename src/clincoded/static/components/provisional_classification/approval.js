@@ -350,10 +350,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                     parseDate={parseDate}
                                                     placeholder={`${formatDate(new Date())}`}
                                                     dayPickerProps={{
-                                                        selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined,
-                                                        disabledDays: {
-                                                            daysOfWeek: [0, 6]
-                                                        }
+                                                        selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
                                                     }}
                                                 />
                                             </div>
