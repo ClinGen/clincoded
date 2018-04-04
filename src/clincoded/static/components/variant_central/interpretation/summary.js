@@ -588,7 +588,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     classificationStatus={this.state.classificationStatus}
                                                     provisional={provisionalVariant}
                                                     affiliation={this.props.affiliation}
-                                                    classificationSnapshots={this.state.classificationSnapshots}
                                                     updateSnapshotList={this.props.updateSnapshotList}
                                                     updateProvisionalObj={this.props.updateProvisionalObj}
                                                     shouldProvisionClassification={shouldProvisionClassification}
@@ -621,9 +620,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                         classificationStatus={this.state.classificationStatus}
                                         provisional={provisionalVariant}
                                         affiliation={this.props.affiliation}
-                                        classificationSnapshots={this.state.classificationSnapshots}
                                         updateSnapshotList={this.props.updateSnapshotList}
                                         updateProvisionalObj={this.props.updateProvisionalObj}
+                                        snapshots={sortedSnapshotList}
                                     />
                                 </div>
                             </div>
