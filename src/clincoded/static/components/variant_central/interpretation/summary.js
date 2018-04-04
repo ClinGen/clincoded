@@ -576,7 +576,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                 one, with access to its Evaluation Summary.
                                             </p>
                                         </div>
-                                        <div className="panel panel-info approval-process provisional-approval">
+                                        <div className="panel panel-warning approval-process provisional-approval">
                                             <div className="panel-heading">
                                                 <h3 className="panel-title">Save Interpretation as Provisional</h3>
                                             </div>
@@ -608,7 +608,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                             </div>
                             : null}
                         {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
-                            <div className="panel panel-info approval-process final-approval">
+                            <div className="panel panel-warning approval-process final-approval">
                                 <div className="panel-heading">
                                     <h3 className="panel-title">Approve Interpretation</h3>
                                 </div>
