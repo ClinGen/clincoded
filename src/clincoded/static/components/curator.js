@@ -443,7 +443,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                         {provisionalClassification.provisional.classificationStatus === 'Provisional' ?
                                                             <div>
                                                                 <span className="header-classification-item">Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a> ]</span>
+                                                                <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
                                                             </div>
                                                             : null}
                                                         {provisionalClassification.provisional.classificationStatus === 'Approved' ?
