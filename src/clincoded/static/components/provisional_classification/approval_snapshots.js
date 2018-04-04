@@ -54,7 +54,7 @@ class ApprovalSnapshots extends Component {
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
                                         <dt><span>Date saved as Approved:</span></dt>
-                                        <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD") : null}</span></dd>
+                                        <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-review-date">
                                         <dt><span>Date reviewed:</span></dt>

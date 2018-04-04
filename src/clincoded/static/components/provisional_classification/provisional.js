@@ -184,7 +184,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
 
     render() {
         const provisionalSubmitter = this.state.provisionalSubmitter;
-        const provisionalDate = this.state.provisionalDate ? moment(this.state.provisionalDate).format('YYYY MM DD') : moment().format('YYYY MM DD');
+        const provisionalDate = this.state.provisionalDate ? moment(this.state.provisionalDate).format('YYYY MM DD, h:mm a') : moment().format('YYYY MM DD, h:mm a');
         const provisionalReviewDate = this.state.provisionalReviewDate ? moment(this.state.provisionalReviewDate).format('MM/DD/YYYY') : '';
         const provisionalComment = this.state.provisionalComment && this.state.provisionalComment.length ? this.state.provisionalComment : '';
         const session = this.props.session;
@@ -217,7 +217,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                                     <div className="provisional-date">
                                         <dl className="inline-dl clearfix preview-provisional-date">
                                             <dt><span>Date saved as Provisional:</span></dt>
-                                            <dd><span>{provisionalDate ? formatDate(parseDate(provisionalDate), "YYYY MMM DD") : null}</span></dd>
+                                            <dd><span>{provisionalDate ? formatDate(parseDate(provisionalDate), "YYYY MMM DD, h:mm a") : null}</span></dd>
                                         </dl>
                                     </div>
                                     <div className="approval-review-date">

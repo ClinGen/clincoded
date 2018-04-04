@@ -233,7 +233,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const approvalSubmitter = this.state.approvalSubmitter;
         const classificationApprover = this.state.classificationApprover;
         const approvalReviewDate = this.state.approvalReviewDate ? moment(this.state.approvalReviewDate).format('MM/DD/YYYY') : '';
-        const approvalDate = this.state.approvalDate ? moment(this.state.approvalDate).format('YYYY MM DD') : moment().format('YYYY MM DD');
+        const approvalDate = this.state.approvalDate ? moment(this.state.approvalDate).format('YYYY MM DD, h:mm a') : moment().format('YYYY MM DD, h:mm a');
         const approvalComment = this.state.approvalComment && this.state.approvalComment.length ? this.state.approvalComment : '';
         const session = this.props.session;
         const provisional = this.props.provisional;
@@ -271,7 +271,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div className="approval-date">
                                         <dl className="inline-dl clearfix preview-approval-date">
                                             <dt><span>Date saved as Approved:</span></dt>
-                                            <dd><span>{approvalDate ? formatDate(parseDate(approvalDate), "YYYY MMM DD") : null}</span></dd>
+                                            <dd><span>{approvalDate ? formatDate(parseDate(approvalDate), "YYYY MMM DD, h:mm a") : null}</span></dd>
                                         </dl>
                                     </div>
                                     <div className="approval-review-date">

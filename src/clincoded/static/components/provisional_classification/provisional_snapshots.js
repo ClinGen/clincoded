@@ -48,7 +48,7 @@ class ProvisionalSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-date">
                                         <dt><span>Date saved as Provisional:</span></dt>
-                                        <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD") : null}</span></dd>
+                                        <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-review-date">
                                         <dt><span>Date reviewed:</span></dt>
