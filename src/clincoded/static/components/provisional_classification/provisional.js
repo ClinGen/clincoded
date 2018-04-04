@@ -236,7 +236,10 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-md-12 alert alert-warning provisional-preview-note"><i className="icon icon-exclamation-circle"></i> This is a Preview; you must Submit.</div>
+                            <div className="col-md-12 alert alert-warning provisional-preview-note">
+                                <i className="icon icon-exclamation-circle"></i> This is a Preview only; you must still Submit to save this
+                                {interpretation && Object.keys(interpretation).length ? 'Interpretation' : 'Classification'} as Provisional.
+                            </div>
                         </div>
                         :
                         <div className="provisional-edit">
