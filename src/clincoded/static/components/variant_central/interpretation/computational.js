@@ -233,7 +233,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 break;
             }
         }
-        
+
     },
 
     /**
@@ -958,17 +958,15 @@ function criteriaMissense1() {
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
                 true
+
             )}
             {vciFormHelper.evalFormSectionWrapper.call(this,
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                false
+                false,
+                true
             )}
-                <div className="bs-callout-info">
-                    <p></p>
-                    <center><p className="header-note">View ExAC Constraint Scores on the Gene-centric tab</p></center>
-                </div>
         </div>
     );
 }
