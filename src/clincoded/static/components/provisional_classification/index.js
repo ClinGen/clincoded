@@ -904,6 +904,7 @@ const ProvisionalClassification = createReactClass({
                                                 affiliation={this.props.affiliation}
                                                 updateSnapshotList={this.updateSnapshotList}
                                                 updateProvisionalObj={this.updateProvisionalObj}
+                                                snapshots={sortedSnapshotList}
                                             />
                                         </Panel>
                                     </PanelGroup>
