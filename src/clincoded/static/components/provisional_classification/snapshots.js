@@ -14,6 +14,29 @@ class CurationSnapshots extends Component {
         super(props);
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        // Finds all hgvs terms in <li> and <td> nodes
+        // Then sets 'title' and 'class' attributes if text overflows
+        let provisionalList = document.querySelectorAll('li.snapshot-item[data-status="Provisioned"]');
+        let approvalList = document.querySelectorAll('li.snapshot-item[data-status="Approved"]');
+        let provisionalSnapshotNodes = Array.from(provisionalList);
+        let approvalSnapshotNodes = Array.from(approvalList);
+        if (approvalSnapshotNodes && approvalSnapshotNodes.length) {
+            approvalSnapshotNodes.forEach(approval => {
+                let label = document.createElement('LABEL');
+                approval.appendChild(label);
+
+                if (approval.getAttribute('data-associated').length) {
+                    for (let provisional of provisionalSnapshotNodes) {
+                        if (provisional.getAttribute('data-key') === approval.getAttribute('data-associated')) {
+                            provisional.appendChild(label);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     viewSnapshotSummary(snapshotId, type, e) {
         e.preventDefault(); e.stopPropagation();
         const snapshotUuid = snapshotId.slice(11, -1);
@@ -25,15 +48,28 @@ class CurationSnapshots extends Component {
     }
 
     /**
+     * Method to display classification tag/label in the interpretation header
+     * @param {string} status - The status of a given classification in an interpretation
+     */
+    renderClassificationStatusTag(status) {
+        if (status === 'Provisioned') {
+            return <span className="label label-info">PROVISIONAL</span>;
+        } else if (status === 'Approved') {
+            return <span className="label label-success">APPROVED</span>;
+        }
+    }
+
+    /**
      * Method to render snapshots in table rows
      * @param {object} snapshot - A saved copy of a provisioned/approved classification and its parent GDM/Interpretation
      */
-    renderSnapshot(snapshot) {
+    renderSnapshot(snapshot, index) {
         const type = snapshot.resourceType;
+        let buttonClass = index.toString() === "0" || index.toString() === "1" ? 'btn-primary' : 'btn-default';
 
         if (snapshot.approvalStatus === 'Provisioned') {
             return (
-                <li className="snapshot-item list-group-item" key={snapshot['@id']} data-status={snapshot.approvalStatus}>
+                <li className="snapshot-item list-group-item" key={snapshot['@id']} data-key={snapshot['@id']} data-status={snapshot.approvalStatus} data-index={index}>
                     <table>
                         <tbody>
                             <tr>
@@ -50,7 +86,8 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-date">
                                         <dt><span>Date saved as Provisional:</span></dt>
-                                        <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD") : null}</span></dd>
+                                        <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
+                                        {this.renderClassificationStatusTag(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-review-date">
                                         <dt><span>Date reviewed:</span></dt>
@@ -74,7 +111,12 @@ class CurationSnapshots extends Component {
                                     </dl>
                                 </td>
                                 <td className="approval-snapshot-buttons">
-                                    <Input type="button" inputClassName="btn-primary" title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                    {index.toString() === "0" || index.toString() === "1" ?
+                                        <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>
+                                        :
+                                        <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>
+                                    }
+                                    <Input type="button" inputClassName={buttonClass} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
                         </tbody>
@@ -83,7 +125,8 @@ class CurationSnapshots extends Component {
             );
         } else if (snapshot.approvalStatus === 'Approved') {
             return (
-                <li className="snapshot-item list-group-item" key={snapshot['@id']} data-status={snapshot.approvalStatus}>
+                <li className="snapshot-item list-group-item" key={snapshot['@id']} data-key={snapshot['@id']} data-status={snapshot.approvalStatus} data-index={index}
+                    data-associated={snapshot['associatedSnapshot'] ? snapshot['associatedSnapshot']['@id'] : null}>
                     <table>
                         <tbody>
                             <tr>
@@ -106,7 +149,8 @@ class CurationSnapshots extends Component {
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
                                         <dt><span>Date saved as Approved:</span></dt>
-                                        <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD") : null}</span></dd>
+                                        <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
+                                        {this.renderClassificationStatusTag(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-review-date">
                                         <dt><span>Date reviewed:</span></dt>
@@ -130,7 +174,12 @@ class CurationSnapshots extends Component {
                                     </dl>
                                 </td>
                                 <td className="approval-snapshot-buttons">
-                                    <Input type="button" inputClassName="btn-primary" title="View Approved Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                    {index.toString() === "0" || index.toString() === "1" ?
+                                        <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>
+                                        :
+                                        <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>
+                                    }
+                                    <Input type="button" inputClassName={buttonClass} title="View Approved Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
                         </tbody>
@@ -146,7 +195,7 @@ class CurationSnapshots extends Component {
         return (
             <div className="snapshot-list panel panel-default">
                 <ul className="list-group">
-                    {snapshots.map(snapshot => this.renderSnapshot(snapshot))}
+                    {snapshots.map((snapshot, i) => this.renderSnapshot(snapshot, i))}
                 </ul>
             </div>
         );
