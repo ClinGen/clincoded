@@ -10,6 +10,7 @@ import PopOverComponent from '../../../libs/bootstrap/popover';
 import AlertMessage from '../../../libs/bootstrap/alert';
 import { ProvisionalApproval } from '../../provisional_classification/provisional';
 import { ClassificationApproval } from '../../provisional_classification/approval';
+import CurationSnapshots from '../../provisional_classification/snapshots';
 import { renderSelectedModeInheritance } from '../../../libs/render_mode_inheritance';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
@@ -64,8 +65,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     reason = provisional_variant[0].reason;
                     evidenceSummary = provisional_variant[0].evidenceSummary ? provisional_variant[0].evidenceSummary : null;
                     classificationStatus = provisional_variant[0].classificationStatus;
-                    this.setState({isClassificationViewOnly: true});
+                    this.setState({isClassificationViewOnly: false});
                 }
+                //this.handleShouldProvisionClassificaton(interpretation);
             }
             // FIXME: Why do we need to update parent component immediately after mounting?
             this.props.setProvisionalEvaluation('provisional-pathogenicity', alteredClassification ? alteredClassification : null);
@@ -95,22 +97,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             evidenceSummary: nextProps.evidenceSummary
         }, () => {
             const interpretation = this.state.interpretation;
-            let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
-            let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : this.state.provisionalPathogenicity;
-            // Should generally allow users to provision an interpretation classificaion unless the following conditions are present
-            if (modifiedPathogenicity) {
-                if (modifiedPathogenicity === 'Pathogenic' || modifiedPathogenicity === 'Likely pathogenic') {
-                    this.setState({shouldProvisionClassification: interpretation.disease && interpretation.disease.term ? true : false});
-                } else {
-                    this.setState({shouldProvisionClassification: true});
-                }
-            } else if (calculatedAssertion) {
-                if (calculatedAssertion === 'Pathogenic' || calculatedAssertion === 'Likely pathogenic') {
-                    this.setState({shouldProvisionClassification: interpretation.disease && interpretation.disease.term ? true : false});
-                } else {
-                    this.setState({shouldProvisionClassification: true});
-                }
-            }
+            this.handleShouldProvisionClassificaton(interpretation);
             if (!this.state.isClassificationViewOnly) {
                 if (interpretation && interpretation.evaluations && interpretation.evaluations.length) {
                     if (!this.state.provisionalPathogenicity) {
@@ -128,6 +115,33 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 }
             }
         });
+    },
+
+    componentWillUnmount() {
+        this.setState({isClassificationViewOnly: false});
+    },
+
+    /**
+     * Method to evaluate whether we should render the provisional approval form
+     * @param {object} interpretation - The interpretation data object
+     */
+    handleShouldProvisionClassificaton(interpretation) {
+        let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
+        let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : this.state.provisionalPathogenicity;
+        // Should generally allow users to provision an interpretation classificaion unless the following conditions are present
+        if (modifiedPathogenicity) {
+            if (modifiedPathogenicity === 'Pathogenic' || modifiedPathogenicity === 'Likely pathogenic') {
+                this.setState({shouldProvisionClassification: interpretation.disease && interpretation.disease.term ? true : false});
+            } else {
+                this.setState({shouldProvisionClassification: true});
+            }
+        } else if (calculatedAssertion) {
+            if (calculatedAssertion === 'Pathogenic' || calculatedAssertion === 'Likely pathogenic') {
+                this.setState({shouldProvisionClassification: interpretation.disease && interpretation.disease.term ? true : false});
+            } else {
+                this.setState({shouldProvisionClassification: true});
+            }
+        }
     },
 
     // Method to alert users about requied input missing values
@@ -396,6 +410,14 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         }
     },
 
+    sortListbyColName(snapshots, colName) {
+        let sortedList = [];
+        if (snapshots.length) {
+            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
+        }
+        return sortedList;
+    },
+
     render() {
         let interpretation = this.state.interpretation;
         let evaluations = interpretation ? interpretation.evaluations : null;
@@ -424,10 +446,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         // And thus we pull the stored value (if any) initially from the db
         // Then we pull the updated value from either REST post or put results
         let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
-        const provisionalPanelTitle = provisionalVariant && provisionalVariant.classificationStatus !== 'In progress' ? "Saved Provisional Interpretation(s)" : "Save Interpretation as Provisional";
-        const approvalPanelTitle = provisionalVariant && provisionalVariant.approvedClassification ? "Saved Approved Interpretation(s)" : "Approve Interpretation";
-        let provisionalSnapshots = this.state.classificationSnapshots.length ? this.state.classificationSnapshots.filter(snapshot => snapshot.resourceType === 'interpretation' && snapshot.approvalStatus === 'Provisioned') : [];
-        let approvalSnapshots = this.state.classificationSnapshots.length ? this.state.classificationSnapshots.filter(snapshot => snapshot.resourceType === 'interpretation' && snapshot.approvalStatus === 'Approved') : [];
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
         let shouldProvisionClassification = this.state.shouldProvisionClassification;
 
         return (
@@ -450,10 +469,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                 <dt>Modified Pathogenicity:</dt>
                                                 <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
                                             </dl>
+                                            {/*
                                             <dl className="inline-dl clearfix">
                                                 <dt>Interpretation Status:</dt>
                                                 <dd className="provisional-interpretation-status">{this.renderClassificationStatusTag(provisionalStatus ? provisionalStatus : 'In progress')}</dd>
                                             </dl>
+                                            */}
                                         </div>
                                         <div className="col-xs-12 col-sm-6">
                                             <dl className="inline-dl clearfix">
@@ -530,25 +551,47 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-md-12 classification-edit">
-                                                <button type="button" className="btn btn-info btn-inline-spacer pull-right"
-                                                    onClick={this.handleEditClassification}>Edit <i className="icon icon-pencil"></i></button>
-                                            </div>
+                                            {this.state.classificationStatus === 'In progress' ?
+                                                <div className="col-md-12 classification-edit">
+                                                    <button type="button" className="btn btn-info btn-inline-spacer pull-right"
+                                                        onClick={this.handleEditClassification}>Edit <i className="icon icon-pencil"></i></button>
+                                                </div>
+                                                : null}
                                         </div>
                                     }
                                 </Form>
                             </div>
                         </div>
-
                         {provisionalVariant ?
                             <div className="provisional-approval-content-wrapper">
                                 {this.state.classificationStatus === 'In progress' && shouldProvisionClassification ?
-                                    <div className="provisional-interpretation-note">
-                                        <p className="alert alert-info">
-                                            <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you are ready to send it for Review. Once you have saved it as
-                                            Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current one, with
-                                            access to its Evaluation Summary.
-                                        </p>
+                                    <div>
+                                        <div className="provisional-interpretation-note">
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you are ready to send it for Review. Once you have saved it as
+                                                Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current one, with
+                                                access to its Evaluation Summary.
+                                            </p>
+                                        </div>
+                                        <div className="panel panel-info approval-process provisional-approval">
+                                            <div className="panel-heading">
+                                                <h3 className="panel-title">Save Interpretation as Provisional</h3>
+                                            </div>
+                                            <div className="panel-body">
+                                                <ProvisionalApproval
+                                                    session={this.props.session}
+                                                    interpretation={interpretation}
+                                                    classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                                    classificationStatus={this.state.classificationStatus}
+                                                    provisional={provisionalVariant}
+                                                    affiliation={this.props.affiliation}
+                                                    classificationSnapshots={this.state.classificationSnapshots}
+                                                    updateSnapshotList={this.props.updateSnapshotList}
+                                                    updateProvisionalObj={this.props.updateProvisionalObj}
+                                                    shouldProvisionClassification={shouldProvisionClassification}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                     : null}
                                 {this.state.classificationStatus === 'In progress' && !shouldProvisionClassification ?
@@ -560,31 +603,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                         </p>
                                     </div>
                                     : null}
-                                <div className="panel panel-info approval-process provisional-approval">
-                                    <div className="panel-heading">
-                                        <h3 className="panel-title">{provisionalPanelTitle}</h3>
-                                    </div>
-                                    <div className="panel-body">
-                                        <ProvisionalApproval
-                                            session={this.props.session}
-                                            interpretation={interpretation}
-                                            classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                            classificationStatus={this.state.classificationStatus}
-                                            provisional={provisionalVariant}
-                                            affiliation={this.props.affiliation}
-                                            classificationSnapshots={this.state.classificationSnapshots}
-                                            updateSnapshotList={this.props.updateSnapshotList}
-                                            updateProvisionalObj={this.props.updateProvisionalObj}
-                                            shouldProvisionClassification={shouldProvisionClassification}
-                                        />
-                                    </div>
-                                </div>
                             </div>
                             : null}
-                        {provisionalVariant && (provisionalVariant.provisionedClassification || approvalSnapshots.length) ?
+                        {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
                             <div className="panel panel-info approval-process final-approval">
                                 <div className="panel-heading">
-                                    <h3 className="panel-title">{approvalPanelTitle}</h3>
+                                    <h3 className="panel-title">Approve Interpretation</h3>
                                 </div>
                                 <div className="panel-body">
                                     <ClassificationApproval
@@ -598,6 +622,16 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                         updateSnapshotList={this.props.updateSnapshotList}
                                         updateProvisionalObj={this.props.updateProvisionalObj}
                                     />
+                                </div>
+                            </div>
+                            : null}
+                        {sortedSnapshotList.length ?
+                            <div className="panel panel-info snapshot-list">
+                                <div className="panel-heading">
+                                    <h3 className="panel-title">Saved Provisonal and Approved Interpretation(s)</h3>
+                                </div>
+                                <div className="panel-body">
+                                    <CurationSnapshots snapshots={sortedSnapshotList} />
                                 </div>
                             </div>
                             : null}
