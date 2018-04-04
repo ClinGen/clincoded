@@ -59,6 +59,36 @@ class CurationSnapshots extends Component {
         }
     }
 
+    renderProvisionalSnapshotStatusIcon(index) {
+        if (index.toString() === "0") {
+            return <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>;
+        } else if (index.toString() === "1") {
+            if (this.props.snapshots[0].approvalStatus === 'Approved') {
+                return <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>;
+            } else {
+                return <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>;
+            }
+        } else {
+            return <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>;
+        }
+    }
+
+    renderProvisionalSnapshotViewSummaryBtn(index) {
+        let buttonClass;
+        if (index.toString() === "0") {
+            buttonClass = 'btn-primary';
+        } else if (index.toString() === "1") {
+            if (this.props.snapshots[0].approvalStatus === 'Approved') {
+                buttonClass = 'btn-primary';
+            } else {
+                buttonClass = 'btn-default';
+            }
+        } else {
+            buttonClass = 'btn-default';
+        }
+        return buttonClass;
+    }
+
     /**
      * Method to render snapshots in table rows
      * @param {object} snapshot - A saved copy of a provisioned/approved classification and its parent GDM/Interpretation
@@ -111,12 +141,8 @@ class CurationSnapshots extends Component {
                                     </dl>
                                 </td>
                                 <td className="approval-snapshot-buttons">
-                                    {index.toString() === "0" || index.toString() === "1" ?
-                                        <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>
-                                        :
-                                        <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>
-                                    }
-                                    <Input type="button" inputClassName={buttonClass} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                    {this.renderProvisionalSnapshotStatusIcon(index)}
+                                    <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
                         </tbody>
