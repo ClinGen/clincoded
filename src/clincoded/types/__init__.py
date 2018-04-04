@@ -1864,6 +1864,9 @@ class Snapshot(Item):
     item_type = 'snapshot'
     schema = load_schema('clincoded:schemas/resourceHistory.json')
     embedded = [
+        'primary',
+        'primary.submitted_by',
+        'primary.modified_by',
         'submitted_by',
         'modified_by'
     ]
