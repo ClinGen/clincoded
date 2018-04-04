@@ -243,6 +243,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
         const affiliationApprovers = this.state.affiliationApprovers;
+        const interpretation = this.props.interpretation;
 
         return (
             <div className="final-approval-panel-content">
@@ -294,10 +295,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 </div>
                             </div>
                             <div className="col-md-12 alert alert-warning approval-preview-note">
-                                <i className="icon icon-exclamation-circle"></i> This is a Preview; you must Submit.
-                                {this.props.interpretation && Object.keys(this.props.interpretation).length ?
-                                    <strong>Approving an Interpretation does not submit it to ClinVar.</strong>
-                                    : null}
+                                <i className="icon icon-exclamation-circle"></i> This is a Preview only; you must still Submit to save this
+                                {interpretation && Object.keys(interpretation).length ? 'Interpretation' : 'Classification'} as Approval.
+                                {interpretation && Object.keys(interpretation).length ? <strong>Approving an Interpretation does not submit it to ClinVar.</strong> : null}
                             </div>
                         </div>
                         :
