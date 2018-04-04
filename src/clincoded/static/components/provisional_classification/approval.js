@@ -25,7 +25,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         classificationStatus: PropTypes.string,
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
-        updateProvisionalObj: PropTypes.func
+        updateProvisionalObj: PropTypes.func,
+        snapshots: PropTypes.array
     },
 
     getInitialState() {
@@ -152,6 +153,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }
         }
 
+        let provisionalSnapshots = this.props.snapshots && this.props.snapshots.length ? this.props.snapshots.filter(snapshot => snapshot.approvalStatus === 'Provisioned') : [];
+
         if (this.props.gdm && Object.keys(this.props.gdm).length) {
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
@@ -176,7 +179,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         approvalStatus: 'Approved',
                         resource: result,
                         resourceParent: newGdm,
-                        associatedSnapshot: this.state.provisionalSnapshots && this.state.provisionalSnapshots[0],
+                        associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0] : undefined,
                         primary: result['@id']
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
@@ -213,7 +216,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         approvalStatus: 'Approved',
                         resource: result,
                         resourceParent: newInterpretation,
-                        associatedSnapshot: this.state.provisionalSnapshots && this.state.provisionalSnapshots[0],
+                        associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0] : undefined,
                         primary: result['@id']
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
