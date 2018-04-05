@@ -448,14 +448,9 @@ export function evalFormSectionWrapper(noteContent, dropdownContent, explanation
             <div className="col-sm-4 pad-top">
                 {explanationContent}
             </div>
-
             <div className={"clear" + (divider ? " divider" : "")}></div>
-            
         </div>
     );
-
-    
-
 }
 
 // wrapper for rendering the note section of eval form group. criteriaList should be an array of criteria codes being handled in the section.

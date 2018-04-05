@@ -957,7 +957,6 @@ function criteriaMissense1() {
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
                 true
-
             )}
             {vciFormHelper.evalFormSectionWrapper.call(this,
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
