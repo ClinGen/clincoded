@@ -895,9 +895,10 @@ const ProvisionalClassification = createReactClass({
                                 <div className="provisional-approval-content-wrapper">
                                     <div className="container">
                                         <p className="alert alert-info">
-                                            <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once you have saved it as
-                                            Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Classification, archiving the current one, with
-                                            access to its Classification Matrix and Evidence Summary.
+                                            <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once saved as Provisional, the saved Provisional
+                                            Classification may not be edited, but it will always be viewable and can be saved as Approved if their are no further changes required. If changes need to be made, existing
+                                            evidence can be edited and/or new evidence added to the Gene:Disease Record at any time and a new current Provisional Classification be made based on those changes. Note: saving
+                                            a Classification does not prevent existing evidence from being edited or scored and archived Provisional Classifications are always viewable).
                                         </p>
                                     </div>
                                     <div className={this.state.classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
@@ -919,22 +920,31 @@ const ProvisionalClassification = createReactClass({
                                 </div>
                                 : null}
                             {provisional && provisional.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
-                                <div className="container approval-process final-approval">
-                                    <PanelGroup>
-                                        <Panel title="Approve Classification" panelClassName="panel-data" open>
-                                            <ClassificationApproval
-                                                session={session}
-                                                gdm={gdm}
-                                                classification={currentClassification}
-                                                classificationStatus={this.state.classificationStatus}
-                                                provisional={provisional}
-                                                affiliation={this.props.affiliation}
-                                                updateSnapshotList={this.updateSnapshotList}
-                                                updateProvisionalObj={this.updateProvisionalObj}
-                                                snapshots={sortedSnapshotList}
-                                            />
-                                        </Panel>
-                                    </PanelGroup>
+                                <div className="final-approval-content-wrapper">    
+                                    <div className="container">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save the current (<i className="icon icon-flag"></i>) Provisional Classification as an Approved Classification
+                                            when ready to do so by using the form below, or return at a later date and use the "Approved this Saved Provisional" button. Alternatively, you continue
+                                            to edit/alter the existing evidence but you will need to create a new Provisional Classification for Approval.
+                                        </p>
+                                    </div>
+                                    <div className="container approval-process final-approval">
+                                        <PanelGroup>
+                                            <Panel title="Approve Classification" panelClassName="panel-data" open>
+                                                <ClassificationApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={this.state.classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                    snapshots={sortedSnapshotList}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
                                 </div>
                                 : null}
                             {sortedSnapshotList.length ?
