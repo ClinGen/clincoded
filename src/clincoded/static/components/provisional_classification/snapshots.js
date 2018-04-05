@@ -1,7 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
@@ -12,29 +11,6 @@ import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/momen
 class CurationSnapshots extends Component {
     constructor(props) {
         super(props);
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        // Finds all hgvs terms in <li> and <td> nodes
-        // Then sets 'title' and 'class' attributes if text overflows
-        let provisionalList = document.querySelectorAll('li.snapshot-item[data-status="Provisioned"]');
-        let approvalList = document.querySelectorAll('li.snapshot-item[data-status="Approved"]');
-        let provisionalSnapshotNodes = Array.from(provisionalList);
-        let approvalSnapshotNodes = Array.from(approvalList);
-        if (approvalSnapshotNodes && approvalSnapshotNodes.length) {
-            approvalSnapshotNodes.forEach(approval => {
-                let label = document.createElement('LABEL');
-                approval.appendChild(label);
-
-                if (approval.getAttribute('data-associated').length) {
-                    for (let provisional of provisionalSnapshotNodes) {
-                        if (provisional.getAttribute('data-key') === approval.getAttribute('data-associated')) {
-                            provisional.appendChild(label);
-                        }
-                    }
-                }
-            });
-        }
     }
 
     viewSnapshotSummary(snapshotId, type, e) {
@@ -93,7 +69,7 @@ class CurationSnapshots extends Component {
         let gdm = snapshot.resourceParent;
         let pathname = window.location.pathname;
         if (index.toString() === "0" && pathname.indexOf('provisional-curation') > -1) {
-            return <span className="approve-provisional-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>Approve this Saved Provisional</a> ]</span>;
+            return <a className="abtn btn-primary pprove-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + gdm.uuid}>Approve this Saved Provisional</a>;
         }
     }
 
