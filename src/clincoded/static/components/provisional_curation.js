@@ -1108,8 +1108,9 @@ var ProvisionalCuration = createReactClass({
                                                 <div>
                                                     {Object.keys(provisional).length ?
                                                         <p className="alert alert-info">
-                                                            <i className="icon icon-info-circle"></i> Click Save to save the Calculated Classification (highlighted in blue) without modification, or modify the
-                                                            Classification value in the pull-down and hit Save. You may also choose to mark your Classification as Provisional.                                                      
+                                                            <i className="icon icon-info-circle"></i> Click Save to save the Calculated Classification (highlighted in blue) without modification, or modify
+                                                            the Classification value in the pull-down and hit Save. Once it is saved, you will have the opportunity to edit the saved Classification, view the
+                                                            Evidence Summary for the saved Classification, and save it as Provisional.                                                      
                                                         </p>
                                                         :
                                                         <p className="alert alert-info">
