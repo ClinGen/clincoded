@@ -164,7 +164,7 @@ class CurationSnapshots extends Component {
                                         {this.renderClassificationStatusTag(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-review-date">
-                                        <dt><span>Date reviewed:</span></dt>
+                                        <dt><span>Date approved:</span></dt>
                                         <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
