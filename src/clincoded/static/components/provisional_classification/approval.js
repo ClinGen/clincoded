@@ -280,7 +280,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     <div className="approval-review-date">
                                         <dl className="inline-dl clearfix preview-approval-review-date">
-                                            <dt><span>Date reviewed:</span></dt>
+                                            <dt><span>Date approved:</span></dt>
                                             <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
                                         </dl>
                                     </div>
@@ -341,7 +341,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 <div className="col-xs-12 col-sm-3">
                                     <div className="approval-review-date">
                                         <div className="form-group">
-                                            <label className="col-sm-5 control-label">Date reviewed:</label>
+                                            <label className="col-sm-5 control-label">Date approved:</label>
                                             <div className="col-sm-7">
                                                 <DayPickerInput
                                                     value={approvalReviewDate}
