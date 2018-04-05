@@ -441,7 +441,7 @@ export function evalFormSectionWrapper(noteContent, dropdownContent, explanation
                 {dropdownContent}
                 {geneNote ? 
                 <div className="bs-callout-info">
-                    <p className="exac-note">ExAC Constraint Scores displayed on the Gene-centric tab</p>
+                    <p className="exac-note">Note: ExAC Constraint Scores displayed on the Gene-centric tab</p>
                 </div>
                 : null}
             </div>

@@ -1147,7 +1147,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             </div>
                         </div>
                             <br/>
-                            <p className="exac-pop-note">ExAC Constraint Scores displayed on the Gene-centric tab</p>
+                            <p className="exac-pop-note">Note: ExAC Constraint Scores displayed on the Gene-centric tab</p>
                     </div>
                     <div className="panel panel-info datasource-gnomAD">
                         <div className="panel-heading">

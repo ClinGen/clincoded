@@ -233,7 +233,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 break;
             }
         }
-
     },
 
     /**
