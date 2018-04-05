@@ -197,6 +197,31 @@ const ProvisionalClassification = createReactClass({
         setTimeout(this.scrollElementIntoView, 500);
     },
 
+    // FIXME: This method is not working as expected in the resulted behavior
+    // Need to revisit in the next release
+    highlightMatchingSnapshots() {
+        // Color code each pair of Approval/Provisional snapshots
+        let provisionalList = document.querySelectorAll('li.snapshot-item[data-status="Provisioned"]');
+        let approvalList = document.querySelectorAll('li.snapshot-item[data-status="Approved"]');
+        let provisionalSnapshotNodes = Array.from(provisionalList);
+        let approvalSnapshotNodes = Array.from(approvalList);
+        if (approvalSnapshotNodes && approvalSnapshotNodes.length) {
+            approvalSnapshotNodes.forEach(approval => {
+                let label = document.createElement('LABEL');
+                approval.appendChild(label);
+
+                if (approval.getAttribute('data-associated').length) {
+                    let matchingProvisional = provisionalSnapshotNodes.filter(provisional => {
+                        return provisional.getAttribute('data-key') === approval.getAttribute('data-associated');
+                    });
+                    if (matchingProvisional && matchingProvisional.length) {
+                        matchingProvisional[0].appendChild(label);
+                    }
+                }
+            });
+        }
+    },
+
     /**
      * Method to show the saved classification data in viewport
      */
