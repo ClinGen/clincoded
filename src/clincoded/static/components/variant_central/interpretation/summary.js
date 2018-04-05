@@ -49,7 +49,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             classificationStatus: this.props.classificationStatus,
             classificationSnapshots: this.props.classificationSnapshots,
             isClassificationViewOnly: false,
-            shouldProvisionClassification: true
+            shouldProvisionClassification: false,
+            isClassificationSaved: false
         };
     },
 
@@ -97,7 +98,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             evidenceSummary: nextProps.evidenceSummary
         }, () => {
             const interpretation = this.state.interpretation;
-            this.handleShouldProvisionClassificaton(interpretation);
+            // this.handleShouldProvisionClassificaton(interpretation);
             if (!this.state.isClassificationViewOnly) {
                 if (interpretation && interpretation.evaluations && interpretation.evaluations.length) {
                     if (!this.state.provisionalPathogenicity) {
@@ -118,7 +119,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     },
 
     componentWillUnmount() {
-        this.setState({isClassificationViewOnly: false});
+        this.setState({
+            isClassificationViewOnly: false,
+            shouldProvisionClassification: false,
+            isClassificationSaved: false
+        });
     },
 
     /**
@@ -255,7 +260,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
      * Method to handle editing interpretation classification form
      */
     handleEditClassification() {
-        this.setState({isClassificationViewOnly: false});
+        this.setState({
+            isClassificationViewOnly: false,
+            shouldProvisionClassification: false,
+            isClassificationSaved: false
+        });
     },
 
     submitForm(e) {
@@ -297,9 +306,12 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     this.setState({
                         submitBusy: false,
                         isClassificationViewOnly: true,
+                        isClassificationSaved: true,
                         autoClassification: result['@graph'][0]['autoClassification'],
                         modifiedPathogenicity: result['@graph'][0]['alteredClassification']
                     });
+                    // Evaluate the pathognicity/disease criteria
+                    this.handleShouldProvisionClassificaton(this.state.interpretation);
                     let provisionalObjUuid = result['@graph'][0]['@id'];
                     if (!('provisional_variant' in flatInterpretationObj)) {
                         flatInterpretationObj.provisional_variant = [provisionalObjUuid];
@@ -366,10 +378,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                         this.setState({
                             submitBusy: false,
                             isClassificationViewOnly: true,
+                            isClassificationSaved: true,
                             classificationStatus: response['@graph'][0]['classificationStatus'],
                             autoClassification: response['@graph'][0]['autoClassification'],
                             modifiedPathogenicity: response['@graph'][0]['alteredClassification']
                         });
+                        // Evaluate the pathognicity/disease criteria
+                        this.handleShouldProvisionClassificaton(this.state.interpretation);
                         this.props.updateProvisionalObj(response['@graph'][0]['@id']);
                     }).catch(err => {
                         this.setState({submitBusy: false});
@@ -447,7 +462,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         // Then we pull the updated value from either REST post or put results
         let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
         let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
-        let shouldProvisionClassification = this.state.shouldProvisionClassification;
+        const shouldProvisionClassification = this.state.shouldProvisionClassification;
+        const isClassificationSaved = this.state.isClassificationSaved;
 
         return (
             <div className="container evaluation-summary">
@@ -565,9 +581,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 </Form>
                             </div>
                         </div>
-                        {provisionalVariant ?
+                        {provisionalVariant && this.state.classificationStatus === 'In progress' && isClassificationSaved ?
                             <div className="provisional-approval-content-wrapper">
-                                {this.state.classificationStatus === 'In progress' && shouldProvisionClassification ?
+                                {shouldProvisionClassification ?
                                     <div>
                                         <div className="provisional-interpretation-note">
                                             <p className="alert alert-info">
@@ -590,20 +606,18 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     affiliation={this.props.affiliation}
                                                     updateSnapshotList={this.props.updateSnapshotList}
                                                     updateProvisionalObj={this.props.updateProvisionalObj}
-                                                    shouldProvisionClassification={shouldProvisionClassification}
                                                 />
                                             </div>
                                         </div>
                                     </div>
-                                    : null}
-                                {this.state.classificationStatus === 'In progress' && !shouldProvisionClassification ?
+                                    :
                                     <div className="provisional-interpretation-note">
                                         <p className="alert alert-warning">
                                             <i className="icon icon-exclamation-circle"></i> The option to save an Interpretation as Provisional will not appear when the saved calculated or modified value
                                             is "Likely Pathogenic" or "Pathogenic" and there is no associated disease.
                                         </p>
                                     </div>
-                                    : null}
+                                }
                             </div>
                             : null}
                         {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
