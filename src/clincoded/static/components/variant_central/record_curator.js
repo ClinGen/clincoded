@@ -233,7 +233,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                 </span>
                                                 <span className="no-broken-item">
                                                     <i>{myInterpretation.provisional_variant && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                        <span>:&nbsp;{myInterpretation.provisional_variant[0].alteredClassification},&nbsp;</span>  : null}</i>
+                                                        <span>{myInterpretation.provisional_variant[0].alteredClassification},&nbsp;</span>  : null}</i>
                                                 </span>
                                                 <span className="no-broken-item">
                                                     last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
@@ -277,7 +277,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                     </span>
                                                     <span className="no-broken-item">
                                                         <i>{interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
-                                                            <span>:&nbsp;{interpretation.provisional_variant[0].alteredClassification},&nbsp;</span> : null}</i>
+                                                            <span>{interpretation.provisional_variant[0].alteredClassification},&nbsp;</span> : null}</i>
                                                     </span>
                                                     last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
                                                     {interpretation.provisional_variant ? self.renderClassificationHeader(interpretation.provisional_variant) : null}
