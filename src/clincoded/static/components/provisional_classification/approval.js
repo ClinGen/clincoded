@@ -93,7 +93,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
      * Method to handle previewing classificaiton approval form
      */
     handlePreviewApproval() {
-        let approver = this.approverInput ? this.approverInput.getValue() : this.props.session.user_properties.title;
+        const affiliation = this.props.affiliation;
+        let approver = this.approverInput ? this.approverInput.getValue() : (affiliation ? getAffiliationName(affiliation.affiliation_id) : this.props.session.user_properties.title);
         let formErr = false;
 
         if (approver && approver !== 'none') {
@@ -264,12 +265,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <dd>{approvalSubmitter ? approvalSubmitter : null}</dd>
                                         </dl>
                                     </div>
-                                    <div className="classification-approver">
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>Approver:</span></dt>
-                                            <dd>{classificationApprover}</dd>
-                                        </dl>
-                                    </div>
+                                    {affiliation && affiliation.length ?
+                                        <div className="classification-approver">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Approver:</span></dt>
+                                                <dd>{classificationApprover}</dd>
+                                            </dl>
+                                        </div>
+                                        : null}
                                 </div>
                                 <div className="col-xs-12 col-sm-3">
                                     <div className="approval-date">
@@ -338,7 +341,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 :
                                                 <dl className="inline-dl clearfix">
                                                     <dt><span>Approver:</span></dt>
-                                                    <dd>{classificationApprover}</dd>
+                                                    <dd>{getAffiliationName(affiliation)}</dd>
                                                 </dl>
                                             }
                                         </div>
