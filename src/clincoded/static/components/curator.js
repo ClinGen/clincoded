@@ -316,7 +316,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     renderViewSnapshotSummaryLink(uuid, status) {
         let url;
         const snapshots = this.state.classificationSnapshots;
-        let matchingSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === status);
+        let matchingSnapshots = snapshots && snapshots.length ? snapshots.filter(snapshot => snapshot.approvalStatus === status) : null;
         const snapshotUuid = matchingSnapshots && matchingSnapshots.length ? matchingSnapshots[0]['@id'].slice(11, -1) : null;
         if (snapshotUuid) {
             url = '/gene-disease-evidence-summary/?snapshot=' + snapshotUuid;
@@ -333,7 +333,8 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
-        let affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation;
+        const snapshots = this.state.classificationSnapshots;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
@@ -394,12 +395,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                 }
             }
 
-            /*
-            let provisionalPage = provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus === 'Approved' ? '/provisional-classification/?gdm=' : '/provisional-curation/?gdm=';
-            let provisionalParam = provisionalClassification.provisionalExist && provisionalClassification.provisional.classificationStatus === 'Approved' ? '' : (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes');
-            let provisionalUrl = provisionalPage + gdm.uuid + provisionalParam;
-            */
-
             return (
                 <div>
                     <div className="curation-data-title">
@@ -454,18 +449,24 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                         {provisionalClassification.provisional.classificationStatus === 'Provisional' ?
                                                             <div>
                                                                 <span className="header-classification-item">Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                                                {snapshots && snapshots.length ?
+                                                                    <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                                                    : null}
                                                             </div>
                                                             : null}
                                                         {provisionalClassification.provisional.classificationStatus === 'Approved' ?
                                                             <div>
                                                                 <div>
                                                                     <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                                                    {snapshots && snapshots.length ?
+                                                                        <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                                                        : null}
                                                                 </div>
                                                                 <div>
                                                                     <span className="header-classification-item">Last Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Provisioned')} target="_blank">View Current Provisional</a> ]</span>
+                                                                    {snapshots && snapshots.length ?
+                                                                        <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Provisioned')} target="_blank">View Current Provisional</a> ]</span>
+                                                                        : null}
                                                                 </div>
                                                             </div>
                                                             : null}
