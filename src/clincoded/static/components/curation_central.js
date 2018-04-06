@@ -174,6 +174,14 @@ var CurationCentral = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
+    sortListbyColName(snapshots, colName) {
+        let sortedList = [];
+        if (snapshots.length) {
+            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
+        }
+        return sortedList;
+    },
+
     render: function() {
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
@@ -186,11 +194,12 @@ var CurationCentral = createReactClass({
         var currArticle = annotation ? annotation.article : null;
 
         let affiliation = this.props.affiliation;
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
 
         return (
             <div>
                 <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} affiliation={affiliation}
-                    context={this.props.context} classificationSnapshots={this.state.classificationSnapshots} />
+                    context={this.props.context} classificationSnapshots={sortedSnapshotList} />
                 <div className="container">
                     <VariantHeader gdm={gdm} pmid={this.state.currPmid} session={session} affiliation={affiliation} />
                     <div className="row curation-content">
