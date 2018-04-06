@@ -2486,7 +2486,7 @@ function flattenProvisional(provisional) {
 
 
 var provisionalVariantSimpleProps = [
-    "autoClassification", "alteredClassification", "reasons", "evidenceSummary", "affiliation", "classificationStatus",
+    "autoClassification", "alteredClassification", "reason", "evidenceSummary", "affiliation", "classificationStatus",
     "approvalSubmitter", "classificationApprover", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
     "provisionalDate", "provisionalComment", "provisionedClassification", "approvedClassification", "publishClassification"
 ];
