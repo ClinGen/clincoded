@@ -1864,3 +1864,4 @@ class Snapshot(Item):
     item_type = 'snapshot'
     schema = load_schema('clincoded:schemas/resourceHistory.json')
     name_key = 'uuid'
+    embedded = ['submitted_by', 'modified_by']
