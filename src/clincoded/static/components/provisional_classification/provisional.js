@@ -74,6 +74,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
      */
     handleCancelProvisional() {
         this.setState({
+            provisionalSubmitter: this.props.provisional && this.props.provisional.provisionalSubmitter ? this.props.provisional.provisionalSubmitter : undefined,
             provisionalReviewDate: this.props.provisional && this.props.provisional.provisionalDate ? this.props.provisional.provisionalDate : undefined,
             provisionalComment: this.props.provisional && this.props.provisional.provisionalComment ? this.props.provisional.provisionalComment : undefined,
             isProvisionalPreview: false
