@@ -179,9 +179,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         resourceType: 'classification',
                         approvalStatus: 'Approved',
                         resource: result,
-                        resourceParent: newGdm,
-                        associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0] : undefined,
-                        primary: result['@id']
+                        resourceParent: JSON.stringify(newGdm),
+                        associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0]['@id'] : undefined
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let approvalSnapshot = response['@graph'][0];
@@ -216,9 +215,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         resourceType: 'interpretation',
                         approvalStatus: 'Approved',
                         resource: result,
-                        resourceParent: newInterpretation,
-                        associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0] : undefined,
-                        primary: result['@id']
+                        resourceParent: JSON.stringify(newInterpretation),
+                        associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0]['@id'] : undefined
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let approvalSnapshot = response['@graph'][0];

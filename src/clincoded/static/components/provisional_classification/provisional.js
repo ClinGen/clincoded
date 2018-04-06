@@ -130,8 +130,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         resourceType: 'classification',
                         approvalStatus: 'Provisioned',
                         resource: result,
-                        resourceParent: newGdm,
-                        primary: result['@id']
+                        resourceParent: JSON.stringify(newGdm)
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
@@ -166,8 +165,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         resourceType: 'interpretation',
                         approvalStatus: 'Provisioned',
                         resource: result,
-                        resourceParent: newInterpretation,
-                        primary: result['@id']
+                        resourceParent: JSON.stringify(newInterpretation)
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
