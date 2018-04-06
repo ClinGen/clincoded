@@ -613,7 +613,7 @@ const ProvisionalClassification = createReactClass({
                     ( gdm ?
                         <div>
                             <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
-                                affiliation={this.props.affiliation} classificationSnapshots={this.state.classificationSnapshots} />
+                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
