@@ -46,22 +46,13 @@
         },
         "resourceParent": {
             "title": "The parent object of the resource item",
-            "description": "Snapshot of the entire parent object of the resource item",
-            "type": "object"
+            "description": "Snapshot of the entire parent object of the resource item in JSON string",
+            "type": "string"
         },
         "associatedSnapshot": {
-            "title": "Associated snapshot object",
+            "title": "Associated snapshot object UUID",
             "description": "Another snapshot that is paired with this one (e.g. approval with its targeted provisional)",
-            "type": "object"
-        },
-        "primary": {
-            "title": "Primary object",
-            "description": "Reference to the primary resource object at the current state",
-            "type": "string",
-            "linkTo": [
-                "provisionalClassification",
-                "provisional_variant"
-            ]
+            "type": "string"
         }
     },
     "columns": {
@@ -79,19 +70,15 @@
         },
         "resourceParent": {
             "title": "The parent object of the resource item",
-            "type": "object"
+            "type": "string"
         },
         "approvalStatus": {
             "title": "Approval Status",
             "type": "string"
         },
-        "primary": {
-            "title": "Primary object information",
-            "type": "object"
-        },
         "associatedSnapshot": {
             "title": "Associated snapshot object",
-            "type": "object"
+            "type": "string"
         },
         "date_created": {
             "title": "Creation Date",
