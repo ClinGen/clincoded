@@ -529,7 +529,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            affiliation={affiliation} session={session}/>
                                     </div>
                                 </div>
                                 : null}
@@ -962,7 +962,8 @@ function criteriaMissense1() {
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                false
+                false,
+                true
             )}
         </div>
     );
