@@ -114,7 +114,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     renderClassificationHeader(classification) {
         return (
             <div className="header-classification">
-                <strong>Status:</strong>
+                <strong>Status:&nbsp;</strong>
                 <span className="classification-status">
                     {classification && classification[0].classificationStatus ?
                         this.renderClassificationStatusTag(classification[0].classificationStatus)
@@ -142,6 +142,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
             : (myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ? myInterpretation.provisional_variant[0].autoClassification : 'None');
         let modifiedPathogenicity = myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length && myInterpretation.provisional_variant[0].alteredClassification ?
             myInterpretation.provisional_variant[0].alteredClassification : 'None';
+        let self = this;
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -223,10 +224,16 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                     :
                                                     <span>, </span>
                                                 }
-                                                <span className="no-broken-item">{myInterpretation.affiliation ? getAffiliationName(myInterpretation.affiliation) : myInterpretation.submitted_by.title},</span>&nbsp;
+                                                <span className="no-broken-item">
+                                                    {myInterpretation.affiliation ?
+                                                        <span><span>{getAffiliationName(myInterpretation.affiliation)}</span>,&nbsp;</span>
+                                                        :
+                                                        <span><span>{myInterpretation.submitted_by.title}</span>,&nbsp;</span>
+                                                    }
+                                                </span>
                                                 <span className="no-broken-item">
                                                     <i>{myInterpretation.provisional_variant && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                        ': ' + myInterpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
+                                                        <span>:&nbsp;{myInterpretation.provisional_variant[0].alteredClassification},&nbsp;</span>  : null}</i>
                                                 </span>
                                                 <span className="no-broken-item">
                                                     last edited: {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
@@ -256,24 +263,24 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                                 :
                                                                 <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
                                                             }
-                                                        , </span>
+                                                            ,&nbsp;
+                                                        </span>
                                                         :
-                                                        ', '
+                                                        <span>, </span>
                                                     }
                                                     <span className="no-broken-item">
                                                         {interpretation.affiliation ?
-                                                            <span>{getAffiliationName(interpretation.affiliation)}</span>
+                                                            <span><span>{getAffiliationName(interpretation.affiliation)}</span>,&nbsp;</span>
                                                             :
-                                                            <a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>
+                                                            <span><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,&nbsp;</span>
                                                         }
                                                     </span>
-                                                    <span>,&nbsp;</span>
                                                     <span className="no-broken-item">
                                                         <i>{interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
-                                                            ': ' + interpretation.provisional_variant[0].alteredClassification : null},&nbsp;</i>
+                                                            <span>:&nbsp;{interpretation.provisional_variant[0].alteredClassification},&nbsp;</span> : null}</i>
                                                     </span>
                                                     last edited: {moment(interpretation.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                    {interpretation.provisional_variant ? this.renderClassificationHeader(interpretation.provisional_variant) : null}
+                                                    {interpretation.provisional_variant ? self.renderClassificationHeader(interpretation.provisional_variant) : null}
                                                 </dd>
                                             </dl>
                                         );
