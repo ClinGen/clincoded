@@ -840,7 +840,7 @@ var ProvisionalCuration = createReactClass({
                     ( gdm ?
                         <div>
                             <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
-                                affiliation={this.props.affiliation} classificationSnapshots={this.state.classificationSnapshots} />
+                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <PanelGroup accordion>
