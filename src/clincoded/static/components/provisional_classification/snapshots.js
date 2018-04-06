@@ -66,7 +66,7 @@ class CurationSnapshots extends Component {
     }
 
     renderProvisionalSnapshotApprovalLink(snapshot, index) {
-        let gdm = snapshot.resourceParent;
+        let gdm = JSON.parse(snapshot.resourceParent);
         let pathname = window.location.pathname;
         if (index.toString() === "0" && pathname.indexOf('provisional-curation') > -1) {
             return <a className="abtn btn-primary pprove-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + gdm.uuid}>Approve this Saved Provisional</a>;
@@ -80,6 +80,7 @@ class CurationSnapshots extends Component {
     renderSnapshot(snapshot, index) {
         const type = snapshot.resourceType;
         let buttonClass = index.toString() === "0" || index.toString() === "1" ? 'btn-primary' : 'btn-default';
+        let resourceParent = JSON.parse(snapshot.resourceParent);
 
         if (snapshot.approvalStatus === 'Provisioned') {
             return (
@@ -113,11 +114,11 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-disease">
                                         <dt><span>Disease:</span></dt>
-                                        <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
+                                        <dd className="disease-term">{resourceParent && resourceParent.disease && resourceParent.disease.term ? resourceParent.disease.term : 'None'}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-modeInheritance">
                                         <dt><span>Mode of Inheritance:</span></dt>
-                                        <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
+                                        <dd className="modeInheritance">{renderSelectedModeInheritance(resourceParent)}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-comment">
                                         <dt><span>Additional comments:</span></dt>
@@ -126,7 +127,7 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderProvisionalSnapshotStatusIcon(index)}
-                                    {snapshot.resourceParent && snapshot.resourceParent['@type'][0] === 'gdm' ? this.renderProvisionalSnapshotApprovalLink(snapshot, index) : null}
+                                    {resourceParent && resourceParent['@type'][0] === 'gdm' ? this.renderProvisionalSnapshotApprovalLink(snapshot, index) : null}
                                     <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
@@ -137,7 +138,7 @@ class CurationSnapshots extends Component {
         } else if (snapshot.approvalStatus === 'Approved') {
             return (
                 <li className="snapshot-item list-group-item" key={snapshot['@id']} data-key={snapshot['@id']} data-status={snapshot.approvalStatus} data-index={index}
-                    data-associated={snapshot['associatedSnapshot'] ? snapshot['associatedSnapshot']['@id'] : null}>
+                    data-associated={snapshot['associatedSnapshot'] ? snapshot['associatedSnapshot'] : null}>
                     <table>
                         <tbody>
                             <tr>
@@ -173,11 +174,11 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-disease">
                                         <dt><span>Disease:</span></dt>
-                                        <dd className="disease-term">{snapshot.resourceParent && snapshot.resourceParent.disease && snapshot.resourceParent.disease.term ? snapshot.resourceParent.disease.term : 'None'}</dd>
+                                        <dd className="disease-term">{resourceParent && resourceParent.disease && resourceParent.disease.term ? resourceParent.disease.term : 'None'}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-modeInheritance">
                                         <dt><span>Mode of Inheritance:</span></dt>
-                                        <dd className="modeInheritance">{renderSelectedModeInheritance(snapshot.resourceParent)}</dd>
+                                        <dd className="modeInheritance">{renderSelectedModeInheritance(resourceParent)}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-comment">
                                         <dt><span>Additional comments:</span></dt>
