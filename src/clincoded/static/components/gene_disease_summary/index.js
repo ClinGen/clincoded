@@ -602,7 +602,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     {!this.state.preview ?
                         <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
                         : <div className="spacer">&nbsp;</div>}
-                    {provisional && Object.keys(provisional).length ?
+                    {!this.state.preview && provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
                         :null}
                     <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
