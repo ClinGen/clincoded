@@ -621,22 +621,30 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                             </div>
                             : null}
                         {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
-                            <div className="panel panel-warning approval-process final-approval">
-                                <div className="panel-heading">
-                                    <h3 className="panel-title">Approve Interpretation</h3>
+                            <div className="final-approval-content-wrapper"> 
+                                <div className="final-approval-note">
+                                    <p className="alert alert-info">
+                                        <i className="icon icon-info-circle"></i> When ready, you may save this Provisional Interpretation as Approved. Once you have saved it as Approved it will become
+                                        uneditable, but you will be able to save a new current Approved Interpretation, thus archiving this current one and retaining access to its Evaluation Summary.
+                                    </p>
                                 </div>
-                                <div className="panel-body">
-                                    <ClassificationApproval
-                                        session={this.props.session}
-                                        interpretation={interpretation}
-                                        classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                        classificationStatus={this.state.classificationStatus}
-                                        provisional={provisionalVariant}
-                                        affiliation={this.props.affiliation}
-                                        updateSnapshotList={this.props.updateSnapshotList}
-                                        updateProvisionalObj={this.props.updateProvisionalObj}
-                                        snapshots={sortedSnapshotList}
-                                    />
+                                <div className="panel panel-warning approval-process final-approval">
+                                    <div className="panel-heading">
+                                        <h3 className="panel-title">Approve Interpretation</h3>
+                                    </div>
+                                    <div className="panel-body">
+                                        <ClassificationApproval
+                                            session={this.props.session}
+                                            interpretation={interpretation}
+                                            classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                            classificationStatus={this.state.classificationStatus}
+                                            provisional={provisionalVariant}
+                                            affiliation={this.props.affiliation}
+                                            updateSnapshotList={this.props.updateSnapshotList}
+                                            updateProvisionalObj={this.props.updateProvisionalObj}
+                                            snapshots={sortedSnapshotList}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             : null}
