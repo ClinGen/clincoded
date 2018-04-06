@@ -897,8 +897,8 @@ const ProvisionalClassification = createReactClass({
                                         <p className="alert alert-info">
                                             <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once saved as Provisional, the saved Provisional
                                             Classification may not be edited, but it will always be viewable and can be saved as Approved if their are no further changes required. If changes need to be made, existing
-                                            evidence can be edited and/or new evidence added to the Gene:Disease Record at any time and a new current Provisional Classification be made based on those changes. Note: saving
-                                            a Classification does not prevent existing evidence from being edited or scored and archived Provisional Classifications are always viewable).
+                                            evidence can be edited and/or new evidence added to the Gene:Disease Record at any time and a new current Provisional Classification made based on those changes. <em>Note: saving
+                                            a Classification does not prevent existing evidence from being edited or scored and archived Provisional Classifications are always viewable</em>.
                                         </p>
                                     </div>
                                     <div className={this.state.classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
