@@ -313,6 +313,17 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         return otherClassifications;
     },
 
+    renderViewSnapshotSummaryLink(uuid, status) {
+        let url;
+        const snapshots = this.state.classificationSnapshots;
+        let matchingSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === status);
+        const snapshotUuid = matchingSnapshots && matchingSnapshots.length ? matchingSnapshots[0]['@id'].slice(11, -1) : null;
+        if (snapshotUuid) {
+            url = '/gene-disease-evidence-summary/?snapshot=' + snapshotUuid;
+        }
+        return url;
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var disease = gdm && gdm.disease;
@@ -450,11 +461,11 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                             <div>
                                                                 <div>
                                                                     <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Approved</a> ]</span>
+                                                                    <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Approved')} target="_blank">View Current Approved</a> ]</span>
                                                                 </div>
                                                                 <div>
                                                                     <span className="header-classification-item">Last Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View Current Provisional</a> ]</span>
+                                                                    <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Provisioned')} target="_blank">View Current Provisional</a> ]</span>
                                                                 </div>
                                                             </div>
                                                             : null}
