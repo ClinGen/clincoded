@@ -189,6 +189,14 @@
 /**
  * Final approval panel UI styles
  */
+.final-approval-content-wrapper {
+    .alert {
+        .icon-flag {
+            color: #82c91e;
+        }
+    }
+}
+
 .final-approval {
     .approval-form-content-wrapper {
         border: none;
@@ -217,6 +225,10 @@
                     width: auto;
                 }
             }
+        }
+
+        .approval-submitter-placeholder-text {
+            color: #ccc;
         }
     }
 
