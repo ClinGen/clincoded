@@ -313,7 +313,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div className="approval-submitter">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Entered by:</span></dt>
-                                            <dd>{approvalSubmitter ? approvalSubmitter : null}</dd>
+                                            <dd>
+                                                {approvalSubmitter ?
+                                                    approvalSubmitter
+                                                    :
+                                                    <span className="approval-submitter-placeholder-text">Current curator's name will be entered upon submission</span>
+                                                }
+                                            </dd>
                                         </dl>
                                     </div>
                                     {affiliation && affiliation.length ?
