@@ -46,7 +46,7 @@ const VariantInterpretationSummary = createReactClass({
             stateObj.user = this.props.session.user_properties.uuid;
             // Just to be sure that the response is a snapshot object
             if (data['@type'][0] === 'snapshot') {
-                stateObj.interpretation = data.resourceParent;
+                stateObj.interpretation = JSON.parse(data.resourceParent);
                 stateObj.classification = data.resource;
             }
             this.setState(stateObj);

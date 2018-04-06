@@ -68,7 +68,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             if (data['@type'][0] === 'gdm') {
                 stateObj.gdm = data;
             } else if (data['@type'][0] === 'snapshot') {
-                stateObj.gdm = data.resourceParent;
+                stateObj.gdm = JSON.parse(data.resourceParent);
             }
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
