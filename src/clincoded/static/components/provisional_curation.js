@@ -1114,10 +1114,11 @@ var ProvisionalCuration = createReactClass({
                                                         </p>
                                                         :
                                                         <p className="alert alert-info">
-                                                            <i className="icon icon-info-circle"></i> The above Classification Matrix was calculated based on the current evidence and accompanying scores saved
-                                                            in the database when you clicked the <strong>View Classification Matrix</strong> button to navigate to this page.<br /><br />
-                                                            To save a new Classification based on this current evidence, view the saved Evidence Summary, and be presented with the option to save a Provisional
-                                                            Classification (and then Approved), please fill in the fields above and click <strong>Save</strong>. Otherwise, click <strong>Cancel</strong>.
+                                                            <i className="icon icon-info-circle"></i> The Classification Matrix at the top of the page was calculated based on the current evidence and accompanying
+                                                            scores saved in the database when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification, optionally
+                                                            modifying the Classification and/or adding an Evidence Summary, please fill in any desired fields above and click "Save". Otherwise, click "Cancel".<br /><br />
+                                                            After saving, you will be able to view the Evidence Summary for the saved Classification, and be presented with the option to save it as
+                                                            a <strong>Provisional</strong> Classification (and then <strong>Approved</strong>).
                                                         </p>
                                                     }
                                                 </div>
