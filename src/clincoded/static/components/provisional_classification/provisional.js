@@ -237,8 +237,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                                 </div>
                             </div>
                             <div className="col-md-12 alert alert-warning provisional-preview-note">
-                                <i className="icon icon-exclamation-circle"></i> This is a Preview only; you must still Submit to save this
-                                {interpretation && Object.keys(interpretation).length ? 'Interpretation' : 'Classification'} as Provisional.
+                                <i className="icon icon-exclamation-circle"></i> This is a Preview only; you must still Submit to save
+                                this {interpretation && Object.keys(interpretation).length ? 'Interpretation' : 'Classification'} as Provisional.
                             </div>
                         </div>
                         :
@@ -254,7 +254,13 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                                     <div className="provisional-submitter">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Provisional Classification entered by:</span></dt>
-                                            <dd>{provisionalSubmitter ? provisionalSubmitter : null}</dd>
+                                            <dd>
+                                                {provisionalSubmitter ?
+                                                    provisionalSubmitter
+                                                    :
+                                                    <span className="provisional-submitter-placeholder-text">Current curator's name will be entered upon submission</span>
+                                                }
+                                            </dd>
                                         </dl>
                                     </div>
                                 </div>
