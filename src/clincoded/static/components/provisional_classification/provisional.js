@@ -24,7 +24,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         classificationStatus: PropTypes.string,
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
-        updateProvisionalObj: PropTypes.func
+        updateProvisionalObj: PropTypes.func,
+        approveProvisional: PropTypes.func
     },
 
     getInitialState() {
@@ -149,6 +150,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             return this.putRestData('/provisional-variant/' + this.props.provisional.uuid, newProvisional).then(data => {
                 let provisionalClassification = data['@graph'][0];
                 this.props.updateProvisionalObj(provisionalClassification['@id']);
+                this.props.approveProvisional();
                 // Record classification approval history
                 let meta = {
                     provisionalClassification: {
