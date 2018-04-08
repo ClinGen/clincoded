@@ -65,11 +65,17 @@ class CurationSnapshots extends Component {
         return buttonClass;
     }
 
-    renderProvisionalSnapshotApprovalLink(snapshot, index) {
-        let gdm = JSON.parse(snapshot.resourceParent);
+    renderGdmProvisionalSnapshotApprovalLink(gdm, index) {
         let pathname = window.location.pathname;
         if (index.toString() === "0" && pathname.indexOf('provisional-curation') > -1) {
             return <a className="abtn btn-primary pprove-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + gdm.uuid}>Approve this Saved Provisional</a>;
+        }
+    }
+
+    renderInterpretationProvisionalSnapshotApprovalLink(interpretation, index) {
+        let pathname = window.location.pathname;
+        if (index.toString() === "0" && pathname.indexOf('provisional-curation') > -1) {
+            return <a className="abtn btn-primary pprove-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + interpretation.uuid}>Approve this Saved Provisional</a>;
         }
     }
 
@@ -80,7 +86,12 @@ class CurationSnapshots extends Component {
     renderSnapshot(snapshot, index) {
         const type = snapshot.resourceType;
         let buttonClass = index.toString() === "0" || index.toString() === "1" ? 'btn-primary' : 'btn-default';
-        let resourceParent = JSON.parse(snapshot.resourceParent);
+        let resourceParent;
+        if (snapshot.resourceType === 'classification' && snapshot.resourceParent.gdm) {
+            resourceParent = snapshot.resourceParent.gdm;
+        } else if (snapshot.resourceType === 'interpretation' && snapshot.resourceParent.interpretation) {
+            resourceParent = snapshot.resourceParent.interpretation;
+        }
 
         if (snapshot.approvalStatus === 'Provisioned') {
             return (
@@ -127,7 +138,8 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderProvisionalSnapshotStatusIcon(index)}
-                                    {resourceParent && resourceParent['@type'][0] === 'gdm' ? this.renderProvisionalSnapshotApprovalLink(snapshot, index) : null}
+                                    {resourceParent && resourceParent['@type'][0] === 'gdm' ? this.renderGdmProvisionalSnapshotApprovalLink(resourceParent, index) : null}
+                                    {resourceParent && resourceParent['@type'][0] === 'interpretation' ? this.renderInterpretationProvisionalSnapshotApprovalLink(resourceParent, index) : null}
                                     <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
