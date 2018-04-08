@@ -67,8 +67,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             // Just to be sure that the response is a gdm object
             if (data['@type'][0] === 'gdm') {
                 stateObj.gdm = data;
-            } else if (data['@type'][0] === 'snapshot') {
-                stateObj.gdm = JSON.parse(data.resourceParent);
+            } else if (data['@type'][0] === 'snapshot' && data.resourceType && data.resourceType === 'classification') {
+                stateObj.gdm = data.resourceParent.gdm;
             }
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
