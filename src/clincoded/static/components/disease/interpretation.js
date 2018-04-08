@@ -290,8 +290,8 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                             <p>
                                 Warning: This interpretation is saved as "{classification.classificationStatus}." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
                                 or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
-                                <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
-                                - otherwise, deleting the disease will automatically remove the "Provisional" status.
+                                <strong>If you still wish to delete the disease, select "Confirm," then select "View Summary" to update the "Evaluation Summary." </strong>
+                                You may then proceed with saving a new provisional and approved Interpretation due to this change.
                             </p>
                         </div>
                         <div className='modal-footer'>
