@@ -126,12 +126,13 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid, null, true).then(newGdm => {
+                    let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'classification',
                         approvalStatus: 'Provisioned',
                         resource: result,
-                        resourceParent: JSON.stringify(newGdm)
+                        resourceParent: parentSnapshot
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
@@ -161,12 +162,13 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             }).then(result => {
                 // get a fresh copy of the interpretation object
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid, null, true).then(newInterpretation => {
+                    let parentSnapshot = {interpretation: newInterpretation};
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'interpretation',
                         approvalStatus: 'Provisioned',
                         resource: result,
-                        resourceParent: JSON.stringify(newInterpretation)
+                        resourceParent: parentSnapshot
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];

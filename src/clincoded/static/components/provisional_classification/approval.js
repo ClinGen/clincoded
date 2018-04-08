@@ -175,12 +175,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid, null, true).then(newGdm => {
+                    let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'classification',
                         approvalStatus: 'Approved',
                         resource: result,
-                        resourceParent: JSON.stringify(newGdm),
+                        resourceParent: parentSnapshot,
                         associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0]['@id'] : undefined
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
@@ -211,12 +212,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the interpretation object
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid, null, true).then(newInterpretation => {
+                    let parentSnapshot = {interpretation: newInterpretation};
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'interpretation',
                         approvalStatus: 'Approved',
                         resource: result,
-                        resourceParent: JSON.stringify(newInterpretation),
+                        resourceParent: parentSnapshot,
                         associatedSnapshot: provisionalSnapshots && provisionalSnapshots[0] ? provisionalSnapshots[0]['@id'] : undefined
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
