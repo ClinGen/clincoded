@@ -441,7 +441,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
      * Passed to the <Snapshots /> component as a prop
      */
     approveProvisional() {
-        this.setState({shouldApproveClassification: true});
+        this.setState({shouldApproveClassification: true, isClassificationViewOnly: true});
     },
 
     render() {
@@ -497,12 +497,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                 <dt>Modified Pathogenicity:</dt>
                                                 <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
                                             </dl>
-                                            {/*
-                                            <dl className="inline-dl clearfix">
-                                                <dt>Interpretation Status:</dt>
-                                                <dd className="provisional-interpretation-status">{this.renderClassificationStatusTag(provisionalStatus ? provisionalStatus : 'In progress')}</dd>
-                                            </dl>
-                                            */}
                                         </div>
                                         <div className="col-xs-12 col-sm-6">
                                             <dl className="inline-dl clearfix">
