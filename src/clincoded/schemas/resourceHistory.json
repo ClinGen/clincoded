@@ -45,9 +45,21 @@
             "type": "object"
         },
         "resourceParent": {
-            "title": "The parent object of the resource item",
-            "description": "Snapshot of the entire parent object of the resource item in JSON string",
-            "type": "string"
+            "title": "The parent snapshot object of the resource item",
+            "description": "Snapshot of the entire parent object of the resource item",
+            "type": "object",
+            "properties": {
+                "gdm": {
+                    "title": "GDM snapshot",
+                    "description": "Snapshot of the entire GDM parent object of the resource item",
+                    "type": "object"
+                },
+                "interpretation": {
+                    "title": "Interpretation snapshot",
+                    "description": "Snapshot of the entire Interpretation parent object of the resource item",
+                    "type": "object"
+                }
+            }
         },
         "associatedSnapshot": {
             "title": "Associated snapshot object UUID",
@@ -69,8 +81,8 @@
             "type": "object"
         },
         "resourceParent": {
-            "title": "The parent object of the resource item",
-            "type": "string"
+            "title": "Parent object of resource item",
+            "type": "object"
         },
         "approvalStatus": {
             "title": "Approval Status",
