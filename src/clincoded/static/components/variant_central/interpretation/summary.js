@@ -50,6 +50,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             classificationSnapshots: this.props.classificationSnapshots,
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
+            shouldApproveClassification: false,
             isClassificationSaved: false
         };
     },
@@ -122,6 +123,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         this.setState({
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
+            shouldApproveClassification: false,
             isClassificationSaved: false
         });
     },
@@ -263,6 +265,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         this.setState({
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
+            shouldApproveClassification: false,
             isClassificationSaved: false
         });
     },
@@ -433,6 +436,14 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         return sortedList;
     },
 
+    /**
+     * Method to show the Approval form entry panel
+     * Passed to the <Snapshots /> component as a prop
+     */
+    approveProvisional() {
+        this.setState({shouldApproveClassification: true});
+    },
+
     render() {
         let interpretation = this.state.interpretation;
         let evaluations = interpretation ? interpretation.evaluations : null;
@@ -463,6 +474,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
         let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
         const shouldProvisionClassification = this.state.shouldProvisionClassification;
+        const shouldApproveClassification = this.state.shouldApproveClassification;
         const isClassificationSaved = this.state.isClassificationSaved;
 
         return (
@@ -606,6 +618,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     affiliation={this.props.affiliation}
                                                     updateSnapshotList={this.props.updateSnapshotList}
                                                     updateProvisionalObj={this.props.updateProvisionalObj}
+                                                    approveProvisional={this.approveProvisional}
                                                 />
                                             </div>
                                         </div>
@@ -620,7 +633,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 }
                             </div>
                             : null}
-                        {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
+                        {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' && shouldApproveClassification ?
                             <div className="final-approval-content-wrapper"> 
                                 <div className="final-approval-note">
                                     <p className="alert alert-info">
@@ -654,7 +667,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                     <h3 className="panel-title">Saved Provisional and Approved Interpretation(s)</h3>
                                 </div>
                                 <div className="panel-body">
-                                    <CurationSnapshots snapshots={sortedSnapshotList} />
+                                    <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
+                                        shouldApproveClassification={shouldApproveClassification} />
                                 </div>
                             </div>
                             : null}
