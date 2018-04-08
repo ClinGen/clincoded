@@ -335,6 +335,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
 
         const affiliation = this.props.affiliation;
         const snapshots = this.state.classificationSnapshots;
+        const context = this.props.context;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
@@ -449,7 +450,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                         {provisionalClassification.provisional.classificationStatus === 'Provisional' ?
                                                             <div>
                                                                 <span className="header-classification-item">Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                {snapshots && snapshots.length ?
+                                                                {snapshots && snapshots.length && context && context.name === 'curation-central' ?
                                                                     <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
                                                                     : null}
                                                             </div>
@@ -458,13 +459,13 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                             <div>
                                                                 <div>
                                                                     <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    {snapshots && snapshots.length ?
+                                                                    {snapshots && snapshots.length && context && context.name === 'curation-central' ?
                                                                         <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Approved')} target="_blank">View Current Approved</a> ]</span>
                                                                         : null}
                                                                 </div>
                                                                 <div>
                                                                     <span className="header-classification-item">Last Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    {snapshots && snapshots.length ?
+                                                                    {snapshots && snapshots.length && context && context.name === 'curation-central' ?
                                                                         <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Provisioned')} target="_blank">View Current Provisional</a> ]</span>
                                                                         : null}
                                                                 </div>
