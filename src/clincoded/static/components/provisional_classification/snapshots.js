@@ -107,7 +107,7 @@ class CurationSnapshots extends Component {
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-submitter">
-                                        <dt><span>Provisional Classification entered by:</span></dt>
+                                        <dt><span>Provisional {snapshot.resourceType === 'classification'? 'Classification' : 'Interpretation'} entered by:</span></dt>
                                         <dd>{snapshot.resource.provisionalSubmitter}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-date">
@@ -162,7 +162,7 @@ class CurationSnapshots extends Component {
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-submitter">
-                                        <dt><span>Approved Classification entered by:</span></dt>
+                                        <dt><span>Approved {snapshot.resourceType === 'classification'? 'Classification' : 'Interpretation'} entered by:</span></dt>
                                         <dd>{snapshot.resource.approvalSubmitter}</dd>
                                     </dl>
                                     {snapshot.resource && snapshot.resource.classificationApprover ?
