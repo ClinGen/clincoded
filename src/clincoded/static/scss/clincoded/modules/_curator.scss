@@ -912,6 +912,15 @@
                 top: 1px;
             }
         }
+
+        .summary-status {
+            margin-left: 8px;
+
+            .label.label-info {
+                background-color: #917bc4;
+                padding-top: .3em;
+            }
+        }
     }
 
     .provisional-data-left {
