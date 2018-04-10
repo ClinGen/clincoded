@@ -83,7 +83,7 @@ class CurationSnapshots extends Component {
      * Method to render snapshots in table rows
      * @param {object} snapshot - A saved copy of a provisioned/approved classification and its parent GDM/Interpretation
      */
-    renderSnapshot(snapshot, index) {
+    renderSnapshot(snapshot, shouldApproveClassification, classificationStatus, index) {
         const type = snapshot.resourceType;
         let buttonClass = index.toString() === "0" || index.toString() === "1" ? 'btn-primary' : 'btn-default';
         let resourceParent;
@@ -138,8 +138,10 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderProvisionalSnapshotStatusIcon(index)}
-                                    {resourceParent && resourceParent['@type'][0] === 'gdm' ? this.renderGdmProvisionalSnapshotApprovalLink(resourceParent, index) : null}
-                                    {resourceParent && resourceParent['@type'][0] === 'interpretation' && !this.props.shouldApproveClassification ?
+                                    {resourceParent && resourceParent['@type'][0] === 'gdm' && classificationStatus !== 'In progress' ?
+                                        this.renderGdmProvisionalSnapshotApprovalLink(resourceParent, index)
+                                        : null}
+                                    {resourceParent && resourceParent['@type'][0] === 'interpretation' && !shouldApproveClassification && classificationStatus !== 'In progress' ?
                                         this.renderInterpretationProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
                                     <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
@@ -216,12 +218,12 @@ class CurationSnapshots extends Component {
     }
 
     render() {
-        const { snapshots } = this.props;
+        const { snapshots, shouldApproveClassification, classificationStatus } = this.props;
 
         return (
             <div className="snapshot-list panel panel-default">
                 <ul className="list-group">
-                    {snapshots.map((snapshot, i) => this.renderSnapshot(snapshot, i))}
+                    {snapshots.map((snapshot, i) => this.renderSnapshot(snapshot, shouldApproveClassification, classificationStatus, i))}
                 </ul>
             </div>
         );
@@ -231,7 +233,8 @@ class CurationSnapshots extends Component {
 CurationSnapshots.propTypes = {
     snapshots: PropTypes.array,
     approveProvisional: PropTypes.func,
-    shouldApproveClassification: PropTypes.bool
+    shouldApproveClassification: PropTypes.bool,
+    classificationStatus: PropTypes.string
 };
 
 export default CurationSnapshots;
