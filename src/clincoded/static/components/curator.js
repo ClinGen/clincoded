@@ -277,10 +277,12 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                 {context && context.name === 'curation-central' ?
                                     <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
                                     : null}
-                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
-                                    : null}
+                                <div className="new-provisional-status-row">
+                                    <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                    {context && context.name === 'curation-central' ?
+                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                        : null}
+                                </div>
                             </span>
                         );
                     } else {
@@ -312,10 +314,12 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                 {context && context.name === 'curation-central' ?
                                     <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
                                     : null}
-                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
-                                    : null}
+                                <div className="new-provisional-status-row">
+                                    <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                    {context && context.name === 'curation-central' ?
+                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                        : null}
+                                </div>
                             </span>
                         );
                     } else {
@@ -501,39 +505,12 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                         <tr>
                                             <td>
                                                 {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?
-                                                    <div>
+                                                    <div className="header-classification-content">
                                                         {provisionalClassification.provisional.affiliation ?
                                                             <span className="header-classification-item"><strong>Affiliation:</strong> {getAffiliationName(provisionalClassification.provisional.affiliation)}</span>
                                                             :
                                                             <span className="header-classification-item"><strong>Curator:</strong> {provisionalClassification.provisional.submitted_by.title}</span>
                                                         }
-                                                    </div>
-                                                    :
-                                                    <div>
-                                                        {affiliation ?
-                                                            <span className="header-classification-item"><strong>Affiliation:</strong> {getAffiliationName(affiliation.affiliation_id)}</span>
-                                                            :
-                                                            <span className="header-classification-item"><strong>Curator:</strong> {session && session.user_properties.title}</span>
-                                                        }
-                                                    </div>
-                                                }
-                                            </td>
-                                            <td className="button-box">
-                                                { !summaryPage ?
-                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
-                                                    : null}
-                                                { summaryButton ?
-                                                    ( !summaryPage ?
-                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
-                                                        : null
-                                                    )
-                                                    : null}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="2">
-                                                {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?
-                                                    <div className="header-classification-content">
                                                         {this.renderClassificationHeader(provisionalClassification.provisional, gdm)}
                                                         <div className="header-classification">
                                                             <strong className="header-classification-item">Classification Last Edited:</strong> {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}
@@ -548,6 +525,17 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                         </div>
                                                     </div>
                                                 }
+                                            </td>
+                                            <td className="button-box">
+                                                { !summaryPage ?
+                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
+                                                    : null}
+                                                { summaryButton ?
+                                                    ( !summaryPage ?
+                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
+                                                        : null
+                                                    )
+                                                    : null}
                                             </td>
                                         </tr>
                                     </tbody>
