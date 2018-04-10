@@ -2110,6 +2110,10 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenDisease(obj);
                 break;
 
+            case 'snapshot':
+                flat = flattenSnapshot(obj);
+                break;
+
             default:
                 break;
         }
@@ -2477,7 +2481,7 @@ var provisionalSimpleProps = [
     "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
     "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "approvalSubmitter", "classificationApprover",
     "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate", "provisionalComment", "provisionedClassification",
-    "approvedClassification", "publishClassification"
+    "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
 ];
 
 function flattenProvisional(provisional) {
@@ -2490,11 +2494,23 @@ function flattenProvisional(provisional) {
 var provisionalVariantSimpleProps = [
     "autoClassification", "alteredClassification", "reason", "evidenceSummary", "affiliation", "classificationStatus",
     "approvalSubmitter", "classificationApprover", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
-    "provisionalDate", "provisionalComment", "provisionedClassification", "approvedClassification", "publishClassification"
+    "provisionalDate", "provisionalComment", "provisionedClassification", "approvedClassification", "publishClassification",
+    "associatedInterpretationSnapshots"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {
     var flat = cloneSimpleProps(provisional_variant, provisionalVariantSimpleProps);
+
+    return flat;
+}
+
+
+var snapshotSimpleProps = [
+    "uuid", "resourceId", "resourceType", "approvalStatus", "date_created"
+];
+
+function flattenSnapshot(snapshot) {
+    var flat = cloneSimpleProps(snapshot, snapshotSimpleProps);
 
     return flat;
 }
