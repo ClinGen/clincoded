@@ -141,7 +141,6 @@ var ProvisionalCuration = createReactClass({
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        // stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
                         stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
@@ -425,17 +424,6 @@ var ProvisionalCuration = createReactClass({
         } else if (ref === 'classification-evidence-summary') {
             this.setState({evidenceSummary: this.refs[ref].getValue()});
         }
-        /*
-        else if (ref === 'classification-status') {
-            this.setState({classificationStatusChecked: !this.state.classificationStatusChecked}, () => {
-                if (this.state.classificationStatusChecked) {
-                    this.setState({classificationStatus: 'Provisional'});
-                } else {
-                    this.setState({classificationStatus: 'In progress'});
-                }
-            });
-        }
-        */
     },
 
     handleReplicatedOverTime: function() {
@@ -1072,13 +1060,6 @@ var ProvisionalCuration = createReactClass({
                                                                             </div>
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
-                                                                            {/*
-                                                                            <div className="classification-status">
-                                                                                <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
-                                                                                <Input type="checkbox" ref="classification-status" checked={this.state.classificationStatusChecked} handleChange={this.handleChange}
-                                                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" />
-                                                                            </div>
-                                                                            */}
                                                                             <div className="classification-evidence-summary">
                                                                                 <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
                                                                                     value={this.state.evidenceSummary} handleChange={this.handleChange}
@@ -1134,7 +1115,7 @@ var ProvisionalCuration = createReactClass({
                                     <div className="snapshot-list">
                                         <PanelGroup>
                                             <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
-                                                <CurationSnapshots snapshots={sortedSnapshotList} />
+                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
                                             </Panel>
                                         </PanelGroup>
                                     </div>
@@ -1151,70 +1132,6 @@ var ProvisionalCuration = createReactClass({
 });
 
 curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
-
-// Description of 4 leves of classification in summary table
-// the below 4 functions are not being used anywhere. Commenting out for backup
-// purposes. Perhaps remove in the next re-visit of this page. - MC
-/*
-var LimitedClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">LIMITED CLASSIFICATION</p>
-            <p>There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:</p>
-            <ul>
-                <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
-                <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
-                <li>Limited experimental data&sup2; supporting the gene-disease association</li>
-            </ul>
-            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
-        </div>
-    );
-};
-
-var ModerateClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">MODERATE CLASSIFICATION</p>
-            <p>There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:</p>
-            <ul>
-                <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
-            </ul>
-            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noded disease.</p>
-        </div>
-    );
-};
-
-var StrongClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">STRONG CLASSIFICATION</p>
-            <p>
-                The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
-                <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
-            </p>
-            <ul>
-                <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
-            </ul>
-            <p>In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
-        </div>
-    );
-};
-
-var DefinitiveClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">DEFINITIVE CLASSIFICATION</p>
-            <p>
-                The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
-                diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
-                that contradicts the role of the gene in the specified disease.
-            </p>
-        </div>
-    );
-};
-*/
 
 // Display a history item for adding a family
 class ProvisionalAddModHistory extends Component {
