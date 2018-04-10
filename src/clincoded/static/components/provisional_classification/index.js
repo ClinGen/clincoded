@@ -14,6 +14,7 @@ import { ClassificationDefinition } from './definition';
 import { ProvisionalApproval } from './provisional';
 import { ClassificationApproval } from './approval';
 import CurationSnapshots from './snapshots';
+import { sortListByDate } from '../../libs/helpers/sort';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -571,14 +572,6 @@ const ProvisionalClassification = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
     },
 
-    sortListbyColName(snapshots, colName) {
-        let sortedList = [];
-        if (snapshots.length) {
-            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
-        }
-        return sortedList;
-    },
-
     render() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
@@ -602,7 +595,7 @@ const ProvisionalClassification = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
-        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
 
         return (
             <div>
