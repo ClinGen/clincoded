@@ -662,7 +662,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 </div>
                                 <div className="panel-body">
                                     <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
-                                        shouldApproveClassification={shouldApproveClassification} />
+                                        shouldApproveClassification={shouldApproveClassification}
+                                        classificationStatus={this.state.classificationStatus} />
                                 </div>
                             </div>
                             : null}
