@@ -168,7 +168,6 @@ const ProvisionalClassification = createReactClass({
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        // stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
                         stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
@@ -830,18 +829,6 @@ const ProvisionalClassification = createReactClass({
                                                                         </div>
                                                                     </div>
                                                                     <div className="col-xs-12 col-sm-6">
-                                                                        {/*
-                                                                        <div className="classification-status">
-                                                                            <dl className="inline-dl clearfix">
-                                                                                <dt>
-                                                                                    <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
-                                                                                </dt>
-                                                                                <dd>
-                                                                                    {this.state.classificationStatusChecked ? <span>Yes</span> : <span>No</span>}
-                                                                                </dd>
-                                                                            </dl>
-                                                                        </div>
-                                                                        */}
                                                                         <div className="classification-evidence-summary">
                                                                             <dl className="inline-dl clearfix">
                                                                                 <dt>
@@ -951,7 +938,7 @@ const ProvisionalClassification = createReactClass({
                                 <div className="container snapshot-list">
                                     <PanelGroup>
                                         <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
-                                            <CurationSnapshots snapshots={sortedSnapshotList} />
+                                            <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
                                         </Panel>
                                     </PanelGroup>
                                 </div>
