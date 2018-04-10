@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { queryKeyValue, external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { sortListByDate } from '../../libs/helpers/sort';
 
 var _ = require('underscore');
 
@@ -18,8 +19,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         interpretationUuid: PropTypes.string,
         interpretation: PropTypes.object,
         session: PropTypes.object,
-        affiliation: PropTypes.object,
-        classificationSnapshots: PropTypes.array
+        affiliation: PropTypes.object
     },
 
     getInitialState() {
@@ -27,8 +27,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
             variant: this.props.data,
             calculatedPathogenicity: this.props.calculatedPathogenicity,
             interpretationUuid: this.props.interpretationUuid,
-            interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
-            classificationSnapshots: this.props.classificationSnapshots
+            interpretation: this.props.interpretation ? this.props.interpretation : null // parent interpretation object
         };
     },
 
@@ -40,9 +39,6 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         }
         if (typeof nextProps.calculatedPathogenicity !== undefined && nextProps.calculatedPathogenicity !== this.props.calculatedPathogenicity) {
             this.setState({calculatedPathogenicity: nextProps.calculatedPathogenicity});
-        }
-        if (nextProps.classificationSnapshots) {
-            this.setState({classificationSnapshots: nextProps.classificationSnapshots});
         }
     },
 
@@ -83,27 +79,46 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
      * Method to display classification tag/label in the interpretation header
      * @param {string} status - The status of a given classification in an interpretation
      */
-    renderClassificationStatusTag(status) {
-        let snapshots = this.state.classificationSnapshots;
+    renderClassificationStatusTag(classification) {
+        let status = classification.classificationStatus;
+        let snapshots = classification.associatedInterpretationSnapshots && classification.associatedInterpretationSnapshots.length ? classification.associatedInterpretationSnapshots : [];
         let filteredSnapshots = [];
         // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
             filteredSnapshots = snapshots.filter(snapshot => {
                 return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'interpretation';
             });
-        }
-        if (status === 'In progress') {
-            return <span className="label label-warning">IN PROGRESS</span>;
-        } else if (status === 'Provisional') {
-            if (filteredSnapshots.length) {
-                return (
-                    <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
-                );
+            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
+            if (status === 'In progress') {
+                let sortedSnapshots = sortListByDate(snapshots, 'date_created');
+                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
+                        );
+                    } else {
+                        return <span className="label label-info">PROVISIONAL</span>;
+                    }
+                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
+                    return <span className="label label-success">APPROVED</span>;
+                }
             } else {
-                return <span className="label label-info">PROVISIONAL</span>;
+                if (status === 'Provisional') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
+                        );
+                    } else {
+                        return <span className="label label-info">PROVISIONAL</span>;
+                    }
+                } else if (status === 'Approved') {
+                    return <span className="label label-success">APPROVED</span>;
+                }
             }
-        } else if (status === 'Approved') {
-            return <span className="label label-success">APPROVED</span>;
+        } else {
+            if (status === 'In progress') {
+                return <span className="label label-warning">IN PROGRESS</span>;
+            }
         }
     },
 
@@ -114,10 +129,10 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     renderClassificationHeader(classification) {
         return (
             <div className="header-classification">
-                <strong>Status:&nbsp;</strong>
+                <strong>Provisional/Approved Status:</strong>
                 <span className="classification-status">
                     {classification && classification[0].classificationStatus ?
-                        this.renderClassificationStatusTag(classification[0].classificationStatus)
+                        this.renderClassificationStatusTag(classification[0])
                         :
                         this.renderClassificationStatusTag('In progress')
                     }
@@ -126,10 +141,15 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         );
     },
 
+    renderSummaryStatus(classification) {
+        if (classification && classification[0].classificationStatus && classification[0].classificationStatus === 'In progress') {
+            return <span className="summary-status"><span className="label label-info">NEW SAVED SUMMARY</span></span>;
+        }
+    },
+
     render() {
         let variant = this.props.data;
         let session = this.props.session;
-        let recordHeader = this.props.recordHeader;
         let interpretationUuid = this.state.interpretationUuid;
         let affiliation = this.props.affiliation;
 
@@ -199,7 +219,10 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                     <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
                                     <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
                                     {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
-                                    <div><strong>Last Edited:</strong> {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}</div>
+                                    <div>
+                                        <strong>Interpretation Last Edited:</strong> {moment(myInterpretation.last_modified).format("YYYY MMM DD, h:mm a")}
+                                        {myInterpretation.provisional_variant ? this.renderSummaryStatus(myInterpretation.provisional_variant) : null}
+                                    </div>
                                 </div>
                                 : null}
                         </div>
