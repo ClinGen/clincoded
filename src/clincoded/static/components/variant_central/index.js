@@ -109,9 +109,7 @@ var VariantCurationHub = createReactClass({
             return Promise.resolve(result);
         }).then(data => {
             // Get an updated copy of the interpretation object
-            this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
-                this.setState({interpretation: interpretation});
-            });
+            this.updateInterpretationObj();
         });
     },
 
