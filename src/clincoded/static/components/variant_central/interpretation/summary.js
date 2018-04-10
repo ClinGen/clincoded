@@ -12,6 +12,7 @@ import { ProvisionalApproval } from '../../provisional_classification/provisiona
 import { ClassificationApproval } from '../../provisional_classification/approval';
 import CurationSnapshots from '../../provisional_classification/snapshots';
 import { renderSelectedModeInheritance } from '../../../libs/render_mode_inheritance';
+import { sortListByDate } from '../../../libs/helpers/sort';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -428,14 +429,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         }
     },
 
-    sortListbyColName(snapshots, colName) {
-        let sortedList = [];
-        if (snapshots.length) {
-            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
-        }
-        return sortedList;
-    },
-
     /**
      * Method to show the Approval form entry panel
      * Passed to the <Snapshots /> component as a prop
@@ -472,7 +465,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         // And thus we pull the stored value (if any) initially from the db
         // Then we pull the updated value from either REST post or put results
         let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
-        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
         const shouldProvisionClassification = this.state.shouldProvisionClassification;
         const shouldApproveClassification = this.state.shouldApproveClassification;
         const isClassificationSaved = this.state.isClassificationSaved;
