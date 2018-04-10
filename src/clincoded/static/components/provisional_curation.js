@@ -13,6 +13,7 @@ import { ContextualHelp } from '../libs/bootstrap/contextual_help';
 import { parseAndLogError } from './mixins';
 import { ClassificationDefinition } from './provisional_classification/definition';
 import CurationSnapshots from './provisional_classification/snapshots';
+import { sortListByDate } from '../libs/helpers/sort';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -787,14 +788,6 @@ var ProvisionalCuration = createReactClass({
         return roundedTempNumber / factor;
     },
 
-    sortListbyColName(snapshots, colName) {
-        let sortedList = [];
-        if (snapshots.length) {
-            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
-        }
-        return sortedList;
-    },
-
     render: function() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
@@ -818,7 +811,7 @@ var ProvisionalCuration = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
-        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
 
         return (
             <div>
