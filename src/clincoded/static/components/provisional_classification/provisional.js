@@ -113,7 +113,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
                 let provisionalClassification = data['@graph'][0];
-                this.props.updateProvisionalObj(provisionalClassification['@id']);
+                // this.props.updateProvisionalObj(provisionalClassification['@id']);
                 // Record classification approval history
                 let meta = {
                     provisionalClassification: {
@@ -138,6 +138,19 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
                         this.props.updateSnapshotList(provisionalSnapshot['@id']);
+                        return Promise.resolve(provisionalSnapshot);
+                    }).then(snapshot => {
+                        let newClassification = curator.flatten(result);
+                        let newSnapshot = curator.flatten(snapshot);
+                        if ('associatedClassificationSnapshots' in newClassification) {
+                            newClassification.associatedClassificationSnapshots.push(newSnapshot);
+                        } else {
+                            newClassification.associatedClassificationSnapshots = [];
+                            newClassification.associatedClassificationSnapshots.push(newSnapshot);
+                        }
+                        this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
+                            this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
+                        });
                     }).catch(err => {
                         console.log('Saving provisional snapshot error = : %o', err);
                     });
@@ -149,7 +162,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             // Update existing classification data and its parent interpretation
             return this.putRestData('/provisional-variant/' + this.props.provisional.uuid, newProvisional).then(data => {
                 let provisionalClassification = data['@graph'][0];
-                this.props.updateProvisionalObj(provisionalClassification['@id']);
+                // this.props.updateProvisionalObj(provisionalClassification['@id']);
                 this.props.approveProvisional();
                 // Record classification approval history
                 let meta = {
@@ -175,6 +188,19 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
                         this.props.updateSnapshotList(provisionalSnapshot['@id']);
+                        return Promise.resolve(provisionalSnapshot);
+                    }).then(snapshot => {
+                        let newClassification = curator.flatten(result);
+                        let newSnapshot = curator.flatten(snapshot);
+                        if ('associatedInterpretationSnapshots' in newClassification) {
+                            newClassification.associatedInterpretationSnapshots.push(newSnapshot);
+                        } else {
+                            newClassification.associatedInterpretationSnapshots = [];
+                            newClassification.associatedInterpretationSnapshots.push(newSnapshot);
+                        }
+                        this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
+                            this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
+                        });
                     }).catch(err => {
                         console.log('Saving provisional snapshot error = : %o', err);
                     });
