@@ -161,7 +161,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
                 let provisionalClassification = data['@graph'][0];
-                this.props.updateProvisionalObj(provisionalClassification['@id']);
+                // this.props.updateProvisionalObj(provisionalClassification['@id']);
                 // Record classification approval history
                 let meta = {
                     provisionalClassification: {
@@ -187,6 +187,19 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let approvalSnapshot = response['@graph'][0];
                         this.props.updateSnapshotList(approvalSnapshot['@id']);
+                        return Promise.resolve(approvalSnapshot);
+                    }).then(snapshot => {
+                        let newClassification = curator.flatten(result);
+                        let newSnapshot = curator.flatten(snapshot);
+                        if ('associatedClassificationSnapshots' in newClassification) {
+                            newClassification.associatedClassificationSnapshots.push(newSnapshot);
+                        } else {
+                            newClassification.associatedClassificationSnapshots = [];
+                            newClassification.associatedClassificationSnapshots.push(newSnapshot);
+                        }
+                        this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
+                            this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
+                        });
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);
                     });
@@ -198,7 +211,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             // Update existing classification data and its parent interpretation
             return this.putRestData('/provisional-variant/' + this.props.provisional.uuid, newProvisional).then(data => {
                 let provisionalClassification = data['@graph'][0];
-                this.props.updateProvisionalObj(provisionalClassification['@id']);
+                // this.props.updateProvisionalObj(provisionalClassification['@id']);
                 // Record classification approval history
                 let meta = {
                     provisionalClassification: {
@@ -224,6 +237,19 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let approvalSnapshot = response['@graph'][0];
                         this.props.updateSnapshotList(approvalSnapshot['@id']);
+                        return Promise.resolve(approvalSnapshot);
+                    }).then(snapshot => {
+                        let newClassification = curator.flatten(result);
+                        let newSnapshot = curator.flatten(snapshot);
+                        if ('associatedInterpretationSnapshots' in newClassification) {
+                            newClassification.associatedInterpretationSnapshots.push(newSnapshot);
+                        } else {
+                            newClassification.associatedInterpretationSnapshots = [];
+                            newClassification.associatedInterpretationSnapshots.push(newSnapshot);
+                        }
+                        this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
+                            this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
+                        });
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);
                     });
