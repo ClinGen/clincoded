@@ -12,6 +12,7 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
+import { sortListByDate } from '../libs/helpers/sort';
 import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { getAffiliationName } from '../libs/get_affiliation_name';
@@ -241,31 +242,107 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
     },
 
+    renderViewSnapshotSummaryLink(snapshots, status) {
+        let url;
+        let matchingSnapshots = snapshots && snapshots.length ? snapshots.filter(snapshot => snapshot.approvalStatus === status) : null;
+        const snapshotUuid = matchingSnapshots && matchingSnapshots.length ? matchingSnapshots[0]['uuid'] : null;
+        if (snapshotUuid) {
+            url = '/gene-disease-evidence-summary/?snapshot=' + snapshotUuid;
+        }
+        return url;
+    },
+
     /**
      * Method to display classification tag/label in gene-disease record header
      * @param {string} status - The status of a given classification in a GDM
      */
-    renderClassificationStatusTag(status) {
-        let snapshots = this.state.classificationSnapshots;
+    renderClassificationStatusTag(classification, gdm) {
+        const context = this.props.context;
+        const status = classification.classificationStatus;
+        let snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
         let filteredSnapshots = [];
         // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
             filteredSnapshots = snapshots.filter(snapshot => {
                 return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
             });
-        }
-        if (status === 'In progress') {
-            return <span className="label label-warning">IN PROGRESS</span>;
-        } else if (status === 'Provisional') {
-            if (filteredSnapshots.length) {
-                return (
-                    <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
-                );
+            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
+            let sortedSnapshots = sortListByDate(snapshots, 'date_created');
+            if (status === 'In progress') {
+                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-success">APPROVED</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                    : null}
+                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                    : null}
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-info">PROVISIONAL</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                    : null}
+                            </span>
+                        );
+                    }
+                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
+                    return (
+                        <span className="classification-status-wrapper">
+                            <span className="label label-success">APPROVED</span>
+                            {context && context.name === 'curation-central' ?
+                                <span>[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                : null}
+                        </span>
+                    );
+                }
             } else {
-                return <span className="label label-info">PROVISIONAL</span>;
+                if (status === 'Provisional') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-success">APPROVED</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                    : null}
+                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                    : null}
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-info">PROVISIONAL</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                    : null}
+                            </span>
+                        );
+                    }
+                } else if (status === 'Approved') {
+                    return (
+                        <span className="classification-status-wrapper">
+                            <span className="label label-success">APPROVED</span>
+                            {context && context.name === 'curation-central' ?
+                                <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                : null}
+                        </span>
+                    );
+                }
             }
-        } else if (status === 'Approved') {
-            return <span className="label label-success">APPROVED</span>;
+        } else {
+            if (status === 'In progress') {
+                return <span className="label label-warning">IN PROGRESS</span>;
+            }
         }
     },
 
@@ -273,13 +350,13 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
      * Method to render the header of a given classification in the gene-disease record header
      * @param {object} classification - Any given classification in a GDM
      */
-    renderClassificationHeader(classification) {
+    renderClassificationHeader(classification, gdm) {
         return (
             <div className="header-classification">
-                <strong>Classification:</strong>
+                <strong>Provisional/Approved Status:</strong>
                 <span className="classification-status">
-                    {classification && Object.keys(classification).length ?
-                        this.renderClassificationStatusTag(classification.classificationStatus ? classification.classificationStatus : 'In progress')
+                    {classification && classification.classificationStatus ?
+                        this.renderClassificationStatusTag(classification, gdm)
                         :
                         <span className="no-classification">None</span>
                     }
@@ -313,15 +390,14 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         return otherClassifications;
     },
 
-    renderViewSnapshotSummaryLink(uuid, status) {
-        let url;
-        const snapshots = this.state.classificationSnapshots;
-        let matchingSnapshots = snapshots && snapshots.length ? snapshots.filter(snapshot => snapshot.approvalStatus === status) : null;
-        const snapshotUuid = matchingSnapshots && matchingSnapshots.length ? matchingSnapshots[0]['@id'].slice(11, -1) : null;
-        if (snapshotUuid) {
-            url = '/gene-disease-evidence-summary/?snapshot=' + snapshotUuid;
+    /**
+     * Method to render 'NEW SAVED SUMMARY' status tag in header
+     * @param {object} classification - The saved GDM classification
+     */
+    renderSummaryStatus(classification) {
+        if (classification.classificationStatus && classification.classificationStatus === 'In progress') {
+            return <span className="summary-status"><span className="label label-info">NEW SAVED SUMMARY</span></span>;
         }
-        return url;
     },
 
     render: function() {
@@ -424,7 +500,23 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {provisionalClassification ? this.renderClassificationHeader(provisionalClassification.provisional) : null}
+                                                {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?
+                                                    <div>
+                                                        {provisionalClassification.provisional.affiliation ?
+                                                            <span className="header-classification-item"><strong>Affiliation:</strong> {getAffiliationName(provisionalClassification.provisional.affiliation)}</span>
+                                                            :
+                                                            <span className="header-classification-item"><strong>Curator:</strong> {provisionalClassification.provisional.submitted_by.title}</span>
+                                                        }
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        {affiliation ?
+                                                            <span className="header-classification-item"><strong>Affiliation:</strong> {getAffiliationName(affiliation.affiliation_id)}</span>
+                                                            :
+                                                            <span className="header-classification-item"><strong>Curator:</strong> {session && session.user_properties.title}</span>
+                                                        }
+                                                    </div>
+                                                }
                                             </td>
                                             <td className="button-box">
                                                 { !summaryPage ?
@@ -440,48 +532,22 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                         </tr>
                                         <tr>
                                             <td colSpan="2">
-                                                {provisionalClassification.provisionalExist ?
+                                                {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?
                                                     <div className="header-classification-content">
-                                                        {provisionalClassification.provisional.affiliation ?
-                                                            <div><span className="header-classification-item">Affiliation: <strong>{getAffiliationName(provisionalClassification.provisional.affiliation)}</strong></span></div>
-                                                            :
-                                                            <div><span className="header-classification-item">Curator: {provisionalClassification.provisional.submitted_by.title}</span></div>
-                                                        }
-                                                        {provisionalClassification.provisional.classificationStatus === 'Provisional' ?
-                                                            <div>
-                                                                <span className="header-classification-item">Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                {snapshots && snapshots.length && context && context.name === 'curation-central' ?
-                                                                    <span> [ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
-                                                                    : null}
-                                                            </div>
-                                                            : null}
-                                                        {provisionalClassification.provisional.classificationStatus === 'Approved' ?
-                                                            <div>
-                                                                <div>
-                                                                    <span className="header-classification-item">Approved Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    {snapshots && snapshots.length && context && context.name === 'curation-central' ?
-                                                                        <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Approved')} target="_blank">View Current Approved</a> ]</span>
-                                                                        : null}
-                                                                </div>
-                                                                <div>
-                                                                    <span className="header-classification-item">Last Provisional Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? provisionalClassification.provisional.autoClassification : provisionalClassification.provisional.alteredClassification}, saved on {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD")}</span>
-                                                                    {snapshots && snapshots.length && context && context.name === 'curation-central' ?
-                                                                        <span> [ <a href={this.renderViewSnapshotSummaryLink(provisionalClassification.provisional.uuid, 'Provisioned')} target="_blank">View Current Provisional</a> ]</span>
-                                                                        : null}
-                                                                </div>
-                                                            </div>
-                                                            : null}
-                                                        {provisionalClassification.provisional.alteredClassification === 'No Selection' ?
-                                                            <div>
-                                                                <span className="header-classification-item">Last Saved Classification: {provisionalClassification.provisional.classificationPoints.evidencePointsTotal} ({provisionalClassification.provisional.autoClassification}); no modification from calculated value</span>
-                                                            </div>
-                                                            :
-                                                            <div>
-                                                                <span className="header-classification-item">Last Saved Classification: {provisionalClassification.provisional.alteredClassification}; Modified from Calculated = {provisionalClassification.provisional.classificationPoints.evidencePointsTotal} ({provisionalClassification.provisional.autoClassification}); {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                            </div>
-                                                        }
+                                                        {this.renderClassificationHeader(provisionalClassification.provisional, gdm)}
+                                                        <div className="header-classification">
+                                                            <strong className="header-classification-item">Classification Last Edited:</strong> {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                            {provisionalClassification && provisionalClassification.provisional ? this.renderSummaryStatus(provisionalClassification.provisional) : null}
+                                                        </div>
                                                     </div>
-                                                    : null}
+                                                    :
+                                                    <div className="header-classification-content">
+                                                        <div className="header-classification">
+                                                            <strong>Provisional/Approved Status:</strong>
+                                                            <span className="classification-status"><span className="no-classification">None</span></span>
+                                                        </div>
+                                                    </div>
+                                                }
                                             </td>
                                         </tr>
                                     </tbody>
