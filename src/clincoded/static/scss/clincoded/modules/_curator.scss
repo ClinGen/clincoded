@@ -1767,6 +1767,31 @@
     }
 }
 
+.curation-data-curator .current-user-interpretations,
+.curation-data-curator .login-users-interpretations,
+.curation-data-curator .other-users-interpretations {
+    .header-classification {
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+}
+
 .curation-variant  {
     .curation-data-disease,
     .curation-data-gene,
@@ -1797,6 +1822,17 @@
         .btn-link {
             border: none;
             padding: 0;
+        }
+
+        .current-user-interpretations {
+            .summary-status {
+                margin-left: 8px;
+
+                .label.label-info {
+                    background-color: #917bc4;
+                    padding-top: .3em;
+                }
+            }
         }
     }
 
