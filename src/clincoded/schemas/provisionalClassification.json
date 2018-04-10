@@ -619,6 +619,15 @@
             "type": "boolean",
             "default": false
         },
+        "associatedClassificationSnapshots": {
+            "title": "Associated Snapshots",
+            "description": "List of associated snapshots of this classification",
+            "type": "array",
+            "items": {
+                "title": "Snapshot",
+                "type": "object"
+            }
+        },
         "active": {
             "title": "Active",
             "description": "Boolean switch for usage",
