@@ -9,6 +9,7 @@ import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { parseAndLogError } from './mixins';
 import { parsePubmed } from '../libs/parse-pubmed';
+import { sortListByDate } from '../libs/helpers/sort';
 import { AddResourceId } from './add_external_resource';
 import * as CuratorHistory from './curator_history';
 import * as curator from './curator';
@@ -174,14 +175,6 @@ var CurationCentral = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
-    sortListbyColName(snapshots, colName) {
-        let sortedList = [];
-        if (snapshots.length) {
-            sortedList = snapshots.sort((x, y) => Date.parse(x[colName]) !== Date.parse(y[colName]) ? Date.parse(x[colName]) > Date.parse(y[colName]) ? -1 : 1 : 0);
-        }
-        return sortedList;
-    },
-
     render: function() {
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
@@ -194,7 +187,7 @@ var CurationCentral = createReactClass({
         var currArticle = annotation ? annotation.article : null;
 
         let affiliation = this.props.affiliation;
-        let sortedSnapshotList = this.state.classificationSnapshots.length ? this.sortListbyColName(this.state.classificationSnapshots, 'date_created') : [];
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
 
         return (
             <div>
