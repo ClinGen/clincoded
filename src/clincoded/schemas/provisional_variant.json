@@ -114,6 +114,15 @@
             "description": "Boolean value for whether the approved classification has been published to the portal",
             "type": "boolean",
             "default": false
+        },
+        "associatedInterpretationSnapshots": {
+            "title": "Associated Snapshots",
+            "description": "List of associated snapshots of this classification",
+            "type": "array",
+            "items": {
+                "title": "Snapshot",
+                "type": "object"
+            }
         }
     },
     "columns": {
