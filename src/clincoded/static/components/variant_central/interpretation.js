@@ -471,13 +471,15 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
-                <InterpretationStatusLegend />
+                {/* <InterpretationStatusLegend /> */}
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
+                            {/*
                             <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
                                 <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
                             </div>
+                            */}
                             <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'variant')}>
                                 <div>Variant Preferred Title<span className={sortIconClass.variant}></span></div>
                                 <div>Variant ID(s)</div>
@@ -501,9 +503,11 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                         {interpretations && interpretations.length ? interpretations.map(interpretation => {
                             return (
                                 <a className="table-row-gdm" href={'/variant-central/?variant=' + interpretation.variantUuid} key={interpretation.interpretation_uuid}>
+                                    {/* 
                                     <div className="table-cell-gdm-status">
                                         <span className={interpretation.iconClass} title={interpretation.interpretation_status}></span>
                                     </div>
+                                    */}
                                     <div className="table-cell-gdm-main">
                                         <div>{interpretation.clinvarVariantTitle ? interpretation.clinvarVariantTitle : interpretation.grch38}</div>
                                         <div>
