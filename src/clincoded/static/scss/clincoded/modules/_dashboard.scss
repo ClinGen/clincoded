@@ -76,3 +76,20 @@
         }
     }
 }
+
+.item-status {
+    .classification-status-wrapper {
+        font-size: 1.1em;
+
+        .label {
+            margin-right: 8px;
+            padding-top: .3em;
+
+            .badge {
+                background-color: #ff7700;
+                font-size: 85%;
+                margin-right: 2px;
+            }
+        }
+    }
+}
