@@ -63,10 +63,18 @@ var Dashboard = createReactClass({
         });
     },
 
-    // Method to render statuses for individual GDMs and Interpretations
-    renderClassificationStatus(gdm, intepretation, affiliation, session) {
+    /**
+     * Method to render status labels/tags for each row of GDMs and Interpretations
+     * Called during the rendering of each GDM or Interpretation
+     * @param {object} gdm - The GDM object
+     * @param {object} interpretation - The Interpretation object
+     * @param {object} affiliation - The affiliation object
+     * @param {object} session - The session object
+     */
+    renderClassificationStatusTag(gdm, intepretation, affiliation, session) {
         let status, classification = null, snapshots = [], filteredSnapshots = [];
         if (gdm && Object.keys(gdm).length) {
+            // The rendering is for a GDM
             let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
             if (provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional) {
                 classification = provisionalClassification.provisional;
@@ -74,6 +82,7 @@ var Dashboard = createReactClass({
                 snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
             }
         } else if (intepretation  && Object.keys(intepretation).length) {
+            // The rendering is for an Interpretation
             if (intepretation && intepretation.provisional_variant && intepretation.provisional_variant.length) {
                 classification = intepretation.provisional_variant[0];
                 status = classification.classificationStatus;
@@ -82,9 +91,8 @@ var Dashboard = createReactClass({
         }
         // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
-            filteredSnapshots = snapshots.filter(snapshot => {
-                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
-            });
+            // Only interested in knowing the presence of any "Approved" classification
+            filteredSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === 'Approved');
             // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
             let sortedSnapshots = sortListByDate(snapshots, 'date_created');
             if (status === 'In progress') {
@@ -179,7 +187,7 @@ var Dashboard = createReactClass({
                         if (!vciInterpResult.affiliation) {
                             vciInterpList.push({
                                 uuid: vciInterpResult.uuid,
-                                interpreation: vciInterpResult,
+                                interpretation: vciInterpResult,
                                 variantUuid: vciInterpResult.variant.uuid,
                                 clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
                                 hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
@@ -353,7 +361,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td className="item-status">{self.renderClassificationStatus(item.gdm, null, null, this.props.session)}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -399,7 +407,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td className="item-status">{self.renderClassificationStatus(item.gdm, null, this.props.affiliation, this.props.session)}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -454,7 +462,7 @@ var Dashboard = createReactClass({
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{self.renderClassificationStatus(null, item.interpretation, null, this.props.session)}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -509,7 +517,7 @@ var Dashboard = createReactClass({
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{self.renderClassificationStatus(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
