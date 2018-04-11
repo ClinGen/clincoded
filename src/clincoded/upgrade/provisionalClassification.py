@@ -32,7 +32,7 @@ def provisionalClassification_3_4(value, system):
 @upgrade_step('provisionalClassification', '4', '5')
 def provisionalClassification_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1417
-    # Add various points proerties and update schema version
+    # Add various points properties and update schema version
     if 'totalScore' in value:
         value['classificationPoints']['evidencePointsTotal'] = value['totalScore']
         value.pop('totalScore', None)
