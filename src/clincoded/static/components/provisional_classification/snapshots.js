@@ -138,10 +138,10 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderProvisionalSnapshotStatusIcon(index)}
-                                    {resourceParent && resourceParent['@type'][0] === 'gdm' && classificationStatus !== 'In progress' ?
+                                    {resourceParent && resourceParent['@type'][0] === 'gdm' && classificationStatus !== 'Approved' ?
                                         this.renderGdmProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
-                                    {resourceParent && resourceParent['@type'][0] === 'interpretation' && !shouldApproveClassification && classificationStatus !== 'In progress' ?
+                                    {resourceParent && resourceParent['@type'][0] === 'interpretation' && !shouldApproveClassification && classificationStatus !== 'Approved' ?
                                         this.renderInterpretationProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
                                     <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
