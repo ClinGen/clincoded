@@ -155,13 +155,15 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
-                <GdmStatusLegend />
+                {/* <GdmStatusLegend /> */}
                 <div className="table-responsive">
                     <div className="table-gdm">
                         <div className="table-header-gdm">
+                            {/*
                             <div className="table-cell-gdm-status tcell-sortable" onClick={this.sortDir.bind(null, 'status')}>
                                 <span className="icon gdm-status-icon-header"></span><span className={sortIconClass.status}></span>
                             </div>
+                            */}
                             <div className="table-cell-gdm-main tcell-sortable" onClick={this.sortDir.bind(null, 'gdm')}>
                                 <div>Gene — Disease<span className={sortIconClass.gdm}></span></div>
                                 <div>Mode</div>
@@ -182,9 +184,11 @@ var GdmCollection = module.exports.GdmCollection = createReactClass({
                         {gdms && gdms.length ? gdms.map(gdm => {
                             return (
                                 <a className="table-row-gdm" href={'/curation-central/?gdm=' + gdm.gdm_uuid} key={gdm.gdm_uuid}>
+                                    {/*  
                                     <div className="table-cell-gdm-status">
                                         <span className={gdm.iconClass} title={gdm.gdm_status}></span>
                                     </div>
+                                    */}
                                     <div className="table-cell-gdm-main">
                                         <div>{gdm.gene_symbol} – {gdm.disease_term}</div>
                                         <div>{gdm.modeInheritance}</div>
