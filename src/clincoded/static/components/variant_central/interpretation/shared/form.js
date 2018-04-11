@@ -431,7 +431,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
 // dropdownContent should be a call to evalFormDropdownSectionWrapper() - see below
 // explanationContent should be a call to evalFormExplanationSectionWrapper() - see below
 // divider is a boolean to indicate whether or not a gray divider bar should be rendered at the bottom of the group (for use if there is a subsequent form group before the Save button)
-export function evalFormSectionWrapper(noteContent, dropdownContent, explanationContent, divider) {
+export function evalFormSectionWrapper(noteContent, dropdownContent, explanationContent, divider, geneNote) {
     return (
         <div>
             <div className="col-sm-4">
@@ -439,6 +439,11 @@ export function evalFormSectionWrapper(noteContent, dropdownContent, explanation
             </div>
             <div className="col-sm-4 pad-top">
                 {dropdownContent}
+                {geneNote ? 
+                <div className="bs-callout-info">
+                    <p className="exac-note">Note: ExAC Constraint Scores displayed on the Gene-centric tab</p>
+                </div>
+                : null}
             </div>
             <div className="col-sm-4 pad-top">
                 {explanationContent}
