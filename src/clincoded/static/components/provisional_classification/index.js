@@ -5,7 +5,7 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
-import { curator_page, history_views, userMatch, queryKeyValue } from '../globals';
+import { curator_page, history_views, userMatch, queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
@@ -44,6 +44,9 @@ const ProvisionalClassification = createReactClass({
             reasons: '',
             classificationStatus: 'In progress',
             classificationSnapshots: [],
+            isApprovalActive: queryKeyValue('approval', this.props.href),
+            showProvisional: false,
+            showApproval: false,
             evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
@@ -91,7 +94,9 @@ const ProvisionalClassification = createReactClass({
         let provisional = this.state.provisional;
         this.getRestData(provisionalId).then(result => {
             // Get an updated copy of the classification object
-            this.setState({provisional: result, classificationStatus: result.classificationStatus});
+            this.setState({provisional: result, classificationStatus: result.classificationStatus}, () => {
+                this.handleProvisionalApprovalVisibility();
+            });
             return Promise.resolve(result);
         }).then(data => {
             // Get an updated copy of the gdm object
@@ -190,6 +195,7 @@ const ProvisionalClassification = createReactClass({
 
     componentDidMount() {
         this.loadData();
+        this.handleProvisionalApprovalVisibility();
     },
 
     componentDidUpdate(prevProps, prevState) {
@@ -572,6 +578,41 @@ const ProvisionalClassification = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
     },
 
+    /**
+     * Method to show the Approval form entry panel
+     * Passed to the <Snapshots /> component as a prop
+     */
+    approveProvisional() {
+        const isApprovalActive = this.state.isApprovalActive;
+        if (!isApprovalActive) {
+            window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'approval', 'yes'));
+            this.setState({isApprovalActive: 'yes'}, () => {
+                this.handleProvisionalApprovalVisibility();
+            });
+        }
+    },
+
+    handleProvisionalApprovalVisibility() {
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+
+        if (classificationStatus === 'In progress') {
+            if (isApprovalActive && isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else {
+                this.setState({showProvisional: true, showApproval: false});
+            }
+        } else if (classificationStatus === 'Provisional') {
+            if (isApprovalActive && isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else {
+                this.setState({showProvisional: false, showApproval: true});
+            }
+        } else {
+            this.setState({showProvisional: false, showApproval: false});
+        }
+    },
+
     render() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
@@ -596,6 +637,8 @@ const ProvisionalClassification = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
 
         return (
             <div>
@@ -852,7 +895,7 @@ const ProvisionalClassification = createReactClass({
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            {provisional && this.state.classificationStatus === 'In progress' ?
+                                            {provisional && classificationStatus === 'In progress' ?
                                                 <div>
                                                     <p className="alert alert-info">
                                                         <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
@@ -863,7 +906,7 @@ const ProvisionalClassification = createReactClass({
                                         </div>
                                     </Panel>
                                 </PanelGroup>
-                                {provisional && this.state.classificationStatus === 'In progress' ?
+                                {provisional && classificationStatus === 'In progress' ?
                                     <div className='modal-footer'>
                                         <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
                                         <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
@@ -871,7 +914,7 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                     : null}
                             </div>
-                            {provisional && this.state.classificationStatus === 'In progress' ?
+                            {provisional && this.state.showProvisional ?
                                 <div className="provisional-approval-content-wrapper">
                                     <div className="container">
                                         <p className="alert alert-info">
@@ -881,14 +924,14 @@ const ProvisionalClassification = createReactClass({
                                             a Classification does not prevent existing evidence from being edited or scored and archived Provisional Classifications are always viewable</em>.
                                         </p>
                                     </div>
-                                    <div className={this.state.classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
+                                    <div className={classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
                                         <PanelGroup>
                                             <Panel title="Save Classification as Provisional" panelClassName="panel-data" open>
                                                 <ProvisionalApproval
                                                     session={session}
                                                     gdm={gdm}
                                                     classification={currentClassification}
-                                                    classificationStatus={this.state.classificationStatus}
+                                                    classificationStatus={classificationStatus}
                                                     provisional={provisional}
                                                     affiliation={this.props.affiliation}
                                                     updateSnapshotList={this.updateSnapshotList}
@@ -899,7 +942,7 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                 </div>
                                 : null}
-                            {provisional && provisional.provisionedClassification && this.state.classificationStatus === 'Provisional' ?
+                            {provisional && this.state.showApproval ?
                                 <div className="final-approval-content-wrapper">    
                                     <div className="container">
                                         <p className="alert alert-info">
@@ -915,7 +958,7 @@ const ProvisionalClassification = createReactClass({
                                                     session={session}
                                                     gdm={gdm}
                                                     classification={currentClassification}
-                                                    classificationStatus={this.state.classificationStatus}
+                                                    classificationStatus={classificationStatus}
                                                     provisional={provisional}
                                                     affiliation={this.props.affiliation}
                                                     updateSnapshotList={this.updateSnapshotList}
@@ -931,7 +974,8 @@ const ProvisionalClassification = createReactClass({
                                 <div className="container snapshot-list">
                                     <PanelGroup>
                                         <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
-                                            <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
+                                            <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
+                                                isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
                                         </Panel>
                                     </PanelGroup>
                                 </div>
