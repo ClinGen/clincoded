@@ -49,6 +49,11 @@ class CurationSnapshots extends Component {
         }
     }
 
+    /**
+     * Method to return different Bootstrap button class depending on the index param
+     * The 'btn-default' button is changed to have gray background-color instead of white
+     * @param {integer} index - The index of the object in the snapshots array
+     */
     renderProvisionalSnapshotViewSummaryBtn(index) {
         let buttonClass;
         if (index.toString() === "0") {
@@ -65,17 +70,27 @@ class CurationSnapshots extends Component {
         return buttonClass;
     }
 
-    renderGdmProvisionalSnapshotApprovalLink(gdm, index) {
+    /**
+     * Method to render the button that allows users to approval the most recently saved provisional
+     * @param {object} resourceParent - The parent object of the classification in a snapshot
+     * @param {integer} index - The index of the object in the snapshots array
+     */
+    renderProvisionalSnapshotApprovalLink(resourceParent, index) {
         let pathname = window.location.pathname;
-        if (index.toString() === "0" && pathname.indexOf('provisional-curation') > -1) {
-            return <a className="btn btn-warning approve-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + gdm.uuid}>Approve this Saved Provisional</a>;
-        }
-    }
-
-    renderInterpretationProvisionalSnapshotApprovalLink(interpretation, index) {
-        let pathname = window.location.pathname;
-        if (index.toString() === "0" && pathname.indexOf('variant-central') > -1) {
-            return <button type="button" className="btn btn-warning approve-provisional-link-item" role="button" onClick={this.props.approveProvisional}>Approve this Saved Provisional</button>;
+        if (index.toString() === "0") {
+            if (pathname.indexOf('provisional-curation') > -1 && resourceParent['@type'][0] === 'gdm') {
+                return (
+                    <a className="btn btn-warning approve-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + resourceParent.uuid + '&approval=yes'}>
+                        Approve this Saved Provisional
+                    </a>
+                );
+            } else {
+                return (
+                    <button type="button" className="btn btn-warning approve-provisional-link-item" role="button" onClick={this.props.approveProvisional}>
+                        Approve this Saved Provisional
+                    </button>
+                );
+            }
         }
     }
 
@@ -83,7 +98,7 @@ class CurationSnapshots extends Component {
      * Method to render snapshots in table rows
      * @param {object} snapshot - A saved copy of a provisioned/approved classification and its parent GDM/Interpretation
      */
-    renderSnapshot(snapshot, shouldApproveClassification, classificationStatus, index) {
+    renderSnapshot(snapshot, isApprovalActive, classificationStatus, index) {
         const type = snapshot.resourceType;
         let buttonClass = index.toString() === "0" || index.toString() === "1" ? 'btn-primary' : 'btn-default';
         let resourceParent;
@@ -138,13 +153,11 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderProvisionalSnapshotStatusIcon(index)}
-                                    {resourceParent && resourceParent['@type'][0] === 'gdm' && classificationStatus !== 'Approved' ?
-                                        this.renderGdmProvisionalSnapshotApprovalLink(resourceParent, index)
+                                    {resourceParent && !isApprovalActive && classificationStatus !== 'Approved' ?
+                                        this.renderProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
-                                    {resourceParent && resourceParent['@type'][0] === 'interpretation' && !shouldApproveClassification && classificationStatus !== 'Approved' ?
-                                        this.renderInterpretationProvisionalSnapshotApprovalLink(resourceParent, index)
-                                        : null}
-                                    <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                    <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" 
+                                        clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
                         </tbody>
@@ -218,12 +231,12 @@ class CurationSnapshots extends Component {
     }
 
     render() {
-        const { snapshots, shouldApproveClassification, classificationStatus } = this.props;
+        const { snapshots, isApprovalActive, classificationStatus } = this.props;
 
         return (
             <div className="snapshot-list panel panel-default">
                 <ul className="list-group">
-                    {snapshots.map((snapshot, i) => this.renderSnapshot(snapshot, shouldApproveClassification, classificationStatus, i))}
+                    {snapshots.map((snapshot, i) => this.renderSnapshot(snapshot, isApprovalActive, classificationStatus, i))}
                 </ul>
             </div>
         );
@@ -233,7 +246,7 @@ class CurationSnapshots extends Component {
 CurationSnapshots.propTypes = {
     snapshots: PropTypes.array,
     approveProvisional: PropTypes.func,
-    shouldApproveClassification: PropTypes.bool,
+    isApprovalActive: PropTypes.string,
     classificationStatus: PropTypes.string
 };
 
