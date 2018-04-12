@@ -280,7 +280,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                 <div className="new-provisional-status-row">
                                     <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
                                     {context && context.name === 'curation-central' ?
-                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
                                         : null}
                                 </div>
                             </span>
@@ -290,7 +290,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                             <span className="classification-status-wrapper">
                                 <span className="label label-info">PROVISIONAL</span>
                                 {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
                                     : null}
                             </span>
                         );
@@ -317,7 +317,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                 <div className="new-provisional-status-row">
                                     <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
                                     {context && context.name === 'curation-central' ?
-                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
                                         : null}
                                 </div>
                             </span>
@@ -327,7 +327,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                             <span className="classification-status-wrapper">
                                 <span className="label label-info">PROVISIONAL</span>
                                 {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid}>View/Approve Current Provisional</a> ]</span>
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
                                     : null}
                             </span>
                         );
