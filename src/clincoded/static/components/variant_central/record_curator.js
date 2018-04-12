@@ -134,7 +134,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                     {classification && classification[0].classificationStatus ?
                         this.renderClassificationStatusTag(classification[0])
                         :
-                        this.renderClassificationStatusTag('In progress')
+                        <span className="no-classification">None</span>
                     }
                 </span>
             </div>
