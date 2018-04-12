@@ -51,8 +51,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             classificationSnapshots: this.props.classificationSnapshots,
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
-            shouldApproveClassification: false,
-            isClassificationSaved: false
+            isClassificationSaved: false,
+            isApprovalActive: null,
+            showProvisional: false,
+            showApproval: false,
         };
     },
 
@@ -70,7 +72,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     classificationStatus = provisional_variant[0].classificationStatus;
                     this.setState({isClassificationViewOnly: false});
                 }
-                //this.handleShouldProvisionClassificaton(interpretation);
             }
             // FIXME: Why do we need to update parent component immediately after mounting?
             this.props.setProvisionalEvaluation('provisional-pathogenicity', alteredClassification ? alteredClassification : null);
@@ -100,7 +101,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             evidenceSummary: nextProps.evidenceSummary
         }, () => {
             const interpretation = this.state.interpretation;
-            // this.handleShouldProvisionClassificaton(interpretation);
             if (!this.state.isClassificationViewOnly) {
                 if (interpretation && interpretation.evaluations && interpretation.evaluations.length) {
                     if (!this.state.provisionalPathogenicity) {
@@ -117,6 +117,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     this.refs['evaluation-evidence-summary'].setValue(this.state.evidenceSummary);
                 }
             }
+            this.handleProvisionalApprovalVisibility();
         });
     },
 
@@ -124,7 +125,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         this.setState({
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
-            shouldApproveClassification: false,
+            isApprovalActive: null,
             isClassificationSaved: false
         });
     },
@@ -266,7 +267,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         this.setState({
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
-            shouldApproveClassification: false,
+            isApprovalActive: null,
             isClassificationSaved: false
         });
     },
@@ -434,7 +435,39 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
      * Passed to the <Snapshots /> component as a prop
      */
     approveProvisional() {
-        this.setState({shouldApproveClassification: true, isClassificationViewOnly: true});
+        this.setState({
+            isApprovalActive: 'yes',
+            shouldProvisionClassification: false,
+            isClassificationViewOnly: true
+        }, () => {
+            this.handleProvisionalApprovalVisibility();
+        });
+    },
+
+    handleProvisionalApprovalVisibility() {
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+        const isClassificationSaved = this.state.isClassificationSaved;
+
+        if (classificationStatus === 'In progress') {
+            if (isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else if (isClassificationSaved) {
+                this.setState({showProvisional: true, showApproval: false});
+            } else {
+                this.setState({showProvisional: false, showApproval: false});
+            }
+        } else if (classificationStatus === 'Provisional') {
+            if (isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else if (isClassificationSaved) {
+                this.setState({showProvisional: false, showApproval: true});
+            } else {
+                this.setState({showProvisional: false, showApproval: false});
+            }
+        } else {
+            this.setState({showProvisional: false, showApproval: false});
+        }
     },
 
     render() {
@@ -466,9 +499,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         // Then we pull the updated value from either REST post or put results
         let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const classificationStatus = this.state.classificationStatus;
         const shouldProvisionClassification = this.state.shouldProvisionClassification;
-        const shouldApproveClassification = this.state.shouldApproveClassification;
         const isClassificationSaved = this.state.isClassificationSaved;
+        const isApprovalActive = this.state.isApprovalActive;
 
         return (
             <div className="container evaluation-summary">
@@ -569,7 +603,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     </div>
                                                 </div>
                                             </div>
-                                            {this.state.classificationStatus === 'In progress' ?
+                                            {classificationStatus === 'In progress' ?
                                                 <div className="col-md-12 classification-edit">
                                                     <button type="button" className="btn btn-info btn-inline-spacer pull-right"
                                                         onClick={this.handleEditClassification}>Edit <i className="icon icon-pencil"></i></button>
@@ -580,7 +614,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 </Form>
                             </div>
                         </div>
-                        {provisionalVariant && this.state.classificationStatus === 'In progress' && isClassificationSaved ?
+                        {provisionalVariant && this.state.showProvisional ?
                             <div className="provisional-approval-content-wrapper">
                                 {shouldProvisionClassification ?
                                     <div>
@@ -600,7 +634,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     session={this.props.session}
                                                     interpretation={interpretation}
                                                     classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                                    classificationStatus={this.state.classificationStatus}
+                                                    classificationStatus={classificationStatus}
                                                     provisional={provisionalVariant}
                                                     affiliation={this.props.affiliation}
                                                     updateSnapshotList={this.props.updateSnapshotList}
@@ -620,7 +654,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 }
                             </div>
                             : null}
-                        {provisionalVariant && provisionalVariant.provisionedClassification && this.state.classificationStatus === 'Provisional' && shouldApproveClassification ?
+                        {provisionalVariant && this.state.showApproval ?
                             <div className="final-approval-content-wrapper"> 
                                 <div className="final-approval-note">
                                     <p className="alert alert-info">
@@ -637,7 +671,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                             session={this.props.session}
                                             interpretation={interpretation}
                                             classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                            classificationStatus={this.state.classificationStatus}
+                                            classificationStatus={classificationStatus}
                                             provisional={provisionalVariant}
                                             affiliation={this.props.affiliation}
                                             updateSnapshotList={this.props.updateSnapshotList}
@@ -655,8 +689,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 </div>
                                 <div className="panel-body">
                                     <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
-                                        shouldApproveClassification={shouldApproveClassification}
-                                        classificationStatus={this.state.classificationStatus} />
+                                        isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
                                 </div>
                             </div>
                             : null}
