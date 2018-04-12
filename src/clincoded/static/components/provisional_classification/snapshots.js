@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
+import { sortListByDate } from '../../libs/helpers/sort';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 
@@ -35,37 +36,47 @@ class CurationSnapshots extends Component {
         }
     }
 
-    renderProvisionalSnapshotStatusIcon(index) {
-        if (index.toString() === "0") {
-            return <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>;
-        } else if (index.toString() === "1") {
-            if (this.props.snapshots[0].approvalStatus === 'Approved') {
+    renderSnapshotStatusIcon(snapshot, approvalStatus) {
+        const snapshots = this.props.snapshots;
+        let filteredSnapshots;
+        if (approvalStatus === 'Provisioned') {
+            filteredSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === 'Provisioned');
+        } else if (approvalStatus === 'Approved') {
+            filteredSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === 'Approved');
+        }
+
+        if (filteredSnapshots && filteredSnapshots.length) {
+            let sortedSnapshots = sortListByDate(filteredSnapshots, 'date_created');
+            if (snapshot['@id'] === sortedSnapshots[0]['@id']) {
                 return <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>;
             } else {
                 return <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>;
             }
-        } else {
-            return <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>;
         }
     }
 
     /**
      * Method to return different Bootstrap button class depending on the index param
      * The 'btn-default' button is changed to have gray background-color instead of white
-     * @param {integer} index - The index of the object in the snapshots array
+     * @param {object} snapshot - The snapshot object
+     * @param {string} approvalStatus - A string value of either 'Provisioned' or 'Approved'
      */
-    renderProvisionalSnapshotViewSummaryBtn(index) {
-        let buttonClass;
-        if (index.toString() === "0") {
-            buttonClass = 'btn-primary';
-        } else if (index.toString() === "1") {
-            if (this.props.snapshots[0].approvalStatus === 'Approved') {
+    renderSnapshotViewSummaryBtn(snapshot, approvalStatus) {
+        const snapshots = this.props.snapshots;
+        let buttonClass, filteredSnapshots;
+        if (approvalStatus === 'Provisioned') {
+            filteredSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === 'Provisioned');
+        } else if (approvalStatus === 'Approved') {
+            filteredSnapshots = snapshots.filter(snapshot => snapshot.approvalStatus === 'Approved');
+        }
+
+        if (filteredSnapshots && filteredSnapshots.length) {
+            let sortedSnapshots = sortListByDate(filteredSnapshots, 'date_created');
+            if (snapshot['@id'] === sortedSnapshots[0]['@id']) {
                 buttonClass = 'btn-primary';
             } else {
                 buttonClass = 'btn-default';
             }
-        } else {
-            buttonClass = 'btn-default';
         }
         return buttonClass;
     }
@@ -100,7 +111,6 @@ class CurationSnapshots extends Component {
      */
     renderSnapshot(snapshot, isApprovalActive, classificationStatus, index) {
         const type = snapshot.resourceType;
-        let buttonClass = index.toString() === "0" || index.toString() === "1" ? 'btn-primary' : 'btn-default';
         let resourceParent;
         if (snapshot.resourceType === 'classification' && snapshot.resourceParent.gdm) {
             resourceParent = snapshot.resourceParent.gdm;
@@ -152,11 +162,11 @@ class CurationSnapshots extends Component {
                                     </dl>
                                 </td>
                                 <td className="approval-snapshot-buttons">
-                                    {this.renderProvisionalSnapshotStatusIcon(index)}
+                                    {this.renderSnapshotStatusIcon(snapshot, 'Provisioned')}
                                     {resourceParent && !isApprovalActive && classificationStatus !== 'Approved' ?
                                         this.renderProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
-                                    <Input type="button" inputClassName={this.renderProvisionalSnapshotViewSummaryBtn(index)} title="View Provisional Summary" 
+                                    <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Provisioned')} title="View Provisional Summary" 
                                         clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
@@ -215,12 +225,9 @@ class CurationSnapshots extends Component {
                                     </dl>
                                 </td>
                                 <td className="approval-snapshot-buttons">
-                                    {index.toString() === "0" || index.toString() === "1" ?
-                                        <div className="snapshot-current-icon"><i className="icon icon-flag"></i></div>
-                                        :
-                                        <div className="snapshot-archive-icon"><i className="icon icon-archive"></i></div>
-                                    }
-                                    <Input type="button" inputClassName={buttonClass} title="View Approved Summary" clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
+                                    {this.renderSnapshotStatusIcon(snapshot, 'Approved')}
+                                    <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Approved')} title="View Approved Summary"
+                                        clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
                         </tbody>
