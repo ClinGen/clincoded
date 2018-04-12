@@ -117,8 +117,13 @@
             margin: 8px 0;
         }
 
+        .btn-primary {
+            border: 1px solid #1663a0;
+        }
+
         .btn-default {
-            background-color: #aaa;
+            background-color: #a6a6a6;
+            border: 1px solid #999;
             color: #fff;
 
             &:hover {
@@ -138,6 +143,10 @@
             position: absolute;
             top: -3px;
             right: 5px;
+
+            .icon {
+                font-size: 1.6rem;
+            }
         }
 
         .snapshot-current-icon {
@@ -147,7 +156,6 @@
         .snapshot-archive-icon {
             color: #aaa;
         }
-
     }
 }
 
