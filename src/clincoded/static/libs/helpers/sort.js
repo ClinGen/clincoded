@@ -6,7 +6,11 @@
 export function sortListByDate(list, field) {
     let sortedList = [];
     if (list.length) {
-        sortedList = list.sort((x, y) => Date.parse(x[field]) !== Date.parse(y[field]) ? Date.parse(x[field]) > Date.parse(y[field]) ? -1 : 1 : 0);
+        if (field) {
+            sortedList = list.sort((x, y) => Date.parse(x[field]) !== Date.parse(y[field]) ? Date.parse(x[field]) > Date.parse(y[field]) ? -1 : 1 : 0);
+        } else {
+            sortedList = list.sort((x, y) => Date.parse(x) !== Date.parse(y) ? Date.parse(x) > Date.parse(y) ? -1 : 1 : 0);
+        }
     }
     return sortedList;
 }
