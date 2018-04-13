@@ -606,7 +606,11 @@ const ProvisionalClassification = createReactClass({
             if (isApprovalActive && isApprovalActive === 'yes') {
                 this.setState({showProvisional: false, showApproval: true});
             } else {
-                this.setState({showProvisional: false, showApproval: true});
+                this.setState({showProvisional: false, showApproval: true}, () => {
+                    if (!isApprovalActive) {
+                        this.setState({isApprovalActive: 'yes'});
+                    }
+                });
             }
         } else {
             this.setState({showProvisional: false, showApproval: false});
