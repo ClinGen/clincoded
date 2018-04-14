@@ -19,6 +19,7 @@
                 padding: 10px 15px;
                 margin-bottom: -1px;
                 border-bottom: 1px solid #ddd;
+                word-break: break-word;
 
                 &:last-child {
                     border-bottom: 0;
@@ -51,6 +52,7 @@
 
         .item-name {
             width: 70%;
+            word-break: break-word;
         }
 
         .item-status,
@@ -64,6 +66,7 @@
 
         .item-variant {
             width: 35%;
+            word-break: break-word;
         }
 
         .item-attribute {
@@ -73,6 +76,23 @@
         .item-status,
         .item-timestamp {
             width: 15%;
+        }
+    }
+}
+
+.item-status {
+    .classification-status-wrapper {
+        font-size: 1.1em;
+
+        .label {
+            margin-right: 8px;
+            padding-top: .3em;
+
+            .badge {
+                background-color: #ff7700;
+                font-size: 85%;
+                margin-right: 2px;
+            }
         }
     }
 }

@@ -855,8 +855,10 @@
 .provisional-info-panel {
     width: 100%;
     border-top: 2px solid #aaa;
+    padding-top: 6px;
 
     table {
+        margin-bottom: 10px;
         width: 100%;
     }
 
@@ -864,20 +866,72 @@
         text-align: left;
     }
 
+    h4 {
+        border-bottom: solid 1px #aaa;
+        margin-top: 15px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+    }
+
     .button-box {
         width: auto;
         padding-left: 15px;
         text-align: right;
-        vertical-align: middle;
+        vertical-align: top;
 
         .btn .icon {
             color: #fff;
         }
     }
 
-    .provisional-title {
+    .header-classification {
         text-align: left;
-        padding-left: 10px;
+        
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+
+            .no-classification {
+                display: inline-block;
+                position: relative;
+                top: 1px;
+            }
+
+            .classification-link-item {
+                font-size: 0.9em;
+                margin-right: 8px;
+            }
+
+            .new-provisional-status-row {
+                margin-left: 201px;
+                margin-top: 4px;
+            }
+        }
+
+        .summary-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label.label-info {
+                background-color: #917bc4;
+                padding-top: .3em;
+            }
+        }
     }
 
     .provisional-data-left {
@@ -1664,7 +1718,7 @@
     .interpretation-record {
         padding: 20px 0;
 
-         h2 {
+        h2 {
             left: 0;
             margin: 0;
             text-align: center;
@@ -1710,6 +1764,56 @@
             }
         }
     }
+
+    .header-classification {
+        margin-bottom: 3px;
+
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+}
+
+.curation-data-curator .current-user-interpretations,
+.curation-data-curator .login-users-interpretations,
+.curation-data-curator .other-users-interpretations {
+    .header-classification {
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
 }
 
 .curation-variant  {
@@ -1742,6 +1846,18 @@
         .btn-link {
             border: none;
             padding: 0;
+        }
+
+        .current-user-interpretations {
+            .summary-status {
+                font-size: 1.1em;
+                margin-left: 8px;
+
+                .label.label-info {
+                    background-color: #917bc4;
+                    padding-top: .3em;
+                }
+            }
         }
     }
 
@@ -2403,16 +2519,30 @@ dl.inline-dl {
             .provisional-interpretation-status:first-letter {
                 text-transform: capitalize;
             }
-
-            .modeInheritance {
-                font-style: italic;
-            }
         }
     }
 
     .provisional-static-content-wrapper {
         margin-bottom: 10px;
         padding: 0;
+
+        .provisional-interpretation-status {
+            line-height: 1.8;
+            margin-left: 3px;
+            position: relative;
+            top: -3px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
     }
 
     .provisional-form-content-wrapper {
@@ -2421,6 +2551,10 @@ dl.inline-dl {
         -webkit-border-radius: 2px;
         -moz-border-radius: 2px;
         border-radius: 2px;
+    }
+
+    .classification-submit, .classification-edit {
+        margin-top: 10px;
     }
 
     .evaluation-provision {
@@ -2542,8 +2676,6 @@ dl.inline-dl {
         }
 
         &.evidence-summary {
-            margin-top: 25px;
-
             label {
                 padding-right: 0;
                 padding-top: 0;

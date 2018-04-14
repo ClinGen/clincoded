@@ -124,5 +124,11 @@
         "title": "Gene Disease Summary & Provisional Classification",
         "status": "released",
         "uuid": "ad945a99-4e4a-402d-8fb4-6194fefead10"
+    },
+    {
+        "name": "variant-interpretation-summary",
+        "title": "Variant Interpretation Summary",
+        "status": "released",
+        "uuid": "a671021c-3ce1-4d6f-858c-9b0e43372b59"
     }
 ]

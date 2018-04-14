@@ -292,3 +292,9 @@ def history_1_2(value, system):
                     value['meta']['interpretation']['disease'] = 'e1fb9424-0a9f-4ce5-a7f5-88a12cb67955'
                 elif value['meta']['interpretation']['disease'] == '7bb7034d-7075-4940-86b8-0233dab3926a':
                     value['meta']['interpretation']['disease'] = '2cea0443-a548-4f54-a4eb-a5fd581cbdef'
+
+
+@upgrade_step('history', '2', '3')
+def history_2_3(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1419
+    return

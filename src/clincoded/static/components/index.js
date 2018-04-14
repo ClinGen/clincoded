@@ -41,5 +41,6 @@ require('./select_variant');
 require('./add_disease');
 require('./gene_disease_summary');
 require('./provisional_classification');
+require('./variant_interpretation_summary');
 
 module.exports = require('./app');

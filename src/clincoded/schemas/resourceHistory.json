@@ -1,0 +1,100 @@
+{
+    "title": "Resource history",
+    "description": "Schema for storing historical snapshots of resource items (e.g. classification, interpretation)",
+    "id": "/profiles/resourceHistory.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["resourceId", "resourceType", "resource"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "resourceId": {
+            "title": "Resource ID",
+            "description": "The UUID of the resource item",
+            "type": "string"
+        },
+        "resourceType": {
+            "title": "Resource item type",
+            "description": "The type of the resource item",
+            "type": "string",
+            "enum": [
+                "classification",
+                "interpretation"
+            ]
+        },
+        "approvalStatus": {
+            "title": "Approval Status",
+            "description": "The status of the approval process",
+            "type": "string",
+            "enum": [
+                "Provisioned",
+                "Approved"
+            ]
+        },
+        "resource": {
+            "title": "Resource item object",
+            "description": "Snapshot of the entire resource item object",
+            "type": "object"
+        },
+        "resourceParent": {
+            "title": "The parent snapshot object of the resource item",
+            "description": "Snapshot of the entire parent object of the resource item",
+            "type": "object",
+            "properties": {
+                "gdm": {
+                    "title": "GDM snapshot",
+                    "description": "Snapshot of the entire GDM parent object of the resource item",
+                    "type": "object"
+                },
+                "interpretation": {
+                    "title": "Interpretation snapshot",
+                    "description": "Snapshot of the entire Interpretation parent object of the resource item",
+                    "type": "object"
+                }
+            }
+        },
+        "associatedSnapshot": {
+            "title": "Associated snapshot object UUID",
+            "description": "Another snapshot that is paired with this one (e.g. approval with its targeted provisional)",
+            "type": "string"
+        }
+    },
+    "columns": {
+        "resourceId": {
+            "title": "Resource ID",
+            "type": "string"
+        },
+        "resourceType": {
+            "title": "Resource item type",
+            "type": "string"
+        },
+        "resource": {
+            "title": "Resource item object",
+            "type": "object"
+        },
+        "resourceParent": {
+            "title": "Parent object of resource item",
+            "type": "object"
+        },
+        "approvalStatus": {
+            "title": "Approval Status",
+            "type": "string"
+        },
+        "associatedSnapshot": {
+            "title": "Associated snapshot object",
+            "type": "string"
+        },
+        "date_created": {
+            "title": "Creation Date",
+            "type": "string"
+        }
+    }
+}
