@@ -2790,6 +2790,13 @@ table.login-users-interpretations {
     }
 }
 
+.curation-data-curator .login-users-interpretations,
+.curation-data-curator .other-users-interpretations {
+    dl {
+        margin-bottom: 16px;
+    }
+}
+
 .other-users-interpretations {
     padding-left: 0;
     padding-top: 5px;
@@ -2801,6 +2808,10 @@ table.login-users-interpretations {
             span.no-broken-item {
                 display: inline-block;
             }
+        }
+
+        &:last-child {
+            margin-bottom: 0;
         }
     }
 }
