@@ -210,6 +210,9 @@
     {
         "affiliation_id": "10024",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "BCM-Education"
+        "affiliation_fullname": "BCM-Education",
+        "approver": [
+            "Deb Ritter"
+        ]
     }
 ]
