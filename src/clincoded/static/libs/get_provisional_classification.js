@@ -20,7 +20,7 @@ export function GetProvisionalClassification(gdm, affiliation, session) {
                     };
                 }
                 return result;
-            } else if (userMatch(item.submitted_by, session)) {
+            } else if (userMatch(item.submitted_by, session) && !item.affiliation) {
                 return result = {
                     provisionalExist: true,
                     provisional: item
