@@ -47,7 +47,7 @@ class VariantInterpretationSummaryHeader extends Component {
                     <div className="panel-body">
                         <dl className="inline-dl clearfix col-sm-6">
                             {clinVarId ?
-                                <dd><strong>ClinVar VariationID:</strong>&nbsp;&nbsp;<a href={external_url_map['ClinVarSearch'] + clinVarId} target="_blank">{clinVarId}</a></dd>
+                                <dd><strong>ClinVar VariationID:</strong>&nbsp;&nbsp;<a href={external_url_map['ClinVarSearch'] + clinVarId} target="_blank">{clinVarId}</a>&nbsp;&nbsp;</dd>
                                 : null}
                             {carId ?
                                 <dd><strong>ClinGen Allele Registry ID:</strong>&nbsp;&nbsp;<a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank">{carId}</a></dd>
