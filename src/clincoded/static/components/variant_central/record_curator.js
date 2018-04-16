@@ -6,7 +6,6 @@ import moment from 'moment';
 import { queryKeyValue, external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { sortListByDate } from '../../libs/helpers/sort';
-import { getLastModified } from '../../libs/get_last_modified';
 
 var _ = require('underscore');
 
@@ -221,7 +220,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                     <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
                                     {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
                                     <div>
-                                        <strong>Interpretation Last Edited:</strong> {moment(getLastModified(myInterpretation, 'last_modified')).format("YYYY MMM DD, h:mm a")}
+                                        {myInterpretation.provisional_variant ?
+                                            <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                            : null}
                                         {myInterpretation.provisional_variant ? this.renderSummaryStatus(myInterpretation.provisional_variant) : null}
                                     </div>
                                 </div>
@@ -259,9 +260,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                     <i>{myInterpretation.provisional_variant && myInterpretation.provisional_variant[0].alteredClassification ?
                                                         <span>{myInterpretation.provisional_variant[0].alteredClassification},&nbsp;</span>  : null}</i>
                                                 </span>
-                                                <span className="no-broken-item">
-                                                    last edited: {moment(getLastModified(myInterpretation, 'last_modified')).format("YYYY MMM DD, h:mm a")}
-                                                </span>
+                                                {myInterpretation.provisional_variant ?
+                                                    <span className="no-broken-item">last saved: {moment(myInterpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                    : null}
                                                 {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
                                             </td>
                                             <td className="icon-box">
@@ -303,7 +304,9 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                                         <i>{interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
                                                             <span>{interpretation.provisional_variant[0].alteredClassification},&nbsp;</span> : null}</i>
                                                     </span>
-                                                    last edited: {moment(getLastModified(interpretation, 'last_modified')).format("YYYY MMM DD, h:mm a")}
+                                                    {interpretation.provisional_variant ?
+                                                        <span className="no-broken-item">last saved: {moment(interpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                        : null}
                                                     {interpretation.provisional_variant ? self.renderClassificationHeader(interpretation.provisional_variant) : null}
                                                 </dd>
                                             </dl>
