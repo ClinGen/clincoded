@@ -5,12 +5,16 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
-import { curator_page, history_views, userMatch, queryKeyValue } from '../globals';
+import { curator_page, history_views, userMatch, queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
 import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
+import { ProvisionalApproval } from './provisional';
+import { ClassificationApproval } from './approval';
+import CurationSnapshots from './snapshots';
+import { sortListByDate } from '../../libs/helpers/sort';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -39,7 +43,10 @@ const ProvisionalClassification = createReactClass({
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
-            classificationStatusChecked: false,
+            classificationSnapshots: [],
+            isApprovalActive: queryKeyValue('approval', this.props.href),
+            showProvisional: false,
+            showApproval: false,
             evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
@@ -75,6 +82,56 @@ const ProvisionalClassification = createReactClass({
                 geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
         };
+    },
+
+    /**
+     * Method to retrieve the updated classification object and pass the updated state as a prop
+     * back to the child components (e.g. provisional, approval).
+     * Called as PropTypes.func in the child components upon the PUT request to update the classification.
+     * @param {string} provisionalId - The '@id' of the (provisional) classification object
+     */
+    updateProvisionalObj(provisionalId) {
+        let provisional = this.state.provisional;
+        this.getRestData(provisionalId).then(result => {
+            // Get an updated copy of the classification object
+            this.setState({provisional: result, classificationStatus: result.classificationStatus}, () => {
+                this.handleProvisionalApprovalVisibility();
+            });
+            return Promise.resolve(result);
+        }).then(data => {
+            // Get an updated copy of the gdm object
+            this.getRestData('/gdm/' + this.state.gdm.uuid).then(gdm => {
+                this.setState({gdm: gdm});
+            });
+        });
+    },
+
+    /**
+     * Method to retrieve the given snapshot object and concat with the existing snapshot list.
+     * Then pass the updated state as a prop back to the child components (e.g. provisional, approval).
+     * Called as PropTypes.func in the child components upon saving a new snapshot.
+     * @param {string} snapshotId - The '@id' of the newly saved snapshot object
+     */
+    updateSnapshotList(snapshotId) {
+        let classificationSnapshots = this.state.classificationSnapshots;
+        this.getRestData(snapshotId).then(result => {
+            const newClassificationSnapshots = [result, ...classificationSnapshots];
+            this.setState({classificationSnapshots: newClassificationSnapshots});
+        });
+    },
+
+    /**
+     * Method to get a list of snapshots of a classification, either provisioned or approved,
+     * given the matching UUID of the classificaiton object.
+     * Called only once in the componentDidMount() lifecycle method via the loadData() method.
+     * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
+     */
+    getClassificationSnaphots(provisionalUuid) {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+            this.setState({classificationSnapshots: result['@graph']});
+        }).catch(err => {
+            console.log('Classification Snapshots Fetch Error=: %o', err);
+        });
     },
 
     loadData() {
@@ -117,13 +174,15 @@ const ProvisionalClassification = createReactClass({
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
                         stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
             }
             stateObj.previousUrl = url;
             this.setState(stateObj);
+            if (stateObj.provisional && stateObj.provisional.uuid) {
+                this.getClassificationSnaphots(stateObj.provisional.uuid);
+            }
 
             return Promise.resolve();
         }).then(result => {
@@ -136,11 +195,37 @@ const ProvisionalClassification = createReactClass({
 
     componentDidMount() {
         this.loadData();
+        this.handleProvisionalApprovalVisibility();
     },
 
     componentDidUpdate(prevProps, prevState) {
         // Need to delay the function call until the DOM is rendered
         setTimeout(this.scrollElementIntoView, 500);
+    },
+
+    // FIXME: This method is not working as expected in the resulted behavior
+    // Need to revisit in the next release
+    highlightMatchingSnapshots() {
+        // Color code each pair of Approval/Provisional snapshots
+        let provisionalList = document.querySelectorAll('li.snapshot-item[data-status="Provisioned"]');
+        let approvalList = document.querySelectorAll('li.snapshot-item[data-status="Approved"]');
+        let provisionalSnapshotNodes = Array.from(provisionalList);
+        let approvalSnapshotNodes = Array.from(approvalList);
+        if (approvalSnapshotNodes && approvalSnapshotNodes.length) {
+            approvalSnapshotNodes.forEach(approval => {
+                let label = document.createElement('LABEL');
+                approval.appendChild(label);
+
+                if (approval.getAttribute('data-associated').length) {
+                    let matchingProvisional = provisionalSnapshotNodes.filter(provisional => {
+                        return provisional.getAttribute('data-key') === approval.getAttribute('data-associated');
+                    });
+                    if (matchingProvisional && matchingProvisional.length) {
+                        matchingProvisional[0].appendChild(label);
+                    }
+                }
+            });
+        }
     },
 
     /**
@@ -493,6 +578,45 @@ const ProvisionalClassification = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
     },
 
+    /**
+     * Method to show the Approval form entry panel
+     * Passed to the <Snapshots /> component as a prop
+     */
+    approveProvisional() {
+        const isApprovalActive = this.state.isApprovalActive;
+        if (!isApprovalActive) {
+            window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'approval', 'yes'));
+            this.setState({isApprovalActive: 'yes'}, () => {
+                this.handleProvisionalApprovalVisibility();
+            });
+        }
+    },
+
+    handleProvisionalApprovalVisibility() {
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+
+        if (classificationStatus === 'In progress') {
+            if (isApprovalActive && isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else {
+                this.setState({showProvisional: true, showApproval: false});
+            }
+        } else if (classificationStatus === 'Provisional') {
+            if (isApprovalActive && isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else {
+                this.setState({showProvisional: false, showApproval: true}, () => {
+                    if (!isApprovalActive) {
+                        this.setState({isApprovalActive: 'yes'});
+                    }
+                });
+            }
+        } else {
+            this.setState({showProvisional: false, showApproval: false});
+        }
+    },
+
     render() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
@@ -516,6 +640,10 @@ const ProvisionalClassification = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -523,7 +651,8 @@ const ProvisionalClassification = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
@@ -740,16 +869,6 @@ const ProvisionalClassification = createReactClass({
                                                                         </div>
                                                                     </div>
                                                                     <div className="col-xs-12 col-sm-6">
-                                                                        <div className="classification-status">
-                                                                            <dl className="inline-dl clearfix">
-                                                                                <dt>
-                                                                                    <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
-                                                                                </dt>
-                                                                                <dd>
-                                                                                    {this.state.classificationStatusChecked ? <span>Yes</span> : <span>No</span>}
-                                                                                </dd>
-                                                                            </dl>
-                                                                        </div>
                                                                         <div className="classification-evidence-summary">
                                                                             <dl className="inline-dl clearfix">
                                                                                 <dt>
@@ -780,21 +899,91 @@ const ProvisionalClassification = createReactClass({
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div>
-                                                <p className="alert alert-info">
-                                                    <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
-                                                    associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
-                                                </p>
-                                            </div>
+                                            {provisional && classificationStatus === 'In progress' ?
+                                                <div>
+                                                    <p className="alert alert-info">
+                                                        <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
+                                                        associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
+                                                    </p>
+                                                </div>
+                                                : null}
                                         </div>
                                     </Panel>
                                 </PanelGroup>
-                                <div className='modal-footer'>
-                                    <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
-                                    <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
-                                    <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
-                                </div>
+                                {provisional && classificationStatus === 'In progress' ?
+                                    <div className='modal-footer'>
+                                        <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
+                                        <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
+                                        <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
+                                    </div>
+                                    : null}
                             </div>
+                            {provisional && this.state.showProvisional ?
+                                <div className="provisional-approval-content-wrapper">
+                                    <div className="container">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once saved as Provisional, the saved Provisional
+                                            Classification may not be edited, but it will always be viewable and can be saved as Approved if their are no further changes required. If changes need to be made, existing
+                                            evidence can be edited and/or new evidence added to the Gene:Disease Record at any time and a new current Provisional Classification made based on those changes. <em>Note: saving
+                                            a Classification does not prevent existing evidence from being edited or scored and archived Provisional Classifications are always viewable</em>.
+                                        </p>
+                                    </div>
+                                    <div className={classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
+                                        <PanelGroup>
+                                            <Panel title="Save Classification as Provisional" panelClassName="panel-data" open>
+                                                <ProvisionalApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                </div>
+                                : null}
+                            {provisional && this.state.showApproval ?
+                                <div className="final-approval-content-wrapper">    
+                                    <div className="container">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save the current (<i className="icon icon-flag"></i>) Provisional Classification as an Approved Classification
+                                            when ready to do so by using the form below, or return at a later date and use the "Approved this Saved Provisional" button. Alternatively, you continue
+                                            to edit/alter the existing evidence but you will need to create a new Provisional Classification for Approval.
+                                        </p>
+                                    </div>
+                                    <div className="container approval-process final-approval">
+                                        <PanelGroup>
+                                            <Panel title="Approve Classification" panelClassName="panel-data" open>
+                                                <ClassificationApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                    snapshots={sortedSnapshotList}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                </div>
+                                : null}
+                            {sortedSnapshotList.length ?
+                                <div className="container snapshot-list">
+                                    <PanelGroup>
+                                        <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
+                                            <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
+                                                isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
+                                        </Panel>
+                                    </PanelGroup>
+                                </div>
+                                : null}
                         </div>
                         :
                         null

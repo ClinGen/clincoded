@@ -1,0 +1,302 @@
+/**
+ * Date Picker Input styles
+ */
+.DayPickerInput>input {
+    border-radius: 2px;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    line-height: 1.42857;
+    color: #555;
+    background-image: none;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+
+    &::placeholder {
+        color: #ccc;
+    }
+
+    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+        color: #ccc;
+    }
+
+    &::-moz-placeholder { /* Firefox 19+ */
+        color: #ccc;
+    }
+
+    &:-ms-input-placeholder { /* IE 10+ */
+        color: #ccc;
+    }
+
+    &:-moz-placeholder { /* Firefox 18- */
+        color: #ccc;
+    }
+}
+
+/**
+ * Approval button styles
+ */
+.provisional-form-buttons-wrapper,
+.approval-form-buttons-wrapper {
+    padding: 0;
+
+    .button-group {
+        text-align: right;
+    }
+}
+
+.provisional-approval.in-progress {
+    margin-bottom: 10px;
+}
+
+/**
+ * Approval snapshot style
+ */
+.snapshot-list.panel {
+    border-radius: 4px;
+    margin-bottom: 0;
+
+    .list-group {
+        list-style: none;
+        padding-left: 0;
+        position: relative;
+
+        .list-group-item {
+            background-color: #fff;
+            border-bottom: solid 1px #e1e1e1;
+            padding: 15px 15px 13px 25px;
+    
+            table {
+                width: 100%;
+    
+                dl {
+                    margin-bottom: 5px;
+
+                    .label {
+                        margin-left: 8px;
+                    }
+                }
+            }
+    
+            &:last-child {
+                border-bottom: none;
+            }
+
+            label {
+                background-color: red;
+                display: block;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                position: absolute;
+            }
+        }
+    }
+
+    .approval-snapshot-content {
+        padding: 14px 18px;
+        width: 80%;
+
+        dl {
+            margin-bottom: 5px;
+        }
+    }
+
+    .approval-snapshot-buttons {
+        padding: 14px 18px;
+        position: relative;
+        text-align: center;
+        vertical-align: bottom;
+        width: 20%;
+
+        input[type="button"] {
+            margin: 8px 0;
+        }
+
+        .btn-primary {
+            border: 1px solid #1663a0;
+        }
+
+        .btn-default {
+            background-color: #a6a6a6;
+            border: 1px solid #999;
+            color: #fff;
+
+            &:hover {
+                background-color: #777;
+            }
+        }
+
+        .btn.approve-provisional-link-item {
+            font-size: 91%;
+            margin-bottom: 5px;
+            padding: 6px 8px;
+        }
+
+        .snapshot-current-icon,
+        .snapshot-archive-icon {
+            font-size: 1.3rem;
+            position: absolute;
+            top: -3px;
+            right: 5px;
+
+            .icon {
+                font-size: 1.6rem;
+            }
+        }
+
+        .snapshot-current-icon {
+            color: #82c91e;
+        }
+
+        .snapshot-archive-icon {
+            color: #aaa;
+        }
+    }
+}
+
+/**
+ * Provisional approval panel UI styles
+ */
+.provisional-approval {
+    .provisional-form-content-wrapper {
+        border: none;
+        padding: 0;
+    
+        .col-sm-4 {
+            padding-left: 0;
+            padding-top: 7px;
+        }
+
+        .col-sm-3, .col-sm-5 {
+            padding-right: 0;
+    
+            label {
+                padding-right: 0;
+            }
+        }
+
+        .provisional-submitter-placeholder-text {
+            color: #ccc;
+        }
+    }
+
+    .provisional-preview {
+        .provisional-form-content-wrapper {
+            .col-sm-3, .col-sm-5 {
+                padding-top: 7px;
+            }
+        }
+    }
+
+    .provisional-preview-note {
+        margin-bottom: 15px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+/**
+ * Final approval panel UI styles
+ */
+.final-approval-content-wrapper {
+    .alert {
+        .icon-flag {
+            color: #82c91e;
+        }
+    }
+}
+
+.final-approval {
+    .approval-form-content-wrapper {
+        border: none;
+        padding: 0;
+    
+        .col-sm-4 {
+            padding-left: 0;
+            padding-top: 7px;
+        }
+    
+        .col-sm-3, .col-sm-5 {
+            padding-right: 0;
+    
+            label {
+                padding-right: 0;
+            }
+        }
+
+        .classification-approver {
+            .form-group {
+                margin: 0;
+
+                label {
+                    padding-left: 0;
+                    text-align: left;
+                    width: auto;
+                }
+            }
+        }
+
+        .approval-submitter-placeholder-text {
+            color: #ccc;
+        }
+    }
+
+    .approval-preview {
+        .approval-form-content-wrapper {
+            .col-sm-3, .col-sm-5 {
+                padding-top: 7px;
+            }
+        }
+    }
+
+    .approval-preview-note {
+        margin-bottom: 15px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+/**
+ * Interpretation approval styles
+ */
+.evaluation-summary {
+    .provisional-interpretation-note {
+        margin-top: 20px;
+    }
+
+    .provisional-approval-panel-content {
+        margin: 0 10px;
+    }
+
+    .final-approval-panel-content {
+        margin: 0 10px;
+    }
+
+    .provisional-form-buttons-wrapper,
+    .approval-form-buttons-wrapper {
+        margin-bottom: 15px;
+    }
+
+    .final-approval {
+        margin-bottom: 10px;
+    }
+
+    .panel.panel-warning.approval-process {
+        border-color: #ffb22e;
+
+        &>.panel-heading {
+            color: #ffffff;
+            background-color: #fdc04d;
+            border-color: #ffb22e;
+
+            .panel-title {
+                font-weight: 500;
+            }
+        }
+    }
+}

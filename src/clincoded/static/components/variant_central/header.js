@@ -19,7 +19,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = createReactCl
         summaryVisible: PropTypes.bool,
         getSelectedTab: PropTypes.func,
         calculatedPathogenicity: PropTypes.string,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        classificationSnapshots: PropTypes.array
     },
 
     getInitialState: function() {
@@ -62,7 +63,8 @@ var VariantCurationHeader = module.exports.VariantCurationHeader = createReactCl
                         <CurationRecordVariant data={variant} />
                         <CurationRecordGeneDisease data={variant} />
                         <CurationRecordCurator data={variant} interpretationUuid={interpretationUuid} interpretation={interpretation}
-                            session={session} calculatedPathogenicity={calculatedPathogenicity} affiliation={this.props.affiliation} />
+                            session={session} calculatedPathogenicity={calculatedPathogenicity} affiliation={this.props.affiliation}
+                            classificationSnapshots={this.props.classificationSnapshots} />
                     </div>
                     {variant && !variant.hgvsNames.GRCh37 ?
                         <div className="alert alert-warning">

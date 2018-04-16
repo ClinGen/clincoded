@@ -32,10 +32,13 @@
     .panel-body {
         dl {
             margin-bottom: 0;
+            padding-left: 0;
+            padding-right: 30px;
         }
     }
 
     .panel-header,
+    .panel-classification-matrix,
     .panel-case-level,
     .panel-case-level-segregation,
     .panel-case-control,
@@ -154,6 +157,14 @@
                 &:last-child span:after {
                     content: '';
                 }
+            }
+        }
+
+        .summary-matrix-wrapper {
+            margin: 15px 15px 10px 15px;
+
+            table {
+                background-color: #fff;
             }
         }
     }

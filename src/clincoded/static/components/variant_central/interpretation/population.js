@@ -1118,7 +1118,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
                     <div className="bs-callout bs-callout-info clearfix">
                         <h4>Subpopulation with Highest Minor Allele Frequency</h4>
-                        <p className="header-note">(Note: this calculation does not currently include PAGE study minor allele data)</p>
+                        <p className="header-note">Note: this calculation does not currently include PAGE study minor allele data</p>
                         <p>This reflects the highest MAF observed, as calculated by the interface, across all subpopulations in the versions of gnomAD, ExAC, 1000 Genomes, and ESP shown below.</p>
                         <div className="clearfix">
                             <div className="bs-callout-content-container">
@@ -1146,6 +1146,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                 </dl>
                             </div>
                         </div>
+                            <br/>
+                            <p className="exac-pop-note">Note: ExAC Constraint Scores displayed on the Gene-centric tab</p>
                     </div>
                     <div className="panel panel-info datasource-gnomAD">
                         <div className="panel-heading">

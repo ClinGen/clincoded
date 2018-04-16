@@ -12,6 +12,8 @@ import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { ContextualHelp } from '../libs/bootstrap/contextual_help';
 import { parseAndLogError } from './mixins';
 import { ClassificationDefinition } from './provisional_classification/definition';
+import CurationSnapshots from './provisional_classification/snapshots';
+import { sortListByDate } from '../libs/helpers/sort';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -47,7 +49,7 @@ var ProvisionalCuration = createReactClass({
             replicatedOverTime: false,
             reasons: '',
             classificationStatus: 'In progress',
-            classificationStatusChecked: false,
+            classificationSnapshots: [],
             evidenceSummary: '',
             contradictingEvidence: {
                 proband: false, caseControl: false, experimental: false
@@ -84,6 +86,20 @@ var ProvisionalCuration = createReactClass({
                 geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
             }
         };
+    },
+
+    /**
+     * Method to get a list of snapshots of a classification, either provisioned or approved,
+     * given the matching UUID of the classificaiton object.
+     * Called only once in the componentDidMount() lifecycle method via the loadData() method.
+     * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
+     */
+    getClassificationSnaphots(provisionalUuid) {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+            this.setState({classificationSnapshots: result['@graph']});
+        }).catch(err => {
+            console.log('Classification Snapshots Fetch Error=: %o', err);
+        });
     },
 
     loadData: function() {
@@ -126,13 +142,15 @@ var ProvisionalCuration = createReactClass({
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
                         stateObj.reasons = stateObj.provisional.reasons;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
                         stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
                     }
                 }
             }
             stateObj.previousUrl = url;
             this.setState(stateObj);
+            if (stateObj.provisional && stateObj.provisional.uuid) {
+                this.getClassificationSnaphots(stateObj.provisional.uuid);
+            }
 
             return Promise.resolve();
         }).then(result => {
@@ -193,14 +211,119 @@ var ProvisionalCuration = createReactClass({
             var calculate = queryKeyValue('calculate', this.props.href);
             var edit = queryKeyValue('edit', this.props.href);
             var newProvisional = this.state.provisional.uuid ? curator.flatten(this.state.provisional) : {};
-            newProvisional.totalScore = Number(this.state.totalScore);
             newProvisional.autoClassification = this.state.autoClassification;
             newProvisional.alteredClassification = this.state.alteredClassification;
             newProvisional.reasons = this.state.reasons;
             newProvisional.replicatedOverTime = this.state.replicatedOverTime;
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
-            newProvisional.classificationStatus = this.state.classificationStatus;
+            newProvisional.classificationStatus = 'In progress';
+            newProvisional.provisionedClassification = false;
+            if (newProvisional.provisionalSubmitter) delete newProvisional.provisionalSubmitter;
+            if (newProvisional.provisionalDate) delete newProvisional.provisionalDate;
+            if (newProvisional.provisionalReviewDate) delete newProvisional.provisionalReviewDate;
+            if (newProvisional.provisionalComment) delete newProvisional.provisionalComment;
+            newProvisional.approvedClassification = false;
+            if (newProvisional.approvalSubmitter) delete newProvisional.approvalSubmitter;
+            if (newProvisional.classificationApprover) delete newProvisional.classificationApprover;
+            if (newProvisional.approvalDate) delete newProvisional.approvalDate;
+            if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
+            if (newProvisional.approvalComment) delete newProvisional.approvalComment;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
+            // Total points and points counted for all evidence
+            let classificationPoints = {}, scoreTableValues = this.state.scoreTableValues;
+            // Autosomal Dominant OR X-linked Disorder case-level evidence
+            classificationPoints['autosomalDominantOrXlinkedDisorder'] = {};
+            // Proband with other variant type with some evidence of gene impact case information type
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['evidenceCount'] = Number(scoreTableValues.probandOtherVariantCount);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['totalPointsGiven'] = Number(scoreTableValues.probandOtherVariantPoints);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithOtherVariantTypeWithGeneImpact']['pointsCounted'] = Number(scoreTableValues.probandOtherVariantPointsCounted);
+            // Proband with predicted or proven null variant case information type
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['evidenceCount'] = Number(scoreTableValues.probandNullVariantCount);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['totalPointsGiven'] = Number(scoreTableValues.probandNullVariantPoints);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['probandWithPredictedOrProvenNullVariant']['pointsCounted'] = Number(scoreTableValues.probandNullVariantPointsCounted);
+            // Variant is de novo case information type
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo'] = {};
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['evidenceCount'] = Number(scoreTableValues.variantDenovoCount);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['totalPointsGiven'] = Number(scoreTableValues.variantDenovoPoints);
+            classificationPoints['autosomalDominantOrXlinkedDisorder']['variantIsDeNovo']['pointsCounted'] = Number(scoreTableValues.variantDenovoPointsCounted);
+            // Autosomal Recessive Disorder case-level evidence
+            classificationPoints['autosomalRecessiveDisorder'] = {};
+            // Two variants (not predicted/proven null) with some evidence of gene impact in trans case information type
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans'] = {};
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans']['evidenceCount'] = Number(scoreTableValues.twoVariantsNotProvenCount);
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsWithGeneImpactInTrans']['totalPointsGiven'] = Number(scoreTableValues.twoVariantsNotProvenPoints);
+            // Two variants in trans and at least one de novo or a predicted/proven null variant case information type
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo'] = {};
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['evidenceCount'] = Number(scoreTableValues.twoVariantsProvenCount);
+            classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['totalPointsGiven'] = Number(scoreTableValues.twoVariantsProvenPoints);
+            // Points counted for Autosomal Recessive Disorder case-level evidence
+            classificationPoints['autosomalRecessiveDisorder']['pointsCounted'] = Number(scoreTableValues.autosomalRecessivePointsCounted);
+            // Segregation case-level evidence
+            classificationPoints['segregation'] = {};
+            classificationPoints['segregation']['evidenceCount'] = Number(scoreTableValues.segregationCount);
+            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationPoints);
+            classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
+            // Case-Control genetic evidence
+            classificationPoints['caseControl'] = {};
+            classificationPoints['caseControl']['evidenceCount'] = Number(scoreTableValues.caseControlCount);
+            classificationPoints['caseControl']['totalPointsGiven'] = Number(scoreTableValues.caseControlPoints);
+            classificationPoints['caseControl']['pointsCounted'] = Number(scoreTableValues.caseControlPointsCounted);
+            // Total points counted for all genetic evidence
+            classificationPoints['geneticEvidenceTotal'] = Number(scoreTableValues.geneticEvidenceTotalPoints);
+            // Function experimental evidence
+            classificationPoints['function'] = {};
+            classificationPoints['function']['biochemicalFunctions'] = {};
+            classificationPoints['function']['biochemicalFunctions']['evidenceCount'] = Number(scoreTableValues.biochemicalFunctionCount);
+            classificationPoints['function']['biochemicalFunctions']['totalPointsGiven'] = Number(scoreTableValues.biochemicalFunctionPoints);
+            classificationPoints['function']['proteinInteractions'] = {};
+            classificationPoints['function']['proteinInteractions']['evidenceCount'] = Number(scoreTableValues.proteinInteractionsCount);
+            classificationPoints['function']['proteinInteractions']['totalPointsGiven'] = Number(scoreTableValues.proteinInteractionsPoints);
+            classificationPoints['function']['expression'] = {};
+            classificationPoints['function']['expression']['evidenceCount'] = Number(scoreTableValues.expressionCount);
+            classificationPoints['function']['expression']['totalPointsGiven'] = Number(scoreTableValues.expressionPoints);
+            classificationPoints['function']['totalPointsGiven'] = Number(scoreTableValues.biochemicalFunctionPoints) + Number(scoreTableValues.proteinInteractionsPoints) + Number(scoreTableValues.expressionPoints);
+            classificationPoints['function']['pointsCounted'] = Number(scoreTableValues.functionalPointsCounted);
+            // Functional Alteration experimental evidence
+            classificationPoints['functionalAlteration'] = {};
+            classificationPoints['functionalAlteration']['patientCells'] = {};
+            classificationPoints['functionalAlteration']['patientCells']['evidenceCount'] = Number(scoreTableValues.patientCellsCount);
+            classificationPoints['functionalAlteration']['patientCells']['totalPointsGiven'] = Number(scoreTableValues.patientCellsPoints);
+            classificationPoints['functionalAlteration']['nonPatientCells'] = {};
+            classificationPoints['functionalAlteration']['nonPatientCells']['evidenceCount'] = Number(scoreTableValues.nonPatientCellsCount);
+            classificationPoints['functionalAlteration']['nonPatientCells']['totalPointsGiven'] = Number(scoreTableValues.nonPatientCellsPoints);
+            classificationPoints['functionalAlteration']['totalPointsGiven'] = Number(scoreTableValues.patientCellsPoints) + Number(scoreTableValues.nonPatientCellsPoints);
+            classificationPoints['functionalAlteration']['pointsCounted'] = Number(scoreTableValues.functionalAlterationPointsCounted);
+            // Model Systems and Rescue experimental evidence
+            classificationPoints['modelsRescue'] = {};
+            classificationPoints['modelsRescue']['modelsNonHuman'] = {};
+            classificationPoints['modelsRescue']['modelsNonHuman']['evidenceCount'] = Number(scoreTableValues.nonHumanModelCount);
+            classificationPoints['modelsRescue']['modelsNonHuman']['totalPointsGiven'] = Number(scoreTableValues.nonHumanModelPoints);
+            classificationPoints['modelsRescue']['modelsCellCulture'] = {};
+            classificationPoints['modelsRescue']['modelsCellCulture']['evidenceCount'] = Number(scoreTableValues.cellCultureCount);
+            classificationPoints['modelsRescue']['modelsCellCulture']['totalPointsGiven'] = Number(scoreTableValues.cellCulturePoints);
+            classificationPoints['modelsRescue']['rescueHuman'] = {};
+            classificationPoints['modelsRescue']['rescueHuman']['evidenceCount'] = Number(scoreTableValues.rescueHumanModelCount);
+            classificationPoints['modelsRescue']['rescueHuman']['totalPointsGiven'] = Number(scoreTableValues.rescueHumanModelPoints);
+            classificationPoints['modelsRescue']['rescueNonHuman'] = {};
+            classificationPoints['modelsRescue']['rescueNonHuman']['evidenceCount'] = Number(scoreTableValues.rescueNonHumanModelCount);
+            classificationPoints['modelsRescue']['rescueNonHuman']['totalPointsGiven'] = Number(scoreTableValues.rescueNonHumanModelPoints);
+            classificationPoints['modelsRescue']['rescueCellCulture'] = {};
+            classificationPoints['modelsRescue']['rescueCellCulture']['evidenceCount'] = Number(scoreTableValues.rescueCellCultureCount);
+            classificationPoints['modelsRescue']['rescueCellCulture']['totalPointsGiven'] = Number(scoreTableValues.rescueCellCulturePoints);
+            classificationPoints['modelsRescue']['rescuePatientCells'] = {};
+            classificationPoints['modelsRescue']['rescuePatientCells']['evidenceCount'] = Number(scoreTableValues.rescuePatientCellsCount);
+            classificationPoints['modelsRescue']['rescuePatientCells']['totalPointsGiven'] = Number(scoreTableValues.rescuePatientCellsPoints);
+            classificationPoints['modelsRescue']['totalPointsGiven'] = Number(scoreTableValues.nonHumanModelPoints) + Number(scoreTableValues.cellCulturePoints) + Number(scoreTableValues.rescueHumanModelPoints)
+                + Number(scoreTableValues.rescueNonHumanModelPoints) + Number(scoreTableValues.rescueCellCulturePoints) + Number(scoreTableValues.rescuePatientCellsPoints);
+            classificationPoints['modelsRescue']['pointsCounted'] = Number(scoreTableValues.modelsRescuePointsCounted);
+            // Total points counted for all experimental evidence
+            classificationPoints['experimentalEvidenceTotal'] = Number(scoreTableValues.experimentalEvidenceTotalPoints);
+            // TOTAL POINTS COUNTED FOR ALL EVIDENCE
+            classificationPoints['evidencePointsTotal'] = Number(this.state.totalScore);
+            // Assign 'classificationPoints' object to 'newProvisional'
+            newProvisional.classificationPoints = Object.assign({}, classificationPoints);
 
             // Add affiliation if the user is associated with an affiliation
             // and if the data object has no affiliation
@@ -301,14 +424,6 @@ var ProvisionalCuration = createReactClass({
             });
         } else if (ref === 'classification-evidence-summary') {
             this.setState({evidenceSummary: this.refs[ref].getValue()});
-        } else if (ref === 'classification-status') {
-            this.setState({classificationStatusChecked: !this.state.classificationStatusChecked}, () => {
-                if (this.state.classificationStatusChecked) {
-                    this.setState({classificationStatus: 'Provisional'});
-                } else {
-                    this.setState({classificationStatus: 'In progress'});
-                }
-            });
         }
     },
 
@@ -696,6 +811,8 @@ var ProvisionalCuration = createReactClass({
                 currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
             }
         }
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -703,7 +820,8 @@ var ProvisionalCuration = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <PanelGroup accordion>
@@ -935,15 +1053,10 @@ var ProvisionalCuration = createReactClass({
                                                                             </div>
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
-                                                                            <div className="classification-status">
-                                                                                <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
-                                                                                <Input type="checkbox" ref="classification-status" checked={this.state.classificationStatusChecked} handleChange={this.handleChange}
-                                                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-1" groupClassName="form-group" />
-                                                                            </div>
                                                                             <div className="classification-evidence-summary">
                                                                                 <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
                                                                                     value={this.state.evidenceSummary} handleChange={this.handleChange}
-                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="5"
+                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="8"
                                                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                                             </div>
                                                                         </div>
@@ -969,14 +1082,17 @@ var ProvisionalCuration = createReactClass({
                                                 <div>
                                                     {Object.keys(provisional).length ?
                                                         <p className="alert alert-info">
-                                                            <i className="icon icon-info-circle"></i> Click Save to save the Calculated Classification (highlighted in blue) without modification, or modify the
-                                                            Classification value in the pull-down and hit Save. You may also choose to mark your Classification as Provisional.                                                      
+                                                            <i className="icon icon-info-circle"></i> Click Save to save the Calculated Classification (highlighted in blue) without modification, or modify
+                                                            the Classification value in the pull-down and hit Save. Once it is saved, you will have the opportunity to edit the saved Classification, view the
+                                                            Evidence Summary for the saved Classification, and save it as Provisional.                                                      
                                                         </p>
                                                         :
                                                         <p className="alert alert-info">
-                                                            <i className="icon icon-info-circle"></i> The above Classification Matrix was calculated based on the current evidence and accompanying scores saved in the database
-                                                            when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification based on this current evidence, please fill in
-                                                            the fields above and click "Save". Otherwise, click "Cancel".
+                                                            <i className="icon icon-info-circle"></i> The Classification Matrix at the top of the page was calculated based on the current evidence and accompanying
+                                                            scores saved in the database when you clicked the "View Classification Matrix" button to navigate to this page. To save a new Classification, optionally
+                                                            modifying the Classification and/or adding an Evidence Summary, please fill in any desired fields above and click "Save". Otherwise, click "Cancel".<br /><br />
+                                                            After saving, you will be able to view the Evidence Summary for the saved Classification, and be presented with the option to save it as
+                                                            a <strong>Provisional</strong> Classification (and then <strong>Approved</strong>).
                                                         </p>
                                                     }
                                                 </div>
@@ -988,6 +1104,15 @@ var ProvisionalCuration = createReactClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
+                                {sortedSnapshotList.length ?
+                                    <div className="snapshot-list">
+                                        <PanelGroup>
+                                            <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
+                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                    : null}
                             </div>
                         </div>
                         :
@@ -1000,70 +1125,6 @@ var ProvisionalCuration = createReactClass({
 });
 
 curator_page.register(ProvisionalCuration,  'curator_page', 'provisional-curation');
-
-// Description of 4 leves of classification in summary table
-// the below 4 functions are not being used anywhere. Commenting out for backup
-// purposes. Perhaps remove in the next re-visit of this page. - MC
-/*
-var LimitedClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">LIMITED CLASSIFICATION</p>
-            <p>There is <strong>limited</strong> evidence to support a causal role for this gene in this disease, such as:</p>
-            <ul>
-                <li>Fewer than three observations of variants that provide convincing evidence for disease causality&sup1;</li>
-                <li>Multiple variants reported in unrelated probands but <i>without</i> sufficient evidence that the variants alter function</li>
-                <li>Limited experimental data&sup2; supporting the gene-disease association</li>
-            </ul>
-            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
-        </div>
-    );
-};
-
-var ModerateClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">MODERATE CLASSIFICATION</p>
-            <p>There is <strong>moderate</strong> evidence to support a causal role for this gene in this diseaese, such as:</p>
-            <ul>
-                <li>At least 3 unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                <li>Moderate experimental data&sup2; supporting the gene-disease association</li>
-            </ul>
-            <p>The role of this gene in disease may not have been independently reported, but no convincing evidence has emerged that contradicts the role of the gene in the noded disease.</p>
-        </div>
-    );
-};
-
-var StrongClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">STRONG CLASSIFICATION</p>
-            <p>
-                The role of this gene in disease has been independently demonstrated in at least two separate studies providing&nbsp;
-                <strong>strong</strong> supporting evidence for this gene&#39;s role in disease, such as the following types of evidence:
-            </p>
-            <ul>
-                <li>Strong variant-level evidence demonstrating numerous unrelated probands with variants that provide convincing evidence for disease causality&sup1;</li>
-                <li>Compelling gene-level evidence from different types of supporting experimental data&sup2;.</li>
-            </ul>
-            <p>In addition, no convincing evidence has emerged that contradicts the role of the gene in the noted disease.</p>
-        </div>
-    );
-};
-
-var DefinitiveClassification = function() {
-    return (
-        <div>
-            <p className="title underline-text title-p">DEFINITIVE CLASSIFICATION</p>
-            <p>
-                The role of this gene in this particular disease hase been repeatedly demonstrated in both the research and clinical
-                diagnostic settings, and has been upheld over time (in general, at least 3 years). No convincing evidence has emerged
-                that contradicts the role of the gene in the specified disease.
-            </p>
-        </div>
-    );
-};
-*/
 
 // Display a history item for adding a family
 class ProvisionalAddModHistory extends Component {
