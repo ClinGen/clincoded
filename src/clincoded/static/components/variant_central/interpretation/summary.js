@@ -126,7 +126,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
             isApprovalActive: null,
-            isClassificationSaved: false
+            isClassificationSaved: false,
+            showProvisional: false,
+            showApproval: false
         });
     },
 
@@ -268,7 +270,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             isClassificationViewOnly: false,
             shouldProvisionClassification: false,
             isApprovalActive: null,
-            isClassificationSaved: false
+            isClassificationSaved: false,
+            showProvisional: false,
+            showApproval: false
         });
     },
 
