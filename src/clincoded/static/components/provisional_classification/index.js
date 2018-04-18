@@ -977,7 +977,7 @@ const ProvisionalClassification = createReactClass({
                             {sortedSnapshotList.length ?
                                 <div className="container snapshot-list">
                                     <PanelGroup>
-                                        <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
+                                        <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
                                             <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
                                                 isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
                                         </Panel>

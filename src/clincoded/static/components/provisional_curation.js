@@ -1107,7 +1107,7 @@ var ProvisionalCuration = createReactClass({
                                 {sortedSnapshotList.length ?
                                     <div className="snapshot-list">
                                         <PanelGroup>
-                                            <Panel title="Saved Provisonal and Approved Classification(s)" panelClassName="panel-data" open>
+                                            <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
                                                 <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
                                             </Panel>
                                         </PanelGroup>
