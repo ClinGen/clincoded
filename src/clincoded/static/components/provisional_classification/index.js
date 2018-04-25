@@ -9,7 +9,6 @@ import { curator_page, history_views, userMatch, queryKeyValue, editQueryValue, 
 import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
-import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
 import GeneDiseaseClassificationMatrix from '../../libs/gene_disease_classification_matrix';
 import { ProvisionalApproval } from './provisional';
@@ -37,19 +36,11 @@ const ProvisionalClassification = createReactClass({
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
             provisional: {}, // login user's existing provisional object, must be null initially.
-            autoClassification: 'No Classification',
-            alteredClassification: 'No Modification',
-            replicatedOverTime: false,
-            reasons: '',
             classificationStatus: 'In progress',
             classificationSnapshots: [],
             isApprovalActive: queryKeyValue('approval', this.props.href),
             showProvisional: false,
             showApproval: false,
-            evidenceSummary: '',
-            contradictingEvidence: {
-                proband: false, caseControl: false, experimental: false
-            }
         };
     },
 
@@ -139,11 +130,7 @@ const ProvisionalClassification = createReactClass({
                     let creator = provisionalClassification.submitted_by;
                     if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
                         stateObj.provisional = provisionalClassification;
-                        stateObj.alteredClassification = stateObj.provisional.alteredClassification;
-                        stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
-                        stateObj.reasons = stateObj.provisional.reasons;
-                        stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
+                        stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
                     }
                 }
             }
@@ -331,8 +318,8 @@ const ProvisionalClassification = createReactClass({
                                                         <tr>
                                                             <td colSpan="2" className="header large">Contradictory Evidence?</td>
                                                             <td colSpan="3">
-                                                                Proband: <strong>{this.state.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
-                                                                Experimental: <strong>{provisional.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                Proband: <strong>{provisional.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                Experimental: <strong>{provisional.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : 'No'}</strong>
                                                             </td>
                                                         </tr>
                                                         <tr>
