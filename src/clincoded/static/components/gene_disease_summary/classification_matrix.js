@@ -1,7 +1,7 @@
 'use strict';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import ClassificationMatrix from '../../libs/classification_matrix';
+import GeneDiseaseClassificationMatrix from '../../libs/gene_disease_classification_matrix';
 
 class GeneDiseaseEvidenceSummaryClassificationMatrix extends Component {
     constructor(props) {
@@ -18,7 +18,7 @@ class GeneDiseaseEvidenceSummaryClassificationMatrix extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Calculated Classification Matrix</h3>
                     </div>
-                    <ClassificationMatrix classificationPoints={classificationPoints} />
+                    <GeneDiseaseClassificationMatrix classificationPoints={classificationPoints} />
                 </div>
             </div>
         );
