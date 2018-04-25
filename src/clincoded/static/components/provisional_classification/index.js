@@ -11,7 +11,7 @@ import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
 import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
-import ClassificationMatrix from '../../libs/classification_matrix';
+import GeneDiseaseClassificationMatrix from '../../libs/gene_disease_classification_matrix';
 import { ProvisionalApproval } from './provisional';
 import { ClassificationApproval } from './approval';
 import CurationSnapshots from './snapshots';
@@ -284,7 +284,7 @@ const ProvisionalClassification = createReactClass({
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
                                         <div className="form-group">
-                                            <ClassificationMatrix classificationPoints={classificationPoints} />
+                                            <GeneDiseaseClassificationMatrix classificationPoints={classificationPoints} />
                                             <div className="summary-provisional-classification-description">
                                                 <p className="alert alert-warning">
                                                     <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
