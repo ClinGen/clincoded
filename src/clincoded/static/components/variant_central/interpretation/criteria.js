@@ -62,7 +62,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
                 case 'population':
                     currentTabName = 'population';
                     break;
-                case 'predictors':
+                case 'variant-type':
                     currentTabName = 'computational';
                     break;
                 case 'experimental':
