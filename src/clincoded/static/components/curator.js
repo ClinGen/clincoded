@@ -2067,22 +2067,22 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((UBERON_|UBERON:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
     efoids: function(s) {
-        return captureBase(s, /^\s*(EFO_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
-        return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((CL_|CL:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
     efoclids: function(s) {
-        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:|CL_|CL:)\d{7})\s*$/i, true);
     }
 };
 
