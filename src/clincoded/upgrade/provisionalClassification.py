@@ -34,8 +34,10 @@ def provisionalClassification_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1417
     # Add various points properties and update schema version
     if 'totalScore' in value:
-        value['classificationPoints']['evidencePointsTotal'] = value['totalScore']
-        value.pop('totalScore', None)
+        if 'classificationPoints' not in value:
+            value['classificationPoints'] = {}
+            value['classificationPoints']['evidencePointsTotal'] = value['totalScore']
+            value.pop('totalScore', None)
 
     if 'classificationStatus' in value:
         if value['classificationStatus'] == 'Provisional':
