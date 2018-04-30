@@ -5,6 +5,7 @@ import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 class VariantInterpretationSummaryHeader extends Component {
     constructor(props) {
@@ -30,19 +31,13 @@ class VariantInterpretationSummaryHeader extends Component {
         const variant = interpretation && interpretation.variant, disease = interpretation && interpretation.disease;
         let clinVarId = variant && variant.clinvarVariantId ? variant.clinvarVariantId : null;
         let carId = variant && variant.carId ? variant.carId : null;
-        let variantTitle = variant && variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null;
-        if (variant && !variantTitle && variant.hgvsNames && variant.hgvsNames != {}) {
-            variantTitle = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38+' (GRCh38)': (variant.carId ? variant.carId : null);
-        } else if (!variantTitle) {
-            variantTitle = 'A preferred title is not available';
-        }
 
         return (
             <div className="evidence-summary panel-header">
                 <h1>Evaluation Summary</h1>
                 <div className="panel panel-primary">
                     <div className="panel-heading">
-                        <h3 className="panel-title">{variantTitle}</h3>
+                        <h3 className="panel-title">{renderVariantTitle(variant)}</h3>
                     </div>
                     <div className="panel-body">
                         <dl className="inline-dl clearfix col-sm-6">
