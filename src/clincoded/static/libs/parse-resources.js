@@ -1,11 +1,10 @@
 'use strict';
-var _ = require('underscore');
+import _ from 'underscore';
 
 // Function for parsing ClinVar data for variant object creation
 // Derived from:
 // https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
-module.exports.parseClinvar = parseClinvar;
-function parseClinvar(xml, extended){
+export function parseClinvar(xml, extended) {
     var variant = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
     var $ClinVarResult = doc.getElementsByTagName('ClinVarResult-Set')[0];
@@ -189,8 +188,7 @@ function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularCons
 }
 
 // Function for parsing CAR data for variant object creation
-module.exports.parseCAR = parseCAR;
-function parseCAR(json) {
+export function parseCAR(json) {
     var variant = {};
     // set carId in payload, since we'll always have this from a CAR response
     variant.carId = json['@id'].substring(json['@id'].indexOf('CA'));
@@ -245,11 +243,20 @@ function parseCAR(json) {
 // helper function for the parseCar() function; loops through some of the CAR's repeating
 // data structures to find HGVS terms and add them to the variant object
 function parseCarHgvsLoop(alleles, variant) {
+    variant['tempAlleles'] = [];
     alleles.map(function(allele, i) {
         if (allele.hgvs && allele.hgvs.length > 0) {
             allele.hgvs.map(function(hgvs_temp, j) {
                 variant = parseCarHgvsHandler(hgvs_temp, variant);
             });
+        }
+        if (allele.geneSymbol) {
+            let temp_allele_obj = {
+                geneSymbol: allele.geneSymbol,
+                hgvs: allele.hgvs,
+                proteinEffect: allele.proteinEffect
+            };
+            variant['tempAlleles'].push(temp_allele_obj);
         }
     });
     return variant;
