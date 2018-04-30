@@ -18,6 +18,7 @@ import { ScoreIndividual } from './score/individual_score';
 import { ScoreViewer } from './score/viewer';
 import ModalComponent from '../libs/bootstrap/modal';
 import { IndividualDisease } from './disease';
+import { renderVariantTitle } from '../libs/render_variant_title';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -233,7 +234,8 @@ const IndividualCuration = createReactClass({
                                 'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
                                 'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                 'carId': variants[i].carId ? variants[i].carId : null,
-                                'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                 'uuid': variants[i].uuid,
                                 'associatedPathogenicities': variants[i].associatedPathogenicities && variants[i].associatedPathogenicities.length ? variants[i].associatedPathogenicities : []
                             };
@@ -786,7 +788,8 @@ const IndividualCuration = createReactClass({
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
-                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid,
                 'associatedPathogenicities': data.associatedPathogenicities && data.associatedPathogenicities.length ? data.associatedPathogenicities : []
             };
@@ -1390,20 +1393,13 @@ function IndividualVariantInfo() {
                                             <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                         </div>
                                         : null}
-
-                                    {variant.clinvarVariantTitle ?
-                                        <div>
-                                            <dt>ClinVar Preferred Title</dt>
-                                            <dd>{variant.clinvarVariantTitle}</dd>
-                                        </div>
-                                        : null}
-
                                     {variant.carId ?
                                         <div>
                                             <dt>ClinGen Allele Registry ID</dt>
                                             <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </div>
                                         : null}
+                                    {VariantLabelAndTitle(variant)}
                                     {variant.uuid ?
                                         <div>
                                             <dt className="no-label"></dt>
@@ -1412,21 +1408,12 @@ function IndividualVariantInfo() {
                                             </dd>
                                         </div>
                                         : null}
-
-                                    {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
-                                        <div>
-                                            <dt>Genomic HGVS Title</dt>
-                                            <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                        </div>
-                                        : null}
-
                                     {variant.otherDescription && variant.otherDescription.length ?
                                         <div>
                                             <dt>Other description</dt>
                                             <dd>{variant.otherDescription}</dd>
                                         </div>
                                         : null}
-
                                     {individual.recessiveZygosity && i === 0 ?
                                         <div>
                                             <dt>If Recessive, select variant zygosity</dt>
@@ -1496,24 +1483,13 @@ function IndividualVariantInfo() {
                                                 <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].clinvarVariantTitle ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                            </div>
-                                            : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].grch38 ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
-                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
-                                            </div>
-                                            : null}
+                                        {VariantLabelAndTitle(this.state.variantInfo[i], true)}
                                         <div className="row variant-curation">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1583,20 +1559,49 @@ function IndividualVariantInfo() {
     );
 }
 
+/**
+ * Function to render variant type label and appropriate title
+ * @param {object} variant - The variant object
+ * @param {boolean} linkout - Whether there is linkout in the label
+ */
+const VariantLabelAndTitle = (variant, linkout) => {
+    let variantLabel;
+    if (variant.clinvarVariantTitle) {
+        variantLabel = linkout ? <LabelClinVarVariantTitle /> : 'ClinVar Preferred Title';
+    } else if (variant.canonicalTranscriptTitle) {
+        variantLabel = 'Canonical Transcript HGVS Title';
+    } else if (variant.hgvsNames && (variant.hgvsNames.GRCh38 || variant.hgvsNames.GRCh37)) {
+        variantLabel = 'Genomic HGVS Title';
+    }
+    if (linkout) {
+        return (
+            <div className="row">
+                <span className="col-sm-5 control-label"><label><strong>{variantLabel}</strong></label></span>
+                <span className="col-sm-7 text-no-input">{renderVariantTitle(variant)}</span>
+            </div>
+        );
+    } else {
+        return (
+            <div>
+                <dl className="dl-horizontal">
+                    <dt>{variantLabel}</dt>
+                    <dd>{renderVariantTitle(variant)}</dd>
+                </dl>
+            </div>
+        );
+    }
+};
+
 const LabelClinVarVariant = () => {
     return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
 };
 
 const LabelClinVarVariantTitle = () => {
-    return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
+    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
 };
 
 const LabelCARVariant = () => {
     return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
-};
-
-const LabelCARVariantTitle = () => {
-    return <span><strong>Genomic HGVS Title:</strong></span>;
 };
 
 const LabelOtherVariant = () => {
@@ -2022,14 +2027,6 @@ const IndividualViewer = createReactClass({
                                                 </dl>
                                             </div>
                                             : null }
-                                        {variant.clinvarVariantTitle ?
-                                            <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>ClinVar Preferred Title</dt>
-                                                    <dd>{variant.clinvarVariantTitle}</dd>
-                                                </dl>
-                                            </div>
-                                            : null}
                                         {variant.carId ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -2038,14 +2035,7 @@ const IndividualViewer = createReactClass({
                                                 </dl>
                                             </div>
                                             : null }
-                                        {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
-                                            <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>Genomic HGVS Title</dt>
-                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                                </dl>
-                                            </div>
-                                            : null }
+                                        {VariantLabelAndTitle(variant)}
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
