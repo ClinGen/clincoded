@@ -315,15 +315,25 @@ var VariantCurationHub = createReactClass({
     parseMyVariantInfo: function(myVariantInfo) {
         let geneSymbol, geneId;
         if (myVariantInfo) {
-            if (myVariantInfo.clinvar) {
+            if (myVariantInfo.clinvar && myVariantInfo.clinvar.gene) {
                 geneSymbol = myVariantInfo.clinvar.gene.symbol;
                 geneId = myVariantInfo.clinvar.gene.id;
-            } else if (myVariantInfo.dbsnp) {
+            } else if (myVariantInfo.dbsnp && myVariantInfo.dbsnp.gene) {
                 geneSymbol = myVariantInfo.dbsnp.gene.symbol;
                 geneId = myVariantInfo.dbsnp.gene.geneid;
-            } else if (myVariantInfo.cadd) {
-                geneSymbol = myVariantInfo.cadd.gene.genename;
-                geneId = myVariantInfo.cadd.gene.gene_id;
+            } else if (myVariantInfo.cadd && myVariantInfo.cadd.gene) {
+                if (typeof myVariantInfo.cadd.gene === 'object') {
+                    geneSymbol = myVariantInfo.cadd.gene.genename;
+                    geneId = myVariantInfo.cadd.gene.gene_id;
+                } else if (Array.isArray(myVariantInfo.cadd.gene)) {
+                    myVariantInfo.cadd.gene.forEach(item => {
+                        if (item.gene_id && item.genename) {
+                            geneSymbol = item.genename;
+                            geneId = item.gene_id;
+                        }
+                    });
+                }
+                
             }
             this.fetchMyGeneInfo(geneSymbol, geneId, 'myVariantInfo');
         }
