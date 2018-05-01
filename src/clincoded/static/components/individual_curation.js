@@ -18,7 +18,7 @@ import { ScoreIndividual } from './score/individual_score';
 import { ScoreViewer } from './score/viewer';
 import ModalComponent from '../libs/bootstrap/modal';
 import { IndividualDisease } from './disease';
-import { renderVariantTitle } from '../libs/render_variant_title';
+import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -1399,7 +1399,7 @@ function IndividualVariantInfo() {
                                             <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </div>
                                         : null}
-                                    {VariantLabelAndTitle(variant)}
+                                    {renderVariantLabelAndTitle(variant)}
                                     {variant.uuid ?
                                         <div>
                                             <dt className="no-label"></dt>
@@ -1489,7 +1489,7 @@ function IndividualVariantInfo() {
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
-                                        {VariantLabelAndTitle(this.state.variantInfo[i], true)}
+                                        {renderVariantLabelAndTitle(this.state.variantInfo[i], true)}
                                         <div className="row variant-curation">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1559,45 +1559,8 @@ function IndividualVariantInfo() {
     );
 }
 
-/**
- * Function to render variant type label and appropriate title
- * @param {object} variant - The variant object
- * @param {boolean} linkout - Whether there is linkout in the label
- */
-const VariantLabelAndTitle = (variant, linkout) => {
-    let variantLabel;
-    if (variant.clinvarVariantTitle) {
-        variantLabel = linkout ? <LabelClinVarVariantTitle /> : 'ClinVar Preferred Title';
-    } else if (variant.canonicalTranscriptTitle) {
-        variantLabel = 'Canonical Transcript HGVS Title';
-    } else if (variant.hgvsNames && (variant.hgvsNames.GRCh38 || variant.hgvsNames.GRCh37)) {
-        variantLabel = 'Genomic HGVS Title';
-    }
-    if (linkout) {
-        return (
-            <div className="row">
-                <span className="col-sm-5 control-label"><label><strong>{variantLabel}</strong></label></span>
-                <span className="col-sm-7 text-no-input">{renderVariantTitle(variant)}</span>
-            </div>
-        );
-    } else {
-        return (
-            <div>
-                <dl className="dl-horizontal">
-                    <dt>{variantLabel}</dt>
-                    <dd>{renderVariantTitle(variant)}</dd>
-                </dl>
-            </div>
-        );
-    }
-};
-
 const LabelClinVarVariant = () => {
     return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
-};
-
-const LabelClinVarVariantTitle = () => {
-    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
 };
 
 const LabelCARVariant = () => {
@@ -2035,7 +1998,7 @@ const IndividualViewer = createReactClass({
                                                 </dl>
                                             </div>
                                             : null }
-                                        {VariantLabelAndTitle(variant)}
+                                        {renderVariantLabelAndTitle(variant)}
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
