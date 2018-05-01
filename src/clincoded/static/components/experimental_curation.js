@@ -1058,7 +1058,7 @@ var ExperimentalCuration = createReactClass({
                     newExperimental.expression = {};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
-                        newExperimental.expression.organOfTissue = EorganOfTissue;
+                        newExperimental.expression.organOfTissue = EorganOfTissue.indexOf('_') > -1 ? EorganOfTissue.replace('_', ':') : EorganOfTissue;
                     }
                     var EorganOfTissueFreeText = this.getFormValue('organOfTissueFreeText');
                     if (EorganOfTissueFreeText) {
@@ -1098,7 +1098,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const FA_patientCells = this.getFormValue('funcalt.patientCells');
                     if (FA_patientCells) {
-                        newExperimental.functionalAlteration.patientCells = FA_patientCells;
+                        newExperimental.functionalAlteration.patientCells = FA_patientCells.indexOf('_') > -1 ? FA_patientCells.replace('_', ':') : FA_patientCells;
                     }
                     const FA_patientCellsFreeText = this.getFormValue('funcalt.patientCellsFreeText');
                     if (FA_patientCellsFreeText) {
@@ -1106,7 +1106,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const FA_nonPatientCells = this.getFormValue('funcalt.nonPatientCells');
                     if (FA_nonPatientCells) {
-                        newExperimental.functionalAlteration.nonPatientCells = FA_nonPatientCells;
+                        newExperimental.functionalAlteration.nonPatientCells = FA_nonPatientCells.indexOf('_') > -1 ? FA_nonPatientCells.replace('_', ':') : FA_nonPatientCells;
                     }
                     const FA_nonPatientCellsFreeText = this.getFormValue('funcalt.nonPatientCellsFreeText');
                     if (FA_nonPatientCellsFreeText) {
@@ -1147,7 +1147,7 @@ var ExperimentalCuration = createReactClass({
                     } else if (MS_modelSystemsType == 'Cell culture model') {
                         const MS_cellCulture = this.getFormValue('cellCulture');
                         if (MS_cellCulture) {
-                            newExperimental.modelSystems.cellCulture = MS_cellCulture;
+                            newExperimental.modelSystems.cellCulture = MS_cellCulture.indexOf('_') > -1 ? MS_cellCulture.replace('_', ':') : MS_cellCulture;
                         }
                         const MS_cellCultureFreeText = this.getFormValue('cellCultureFreeText');
                         if (MS_cellCultureFreeText) {
@@ -1191,7 +1191,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_patientCells = this.getFormValue('rescue.patientCells');
                     if (RES_patientCells) {
-                        newExperimental.rescue.patientCells = RES_patientCells;
+                        newExperimental.rescue.patientCells = RES_patientCells.indexOf('_') > -1 ? RES_patientCells.replace('_', ':') : RES_patientCells;
                     }
                     const RES_patientCellsFreeText = this.getFormValue('rescue.patientCellsFreeText');
                     if (RES_patientCellsFreeText) {
@@ -1199,7 +1199,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_cellCulture = this.getFormValue('rescue.cellCulture');
                     if (RES_cellCulture) {
-                        newExperimental.rescue.cellCulture = RES_cellCulture;
+                        newExperimental.rescue.cellCulture = RES_cellCulture.indexOf('_') > -1 ? RES_cellCulture.replace('_', ':') : RES_cellCulture;
                     }
                     const RES_cellCultureFreeText = this.getFormValue('rescue.cellCultureFreeText');
                     if (RES_cellCultureFreeText) {
@@ -2812,9 +2812,9 @@ const ExperimentalViewer = createReactClass({
 
     handleSearchLinkById(id) {
         let searchURL;
-        if (id.indexOf('EFO_') > -1) {
+        if (id.indexOf('EFO') > -1) {
             searchURL = external_url_map['EFOSearch'];
-        } else if (id.indexOf('CL_') > -1) {
+        } else if (id.indexOf('CL') > -1) {
             searchURL = external_url_map['CLSearch'];
         }
         return searchURL;
@@ -3071,12 +3071,12 @@ const ExperimentalViewer = createReactClass({
                                     {experimental.functionalAlteration.functionalAlterationType === 'Patient cells' ?
                                         <div>
                                             <dt>Patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.patientCells ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCells} title={"CL entry for " + experimental.functionalAlteration.patientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCells}</a> : null}</dd>
+                                            <dd>{experimental.functionalAlteration.patientCells ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCells.replace(':', '_')} title={"CL entry for " + experimental.functionalAlteration.patientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCells}</a> : null}</dd>
                                         </div>
                                         :
                                         <div>
                                             <dt>Non-patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.nonPatientCells ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.nonPatientCells) + experimental.functionalAlteration.nonPatientCells} title={"EFO entry for " + experimental.functionalAlteration.nonPatientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.nonPatientCells}</a> : null}</dd>
+                                            <dd>{experimental.functionalAlteration.nonPatientCells ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.nonPatientCells) + experimental.functionalAlteration.nonPatientCells.replace(':', '_')} title={"EFO entry for " + experimental.functionalAlteration.nonPatientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.nonPatientCells}</a> : null}</dd>
                                         </div>
                                     }
 
@@ -3135,7 +3135,7 @@ const ExperimentalViewer = createReactClass({
                                         :
                                         <div>
                                             <dt>Cell culture model type</dt>
-                                            <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                            <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture.replace(':', '_')} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
                                         </div>
                                     }
 
@@ -3199,7 +3199,7 @@ const ExperimentalViewer = createReactClass({
                                         <div className="rescue-observed-group">
                                             <div>
                                                 <dt>Patient cell type</dt>
-                                                <dd>{experimental.rescue.patientCells ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCells} title={"CL entry for " + experimental.rescue.patientCells + " in new tab"} target="_blank">{experimental.rescue.patientCells}</a> : null}</dd>
+                                                <dd>{experimental.rescue.patientCells ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCells.replace(':', '_')} title={"CL entry for " + experimental.rescue.patientCells + " in new tab"} target="_blank">{experimental.rescue.patientCells}</a> : null}</dd>
                                             </div>
                                             <div>
                                                 <dt>Patient cell type (free text)</dt>
@@ -3212,7 +3212,7 @@ const ExperimentalViewer = createReactClass({
                                         <div className="rescue-observed-group">
                                             <div>
                                                 <dt>Cell culture model</dt>
-                                                <dd>{experimental.rescue.cellCulture ? <a href={this.handleSearchLinkById(experimental.rescue.cellCulture) + experimental.rescue.cellCulture} title={"EFO entry for " + experimental.rescue.cellCulture + " in new tab"} target="_blank">{experimental.rescue.cellCulture}</a> : null}</dd>
+                                                <dd>{experimental.rescue.cellCulture ? <a href={this.handleSearchLinkById(experimental.rescue.cellCulture) + experimental.rescue.cellCulture.replace(':', '_')} title={"EFO entry for " + experimental.rescue.cellCulture + " in new tab"} target="_blank">{experimental.rescue.cellCulture}</a> : null}</dd>
                                             </div>
                                             <div>
                                                 <dt>Cell culture model (free text)</dt>
