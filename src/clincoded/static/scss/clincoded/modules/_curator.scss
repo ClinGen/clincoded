@@ -1331,11 +1331,19 @@
         dt {
             text-align: left;
             width: 300px;
+
+            &.variant-title-row {
+                display: table-cell;
+            }
         }
 
         dd {
             word-break: break-all;
             word-wrap: break-word;
+
+            &.variant-title-row {
+                display: table-cell;
+            }
         }
     }
 
