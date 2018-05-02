@@ -7,8 +7,9 @@ import { renderVariantTitle } from './render_variant_title';
  * Wrapper function to render variant type label and appropriate title
  * @param {object} variant - The variant object
  * @param {boolean} linkout - Whether there is linkout in the label
+  * @param {boolean} showInHeader - Whether it is rendered in GDM's variant curation header
  */
-export function renderVariantLabelAndTitle(variant, linkout) {
+export function renderVariantLabelAndTitle(variant, linkout, showInHeader) {
     let variantLabel;
     if (variant.clinvarVariantTitle) {
         variantLabel = linkout ? <LabelClinVarVariantTitle /> : 'ClinVar Preferred Title';
@@ -23,6 +24,13 @@ export function renderVariantLabelAndTitle(variant, linkout) {
                 <span className="col-sm-5 control-label"><label><strong>{variantLabel}</strong></label></span>
                 <span className={variant.clinvarVariantTitle ? "col-sm-7 text-no-input" : "col-sm-7 text-no-input clinvar-preferred-title"}>{renderVariantTitle(variant)}</span>
             </div>
+        );
+    } else if (showInHeader) {
+        return (
+            <span>
+                <span className="term-name">{variantLabel}: </span>
+                <span className="term-value">{renderVariantTitle(variant)}</span>
+            </span>
         );
     } else {
         return (
