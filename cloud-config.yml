@@ -245,7 +245,6 @@ write_files:
 - path: /var/awslogs/etc/awslogs.conf
   content: |
     [/var/log/elasticsearch]
-    datetime_format = %b %d %Y %H:%M:%S
     file = /var/log/elasticsearch/elasticsearch.log
     buffer_duration = 5000
     log_stream_name = {hostname}
@@ -253,7 +252,6 @@ write_files:
     log_group_name = Elasticsearch-logging-test
 
     [/var/log/apache2]
-    datetime_format = %b %d %Y %H:%M:%S
     file = /var/log/apache2/access.log
     buffer_duration = 5000
     log_stream_name = {hostname}
@@ -261,12 +259,19 @@ write_files:
     log_group_name = Apache2-logging-test
 
     [/var/log/postgresql]
-    datetime_format = %b %d %Y %H:%M:%S
     file = /var/log/postgresql/postgresql-9.4-main.log
     buffer_duration = 5000
     log_stream_name = {hostname}
     initial_position = end_of_file
     log_group_name = Postgresql-logging-test
+
+- path: /var/awslogs/etc/aws.conf
+  content: |
+    [plugins]
+    cwlogs = cwlogs
+    [default]
+    region = us-west-2
+    output = json
 
 - path: /etc/ssh/users_ca.pub
   content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmiM5UBd3Rant92xxhCVZFW+U+gUN3aLkICO1gzOGr/Ps173YgzgVPmdKdiI6vBzCZ8BXMG/aeiBHk2LKA+vFjh1/sFRA51nA+hnBzXuIbWYpsTHaGG3BFhnAP8tzDm/7MYRkIeXLwZRwTeFtrMd9MR/HGBVG5HmbM/jtrvTRWZVwFnXRxLQ3Rs5Y9v1QKOrZs4w5tt3iKBiBr+kJKhDHV5O8COowxjcfSqCZmfafVJQNR+8Dg6cvaizqY+ykHpgzc+a7oXJfo1LDDQELl0DGIPDIa340jMDjSSVV0o+RpjbIXTtH4m3TDpKRmZsTQrnHCMNSp5Uk7mMkhKwIwX1SP clincoded-dev@clinicalgenome.org 
