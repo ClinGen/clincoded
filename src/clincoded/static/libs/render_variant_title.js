@@ -7,8 +7,9 @@ import React from 'react';
  * 2nd alternative is a string constructed with the canonical transcript, gene symbol and protein change.
  * The fallback is the GRCh38 NC_ HGVS name.
  * @param {object} variant - A variant object
+ * @param {boolean} stringOnly - Whether the output should be just string
  */
-export function renderVariantTitle(variant) {
+export function renderVariantTitle(variant, stringOnly) {
     let variantTitle;
     if (variant) {
         if (variant.clinvarVariantId && variant.clinvarVariantTitle) {
@@ -25,5 +26,9 @@ export function renderVariantTitle(variant) {
             }
         }
     }
-    return <span className="variant-title">{variantTitle}</span>;
+    if (stringOnly) {
+        return variantTitle;
+    } else {
+        return <span className="variant-title">{variantTitle}</span>;
+    }
 }
