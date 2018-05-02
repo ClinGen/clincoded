@@ -96,7 +96,6 @@ runcmd:
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - sudo apt-get update
 - sudo curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-- sudo sudo python ./awslogs-agent-setup.py --region us-west-2
 - sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
 - sudo apt-get -y install postgresql-9.4
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
@@ -112,7 +111,7 @@ runcmd:
 - fi
 - sudo -u postgres createuser clincoded
 - sudo -u postgres createdb --owner=clincoded clincoded
-- curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
+#- curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
 - mkdir /srv/clincoded
 - chown clincoded:clincoded /srv/clincoded
 - cd /srv/clincoded
@@ -245,36 +244,3 @@ write_files:
 
 - path: /etc/ssh/users_ca.pub
   content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmiM5UBd3Rant92xxhCVZFW+U+gUN3aLkICO1gzOGr/Ps173YgzgVPmdKdiI6vBzCZ8BXMG/aeiBHk2LKA+vFjh1/sFRA51nA+hnBzXuIbWYpsTHaGG3BFhnAP8tzDm/7MYRkIeXLwZRwTeFtrMd9MR/HGBVG5HmbM/jtrvTRWZVwFnXRxLQ3Rs5Y9v1QKOrZs4w5tt3iKBiBr+kJKhDHV5O8COowxjcfSqCZmfafVJQNR+8Dg6cvaizqY+ykHpgzc+a7oXJfo1LDDQELl0DGIPDIa340jMDjSSVV0o+RpjbIXTtH4m3TDpKRmZsTQrnHCMNSp5Uk7mMkhKwIwX1SP clincoded-dev@clinicalgenome.org
-
-- path: /var/awslogs/etc/awslogs.conf
-  content: |
-    datetime_format = %b %d %Y %H:%M:%S
-    file = /var/log/elasticsearch/elasticsearch.log
-    buffer_duration = 5000
-    log_stream_name = {hostname}
-    initial_position = end_of_file
-    log_group_name = Elasticsearch-logging-test
-
-    [/var/log/apache2]
-    datetime_format = %b %d %Y %H:%M:%S
-    file = /var/log/apache2/access.log
-    buffer_duration = 5000
-    log_stream_name = {hostname}
-    initial_position = end_of_file
-    log_group_name = Apache2-logging-test
-
-    [/var/log/postgresql]
-    datetime_format = %b %d %Y %H:%M:%S
-    file = /var/log/postgresql/postgresql-9.4-main.log
-    buffer_duration = 5000
-    log_stream_name = {hostname}
-    initial_position = end_of_file
-    log_group_name = Postgresql-logging-test
-- path: /var/awslogs/etc/aws.conf
-  content: |
-    [plugins]
-    cwlogs = cwlogs
-    [default]
-    region = us-west-2
-    output = json
-
