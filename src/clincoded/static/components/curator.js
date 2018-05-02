@@ -1217,10 +1217,12 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, af
     });
 
     let variantTitle = renderVariantTitle(variant);
+    // Parse variant title text for the <span /> 'title' attribbute
+    let elementTitleAttribute = renderVariantTitle(variant, true);
 
     return (
         <div className="panel-evidence-group">
-            <h5><span className="title-ellipsis dotted" title={variantTitle}>{variantTitle}</span></h5>
+            <h5><span className="title-ellipsis dotted" title={elementTitleAttribute}>{variantTitle}</span></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
