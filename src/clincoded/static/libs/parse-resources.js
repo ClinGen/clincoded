@@ -250,6 +250,9 @@ function parseCarHgvsLoop(alleles, variant) {
                 variant = parseCarHgvsHandler(hgvs_temp, variant);
             });
         }
+        // Collect all the allele objects containing 'geneSymbol'
+        // and put them in a temp array for canonical transcript matching
+        // (if match found, the gene is selected for constructing the canonical transcript title)
         if (allele.geneSymbol) {
             let temp_allele_obj = {
                 geneSymbol: allele.geneSymbol,
@@ -259,6 +262,16 @@ function parseCarHgvsLoop(alleles, variant) {
             variant['tempAlleles'].push(temp_allele_obj);
         }
     });
+    // Evaluate whether there are overlapping genes in the variant
+    // If so, we won't try constructing the canonical transcript title.
+    // Instead, we just show the GRCh38 HGVS representation for the variant title.
+    // Hence, delete the variant['tempAlleles'] as it is no longer useful.
+    let genes = []; // For keeping track of overlapping genes
+    variant['tempAlleles'].forEach(item => {
+        let match = genes.find(gene => gene === item.geneSymbol);
+        if (!match) genes.push(item.geneSymbol);
+    });
+    if (genes.length > 1) delete variant['tempAlleles'];
     return variant;
 }
 
