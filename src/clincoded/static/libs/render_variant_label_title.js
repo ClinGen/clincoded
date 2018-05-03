@@ -23,7 +23,7 @@ export function renderVariantLabelAndTitle(variant, linkout, showInHeader) {
         return (
             <div className="row">
                 <span className="col-sm-5 control-label"><label><strong>{variantLabel}</strong></label></span>
-                <span className={variant.clinvarVariantTitle ? "col-sm-7 text-no-input" : "col-sm-7 text-no-input clinvar-preferred-title"}>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}</span>
+                <span className={variant.clinvarVariantTitle ? "col-sm-7 text-no-input clinvar-preferred-title" : "col-sm-7 text-no-input"}>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}</span>
             </div>
         );
     } else if (showInHeader) {
