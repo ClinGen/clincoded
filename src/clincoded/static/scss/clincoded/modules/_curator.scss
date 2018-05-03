@@ -3521,3 +3521,15 @@ table.login-users-interpretations {
         }
     }
 }
+
+/* Styles for hovering tool tip upon mouseover variant title "i" icon */
+.variant-title-explanation {
+    font-size: 90%;
+    margin-left: 5px;
+
+    /* Overriding tool tip width */
+    [data-tooltip]:before {
+        margin-left: -120px;
+        width: 240px;
+    }
+}
