@@ -245,7 +245,6 @@ write_files:
 - path: /var/awslogs/etc/awslogs.conf
   content: |
     [/var/log/elasticsearch]
-    ""datetime_format = %b %d %Y %H:%M:%S""
     file = /var/log/elasticsearch/elasticsearch.log
     buffer_duration = 5000
     log_stream_name = {hostname}
