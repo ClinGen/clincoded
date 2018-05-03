@@ -3524,7 +3524,7 @@ table.login-users-interpretations {
 
 /* Styles for hovering tool tip upon mouseover variant title "i" icon */
 .variant-title-explanation {
-    font-size: 90%;
+    font-size: 85%;
     margin-left: 5px;
 
     /* Overriding tool tip width */
@@ -3532,4 +3532,8 @@ table.login-users-interpretations {
         margin-left: -120px;
         width: 240px;
     }
+}
+
+.variant-panel .variant-title-explanation {
+    font-size: 100%;
 }
