@@ -2,6 +2,7 @@
 import React from 'react';
 import { external_url_map } from '../components/globals';
 import { renderVariantTitle } from './render_variant_title';
+import { renderVariantTitleExplanation } from './render_variant_title_explanation';
 
 /**
  * Wrapper function to render variant type label and appropriate title
@@ -22,7 +23,7 @@ export function renderVariantLabelAndTitle(variant, linkout, showInHeader) {
         return (
             <div className="row">
                 <span className="col-sm-5 control-label"><label><strong>{variantLabel}</strong></label></span>
-                <span className={variant.clinvarVariantTitle ? "col-sm-7 text-no-input" : "col-sm-7 text-no-input clinvar-preferred-title"}>{renderVariantTitle(variant)}</span>
+                <span className={variant.clinvarVariantTitle ? "col-sm-7 text-no-input" : "col-sm-7 text-no-input clinvar-preferred-title"}>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}</span>
             </div>
         );
     } else if (showInHeader) {
