@@ -2824,7 +2824,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
-                        (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
+                        (e.g. UBERON:0015228 or UBERON_0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
@@ -2832,7 +2832,7 @@ export function renderWarning(context) {
             { context === 'CL' ?
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
-                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
+                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL:0000057 or CL_0000057).
                         If you are unable to find an appropriate CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
@@ -2842,7 +2842,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
-                        (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
+                        (e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
