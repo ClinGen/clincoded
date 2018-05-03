@@ -2091,7 +2091,7 @@ function TypeFunctionalAlteration(uniprotId) {
                     <Input type="textarea" ref="funcalt.patientCells" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCells')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={FA_patientCells} placeholder="e.g. CL:0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationPCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="funcalt.patientCellsFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
@@ -2112,7 +2112,7 @@ function TypeFunctionalAlteration(uniprotId) {
                     <Input type="textarea" ref="funcalt.nonPatientCells" label={<span>Non-patient cell type <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.nonPatientCells')} clearError={this.clrFormErrors.bind(null, 'funcalt.nonPatientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_nonPatientCells} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={FA_nonPatientCells} placeholder="e.g. EFO:0001187, or CL:0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationNPCells_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="funcalt.nonPatientCellsFreeText" label={<span>Non-patient cell type <span className="normal">(free text)</span>:</span>}
@@ -2238,7 +2238,7 @@ function TypeModelSystems() {
                     <Input type="textarea" ref="cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO:0001187, or CL:0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
@@ -2393,7 +2393,7 @@ function TypeRescue() {
                     <Input type="textarea" ref="rescue.cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.cellCulture')} clearError={this.clrFormErrors.bind(null, 'rescue.cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={RES_cellCulture} placeholder="e.g. EFO:0001187, or CL:0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescueCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="rescue.cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
@@ -2414,7 +2414,7 @@ function TypeRescue() {
                     <Input type="textarea" ref="rescue.patientCells" label={<span>Patient cell type/line <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCells')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={RES_patientCells} placeholder="e.g. CL:0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescuePCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="rescue.patientCellsFreeText" label={<span>Patient cell type/line <span className="normal">(free text)</span>:</span>}
