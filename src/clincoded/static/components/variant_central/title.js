@@ -6,6 +6,7 @@ import _ from 'underscore';
 import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
 import { queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 import { renderVariantTitle } from '../../libs/render_variant_title';
+import { renderVariantTitleExplanation } from '../../libs/render_variant_title_explanation';
 
 // General purpose title rendering
 var Title = module.exports.Title = createReactClass({
@@ -99,7 +100,7 @@ var Title = module.exports.Title = createReactClass({
 
         return (
             <div>
-                <h1>{renderVariantTitle(variant)}{this.props.children}</h1>
+                <h1>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}{this.props.children}</h1>
                 <h2>{this.renderSubtitle(interpretation, variant)}</h2>
                 {variant && calculatePatho_button ?
                     <div className="btn-vertical-space">
