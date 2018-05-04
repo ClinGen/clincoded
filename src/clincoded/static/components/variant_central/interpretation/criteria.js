@@ -67,9 +67,15 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
                 window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'tab', mappingTab[category]));
             }
             if (selectedSubtab) {
-                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', mappingSubtab[key]));
+                if (mappingSubtab[key]) {
+                    window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', mappingSubtab[key]));
+                } else {
+                    window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', ''));
+                }
             } else {
-                window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'subtab', mappingSubtab[key]));
+                if (mappingSubtab[key]) {
+                    window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'subtab', mappingSubtab[key]));
+                }
             }
             if (selectedCriteria) {
                 window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'criteria', key));
