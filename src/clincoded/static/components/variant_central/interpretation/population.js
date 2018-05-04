@@ -15,6 +15,7 @@ import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { findDiffKeyValuesMixin } from './shared/find_diff';
 import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
@@ -65,7 +66,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         loading_ensemblVariation: PropTypes.bool,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
-        session: PropTypes.object
+        session: PropTypes.object,
+        selectedCriteria: PropTypes.string
     
     },
 
@@ -116,7 +118,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
-            loading_ensemblVariation: this.props.loading_ensemblVariation
+            loading_ensemblVariation: this.props.loading_ensemblVariation,
+            selectedCriteria: this.props.selectedCriteria
         };
     },
 
@@ -146,9 +149,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseTGenomesData(this.props.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
-
         if (this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
+        }
+        if (this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
         }
     },
 
@@ -176,6 +181,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
+        }
+        if (nextProps.selectedCriteria) {
+            this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+            });
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,

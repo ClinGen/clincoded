@@ -8,6 +8,7 @@ import { RestMixin } from '../../rest';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { CompleteSection } from './shared/complete_section';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
 var vciFormHelper = require('./shared/form');
 var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
@@ -23,24 +24,37 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         updateInterpretationObj: PropTypes.func,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
-        session: PropTypes.object
+        session: PropTypes.object,
+        selectedCriteria: PropTypes.string
     },
 
-    getInitialState: function() {
+    getInitialState() {
         return {
             data: this.props.data,
             clinvar_id: null,
             interpretation: this.props.interpretation,
             submitBusy: false,
-            pmid: 0
+            pmid: 0,
+            selectedCriteria: this.props.selectedCriteria
         };
     },
 
-    componentWillReceiveProps: function(nextProps) {
-        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
+    componentDidMount() {
+        if (this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+        }
     },
 
-    render: function() {
+    componentWillReceiveProps(nextProps) {
+        this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
+        if (nextProps.selectedCriteria) {
+            this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+            });
+        }
+    },
+
+    render() {
         const affiliation = this.props.affiliation, session = this.props.session;
 
         return (

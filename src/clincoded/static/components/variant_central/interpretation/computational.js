@@ -17,6 +17,7 @@ import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
 import { parseKeyValue } from '../helpers/parse_key_value';
 import PopOverComponent from '../../../libs/bootstrap/popover';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
@@ -122,7 +123,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         ext_singleNucleotide: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_clinvarEsearch: PropTypes.bool,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        selectedSubtab: PropTypes.string,
+        selectedCriteria: PropTypes.string
     },
 
     getInitialState: function() {
@@ -132,7 +135,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             interpretation: this.props.interpretation,
             hasConservationData: false,
             hasOtherPredData: false,
-            selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
+            selectedSubtab: this.props.selectedSubtab,
+            selectedCriteria: this.props.selectedCriteria,
             codonObj: {},
             computationObj: {
                 conservation: {
@@ -185,9 +189,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = this.props.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
-
         if (this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
+        }
+        if (this.state.selectedSubtab && this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
         }
     },
 
@@ -208,6 +214,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
+        }
+        if (nextProps.selectedSubtab) {
+            this.setState({selectedSubtab: nextProps.selectedSubtab}, () => {
+                if (nextProps.selectedCriteria) {
+                    this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                        setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+                    });
+                }
+            });
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
@@ -434,6 +449,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         } else {
             this.setState({selectedSubtab: subtab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', subtab));
+        }
+        // Remove the criteria param whenever the subtab is changed
+        if (queryKeyValue('criteria', window.location.href)) {
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'criteria', ''));
         }
     },
 
