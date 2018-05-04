@@ -19,7 +19,8 @@ import { CurationInterpretationGeneSpecific } from './interpretation/gene_specif
 // Import pathogenicity calculator
 import { PathogenicityCalculator } from './interpretation/shared/calculator';
 
-var validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+const validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+const validSubtabs = ['missense', 'lof', 'silent-intron', 'indel'];
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = createReactClass({
@@ -51,6 +52,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_myGeneInfo: PropTypes.bool,
         setCalculatedPathogenicity: PropTypes.func,
         selectedTab: PropTypes.string,
+        selectedSubtab: PropTypes.string,
+        selectedCriteria: PropTypes.string,
         affiliation: PropTypes.object
     },
 
@@ -79,7 +82,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_myGeneInfo: this.props.loading_myGeneInfo,
             //remember current tab/subtab so user will land on that tab when interpretation starts
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info')
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
+            selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validSubtabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
+            selectedCriteria: this.props.selectedCriteria
         };
     },
 
@@ -123,6 +128,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.selectedTab) {
             this.setState({selectedTab: nextProps.selectedTab});
         }
+        if (nextProps.selectedSubtab) {
+            this.setState({selectedSubtab: nextProps.selectedSubtab});
+        }
+        if (nextProps.selectedCriteria) {
+            this.setState({selectedCriteria: nextProps.selectedCriteria});
+        }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
@@ -144,6 +155,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         } else {
             this.setState({selectedTab: tab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', tab));
+        }
+        // Remove the criteria param whenever the tab is changed
+        if (queryKeyValue('criteria', window.location.href)) {
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'criteria', ''));
         }
         this.props.getSelectedTab(tab);
     },
@@ -194,7 +209,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
-                            affiliation={this.props.affiliation} />
+                            affiliation={this.props.affiliation}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'predictors' ?
@@ -207,19 +223,23 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
-                            affiliation={this.props.affiliation} />
+                            affiliation={this.props.affiliation}
+                            selectedSubtab={this.state.selectedSubtab}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'experimental' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'segregation-case' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'gene-centric' ?
