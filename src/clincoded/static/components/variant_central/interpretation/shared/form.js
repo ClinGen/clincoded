@@ -482,7 +482,7 @@ export function evalFormDropdownSectionWrapper(criteriaList, disableEvalForm) {
         <div>
             {criteriaList.map((criteria, i) => {
                 return (
-                    <span key={i} id={criteria}>
+                    <span key={i}>
                         {evalFormValueDropdown.call(this, criteria, disableEvalForm)}
                         {i < criteriaList.length - 1 ? <span className="col-xs-3 pad-bottom"><span className="pull-right">- or -</span></span> : null}
                         <div className="clear"></div>
