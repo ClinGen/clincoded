@@ -55,10 +55,10 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
     handleClick(key, category, e) {
         e.preventDefault(); e.stopPropagation();
 
-        const interpretation = this.props.interpretation,
-                selectedTab = this.state.selectedTab,
-                selectedSubtab = queryKeyValue('subtab', window.location.href),
-                selectedCriteria = queryKeyValue('criteria', window.location.href);
+        const interpretation = this.props.interpretation;
+        const selectedTab = this.state.selectedTab;
+        const selectedSubtab = queryKeyValue('subtab', window.location.href);
+        const selectedCriteria = queryKeyValue('criteria', window.location.href);
 
         if (interpretation) {
             if (selectedTab) {
@@ -88,7 +88,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
 
     // Method to render individual criteria codes and their respective tooltip
     // 'data-status' attribute flags whether a criterion is met
-    renderCriteriaBar: function(key, evidence, interpretation) {
+    renderCriteriaBar(key, evidence, interpretation) {
         let status = 'not-evaluated';
         // Flag 'met' criteria via [data-status]
         let evalArray = interpretation.evaluations;
@@ -102,9 +102,8 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
             }
         }
         return (
-            <button className={'btn btn-default ' + evidence[key].class + ' ' + evidence[key].category
-                + this.getCurrentTab(evidence[key].category)}
-                type="button" key={key} data-status={status} data-
+            <button className={'btn btn-default ' + evidence[key].class + ' ' + evidence[key].category + this.getCurrentTab(evidence[key].category)}
+                type="button" key={key} data-status={status}
                 data-toggle="tooltip" data-placement="top"
                 data-tooltip={evidence[key].definition}
                 onClick={this.handleClick.bind(this, key, evidence[key].category)}>
@@ -114,7 +113,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
     },
 
     // Method to return current tab
-    getCurrentTab: function(category) {
+    getCurrentTab(category) {
         let currentTabName, className = '';
         let currentTab = this.state.selectedTab;
         if (currentTab) {
@@ -155,7 +154,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
                             })}
                         </div> 
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }
