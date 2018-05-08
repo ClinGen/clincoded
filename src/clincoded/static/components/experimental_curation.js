@@ -102,8 +102,7 @@ var ExperimentalCuration = createReactClass({
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
             uniprotId: '',
-            formError: false,
-            scoreDisabled: true // Flag to enable/disable scoring
+            formError: false
         };
     },
 
@@ -175,12 +174,6 @@ var ExperimentalCuration = createReactClass({
                 expressedInPatients: false,
                 patientVariantRescue: false,
                 wildTypeRescuePhenotype: false
-            }, () => {
-                if (this.state.experimentalType.indexOf('Functional Alteration') > -1 || this.state.experimentalType.indexOf('Model Systems') > -1) {
-                    this.setState({scoreDisabled: false});
-                } else {
-                    this.setState({scoreDisabled: true});
-                }
             });
             if (this.state.experimentalNameVisible) {
                 this.refs['experimentalName'].setValue('');
@@ -203,18 +196,7 @@ var ExperimentalCuration = createReactClass({
             }
         } else if (ref === 'experimentalSubtype') {
             var tempExperimentalSubtype = this.refs[ref].getValue();
-            this.setState({experimentalSubtype: tempExperimentalSubtype}, () => {
-                /**
-                 * Selecting the 'Biochemical Function' subtype 'B' option shall enable scoring
-                 */
-                if (this.state.experimentalType.indexOf('Biochemical Function') > -1) {
-                    if (this.state.experimentalSubtype.indexOf('B. Gene function consistent with phenotype(s)') > -1) {
-                        this.setState({scoreDisabled: false});
-                    } else {
-                        this.setState({scoreDisabled: true});
-                    }
-                }
-            });
+            this.setState({experimentalSubtype: tempExperimentalSubtype});
             // if assessmentTracker was set previously, reset its value
             if (this.cv.assessmentTracker) {
                 // set values for assessmentTracker
@@ -253,15 +235,11 @@ var ExperimentalCuration = createReactClass({
             }
             if (this.refs['normalExpression.expressedInTissue']) {
                 this.refs['normalExpression.expressedInTissue'].resetValue();
-                this.setState({expressedInTissue: false}, () => {
-                    this.toggleScoring(this.state.expressedInTissue);
-                });
+                this.setState({expressedInTissue: false});
             }
             if (this.refs['alteredExpression.expressedInPatients']) {
                 this.refs['alteredExpression.expressedInPatients'].resetValue();
-                this.setState({expressedInPatients: false}, () => {
-                    this.toggleScoring(this.state.expressedInPatients);
-                });
+                this.setState({expressedInPatients: false});
             }
             // If a subtype is not selected, do not let the user specify the experimental name
             if (tempExperimentalSubtype == 'none' || tempExperimentalSubtype === '') {
@@ -276,41 +254,31 @@ var ExperimentalCuration = createReactClass({
                 });
             }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
-            this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.geneImplicatedWithDisease);
-            });
+            this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
             if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
                 this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
                 this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'geneImplicatedInDisease') {
-            this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.geneImplicatedInDisease);
-            });
+            this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()});
             if (this.refs['geneImplicatedInDisease'].getValue() === false) {
                 this.refs['relationshipOfOtherGenesToDisese'].resetValue();
                 this.refs['evidenceInPaper'].resetValue();
             }
         } else if (ref === 'normalExpression.expressedInTissue') {
-            this.setState({expressedInTissue: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.expressedInTissue);
-            });
+            this.setState({expressedInTissue: this.refs[ref].toggleValue()});
             if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
                 this.refs['normalExpression.evidence'].resetValue();
                 this.refs['normalExpression.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'alteredExpression.expressedInPatients') {
-            this.setState({expressedInPatients: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.expressedInPatients);
-            });
+            this.setState({expressedInPatients: this.refs[ref].toggleValue()});
             if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
                 this.refs['alteredExpression.evidence'].resetValue();
                 this.refs['alteredExpression.evidenceInPaper'].resetValue();
             }
         } else if (ref === 'wildTypeRescuePhenotype') {
-            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.wildTypeRescuePhenotype);
-            });
+            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO') {
@@ -546,15 +514,12 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
-                            this.setState({geneImplicatedWithDisease: bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease}, () => {
-                                this.toggleScoring(this.state.geneImplicatedWithDisease);
-                            });
+                            this.setState({geneImplicatedWithDisease: bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                         }
                     } else if (!_.isEmpty(bioFunc.geneFunctionConsistentWithPhenotype)) {
                         this.setState({
                             experimentalSubtype: "B. Gene function consistent with phenotype(s)",
-                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B'),
-                            scoreDisabled: false
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
                         });
                         if (bioFunc.geneFunctionConsistentWithPhenotype.phenotypeHPO && bioFunc.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
                             this.setState({'biochemicalFunctionHPO': true});
@@ -571,9 +536,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({bioChemicalFunctionIF_FreeText: true}) : this.setState({bioChemicalFunctionIF_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Protein Interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
-                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease}, () => {
-                            this.toggleScoring(this.state.geneImplicatedInDisease);
-                        });
+                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Expression') {
                     let expression = stateObj.experimental.expression;
@@ -583,9 +546,7 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (expression.normalExpression.expressedInTissue) {
-                            this.setState({expressedInTissue: expression.normalExpression.expressedInTissue}, () => {
-                                this.toggleScoring(this.state.expressedInTissue);
-                            });
+                            this.setState({expressedInTissue: expression.normalExpression.expressedInTissue});
                         }
                     } else if (!_.isEmpty(expression.alteredExpression)) {
                         this.setState({
@@ -593,9 +554,7 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
                         });
                         if (expression.alteredExpression.expressedInPatients) {
-                            this.setState({expressedInPatients: expression.alteredExpression.expressedInPatients}, () => {
-                                this.toggleScoring(this.state.expressedInPatients);
-                            });
+                            this.setState({expressedInPatients: expression.alteredExpression.expressedInPatients});
                         }
                     }
                     // Set boolean state on 'required' prop for Expression 'Organ of Tissue' Uberon ID
@@ -606,7 +565,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({expressionOT_FreeText: true}) : this.setState({expressionOT_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Functional Alteration') {
                     let funcAlt = stateObj.experimental.functionalAlteration;
-                    this.setState({functionalAlterationType: funcAlt.functionalAlterationType, scoreDisabled: false});
+                    this.setState({functionalAlterationType: funcAlt.functionalAlterationType});
                     // Set boolean state on 'required' prop for Functional Alteration 'Patient Cell Type' CL Ontology
                     funcAlt.patientCells && funcAlt.patientCells.length ?
                         this.setState({functionalAlterationPCells_ClId: true}): this.setState({functionalAlterationPCells_ClId: false});
@@ -627,7 +586,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({functionalAlterationNFG_FreeText: true}) : this.setState({functionalAlterationNFG_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Model Systems') {
                     let modelSystems = stateObj.experimental.modelSystems;
-                    this.setState({modelSystemsType: modelSystems.modelSystemsType, scoreDisabled: false});
+                    this.setState({modelSystemsType: modelSystems.modelSystemsType});
                     modelSystems.phenotypeHPOObserved && modelSystems.phenotypeHPOObserved.length ?
                         this.setState({modelSystemsPOMSHPO: true}) : this.setState({modelSystemsPOMSHPO: false});
                     modelSystems.phenotypeFreetextObserved && modelSystems.phenotypeFreetextObserved.length ?
@@ -652,9 +611,7 @@ var ExperimentalCuration = createReactClass({
                         }
                     });
                     if (rescue.wildTypeRescuePhenotype) {
-                        this.setState({wildTypeRescuePhenotype: rescue.wildTypeRescuePhenotype}, () => {
-                            this.toggleScoring(this.state.wildTypeRescuePhenotype);
-                        });
+                        this.setState({wildTypeRescuePhenotype: rescue.wildTypeRescuePhenotype});
                     }
                     if (rescue.hasOwnProperty('patientVariantRescue')) {
                         this.setState({patientVariantRescue: rescue.patientVariantRescue});
@@ -756,14 +713,6 @@ var ExperimentalCuration = createReactClass({
         } else if (typeof prevState.experimentalSubtype !== undefined && prevState.experimentalSubtype !== this.state.experimentalSubtype) {
             this.setState({formErrors: []});
         }
-    },
-
-    /**
-     * Method to set the flag to enable scoring
-     * @param {bool} value - The value of checkbox.
-     */
-    toggleScoring(value) {
-        this.setState({scoreDisabled: !value});
     },
 
     // validate values and return error messages as needed
@@ -1510,8 +1459,10 @@ var ExperimentalCuration = createReactClass({
         // Find any pre-existing scores associated with the evidence
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
         let experimentalEvidenceType;
-        if (this.state.experimentalType === 'Biochemical Function' || this.state.experimentalType === 'Protein Interactions' || this.state.experimentalType === 'Expression') {
+        if (this.state.experimentalType === 'Protein Interactions') {
             experimentalEvidenceType = null;
+        } else if (this.state.experimentalType === 'Biochemical Function' || this.state.experimentalType === 'Expression') {
+            experimentalEvidenceType = this.state.experimentalSubtype;
         } else if (this.state.experimentalType === 'Functional Alteration') {
             experimentalEvidenceType = this.state.functionalAlterationType;
         } else if (this.state.experimentalType === 'Model Systems') {
@@ -1606,7 +1557,7 @@ var ExperimentalCuration = createReactClass({
                                                     <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
                                                         <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
                                                             evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError}
-                                                            scoreDisabled={this.state.scoreDisabled} affiliation={this.props.affiliation} />
+                                                            affiliation={this.props.affiliation} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -2773,8 +2724,21 @@ const ExperimentalViewer = createReactClass({
             this.loadAssessmentTracker(user);
         }
 
-        if (experimental.evidenceType === 'Biochemical Function' || experimental.evidenceType === 'Protein Interactions' || experimental.evidenceType === 'Expression') {
+        if (experimental.evidenceType === 'Protein Interactions') {
             this.setState({experimentalEvidenceType: null});
+        } else if (experimental.evidenceType === 'Biochemical Function') {
+            if (experimental.biochemicalFunction.geneWithSameFunctionSameDisease && Object.keys(experimental.biochemicalFunction.geneWithSameFunctionSameDisease).length) {
+                this.setState({experimentalEvidenceType: 'A. Gene(s) with same function implicated in same disease'});
+            } else {
+                this.setState({experimentalEvidenceType: 'B. Gene function consistent with phenotype(s)'});
+            }
+            this.setState({experimentalEvidenceType: experimental.biochemicalFunction.functionalAlterationType});
+        } else if (experimental.evidenceType === 'Expression') {
+            if (experimental.expression.normalExpression && Object.keys(experimental.expression.normalExpression).length) {
+                this.setState({experimentalEvidenceType: 'A. Gene normally expressed in tissue relevant to the disease'});
+            } else {
+                this.setState({experimentalEvidenceType: 'B. Altered expression in Patients'});
+            }
         } else if (experimental.evidenceType === 'Functional Alteration') {
             this.setState({experimentalEvidenceType: experimental.functionalAlteration.functionalAlterationType});
         } else if (experimental.evidenceType === 'Model Systems') {
