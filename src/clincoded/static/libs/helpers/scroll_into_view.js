@@ -1,12 +1,18 @@
 'use strict';
 
 /**
- * Scroll DOM element into viewport
+ * Find a single DOM element by id or CSS selector
+ * The scroll this DOM element into viewport
  */
-export function scrollElementIntoView(str) {
-    const elementId = '#' + str;
-    const element = document.querySelector(elementId);
-    if (element) {
-        element.scrollIntoView();
+export function scrollElementIntoView(str, selector) {
+    let domElement;
+    if (selector === 'id') {
+        domElement = '#' + str;
+    } else if (selector === 'class') {
+        domElement = '.' + str;
+    }
+    const el = document.querySelector(domElement);
+    if (el) {
+        el.scrollIntoView();
     }
 }
