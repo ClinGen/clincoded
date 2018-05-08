@@ -10,9 +10,10 @@ import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { CompleteSection } from './shared/complete_section';
 import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
-var vciFormHelper = require('./shared/form');
-var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var extraEvidence = require('./shared/extra_evidence');
+const vciFormHelper = require('./shared/form');
+const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
+const extraEvidence = require('./shared/extra_evidence');
 
 // Display the curator data of the curation data
 var CurationInterpretationFunctional = module.exports.CurationInterpretationFunctional = createReactClass({
@@ -41,7 +42,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
 
     componentDidMount() {
         if (this.state.selectedCriteria) {
-            setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+            setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
     },
 
@@ -49,7 +50,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
         if (nextProps.selectedCriteria) {
             this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
-                setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+                setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
             });
         }
     },
@@ -59,7 +60,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
 
         return (
             <div className="variant-interpretation functional">
-                <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-experimental-panel-hotspot-functiona-domain" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -76,7 +78,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
-                <PanelGroup accordion><Panel title="Experimental Studies" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Experimental Studies" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-experimental-panel-experimental-studies" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">

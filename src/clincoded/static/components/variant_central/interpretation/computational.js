@@ -22,6 +22,7 @@ import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
 const extraEvidence = require('./shared/extra_evidence');
 
 const validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
@@ -193,7 +194,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
         }
         if (this.state.selectedSubtab && this.state.selectedCriteria) {
-            setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+            setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
     },
 
@@ -219,7 +220,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.setState({selectedSubtab: nextProps.selectedSubtab}, () => {
                 if (nextProps.selectedCriteria) {
                     this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
-                        setTimeout(scrollElementIntoView(this.state.selectedCriteria), 200);
+                        setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
                     });
                 }
             });
@@ -539,7 +540,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </ul>
                 {this.state.selectedSubtab == '' || this.state.selectedSubtab == 'missense' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-functional-conservation-splicing-predictors" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -795,7 +797,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
 
-                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-other-variants-in-codon" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -825,7 +828,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'lof' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-null-variant-analysis" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -864,7 +868,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'silent-intron' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-molecular-consequence-silent-intron" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -893,7 +898,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'indel' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-molecular-consequence-inframe-indel" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
