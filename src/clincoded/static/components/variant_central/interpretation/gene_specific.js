@@ -68,7 +68,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             <td>{this.parseFloatShort(allExac.syn_z)}</td>
                             <td>{this.parseFloatShort(allExac.mis_z)}</td>
                         </tr>
-                    : null}
+                        : null}
                     {nonPsych ?
                         <tr>
                             <td>Non-psych</td>
@@ -78,7 +78,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             <td>{this.parseFloatShort(nonPsych.syn_z)}</td>
                             <td>{this.parseFloatShort(nonPsych.mis_z)}</td>
                         </tr>
-                    : null}
+                        : null}
                     {nonTcga ?
                         <tr>
                             <td>Non-TCGA</td>
@@ -88,7 +88,7 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                             <td>{this.parseFloatShort(nonTcga.syn_z)}</td>
                             <td>{this.parseFloatShort(nonTcga.mis_z)}</td>
                         </tr>
-                    : null}
+                        : null}
                 </tbody>
             );
         }
@@ -192,12 +192,16 @@ var CurationInterpretationGeneSpecific = module.exports.CurationInterpretationGe
                                         Approved Name: {myGeneInfo.name}<br/>
                                         {(geneSynonyms) ?
                                             <span>Synonyms: {geneSynonyms.join(', ')}</span>
-                                        : null}
+                                            : 'None'}
                                     </dd>
                                 </dl>
                                 <dl className="inline-dl clearfix">
                                     <dt>Entrez Gene:</dt>
-                                    <dd><a href={dbxref_prefix_map['GeneID'] + myGeneInfo.entrezgene.toString()} target="_blank">{myGeneInfo.entrezgene}</a></dd>
+                                    <dd>
+                                        {myGeneInfo.entrezgene ?
+                                            <a href={dbxref_prefix_map['GeneID'] + myGeneInfo.entrezgene.toString()} target="_blank">{myGeneInfo.entrezgene}</a>
+                                            : 'None'}
+                                    </dd>
                                 </dl>
                                 <dl className="inline-dl clearfix">
                                     <dt>Ensembl:</dt>
