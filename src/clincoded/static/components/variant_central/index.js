@@ -321,19 +321,17 @@ var VariantCurationHub = createReactClass({
             } else if (myVariantInfo.dbsnp && myVariantInfo.dbsnp.gene) {
                 geneSymbol = myVariantInfo.dbsnp.gene.symbol;
                 geneId = myVariantInfo.dbsnp.gene.geneid;
-            } else if (myVariantInfo.cadd && myVariantInfo.cadd.gene) {
-                if (typeof myVariantInfo.cadd.gene === 'object') {
+            } else if (myVariantInfo.cadd) {
+                if (myVariantInfo.cadd.gene && !Array.isArray(myVariantInfo.cadd.gene)) {
                     geneSymbol = myVariantInfo.cadd.gene.genename;
                     geneId = myVariantInfo.cadd.gene.gene_id;
-                } else if (Array.isArray(myVariantInfo.cadd.gene)) {
-                    myVariantInfo.cadd.gene.forEach(item => {
-                        if (item.gene_id && item.genename) {
-                            geneSymbol = item.genename;
-                            geneId = item.gene_id;
-                        }
-                    });
+                } else if (myVariantInfo.cadd.gene && Array.isArray(myVariantInfo.cadd.gene)) {
+                    let found = myVariantInfo.cadd.gene.filter(item => item.gene_id && item.genename);
+                    if (found && found.length) {
+                        geneSymbol = found[0].genename;
+                        geneId = found[0].gene_id;
+                    }
                 }
-                
             }
             this.fetchMyGeneInfo(geneSymbol, geneId, 'myVariantInfo');
         }
