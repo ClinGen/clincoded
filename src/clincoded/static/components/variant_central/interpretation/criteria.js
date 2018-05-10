@@ -147,12 +147,15 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
         return (
             <div className="container curation-criteria curation-variant">
                 {interpretation ?
-                    <div className="criteria-bar btn-toolbar" role="toolbar" aria-label="Criteria bar with code buttons">
-                        <div className="criteria-group btn-group btn-group-sm" role="group" aria-label="Criteria code button group">
-                            {keys.map(key => {
-                                return (this.renderCriteriaBar(key, evidenceCodes, interpretation));
-                            })}
-                        </div> 
+                    <div>
+                        <div className="criteria-bar btn-toolbar" role="toolbar" aria-label="Criteria bar with code buttons">
+                            <div className="criteria-group btn-group btn-group-sm" role="group" aria-label="Criteria code button group">
+                                {keys.map(key => {
+                                    return (this.renderCriteriaBar(key, evidenceCodes, interpretation));
+                                })}
+                            </div>
+                        </div>
+                        <p className="criteria-usage-note"><i className="icon icon-info-circle"></i> Mouse over a criterion code to see its description; click on it to go to its evaluation section.</p>
                     </div>
                     : null}
             </div>
