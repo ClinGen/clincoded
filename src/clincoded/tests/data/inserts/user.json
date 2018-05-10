@@ -2623,6 +2623,7 @@
             "10006",
             "10008",
             "10009",
+            "10011",
             "10018"
         ],
         "job_title": "ClinGen Curator",
@@ -4953,6 +4954,9 @@
             "curator"
         ],
         "affiliation": [
+            "10009",
+            "10010",
+            "10011",
             "10015"
         ],
         "job_title": "ClinGen Curator",
@@ -5609,6 +5613,9 @@
         "uuid": "885ca641-16b6-4125-b5cb-022ee7f74946",
         "groups": [
             "curator"
+        ],
+        "affiliation": [
+            "10023"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -6979,6 +6986,7 @@
             "curator"
         ],
         "affiliation": [
+            "10011",
             "10018"
         ],
         "job_title": "ClinGen Curator",
