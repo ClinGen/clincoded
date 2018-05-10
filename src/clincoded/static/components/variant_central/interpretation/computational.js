@@ -17,10 +17,12 @@ import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
 import { parseKeyValue } from '../helpers/parse_key_value';
 import PopOverComponent from '../../../libs/bootstrap/popover';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
 const extraEvidence = require('./shared/extra_evidence');
 
 const validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
@@ -122,7 +124,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         ext_singleNucleotide: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_clinvarEsearch: PropTypes.bool,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        selectedSubtab: PropTypes.string,
+        selectedCriteria: PropTypes.string
     },
 
     getInitialState: function() {
@@ -132,7 +136,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             interpretation: this.props.interpretation,
             hasConservationData: false,
             hasOtherPredData: false,
-            selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
+            selectedSubtab: this.props.selectedSubtab,
+            selectedCriteria: this.props.selectedCriteria,
             codonObj: {},
             computationObj: {
                 conservation: {
@@ -185,9 +190,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = this.props.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
-
         if (this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
+        }
+        if (this.state.selectedSubtab && this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
     },
 
@@ -208,6 +215,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
+        }
+        if (nextProps.selectedSubtab) {
+            this.setState({selectedSubtab: nextProps.selectedSubtab}, () => {
+                if (nextProps.selectedCriteria) {
+                    this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                        setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
+                    });
+                }
+            });
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
@@ -435,6 +451,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.setState({selectedSubtab: subtab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', subtab));
         }
+        // Remove the criteria param whenever the subtab is changed
+        if (queryKeyValue('criteria', window.location.href)) {
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'criteria', ''));
+        }
     },
 
     // Method to temporarily render other variant count in same codon and link out to clinvar
@@ -520,7 +540,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </ul>
                 {this.state.selectedSubtab == '' || this.state.selectedSubtab == 'missense' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-functional-conservation-splicing-predictors" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -776,7 +797,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
 
-                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-other-variants-in-codon" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -806,7 +828,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'lof' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-null-variant-analysis" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -845,7 +868,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'silent-intron' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-molecular-consequence-silent-intron" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -874,7 +898,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'indel' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-molecular-consequence-inframe-indel" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">

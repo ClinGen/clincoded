@@ -2019,6 +2019,18 @@
 }
 
 /* variant curation interface - criteria bar */
+/* temp styles for note below criteria bar */
+.curation-criteria {
+    .criteria-usage-note {
+        color: #aaa;
+        font-size: 95%;
+        line-height: normal;
+        margin-bottom: 0;
+        position: relative;
+        top: -6px;
+    }
+}
+
 .criteria-group.btn-group-sm {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -2026,7 +2038,7 @@
 
 .criteria-group.btn-group-sm .btn {
     background-color: #fff;
-    cursor: default;
+    cursor: pointer;
     padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
