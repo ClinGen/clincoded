@@ -2060,22 +2060,22 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((UBERON_|UBERON:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
     efoids: function(s) {
-        return captureBase(s, /^\s*(EFO_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
-        return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((CL_|CL:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
     efoclids: function(s) {
-        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:|CL_|CL:)\d{7})\s*$/i, true);
     }
 };
 
@@ -2817,7 +2817,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
-                        (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
+                        (e.g. UBERON:0015228 or UBERON_0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
@@ -2825,7 +2825,7 @@ export function renderWarning(context) {
             { context === 'CL' ?
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
-                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
+                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL:0000057 or CL_0000057).
                         If you are unable to find an appropriate CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
@@ -2835,7 +2835,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
-                        (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
+                        (e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>

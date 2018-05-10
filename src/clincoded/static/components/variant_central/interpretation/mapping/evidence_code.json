@@ -38,7 +38,7 @@
         "class": "benign-supporting",
         "definition": "Missense in gene where primarily truncating cause disease",
         "definitionLong": "Missense variant in a gene for which primarily truncating variants are known to cause disease",
-        "category": "predictors",
+        "category": "computational",
         "diseaseDependent": true
     },
     "BP2": {

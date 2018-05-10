@@ -20,7 +20,7 @@ import { CurationInterpretationGeneSpecific } from './interpretation/gene_specif
 // Import pathogenicity calculator
 import { PathogenicityCalculator } from './interpretation/shared/calculator';
 
-var validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+var validTabs = ['basic-info', 'population', 'variant-type', 'experimental', 'segregation-case', 'gene-centric'];
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = createReactClass({
@@ -164,7 +164,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population {completedSections.indexOf('population') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('variant-type')} aria-selected={this.state.selectedTab == 'variant-type'}>Variant Type {completedSections.indexOf('variant-type') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Case/Segregation {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric</li>
@@ -198,7 +198,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             affiliation={this.props.affiliation} />
                     </div>
                     : null}
-                    {this.state.selectedTab == 'predictors' ?
+                    {this.state.selectedTab == 'variant-type' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationComputational data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
