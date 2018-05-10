@@ -214,5 +214,19 @@
         "approver": [
             "Deb Ritter"
         ]
+    },
+    {
+        "affiliation_id": "10025",
+        "affiliation_abbreviation": "CV-LQTS-EP",
+        "affiliation_fullname": "ClinGen Cardiovascular LQTS Expert Panel",
+        "publish_approval": true,
+        "approver": [
+            "Lisa Kurtz",
+            "Arthur Wilde",
+            "Melanie Care",
+            "Amy Sturm",
+            "Valeria Novelli",
+            "Michael Gollob"
+        ]
     }
 ]
