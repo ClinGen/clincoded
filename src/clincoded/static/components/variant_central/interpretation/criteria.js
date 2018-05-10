@@ -8,8 +8,8 @@ const evidenceCodes = require('./mapping/evidence_code.json');
 
 const mappingTab = {
     population: 'population',
-    predictors: 'predictors',
-    computational: 'predictors',
+    predictors: 'variant-type',
+    computational: 'variant-type',
     functional: 'experimental',
     experimental: 'experimental',
     segregation: 'segregation-case'
