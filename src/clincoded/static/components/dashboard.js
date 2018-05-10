@@ -14,6 +14,7 @@ import { showActivityIndicator } from './activity_indicator';
 import { findNonEmptyArray } from '../libs/helpers/find_array';
 import { sortListByDate } from '../libs/helpers/sort';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
+import { renderVariantTitle } from '../libs/render_variant_title';
 import * as curator from './curator';
 
 var fetched = require('./fetched');
@@ -189,9 +190,7 @@ var Dashboard = createReactClass({
                                 uuid: vciInterpResult.uuid,
                                 interpretation: vciInterpResult,
                                 variantUuid: vciInterpResult.variant.uuid,
-                                clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
-                                hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
-                                hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
+                                variant: vciInterpResult.variant,
                                 diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
                                 modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
                                 date_created: vciInterpResult.date_created
@@ -245,9 +244,7 @@ var Dashboard = createReactClass({
                             uuid: interpretation.uuid,
                             interpretation: interpretation,
                             variantUuid: interpretation.variant.uuid,
-                            clinvarVariantTitle: interpretation.variant.clinvarVariantTitle,
-                            hgvsName37: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh37 ? interpretation.variant.hgvsNames.GRCh37 : null,
-                            hgvsName38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
+                            variant: interpretation.variant,
                             diseaseTerm: interpretation.disease ? interpretation.disease.term : null,
                             modeInheritance: interpretation.modeInheritance ? this.cleanHpoName(interpretation.modeInheritance) : null,
                             modified_by: interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title,
@@ -453,12 +450,7 @@ var Dashboard = createReactClass({
                                                 <a key={item.uuid}
                                                     className="individual-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>
-                                                        {item.clinvarVariantTitle
-                                                            ? item.clinvarVariantTitle
-                                                            : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
-                                                        }
-                                                    </strong></span>
+                                                    <span className="variant-title"><strong>{renderVariantTitle(item.variant)}</strong></span>
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
@@ -508,12 +500,7 @@ var Dashboard = createReactClass({
                                                 <a key={item.uuid}
                                                     className="affiliated-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>
-                                                        {item.clinvarVariantTitle
-                                                            ? item.clinvarVariantTitle
-                                                            : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
-                                                        }
-                                                    </strong></span>
+                                                    <span className="variant-title"><strong>{renderVariantTitle(item.variant)}</strong></span>
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>

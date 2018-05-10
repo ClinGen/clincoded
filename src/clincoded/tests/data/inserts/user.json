@@ -1985,7 +1985,8 @@
             "curator"
         ],
         "affiliation": [
-            "10023"
+            "10023",
+            "10024"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -7488,6 +7489,66 @@
         "first_name": "Minjie",
         "last_name": "Luo",
         "uuid": "b1f57382-c7e8-4ad3-936b-ed4efde423e4",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "a.allison@mac.com",
+        "first_name": "Andrew",
+        "last_name": "Allison",
+        "uuid": "08a1212b-f7c0-4ef6-81fe-c2d9af572817",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "johnpaul.plazzer@gmail.com",
+        "first_name": "John-Paul",
+        "last_name": "Plazzer",
+        "uuid": "51e6cc90-e26f-469c-a51e-d30f71c227cb",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "imoeller@rhythmtx.com",
+        "first_name": "Ida",
+        "last_name": "Hatoum Moeller",
+        "uuid": "0aca35bf-d4d2-4747-8908-c169c453a3b9",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "sshenbagam@valleychildrens.org",
+        "first_name": "Shruti",
+        "last_name": "Shenbagam",
+        "uuid": "e0ccce8f-8136-451a-bfa0-9f3e34691841",
         "groups": [
             "curator"
         ],

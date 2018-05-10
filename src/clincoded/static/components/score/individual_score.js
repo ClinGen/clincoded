@@ -12,6 +12,7 @@ import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 import { affiliationScore } from './helpers/affiliation_score';
 import { getPathogenicityFromVariant } from '../curator';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 // Render scoring panel in Gene Curation Interface
 const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
@@ -532,7 +533,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     return (
                         <span key={i} className="variant-gene-impact-curation-link-item">
                             <a className="variant-gene-impact-curation-link" href={variantCurationUrl} target="_blank">
-                                {variant.clinvarVariantTitle ? <span>{variant.clinvarVariantTitle}</span> : <span>{variant.grch38} (GRCh38)</span>}
+                                <span>{renderVariantTitle(variant)}</span>
                             </a>
                         </span>
                     );

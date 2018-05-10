@@ -16,7 +16,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "clinvarVariantId": {
             "title": "Variant ID",
@@ -34,6 +34,11 @@
             "title": "ClinVar Variant Title",
             "type": "string",
             "default": ""
+        },
+        "canonicalTranscriptTitle": {
+            "title": "Canonical Transcript Title",
+            "description": "Variant title constructed with canonical transcript, gene symbol and protein change when the variant is not in ClinVar",
+            "type": "string"
         },
         "clinVarRCVs": {
             "title": "ClinVar RCV Accession",
