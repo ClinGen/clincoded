@@ -373,8 +373,9 @@ var VariantCurationHub = createReactClass({
     // and pass the data object to child component
     fetchMyGeneInfo: function(geneSymbol, geneId, source) {
         if (geneSymbol) {
-            this.getRestData('/genes/' + geneSymbol).then(response => {
-                this.setState({ext_geneSynonyms: response.synonyms});
+            this.getRestData(this.props.href_url.protocol + external_url_map['HGNCFetch'] + geneSymbol).then(result => {
+                const synonyms = result.response.docs[0].alias_symbol ? result.response.docs[0].alias_symbol : null;
+                this.setState({ext_geneSynonyms: synonyms});
             }).catch(err => {
                 console.log('Local Gene Symbol Fetch ERROR=: %o', err);
             });
@@ -405,7 +406,8 @@ var VariantCurationHub = createReactClass({
      * @param {object} variant - The variant data object
      */
     fetchPageData(variant) {
-        if (variant) {
+        const hostname = this.props.href_url && this.props.href_url.hostname;
+        if (variant && (hostname && hostname !== 'localhost')) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37', true);
             let hgvsParts = hgvs_notation.split(':');
             let position = hgvsParts[1].replace(/[^\d]/g, '');
