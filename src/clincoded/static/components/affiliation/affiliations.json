@@ -80,13 +80,13 @@
     {
         "affiliation_id": "10009",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Storage Diseases Working Group",
+        "affiliation_fullname": "ClinGen Storage Diseases Expert Panel",
         "publish_approval": true
     },
     {
         "affiliation_id": "10010",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Fatty Acid Oxidation Disorders Working Group",
+        "affiliation_fullname": "ClinGen Fatty Acid Oxidation Disorders Expert Panel",
         "publish_approval": true,
         "approver": [
             "Heather Baudet",
@@ -96,7 +96,7 @@
     {
         "affiliation_id": "10011",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Aminoacidopathies Working Group",
+        "affiliation_fullname": "ClinGen Aminoacidopathies Expert Panel",
         "publish_approval": true
     },
     {
