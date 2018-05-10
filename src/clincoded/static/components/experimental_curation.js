@@ -14,6 +14,7 @@ import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import { ScoreExperimental } from './score/experimental_score';
 import { ScoreViewer } from './score/viewer';
+import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -692,7 +693,8 @@ var ExperimentalCuration = createReactClass({
                                     'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
                                     'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                     'carId': variants[i].carId ? variants[i].carId : null,
-                                    'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                    'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                    'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                     'uuid': variants[i].uuid
                                 };
                             }
@@ -1447,7 +1449,8 @@ var ExperimentalCuration = createReactClass({
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
-                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid
             };
         } else {
@@ -2501,14 +2504,7 @@ function ExperimentalDataVariant() {
                                             </dl>
                                         </div>
                                         : null }
-                                    {variant.clinvarVariantTitle ?
-                                        <div>
-                                            <dl className="dl-horizontal">
-                                                <dt>ClinVar Preferred Title</dt>
-                                                <dd>{variant.clinvarVariantTitle}</dd>
-                                            </dl>
-                                        </div>
-                                        : null }
+                                    {renderVariantLabelAndTitle(variant)}
                                     {variant.otherDescription ?
                                         <div>
                                             <dl className="dl-horizontal">
@@ -2554,24 +2550,13 @@ function ExperimentalDataVariant() {
                                                 <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].clinvarVariantTitle ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                            </div>
-                                            : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label>{LabelCARVariant(this.state.variantRequired)}</label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
-                                        {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
-                                            </div>
-                                            : null}
+                                        {renderVariantLabelAndTitle(this.state.variantInfo[i], true)}
                                     </div>
                                     : null}
                                 <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''} handleChange={this.handleChange}
@@ -2616,16 +2601,8 @@ const LabelClinVarVariant = () => {
     return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
 };
 
-const LabelClinVarVariantTitle = () => {
-    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
-};
-
 const LabelCARVariant = variantRequired => {
     return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{variantRequired ? ' *' : null}</strong></span>;
-};
-
-const LabelCARVariantTitle = () => {
-    return <span><strong>Genomic HGVS Title:</strong></span>;
 };
 
 /**
@@ -3295,14 +3272,6 @@ const ExperimentalViewer = createReactClass({
                                                     </dl>
                                                 </div>
                                                 : null }
-                                            {variant.clinvarVariantTitle ?
-                                                <div>
-                                                    <dl className="dl-horizontal">
-                                                        <dt>ClinVar Preferred Title</dt>
-                                                        <dd>{variant.clinvarVariantTitle}</dd>
-                                                    </dl>
-                                                </div>
-                                                : null }
                                             {variant.carId ?
                                                 <div>
                                                     <dl className="dl-horizontal">
@@ -3311,14 +3280,7 @@ const ExperimentalViewer = createReactClass({
                                                     </dl>
                                                 </div>
                                                 : null }
-                                            {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
-                                                <div>
-                                                    <dl className="dl-horizontal">
-                                                        <dt>Genomic HGVS Title</dt>
-                                                        <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                                    </dl>
-                                                </div>
-                                                : null }
+                                            {renderVariantLabelAndTitle(variant)}
                                             {variant.otherDescription ?
                                                 <div>
                                                     <dl className="dl-horizontal">

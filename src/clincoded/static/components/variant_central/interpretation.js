@@ -6,6 +6,7 @@ import _ from 'underscore';
 import moment from 'moment';
 import * as curator from '../curator';
 import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';
@@ -335,10 +336,9 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                     interpretation_uuid: interpretation.uuid,
                     interpretation_status: interpretation.interpretation_status,
                     variantUuid: interpretation.variant.uuid,
+                    variant: interpretation.variant,
                     clinvarVariantId: interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null,
-                    clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
                     carId: interpretation.variant.carId ? interpretation.variant.carId : null,
-                    grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
                     diseaseId: interpretation.disease && interpretation.disease.diseaseId ? interpretation.disease.diseaseId : null,
                     disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
                     modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
@@ -509,7 +509,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                                     </div>
                                     */}
                                     <div className="table-cell-gdm-main">
-                                        <div>{interpretation.clinvarVariantTitle ? interpretation.clinvarVariantTitle : interpretation.grch38}</div>
+                                        <div>{renderVariantTitle(interpretation.variant)}</div>
                                         <div>
                                             {interpretation.clinvarVariantId ? <span>ClinVar Variation ID: <strong>{interpretation.clinvarVariantId}</strong></span> : null}
                                             {interpretation.clinvarVariantId && interpretation.carId ? " // " : null}

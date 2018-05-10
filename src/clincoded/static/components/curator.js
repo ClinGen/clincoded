@@ -16,6 +16,7 @@ import { sortListByDate } from '../libs/helpers/sort';
 import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { getAffiliationName } from '../libs/get_affiliation_name';
+import { renderVariantTitle } from '../libs/render_variant_title';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -654,16 +655,6 @@ var searchProbandIndividual = function(individualList, variantList) {
     return false;
 };
 
-// function to get the preferred display title for variants. Current preferential order is clinvar variant title > clinvar variant ID
-// > grch38 hgvs term > CA ID
-var getVariantTitle = function(variant) {
-    let clinvarRepresentation = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : null);
-    let carRepresentation = variant.hgvsNames && variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.carId ? variant.carId : null);
-    let variantTitle = clinvarRepresentation ? clinvarRepresentation : carRepresentation;
-
-    return variantTitle;
-};
-
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = createReactClass({
     propTypes: {
@@ -688,7 +679,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                         <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
-                            var variantName = getVariantTitle(variant);
+                            var variantName = renderVariantTitle(variant);
                             var userPathogenicity = null, affiliatedPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -1225,11 +1216,13 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, af
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
-    let variantTitle = getVariantTitle(variant);
+    let variantTitle = renderVariantTitle(variant);
+    // Parse variant title text for the <span /> 'title' attribbute
+    let elementTitleAttribute = renderVariantTitle(variant, true);
 
     return (
         <div className="panel-evidence-group">
-            <h5><span className="title-ellipsis dotted" title={variantTitle}>{variantTitle}</span></h5>
+            <h5><span className="title-ellipsis dotted" title={elementTitleAttribute}>{variantTitle}</span></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
