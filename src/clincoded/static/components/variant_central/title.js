@@ -5,6 +5,8 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
 import { queryKeyValue, editQueryValue, addQueryKey } from '../globals';
+import { renderVariantTitle } from '../../libs/render_variant_title';
+import { renderVariantTitleExplanation } from '../../libs/render_variant_title_explanation';
 
 // General purpose title rendering
 var Title = module.exports.Title = createReactClass({
@@ -90,27 +92,15 @@ var Title = module.exports.Title = createReactClass({
         }
     },
 
-    render: function() {
-        var variant = this.props.data;
-        var interpretation = this.state.interpretation;
-
-        var variantTitle = (variant && variant.clinvarVariantTitle) ? variant.clinvarVariantTitle : null;
-        if (variant && !variantTitle && variant.hgvsNames && variant.hgvsNames != {}) {
-            variantTitle = variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38+' (GRCh38)': (variant.carId ? variant.carId : null);
-        } else if (!variantTitle) {
-            variantTitle = 'A preferred title is not available';
-        }
-
-        var calculatePatho_button = false;
-        if (this.props.interpretationUuid) {
-            calculatePatho_button = true;
-        }
-
-        const summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
+    render() {
+        const variant = this.props.data;
+        const interpretation = this.state.interpretation;
+        let calculatePatho_button = this.props.interpretationUuid ? true : false;
+        let summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
 
         return (
             <div>
-                <h1>{variantTitle}{this.props.children}</h1>
+                <h1>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}{this.props.children}</h1>
                 <h2>{this.renderSubtitle(interpretation, variant)}</h2>
                 {variant && calculatePatho_button ?
                     <div className="btn-vertical-space">
@@ -121,7 +111,7 @@ var Title = module.exports.Title = createReactClass({
                             </div>
                         </div>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }

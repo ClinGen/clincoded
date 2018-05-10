@@ -791,7 +791,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -819,7 +819,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </div>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="other-variants-in-codon" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -859,7 +859,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </thead>
                                 </table>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="null-variant-analysis" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -889,7 +889,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="molecular-consequence-silent-intron" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -948,7 +948,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </dl>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -957,7 +957,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
 
                 {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <CompleteSection interpretation={this.state.interpretation} tabName="variant-type" updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
 
                 {renderDataCredit('myvariant')}

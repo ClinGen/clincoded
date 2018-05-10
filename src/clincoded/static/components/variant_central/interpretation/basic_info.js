@@ -252,13 +252,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     renderClinvarAssertionsHeader: function(clinvar_id, loading_clinvarSCV) {
         if (clinvar_id && !loading_clinvarSCV) {
             return (
-                <h3 className="panel-title">Interpretations Submitted to ClinVar
+                <h3 className="panel-title">Interpretations Submitted to ClinVar <span className="panel-title-note">(Germline SCVs only)</span>
                     <a className="panel-subtitle pull-right" href={external_url_map['ClinVarSearch'] + clinvar_id} target="_blank">See data in ClinVar</a>
                 </h3>
             );
         } else {
             return (
-                <h3 className="panel-title">Interpretations Submitted to ClinVar</h3>
+                <h3 className="panel-title">Interpretations Submitted to ClinVar <span className="panel-title-note">(Germline SCVs only)</span></h3>
             );
         }
     },

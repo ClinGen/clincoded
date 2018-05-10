@@ -23,7 +23,7 @@
 /* Position tooltip above the element */
 [data-tooltip]:before {
     position: absolute;
-    bottom: 120%;
+    bottom: 105%;
     left: 50%;
     margin-bottom: 5px;
     margin-left: -80px;
@@ -41,12 +41,13 @@
     font-weight: normal;
     line-height: 1.2;
     white-space: normal;
+    word-break: normal;
 }
 
 /* Triangle hack to make tooltip look like a speech bubble */
 [data-tooltip]:after {
     position: absolute;
-    bottom: 120%;
+    bottom: 105%;
     left: 50%;
     margin-left: -5px;
     width: 0;

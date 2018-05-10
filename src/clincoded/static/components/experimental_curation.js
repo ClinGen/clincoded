@@ -14,6 +14,7 @@ import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import { ScoreExperimental } from './score/experimental_score';
 import { ScoreViewer } from './score/viewer';
+import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -692,7 +693,8 @@ var ExperimentalCuration = createReactClass({
                                     'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
                                     'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                     'carId': variants[i].carId ? variants[i].carId : null,
-                                    'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                    'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                    'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                     'uuid': variants[i].uuid
                                 };
                             }
@@ -1058,7 +1060,7 @@ var ExperimentalCuration = createReactClass({
                     newExperimental.expression = {};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
-                        newExperimental.expression.organOfTissue = EorganOfTissue;
+                        newExperimental.expression.organOfTissue = EorganOfTissue.indexOf('_') > -1 ? EorganOfTissue.replace('_', ':') : EorganOfTissue;
                     }
                     var EorganOfTissueFreeText = this.getFormValue('organOfTissueFreeText');
                     if (EorganOfTissueFreeText) {
@@ -1098,7 +1100,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const FA_patientCells = this.getFormValue('funcalt.patientCells');
                     if (FA_patientCells) {
-                        newExperimental.functionalAlteration.patientCells = FA_patientCells;
+                        newExperimental.functionalAlteration.patientCells = FA_patientCells.indexOf('_') > -1 ? FA_patientCells.replace('_', ':') : FA_patientCells;
                     }
                     const FA_patientCellsFreeText = this.getFormValue('funcalt.patientCellsFreeText');
                     if (FA_patientCellsFreeText) {
@@ -1106,7 +1108,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const FA_nonPatientCells = this.getFormValue('funcalt.nonPatientCells');
                     if (FA_nonPatientCells) {
-                        newExperimental.functionalAlteration.nonPatientCells = FA_nonPatientCells;
+                        newExperimental.functionalAlteration.nonPatientCells = FA_nonPatientCells.indexOf('_') > -1 ? FA_nonPatientCells.replace('_', ':') : FA_nonPatientCells;
                     }
                     const FA_nonPatientCellsFreeText = this.getFormValue('funcalt.nonPatientCellsFreeText');
                     if (FA_nonPatientCellsFreeText) {
@@ -1147,7 +1149,7 @@ var ExperimentalCuration = createReactClass({
                     } else if (MS_modelSystemsType == 'Cell culture model') {
                         const MS_cellCulture = this.getFormValue('cellCulture');
                         if (MS_cellCulture) {
-                            newExperimental.modelSystems.cellCulture = MS_cellCulture;
+                            newExperimental.modelSystems.cellCulture = MS_cellCulture.indexOf('_') > -1 ? MS_cellCulture.replace('_', ':') : MS_cellCulture;
                         }
                         const MS_cellCultureFreeText = this.getFormValue('cellCultureFreeText');
                         if (MS_cellCultureFreeText) {
@@ -1191,7 +1193,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_patientCells = this.getFormValue('rescue.patientCells');
                     if (RES_patientCells) {
-                        newExperimental.rescue.patientCells = RES_patientCells;
+                        newExperimental.rescue.patientCells = RES_patientCells.indexOf('_') > -1 ? RES_patientCells.replace('_', ':') : RES_patientCells;
                     }
                     const RES_patientCellsFreeText = this.getFormValue('rescue.patientCellsFreeText');
                     if (RES_patientCellsFreeText) {
@@ -1199,7 +1201,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_cellCulture = this.getFormValue('rescue.cellCulture');
                     if (RES_cellCulture) {
-                        newExperimental.rescue.cellCulture = RES_cellCulture;
+                        newExperimental.rescue.cellCulture = RES_cellCulture.indexOf('_') > -1 ? RES_cellCulture.replace('_', ':') : RES_cellCulture;
                     }
                     const RES_cellCultureFreeText = this.getFormValue('rescue.cellCultureFreeText');
                     if (RES_cellCultureFreeText) {
@@ -1357,7 +1359,9 @@ var ExperimentalCuration = createReactClass({
                     // 2. New score and other curators' scores
                     // 3. No new score but an updated score
                     // 4. No score after the curator deletes the only score in the array
-                    newExperimental.scores = scoreArray;
+                    if (scoreArray && scoreArray.length) {
+                        newExperimental.scores = scoreArray;
+                    }
 
                     if (this.state.experimental) {
                         // We're editing a experimental. PUT the new group object to the DB to update the existing one.
@@ -1445,7 +1449,8 @@ var ExperimentalCuration = createReactClass({
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
-                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid
             };
         } else {
@@ -1965,7 +1970,7 @@ function TypeExpression() {
             <Input type="text" ref="organOfTissue" label={<span>Organ or tissue relevant to disease <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228" inputDisabled={this.cv.othersAssessed}
+                value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228 or UBERON_0015228" inputDisabled={this.cv.othersAssessed}
                 handleChange={this.handleChange} required={!this.state.expressionOT_FreeText}
                 customErrorMsg="Enter Uberon ID and/or free text" />
             <Input type="textarea" ref="organOfTissueFreeText" label={<span>Organ or tissue relevant to disease <span className="normal">(free text)</span>:</span>}
@@ -2089,7 +2094,7 @@ function TypeFunctionalAlteration(uniprotId) {
                     <Input type="textarea" ref="funcalt.patientCells" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCells')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={FA_patientCells} placeholder="e.g. CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationPCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="funcalt.patientCellsFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
@@ -2110,7 +2115,7 @@ function TypeFunctionalAlteration(uniprotId) {
                     <Input type="textarea" ref="funcalt.nonPatientCells" label={<span>Non-patient cell type <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.nonPatientCells')} clearError={this.clrFormErrors.bind(null, 'funcalt.nonPatientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_nonPatientCells} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={FA_nonPatientCells} placeholder="e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationNPCells_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="funcalt.nonPatientCellsFreeText" label={<span>Non-patient cell type <span className="normal">(free text)</span>:</span>}
@@ -2236,7 +2241,7 @@ function TypeModelSystems() {
                     <Input type="textarea" ref="cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
@@ -2391,7 +2396,7 @@ function TypeRescue() {
                     <Input type="textarea" ref="rescue.cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.cellCulture')} clearError={this.clrFormErrors.bind(null, 'rescue.cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={RES_cellCulture} placeholder="e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescueCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="rescue.cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
@@ -2412,7 +2417,7 @@ function TypeRescue() {
                     <Input type="textarea" ref="rescue.patientCells" label={<span>Patient cell type/line <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCells')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={RES_patientCells} placeholder="e.g. CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescuePCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="rescue.patientCellsFreeText" label={<span>Patient cell type/line <span className="normal">(free text)</span>:</span>}
@@ -2499,14 +2504,7 @@ function ExperimentalDataVariant() {
                                             </dl>
                                         </div>
                                         : null }
-                                    {variant.clinvarVariantTitle ?
-                                        <div>
-                                            <dl className="dl-horizontal">
-                                                <dt>ClinVar Preferred Title</dt>
-                                                <dd>{variant.clinvarVariantTitle}</dd>
-                                            </dl>
-                                        </div>
-                                        : null }
+                                    {renderVariantLabelAndTitle(variant)}
                                     {variant.otherDescription ?
                                         <div>
                                             <dl className="dl-horizontal">
@@ -2552,24 +2550,13 @@ function ExperimentalDataVariant() {
                                                 <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].clinvarVariantTitle ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                            </div>
-                                            : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label>{LabelCARVariant(this.state.variantRequired)}</label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
-                                        {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
-                                            </div>
-                                            : null}
+                                        {renderVariantLabelAndTitle(this.state.variantInfo[i], true)}
                                     </div>
                                     : null}
                                 <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''} handleChange={this.handleChange}
@@ -2614,16 +2601,8 @@ const LabelClinVarVariant = () => {
     return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
 };
 
-const LabelClinVarVariantTitle = () => {
-    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
-};
-
 const LabelCARVariant = variantRequired => {
     return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{variantRequired ? ' *' : null}</strong></span>;
-};
-
-const LabelCARVariantTitle = () => {
-    return <span><strong>Genomic HGVS Title:</strong></span>;
 };
 
 /**
@@ -2810,9 +2789,9 @@ const ExperimentalViewer = createReactClass({
 
     handleSearchLinkById(id) {
         let searchURL;
-        if (id.indexOf('EFO_') > -1) {
+        if (id.indexOf('EFO') > -1) {
             searchURL = external_url_map['EFOSearch'];
-        } else if (id.indexOf('CL_') > -1) {
+        } else if (id.indexOf('CL') > -1) {
             searchURL = external_url_map['CLSearch'];
         }
         return searchURL;
@@ -3069,12 +3048,12 @@ const ExperimentalViewer = createReactClass({
                                     {experimental.functionalAlteration.functionalAlterationType === 'Patient cells' ?
                                         <div>
                                             <dt>Patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.patientCells ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCells} title={"CL entry for " + experimental.functionalAlteration.patientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCells}</a> : null}</dd>
+                                            <dd>{experimental.functionalAlteration.patientCells ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCells.replace(':', '_')} title={"CL entry for " + experimental.functionalAlteration.patientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCells}</a> : null}</dd>
                                         </div>
                                         :
                                         <div>
                                             <dt>Non-patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.nonPatientCells ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.nonPatientCells) + experimental.functionalAlteration.nonPatientCells} title={"EFO entry for " + experimental.functionalAlteration.nonPatientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.nonPatientCells}</a> : null}</dd>
+                                            <dd>{experimental.functionalAlteration.nonPatientCells ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.nonPatientCells) + experimental.functionalAlteration.nonPatientCells.replace(':', '_')} title={"EFO entry for " + experimental.functionalAlteration.nonPatientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.nonPatientCells}</a> : null}</dd>
                                         </div>
                                     }
 
@@ -3133,7 +3112,7 @@ const ExperimentalViewer = createReactClass({
                                         :
                                         <div>
                                             <dt>Cell culture model type</dt>
-                                            <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                            <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture.replace(':', '_')} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
                                         </div>
                                     }
 
@@ -3197,7 +3176,7 @@ const ExperimentalViewer = createReactClass({
                                         <div className="rescue-observed-group">
                                             <div>
                                                 <dt>Patient cell type</dt>
-                                                <dd>{experimental.rescue.patientCells ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCells} title={"CL entry for " + experimental.rescue.patientCells + " in new tab"} target="_blank">{experimental.rescue.patientCells}</a> : null}</dd>
+                                                <dd>{experimental.rescue.patientCells ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCells.replace(':', '_')} title={"CL entry for " + experimental.rescue.patientCells + " in new tab"} target="_blank">{experimental.rescue.patientCells}</a> : null}</dd>
                                             </div>
                                             <div>
                                                 <dt>Patient cell type (free text)</dt>
@@ -3210,7 +3189,7 @@ const ExperimentalViewer = createReactClass({
                                         <div className="rescue-observed-group">
                                             <div>
                                                 <dt>Cell culture model</dt>
-                                                <dd>{experimental.rescue.cellCulture ? <a href={this.handleSearchLinkById(experimental.rescue.cellCulture) + experimental.rescue.cellCulture} title={"EFO entry for " + experimental.rescue.cellCulture + " in new tab"} target="_blank">{experimental.rescue.cellCulture}</a> : null}</dd>
+                                                <dd>{experimental.rescue.cellCulture ? <a href={this.handleSearchLinkById(experimental.rescue.cellCulture) + experimental.rescue.cellCulture.replace(':', '_')} title={"EFO entry for " + experimental.rescue.cellCulture + " in new tab"} target="_blank">{experimental.rescue.cellCulture}</a> : null}</dd>
                                             </div>
                                             <div>
                                                 <dt>Cell culture model (free text)</dt>
@@ -3293,14 +3272,6 @@ const ExperimentalViewer = createReactClass({
                                                     </dl>
                                                 </div>
                                                 : null }
-                                            {variant.clinvarVariantTitle ?
-                                                <div>
-                                                    <dl className="dl-horizontal">
-                                                        <dt>ClinVar Preferred Title</dt>
-                                                        <dd>{variant.clinvarVariantTitle}</dd>
-                                                    </dl>
-                                                </div>
-                                                : null }
                                             {variant.carId ?
                                                 <div>
                                                     <dl className="dl-horizontal">
@@ -3309,14 +3280,7 @@ const ExperimentalViewer = createReactClass({
                                                     </dl>
                                                 </div>
                                                 : null }
-                                            {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
-                                                <div>
-                                                    <dl className="dl-horizontal">
-                                                        <dt>Genomic HGVS Title</dt>
-                                                        <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                                    </dl>
-                                                </div>
-                                                : null }
+                                            {renderVariantLabelAndTitle(variant)}
                                             {variant.otherDescription ?
                                                 <div>
                                                     <dl className="dl-horizontal">

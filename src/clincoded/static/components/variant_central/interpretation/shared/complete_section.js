@@ -10,7 +10,7 @@ var curator = require('../../../curator');
 
 var tabNames = {
     'population': 'Population',
-    'predictors': 'Predictors',
+    'variant-type': 'Variant Type',
     'experimental': 'Experimental',
     'segregation-case': 'Case/Segregation'
 };

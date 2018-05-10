@@ -6,6 +6,7 @@ import _ from 'underscore';
 import moment from 'moment';
 import * as curator from '../curator';
 import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';
@@ -19,7 +20,7 @@ import { CurationInterpretationGeneSpecific } from './interpretation/gene_specif
 // Import pathogenicity calculator
 import { PathogenicityCalculator } from './interpretation/shared/calculator';
 
-const validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+const validTabs = ['basic-info', 'population', 'variant-type', 'experimental', 'segregation-case', 'gene-centric'];
 const validSubtabs = ['missense', 'lof', 'silent-intron', 'indel'];
 
 // Curation data header for Gene:Disease
@@ -178,7 +179,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population {completedSections.indexOf('population') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('variant-type')} aria-selected={this.state.selectedTab == 'variant-type'}>Variant Type {completedSections.indexOf('variant-type') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Case/Segregation {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric</li>
@@ -213,7 +214,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
-                    {this.state.selectedTab == 'predictors' ?
+                    {this.state.selectedTab == 'variant-type' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationComputational data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
@@ -355,10 +356,9 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                     interpretation_uuid: interpretation.uuid,
                     interpretation_status: interpretation.interpretation_status,
                     variantUuid: interpretation.variant.uuid,
+                    variant: interpretation.variant,
                     clinvarVariantId: interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null,
-                    clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
                     carId: interpretation.variant.carId ? interpretation.variant.carId : null,
-                    grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
                     diseaseId: interpretation.disease && interpretation.disease.diseaseId ? interpretation.disease.diseaseId : null,
                     disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
                     modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
@@ -529,7 +529,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                                     </div>
                                     */}
                                     <div className="table-cell-gdm-main">
-                                        <div>{interpretation.clinvarVariantTitle ? interpretation.clinvarVariantTitle : interpretation.grch38}</div>
+                                        <div>{renderVariantTitle(interpretation.variant)}</div>
                                         <div>
                                             {interpretation.clinvarVariantId ? <span>ClinVar Variation ID: <strong>{interpretation.clinvarVariantId}</strong></span> : null}
                                             {interpretation.clinvarVariantId && interpretation.carId ? " // " : null}
