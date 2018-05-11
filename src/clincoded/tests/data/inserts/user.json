@@ -7889,5 +7889,35 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "jung.housung@gmail.com",
+        "first_name": "Hou-Sung",
+        "last_name": "Jung",
+        "uuid": "c5ba68f6-699f-48aa-8711-2b1f8f767cfc",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "junyuzhang@hotmail.com",
+        "first_name": "Junyu",
+        "last_name": "Zhang",
+        "uuid": "79128683-e21a-4da7-add8-9a952460f787",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
