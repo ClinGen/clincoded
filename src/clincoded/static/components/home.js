@@ -68,7 +68,7 @@ var Home = module.exports.Home = createReactClass({
                                 </p>
                                 <p><strong>Pathogenic &#8226; Likely Pathogenic &#8226; Uncertain &#8226; Likely Benign &#8226; Benign</strong></p>
                                 <p className="help-document">
-                                    <a className="btn btn-primary" href="https://github.com/ClinGen/clincoded/wiki/VCI-Curation-Help" target="_blank" rel="noopener noreferrer" role="button">Learn more »</a>
+                                    <a className="btn btn-primary" href="https://github.com/ClinGen/clincoded/wiki/VCI-Curation-Help" target="_blank" rel="noopener noreferrer" role="button">Learn more</a>
                                 </p>
                             </div>
                         </div>
