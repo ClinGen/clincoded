@@ -374,7 +374,7 @@ var VariantCurationHub = createReactClass({
     fetchMyGeneInfo: function(geneSymbol, geneId, source) {
         if (geneSymbol) {
             this.getRestData(this.props.href_url.protocol + external_url_map['HGNCFetch'] + geneSymbol).then(result => {
-                const synonyms = result.response.docs[0].alias_symbol ? result.response.docs[0].alias_symbol : null;
+                const synonyms = result.response.docs.length && result.response.docs[0].alias_symbol ? result.response.docs[0].alias_symbol : null;
                 this.setState({ext_geneSynonyms: synonyms});
             }).catch(err => {
                 console.log('Local Gene Symbol Fetch ERROR=: %o', err);
