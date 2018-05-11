@@ -150,7 +150,7 @@ class CurationInterpretationGeneSpecific extends Component {
                                     <dt>HGNC</dt>
                                     <dd>
                                         Symbol: <a href={external_url_map['HGNC'] + myGeneInfo.HGNC} target="_blank">{myGeneInfo.symbol}</a><br/>
-                                        Approved Name: {myGeneInfo.name}<br/>
+                                        Approved Name: {myGeneInfo.name ? myGeneInfo.name : 'None'}<br/>
                                         {geneSynonyms ? <span>Synonyms: {geneSynonyms.join(', ')}</span> : null}
                                     </dd>
                                 </dl>
