@@ -46,19 +46,19 @@
     {
         "affiliation_id": "10005",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Epilepsy Working Group",
+        "affiliation_fullname": "ClinGen Epilepsy Expert Panel",
         "publish_approval": true
     },
     {
         "affiliation_id": "10006",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Intellectual Disability & Autism Working Group",
+        "affiliation_fullname": "ClinGen Intellectual Disability & Autism Expert Panel",
         "publish_approval": true
     },
     {
         "affiliation_id": "10007",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Hearing Loss Working Group",
+        "affiliation_fullname": "ClinGen Hearing Loss Expert Panel",
         "publish_approval": true,
         "approver": [
             "Ahmad Tayoun",
@@ -69,7 +69,7 @@
     {
         "affiliation_id": "10008",
         "affiliation_abbreviation": "HLWG",
-        "affiliation_fullname": "ClinGen Hypertrophic Cardiomyopathy Working Group",
+        "affiliation_fullname": "ClinGen Hypertrophic Cardiomyopathy Expert Panel",
         "publish_approval": true,
         "approver": [
             "Courtney Thaxton",
@@ -111,7 +111,7 @@
     {
         "affiliation_id": "10013",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen TP53 Working Group",
+        "affiliation_fullname": "ClinGen TP53 Expert Panel",
         "publish_approval": true,
         "approver": [
             "Jessica Mester",
@@ -122,7 +122,7 @@
     {
         "affiliation_id": "10014",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen CDH1 Working Group",
+        "affiliation_fullname": "ClinGen CDH1 Expert Panel",
         "publish_approval": true,
         "approver": [
             "Intan Schrader",
@@ -135,7 +135,7 @@
     {
         "affiliation_id": "10015",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen PAH Working Group",
+        "affiliation_fullname": "ClinGen PAH Expert Panel",
         "publish_approval": true,
         "approver": [
             "Amanda Thomas",
@@ -201,7 +201,7 @@
     {
         "affiliation_id": "10023",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Hereditary Cancer Gene Curation Working Group",
+        "affiliation_fullname": "ClinGen Hereditary Cancer Gene Curation Expert Panel",
         "publish_approval": true,
         "approver": [
             "Sharon Plon"
