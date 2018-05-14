@@ -279,3 +279,4 @@ write_files:
 
 - path: /etc/ssh/users_ca.pub
   content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmiM5UBd3Rant92xxhCVZFW+U+gUN3aLkICO1gzOGr/Ps173YgzgVPmdKdiI6vBzCZ8BXMG/aeiBHk2LKA+vFjh1/sFRA51nA+hnBzXuIbWYpsTHaGG3BFhnAP8tzDm/7MYRkIeXLwZRwTeFtrMd9MR/HGBVG5HmbM/jtrvTRWZVwFnXRxLQ3Rs5Y9v1QKOrZs4w5tt3iKBiBr+kJKhDHV5O8COowxjcfSqCZmfafVJQNR+8Dg6cvaizqY+ykHpgzc+a7oXJfo1LDDQELl0DGIPDIa340jMDjSSVV0o+RpjbIXTtH4m3TDpKRmZsTQrnHCMNSp5Uk7mMkhKwIwX1SP clincoded-dev@clinicalgenome.org
+  
