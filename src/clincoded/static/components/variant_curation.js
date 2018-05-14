@@ -23,6 +23,7 @@ const AssessmentTracker = Assessments.AssessmentTracker;
 const AssessmentPanel = Assessments.AssessmentPanel;
 const AssessmentMixin = Assessments.AssessmentMixin;
 import { getAffiliationName } from '../libs/get_affiliation_name';
+import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 
 var VariantCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],
@@ -349,17 +350,7 @@ var VariantCuration = createReactClass({
                                             : null}
                                     </div>
                                     <div>
-                                        {variant.clinvarVariantTitle ?
-                                            <span>
-                                                <span className="term-name">ClinVar Preferred Title: </span>
-                                                <span className="term-value">{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : null}</span>
-                                            </span>
-                                            :
-                                            <span>
-                                                <span className="term-name">Genomic HGVS Term: </span>
-                                                <span className="term-value">{variant.hgvsNames && variant.hgvsNames.GRCh38 ? `${variant.hgvsNames.GRCh38} (GRCh38)` : null}</span>
-                                            </span>
-                                        }
+                                        {renderVariantLabelAndTitle(variant, false, true)}
                                     </div>
                                 </div>
                             </h2>

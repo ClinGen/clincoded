@@ -1331,11 +1331,19 @@
         dt {
             text-align: left;
             width: 300px;
+
+            &.variant-title-row {
+                display: table-cell;
+            }
         }
 
         dd {
             word-break: break-all;
             word-wrap: break-word;
+
+            &.variant-title-row {
+                display: table-cell;
+            }
         }
     }
 
@@ -2011,6 +2019,18 @@
 }
 
 /* variant curation interface - criteria bar */
+/* temp styles for note below criteria bar */
+.curation-criteria {
+    .criteria-usage-note {
+        color: #aaa;
+        font-size: 95%;
+        line-height: normal;
+        margin-bottom: 0;
+        position: relative;
+        top: -6px;
+    }
+}
+
 .criteria-group.btn-group-sm {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -2018,7 +2038,7 @@
 
 .criteria-group.btn-group-sm .btn {
     background-color: #fff;
-    cursor: default;
+    cursor: pointer;
     padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
@@ -3512,4 +3532,20 @@ table.login-users-interpretations {
             visibility: visible;
         }
     }
+}
+
+/* Styles for hovering tool tip upon mouseover variant title "i" icon */
+.variant-title-explanation {
+    font-size: 85%;
+    margin-left: 5px;
+
+    /* Overriding tool tip width */
+    [data-tooltip]:before {
+        margin-left: -180px;
+        width: 360px;
+    }
+}
+
+.variant-panel .variant-title-explanation {
+    font-size: 100%;
 }

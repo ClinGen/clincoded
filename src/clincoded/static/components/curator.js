@@ -16,6 +16,7 @@ import { sortListByDate } from '../libs/helpers/sort';
 import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { getAffiliationName } from '../libs/get_affiliation_name';
+import { renderVariantTitle } from '../libs/render_variant_title';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -654,16 +655,6 @@ var searchProbandIndividual = function(individualList, variantList) {
     return false;
 };
 
-// function to get the preferred display title for variants. Current preferential order is clinvar variant title > clinvar variant ID
-// > grch38 hgvs term > CA ID
-var getVariantTitle = function(variant) {
-    let clinvarRepresentation = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : null);
-    let carRepresentation = variant.hgvsNames && variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.carId ? variant.carId : null);
-    let variantTitle = clinvarRepresentation ? clinvarRepresentation : carRepresentation;
-
-    return variantTitle;
-};
-
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = createReactClass({
     propTypes: {
@@ -688,7 +679,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                         <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
-                            var variantName = getVariantTitle(variant);
+                            var variantName = renderVariantTitle(variant);
                             var userPathogenicity = null, affiliatedPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -1225,11 +1216,13 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, af
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
-    let variantTitle = getVariantTitle(variant);
+    let variantTitle = renderVariantTitle(variant);
+    // Parse variant title text for the <span /> 'title' attribbute
+    let elementTitleAttribute = renderVariantTitle(variant, true);
 
     return (
         <div className="panel-evidence-group">
-            <h5><span className="title-ellipsis dotted" title={variantTitle}>{variantTitle}</span></h5>
+            <h5><span className="title-ellipsis dotted" title={elementTitleAttribute}>{variantTitle}</span></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
@@ -2067,22 +2060,22 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((UBERON_|UBERON:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
     efoids: function(s) {
-        return captureBase(s, /^\s*(EFO_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
-        return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((CL_|CL:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
     efoclids: function(s) {
-        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:|CL_|CL:)\d{7})\s*$/i, true);
     }
 };
 
@@ -2824,7 +2817,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
-                        (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
+                        (e.g. UBERON:0015228 or UBERON_0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
@@ -2832,7 +2825,7 @@ export function renderWarning(context) {
             { context === 'CL' ?
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
-                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
+                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL:0000057 or CL_0000057).
                         If you are unable to find an appropriate CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
@@ -2842,7 +2835,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
-                        (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
+                        (e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
