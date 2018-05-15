@@ -1250,7 +1250,8 @@
             "10005",
             "10006",
             "10019",
-            "10022"
+            "10022",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1268,7 +1269,8 @@
             "curator"
         ],
         "affiliation": [
-            "10019"
+            "10019",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1532,7 +1534,8 @@
         ],
         "affiliation": [
             "10007",
-            "10019"
+            "10019",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1563,6 +1566,9 @@
         "uuid": "75bf9943-e1db-4327-bd00-bcf37c00cc56",
         "groups": [
             "curator"
+        ],
+        "affiliation": [
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1760,7 +1766,8 @@
             "curator"
         ],
         "affiliation": [
-            "10023"
+            "10023",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1794,7 +1801,8 @@
         ],
         "affiliation": [
             "10019",
-            "10021"
+            "10021",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1858,7 +1866,8 @@
         ],
         "affiliation": [
             "10007",
-            "10019"
+            "10019",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -1986,7 +1995,8 @@
         ],
         "affiliation": [
             "10023",
-            "10024"
+            "10024",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -2023,7 +2033,8 @@
             "10009",
             "10011",
             "10015",
-            "10018"
+            "10018",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -2582,7 +2593,8 @@
             "10008",
             "10009",
             "10010",
-            "10018"
+            "10018",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -2624,7 +2636,8 @@
             "10008",
             "10009",
             "10011",
-            "10018"
+            "10018",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -3206,7 +3219,8 @@
             "10006",
             "10007",
             "10019",
-            "10021"
+            "10021",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -3438,7 +3452,8 @@
             "10006",
             "10007",
             "10017",
-            "10019"
+            "10019",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -4508,7 +4523,8 @@
         ],
         "affiliation": [
             "10019",
-            "10022"
+            "10022",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -5029,7 +5045,8 @@
         ],
         "affiliation": [
             "10014",
-            "10023"
+            "10023",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -5443,7 +5460,8 @@
             "curator"
         ],
         "affiliation": [
-            "10019"
+            "10019",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -7912,6 +7930,24 @@
         "uuid": "79128683-e21a-4da7-add8-9a952460f787",
         "groups": [
             "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "jonathan_berg@med.unc.edu",
+        "first_name": "Jonathan",
+        "last_name": "Berg",
+        "uuid": "b49cd174-2a64-41c0-96c2-feb0fe4c1a86",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
