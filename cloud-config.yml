@@ -165,7 +165,7 @@ runcmd:
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
 - sudo curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-- sudo ./awslogs-agent-setup.py 
+- sudo python ./awslogs-agent-setup.py 
 - if test "%(ROLE)s" = "demo"
 - then
 -   sudo -u clincoded bin/batchupgrade production.ini --app-name app
