@@ -247,7 +247,6 @@ write_files:
   - path: /var/awslogs/etc/awslogs_config.conf
   content: |
     [/var/log/elasticsearch]
-    datetime_format = %b %d %Y %H:%M:%S
     file = /var/log/elasticsearch/elasticsearch.log
     buffer_duration = 5000
     log_stream_name = {hostname}
@@ -255,7 +254,6 @@ write_files:
     log_group_name = Elasticsearch-logging-test
 
     [/var/log/apache2]
-    datetime_format = %b %d %Y %H:%M:%S
     file = /var/log/apache2/access.log
     buffer_duration = 5000
     log_stream_name = {hostname}
@@ -263,7 +261,6 @@ write_files:
     log_group_name = Apache2-logging-test
 
     [/var/log/postgresql]
-    datetime_format = %b %d %Y %H:%M:%S
     file = /var/log/postgresql/postgresql-9.4-main.log
     buffer_duration = 5000
     log_stream_name = {hostname}
