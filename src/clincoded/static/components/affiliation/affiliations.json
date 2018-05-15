@@ -221,12 +221,25 @@
         "affiliation_fullname": "ClinGen Cardiovascular LQTS Expert Panel",
         "publish_approval": true,
         "approver": [
-            "Lisa Kurtz",
-            "Arthur Wilde",
-            "Melanie Care",
             "Amy Sturm",
-            "Valeria Novelli",
-            "Michael Gollob"
+            "Arthur Wilde",
+            "Lisa Kurtz",
+            "Melanie Care",
+            "Michael Gollob",
+            "Valeria Novelli"
+        ]
+    },
+    {
+        "affiliation_id": "10026",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Gene Curation Core",
+        "publish_approval": true,
+        "approver": [
+            "Christa Martin",
+            "Heidi Rehm",
+            "Jonathan Berg",
+            "Ozge Birsoy",
+            "Sharon Plon"
         ]
     }
 ]
