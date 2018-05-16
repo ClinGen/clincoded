@@ -217,29 +217,32 @@ write_files:
 
 - path: /var/awslogs/etc/awslogsconf.conf
   content: |
-    [general]
-    state_file = /var/awslogs/state/agent-state
-    
-    [/var/log/elasticsearch]
-    file = /var/log/elasticsearch/elasticsearch.log
-    buffer_duration = 5000
-    log_stream_name = {hostname}
-    initial_position = end_of_file
-    log_group_name = Elasticsearch-logging-test
+    if test "%(BACKUPDB)s" = "s3_data"
+    then
+      [general]
+      state_file = /var/awslogs/state/agent-state
 
-    [/var/log/apache2]
-    file = /var/log/apache2/access.log
-    buffer_duration = 5000
-    log_stream_name = {hostname}
-    initial_position = end_of_file
-    log_group_name = Apache2-logging-test
+      [/var/log/elasticsearch]
+      file = /var/log/elasticsearch/elasticsearch.log
+      buffer_duration = 5000
+      log_stream_name = {hostname}
+      initial_position = end_of_file
+      log_group_name = Elasticsearch-logging-test
 
-    [/var/log/postgresql]
-    file = /var/log/postgresql/postgresql-9.4-main.log
-    buffer_duration = 5000
-    log_stream_name = {hostname}
-    initial_position = end_of_file
-    log_group_name = Postgresql-logging-test
+      [/var/log/apache2]
+      file = /var/log/apache2/access.log
+      buffer_duration = 5000
+      log_stream_name = {hostname}
+      initial_position = end_of_file
+      log_group_name = Apache2-logging-test
+
+      [/var/log/postgresql]
+      file = /var/log/postgresql/postgresql-9.4-main.log
+      buffer_duration = 5000
+      log_stream_name = {hostname}
+      initial_position = end_of_file
+      log_group_name = Postgresql-logging-test
+    fi
 
 - path: /etc/postgresql/9.4/main/custom.conf
   content: |
