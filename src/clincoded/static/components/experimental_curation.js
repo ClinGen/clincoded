@@ -807,11 +807,6 @@ var ExperimentalCuration = createReactClass({
             var formError = false;
 
             if (this.state.experimentalType == 'Biochemical Function') {
-                // Check form for Biochemical Function panel
-                if (this.state.experimentalSubtype.charAt(0) == 'A' && !this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')) {
-                    formError = true;
-                    this.setFormErrors('geneWithSameFunctionSameDisease.geneImplicatedWithDisease', "Please see note below.");
-                }
                 // Validate GO ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('identifiedFunction')) {
                     goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
@@ -825,21 +820,11 @@ var ExperimentalCuration = createReactClass({
                 formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
             else if (this.state.experimentalType == 'Protein Interactions') {
-                // Check form for Protein Interactions panel
                 // check geneSymbols
-                if (!this.getFormValue('geneImplicatedInDisease')) {
-                    formError = true;
-                    this.setFormErrors('geneImplicatedInDisease', "Please see note below.");
-                }
                 geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'interactingGenes');
             }
             else if (this.state.experimentalType == 'Expression') {
-                // Check form for Expression panel
-                if (this.state.experimentalSubtype.charAt(0) == 'B' && !this.getFormValue('alteredExpression.expressedInPatients')) {
-                    formError = true;
-                    this.setFormErrors('alteredExpression.expressedInPatients', "Please see note below.");
-                }
                 // Validate Uberon ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('organOfTissue')) {
                     uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
@@ -883,12 +868,7 @@ var ExperimentalCuration = createReactClass({
                 }
             }
             else if (this.state.experimentalType == 'Rescue') {
-                // Check form for Rescue panel
                 // Validate clIDs/efoIDs depending on form selection. Don't validate if free text is provided.
-                if (!this.getFormValue('wildTypeRescuePhenotype')) {
-                    formError = true;
-                    this.setFormErrors('wildTypeRescuePhenotype', "Please see note below.");
-                }
                 if (this.getFormValue('rescueType') === 'Patient cells' && this.getFormValue('rescue.patientCells')) {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCells'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCells', 1);
