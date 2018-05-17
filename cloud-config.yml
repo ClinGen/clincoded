@@ -110,7 +110,6 @@ runcmd:
 - fi
 - sudo -u postgres createuser clincoded
 - sudo -u postgres createdb --owner=clincoded clincoded
-#- curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
 - mkdir /srv/clincoded
 - chown clincoded:clincoded /srv/clincoded
 - cd /srv/clincoded
