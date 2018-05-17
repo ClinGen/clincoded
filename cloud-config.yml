@@ -164,8 +164,11 @@ runcmd:
 - a2disconf localized-error-pages
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
-- sudo curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-- sudo python ./awslogs-agent-setup.py -n --region us-west-2 -c /var/awslogs/etc/awslogsconf.conf
+- if test "%(BACKUPDB)s" = "s3_data"
+- then
+-   sudo curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
+-   sudo python ./awslogs-agent-setup.py -n --region us-west-2 -c /var/awslogs/etc/awslogsconf.conf
+- fi
 - if test "%(ROLE)s" = "demo"
 - then
 -   sudo -u clincoded bin/batchupgrade production.ini --app-name app
@@ -217,8 +220,6 @@ write_files:
 
 - path: /var/awslogs/etc/awslogsconf.conf
   content: |
-    if test "%(BACKUPDB)s" = "s3_data"
-    then
       [general]
       state_file = /var/awslogs/state/agent-state
 
@@ -242,7 +243,6 @@ write_files:
       log_stream_name = {hostname}
       initial_position = end_of_file
       log_group_name = Postgresql-prod
-    fi
 
 - path: /etc/postgresql/9.4/main/custom.conf
   content: |
