@@ -164,7 +164,7 @@ runcmd:
 - a2disconf localized-error-pages
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
-- if test "%(ROLE)s" != "demo"
+- if test "%(ROLE)s" = "production"
 - then
 -   sudo curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
 -   sudo python ./awslogs-agent-setup.py -n --region us-west-2 -c /var/awslogs/etc/awslogsconf.conf
