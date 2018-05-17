@@ -622,10 +622,10 @@ var ExperimentalCuration = createReactClass({
                     rescue.patientCellsFreeText && rescue.patientCellsFreeText.length ?
                         this.setState({rescuePCells_FreeText: true}) : this.setState({rescuePCells_FreeText: false});
                     // Set boolean state on 'required' prop for Rescue 'Engineered Equivalent Cell Type' EFO ID
-                    rescue.engineeredEquivalentCellType && rescue.engineeredEquivalentCellType.length ?
+                    rescue.cellCulture && rescue.cellCulture.length ?
                         this.setState({rescueCC_EfoId: true}) : this.setState({rescueCC_EfoId: false});
                     // Set boolean state on 'required' prop for Rescue 'Engineered Equivalent Cell Type' free text
-                    rescue.engineeredEquivalentCellTypeFreeText && rescue.engineeredEquivalentCellTypeFreeText.length ?
+                    rescue.cellCultureFreeText && rescue.cellCultureFreeText.length ?
                         this.setState({rescueCC_FreeText: true}) : this.setState({rescueCC_FreeText: false});
                 }
 
