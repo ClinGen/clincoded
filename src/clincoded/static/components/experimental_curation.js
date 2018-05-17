@@ -255,31 +255,25 @@ var ExperimentalCuration = createReactClass({
                 });
             }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
-            this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()});
-            if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
-                this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
-                this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
-            }
+            this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()}, () => {
+                this.clrFormErrors('geneWithSameFunctionSameDisease.explanationOfOtherGenes');
+            });
         } else if (ref === 'geneImplicatedInDisease') {
-            this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()});
-            if (this.refs['geneImplicatedInDisease'].getValue() === false) {
-                this.refs['relationshipOfOtherGenesToDisese'].resetValue();
-                this.refs['evidenceInPaper'].resetValue();
-            }
+            this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()}, () => {
+                this.clrFormErrors('relationshipOfOtherGenesToDisese');
+            });
         } else if (ref === 'normalExpression.expressedInTissue') {
-            this.setState({expressedInTissue: this.refs[ref].toggleValue()});
-            if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
-                this.refs['normalExpression.evidence'].resetValue();
-                this.refs['normalExpression.evidenceInPaper'].resetValue();
-            }
+            this.setState({expressedInTissue: this.refs[ref].toggleValue()}, () => {
+                this.clrFormErrors('normalExpression.evidence');
+            });
         } else if (ref === 'alteredExpression.expressedInPatients') {
-            this.setState({expressedInPatients: this.refs[ref].toggleValue()});
-            if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
-                this.refs['alteredExpression.evidence'].resetValue();
-                this.refs['alteredExpression.evidenceInPaper'].resetValue();
-            }
+            this.setState({expressedInPatients: this.refs[ref].toggleValue()}, () => {
+                this.clrFormErrors('alteredExpression.evidence');
+            });
         } else if (ref === 'wildTypeRescuePhenotype') {
-            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()});
+            this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()}, () => {
+                this.clrFormErrors('explanation');
+            });
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
         } else if (ref === 'geneFunctionConsistentWithPhenotype.phenotypeHPO') {
@@ -1740,11 +1734,10 @@ function TypeBiochemicalFunctionA() {
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this other gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5" value={BF_explanationOfOtherGenes}
-                inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} required={this.state.geneImplicatedWithDisease} />
+                inputDisabled={this.cv.othersAssessed} required={this.state.geneImplicatedWithDisease} />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Additional comments:"
-                error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5"
-                value={BF_evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
+                value={BF_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1864,11 +1857,10 @@ function TypeProteinInteractions() {
                 error={this.getFormError('relationshipOfOtherGenesToDisese')} clearError={this.clrFormErrors.bind(null, 'relationshipOfOtherGenesToDisese')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={PI_relationshipOfOtherGenesToDisese}
-                inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} required={this.state.geneImplicatedInDisease} />
+                inputDisabled={this.cv.othersAssessed} required={this.state.geneImplicatedInDisease} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
-                error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={PI_evidenceInPaper}inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} />
+                rows="5" value={PI_evidenceInPaper}inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1945,11 +1937,10 @@ function TypeExpressionA() {
             <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in disease tissue:"
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_normalExpression_evidence} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} required={this.state.expressedInTissue} />
+                rows="5" value={EXP_normalExpression_evidence} inputDisabled={this.cv.othersAssessed} required={this.state.expressedInTissue} />
             <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Notes on where evidence found:"
-                error={this.getFormError('normalExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_normalExpression_evidenceInPaper} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} />
+                rows="5" value={EXP_normalExpression_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1976,11 +1967,10 @@ function TypeExpressionB() {
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for altered expression in patients:"
                 error={this.getFormError('alteredExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_alteredExpression_evidence} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} required={this.state.expressedInPatients} />
+                rows="5" value={EXP_alteredExpression_evidence} inputDisabled={this.cv.othersAssessed} required={this.state.expressedInPatients} />
             <Input type="textarea" ref="alteredExpression.evidenceInPaper" label="Notes on where evidence found in paper:"
-                error={this.getFormError('alteredExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_alteredExpression_evidenceInPaper} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} />
+                rows="5" value={EXP_alteredExpression_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -2401,11 +2391,10 @@ function TypeRescue() {
             <Input type="textarea" ref="explanation" label="Explanation of rescue of phenotype:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={RES_explanation} inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} required={this.state.wildTypeRescuePhenotype} />
+                rows="5" value={RES_explanation} inputDisabled={this.cv.othersAssessed} required={this.state.wildTypeRescuePhenotype} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
-                error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} value={RES_evidenceInPaper} />
+                rows="5" inputDisabled={this.cv.othersAssessed} value={RES_evidenceInPaper} />
         </div>
     );
 }
