@@ -459,6 +459,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         if (GRCh37) {
             links_37 = setContextLinks(GRCh37, 'GRCh37');
         }
+        // Ensure the transcripts have the expected 'hgvsc' values to render table rows
+        let transcriptsWithHgvsc = [];
+        if (ensembl_data && ensembl_data.length) {
+            transcriptsWithHgvsc = ensembl_data.filter(item => item.hgvsc && item.hgvsc.length);
+        }
 
         return (
             <div className="variant-interpretation basic-info">
@@ -577,14 +582,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
+                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
                                 <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                                 : null}
                         </h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
-                        {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
+                        {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -611,14 +616,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
+                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
                                 <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
                                 : null}
                         </h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
-                        {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length ?
+                        {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
                             <table className="table">
                                 <thead>
                                     <tr>

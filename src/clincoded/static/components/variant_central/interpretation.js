@@ -15,7 +15,7 @@ import { CurationInterpretationPopulation } from './interpretation/population';
 import { CurationInterpretationComputational } from './interpretation/computational';
 import { CurationInterpretationFunctional } from './interpretation/functional';
 import { CurationInterpretationSegregation } from './interpretation/segregation';
-import { CurationInterpretationGeneSpecific } from './interpretation/gene_specific';
+import CurationInterpretationGeneSpecific from './interpretation/gene_specific';
 
 // Import pathogenicity calculator
 import { PathogenicityCalculator } from './interpretation/shared/calculator';

@@ -146,7 +146,10 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
-                                        <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
+                                        <dd><span>
+                                            {snapshot.resource.alteredClassification && snapshot.resource.alteredClassification !== 'No Modification' ?
+                                                <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}
+                                        </span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-disease">
                                         <dt><span>Disease:</span></dt>
@@ -209,7 +212,10 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
-                                        <dd><span>{snapshot.resource.alteredClassification ? <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}</span></dd>
+                                        <dd><span>
+                                            {snapshot.resource.alteredClassification && snapshot.resource.alteredClassification !== 'No Modification' ?
+                                                <span>{snapshot.resource.alteredClassification} (modified)</span> : snapshot.resource.autoClassification}
+                                        </span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-disease">
                                         <dt><span>Disease:</span></dt>
