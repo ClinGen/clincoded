@@ -103,7 +103,7 @@ const computationStatic = {
             'revel': 'https://sites.google.com/site/revelgenomics/about'
         },
         _pathoThreshold: {
-            'revel': '>0.5',
+            'revel': '>0.75',
             'cftr': '--'
         }
     }
