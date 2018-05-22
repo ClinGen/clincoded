@@ -18,7 +18,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         handleUserScoreObj: PropTypes.func, // Function to call create/update score object
         scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         submitBusy: PropTypes.bool, // TRUE while the form submit is running
-        affiliation: PropTypes.object // Affiliation object passed from parent
+        affiliation: PropTypes.object, // Affiliation object passed from parent
+        isDisabled: PropTypes.bool // Boolean for the state (disabled or not) of the input field
     },
 
     getInitialState() {
@@ -33,6 +34,15 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
 
     componentDidMount() {
         this.loadData();
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if (!this.props.isDisabled && nextProps.isDisabled && this.state.modifiedScore) {
+            this.setState({modifiedScore: null}, () => {
+                this.refs.scoreRange.resetValue();
+                this.updateUserScoreObj();
+            });
+        }
     },
 
     loadData() {
@@ -162,7 +172,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
             <div>
                 <div className="row">
                     <Input type="select" ref="scoreRange" label="Score:"  handleChange={this.handleScoreRangeChange}
-                        defaultValue={modifiedScore} value={modifiedScore}
+                        defaultValue={modifiedScore} value={modifiedScore} inputDisabled={this.props.isDisabled}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
