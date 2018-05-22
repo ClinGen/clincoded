@@ -15,13 +15,15 @@ import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { findDiffKeyValuesMixin } from './shared/find_diff';
 import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
-var vciFormHelper = require('./shared/form');
-var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
-var extraEvidence = require('./shared/extra_evidence');
+const vciFormHelper = require('./shared/form');
+const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+const genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
+const extraEvidence = require('./shared/extra_evidence');
 
-var populationStatic = {
+const populationStatic = {
     page: {
         _labels: {
             AfricanAmerican: 'African American', Asian: 'Asian', CentralAmerican: 'Central American', Cuban: 'Cuban', Dominican: 'Dominican', Mexican: 'Mexican',
@@ -45,7 +47,7 @@ var populationStatic = {
         _labels: {ea: 'EA Allele', aa: 'AA Allele'}
     }
 };
-var CI_DEFAULT = 95;
+const CI_DEFAULT = 95;
 
 // Display the population data of external sources
 var CurationInterpretationPopulation = module.exports.CurationInterpretationPopulation = createReactClass({
@@ -65,7 +67,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         loading_ensemblVariation: PropTypes.bool,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
-        session: PropTypes.object
+        session: PropTypes.object,
+        selectedCriteria: PropTypes.string
     
     },
 
@@ -116,7 +119,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             ext_singleNucleotide: this.props.ext_singleNucleotide,
             loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
-            loading_ensemblVariation: this.props.loading_ensemblVariation
+            loading_ensemblVariation: this.props.loading_ensemblVariation,
+            selectedCriteria: this.props.selectedCriteria
         };
     },
 
@@ -146,9 +150,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseTGenomesData(this.props.ext_ensemblVariation);
             this.calculateHighestMAF();
         }
-
         if (this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
+        }
+        if (this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
     },
 
@@ -176,6 +182,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
+        }
+        if (nextProps.selectedCriteria) {
+            this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
+            });
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
@@ -346,6 +357,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (response.gnomad_genome && (response.gnomad_genome.ac || response.gnomad_genome.an || response.gnomad_genome.hom)) {
             let indexHOM = -2;
             let gnomADGenomeAC, gnomADGenomeAN, gnomADGenomeHOM, gnomADGenomeAF;
+            let hasExomeData = populationObj.gnomAD._extra.hasExomeData;
 
             populationObj.gnomAD._extra.hasGenomeData = true;
 
@@ -357,23 +369,33 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationStatic.gnomAD._order.map(key => {
                 gnomADGenomeAC = response.gnomad_genome.ac ? parseInt(response.gnomad_genome.ac['ac_' + key]) : null;
                 if (!(isNaN(gnomADGenomeAC) || gnomADGenomeAC == null)) {
-                    populationObj.gnomAD[key].ac += gnomADGenomeAC;
+                    if (hasExomeData) {
+                        populationObj.gnomAD[key].ac += gnomADGenomeAC;
+                    } else {
+                        populationObj.gnomAD[key].ac = gnomADGenomeAC;
+                    }
                 }
 
                 gnomADGenomeAN = response.gnomad_genome.an ? parseInt(response.gnomad_genome.an['an_' + key]) : null;
                 if (!(isNaN(gnomADGenomeAN) || gnomADGenomeAN == null)) {
-                    populationObj.gnomAD[key].an += gnomADGenomeAN;
+                    if (hasExomeData) {
+                        populationObj.gnomAD[key].an += gnomADGenomeAN;
+                    } else {
+                        populationObj.gnomAD[key].an = gnomADGenomeAN;
+                    }
                 }
 
                 if (indexHOM < -1) {
                     gnomADGenomeHOM = response.gnomad_genome.hom ? parseInt(response.gnomad_genome.hom['hom_' + key]) : null;
-                    if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
-                        populationObj.gnomAD[key].hom += gnomADGenomeHOM;
-                    }
                 } else if (indexHOM > -1) {
                     gnomADGenomeHOM = parseInt(response.gnomad_genome.hom['hom_' + key][indexHOM]);
-                    if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                }
+
+                if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                    if (hasExomeData) {
                         populationObj.gnomAD[key].hom += gnomADGenomeHOM;
+                    } else {
+                        populationObj.gnomAD[key].hom = gnomADGenomeHOM;
                     }
                 }
 
@@ -384,23 +406,33 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Retrieve allele and homozygote genome totals and add them to any corresponding exome totals
             gnomADGenomeAC = response.gnomad_genome.ac ? parseInt(response.gnomad_genome.ac.ac) : null;
             if (!(isNaN(gnomADGenomeAC) || gnomADGenomeAC == null)) {
-                populationObj.gnomAD._tot.ac += gnomADGenomeAC;
+                if (hasExomeData) {
+                    populationObj.gnomAD._tot.ac += gnomADGenomeAC;
+                } else {
+                    populationObj.gnomAD._tot.ac = gnomADGenomeAC;
+                }
             }
 
             gnomADGenomeAN = response.gnomad_genome.an ? parseInt(response.gnomad_genome.an.an) : null;
             if (!(isNaN(gnomADGenomeAN) || gnomADGenomeAN == null)) {
-                populationObj.gnomAD._tot.an += gnomADGenomeAN;
+                if (hasExomeData) {
+                    populationObj.gnomAD._tot.an += gnomADGenomeAN;
+                } else {
+                    populationObj.gnomAD._tot.an = gnomADGenomeAN;
+                }
             }
 
             if (indexHOM < -1) {
                 gnomADGenomeHOM = response.gnomad_genome.hom ? parseInt(response.gnomad_genome.hom.hom) : null;
-                if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
-                    populationObj.gnomAD._tot.hom += gnomADGenomeHOM;
-                }
             } else if (indexHOM > -1) {
                 gnomADGenomeHOM = parseInt(response.gnomad_genome.hom.hom[indexHOM]);
-                if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+            }
+
+            if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
+                if (hasExomeData) {
                     populationObj.gnomAD._tot.hom += gnomADGenomeHOM;
+                } else {
+                    populationObj.gnomAD._tot.hom = gnomADGenomeHOM;
                 }
             }
 
@@ -1095,7 +1127,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         return (
             <div className="variant-interpretation population">
-                <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Population Criteria Evaluation" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-population-panel-population" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">

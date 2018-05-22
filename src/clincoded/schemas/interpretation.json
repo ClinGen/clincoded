@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "variant": {
             "title": "Variant",
@@ -157,6 +157,10 @@
         },
         "variant.carId": {
             "title": "Variant CA ID",
+            "type": "string"
+        },
+        "variant.canonicalTranscriptTitle": {
+            "title": "Canonical Transcript Title",
             "type": "string"
         },
         "variant.hgvsNames": {

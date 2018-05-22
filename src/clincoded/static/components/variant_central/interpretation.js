@@ -6,6 +6,7 @@ import _ from 'underscore';
 import moment from 'moment';
 import * as curator from '../curator';
 import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';
@@ -14,12 +15,13 @@ import { CurationInterpretationPopulation } from './interpretation/population';
 import { CurationInterpretationComputational } from './interpretation/computational';
 import { CurationInterpretationFunctional } from './interpretation/functional';
 import { CurationInterpretationSegregation } from './interpretation/segregation';
-import { CurationInterpretationGeneSpecific } from './interpretation/gene_specific';
+import CurationInterpretationGeneSpecific from './interpretation/gene_specific';
 
 // Import pathogenicity calculator
 import { PathogenicityCalculator } from './interpretation/shared/calculator';
 
-var validTabs = ['basic-info', 'population', 'predictors', 'experimental', 'segregation-case', 'gene-centric'];
+const validTabs = ['basic-info', 'population', 'variant-type', 'experimental', 'segregation-case', 'gene-centric'];
+const validSubtabs = ['missense', 'lof', 'silent-intron', 'indel'];
 
 // Curation data header for Gene:Disease
 var VariantCurationInterpretation = module.exports.VariantCurationInterpretation = createReactClass({
@@ -51,6 +53,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_myGeneInfo: PropTypes.bool,
         setCalculatedPathogenicity: PropTypes.func,
         selectedTab: PropTypes.string,
+        selectedSubtab: PropTypes.string,
+        selectedCriteria: PropTypes.string,
         affiliation: PropTypes.object
     },
 
@@ -79,7 +83,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_myGeneInfo: this.props.loading_myGeneInfo,
             //remember current tab/subtab so user will land on that tab when interpretation starts
-            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info')
+            selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
+            selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validSubtabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
+            selectedCriteria: this.props.selectedCriteria
         };
     },
 
@@ -123,6 +129,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.selectedTab) {
             this.setState({selectedTab: nextProps.selectedTab});
         }
+        if (nextProps.selectedSubtab) {
+            this.setState({selectedSubtab: nextProps.selectedSubtab});
+        }
+        if (nextProps.selectedCriteria) {
+            this.setState({selectedCriteria: nextProps.selectedCriteria});
+        }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
@@ -145,6 +157,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             this.setState({selectedTab: tab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'tab', tab));
         }
+        // Remove the criteria param whenever the tab is changed
+        if (queryKeyValue('criteria', window.location.href)) {
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'criteria', ''));
+        }
         this.props.getSelectedTab(tab);
     },
 
@@ -163,7 +179,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <ul className="vci-tabs-header tab-label-list" role="tablist">
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('basic-info')} aria-selected={this.state.selectedTab == 'basic-info'}>Basic Information</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('population')} aria-selected={this.state.selectedTab == 'population'}>Population {completedSections.indexOf('population') > -1 ? <span>&#10003;</span> : null}</li>
-                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('predictors')} aria-selected={this.state.selectedTab == 'predictors'}>Predictors {completedSections.indexOf('predictors') > -1 ? <span>&#10003;</span> : null}</li>
+                        <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('variant-type')} aria-selected={this.state.selectedTab == 'variant-type'}>Variant Type {completedSections.indexOf('variant-type') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('experimental')} aria-selected={this.state.selectedTab == 'experimental'}>Experimental {completedSections.indexOf('experimental') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('segregation-case')} aria-selected={this.state.selectedTab == 'segregation-case'}>Case/Segregation {completedSections.indexOf('segregation-case') > -1 ? <span>&#10003;</span> : null}</li>
                         <li className="tab-label col-sm-2" role="tab" onClick={() => this.handleSelect('gene-centric')} aria-selected={this.state.selectedTab == 'gene-centric'}>Gene-centric</li>
@@ -194,10 +210,11 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
-                            affiliation={this.props.affiliation} />
+                            affiliation={this.props.affiliation}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
-                    {this.state.selectedTab == 'predictors' ?
+                    {this.state.selectedTab == 'variant-type' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationComputational data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
@@ -207,19 +224,23 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
-                            affiliation={this.props.affiliation} />
+                            affiliation={this.props.affiliation}
+                            selectedSubtab={this.state.selectedSubtab}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'experimental' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'segregation-case' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation} />
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
+                            selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'gene-centric' ?
@@ -335,10 +356,9 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                     interpretation_uuid: interpretation.uuid,
                     interpretation_status: interpretation.interpretation_status,
                     variantUuid: interpretation.variant.uuid,
+                    variant: interpretation.variant,
                     clinvarVariantId: interpretation.variant.clinvarVariantId ? interpretation.variant.clinvarVariantId : null,
-                    clinvarVariantTitle: interpretation.variant.clinvarVariantTitle ? interpretation.variant.clinvarVariantTitle : null,
                     carId: interpretation.variant.carId ? interpretation.variant.carId : null,
-                    grch38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
                     diseaseId: interpretation.disease && interpretation.disease.diseaseId ? interpretation.disease.diseaseId : null,
                     disease_term: interpretation.disease && interpretation.disease.term ? interpretation.disease.term : null,
                     modeInheritance: interpretation.modeInheritance ? interpretation.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null,
@@ -509,7 +529,7 @@ var InterpretationCollection = module.exports.InterpretationCollection = createR
                                     </div>
                                     */}
                                     <div className="table-cell-gdm-main">
-                                        <div>{interpretation.clinvarVariantTitle ? interpretation.clinvarVariantTitle : interpretation.grch38}</div>
+                                        <div>{renderVariantTitle(interpretation.variant)}</div>
                                         <div>
                                             {interpretation.clinvarVariantId ? <span>ClinVar Variation ID: <strong>{interpretation.clinvarVariantId}</strong></span> : null}
                                             {interpretation.clinvarVariantId && interpretation.carId ? " // " : null}

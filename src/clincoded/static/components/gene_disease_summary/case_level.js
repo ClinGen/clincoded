@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
 import HpoTerms from '../../libs/get_hpo_term';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
@@ -42,11 +43,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.variants.map((variant, i) => {
                         return (
                             <div key={i} className="variant-info">
-                                <span className="variant-title">
-                                    {variant.clinvarVariantTitle ?
-                                        variant.clinvarVariantTitle : (variant.hgvsNames && variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)
-                                    }
-                                </span>
+                                {renderVariantTitle(variant)}
                             </div>
                         );
                     })}

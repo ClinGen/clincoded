@@ -38,6 +38,8 @@ var VariantCurationHub = createReactClass({
             summaryKey: queryKeyValue('summary', this.props.href),
             summaryVisible: false,
             selectedTab: queryKeyValue('tab', this.props.href),
+            selectedSubtab: queryKeyValue('subtab', this.props.href),
+            selectedCriteria: queryKeyValue('criteria', this.props.href),
             variantObj: null,
             ext_pageData: null,
             ext_myVariantInfo: null,
@@ -315,15 +317,23 @@ var VariantCurationHub = createReactClass({
     parseMyVariantInfo: function(myVariantInfo) {
         let geneSymbol, geneId;
         if (myVariantInfo) {
-            if (myVariantInfo.clinvar) {
+            if (myVariantInfo.clinvar && myVariantInfo.clinvar.gene) {
                 geneSymbol = myVariantInfo.clinvar.gene.symbol;
                 geneId = myVariantInfo.clinvar.gene.id;
-            } else if (myVariantInfo.dbsnp) {
+            } else if (myVariantInfo.dbsnp && myVariantInfo.dbsnp.gene) {
                 geneSymbol = myVariantInfo.dbsnp.gene.symbol;
                 geneId = myVariantInfo.dbsnp.gene.geneid;
             } else if (myVariantInfo.cadd) {
-                geneSymbol = myVariantInfo.cadd.gene.genename;
-                geneId = myVariantInfo.cadd.gene.gene_id;
+                if (myVariantInfo.cadd.gene && !Array.isArray(myVariantInfo.cadd.gene)) {
+                    geneSymbol = myVariantInfo.cadd.gene.genename;
+                    geneId = myVariantInfo.cadd.gene.gene_id;
+                } else if (myVariantInfo.cadd.gene && Array.isArray(myVariantInfo.cadd.gene)) {
+                    let found = myVariantInfo.cadd.gene.filter(item => item.gene_id && item.genename);
+                    if (found && found.length) {
+                        geneSymbol = found[0].genename;
+                        geneId = found[0].gene_id;
+                    }
+                }
             }
             this.fetchMyGeneInfo(geneSymbol, geneId, 'myVariantInfo');
         }
@@ -363,8 +373,9 @@ var VariantCurationHub = createReactClass({
     // and pass the data object to child component
     fetchMyGeneInfo: function(geneSymbol, geneId, source) {
         if (geneSymbol) {
-            this.getRestData('/genes/' + geneSymbol).then(response => {
-                this.setState({ext_geneSynonyms: response.synonyms});
+            this.getRestData(this.props.href_url.protocol + external_url_map['HGNCFetch'] + geneSymbol).then(result => {
+                const synonyms = result.response.docs.length && result.response.docs[0].alias_symbol ? result.response.docs[0].alias_symbol : null;
+                this.setState({ext_geneSynonyms: synonyms});
             }).catch(err => {
                 console.log('Local Gene Symbol Fetch ERROR=: %o', err);
             });
@@ -385,6 +396,8 @@ var VariantCurationHub = createReactClass({
                 this.setState({loading_myGeneInfo: false});
                 console.log('MyGeneInfo Fetch Error=: %o', err);
             });
+        } else {
+            this.setState({loading_myGeneInfo: false});
         }
     },
 
@@ -393,7 +406,8 @@ var VariantCurationHub = createReactClass({
      * @param {object} variant - The variant data object
      */
     fetchPageData(variant) {
-        if (variant) {
+        const hostname = this.props.href_url && this.props.href_url.hostname;
+        if (variant && (hostname && hostname !== 'localhost')) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37', true);
             let hgvsParts = hgvs_notation.split(':');
             let position = hgvsParts[1].replace(/[^\d]/g, '');
@@ -453,6 +467,15 @@ var VariantCurationHub = createReactClass({
         this.setState({selectedTab: selectedTab});
     },
 
+    // Method to update the selected subtab state and update the url
+    updateSelectedCriteria(selectedTab, selectedSubtab, selectedCriteria) {
+        this.setState({
+            selectedTab: selectedTab,
+            selectedSubtab: selectedSubtab,
+            selectedCriteria: selectedCriteria
+        });
+    },
+
     // Method to set the calculated pathogenicity state for summary page
     setCalculatedPathogenicity: function(assertion) {
         if (assertion && this.state.calculated_pathogenicity !== assertion) {
@@ -473,16 +496,18 @@ var VariantCurationHub = createReactClass({
         }
     },
 
-    render: function() {
-        var variantData = this.state.variantObj;
-        var interpretation = (this.state.interpretation) ? this.state.interpretation : null;
-        var interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
-        var editKey = this.state.editKey;
-        var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
-        var selectedTab = this.state.selectedTab;
+    render() {
+        const variantData = this.state.variantObj;
+        const editKey = this.state.editKey;
+        const selectedTab = this.state.selectedTab;
+        const selectedSubtab = this.state.selectedSubtab;
+        const selectedCriteria = this.state.selectedCriteria;
+        const affiliation = this.props.affiliation;
+        let interpretation = (this.state.interpretation) ? this.state.interpretation : null;
+        let interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
+        let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         let calculated_pathogenicity = (this.state.calculated_pathogenicity) ? this.state.calculated_pathogenicity : (this.state.autoClassification ? this.state.autoClassification : null);
         let my_gene_info = (this.state.ext_myGeneInfo_MyVariant) ? this.state.ext_myGeneInfo_MyVariant : (this.state.ext_myGeneInfo_VEP ? this.state.ext_myGeneInfo_VEP : this.state.ext_myGeneInfo_ClinVar);
-        let affiliation = this.props.affiliation;
 
         return (
             <div>
@@ -492,7 +517,8 @@ var VariantCurationHub = createReactClass({
                     classificationSnapshots={this.state.classificationSnapshots} />
                 {!this.state.summaryVisible ?
                     <div>
-                        <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab} />
+                        <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab}
+                            updateSelectedCriteria={this.updateSelectedCriteria} />
                         <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
                             calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity}
@@ -520,7 +546,8 @@ var VariantCurationHub = createReactClass({
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
-                            selectedTab={selectedTab} affiliation={affiliation} />
+                            selectedTab={selectedTab} selectedSubtab={selectedSubtab}
+                            selectedCriteria={selectedCriteria} affiliation={affiliation} />
                     </div>
                     :
                     <EvaluationSummary interpretation={interpretation} calculatedAssertion={calculated_pathogenicity}

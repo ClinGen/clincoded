@@ -25,7 +25,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
-        When I press the tab "Predictors "
+        When I press the tab "Variant Type "
         And I wait for 1 seconds
         Then I should see "ClinGen Predictors"
         When I press the tab "Experimental "
@@ -68,7 +68,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
-        When I press the tab "Predictors "
+        When I press the tab "Variant Type "
         And I wait for 1 seconds
         Then I should see "ClinGen Predictors"
         When I press the tab "Experimental "
@@ -112,7 +112,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
-        When I press the tab "Predictors "
+        When I press the tab "Variant Type "
         And I wait for 1 seconds
         Then I should see "ClinGen Predictors"
         When I press the tab "Experimental "
@@ -156,7 +156,7 @@ Feature: Variant Curation Tabs
         When I press the tab "Population "
         And I wait for 1 seconds
         Then I should see "Highest Minor Allele Frequency"
-        When I press the tab "Predictors "
+        When I press the tab "Variant Type "
         And I wait for 1 seconds
         Then I should see "ClinGen Predictors"
         When I press the tab "Experimental "
