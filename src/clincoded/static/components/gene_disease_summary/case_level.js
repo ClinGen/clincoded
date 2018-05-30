@@ -63,7 +63,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 <td className="evidence-phenotypes">
                     {evidence.hpoIdInDiagnosis.length ?
                         <span><strong>HPO term(s):</strong>
-                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} />
+                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         </span> 
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
@@ -207,7 +207,8 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
-    caseLevelEvidenceList: PropTypes.array
+    caseLevelEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;

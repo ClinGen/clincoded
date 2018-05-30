@@ -44,7 +44,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                 <td className="evidence-phenotypes">
                     {evidence.hpoIdInDiagnosis.length ?
                         <span><strong>HPO term(s):</strong>
-                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} />
+                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         </span> 
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
@@ -150,7 +150,8 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
 }
 
 GeneDiseaseEvidenceSummarySegregation.propTypes = {
-    segregationEvidenceList: PropTypes.array
+    segregationEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummarySegregation;
