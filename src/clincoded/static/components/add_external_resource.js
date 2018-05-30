@@ -802,6 +802,9 @@ function carQueryResource() {
                                     }
                                 });
                             }
+                            // Remove the 'tempAlleles' object at this point regardless
+                            // whether the preceding evaluations are executed
+                            if (data['tempAlleles']) delete data['tempAlleles'];
                             this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         } else {
                             // Fall back to CAR data without the canonical transcript title if there is no ensembl transcript
