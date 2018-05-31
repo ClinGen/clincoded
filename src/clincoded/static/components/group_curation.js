@@ -364,39 +364,53 @@ var GroupCuration = createReactClass({
                     var value = this.getFormValue('malecount');
                     if (value) {
                         newGroup.numberOfMale = parseInt(value, 10);
+                    } else {
+                        if (newGroup && newGroup.numberOfMale) {
+                            delete newGroup['numberOfMale'];
+                        }
                     }
+
                     value = this.getFormValue('femalecount');
                     if (value) {
                         newGroup.numberOfFemale = parseInt(value, 10);
+                    } else {
+                        if (newGroup && newGroup.numberOfFemale) {
+                            delete newGroup['numberOfFemale'];
+                        }
                     }
+
                     value = this.getFormValue('country');
-                    if (value !== 'none') {
-                        newGroup.countryOfOrigin = value;
-                    }
+                    newGroup.countryOfOrigin = value !== 'none' ? value : '';
+
                     value = this.getFormValue('ethnicity');
-                    if (value !== 'none') {
-                        newGroup.ethnicity = value;
-                    }
+                    newGroup.ethnicity = value !== 'none' ? value : '';
+
                     value = this.getFormValue('race');
-                    if (value !== 'none') {
-                        newGroup.race = value;
-                    }
+                    newGroup.race = value !== 'none' ? value : '';
+
                     value = this.getFormValue('agerangetype');
-                    if (value !== 'none') {
-                        newGroup.ageRangeType = value + '';
-                    }
+                    newGroup.ageRangeType = value !== 'none' ? value : '';
+
                     value = this.getFormValue('agefrom');
                     if (value) {
                         newGroup.ageRangeFrom = parseInt(value, 10);
+                    } else {
+                        if (newGroup && newGroup.ageRangeFrom) {
+                            delete newGroup['ageRangeFrom'];
+                        }
                     }
+
                     value = this.getFormValue('ageto');
                     if (value) {
                         newGroup.ageRangeTo = parseInt(value, 10);
+                    } else {
+                        if (newGroup && newGroup.ageRangeTo) {
+                            delete newGroup['ageRangeTo'];
+                        }
                     }
+
                     value = this.getFormValue('ageunit');
-                    if (value !== 'none') {
-                        newGroup.ageRangeUnit = value;
-                    }
+                    newGroup.ageRangeUnit = value !== 'none' ? value : '';
 
                     // Fill in the group fields from Group Information panel
                     newGroup.totalNumberIndividuals = parseInt(this.getFormValue('indcount'), 10);
