@@ -551,39 +551,53 @@ const CaseControlCuration = createReactClass({
                     var value = this.getFormValue(prefix + 'maleCount');
                     if (value) {
                         newCaseGroup.numberOfMale = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.numberOfMale) {
+                            delete newCaseGroup['numberOfMale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'femaleCount');
                     if (value) {
                         newCaseGroup.numberOfFemale = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.numberOfFemale) {
+                            delete newCaseGroup['numberOfFemale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'country');
-                    if (value !== 'none') {
-                        newCaseGroup.countryOfOrigin = value;
-                    }
+                    newCaseGroup.countryOfOrigin = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ethnicity');
-                    if (value !== 'none') {
-                        newCaseGroup.ethnicity = value;
-                    }
+                    newCaseGroup.ethnicity = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'race');
-                    if (value !== 'none') {
-                        newCaseGroup.race = value;
-                    }
+                    newCaseGroup.race = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ageRangeType');
-                    if (value !== 'none') {
-                        newCaseGroup.ageRangeType = value + '';
-                    }
+                    newCaseGroup.ageRangeType = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
                         newCaseGroup.ageRangeFrom = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.ageRangeFrom) {
+                            delete newCaseGroup['ageRangeFrom'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageTo');
                     if (value) {
                         newCaseGroup.ageRangeTo = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.ageRangeTo) {
+                            delete newCaseGroup['ageRangeTo'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageUnit');
-                    if (value !== 'none') {
-                        newCaseGroup.ageRangeUnit = value;
-                    }
+                    newCaseGroup.ageRangeUnit = value !== 'none' ? value : '';
 
                     /*****************************************************/
                     /* Group Additional Information form fields          */
@@ -677,35 +691,50 @@ const CaseControlCuration = createReactClass({
                     var value = this.getFormValue(prefix + 'maleCount');
                     if (value) {
                         newControlGroup.numberOfMale = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.numberOfMale) {
+                            delete newControlGroup['numberOfMale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'femaleCount');
                     if (value) {
                         newControlGroup.numberOfFemale = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.numberOfFemale) {
+                            delete newControlGroup['numberOfFemale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'country');
-                    if (value !== 'none') {
-                        newControlGroup.countryOfOrigin = value;
-                    }
+                    newControlGroup.countryOfOrigin = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ethnicity');
-                    if (value !== 'none') {
-                        newControlGroup.ethnicity = value;
-                    }
+                    newControlGroup.ethnicity = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'race');
-                    if (value !== 'none') {
-                        newControlGroup.race = value;
-                    }
+                    newControlGroup.race = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
                         newControlGroup.ageRangeFrom = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.ageRangeFrom) {
+                            delete newControlGroup['ageRangeFrom'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageTo');
                     if (value) {
                         newControlGroup.ageRangeTo = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.ageRangeTo) {
+                            delete newControlGroup['ageRangeTo'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageUnit');
-                    if (value !== 'none') {
-                        newControlGroup.ageRangeUnit = value;
-                    }
+                    newControlGroup.ageRangeUnit = value !== 'none' ? value : '';
 
                     /*****************************************************/
                     /* Group Additional Information form fields          */
