@@ -16,52 +16,14 @@ import { external_url_map } from '../components/globals';
 class HpoTerms extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            hpoTermList: null
-        };
-    }
-
-    componentDidMount() {
-        this.fetchHpoTerms(this.props.hpoIds);
-    }
-
-    fetchHpoTerms(ids) {
-        let hpoTermList = [];
-        ids.forEach(id => {
-            let hpoTerm;
-            let url = external_url_map['HPOApi'] + id.replace(':', '_');
-            // Make the OLS REST API call
-            this.context.fetch(url, {
-                method: 'GET',
-                headers: {'Accept': 'application/json'}
-            }).then(response => {
-                if (!response.ok) throw response;
-                return response.json();
-            }).then(result => {
-                let termLabel = result['_embedded']['terms'][0]['label'];
-                if (termLabel) {
-                    hpoTerm = termLabel;
-                } else {
-                    hpoTerm = id + ' (note: term not found)';
-                }
-                hpoTermList.push(hpoTerm);
-                this.setState({hpoTermList: hpoTermList});
-            }, error => {
-                // Unsuccessful retrieval
-                console.warn('Error in fetching HPO data =: %o', error);
-                hpoTerm = id + ' (note: term not found)';
-                hpoTermList.push(hpoTerm);
-                this.setState({hpoTermList: hpoTermList});
-            });
-        });
     }
 
     render() {
-        let hpoTermList = this.state.hpoTermList;
+        const { hpoIds, hpoTerms } = this.props;
         return (
             <ul className="hpo-terms-list">
-                {hpoTermList && hpoTermList.length ?
-                    hpoTermList.map((term, i) => <li key={i} className="hpo-term-item"><span>{term}</span></li>)
+                {hpoIds && hpoIds.length ?
+                    hpoIds.map((id, i) => <li key={i} className="hpo-term-item"><span>{hpoTerms[id]}</span></li>)
                     : null}
             </ul>
         );
@@ -69,11 +31,8 @@ class HpoTerms extends Component {
 }
 
 HpoTerms.propTypes = {
-    hpoIds: PropTypes.array
-};
-
-HpoTerms.contextTypes = {
-    fetch: PropTypes.func
+    hpoIds: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default HpoTerms;
