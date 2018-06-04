@@ -109,3 +109,9 @@ def variant_2_3(value, system):
     if 'hgvsNames' in value and value['hgvsNames'] == []:
         value['hgvsNames'] = {}
 
+
+@upgrade_step('variant', '3', '4')
+def variant_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1600
+    # Add canonical transcript title property and update schema version
+    return
