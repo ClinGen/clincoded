@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "label": {
             "title": "Label",
@@ -375,6 +375,15 @@
                 "includeLodScoreInAggregateCalculation": {
                     "title": "LOD in Aggregate Calculation",
                     "type": "boolean"
+                },
+                "sequencingMethod": {
+                    "title": "Sequencing Method",
+                    "description": "Sequencing method associated with the segregation LOD score",
+                    "type": "string",
+                    "enum": [
+                        "Candidate gene sequencing",
+                        "Exome/genome or all genes sequenced in linkage region"
+                    ]
                 },
                 "reasonExplanation": {
                     "title": "Explanation",
