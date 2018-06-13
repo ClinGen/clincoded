@@ -42,3 +42,14 @@ def provisionalClassification_4_5(value, system):
     if 'classificationStatus' in value:
         if value['classificationStatus'] == 'Provisional':
             value['classificationStatus'] = 'In progress'
+
+
+@upgrade_step('provisionalClassification', '5', '6')
+def provisionalClassification_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1549
+    # Add sequencing type to be associated with LOD score
+    if 'classificationPoints' in value:
+        if 'segregation' in value['classificationPoints']:
+            if 'evidenceCount' in value['classificationPoints']['segregation']:
+                value['classificationPoints']['segregation']['evidenceCountCandidate'] = value['classificationPoints']['segregation']['evidenceCount']
+                value['classificationPoints']['segregation'].pop('evidenceCount', None)
