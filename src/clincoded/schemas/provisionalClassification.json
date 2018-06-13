@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "classificationPoints": {
             "title": "Calculated scores and points from the scored evidence",
@@ -176,9 +176,15 @@
                     "description": "Segregation case-level evidence",
                     "type": "object",
                     "properties": {
-                        "evidenceCount": {
-                            "title": "Segregation Evidence Count",
-                            "description": "Number of scored evidence for Segregation case-level evidence",
+                        "evidenceCountCandidate": {
+                            "title": "Segregation Evidence Count for Candidate gene sequencing",
+                            "description": "Number of scored evidence for Segregation case-level evidence (Candidate gene sequencing)",
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "evidenceCountExome": {
+                            "title": "Segregation Evidence Count for Exome/genome or all genes sequenced in linkage region",
+                            "description": "Number of scored evidence for Segregation case-level evidence (Exome/genome or all genes sequenced in linkage region)",
                             "type": "number",
                             "minimum": 0
                         },
