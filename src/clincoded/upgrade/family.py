@@ -95,3 +95,13 @@ def family_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+
+@upgrade_step('family', '5', '6')
+def family_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1549
+    # Add sequencing type to be associated with LOD score
+    if 'segregation' in value:
+        if 'includeLodScoreInAggregateCalculation' in value['segregation']:
+            if value['segregation']['includeLodScoreInAggregateCalculation'] is True:
+                value['segregation']['sequencingMethod'] = 'Candidate gene sequencing'
