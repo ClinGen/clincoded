@@ -25,8 +25,8 @@ class GeneDiseaseClassificationMatrix extends Component {
                             <td>Points Counted</td>
                         </tr>
                         <tr>
-                            <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
-                            <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
+                            <td rowSpan="9" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
+                            <td rowSpan="7" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
                             <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
                             <td rowSpan="3" className="header">Autosomal Dominant OR X-linked Disorder</td>
                             <td>Proband with other variant type with some evidence of gene impact</td>
@@ -59,12 +59,17 @@ class GeneDiseaseClassificationMatrix extends Component {
                             <td>{classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['totalPointsGiven']}</td>
                         </tr>
                         <tr>
-                            <td colSpan="3" className="header">Segregation</td>
-                            <td>{classificationPoints['segregation']['evidenceCount']}</td>
-                            <td>
+                            <td colSpan="2" rowSpan="2" className="header">Segregation</td>
+                            <td>Candidate gene sequencing</td>
+                            <td>{classificationPoints['segregation']['evidenceCountCandidate']}</td>
+                            <td rowSpan="2">
                                 <span>{classificationPoints['segregation']['pointsCounted']}</span> (<abbr title="Combined LOD Score"><span>{classificationPoints['segregation']['totalPointsGiven']}</span><strong>*</strong></abbr>)
                             </td>
-                            <td>{classificationPoints['segregation']['pointsCounted']}</td>
+                            <td rowSpan="2">{classificationPoints['segregation']['pointsCounted']}</td>
+                        </tr>
+                        <tr>
+                            <td>Exome/genome or all genes sequenced in linkage region</td>
+                            <td>{classificationPoints['segregation']['evidenceCountExome']}</td>
                         </tr>
                         <tr>
                             <td colSpan="4" className="header">Case-Control</td>

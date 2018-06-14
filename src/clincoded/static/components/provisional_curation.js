@@ -65,8 +65,9 @@ var ProvisionalCuration = createReactClass({
                 twoVariantsProvenCount: 0, twoVariantsProvenPoints: 0,
                 twoVariantsNotProvenCount: 0, twoVariantsNotProvenPoints: 0,
                 // variables for segregation data
-                // segregationPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
-                segregationCount: 0, segregationPoints: 0, segregationPointsCounted: 0,
+                // segregationTotalPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
+                segregationCountCandidate: 0, segregationCountExome: 0, segregationPointsCandidate: 0, segregationPointsExome: 0,
+                segregationTotalPoints: 0, segregationPointsCounted: 0,
                 // variables for case-control data
                 caseControlCount: 0, caseControlPoints: 0, caseControlPointsCounted: 0,
                 // variables for Experimental data
@@ -262,8 +263,9 @@ var ProvisionalCuration = createReactClass({
             classificationPoints['autosomalRecessiveDisorder']['pointsCounted'] = Number(scoreTableValues.autosomalRecessivePointsCounted);
             // Segregation case-level evidence
             classificationPoints['segregation'] = {};
-            classificationPoints['segregation']['evidenceCount'] = Number(scoreTableValues.segregationCount);
-            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationPoints);
+            classificationPoints['segregation']['evidenceCountCandidate'] = Number(scoreTableValues.segregationCountCandidate);
+            classificationPoints['segregation']['evidenceCountExome'] = Number(scoreTableValues.segregationCountExome);
+            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationTotalPoints);
             classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
             // Case-Control genetic evidence
             classificationPoints['caseControl'] = {};
@@ -437,7 +439,7 @@ var ProvisionalCuration = createReactClass({
         this.setState({replicatedOverTime: replicatedOverTime}, this.calculateClassifications(this.state.totalScore, replicatedOverTime));
     },
 
-    familyScraper: function(user, families, annotation, segregationCount, segregationPoints, individualMatched) {
+    familyScraper: function(user, families, annotation, segregationCountCandidate, segregationCountExome, segregationPointsCandidate, segregationPointsExome, individualMatched) {
         // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
         // returns dictionary of relevant items that need to be updated within NewCalculation()
         families.forEach(family => {
@@ -448,11 +450,21 @@ var ProvisionalCuration = createReactClass({
                 // get lod score of segregation of family
                 if (family.segregation.includeLodScoreInAggregateCalculation) {
                     if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
-                        segregationCount += 1;
-                        segregationPoints += family.segregation.publishedLodScore;
+                        if (family.segregation.sequencingMethod === 'Candidate gene sequencing') {
+                            segregationCountCandidate += 1;
+                            segregationPointsCandidate += family.segregation.publishedLodScore;
+                        } else if (family.segregation.sequencingMethod === 'Exome/genome or all genes sequenced in linkage region') {
+                            segregationCountExome += 1;
+                            segregationPointsExome += family.segregation.publishedLodScore;
+                        }
                     } else if ("lodPublished" in family.segregation && family.segregation.lodPublished === false && family.segregation.estimatedLodScore) {
-                        segregationCount += 1;
-                        segregationPoints += family.segregation.estimatedLodScore;
+                        if (family.segregation.sequencingMethod === 'Candidate gene sequencing') {
+                            segregationCountCandidate += 1;
+                            segregationPointsCandidate += family.segregation.estimatedLodScore;
+                        } else if (family.segregation.sequencingMethod === 'Exome/genome or all genes sequenced in linkage region') {
+                            segregationCountExome += 1;
+                            segregationPointsExome += family.segregation.estimatedLodScore;
+                        }
                     }
                 }
             }
@@ -463,8 +475,10 @@ var ProvisionalCuration = createReactClass({
         });
 
         return {
-            segregationCount: segregationCount,
-            segregationPoints: segregationPoints,
+            segregationCountCandidate: segregationCountCandidate,
+            segregationCountExome: segregationCountExome,
+            segregationPointsCandidate: segregationPointsCandidate,
+            segregationPointsExome: segregationPointsExome,
             individualMatched: individualMatched
         };
     },
@@ -522,9 +536,12 @@ var ProvisionalCuration = createReactClass({
             groups.forEach(group => {
                 // loop through families using FamilyScraper
                 families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
-                tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
-                scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
-                scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
+                tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCountCandidate'],
+                    scoreTableValues['segregationCountExome'], scoreTableValues['segregationPointsCandidate'], scoreTableValues['segregationPointsExome'], individualMatched);
+                scoreTableValues['segregationCountCandidate'] = tempFamilyScraperValues['segregationCountCandidate'];
+                scoreTableValues['segregationCountExome'] = tempFamilyScraperValues['segregationCountExome'];
+                scoreTableValues['segregationPointsCandidate'] = tempFamilyScraperValues['segregationPointsCandidate'];
+                scoreTableValues['segregationPointsExome'] = tempFamilyScraperValues['segregationPointsExome'];
                 individualMatched = tempFamilyScraperValues['individualMatched'];
                 // get proband individuals of group
                 if (group.individualIncluded && group.individualIncluded.length) {
@@ -534,9 +551,12 @@ var ProvisionalCuration = createReactClass({
 
             // loop through families using FamilyScraper
             families = annotation.families && annotation.families.length ? annotation.families : [];
-            tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
-            scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
-            scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
+            tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCountCandidate'],
+                scoreTableValues['segregationCountExome'], scoreTableValues['segregationPointsCandidate'], scoreTableValues['segregationPointsExome'], individualMatched);
+            scoreTableValues['segregationCountCandidate'] = tempFamilyScraperValues['segregationCountCandidate'];
+            scoreTableValues['segregationCountExome'] = tempFamilyScraperValues['segregationCountExome'];
+            scoreTableValues['segregationPointsCandidate'] = tempFamilyScraperValues['segregationPointsCandidate'];
+            scoreTableValues['segregationPointsExome'] = tempFamilyScraperValues['segregationPointsExome'];
             individualMatched = tempFamilyScraperValues['individualMatched'];
 
             // push all matched individuals from families and families of groups to probandTotal
@@ -689,18 +709,25 @@ var ProvisionalCuration = createReactClass({
         });
 
         // calculate segregation counted points
-        scoreTableValues['segregationPoints'] = this.classificationMathRound(scoreTableValues['segregationPoints']);
-        if (scoreTableValues['segregationPoints'] >= 0.72 && scoreTableValues['segregationPoints'] <= 0.99) {
-            scoreTableValues['segregationPointsCounted'] = 1;
-        } else if (scoreTableValues['segregationPoints'] >= 1 && scoreTableValues['segregationPoints'] <= 1.24) {
-            scoreTableValues['segregationPointsCounted'] = 1.5;
-        } else if (scoreTableValues['segregationPoints'] >= 1.25 && scoreTableValues['segregationPoints'] <= 1.49) {
-            scoreTableValues['segregationPointsCounted'] = 2.5;
-        } else if (scoreTableValues['segregationPoints'] >= 1.5 && scoreTableValues['segregationPoints'] <= 1.74) {
-            scoreTableValues['segregationPointsCounted'] = 3;
-        } else if (scoreTableValues['segregationPoints'] >= 1.75) {
-            scoreTableValues['segregationPointsCounted'] = MAX_SCORE_CONSTANTS.SEGREGATION;
+        // Total LOD scores is calculated from the sum of all LOD scores from both sequencing methods
+        scoreTableValues['segregationTotalPoints'] = this.classificationMathRound(scoreTableValues['segregationPointsCandidate'] + scoreTableValues['segregationPointsExome']);
+        // Determine the min points (Candidate gene sequencing) and max points (Exome/genome or all genes sequenced in linkage region) given the total LOD scores
+        let range = {min: 0, max: 0};
+        if (scoreTableValues['segregationTotalPoints'] >= 0 && scoreTableValues['segregationTotalPoints'] <= 1.99) {
+            range = {min: 0, max: 0};
+        } else if (scoreTableValues['segregationTotalPoints'] >= 2 && scoreTableValues['segregationTotalPoints'] <= 2.99) {
+            range = {min: 0.5, max: 1};
+        } else if (scoreTableValues['segregationTotalPoints'] >= 3 && scoreTableValues['segregationTotalPoints'] <= 4.99) {
+            range = {min: 1, max: 2};
+        } else if (scoreTableValues['segregationTotalPoints'] >= 5) {
+            range = {min: 1.5, max: 3};
         }
+        // Calculate the segregation points counted given total LOD scores, min points and max points
+        scoreTableValues['segregationPointsCounted'] = scoreTableValues['segregationTotalPoints'] === parseFloat(0) ?
+            parseFloat(0)
+            :
+            this.classificationMathRound(((scoreTableValues['segregationPointsCandidate'] / scoreTableValues['segregationTotalPoints']) * range['min']) +
+            ((scoreTableValues['segregationPointsExome'] / scoreTableValues['segregationTotalPoints']) * range['max']));
 
         // calculate other counted points
         let tempPoints = 0;
@@ -837,8 +864,8 @@ var ProvisionalCuration = createReactClass({
                                                                 <td>Points Counted</td>
                                                             </tr>
                                                             <tr>
-                                                                <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
-                                                                <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
+                                                                <td rowSpan="9" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
+                                                                <td rowSpan="7" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
                                                                 <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
                                                                 <td rowSpan="3" className="header">Autosomal Dominant OR X-linked Disorder</td>
                                                                 <td>Proband with other variant type with some evidence of gene impact</td>
@@ -871,10 +898,18 @@ var ProvisionalCuration = createReactClass({
                                                                 <td>{scoreTableValues['twoVariantsProvenPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td colSpan="3" className="header">Segregation</td>
-                                                                <td>{scoreTableValues['segregationCount']}</td>
-                                                                <td><span>{scoreTableValues['segregationPointsCounted']}</span> (<abbr title="Combined LOD Score"><span>{scoreTableValues['segregationPoints']}</span><strong>*</strong></abbr>)</td>
-                                                                <td>{scoreTableValues['segregationPointsCounted']}</td>
+                                                                <td colSpan="2" rowSpan="2" className="header">Segregation</td>
+                                                                <td>Candidate gene sequencing</td>
+                                                                <td>{scoreTableValues['segregationCountCandidate']}</td>
+                                                                <td rowSpan="2">
+                                                                    <span>{scoreTableValues['segregationPointsCounted']}</span>
+                                                                    &nbsp;(<abbr title="Combined LOD Score"><span>{scoreTableValues['segregationTotalPoints']}</span><strong>*</strong></abbr>)
+                                                                </td>
+                                                                <td rowSpan="2">{scoreTableValues['segregationPointsCounted']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Exome/genome or all genes sequenced in linkage region</td>
+                                                                <td>{scoreTableValues['segregationCountExome']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="4" className="header">Case-Control</td>
