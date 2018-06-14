@@ -2144,9 +2144,10 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
         // It's possible to create a proband w/o variants at the moment
         newIndividual.variants = variants;
     }
-    if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
-
-    if (affiliation) { newIndividual.affiliation = affiliation.affiliation_id; }
+    if (zygosity) newIndividual.recessiveZygosity = zygosity;
+    if (affiliation) newIndividual.affiliation = affiliation.affiliation_id;
+    const newMethod = {dateTime: moment().format()};
+    newIndividual.method = newMethod;
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {
