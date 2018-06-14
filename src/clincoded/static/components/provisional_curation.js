@@ -1040,6 +1040,7 @@ var ProvisionalCuration = createReactClass({
                                                                                     wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
                                                                                     clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
                                                                                     required={this.state.alteredClassification !== 'No Modification' ? true : false}
+                                                                                    placeholder="Note: If you choose to publish this classification, this text will be displayed on the ClinGen website."
                                                                                     customErrorMsg="Required when changing classification" />
                                                                                 {this.state.resetAlteredClassification ?
                                                                                     <div className="altered-classification-reset-warning">
@@ -1056,8 +1057,9 @@ var ProvisionalCuration = createReactClass({
                                                                             <div className="classification-evidence-summary">
                                                                                 <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
                                                                                     value={this.state.evidenceSummary} handleChange={this.handleChange}
-                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="8"
-                                                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional). Note: If you choose to publish
+                                                                                    this classification, this text will be displayed on the ClinGen website."
+                                                                                    rows="8" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
