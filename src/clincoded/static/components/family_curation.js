@@ -138,19 +138,19 @@ var FamilyCuration = createReactClass({
                 publishedLodScore = this.state.family.segregation.publishedLodScore;
             }
             if (lodPublished === 'Yes') {
-                this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null}, () => {
+                this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null, includeLodScore: false}, () => {
                     if (!this.state.publishedLodScore) {
                         this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                     }
                 });
             } else if (lodPublished === 'No') {
-                this.setState({lodPublished: 'No', publishedLodScore: null});
+                this.setState({lodPublished: 'No', publishedLodScore: null, includeLodScore: false});
                 if (!this.state.estimatedLodScore) {
                     this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                 }
             } else {
                 this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
-                this.setState({lodPublished: null, publishedLodScore: null});
+                this.setState({lodPublished: null, publishedLodScore: null, includeLodScore: false});
             }
         } else if (ref === 'SEGincludeLodScoreInAggregateCalculation') {
             let includeLodScore = this.refs[ref].getValue();
