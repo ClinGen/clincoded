@@ -1036,11 +1036,11 @@ var ProvisionalCuration = createReactClass({
                                                                                 </Input>
                                                                             </div>
                                                                             <div className="altered-classification-reasons">
-                                                                                <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
+                                                                                <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change:" labelClassName="col-sm-5 control-label"
                                                                                     wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
                                                                                     clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
                                                                                     required={this.state.alteredClassification !== 'No Modification' ? true : false}
-                                                                                    placeholder="Note: If you choose to publish this classification, this text will be displayed on the ClinGen website."
+                                                                                    placeholder="Note: This text will appear on ClinGen's website if you publish this Classification."
                                                                                     customErrorMsg="Required when changing classification" />
                                                                                 {this.state.resetAlteredClassification ?
                                                                                     <div className="altered-classification-reset-warning">
@@ -1055,10 +1055,9 @@ var ProvisionalCuration = createReactClass({
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
                                                                             <div className="classification-evidence-summary">
-                                                                                <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
-                                                                                    value={this.state.evidenceSummary} handleChange={this.handleChange}
-                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional). Note: If you choose to publish
-                                                                                    this classification, this text will be displayed on the ClinGen website."
+                                                                                <Input type="textarea" ref="classification-evidence-summary" value={this.state.evidenceSummary} handleChange={this.handleChange}
+                                                                                    label={<span className="label-main">Evidence Summary (optional):<span className="label-note">Rationale for the clinical validity classification</span></span>}
+                                                                                    placeholder="Note: This text will appear on ClinGen's website if you publish this Classification."
                                                                                     rows="8" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                                             </div>
                                                                         </div>
