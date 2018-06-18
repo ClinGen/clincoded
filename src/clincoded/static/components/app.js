@@ -32,6 +32,27 @@ var portal = {
 };
 
 
+const demoAffiliations = [
+    {
+        "affiliation_id": "88888",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Curator Test Affiliation 1",
+        "approver": [
+            "Person A",
+            "Person B"
+        ]
+    },
+    {
+        "affiliation_id": "99999",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Curator Test Affiliation 2",
+        "approver": [
+            "Person X",
+            "Person Y"
+        ]
+    }
+];
+
 // Renders HTML common to all pages.
 var App = module.exports = createReactClass({
     mixins: [Auth0, HistoryAndTriggers, RestMixin],
@@ -162,6 +183,7 @@ var App = module.exports = createReactClass({
      * @param {string} curatorName - The title of the logged-in user
      */
     renderAffiliationModal(affiliations, curatorName) {
+        if (this.state.demoWarning) AffiliationsList.push(...demoAffiliations);
         let userAffiliations = this.getUserAffiliations(affiliations, AffiliationsList);
         return (
             <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
