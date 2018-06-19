@@ -621,7 +621,7 @@ var FamilyCuration = createReactClass({
             // when LOD score is included for calculation
             if (this.getFormValue('SEGincludeLodScoreInAggregateCalculation') === 'Yes' && this.getFormValue('SEGsequencingMethod') === 'none') {
                 formError = true;
-                this.setFormErrors('SEGsequencingMethod', 'Select a valid sequencing method');
+                this.setFormErrors('SEGsequencingMethod', 'A sequencing method is required');
             }
 
             if (!formError) {
@@ -1721,8 +1721,14 @@ function FamilySegregation() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
+            <div className="col-sm-7 col-sm-offset-5 lod-score-inclusion-note">
+                <p className="alert alert-warning">
+                    Note: For X-linked and autosomal dominant conditions, only include families with 4 or more segregations in the final calculation.
+                    For autosomal recessive conditions, only include families with at least 3 affected individuals. See the Gene Curation SOP for additional details.
+                </p>
+            </div>
             {this.state.includeLodScore ?
-                <Input type="select" ref="SEGsequencingMethod" label="Sequencing Method:"
+                <Input type="select" ref="SEGsequencingMethod" label="Sequencing Method: *"
                     defaultValue="none" value={segregation.sequencingMethod ? segregation.sequencingMethod : 'none'}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                     error={this.getFormError('SEGsequencingMethod')} clearError={this.clrFormErrors.bind(null, 'SEGsequencingMethod')}>
@@ -1732,12 +1738,6 @@ function FamilySegregation() {
                     <option value="Exome/genome or all genes sequenced in linkage region">Exome/genome or all genes sequenced in linkage region</option>
                 </Input>
                 : null}
-            <div className="col-sm-7 col-sm-offset-5 lod-score-inclusion-note">
-                <p className="alert alert-warning">
-                    Note: For X-linked and autosomal dominant conditions, only include families with 4 or more segregations in the final calculation.
-                    For autosomal recessive conditions, only include families with at least 3 affected individuals. See the Gene Curation SOP for additional details.
-                </p>
-            </div>
             <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5"
                 value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
