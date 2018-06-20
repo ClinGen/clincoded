@@ -3669,7 +3669,7 @@
         "timezone": "US/Pacific"
     },
     {
-        "email": "tristansands@gmail.com",
+        "email": "tts27@cumc.columbia.edu",
         "first_name": "Tristan",
         "last_name": "Sands",
         "uuid": "44845740-a5ae-4fb1-91ad-94cab4dc6a3a",
@@ -8099,6 +8099,21 @@
         "first_name": "Fei",
         "last_name": "Wang",
         "uuid": "8200c5ce-a392-46f0-acf0-fb324883b242",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "pwm2@cdc.gov",
+        "first_name": "Patricia",
+        "last_name": "Mueller",
+        "uuid": "0d16254d-e825-4f24-8ae5-d9f3c5105361",
         "groups": [
             "curator"
         ],
