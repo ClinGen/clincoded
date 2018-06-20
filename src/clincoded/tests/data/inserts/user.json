@@ -2397,6 +2397,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10027"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -2475,6 +2478,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10027"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -2490,6 +2496,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10027"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -2504,6 +2513,9 @@
         "uuid": "dbde13ef-e23e-4730-9bbe-08d5d59248f5",
         "groups": [
             "curator"
+        ],
+        "affiliation": [
+            "10027"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -4476,6 +4488,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10027"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -4490,6 +4505,9 @@
         "uuid": "bf178911-2aaa-4940-9f53-daf1fa786c99",
         "groups": [
             "curator"
+        ],
+        "affiliation": [
+            "10027"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -4506,6 +4524,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10027"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -4521,6 +4542,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10027"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -4535,6 +4559,9 @@
         "uuid": "6a52d255-69bb-4b21-aef0-96f503870f44",
         "groups": [
             "curator"
+        ],
+        "affiliation": [
+            "10027"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
