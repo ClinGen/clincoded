@@ -36,7 +36,7 @@
     {
         "affiliation_id": "10004",
         "affiliation_abbreviation": "CV-FH-EP",
-        "affiliation_fullname": "Familial Hypercholesterolemia EP",
+        "affiliation_fullname": "Cardiovascular Familial Hypercholesterolemia EP",
         "publish_approval": true,
         "approver": [
             "Lisa Kurtz",
@@ -52,7 +52,7 @@
     {
         "affiliation_id": "10006",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "Intellectual Disability & Autism EP",
+        "affiliation_fullname": "Autism and Intellectual Disability EP",
         "publish_approval": true
     },
     {
@@ -96,7 +96,7 @@
     {
         "affiliation_id": "10011",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "Aminoacidopathies EP",
+        "affiliation_fullname": "Aminoacidopathy EP",
         "publish_approval": true
     },
     {
@@ -201,7 +201,7 @@
     {
         "affiliation_id": "10023",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "Hereditary Cancer Gene Curation EP",
+        "affiliation_fullname": "Hereditary Cancer EP",
         "publish_approval": true,
         "approver": [
             "Sharon Plon"
@@ -232,7 +232,7 @@
     {
         "affiliation_id": "10026",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "ClinGen Gene Curation Core",
+        "affiliation_fullname": "ClinGen Biocuration Core",
         "publish_approval": true,
         "approver": [
             "Christa Martin",
