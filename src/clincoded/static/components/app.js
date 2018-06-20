@@ -75,6 +75,7 @@ var App = module.exports = createReactClass({
         } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
             // if neither production nor curation URL, enable demoWarning.
             demoWarning = true;
+            AffiliationsList.push(...demoAffiliations);
         }
         return {
             context: this.props.context, // Close to anti-pattern, but puts *initial* context into state
@@ -183,7 +184,6 @@ var App = module.exports = createReactClass({
      * @param {string} curatorName - The title of the logged-in user
      */
     renderAffiliationModal(affiliations, curatorName) {
-        if (this.state.demoWarning) AffiliationsList.push(...demoAffiliations);
         let userAffiliations = this.getUserAffiliations(affiliations, AffiliationsList);
         return (
             <AffiliationModal show={this.state.isAffiliationModalOpen} onClose={this.toggleAffiliationModal}
