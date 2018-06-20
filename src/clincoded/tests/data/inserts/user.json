@@ -8123,5 +8123,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "troman@email.unc.edu",
+        "first_name": "Tamara",
+        "last_name": "Roman",
+        "uuid": "b579a23e-9ddc-4de2-8efb-198cc89f5811",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
