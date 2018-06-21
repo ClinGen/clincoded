@@ -32,6 +32,27 @@ var portal = {
 };
 
 
+const demoAffiliations = [
+    {
+        "affiliation_id": "88888",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Curator Test Affiliation 1",
+        "approver": [
+            "Person A",
+            "Person B"
+        ]
+    },
+    {
+        "affiliation_id": "99999",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Curator Test Affiliation 2",
+        "approver": [
+            "Person X",
+            "Person Y"
+        ]
+    }
+];
+
 // Renders HTML common to all pages.
 var App = module.exports = createReactClass({
     mixins: [Auth0, HistoryAndTriggers, RestMixin],
@@ -54,6 +75,7 @@ var App = module.exports = createReactClass({
         } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
             // if neither production nor curation URL, enable demoWarning.
             demoWarning = true;
+            AffiliationsList.push(...demoAffiliations);
         }
         return {
             context: this.props.context, // Close to anti-pattern, but puts *initial* context into state
