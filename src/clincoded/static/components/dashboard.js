@@ -1,23 +1,17 @@
 'use strict';
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, userMatch, external_url_map } from './globals';
+import { curator_page } from './globals';
 import { RestMixin } from './rest';
-import { Form, FormMixin, Input } from '../libs/bootstrap/form';
-import { Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { showActivityIndicator } from './activity_indicator';
-import { findNonEmptyArray } from '../libs/helpers/find_array';
 import { sortListByDate } from '../libs/helpers/sort';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { renderVariantTitle } from '../libs/render_variant_title';
-import * as curator from './curator';
-
-var fetched = require('./fetched');
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
