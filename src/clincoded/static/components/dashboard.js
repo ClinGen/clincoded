@@ -163,7 +163,7 @@ var Dashboard = createReactClass({
             // go through GDM results and get their data
             gdmURLs = data[0]['@graph'].map(res => { return res['@id']; });
             if (gdmURLs.length > 0) {
-                this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
+                this.getRestDatas(gdmURLs).then(gdmResults => {
                     gdmResults.map(gdmResult => {
                         if (!gdmResult.affiliation) {
                             gdmList.push({
@@ -183,7 +183,7 @@ var Dashboard = createReactClass({
             // go through VCI interpretation results and get their data
             vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
             if (vciInterpURLs.length > 0) {
-                this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                this.getRestDatas(vciInterpURLs).then(vciInterpResults => {
                     vciInterpResults.map(vciInterpResult => {
                         if (!vciInterpResult.affiliation) {
                             vciInterpList.push({
@@ -220,7 +220,7 @@ var Dashboard = createReactClass({
             // Handle gdm result
             gdmURLs = data[0]['@graph'].map(result => { return result['@id']; });
             if (gdmURLs.length > 0) {
-                this.getRestDatas(gdmURLs, null, true).then(gdms => {
+                this.getRestDatas(gdmURLs).then(gdms => {
                     gdms.map(affiliatedGdm => {
                         affiliatedGdms.push({
                             uuid: affiliatedGdm.uuid,
@@ -238,7 +238,7 @@ var Dashboard = createReactClass({
             // Handle interpretations result
             interpretationURLs = data[1]['@graph'].map(result => { return result['@id']; });
             if (interpretationURLs.length > 0) {
-                this.getRestDatas(interpretationURLs, null, true).then(interpretationRecords => {
+                this.getRestDatas(interpretationURLs).then(interpretationRecords => {
                     interpretationRecords.map(interpretation => {
                         affiliatedInterpretations.push({
                             uuid: interpretation.uuid,
