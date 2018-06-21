@@ -8169,5 +8169,20 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "jessicajwang@g.ucla.edu",
+        "first_name": "Jessica",
+        "last_name": "Wang",
+        "uuid": "ac3d9bda-432f-4b6e-91ce-632fa6b71af5",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
