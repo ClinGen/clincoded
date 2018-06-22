@@ -94,5 +94,18 @@
                 margin-right: 2px;
             }
         }
+
+        .publish-status {
+            display: block;
+            padding-top: 5px;
+
+            .publish-warning {
+                color: #b6238a;
+
+                i.icon-exclamation-triangle {
+                    vertical-align: middle;
+                }
+            }
+        }
     }
 }
