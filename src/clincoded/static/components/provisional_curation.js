@@ -34,7 +34,8 @@ var ProvisionalCuration = createReactClass({
     propTypes: {
         href: PropTypes.string,
         session: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        demoVersion: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -228,6 +229,10 @@ var ProvisionalCuration = createReactClass({
             if (newProvisional.approvalDate) delete newProvisional.approvalDate;
             if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
             if (newProvisional.approvalComment) delete newProvisional.approvalComment;
+            newProvisional.publishClassification = false;
+            if (newProvisional.publishSubmitter) delete newProvisional.publishSubmitter;
+            if (newProvisional.publishDate) delete newProvisional.publishDate;
+            if (newProvisional.publishComment) delete newProvisional.publishComment;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
             // Total points and points counted for all evidence
             let classificationPoints = {}, scoreTableValues = this.state.scoreTableValues;
@@ -812,6 +817,7 @@ var ProvisionalCuration = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval ? true : false;
 
         return (
             <div>
@@ -1109,7 +1115,8 @@ var ProvisionalCuration = createReactClass({
                                     <div className="snapshot-list">
                                         <PanelGroup>
                                             <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
-                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
+                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus}
+                                                    allowPublishButton={allowPublishButton} demoVersion={this.props.demoVersion} />
                                             </Panel>
                                         </PanelGroup>
                                     </div>
