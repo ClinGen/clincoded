@@ -42,3 +42,10 @@ def provisionalClassification_4_5(value, system):
     if 'classificationStatus' in value:
         if value['classificationStatus'] == 'Provisional':
             value['classificationStatus'] = 'In progress'
+
+
+@upgrade_step('provisionalClassification', '5', '6')
+def provisionalClassification_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1420
+    # Add publication properties and update schema version
+    return
