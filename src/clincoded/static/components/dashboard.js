@@ -1,23 +1,17 @@
 'use strict';
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, userMatch, external_url_map } from './globals';
+import { curator_page } from './globals';
 import { RestMixin } from './rest';
-import { Form, FormMixin, Input } from '../libs/bootstrap/form';
-import { Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { showActivityIndicator } from './activity_indicator';
-import { findNonEmptyArray } from '../libs/helpers/find_array';
 import { sortListByDate } from '../libs/helpers/sort';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { renderVariantTitle } from '../libs/render_variant_title';
-import * as curator from './curator';
-
-var fetched = require('./fetched');
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
@@ -163,7 +157,7 @@ var Dashboard = createReactClass({
             // go through GDM results and get their data
             gdmURLs = data[0]['@graph'].map(res => { return res['@id']; });
             if (gdmURLs.length > 0) {
-                this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
+                this.getRestDatas(gdmURLs).then(gdmResults => {
                     gdmResults.map(gdmResult => {
                         if (!gdmResult.affiliation) {
                             gdmList.push({
@@ -183,7 +177,7 @@ var Dashboard = createReactClass({
             // go through VCI interpretation results and get their data
             vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
             if (vciInterpURLs.length > 0) {
-                this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                this.getRestDatas(vciInterpURLs).then(vciInterpResults => {
                     vciInterpResults.map(vciInterpResult => {
                         if (!vciInterpResult.affiliation) {
                             vciInterpList.push({
@@ -220,7 +214,7 @@ var Dashboard = createReactClass({
             // Handle gdm result
             gdmURLs = data[0]['@graph'].map(result => { return result['@id']; });
             if (gdmURLs.length > 0) {
-                this.getRestDatas(gdmURLs, null, true).then(gdms => {
+                this.getRestDatas(gdmURLs).then(gdms => {
                     gdms.map(affiliatedGdm => {
                         affiliatedGdms.push({
                             uuid: affiliatedGdm.uuid,
@@ -238,7 +232,7 @@ var Dashboard = createReactClass({
             // Handle interpretations result
             interpretationURLs = data[1]['@graph'].map(result => { return result['@id']; });
             if (interpretationURLs.length > 0) {
-                this.getRestDatas(interpretationURLs, null, true).then(interpretationRecords => {
+                this.getRestDatas(interpretationURLs).then(interpretationRecords => {
                     interpretationRecords.map(interpretation => {
                         affiliatedInterpretations.push({
                             uuid: interpretation.uuid,
