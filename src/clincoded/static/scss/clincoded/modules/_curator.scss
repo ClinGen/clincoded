@@ -1131,6 +1131,43 @@
             }
         }
 
+        .altered-classification-reasons,
+        .classification-evidence-summary {
+            textarea {
+                /* placeholder text color */
+                &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+                    color: #b6238a;
+                }
+                &::-moz-placeholder { /* Firefox 19+ */
+                    color: #b6238a;
+                }
+                &::-ms-input-placeholder { /* IE 10+ */
+                    color: #b6238a;
+                }
+                &::-moz-placeholder { /* Firefox 18- */
+                    color: #b6238a;
+                }
+                /* placeholder text color on focus */
+                &:focus::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+                    color: transparent;
+                }
+                &:focus::-moz-placeholder { /* Firefox 19+ */
+                    color: transparent;
+                }
+                &:focus::-ms-input-placeholder { /* IE 10+ */
+                    color: transparent;
+                }
+                &:focus::-moz-placeholder { /* Firefox 18- */
+                    color: transparent;
+                }
+            }
+
+            .label-note {
+                display: block;
+                font-weight: normal;
+            }
+        }
+
         .classification-status {
             margin-top: 3px;
             margin-bottom: 38px;
