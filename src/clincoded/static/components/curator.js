@@ -371,6 +371,43 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     },
 
     /**
+     * Method to display publication status of classification in gene-disease record header
+     * @param {array} snapshots - List of snapshots associated with classification
+     */
+    renderPublishStatus(snapshots) {
+        const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
+        let publishedSnapshot = null;
+        let publishedWarningMessage = null;
+
+        for (let snapshot of sortedSnapshots) {
+            if (snapshot.resource && snapshot.resource.publishClassification) {
+                publishedSnapshot = snapshot;
+                break;
+            }
+
+            if (snapshot.approvalStatus === 'Approved' && !publishedWarningMessage) {
+                publishedWarningMessage = (
+                    <span className="publish-warning" data-toggle="tooltip" data-placement="top"
+                        data-tooltip="The current approved Classification is more recent than this published Classification.">
+                        <i className="icon icon-exclamation-triangle"></i>
+                    </span>
+                );
+            }
+        }
+
+        if (publishedSnapshot) {
+            return (
+                <div className="header-classification">
+                    <strong className="header-classification-item">Date Published:</strong> {moment(publishedSnapshot.resource.publishDate).format("YYYY MMM DD, h:mm a")}
+                    <span className="classification-status"><span className="label publish-background">PUBLISHED</span>{publishedWarningMessage}</span>
+                </div>
+            );
+        } else {
+            return null;
+        }
+    },
+
+    /**
      * Method to get all other existing classifications (of a gdm) that are not owned by the logged-in user,
      * or owned by the affiliation that the logged-in user is part of.
      * @param {object} gdm - The gene-disease record
@@ -517,6 +554,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                             <strong className="header-classification-item">Classification Last Edited:</strong> {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}
                                                             {provisionalClassification && provisionalClassification.provisional ? this.renderSummaryStatus(provisionalClassification.provisional) : null}
                                                         </div>
+                                                        {this.renderPublishStatus(snapshots)}
                                                     </div>
                                                     :
                                                     <div className="header-classification-content">
@@ -2527,8 +2565,9 @@ function flattenAssessment(assessment) {
 var provisionalSimpleProps = [
     "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
     "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "approvalSubmitter", "classificationApprover",
-    "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate", "provisionalComment", "provisionedClassification",
-    "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
+    "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate", "provisionalReviewDate",
+    "provisionalComment", "publishSubmitter", "publishDate", "publishComment", "provisionedClassification", "approvedClassification",
+    "publishClassification", "associatedClassificationSnapshots"
 ];
 
 function flattenProvisional(provisional) {
@@ -2540,9 +2579,9 @@ function flattenProvisional(provisional) {
 
 var provisionalVariantSimpleProps = [
     "autoClassification", "alteredClassification", "reason", "evidenceSummary", "affiliation", "classificationStatus",
-    "approvalSubmitter", "classificationApprover", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
-    "provisionalDate", "provisionalComment", "provisionedClassification", "approvedClassification", "publishClassification",
-    "associatedInterpretationSnapshots"
+    "approvalSubmitter", "classificationApprover", "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
+    "provisionalDate", "provisionalReviewDate", "provisionalComment", "provisionedClassification", "approvedClassification",
+    "publishClassification", "associatedInterpretationSnapshots"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {

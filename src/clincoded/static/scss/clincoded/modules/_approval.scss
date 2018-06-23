@@ -40,7 +40,8 @@
  * Approval button styles
  */
 .provisional-form-buttons-wrapper,
-.approval-form-buttons-wrapper {
+.approval-form-buttons-wrapper,
+.publish-form-buttons-wrapper {
     padding: 0;
 
     .button-group {
@@ -50,6 +51,18 @@
 
 .provisional-approval.in-progress {
     margin-bottom: 10px;
+}
+
+.publish-background {
+    background-color: #b6238a;
+}
+
+.publish-background.unpublish {
+    background-color: #fff;
+    border: 1px solid #b6238a;
+    color: #b6238a;
+    font-weight: bold;
+    padding-bottom: 0.2em;
 }
 
 /**
@@ -66,11 +79,18 @@
 
         .list-group-item {
             background-color: #fff;
-            border-bottom: solid 1px #e1e1e1;
-            padding: 15px 15px 13px 25px;
+            border-bottom: solid 3px #e1e1e1;
     
             table {
                 width: 100%;
+
+                .snapshot-content {
+                    padding: 15px 0px 13px 25px;
+                }
+
+                .snapshot-publish-approval {
+                    border-top: solid 1px #e1e1e1;
+                }
     
                 dl {
                     margin-bottom: 5px;
@@ -107,7 +127,7 @@
     }
 
     .approval-snapshot-buttons {
-        padding: 14px 18px;
+        padding: 27px 33px;
         position: relative;
         text-align: center;
         vertical-align: bottom;
@@ -131,18 +151,38 @@
             }
         }
 
-        .btn.approve-provisional-link-item {
+        .btn.approve-provisional-link-item,
+        .btn.publish-link-item {
             font-size: 91%;
             margin-bottom: 5px;
             padding: 6px 8px;
+        }
+
+        .btn.btn-default.publish-link-item {
+            background-color: #b6238a;
+
+            &:hover {
+                background-color: #911c6e;
+            }
+
+            &.unpublish {
+                background-color: #fff;
+                border: 1px solid #b6238a;
+                color: #b6238a;
+                font-weight: bold;
+
+                &:hover {
+                    background-color: #f7e9f3;
+                }
+            }
         }
 
         .snapshot-current-icon,
         .snapshot-archive-icon {
             font-size: 1.3rem;
             position: absolute;
-            top: -3px;
-            right: 5px;
+            top: 12px;
+            right: 20px;
 
             .icon {
                 font-size: 1.6rem;
@@ -203,16 +243,53 @@
 /**
  * Final approval panel UI styles
  */
-.final-approval-content-wrapper {
+.final-approval-content-wrapper,
+.publish-approval-content-wrapper {
     .alert {
         .icon-flag {
             color: #82c91e;
         }
     }
+
+    .panel-heading h4 a {
+        background-color: #f0ad4e;
+
+        &:hover {
+            background-color: #ec971f;
+        }
+    }
+
+    .publish-approval .panel-heading h4 a {
+        background-color: #b6238a;
+
+        &:hover {
+            background-color: #911c6e;
+        }
+    }
+
+    &.unpublish {
+        .panel-heading {
+            h4 a {
+                background-color: #fff;
+                border: 1px solid #b6238a;
+                color: #b6238a;
+
+                &:hover {
+                    background-color: #f7e9f3;
+                }
+            }
+
+            .panel-header-indicator {
+                color: #b6238a;
+            }
+        }
+    }
 }
 
-.final-approval {
-    .approval-form-content-wrapper {
+.final-approval,
+.publish-approval {
+    .approval-form-content-wrapper,
+    .publish-form-content-wrapper {
         border: none;
         padding: 0;
     
@@ -241,24 +318,33 @@
             }
         }
 
-        .approval-submitter-placeholder-text {
+        .approval-submitter-placeholder-text,
+        .publish-placeholder-text {
             color: #ccc;
         }
     }
 
-    .approval-preview {
-        .approval-form-content-wrapper {
+    .approval-preview,
+    .publish-preview {
+        .approval-form-content-wrapper,
+        .publish-form-content-wrapper {
             .col-sm-3, .col-sm-5 {
                 padding-top: 7px;
             }
         }
     }
 
-    .approval-preview-note {
+    .approval-preview-note,
+    .publish-preview-note {
         margin-bottom: 15px;
         padding-top: 7px;
         padding-bottom: 7px;
     }
+}
+
+.feedback-message.publish-error {
+    margin-top: 15px;
+    text-align: center;
 }
 
 /**
@@ -273,16 +359,19 @@
         margin: 0 10px;
     }
 
-    .final-approval-panel-content {
+    .final-approval-panel-content,
+    .publish-approval-panel-content {
         margin: 0 10px;
     }
 
     .provisional-form-buttons-wrapper,
-    .approval-form-buttons-wrapper {
+    .approval-form-buttons-wrapper,
+    .publish-form-buttons-wrapper {
         margin-bottom: 15px;
     }
 
-    .final-approval {
+    .final-approval,
+    .publish-approval {
         margin-bottom: 10px;
     }
 

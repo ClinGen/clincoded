@@ -921,6 +921,14 @@
                 margin-left: 201px;
                 margin-top: 4px;
             }
+
+            .publish-warning {
+                color: #b6238a;
+
+                i.icon-exclamation-triangle {
+                    vertical-align: middle;
+                }
+            }
         }
 
         .summary-status {
