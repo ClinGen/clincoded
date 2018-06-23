@@ -379,13 +379,13 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         let publishedSnapshot = null;
         let publishedWarningMessage = null;
 
-        for (let i = 0; i < sortedSnapshots.length; i++) {
-            if (sortedSnapshots[i].resource && sortedSnapshots[i].resource.publishClassification) {
-                publishedSnapshot = sortedSnapshots[i];
+        for (let snapshot of sortedSnapshots) {
+            if (snapshot.resource && snapshot.resource.publishClassification) {
+                publishedSnapshot = snapshot;
                 break;
             }
 
-            if (sortedSnapshots[i].approvalStatus === 'Approved' && !publishedWarningMessage) {
+            if (snapshot.approvalStatus === 'Approved' && !publishedWarningMessage) {
                 publishedWarningMessage = (
                     <span className="publish-warning" data-toggle="tooltip" data-placement="top"
                         data-tooltip="The current approved Classification is more recent than this published Classification.">

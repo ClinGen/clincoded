@@ -34,6 +34,7 @@ const ProvisionalClassification = createReactClass({
     },
 
     getInitialState() {
+        // Set states to indicate user intends to publish/unpublish based on URL parameters
         let isPublishActive = undefined;
         let isUnpublishActive = undefined;
 
