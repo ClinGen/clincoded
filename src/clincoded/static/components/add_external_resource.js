@@ -802,6 +802,9 @@ function carQueryResource() {
                                     }
                                 });
                             }
+                            // Remove the 'tempAlleles' object at this point regardless
+                            // whether the preceding evaluations are executed
+                            if (data['tempAlleles']) delete data['tempAlleles'];
                             this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         } else {
                             // Fall back to CAR data without the canonical transcript title if there is no ensembl transcript
@@ -809,8 +812,11 @@ function carQueryResource() {
                             this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         }
                     }).catch(err => {
-                        this.setFormErrors('resourceId', 'Error querying Ensembl VEP for additional data. Please check your input and try again.');
-                        this.setState({queryResourceBusy: false, resourceFetched: false});
+                        // Error in VEP get request
+                        console.warn('Error in querying Ensembl VEP data = %o', err);
+                        // Fall back to CAR data
+                        if (data['tempAlleles']) delete data['tempAlleles'];
+                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                     });
                 } else {
                     // Fall back to CAR data without the canonical transcript title if parsing fails

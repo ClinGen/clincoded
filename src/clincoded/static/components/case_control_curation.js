@@ -62,6 +62,7 @@ const CaseControlCuration = createReactClass({
             statisticOtherType: 'collapsed',
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
+            scoreDisabled: true,
             diseaseObj: {},
             diseaseUuid: null,
             diseaseError: null,
@@ -158,7 +159,7 @@ const CaseControlCuration = createReactClass({
                 this.setState({controlNumAllGenotyped: stateObj.controlGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.caseControl) {
-                this.setState({caseControlName: stateObj.caseControl.label});
+                this.setState({caseControlName: stateObj.caseControl.label, scoreDisabled: !stateObj.caseControl.studyType});
             }
 
             // Set all the state variables we've collected
@@ -207,6 +208,10 @@ const CaseControlCuration = createReactClass({
         }
         if (ref === 'controlCohort_numGroupGenotyped') {
             this.setState({controlNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'studyType') {
+            const studyTypeValue = this.refs[ref].getValue();
+            this.setState({scoreDisabled: studyTypeValue && studyTypeValue !== 'none' ? false : true});
         }
     },
 
@@ -551,39 +556,53 @@ const CaseControlCuration = createReactClass({
                     var value = this.getFormValue(prefix + 'maleCount');
                     if (value) {
                         newCaseGroup.numberOfMale = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.numberOfMale) {
+                            delete newCaseGroup['numberOfMale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'femaleCount');
                     if (value) {
                         newCaseGroup.numberOfFemale = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.numberOfFemale) {
+                            delete newCaseGroup['numberOfFemale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'country');
-                    if (value !== 'none') {
-                        newCaseGroup.countryOfOrigin = value;
-                    }
+                    newCaseGroup.countryOfOrigin = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ethnicity');
-                    if (value !== 'none') {
-                        newCaseGroup.ethnicity = value;
-                    }
+                    newCaseGroup.ethnicity = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'race');
-                    if (value !== 'none') {
-                        newCaseGroup.race = value;
-                    }
+                    newCaseGroup.race = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ageRangeType');
-                    if (value !== 'none') {
-                        newCaseGroup.ageRangeType = value + '';
-                    }
+                    newCaseGroup.ageRangeType = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
                         newCaseGroup.ageRangeFrom = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.ageRangeFrom) {
+                            delete newCaseGroup['ageRangeFrom'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageTo');
                     if (value) {
                         newCaseGroup.ageRangeTo = parseInt(value, 10);
+                    } else {
+                        if (newCaseGroup && newCaseGroup.ageRangeTo) {
+                            delete newCaseGroup['ageRangeTo'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageUnit');
-                    if (value !== 'none') {
-                        newCaseGroup.ageRangeUnit = value;
-                    }
+                    newCaseGroup.ageRangeUnit = value !== 'none' ? value : '';
 
                     /*****************************************************/
                     /* Group Additional Information form fields          */
@@ -677,35 +696,50 @@ const CaseControlCuration = createReactClass({
                     var value = this.getFormValue(prefix + 'maleCount');
                     if (value) {
                         newControlGroup.numberOfMale = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.numberOfMale) {
+                            delete newControlGroup['numberOfMale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'femaleCount');
                     if (value) {
                         newControlGroup.numberOfFemale = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.numberOfFemale) {
+                            delete newControlGroup['numberOfFemale'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'country');
-                    if (value !== 'none') {
-                        newControlGroup.countryOfOrigin = value;
-                    }
+                    newControlGroup.countryOfOrigin = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ethnicity');
-                    if (value !== 'none') {
-                        newControlGroup.ethnicity = value;
-                    }
+                    newControlGroup.ethnicity = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'race');
-                    if (value !== 'none') {
-                        newControlGroup.race = value;
-                    }
+                    newControlGroup.race = value !== 'none' ? value : '';
+
                     value = this.getFormValue(prefix + 'ageFrom');
                     if (value) {
                         newControlGroup.ageRangeFrom = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.ageRangeFrom) {
+                            delete newControlGroup['ageRangeFrom'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageTo');
                     if (value) {
                         newControlGroup.ageRangeTo = parseInt(value, 10);
+                    } else {
+                        if (newControlGroup && newControlGroup.ageRangeTo) {
+                            delete newControlGroup['ageRangeTo'];
+                        }
                     }
+
                     value = this.getFormValue(prefix + 'ageUnit');
-                    if (value !== 'none') {
-                        newControlGroup.ageRangeUnit = value;
-                    }
+                    newControlGroup.ageRangeUnit = value !== 'none' ? value : '';
 
                     /*****************************************************/
                     /* Group Additional Information form fields          */
@@ -1075,7 +1109,7 @@ const CaseControlCuration = createReactClass({
                                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
                                                 <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
                                                     session={session} handleUserScoreObj={this.handleUserScoreObj}
-                                                    affiliation={this.props.affiliation} />
+                                                    affiliation={this.props.affiliation} isDisabled={this.state.scoreDisabled} />
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1499,8 +1533,15 @@ var CaseControlViewer = createReactClass({
     getInitialState: function() {
         return {
             userScoreObj: {}, // Logged-in user's score object
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            scoreDisabled: true
         };
+    },
+
+    componentDidMount: function() {
+        if (this.props.context && this.props.context.studyType) {
+            this.setState({scoreDisabled: false});
+        }
     },
 
     // Called by child function props to update user score obj
@@ -2078,7 +2119,8 @@ var CaseControlViewer = createReactClass({
                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                 {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedCaseControl) || (!isEvidenceScored && !affiliation && userCaseControl) ?
                                     <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session}
-                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation}
+                                        isDisabled={this.state.scoreDisabled} />
                                     : null}
                                 {!isEvidenceScored  && ((affiliation && !affiliatedCaseControl) || (!affiliation && !userCaseControl)) ?
                                     <div className="row">

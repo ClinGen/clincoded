@@ -257,7 +257,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // get the allele count, allele number, and homozygote count totals
             populationObj.exac._tot.ac = parseInt(response.exac.ac.ac_adj);
             populationObj.exac._tot.an = parseInt(response.exac.an.an_adj);
-            populationObj.exac._tot.hom = parseInt(response.exac.hom.ac_hom);
+            populationObj.exac._tot.hom = response.exac.ac.ac_hom ? parseInt(response.exac.ac.ac_hom) : parseInt(response.exac.hom.ac_hom);
             populationObj.exac._tot.af = populationObj.exac._tot.ac / populationObj.exac._tot.an;
             // get extra ExAC information
             populationObj.exac._extra.chrom = response.exac.chrom + ''; // ensure that the chromosome is stored as a String

@@ -686,22 +686,46 @@ const IndividualCuration = createReactClass({
         if (value !== 'none') { newIndividual.sex = value; }
 
         value = this.getFormValue('country');
-        if (value !== 'none') { newIndividual.countryOfOrigin = value; }
+        if (value !== 'none') {
+            newIndividual.countryOfOrigin = value;
+        } else {
+            if (newIndividual && newIndividual.countryOfOrigin) {
+                delete newIndividual['countryOfOrigin'];
+            }
+        }
 
         value = this.getFormValue('ethnicity');
-        if (value !== 'none') { newIndividual.ethnicity = value; }
+        if (value !== 'none') {
+            newIndividual.ethnicity = value;
+        } else {
+            if (newIndividual && newIndividual.ethnicity) {
+                delete newIndividual['ethnicity'];
+            }
+        }
 
         value = this.getFormValue('race');
-        if (value !== 'none') { newIndividual.race = value; }
+        if (value !== 'none') {
+            newIndividual.race = value;
+        } else {
+            if (newIndividual && newIndividual.race) {
+                delete newIndividual['race'];
+            }
+        }
 
         value = this.getFormValue('agetype');
-        if (value !== 'none') { newIndividual.ageType = value; }
+        newIndividual.ageType = value !== 'none' ? value : '';
 
         value = this.getFormValueNumber('agevalue');
-        if (value) { newIndividual.ageValue = value; }
+        if (value) {
+            newIndividual.ageValue = value;
+        } else {
+            if (newIndividual && newIndividual.ageValue) {
+                delete newIndividual['ageValue'];
+            }
+        }
 
         value = this.getFormValue('ageunit');
-        if (value !== 'none') { newIndividual.ageUnit = value; }
+        newIndividual.ageUnit = value !== 'none' ? value : '';
 
         // Fill in the individual fields from the Additional panel
         value = this.getFormValue('additionalinfoindividual');
@@ -2120,9 +2144,10 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
         // It's possible to create a proband w/o variants at the moment
         newIndividual.variants = variants;
     }
-    if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
-
-    if (affiliation) { newIndividual.affiliation = affiliation.affiliation_id; }
+    if (zygosity) newIndividual.recessiveZygosity = zygosity;
+    if (affiliation) newIndividual.affiliation = affiliation.affiliation_id;
+    const newMethod = {dateTime: moment().format()};
+    newIndividual.method = newMethod;
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {

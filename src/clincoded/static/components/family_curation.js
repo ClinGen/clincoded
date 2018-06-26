@@ -1090,13 +1090,13 @@ var FamilyCuration = createReactClass({
 
         // Fill in the group fields from the Family Demographics panel
         var value = this.getFormValue('country');
-        if (value !== 'none') { newFamily.countryOfOrigin = value; }
+        newFamily.countryOfOrigin = value !== 'none' ? value : '';
 
         value = this.getFormValue('ethnicity');
-        if (value !== 'none') { newFamily.ethnicity = value; }
+        newFamily.ethnicity = value !== 'none' ? value : '';
 
         value = this.getFormValue('race');
-        if (value !== 'none') { newFamily.race = value; }
+        newFamily.race = value !== 'none' ? value : '';
 
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }

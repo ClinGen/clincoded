@@ -34,7 +34,8 @@ var ProvisionalCuration = createReactClass({
     propTypes: {
         href: PropTypes.string,
         session: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        demoVersion: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -228,6 +229,10 @@ var ProvisionalCuration = createReactClass({
             if (newProvisional.approvalDate) delete newProvisional.approvalDate;
             if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
             if (newProvisional.approvalComment) delete newProvisional.approvalComment;
+            newProvisional.publishClassification = false;
+            if (newProvisional.publishSubmitter) delete newProvisional.publishSubmitter;
+            if (newProvisional.publishDate) delete newProvisional.publishDate;
+            if (newProvisional.publishComment) delete newProvisional.publishComment;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
             // Total points and points counted for all evidence
             let classificationPoints = {}, scoreTableValues = this.state.scoreTableValues;
@@ -812,6 +817,7 @@ var ProvisionalCuration = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval ? true : false;
 
         return (
             <div>
@@ -1036,10 +1042,11 @@ var ProvisionalCuration = createReactClass({
                                                                                 </Input>
                                                                             </div>
                                                                             <div className="altered-classification-reasons">
-                                                                                <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change" labelClassName="col-sm-5 control-label"
+                                                                                <Input type="textarea" ref="reasons" rows="5" label="Explain Reason(s) for Change:" labelClassName="col-sm-5 control-label"
                                                                                     wrapperClassName="col-sm-7" groupClassName="form-group" error={this.getFormError('reasons')} value={this.state.reasons}
                                                                                     clearError={this.clrFormErrors.bind(null, 'reasons')} handleChange={this.handleChange}
                                                                                     required={this.state.alteredClassification !== 'No Modification' ? true : false}
+                                                                                    placeholder="Note: This text will appear on ClinGen's website if you publish this Classification."
                                                                                     customErrorMsg="Required when changing classification" />
                                                                                 {this.state.resetAlteredClassification ?
                                                                                     <div className="altered-classification-reset-warning">
@@ -1054,10 +1061,10 @@ var ProvisionalCuration = createReactClass({
                                                                         </div>
                                                                         <div className="col-xs-12 col-sm-6">
                                                                             <div className="classification-evidence-summary">
-                                                                                <Input type="textarea" ref="classification-evidence-summary" label="Evidence Summary:"
-                                                                                    value={this.state.evidenceSummary} handleChange={this.handleChange}
-                                                                                    placeholder="Summary of the evidence and rationale for the clinical validity classification (optional)." rows="8"
-                                                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                                                                <Input type="textarea" ref="classification-evidence-summary" value={this.state.evidenceSummary} handleChange={this.handleChange}
+                                                                                    label={<span className="label-main">Evidence Summary (optional):<span className="label-note">Rationale for the clinical validity classification</span></span>}
+                                                                                    placeholder="Note: This text will appear on ClinGen's website if you publish this Classification."
+                                                                                    rows="8" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -1108,7 +1115,8 @@ var ProvisionalCuration = createReactClass({
                                     <div className="snapshot-list">
                                         <PanelGroup>
                                             <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
-                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus} />
+                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus}
+                                                    allowPublishButton={allowPublishButton} demoVersion={this.props.demoVersion} />
                                             </Panel>
                                         </PanelGroup>
                                     </div>

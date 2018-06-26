@@ -13,6 +13,7 @@ import { ClassificationDefinition } from './definition';
 import GeneDiseaseClassificationMatrix from '../../libs/gene_disease_classification_matrix';
 import { ProvisionalApproval } from './provisional';
 import { ClassificationApproval } from './approval';
+import { PublishApproval } from './publish';
 import CurationSnapshots from './snapshots';
 import { sortListByDate } from '../../libs/helpers/sort';
 import * as methods from '../methods';
@@ -28,10 +29,20 @@ const ProvisionalClassification = createReactClass({
     propTypes: {
         href: PropTypes.string,
         session: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        demoVersion: PropTypes.bool
     },
 
     getInitialState() {
+        // Set states to indicate user intends to publish/unpublish based on URL parameters
+        let isPublishActive = undefined;
+        let isUnpublishActive = undefined;
+
+        if (typeof window !== "undefined" && window.location && window.location.href) {
+            isPublishActive = queryKeyValue('publish', window.location.href);
+            isUnpublishActive = queryKeyValue('unpublish', window.location.href);
+        }
+
         return {
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
@@ -39,8 +50,14 @@ const ProvisionalClassification = createReactClass({
             classificationStatus: 'In progress',
             classificationSnapshots: [],
             isApprovalActive: queryKeyValue('approval', this.props.href),
+            isPublishActive: isPublishActive,
+            isUnpublishActive: isUnpublishActive,
             showProvisional: false,
             showApproval: false,
+            publishProvisionalReady: false,
+            publishSnapshotListReady: false,
+            showPublish: false,
+            showUnpublish: false
         };
     },
 
@@ -49,12 +66,13 @@ const ProvisionalClassification = createReactClass({
      * back to the child components (e.g. provisional, approval).
      * Called as PropTypes.func in the child components upon the PUT request to update the classification.
      * @param {string} provisionalId - The '@id' of the (provisional) classification object
+     * @param {boolean} publishProvisionalReady - Indicator that (provisional) classification is ready for publish component (optional, defaults to false)
      */
-    updateProvisionalObj(provisionalId) {
+    updateProvisionalObj(provisionalId, publishProvisionalReady = false) {
         let provisional = this.state.provisional;
         this.getRestData(provisionalId).then(result => {
             // Get an updated copy of the classification object
-            this.setState({provisional: result, classificationStatus: result.classificationStatus}, () => {
+            this.setState({provisional: result, classificationStatus: result.classificationStatus, publishProvisionalReady: publishProvisionalReady}, () => {
                 this.handleProvisionalApprovalVisibility();
             });
             return Promise.resolve(result);
@@ -67,16 +85,37 @@ const ProvisionalClassification = createReactClass({
     },
 
     /**
-     * Method to retrieve the given snapshot object and concat with the existing snapshot list.
+     * Method to retrieve the given snapshot object and concat with (or refresh) the existing snapshot list.
      * Then pass the updated state as a prop back to the child components (e.g. provisional, approval).
      * Called as PropTypes.func in the child components upon saving a new snapshot.
      * @param {string} snapshotId - The '@id' of the newly saved snapshot object
+     * @param {boolean} publishSnapshotListReady - Indicator that list of snapshots is ready for publish component (optional, defaults to false)
      */
-    updateSnapshotList(snapshotId) {
+    updateSnapshotList(snapshotId, publishSnapshotListReady = false) {
         let classificationSnapshots = this.state.classificationSnapshots;
+        let isNewSnapshot = true;
         this.getRestData(snapshotId).then(result => {
-            const newClassificationSnapshots = [result, ...classificationSnapshots];
-            this.setState({classificationSnapshots: newClassificationSnapshots});
+            for (let i = 0; i < classificationSnapshots.length; i++) {
+                if (classificationSnapshots[i]['@id'] === snapshotId) {
+                    classificationSnapshots[i] = result;
+                    isNewSnapshot = false;
+                    break;
+                }
+            }
+
+            if (isNewSnapshot) {
+                const newClassificationSnapshots = [result, ...classificationSnapshots];
+
+                if (publishSnapshotListReady) {
+                    this.setState({classificationSnapshots: newClassificationSnapshots, publishSnapshotListReady: publishSnapshotListReady}, () => {
+                        this.handleProvisionalApprovalVisibility();
+                    });
+                } else {
+                    this.setState({classificationSnapshots: newClassificationSnapshots});
+                }
+            } else {
+                this.setState({classificationSnapshots: classificationSnapshots});
+            }
         });
     },
 
@@ -217,29 +256,97 @@ const ProvisionalClassification = createReactClass({
         }
     },
 
+    /**
+     * Method to determine if user is allowed to publish
+     */
+    isUserAllowedToPublish() {
+        const curatorAffiliation = this.props.affiliation;
+
+        if (curatorAffiliation && curatorAffiliation.publish_approval) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     handleProvisionalApprovalVisibility() {
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
+        const isPublishActive = this.state.isPublishActive;
+        const isUnpublishActive = this.state.isUnpublishActive;
+        const provisional = this.state.provisional;
 
         if (classificationStatus === 'In progress') {
             if (isApprovalActive && isApprovalActive === 'yes') {
-                this.setState({showProvisional: false, showApproval: true});
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+            } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+            } else if (isUnpublishActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
             } else {
-                this.setState({showProvisional: true, showApproval: false});
+                this.setState({showProvisional: true, showApproval: false, showPublish: false, showUnpublish: false});
             }
         } else if (classificationStatus === 'Provisional') {
             if (isApprovalActive && isApprovalActive === 'yes') {
-                this.setState({showProvisional: false, showApproval: true});
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+            } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+            } else if (isUnpublishActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
             } else {
-                this.setState({showProvisional: false, showApproval: true}, () => {
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false}, () => {
                     if (!isApprovalActive) {
                         this.setState({isApprovalActive: 'yes'});
                     }
                 });
             }
+        } else if (classificationStatus === 'Approved') {
+            if (this.isUserAllowedToPublish()) {
+                if (!provisional || !provisional.publishClassification) {
+                    if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                        this.setState({isApprovalActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+                    } else if (isUnpublishActive === 'yes') {
+                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+                    } else if (this.state.publishProvisionalReady && this.state.publishSnapshotListReady) {
+                        this.setState({isApprovalActive: undefined, isPublishActive: 'auto', isUnpublishActive: undefined, showProvisional: false, showApproval: false, publishProvisionalReady: false, publishSnapshotListReady: false, showPublish: true, showUnpublish: false});
+                    } else {
+                    }
+                } else {
+                    if (isUnpublishActive === 'yes') {
+                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
+                    } else {
+                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+                    }
+                }
+            } else {
+                this.setState({isApprovalActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+            }
         } else {
-            this.setState({showProvisional: false, showApproval: false});
+            this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
         }
+    },
+
+    /**
+     * Method to clear publish-related URL parameters and state data
+     * Called at the end of every publish event
+     */
+    clearPublishState() {
+        if (typeof window !== "undefined" && window.location && window.location.href && window.history) {
+            if (queryKeyValue('publish', window.location.href)) {
+                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'publish', null));
+            }
+
+            if (queryKeyValue('unpublish', window.location.href)) {
+                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'unpublish', null));
+            }
+
+            if (queryKeyValue('snapshot', window.location.href)) {
+                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'snapshot', null));
+            }
+        }
+
+        this.setState({isPublishActive: undefined, isUnpublishActive: undefined, publishProvisionalReady: false,
+            publishSnapshotListReady: false, showPublish: false, showUnpublish: false});
     },
 
     render() {
@@ -257,6 +364,8 @@ const ProvisionalClassification = createReactClass({
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
+        const snapshotUUID = typeof window !== "undefined" && window.location && window.location.href ?
+            queryKeyValue('snapshot', window.location.href) : undefined;
 
         return (
             <div>
@@ -450,12 +559,47 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                 </div>
                                 : null}
+                            {sortedSnapshotList.length && (this.state.showPublish || this.state.showUnpublish) ?
+                                <div className={'publish-approval-content-wrapper' + (this.state.showUnpublish ? ' unpublish' : '')}>
+                                    <div className="container">
+                                        {this.state.isPublishActive === 'auto' ?
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> Publish the current (<i className="icon icon-flag"></i>) Approved Classification.
+                                            </p>
+                                            :
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> {this.state.showUnpublish ? 'Unpublish' : 'Publish'} the selected Approved Classification.
+                                            </p>
+                                        }
+                                    </div>
+                                    <div className="container approval-process publish-approval">
+                                        <PanelGroup>
+                                            <Panel title={this.state.showUnpublish ? 'Unpublish Classification' : 'Publish Classification'} panelClassName="panel-data" open>
+                                                <PublishApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    snapshots={sortedSnapshotList}
+                                                    selectedSnapshotUUID={snapshotUUID}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                    clearPublishState={this.clearPublishState}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                </div>
+                                : null}
                             {sortedSnapshotList.length ?
                                 <div className="container snapshot-list">
                                     <PanelGroup>
                                         <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
                                             <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
-                                                isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
+                                                isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} demoVersion={this.props.demoVersion}
+                                                allowPublishButton={this.isUserAllowedToPublish() && !(this.state.isPublishActive || this.state.isUnpublishActive)} />
                                         </Panel>
                                     </PanelGroup>
                                 </div>
