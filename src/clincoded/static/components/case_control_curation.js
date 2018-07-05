@@ -62,6 +62,7 @@ const CaseControlCuration = createReactClass({
             statisticOtherType: 'collapsed',
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
+            scoreDisabled: true,
             diseaseObj: {},
             diseaseUuid: null,
             diseaseError: null,
@@ -158,7 +159,7 @@ const CaseControlCuration = createReactClass({
                 this.setState({controlNumAllGenotyped: stateObj.controlGroup.numberAllGenotypedSequenced});
             }
             if (stateObj.caseControl) {
-                this.setState({caseControlName: stateObj.caseControl.label});
+                this.setState({caseControlName: stateObj.caseControl.label, scoreDisabled: !stateObj.caseControl.studyType});
             }
 
             // Set all the state variables we've collected
@@ -207,6 +208,10 @@ const CaseControlCuration = createReactClass({
         }
         if (ref === 'controlCohort_numGroupGenotyped') {
             this.setState({controlNumAllGenotyped: parseInt(this.refs[ref].getValue(), 10)});
+        }
+        if (ref === 'studyType') {
+            const studyTypeValue = this.refs[ref].getValue();
+            this.setState({scoreDisabled: studyTypeValue && studyTypeValue !== 'none' ? false : true});
         }
     },
 
@@ -1104,7 +1109,7 @@ const CaseControlCuration = createReactClass({
                                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score" open>
                                                 <ScoreCaseControl evidence={caseControl} evidenceType="Case control"
                                                     session={session} handleUserScoreObj={this.handleUserScoreObj}
-                                                    affiliation={this.props.affiliation} />
+                                                    affiliation={this.props.affiliation} isDisabled={this.state.scoreDisabled} />
                                             </Panel>
                                         </PanelGroup>
                                         <div className="curation-submit clearfix">
@@ -1528,8 +1533,15 @@ var CaseControlViewer = createReactClass({
     getInitialState: function() {
         return {
             userScoreObj: {}, // Logged-in user's score object
-            submitBusy: false // True while form is submitting
+            submitBusy: false, // True while form is submitting
+            scoreDisabled: true
         };
+    },
+
+    componentDidMount: function() {
+        if (this.props.context && this.props.context.studyType) {
+            this.setState({scoreDisabled: false});
+        }
     },
 
     // Called by child function props to update user score obj
@@ -2107,7 +2119,8 @@ var CaseControlViewer = createReactClass({
                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                 {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedCaseControl) || (!isEvidenceScored && !affiliation && userCaseControl) ?
                                     <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session}
-                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation} />
+                                        handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation}
+                                        isDisabled={this.state.scoreDisabled} />
                                     : null}
                                 {!isEvidenceScored  && ((affiliation && !affiliatedCaseControl) || (!affiliation && !userCaseControl)) ?
                                     <div className="row">

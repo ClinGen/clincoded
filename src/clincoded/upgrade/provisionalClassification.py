@@ -46,6 +46,13 @@ def provisionalClassification_4_5(value, system):
 
 @upgrade_step('provisionalClassification', '5', '6')
 def provisionalClassification_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1420
+    # Add publication properties and update schema version
+    return
+
+
+@upgrade_step('provisionalClassification', '6', '7')
+def provisionalClassification_6_7(value, system):
     # https://github.com/ClinGen/clincoded/issues/1549
     # Add sequencing type to be associated with LOD score
     if 'classificationPoints' in value:

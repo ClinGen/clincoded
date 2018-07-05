@@ -186,7 +186,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     };
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let approvalSnapshot = response['@graph'][0];
-                        this.props.updateSnapshotList(approvalSnapshot['@id']);
+                        this.props.updateSnapshotList(approvalSnapshot['@id'], true);
                         return Promise.resolve(approvalSnapshot);
                     }).then(snapshot => {
                         let newClassification = curator.flatten(result);
@@ -198,7 +198,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                             newClassification.associatedClassificationSnapshots.push(newSnapshot);
                         }
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
-                            this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
+                            this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id'], true);
                         });
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);

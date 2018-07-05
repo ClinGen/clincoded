@@ -607,6 +607,21 @@
             "description": "Provisional comments for the classification",
             "type": "string"
         },
+        "publishSubmitter": {
+            "title": "Publish Submitter",
+            "description": "Curator who published the classification",
+            "type": "string"
+        },
+        "publishDate": {
+            "title": "Date Published",
+            "description": "Date when the classification was published",
+            "type": "string"
+        },
+        "publishComment": {
+            "title": "Publish Comments",
+            "description": "Publish comments for the classification",
+            "type": "string"
+        },
         "provisionedClassification": {
             "title": "Provisioned Classification",
             "description": "Boolean value for whether the classification has been saved as provisional",
@@ -712,6 +727,18 @@
         },
         "provisionalComment": {
             "title": "Provisional Comments",
+            "type": "string"
+        },
+        "publishSubmitter": {
+            "title": "Publish Submitter",
+            "type": "string"
+        },
+        "publishDate": {
+            "title": "Date Published",
+            "type": "string"
+        },
+        "publishComment": {
+            "title": "Publish Comments",
             "type": "string"
         },
         "provisionedClassification": {

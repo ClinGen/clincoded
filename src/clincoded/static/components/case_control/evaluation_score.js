@@ -43,7 +43,7 @@ module.exports = {
             <div>
                 <div className="row section section-study-type-detection-method">
                     <Input type="select" ref="studyType" label="Study type:" defaultValue="none"
-                        value={caseControl.studyType ? caseControl.studyType: 'none'}
+                        value={caseControl.studyType ? caseControl.studyType: 'none'} handleChange={this.handleChange}
                         labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group studyType">
                         <option value="none">No Selection</option>
                         <option disabled="disabled"></option>
