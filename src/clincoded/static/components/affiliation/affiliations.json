@@ -247,5 +247,11 @@
         "affiliation_abbreviation": "",
         "affiliation_fullname": "Mitochondrial Diseases EP",
         "publish_approval": true
+    },
+    {
+        "affiliation_id": "10028",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "Hemostatis/Thrombosis EP",
+        "publish_approval": true
     }
 ]
