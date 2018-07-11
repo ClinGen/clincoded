@@ -253,5 +253,11 @@
         "affiliation_abbreviation": "",
         "affiliation_fullname": "Hemostatis/Thrombosis EP",
         "publish_approval": true
+    },
+    {
+        "affiliation_id": "10029",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "Broad Institute Rare Disease Group",
+        "publish_approval": true
     }
 ]
