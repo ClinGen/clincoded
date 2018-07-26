@@ -114,6 +114,12 @@
         "uuid": "bf6bc011-2130-4390-af50-a076618cb9e6"
     },
     {
+        "name": "add-affiliation",
+        "title": "Add Affiliation",
+        "status": "released",
+        "uuid": "75f11790-ad18-4309-a9f4-ffde0a1043bd"
+    },
+    {
         "name": "gene-disease-evidence-summary",
         "title": "Gene Disease Evidence Summary",
         "status": "released",
