@@ -34,9 +34,8 @@ const ProvisionalClassification = createReactClass({
     },
 
     getInitialState() {
-        // Set states to indicate user intends to publish/unpublish based on URL parameters
-        let isPublishActive = undefined;
-        let isUnpublishActive = undefined;
+        // Set state to indicate user intends to publish/unpublish based on URL query parameters
+        let isPublishActive, isUnpublishActive;
 
         if (typeof window !== "undefined" && window.location && window.location.href) {
             isPublishActive = queryKeyValue('publish', window.location.href);
@@ -56,6 +55,7 @@ const ProvisionalClassification = createReactClass({
             showApproval: false,
             publishProvisionalReady: false,
             publishSnapshotListReady: false,
+            publishSnapshotUUID: null,
             showPublish: false,
             showUnpublish: false
         };
@@ -276,48 +276,40 @@ const ProvisionalClassification = createReactClass({
         const isUnpublishActive = this.state.isUnpublishActive;
         const provisional = this.state.provisional;
 
-        if (classificationStatus === 'In progress') {
+        if (classificationStatus === 'In progress' || classificationStatus === 'Provisional') {
             if (isApprovalActive && isApprovalActive === 'yes') {
                 this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
             } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
                 this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
             } else if (isUnpublishActive === 'yes') {
                 this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
+
+            // Automatic display of the approval panel (system directing user through approval process)
+            } else if (classificationStatus === 'Provisional') {
+                this.setState({isApprovalActive: 'yes', showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+
+            // Automatic display of the provisional panel (system directing user through approval process)
             } else {
                 this.setState({showProvisional: true, showApproval: false, showPublish: false, showUnpublish: false});
             }
-        } else if (classificationStatus === 'Provisional') {
-            if (isApprovalActive && isApprovalActive === 'yes') {
-                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
-            } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
-                this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
-            } else if (isUnpublishActive === 'yes') {
-                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
-            } else {
-                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false}, () => {
-                    if (!isApprovalActive) {
-                        this.setState({isApprovalActive: 'yes'});
-                    }
-                });
-            }
         } else if (classificationStatus === 'Approved') {
             if (this.isUserAllowedToPublish()) {
+
+                // Check if the current classification has been published
                 if (!provisional || !provisional.publishClassification) {
                     if (isPublishActive === 'yes' || isPublishActive === 'auto') {
-                        this.setState({isApprovalActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
-                    } else if (isUnpublishActive === 'yes') {
-                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+                        this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+
+                    // Only update state data (to automatically display publish panel) when the approval step is complete
                     } else if (this.state.publishProvisionalReady && this.state.publishSnapshotListReady) {
-                        this.setState({isApprovalActive: undefined, isPublishActive: 'auto', isUnpublishActive: undefined, showProvisional: false, showApproval: false, publishProvisionalReady: false, publishSnapshotListReady: false, showPublish: true, showUnpublish: false});
-                    } else {
+                        this.setState({isApprovalActive: undefined, isPublishActive: 'auto', publishProvisionalReady: false,
+                            publishSnapshotListReady: false, showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
                     }
-                } else {
-                    if (isUnpublishActive === 'yes') {
-                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
-                    } else {
-                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
-                    }
+                } else if (isUnpublishActive === 'yes') {
+                    this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
                 }
+
+            // End approval process (for users without publication rights)
             } else {
                 this.setState({isApprovalActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
             }
@@ -327,7 +319,27 @@ const ProvisionalClassification = createReactClass({
     },
 
     /**
-     * Method to clear publish-related URL parameters and state data
+     * Method to add publish-related state data
+     * Under certain circumstances (when URL of source page includes "provisional-classification"), called at the start of a publish event
+     * @param {string} snapshotUUID - The UUID of the source snapshot
+     * @param {string} eventType - The type of event being initiated (publish or unpublish)
+     */
+    addPublishState(snapshotUUID, eventType) {
+        if (snapshotUUID) {
+            if (eventType === 'publish') {
+                this.setState({isPublishActive: 'yes', isUnpublishActive: undefined, publishSnapshotUUID: snapshotUUID}, () => {
+                    this.handleProvisionalApprovalVisibility();
+                });
+            } else if (eventType === 'unpublish') {
+                this.setState({isPublishActive: undefined, isUnpublishActive: 'yes', publishSnapshotUUID: snapshotUUID}, () => {
+                    this.handleProvisionalApprovalVisibility();
+                });
+            }
+        }
+    },
+
+    /**
+     * Method to clear publish-related URL query parameters and state data
      * Called at the end of every publish event
      */
     clearPublishState() {
@@ -346,7 +358,7 @@ const ProvisionalClassification = createReactClass({
         }
 
         this.setState({isPublishActive: undefined, isUnpublishActive: undefined, publishProvisionalReady: false,
-            publishSnapshotListReady: false, showPublish: false, showUnpublish: false});
+            publishSnapshotListReady: false, publishSnapshotUUID: null, showPublish: false, showUnpublish: false});
     },
 
     render() {
@@ -364,8 +376,10 @@ const ProvisionalClassification = createReactClass({
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
-        const snapshotUUID = typeof window !== "undefined" && window.location && window.location.href ?
-            queryKeyValue('snapshot', window.location.href) : undefined;
+
+        // If state has a snapshot UUID, use it; otherwise, check URL query parameters
+        const snapshotUUID = this.state.publishSnapshotUUID ? this.state.publishSnapshotUUID :
+            typeof window !== "undefined" && window.location && window.location.href ? queryKeyValue('snapshot', window.location.href) : undefined;
 
         return (
             <div>
@@ -597,9 +611,9 @@ const ProvisionalClassification = createReactClass({
                                 <div className="container snapshot-list">
                                     <PanelGroup>
                                         <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
-                                            <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
-                                                isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} demoVersion={this.props.demoVersion}
-                                                allowPublishButton={this.isUserAllowedToPublish() && !(this.state.isPublishActive || this.state.isUnpublishActive)} />
+                                            <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional} addPublishState={this.addPublishState}
+                                                isApprovalActive={isApprovalActive} isPublishEventActive={this.state.isPublishActive || this.state.isUnpublishActive ? true : false}
+                                                classificationStatus={classificationStatus} demoVersion={this.props.demoVersion} allowPublishButton={this.isUserAllowedToPublish()} />
                                         </Panel>
                                     </PanelGroup>
                                 </div>

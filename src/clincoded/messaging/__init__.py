@@ -388,11 +388,11 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
 
             if value_length > 0:
                 # Retrieve data using data path lists
-                if value[0] == '# path to data #':
+                if value[0] == '$PATH_TO_DATA':
                     template[key] = get_data_by_path(data, value[1:])
 
                 # Keep first, non-excluded data found (using data path lists)
-                elif value[0] == '# use first data #':
+                elif value[0] == '$USE_FIRST_DATA':
                     if value_length > 2:
                         for data_path in value[2:]:
                             temp_result = get_data_by_path(data, data_path)
@@ -408,7 +408,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Use one of two provided values, based on data (from a data path list)
-                elif value[0] == '# check for data #':
+                elif value[0] == '$CHECK_FOR_DATA':
                     if value_length == 4:
                         if get_data_by_path(data, value[1]):
                             template[key] = value[2]
@@ -418,7 +418,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Replace data (from a data path list) using the provided strings
-                elif value[0] == '# replace data #':
+                elif value[0] == '$REPLACE_DATA':
                     if value_length == 4:
                         temp_result = get_data_by_path(data, value[1])
 
@@ -430,10 +430,10 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Convert data (from a data path list) using the provided map
-                elif value[0] == '# convert data #':
+                elif value[0] == '$CONVERT_DATA':
                     if value_length == 3:
                         temp_result = get_data_by_path(data, value[1])
-                        default_result_key = '# default #'
+                        default_result_key = '$DEFAULT'
 
                         if temp_result in value[2]:
                             template[key] = value[2][temp_result]
@@ -445,7 +445,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Combine data (from dictionary of data path lists) with a separator
-                elif value[0] == '# combine data #':
+                elif value[0] == '$COMBINE_DATA':
                     if value_length == 3:
                         add_data_to_msg_template(data, evidence, evidence_counts, value[2])
                         template[key] = value[1].join(value[2].values())
@@ -453,14 +453,14 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Lookup an affiliation name by ID (from a data path list)
-                elif value[0] == '# lookup affiliation name #':
+                elif value[0] == '$LOOKUP_AFFILIATION_NAME':
                     if value_length == 2:
                         template[key] = lookup_affiliation_name(get_data_by_path(data, value[1]))
                     else:
                         template[key] = ''
 
                 # Add score (using a data path list)
-                elif value[0] == '# score data #':
+                elif value[0] == '$SCORE_DATA':
                     if value_length >= 3:
                         template[key] = get_data_by_path(data, value[1])
 
@@ -477,7 +477,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Add evidence (articles) based on information type
-                elif value[0] == '# evidence data #':
+                elif value[0] == '$EVIDENCE_DATA':
                     if value_length == 2 and value[1] in evidence:
                         template[key] = evidence[value[1]]
                     else:

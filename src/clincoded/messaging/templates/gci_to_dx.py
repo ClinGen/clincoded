@@ -1,9 +1,9 @@
 
 message_template = {
-    'iri': ['# path to data #', 'resource', 'uuid'],
-    'jsonMessageVersion': ['# combine data #', '.',
+    'iri': ['$PATH_TO_DATA', 'resource', 'uuid'],
+    'jsonMessageVersion': ['$COMBINE_DATA', '.',
         {
-            1: ['# convert data #', ['resourceType'],
+            1: ['$CONVERT_DATA', ['resourceType'],
                 {
                     'classification': 'GCI',
                     'interpretation': 'VCI'
@@ -14,14 +14,14 @@ message_template = {
     ],    
     'sopVersion': '5',
     'curationVersion': 'TO BE DETERMINED',
-    'title': ['# combine data #', ' : ',
+    'title': ['$COMBINE_DATA', ' : ',
         {
-            1: ['# path to data #', 'resourceParent', 'gdm', 'gene', 'symbol'],
-            2: ['# path to data #', 'resourceParent', 'gdm', 'disease', 'term']
+            1: ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'gene', 'symbol'],
+            2: ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'disease', 'term']
         }
     ],
-    'statusFlag': ['# path to data #', 'resource', 'classificationStatus'],
-    'statusPublishFlag': ['# convert data #', ['resource', 'publishClassification'],
+    'statusFlag': ['$PATH_TO_DATA', 'resource', 'classificationStatus'],
+    'statusPublishFlag': ['$CONVERT_DATA', ['resource', 'publishClassification'],
         {
             False: 'Publish',
             True: 'Unpublish'
@@ -29,69 +29,69 @@ message_template = {
     ],
     'type': 'clinicalValidity',
     'affiliation': {
-        'id': ['# path to data #', 'resource', 'affiliation'],
-        'name': ['# lookup affiliation name #', ['resource', 'affiliation']]
+        'id': ['$PATH_TO_DATA', 'resource', 'affiliation'],
+        'name': ['$LOOKUP_AFFILIATION_NAME', ['resource', 'affiliation']]
     },
     'genes': [
         {
             'ontology': 'HGNC',
-            'curie': ['# path to data #', 'resourceParent', 'gdm', 'gene', 'hgncId'],
-            'symbol': ['# path to data #', 'resourceParent', 'gdm', 'gene', 'symbol'],
-            'uri': ['# replace data #', ['resourceParent', 'gdm', 'gene', 'hgncId'], ':', '']
+            'curie': ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'gene', 'hgncId'],
+            'symbol': ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'gene', 'symbol'],
+            'uri': ['$REPLACE_DATA', ['resourceParent', 'gdm', 'gene', 'hgncId'], ':', '']
         }
     ],
     # Going to need something for free text
     'conditions': [
         {
             'ontology': 'MONDO',
-            'curie': ['# replace data #', ['resourceParent', 'gdm', 'disease', 'diseaseId'], '_', ':'],
-            'name': ['# path to data #', 'resourceParent', 'gdm', 'disease', 'term'],
-            'uri': ['# replace data #', ['resourceParent', 'gdm', 'disease', 'diseaseId'], '_', ''],
-            'iri': ['# combine data #', '',
+            'curie': ['$REPLACE_DATA', ['resourceParent', 'gdm', 'disease', 'diseaseId'], '_', ':'],
+            'name': ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'disease', 'term'],
+            'uri': ['$REPLACE_DATA', ['resourceParent', 'gdm', 'disease', 'diseaseId'], '_', ''],
+            'iri': ['$COMBINE_DATA', '',
                 {
                     1: 'http://purl.obolibrary.org/obo/',
-                    2: ['# path to data #', 'resourceParent', 'gdm', 'disease', 'diseaseId']
+                    2: ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'disease', 'diseaseId']
                 }
             ]
         }
     ],
     'scoreJson': {
-        'ModeOfInheritance': ['# path to data #', 'resourceParent', 'gdm', 'modeInheritance'],
+        'ModeOfInheritance': ['$PATH_TO_DATA', 'resourceParent', 'gdm', 'modeInheritance'],
         'GeneticEvidence': {
             'CaseLevelData': {
                 'VariantEvidence': {
                     'AutosomalDominantOrXlinkedDisorder': {
                         'VariantIsDeNovo': {
-                            'Value': ['# score data #', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'variantIsDeNovo', 'totalPointsGiven'],
+                            'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'variantIsDeNovo', 'totalPointsGiven'],
                                 ['autosomalDominantOrXlinkedDisorder', 'variantIsDeNovo', 'evidenceCount']],
-                            'Tally': ['# score data #', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'variantIsDeNovo', 'pointsCounted'],
+                            'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'variantIsDeNovo', 'pointsCounted'],
                                 ['autosomalDominantOrXlinkedDisorder', 'variantIsDeNovo', 'evidenceCount']],
                             'Evidence': {
-                                'Publications': ['# evidence data #', 'VARIANT_IS_DE_NOVO'],
+                                'Publications': ['$EVIDENCE_DATA', 'VARIANT_IS_DE_NOVO'],
                                 'Notes': {
                                     'note': ''
                                 }
                             }
                         },
                         'ProbandWithPredictedOrProvenNullVariant': {
-                            'Value': ['# score data #', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithPredictedOrProvenNullVariant', 'totalPointsGiven'],
+                            'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithPredictedOrProvenNullVariant', 'totalPointsGiven'],
                                 ['autosomalDominantOrXlinkedDisorder', 'probandWithPredictedOrProvenNullVariant', 'evidenceCount']],
-                            'Tally': ['# score data #', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithPredictedOrProvenNullVariant', 'pointsCounted'],
+                            'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithPredictedOrProvenNullVariant', 'pointsCounted'],
                                 ['autosomalDominantOrXlinkedDisorder', 'probandWithPredictedOrProvenNullVariant', 'evidenceCount']],
                             'Evidence': {
-                                'Publications': ['# evidence data #', 'PREDICTED_OR_PROVEN_NULL_VARIANT'],
+                                'Publications': ['$EVIDENCE_DATA', 'PREDICTED_OR_PROVEN_NULL_VARIANT'],
                                 'Notes': {
                                     'note': ''
                                 }
                             }
                         },
                         'ProbandWithOtherVariantTypeWithSomeEvidenceOfGeneImpact': {
-                            'Value': ['# score data #', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithOtherVariantTypeWithGeneImpact', 'totalPointsGiven'],
+                            'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithOtherVariantTypeWithGeneImpact', 'totalPointsGiven'],
                                 ['autosomalDominantOrXlinkedDisorder', 'probandWithOtherVariantTypeWithGeneImpact', 'evidenceCount']],
-                            'Tally': ['# score data #', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithOtherVariantTypeWithGeneImpact', 'pointsCounted'],
+                            'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalDominantOrXlinkedDisorder', 'probandWithOtherVariantTypeWithGeneImpact', 'pointsCounted'],
                                 ['autosomalDominantOrXlinkedDisorder', 'probandWithOtherVariantTypeWithGeneImpact', 'evidenceCount']],
                             'Evidence': {
-                                'Publications': ['# evidence data #', 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT'],
+                                'Publications': ['$EVIDENCE_DATA', 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT'],
                                 'Notes': {
                                     'note': ''
                                 }
@@ -100,22 +100,22 @@ message_template = {
                     },
                     'AutosomalRecessiveDisease': {
                         'TwoVariantsInTransAndAtLeastOneDeNovoOrAPredictedProvenNullVariant': {
-                            'Value': ['# score data #', ['resource', 'classificationPoints', 'autosomalRecessiveDisorder', 'twoVariantsInTransWithOneDeNovo', 'totalPointsGiven'],
+                            'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalRecessiveDisorder', 'twoVariantsInTransWithOneDeNovo', 'totalPointsGiven'],
                                 ['autosomalRecessiveDisorder', 'twoVariantsInTransWithOneDeNovo', 'evidenceCount']],
                             'Evidence': {
-                                'Publications': ['# evidence data #', 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO'],
+                                'Publications': ['$EVIDENCE_DATA', 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO'],
                                 'Notes': {
                                     'note': ''
                                 }
                             }
                         },
-                        'Tally': ['# score data #', ['resource', 'classificationPoints', 'autosomalRecessiveDisorder', 'pointsCounted'],
+                        'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalRecessiveDisorder', 'pointsCounted'],
                             ['autosomalRecessiveDisorder']],
                         'TwoVariantsNotPredictedProvenNullWithSomeEvidenceOfGeneImpactInTrans': {
-                            'Value': ['# score data #', ['resource', 'classificationPoints', 'autosomalRecessiveDisorder', 'twoVariantsWithGeneImpactInTrans', 'totalPointsGiven'],
+                            'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'autosomalRecessiveDisorder', 'twoVariantsWithGeneImpactInTrans', 'totalPointsGiven'],
                                 ['autosomalRecessiveDisorder', 'twoVariantsWithGeneImpactInTrans', 'evidenceCount']],
                             'Evidence': {
-                                'Publications': ['# evidence data #', 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS'],
+                                'Publications': ['$EVIDENCE_DATA', 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS'],
                                 'Notes': {
                                     'note': ''
                                 }
@@ -125,9 +125,9 @@ message_template = {
                 },
                 'SegregationEvidence': {
                     'EvidenceOfSegregationInOneOrMoreFamilies': {
-                        'Value': ['# score data #', ['resource', 'classificationPoints', 'segregation', 'pointsCounted'],
+                        'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'segregation', 'pointsCounted'],
                             ['segregation', 'evidenceCount']],
-                        'Tally': ['# score data #', ['resource', 'classificationPoints', 'segregation', 'pointsCounted'],
+                        'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'segregation', 'pointsCounted'],
                             ['segregation', 'evidenceCount']]
                         # Evidence, in the form of key/value pairs of numbers and article metadata objects, added here (dynamically)
                     }
@@ -135,20 +135,20 @@ message_template = {
             },
             'CaseControlData': {
                 'SingleVariantAnalysis': {
-                    'Value': ['# evidence data #', 'case-control-single-points'],
+                    'Value': ['$EVIDENCE_DATA', 'case-control-single-points'],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'case-control-single'],
+                        'Publications': ['$EVIDENCE_DATA', 'case-control-single'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
-                'Tally': ['# score data #', ['resource', 'classificationPoints', 'caseControl', 'pointsCounted'],
+                'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'caseControl', 'pointsCounted'],
                     ['caseControl', 'evidenceCount']],
                 'AggregateVariantAnalysis': {
-                    'Value': ['# evidence data #', 'case-control-aggregate-points'],
+                    'Value': ['$EVIDENCE_DATA', 'case-control-aggregate-points'],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'case-control-aggregate'],
+                        'Publications': ['$EVIDENCE_DATA', 'case-control-aggregate'],
                         'Notes': {
                             'note': ''
                         }
@@ -156,39 +156,39 @@ message_template = {
                 }
             },
             'TotalGeneticEvidencePoints': {
-                'Tally': ['# score data #', ['resource', 'classificationPoints', 'geneticEvidenceTotal'], True],
+                'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'geneticEvidenceTotal'], True],
                 'Notes': ''
             }
         },
         'ExperimentalEvidence': {
             'Function': {
                 'BiochemicalFunction': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'function', 'biochemicalFunctions', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'function', 'biochemicalFunctions', 'totalPointsGiven'],
                         ['function', 'biochemicalFunctions', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-biochemical-function'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-biochemical-function'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
-                'Tally': ['# score data #', ['resource', 'classificationPoints', 'function', 'pointsCounted'],
+                'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'function', 'pointsCounted'],
                     ['function']],
                 'ProteinInteraction': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'function', 'proteinInteractions', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'function', 'proteinInteractions', 'totalPointsGiven'],
                         ['function', 'proteinInteractions', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-protein-interactions'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-protein-interactions'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
                 'Expression': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'function', 'expression', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'function', 'expression', 'totalPointsGiven'],
                         ['function', 'expression', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-expression'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-expression'],
                         'Notes': {
                             'note': ''
                         }
@@ -197,22 +197,22 @@ message_template = {
             },
             'FunctionalAlteration': {
                 'PatientCells': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'functionalAlteration', 'patientCells', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'functionalAlteration', 'patientCells', 'totalPointsGiven'],
                         ['functionalAlteration', 'patientCells', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-functional-alteration-patient-cells'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-functional-alteration-patient-cells'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
-                'Tally': ['# score data #', ['resource', 'classificationPoints', 'functionalAlteration', 'pointsCounted'],
+                'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'functionalAlteration', 'pointsCounted'],
                     ['functionalAlteration']],
                 'NonPatientCells': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'functionalAlteration', 'nonPatientCells', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'functionalAlteration', 'nonPatientCells', 'totalPointsGiven'],
                         ['functionalAlteration', 'nonPatientCells', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-functional-alteration-non-patient-cells'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-functional-alteration-non-patient-cells'],
                         'Notes': {
                             'note': ''
                         }
@@ -221,14 +221,14 @@ message_template = {
             },
             'Models': {
                 'NonHumanModelOrganism': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'modelsNonHuman', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'modelsNonHuman', 'totalPointsGiven'],
                         ['modelsRescue', 'modelsNonHuman', 'evidenceCount']]
                 },
                 'CellCultureModel': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'modelsCellCulture', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'modelsCellCulture', 'totalPointsGiven'],
                         ['modelsRescue', 'modelsCellCulture', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-model-systems-cell-culture-model'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-model-systems-cell-culture-model'],
                         'Notes': {
                             'note': ''
                         }
@@ -236,11 +236,11 @@ message_template = {
                 }
             },
             'ModelsRescue': {
-                'Tally': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'pointsCounted'],
+                'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'pointsCounted'],
                     ['modelsRescue']],
                 'NonHumanModelOrganism': {
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-model-systems-non-human-model-organism'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-model-systems-non-human-model-organism'],
                         'Notes': {
                             'note': ''
                         }
@@ -249,40 +249,40 @@ message_template = {
             },
             'Rescue': {
                 'RescueInHuman': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'rescueHuman', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'rescueHuman', 'totalPointsGiven'],
                         ['modelsRescue', 'rescueHuman', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-rescue-human'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-rescue-human'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
                 'RescueInNonHumanModelOrganism': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'rescueNonHuman', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'rescueNonHuman', 'totalPointsGiven'],
                         ['modelsRescue', 'rescueNonHuman', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-rescue-non-human-model-organism'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-rescue-non-human-model-organism'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
                 'RescueInCellCultureModel': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'rescueCellCulture', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'rescueCellCulture', 'totalPointsGiven'],
                         ['modelsRescue', 'rescueCellCulture', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-rescue-cell-culture-model'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-rescue-cell-culture-model'],
                         'Notes': {
                             'note': ''
                         }
                     }
                 },
                 'RescueInPatientCell': {
-                    'Value': ['# score data #', ['resource', 'classificationPoints', 'modelsRescue', 'rescuePatientCells', 'totalPointsGiven'],
+                    'Value': ['$SCORE_DATA', ['resource', 'classificationPoints', 'modelsRescue', 'rescuePatientCells', 'totalPointsGiven'],
                         ['modelsRescue', 'rescuePatientCells', 'evidenceCount']],
                     'Evidence': {
-                        'Publications': ['# evidence data #', 'exp-rescue-patient-cells'],
+                        'Publications': ['$EVIDENCE_DATA', 'exp-rescue-patient-cells'],
                         'Notes': {
                             'note': ''
                         }
@@ -290,30 +290,30 @@ message_template = {
                 }
             },
             'TotalExperimentalEvidencePoints': {
-                'Tally': ['# score data #', ['resource', 'classificationPoints', 'experimentalEvidenceTotal'], True],
+                'Tally': ['$SCORE_DATA', ['resource', 'classificationPoints', 'experimentalEvidenceTotal'], True],
                 'Notes': ''
             }
         },
         'summary': {
-            'GeneticEvidenceTotal': ['# score data #', ['resource', 'classificationPoints', 'geneticEvidenceTotal'], True],
-            'ExperimentalEvidenceTotal': ['# score data #', ['resource', 'classificationPoints', 'experimentalEvidenceTotal'], True],
-            'EvidencePointsTotal': ['# score data #', ['resource', 'classificationPoints', 'evidencePointsTotal'], True],
-            'CalculatedClassification': ['# path to data #', 'resource', 'autoClassification'],
-            'CalculatedClassificationDate': ['# path to data #', 'resource', 'provisionalDate'],
-            'CuratorModifyCalculation': ['# convert data #', ['resource', 'alteredClassification'],
+            'GeneticEvidenceTotal': ['$SCORE_DATA', ['resource', 'classificationPoints', 'geneticEvidenceTotal'], True],
+            'ExperimentalEvidenceTotal': ['$SCORE_DATA', ['resource', 'classificationPoints', 'experimentalEvidenceTotal'], True],
+            'EvidencePointsTotal': ['$SCORE_DATA', ['resource', 'classificationPoints', 'evidencePointsTotal'], True],
+            'CalculatedClassification': ['$PATH_TO_DATA', 'resource', 'autoClassification'],
+            'CalculatedClassificationDate': ['$PATH_TO_DATA', 'resource', 'provisionalDate'],
+            'CuratorModifyCalculation': ['$CONVERT_DATA', ['resource', 'alteredClassification'],
                 {
                     'No Modification': 'NO',
-                    '# default #': 'YES'
+                    '$DEFAULT': 'YES'
                 }
             ],
-            'CuratorClassification': ['# path to data #', 'resource', 'alteredClassification'],
-            'CuratorClassificationDate': ['# path to data #', 'resource', 'provisionalDate'],
-            'CuratorClassificationNotes': ['# path to data #', 'resource', 'reasons'],
-            'FinalClassification': ['# use first data #', 'No Modification', ['resource', 'alteredClassification'], ['resource', 'autoClassification']],
-            'FinalClassificationDate': ['# path to data #', 'resource', 'approvalDate'],
-            'FinalClassificationNotes': ['# path to data #', 'resource', 'evidenceSummary']
+            'CuratorClassification': ['$PATH_TO_DATA', 'resource', 'alteredClassification'],
+            'CuratorClassificationDate': ['$PATH_TO_DATA', 'resource', 'provisionalDate'],
+            'CuratorClassificationNotes': ['$PATH_TO_DATA', 'resource', 'reasons'],
+            'FinalClassification': ['$USE_FIRST_DATA', 'No Modification', ['resource', 'alteredClassification'], ['resource', 'autoClassification']],
+            'FinalClassificationDate': ['$PATH_TO_DATA', 'resource', 'approvalDate'],
+            'FinalClassificationNotes': ['$PATH_TO_DATA', 'resource', 'evidenceSummary']
         },
-        'ReplicationOverTime': ['# convert data #', ['resource', 'replicatedOverTime'],
+        'ReplicationOverTime': ['$CONVERT_DATA', ['resource', 'replicatedOverTime'],
             {
                 False: 'NO',
                 True: 'YES'

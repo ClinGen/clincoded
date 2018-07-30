@@ -107,24 +107,38 @@ class CurationSnapshots extends Component {
 
     /**
      * Method to render the button that allows users to publish/unpublish an approved classification
-     * The target="_self" attribute is included to ensure page is reloaded (to restart lifecycle of ProvisionalClassification component)
      * @param {object} resourceParent - The parent object of the classification in a snapshot
      * @param {string} snapshotUUID - The UUID of the source snapshot
      * @param {boolean} publishClassification - The published status of the classification (per the source snapshot)
      */
     renderPublishLink(resourceParent, snapshotUUID, publishClassification) {
-        if (resourceParent && resourceParent.uuid) {
-            if (!publishClassification) {
+        let classData = 'btn btn-default publish-link-item';
+        let eventType = 'publish';
+        let buttonText = 'Publish Summary';
+
+        if (publishClassification) {
+            classData += ' unpublish';
+            eventType = 'unpublish';
+            buttonText = 'Unpublish Summary';
+        }
+
+        // If already within the approval process, present publish link as a button (that triggers a state update in a parent component)
+        if (typeof window !== "undefined" && window.location && window.location.pathname && window.location.pathname.indexOf('provisional-classification') > -1) {
+            if (this.props.addPublishState) {
                 return (
-                    <a className="btn btn-default publish-link-item" role="button" href={'/provisional-classification/?gdm=' +
-                        resourceParent.uuid + '&snapshot=' + snapshotUUID + '&publish=yes'} target="_self">Publish Summary</a>
+                    <button type="button" className={classData} role="button"
+                        onClick={this.props.addPublishState.bind(null, snapshotUUID, eventType)}>{buttonText}</button>
                 );
             } else {
-                return (
-                    <a className="btn btn-default publish-link-item unpublish" role="button" href={'/provisional-classification/?gdm=' +
-                        resourceParent.uuid + '&snapshot=' + snapshotUUID + '&unpublish=yes'} target="_self">Unpublish Summary</a>
-                );
+                return null;
             }
+
+        // Otherwise, present publish link as a link (that passes along required data in URL query parameters)
+        } else if (resourceParent && resourceParent.uuid) {
+            return (
+                <a className={classData} role="button" href={'/provisional-classification/?gdm=' +
+                    resourceParent.uuid + '&snapshot=' + snapshotUUID + '&' + eventType + '=yes'}>{buttonText}</a>
+            );
         } else {
             return null;
         }
@@ -169,7 +183,7 @@ class CurationSnapshots extends Component {
                             </dl>
                         </td>
                         <td className="approval-snapshot-buttons">
-                            {this.props.allowPublishButton && resourceParent && !isApprovalActive ?
+                            {this.props.allowPublishButton && !this.props.isPublishEventActive && !isApprovalActive ?
                                 this.renderPublishLink(resourceParent, snapshotUUID, snapshot.resource.publishClassification) : null}
                         </td>
                     </tr>
@@ -193,7 +207,7 @@ class CurationSnapshots extends Component {
                             </dl>
                         </td>
                         <td className="approval-snapshot-buttons">
-                            {this.props.allowPublishButton && snapshot['@id'] === currentApprovedSnapshotID && resourceParent && !isApprovalActive ?
+                            {this.props.allowPublishButton && !this.props.isPublishEventActive && snapshot['@id'] === currentApprovedSnapshotID && !isApprovalActive ?
                                 this.renderPublishLink(resourceParent, snapshotUUID, snapshot.resource.publishClassification) : null}
                         </td>
                     </tr>
@@ -217,6 +231,13 @@ class CurationSnapshots extends Component {
         } else if (snapshot.resourceType === 'interpretation' && snapshot.resourceParent.interpretation) {
             resourceParent = snapshot.resourceParent.interpretation;
         }
+
+        // Criteria to render a publish link (above a "View Approved Summary" button):
+        // User has permission to publish (this.props.allowPublishButton) and a publish event is not currently in progress (!this.props.isPublishEventActive)
+        // Given snapshot has no publish activity (!snapshot.resource.publishDate) and is the current approved (snapshot['@id'] === currentApprovedSnapshotID)
+        // The approval process is not currently in progress (!isApprovalActive)
+        const renderPublishLinkBool = this.props.allowPublishButton && !this.props.isPublishEventActive &&
+            (!snapshot.resource || !snapshot.resource.publishDate) && snapshot['@id'] === currentApprovedSnapshotID && !isApprovalActive;
 
         if (snapshot.approvalStatus === 'Provisioned') {
             return (
@@ -266,7 +287,7 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Provisioned')}
-                                    {resourceParent && !isApprovalActive && classificationStatus !== 'Approved' ?
+                                    {resourceParent && !this.props.isPublishEventActive && !isApprovalActive && classificationStatus !== 'Approved' ?
                                         this.renderProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
                                     <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Provisioned')} title="View Provisional Summary" 
@@ -332,8 +353,7 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Approved')}
-                                    {this.props.allowPublishButton && (!snapshot.resource || !snapshot.resource.publishDate) && snapshot['@id'] === currentApprovedSnapshotID &&
-                                        resourceParent && !isApprovalActive ? this.renderPublishLink(resourceParent, snapshotUUID, false) : null}
+                                    {renderPublishLinkBool ? this.renderPublishLink(resourceParent, snapshotUUID, false) : null}
                                     <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Approved')} title="View Approved Summary"
                                         clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
@@ -348,7 +368,7 @@ class CurationSnapshots extends Component {
 
     render() {
         const { snapshots, isApprovalActive, classificationStatus } = this.props;
-        const currentApprovedSnapshot = this.props.snapshots ? this.props.snapshots.find(snapshot => snapshot.approvalStatus === 'Approved') : {};
+        const currentApprovedSnapshot = snapshots ? snapshots.find(snapshot => snapshot.approvalStatus === 'Approved') : {};
         const currentApprovedSnapshotID = currentApprovedSnapshot ? currentApprovedSnapshot['@id'] : undefined;
 
         return (
@@ -364,7 +384,9 @@ class CurationSnapshots extends Component {
 CurationSnapshots.propTypes = {
     snapshots: PropTypes.array,
     approveProvisional: PropTypes.func,
+    addPublishState: PropTypes.func,
     isApprovalActive: PropTypes.string,
+    isPublishEventActive: PropTypes.bool,
     classificationStatus: PropTypes.string,
     allowPublishButton: PropTypes.bool,
     demoVersion: PropTypes.bool

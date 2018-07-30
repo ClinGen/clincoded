@@ -59,6 +59,41 @@ var Dashboard = createReactClass({
     },
 
     /**
+     * Method to render a label/tag to indicate the publication status of a GDM or Interpretation
+     * Called during the rendering of each GDM or Interpretation
+     * @param {array} filteredSnapshots - Sorted list of approved snapshots associated with a single GDM or Interpretation
+     */
+    renderPublishStatusTag(filteredSnapshots) {
+        let showTag = false, showWarning = false;
+
+        for (let snapshot of filteredSnapshots) {
+            if (snapshot.publishStatus) {
+                showTag = true;
+                break;
+            }
+
+            // If the most recent approved snapshot hasn't been published, include warning with label/tag
+            showWarning = true;
+        }
+
+        if (showTag) {
+            return (
+                <span className="publish-status">
+                    <span className="label publish-background">PUBLISHED</span>
+                    {showWarning ?
+                        <span className="publish-warning" data-toggle="tooltip" data-placement="top"
+                            data-tooltip="The current approved Classification is more recent than this published Classification.">
+                            <i className="icon icon-exclamation-triangle"></i>
+                        </span>
+                        : null}
+                </span>
+            );
+        } else {
+            return null;
+        }
+    },
+
+    /**
      * Method to render status labels/tags for each row of GDMs and Interpretations
      * Called during the rendering of each GDM or Interpretation
      * @param {object} gdm - The GDM object
@@ -91,27 +126,6 @@ var Dashboard = createReactClass({
             // Only interested in knowing the presence of any "Approved" classification
             filteredSnapshots = sortedSnapshots.filter(snapshot => snapshot.approvalStatus === 'Approved');
 
-            // Construct a label/tag to indicate the publish status of a GDM or Interpretation
-            let publishedStatusTag = null;
-            const publishedWarningMessage = (
-                <span className="publish-warning" data-toggle="tooltip" data-placement="top"
-                    data-tooltip="The current approved Classification is more recent than this published Classification.">
-                    <i className="icon icon-exclamation-triangle"></i>
-                </span>
-            );
-
-            for (let i = 0; i < filteredSnapshots.length; i++) {
-                if (filteredSnapshots[i].publishStatus) {
-                    publishedStatusTag = (
-                        <span className="publish-status">
-                            <span className="label publish-background">PUBLISHED</span>
-                            {i > 0 ? publishedWarningMessage : null}
-                        </span>
-                    );
-                    break;
-                }
-            }
-
             if (status === 'In progress') {
                 if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
                     if (filteredSnapshots.length) {
@@ -119,7 +133,7 @@ var Dashboard = createReactClass({
                             <span className="classification-status-wrapper">
                                 <span className="label label-success">APPROVED</span>
                                 <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                {publishedStatusTag}
+                                {this.renderPublishStatusTag(filteredSnapshots)}
                             </span>
                         );
                     } else {
@@ -133,7 +147,7 @@ var Dashboard = createReactClass({
                     return (
                         <span className="classification-status-wrapper">
                             <span className="label label-success">APPROVED</span>
-                            {publishedStatusTag}
+                            {this.renderPublishStatusTag(filteredSnapshots)}
                         </span>
                     );
                 }
@@ -144,7 +158,7 @@ var Dashboard = createReactClass({
                             <span className="classification-status-wrapper">
                                 <span className="label label-success">APPROVED</span>
                                 <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                {publishedStatusTag}
+                                {this.renderPublishStatusTag(filteredSnapshots)}
                             </span>
                         );
                     } else {
@@ -158,7 +172,7 @@ var Dashboard = createReactClass({
                     return (
                         <span className="classification-status-wrapper">
                             <span className="label label-success">APPROVED</span>
-                            {publishedStatusTag}
+                            {this.renderPublishStatusTag(filteredSnapshots)}
                         </span>
                     );
                 }
