@@ -95,9 +95,9 @@ const ProvisionalClassification = createReactClass({
         let classificationSnapshots = this.state.classificationSnapshots;
         let isNewSnapshot = true;
         this.getRestData(snapshotId).then(result => {
-            for (let i = 0; i < classificationSnapshots.length; i++) {
-                if (classificationSnapshots[i]['@id'] === snapshotId) {
-                    classificationSnapshots[i] = result;
+            for (let snapshot of classificationSnapshots) {
+                if (snapshot['@id'] === snapshotId) {
+                    snapshot = result;
                     isNewSnapshot = false;
                     break;
                 }
