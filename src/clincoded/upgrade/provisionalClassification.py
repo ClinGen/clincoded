@@ -49,3 +49,10 @@ def provisionalClassification_5_6(value, system):
     # https://github.com/ClinGen/clincoded/issues/1420
     # Add publication properties and update schema version
     return
+
+
+@upgrade_step('provisionalClassification', '6', '7')
+def provisionalClassification_6_7(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1712
+    # Add classification saved date and update schema version
+    return

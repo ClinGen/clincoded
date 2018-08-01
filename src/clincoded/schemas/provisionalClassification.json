@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "6"
+            "default": "7"
         },
         "classificationPoints": {
             "title": "Calculated scores and points from the scored evidence",
@@ -556,6 +556,11 @@
             "description": "The affiliation this classification is associated with.",
             "type": "string"
         },
+        "classificationDate": {
+            "title": "Classification Date",
+            "description": "Date when the classification was last created/saved",
+            "type": "string"
+        },
         "approvalSubmitter": {
             "title": "Approval Submitter",
             "description": "Curator who entered the approved classification",
@@ -685,6 +690,10 @@
         },
         "affiliation": {
             "title": "Affiliation",
+            "type": "string"
+        },
+        "classificationDate": {
+            "title": "Classification Date",
             "type": "string"
         },
         "approvalSubmitter": {
