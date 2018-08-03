@@ -26,7 +26,7 @@ export function renderOtherClassifications(classification, context) {
                             {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
                             <span className="classification-status-wrapper">
                                 <span className="label label-success">APPROVED</span>
-                                {context && context.name === 'curation-central' ?
+                                {context && context.name.match(/curation-central|provisional-curation|provisional-classification/) ?
                                     <span className="classification-link-item">[ <a href={renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved', affiliationId, userId)} target="_blank">View Classification</a> ]</span>
                                     : null}
                                 <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
@@ -40,7 +40,7 @@ export function renderOtherClassifications(classification, context) {
                         {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
                         <span className="classification-status-wrapper">
                             <span className="label label-success">APPROVED</span>
-                            {context && context.name === 'curation-central' ?
+                            {context && context.name.match(/curation-central|provisional-curation|provisional-classification/) ?
                                 <span>[ <a href={renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved', affiliationId, userId)} target="_blank">View Classification</a> ]</span>
                                 : null}
                         </span>
@@ -55,7 +55,7 @@ export function renderOtherClassifications(classification, context) {
                             {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
                             <span className="classification-status-wrapper">
                                 <span className="label label-success">APPROVED</span>
-                                {context && context.name === 'curation-central' ?
+                                {context && context.name.match(/curation-central|provisional-curation|provisional-classification/) ?
                                     <span className="classification-link-item">[ <a href={renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved', affiliationId, userId)} target="_blank">View Classification</a> ]</span>
                                     : null}
                                 <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
@@ -69,7 +69,7 @@ export function renderOtherClassifications(classification, context) {
                         {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
                         <span className="classification-status-wrapper">
                             <span className="label label-success">APPROVED</span>
-                            {context && context.name === 'curation-central' ?
+                            {context && context.name.match(/curation-central|provisional-curation|provisional-classification/) ?
                                 <span className="classification-link-item">[ <a href={renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved', affiliationId, userId)} target="_blank">View Classification</a> ]</span>
                                 : null}
                         </span>

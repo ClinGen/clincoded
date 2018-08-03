@@ -419,7 +419,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         const context = this.props.context;
         let classificationList = gdm && gdm.provisionalClassifications ? gdm.provisionalClassifications : null;
         let otherClassifications = [];
-        if (context && context.name === 'curation-central') {
+        if (context && context.name.match(/curation-central|provisional-curation|provisional-classification/)) {
             if (classificationList && classificationList.length) {
                 if (currClassification && Object.keys(currClassification).length) {
                     otherClassifications = classificationList.filter(classification => {
