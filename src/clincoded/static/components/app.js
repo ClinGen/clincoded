@@ -37,6 +37,7 @@ const demoAffiliations = [
         "affiliation_id": "88888",
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Curator Test Affiliation 1",
+        "publish_approval": true,
         "approver": [
             "Person A",
             "Person B"
@@ -46,6 +47,7 @@ const demoAffiliations = [
         "affiliation_id": "99999",
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Curator Test Affiliation 2",
+        "publish_approval": true,
         "approver": [
             "Person X",
             "Person Y"
