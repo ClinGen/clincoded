@@ -63,18 +63,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         const status = queryKeyValue('status', this.props.href);
         const affiliationId = queryKeyValue('affiliationId', this.props.href);
         const userId = queryKeyValue('userId', this.props.href);
-        let user, curatorAffiliation = {};
-        if (status === 'Approved' && (affiliationId || userId)) {
-            if (affiliationId) {
-                curatorAffiliation['affiliation_id'] = affiliationId;
-            } else if (userId) {
-                user = userId;
-            }
-        } else {
-            user = this.props.session.user_properties.uuid;
-            curatorAffiliation = this.props.affiliation;
-        }
-        let uri;
+        let uri, user, curatorAffiliation;
         if (gdmUuid) {
             uri = '/gdm/' + gdmUuid;
         } else if (snapshotUuid) {
@@ -89,7 +78,21 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             } else if (data['@type'][0] === 'snapshot' && data.resourceType && data.resourceType === 'classification') {
                 stateObj.gdm = data.resourceParent.gdm;
             }
-            // search for provisional owned by login user
+            // Allow logged-in user/affiliation to view classifications
+            // approved by other users/affiliations, or to view the
+            // approved classification owned by the logged-in user/affiliation
+            if (status === 'Approved' && (affiliationId || userId)) {
+                if (affiliationId) {
+                    curatorAffiliation = {};
+                    curatorAffiliation['affiliation_id'] = affiliationId;
+                } else if (userId) {
+                    user = userId;
+                }
+            } else {
+                curatorAffiliation = this.props.affiliation;
+                user = stateObj.user;
+            }
+            // Then find the classification either by affiliation or by user id
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
                 for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
                     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
