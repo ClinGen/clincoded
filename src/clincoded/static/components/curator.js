@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, content_views, userMatch, affiliationMatch, truncateString, external_url_map } from './globals';
+import { curator_page, content_views, userMatch, affiliationMatch, external_url_map } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
@@ -17,6 +17,7 @@ import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { getAffiliationName } from '../libs/get_affiliation_name';
 import { renderVariantTitle } from '../libs/render_variant_title';
+import { renderOtherClassifications } from '../libs/render_other_classifications';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -255,7 +256,8 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
 
     /**
      * Method to display classification tag/label in gene-disease record header
-     * @param {string} status - The status of a given classification in a GDM
+     * @param {object} classification - A given classification within a GDM
+     * @param {object} gdm - The gene-disease record
      */
     renderClassificationStatusTag(classification, gdm) {
         const context = this.props.context;
@@ -580,13 +582,23 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                     </tbody>
                                 </table>
                             </div>
+                            {otherClassifications.length ?
+                                <div className="other-classifications">
+                                    <strong>Other classifications by: </strong>
+                                    {otherClassifications.map((classification, i) => {
+                                        return (
+                                            <div key={i} className="header-classification">{renderOtherClassifications(classification, context)}</div>
+                                        );
+                                    })}
+                                </div>
+                                : null}
                         </div>
                     </div>
                     <div className="container curation-data">
                         <div className="row equal-height">
                             <GeneRecordHeader gene={gene} />
                             <DiseaseRecordHeader gdm={gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
-                            <CuratorRecordHeader gdm={gdm} otherClassifications={otherClassifications} />
+                            <CuratorRecordHeader gdm={gdm} />
                         </div>
                     </div>
                 </div>
@@ -1504,33 +1516,23 @@ var AddOmimIdModal = createReactClass({
 // Display the curator data of the curation data
 var CuratorRecordHeader = createReactClass({
     propTypes: {
-        gdm: PropTypes.object, // GDM with curator data to display
-        otherClassifications: PropTypes.array
+        gdm: PropTypes.object // GDM with curator data to display
     },
 
     render() {
         const gdm = this.props.gdm;
-        const otherClassifications = this.props.otherClassifications;
         const participants = findAllParticipants(gdm);
         const latestRecord = gdm && findLatestRecord(gdm);
-        // Concat owners into an array (with affiliation or not) of all other classifications
-        let otherClassificationOwners = [];
-        if (otherClassifications && otherClassifications.length) {
-            for (let item of otherClassifications) {
-                if (item.affiliation) {
-                    otherClassificationOwners.push(getAffiliationName(item.affiliation));
-                } else {
-                    otherClassificationOwners.push(item.submitted_by.title);
-                }
-            }
-        }
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
                 <div className="curation-data-curator">
                     {gdm ?
                         <dl className="inline-dl clearfix">
-                            <dt>Creator: </dt><dd><a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a> — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}</dd>
+                            <dt>Creator: </dt>
+                            <dd>
+                                <a href={'mailto:' + gdm.submitted_by.email}>{gdm.submitted_by.title}</a>{gdm.affiliation ? <span> ({getAffiliationName(gdm.affiliation)})</span> : null} — {moment(gdm.date_created).format('YYYY MMM DD, h:mm a')}
+                            </dd>
                             {participants && participants.length && latestRecord ?
                                 <div>
                                     <dt>Contributors: </dt>
@@ -1545,13 +1547,9 @@ var CuratorRecordHeader = createReactClass({
                                         })}
                                     </dd>
                                     <dt>Last edited: </dt>
-                                    <dd><a href={'mailto:' + latestRecord.submitted_by.email}>{latestRecord.submitted_by.title}</a> — {moment(latestRecord.last_modified).format('YYYY MMM DD, h:mm a')}</dd>
-                                    {otherClassificationOwners.length ?
-                                        <div>
-                                            <dt>Other classifications by: </dt>
-                                            <dd>{otherClassificationOwners.join(', ')}</dd>
-                                        </div>
-                                        : null}
+                                    <dd>
+                                        <a href={'mailto:' + latestRecord.submitted_by.email}>{latestRecord.submitted_by.title}</a>{latestRecord.affiliation ? <span> ({getAffiliationName(latestRecord.affiliation)})</span> : null} — {moment(latestRecord.last_modified).format('YYYY MMM DD, h:mm a')}
+                                    </dd>
                                 </div>
                                 : null}
                         </dl>
