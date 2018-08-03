@@ -379,7 +379,7 @@ var Dashboard = createReactClass({
                             <thead>
                                 <tr>
                                     <th className="item-name">Gene-Disease Record</th>
-                                    <th className="item-status">Provisional/Approved Status</th>
+                                    <th className="item-status">Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
@@ -472,7 +472,7 @@ var Dashboard = createReactClass({
                                 <tr>
                                     <th className="item-variant">Variant</th>
                                     <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-status">Provisional/Approved Status</th>
+                                    <th className="item-status">Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
@@ -522,7 +522,7 @@ var Dashboard = createReactClass({
                                 <tr>
                                     <th className="item-variant">Variant</th>
                                     <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-status">Provisional/Approved Status</th>
+                                    <th className="item-status">Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
