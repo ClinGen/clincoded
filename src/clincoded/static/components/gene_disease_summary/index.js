@@ -1,8 +1,8 @@
 'use strict';
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
-import { curator_page, userMatch, queryKeyValue, external_url_map } from '../globals';
+import { curator_page, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
 import GeneDiseaseEvidenceSummaryHeader from './header';
 import GeneDiseaseEvidenceSummaryCaseLevel from './case_level';
@@ -60,6 +60,20 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     loadData() {
         const gdmUuid = queryKeyValue('gdm', this.props.href);
         const snapshotUuid = queryKeyValue('snapshot', this.props.href);
+        const status = queryKeyValue('status', this.props.href);
+        const affiliationId = queryKeyValue('affiliationId', this.props.href);
+        const userId = queryKeyValue('userId', this.props.href);
+        let user, curatorAffiliation = {};
+        if (status === 'Approved' && (affiliationId || userId)) {
+            if (affiliationId) {
+                curatorAffiliation['affiliation_id'] = affiliationId;
+            } else if (userId) {
+                user = userId;
+            }
+        } else {
+            user = this.props.session.user_properties.uuid;
+            curatorAffiliation = this.props.affiliation;
+        }
         let uri;
         if (gdmUuid) {
             uri = '/gdm/' + gdmUuid;
@@ -78,10 +92,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
                 for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
-                    let curatorAffiliation = this.props.affiliation;
                     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
                     let creator = provisionalClassification.submitted_by;
-                    if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
+                    if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === user)) {
                         stateObj.provisional = provisionalClassification;
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
@@ -94,10 +107,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             return Promise.resolve();
         }).then(result => {
             // Once we have the GDM data, invoke other processes such as parsing, calculation and rendering
-            const user = this.state.user;
             const gdm = this.state.gdm;
             const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
-            const curatorAffiliation = this.props.affiliation;
             // Parse proband evidence and its associated segregation data
             this.parseCaseLevelEvidence(annotations, user, curatorAffiliation);
             // Parse segregation evidence with LOD scores but without proband
