@@ -157,80 +157,91 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         let myInterpretation = this.state.interpretation ? this.state.interpretation
             : (sortedInterpretations && sortedInterpretations.affiliatedInterpretation ? sortedInterpretations.affiliatedInterpretation
                 : (sortedInterpretations && sortedInterpretations.myInterpretation ? sortedInterpretations.myInterpretation : null));
-        let otherInterpretations = sortedInterpretations && sortedInterpretations.otherInterpretations.length ? sortedInterpretations.otherInterpretations : null;
         let calculatedPathogenicity = this.state.calculatedPathogenicity ? this.state.calculatedPathogenicity
             : (myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ? myInterpretation.provisional_variant[0].autoClassification : 'None');
         let modifiedPathogenicity = myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length && myInterpretation.provisional_variant[0].alteredClassification ?
-            myInterpretation.provisional_variant[0].alteredClassification : 'None';
+            myInterpretation.provisional_variant[0].alteredClassification : 'Not provided';
         let self = this;
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
                 <div className="curation-data-curator">
-                    {interpretationUuid ?
-                        <div className="clearfix">
-                            <h4>My Interpretation</h4>
-                            {myInterpretation ?
-                                <div className="current-user-interpretations">
-                                    <div className="associated-disease"><strong>Disease:</strong>&nbsp;
-                                        {myInterpretation && myInterpretation.disease ?
-                                            <span>
-                                                {myInterpretation.disease.term}
-                                                <span>&nbsp;</span>
-                                                {!myInterpretation.disease.freetext ? 
+                    <div className="clearfix">
+                        <h4>My Interpretation</h4>
+                        {myInterpretation ?
+                            <table className="login-users-interpretations current-user-interpretations">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div className="associated-disease"><strong>Disease:</strong>&nbsp;
+                                                {myInterpretation && myInterpretation.disease ?
                                                     <span>
-                                                        (
-                                                        <a href={external_url_map['MondoSearch'] + myInterpretation.disease.diseaseId} target="_blank">{myInterpretation.disease.diseaseId.replace('_', ':')}</a>
-                                                        {myInterpretation.disease.description && myInterpretation.disease.description.length ?
-                                                            <span><span>,&nbsp;</span>
-                                                                <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                                    actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
-                                                                    {myInterpretation.disease.description}
-                                                                </PopOverComponent>
+                                                        {myInterpretation.disease.term}
+                                                        <span>&nbsp;</span>
+                                                        {!myInterpretation.disease.freetext ? 
+                                                            <span>
+                                                                (
+                                                                <a href={external_url_map['MondoSearch'] + myInterpretation.disease.diseaseId} target="_blank">{myInterpretation.disease.diseaseId.replace('_', ':')}</a>
+                                                                {myInterpretation.disease.description && myInterpretation.disease.description.length ?
+                                                                    <span><span>,&nbsp;</span>
+                                                                        <PopOverComponent popOverWrapperClass="interpretation-disease-description"
+                                                                            actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                            {myInterpretation.disease.description}
+                                                                        </PopOverComponent>
+                                                                    </span>
+                                                                    : null}
+                                                                )
                                                             </span>
-                                                            : null}
-                                                        )
+                                                            :
+                                                            <span>
+                                                                (
+                                                                {myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ?
+                                                                    <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                                                        actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                                                        {myInterpretation.disease.phenotypes.join(', ')}
+                                                                    </PopOverComponent>
+                                                                    : null}
+                                                                {myInterpretation.disease.description && myInterpretation.disease.description.length ?
+                                                                    <span>{myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
+                                                                        <PopOverComponent popOverWrapperClass="interpretation-disease-description"
+                                                                            actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                            {myInterpretation.disease.description}
+                                                                        </PopOverComponent>
+                                                                    </span>
+                                                                    : null}
+                                                                )
+                                                            </span>
+                                                        }
                                                     </span>
                                                     :
-                                                    <span>
-                                                        (
-                                                        {myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ?
-                                                            <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
-                                                                actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
-                                                                {myInterpretation.disease.phenotypes.join(', ')}
-                                                            </PopOverComponent>
-                                                            : null}
-                                                        {myInterpretation.disease.description && myInterpretation.disease.description.length ?
-                                                            <span>{myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
-                                                                <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                                    actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
-                                                                    {myInterpretation.disease.description}
-                                                                </PopOverComponent>
-                                                            </span>
-                                                            : null}
-                                                        )
-                                                    </span>
+                                                    <span>Not provided</span>
                                                 }
-                                            </span>
-                                            :
-                                            <span>Not associated</span>
-                                        }
-                                    </div>
-                                    <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
-                                    <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
-                                    {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
-                                    <div>
-                                        {myInterpretation.provisional_variant ?
-                                            <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                            </div>
+                                            <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
+                                            <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
+                                            {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
+                                            <div>
+                                                {myInterpretation.provisional_variant ?
+                                                    <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant[0].last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                    : null}
+                                                {myInterpretation.provisional_variant ? this.renderSummaryStatus(myInterpretation.provisional_variant) : null}
+                                            </div>
+                                        </td>
+                                        {!interpretationUuid ?
+                                            <td className="icon-box">
+                                                <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
+                                                    <i className="icon icon-pencil-square large-icon"></i>
+                                                </a>
+                                            </td>
                                             : null}
-                                        {myInterpretation.provisional_variant ? this.renderSummaryStatus(myInterpretation.provisional_variant) : null}
-                                    </div>
-                                </div>
-                                : null}
-                        </div>
-                        :
+                                    </tr>
+                                </tbody>
+                            </table>
+                            : null}
+                    </div>
+{/*
                         <div className="clearfix">
-                            <h4>All Existing Interpretations</h4>
+                            <h4>My Existing Interpretation</h4>
                             {myInterpretation ?
                                 <table className="login-users-interpretations">
                                     <tbody>
@@ -274,48 +285,8 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                     </tbody>
                                 </table>
                                 : null}
-                            {otherInterpretations && otherInterpretations.length ?
-                                <div className="col-lg-12 other-users-interpretations">
-                                    {otherInterpretations.map(function(interpretation, i) {
-                                        return (
-                                            <dl key={i}>
-                                                <dd>
-                                                    {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : <strong>No disease</strong>}
-                                                    {interpretation.modeInheritance ?
-                                                        <span>-
-                                                            {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
-                                                                <i>{interpretation.modeInheritance}</i>
-                                                                :
-                                                                <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
-                                                            }
-                                                            ,&nbsp;
-                                                        </span>
-                                                        :
-                                                        <span>, </span>
-                                                    }
-                                                    <span className="no-broken-item">
-                                                        {interpretation.affiliation ?
-                                                            <span><span>{getAffiliationName(interpretation.affiliation)}</span>,&nbsp;</span>
-                                                            :
-                                                            <span><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,&nbsp;</span>
-                                                        }
-                                                    </span>
-                                                    <span className="no-broken-item">
-                                                        <i>{interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
-                                                            <span>{interpretation.provisional_variant[0].alteredClassification},&nbsp;</span> : null}</i>
-                                                    </span>
-                                                    {interpretation.provisional_variant ?
-                                                        <span className="no-broken-item">last saved: {moment(interpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                        : null}
-                                                    {interpretation.provisional_variant ? self.renderClassificationHeader(interpretation.provisional_variant) : null}
-                                                </dd>
-                                            </dl>
-                                        );
-                                    })}
-                                </div>
-                                : null}
                         </div>
-                    }
+*/}
                 </div>
             </div>
         );
