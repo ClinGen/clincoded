@@ -1553,6 +1553,36 @@
                 }
             }
 
+            .basic-info .all-existing-interpretaions .table th,
+            .basic-info .all-existing-interpretaions .table td {
+                width: 20%;
+            }
+
+            .basic-info .all-existing-interpretaions {
+                margin-bottom: 20px;
+
+                .classification-status {
+                    font-size: 1.1em;
+
+                    .classification-link-item {
+                        display: block;
+                        font-size: 14px;
+                        margin: 3px 0 4px 0;
+                    }
+        
+                    .label {
+                        margin-right: 8px;
+                        padding-top: .3em;
+        
+                        .badge {
+                            background-color: #ff7700;
+                            font-size: 85%;
+                            margin-right: 2px;
+                        }
+                    }
+                }
+            }
+
             .basic-info .datasource-clinvar-interpretaions {
                 .clinvar-interpretation-summary {
                     padding-left: 0;
@@ -1575,18 +1605,8 @@
                 }
             }
 
-            .basic-info .datasource-clinvar-interpretaions .table th,
-            .basic-info .datasource-clinvar-interpretaions .table td {
-                width: 16.67%;
-            }
-
             .basic-info .datasource-clinvar-interpretaions {
                 margin-bottom: 20px;
-            }
-
-            .basic-info .datasource-clinvar-interpretaions .table th:last-child,
-            .basic-info .datasource-clinvar-interpretaions .table td:last-child {
-                width: 50%;
             }
 
             .basic-info .clinvar-interpretation .review-status:first-letter,
