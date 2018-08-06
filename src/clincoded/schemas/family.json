@@ -184,11 +184,19 @@
                         "description": "Genotyping method",
                         "type": "string",
                         "enum": [
+                            "Chromosomal microarray",
+                            "Denaturing gradient gel",
                             "Exome sequencing",
                             "Genotyping",
                             "High resolution melting",
+                            "Homozygosity mapping",
+                            "Linkage analysis",
+                            "Next generation sequencing panels",
+                            "Other",
                             "PCR",
+                            "Restriction digest",
                             "Sanger sequencing",
+                            "SSCP",
                             "Whole genome shotgun sequencing"
                         ]
                     }

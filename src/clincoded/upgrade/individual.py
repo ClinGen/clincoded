@@ -96,3 +96,10 @@ def individual_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+
+@upgrade_step('individual', '5', '6')
+def individual_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1406
+    # Add new genotype methods and update schema version
+    return
