@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getClassificationSavedDate } from '../../libs/get_saved_date';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -68,7 +69,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             {provisional ?
                                 <div>
                                     <dt>Date classification saved:</dt>
-                                    <dd className="classificationSaved">{provisional.last_modified ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                    <dd className="classificationSaved">{provisional.last_modified ? moment(getClassificationSavedDate(provisional)).format("YYYY MMM DD, h:mm a") : null}</dd>
                                 </div>
                                 : null}
                             <dt>Replication Over Time:</dt>

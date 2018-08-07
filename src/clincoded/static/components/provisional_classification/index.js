@@ -16,6 +16,7 @@ import { ClassificationApproval } from './approval';
 import { PublishApproval } from './publish';
 import CurationSnapshots from './snapshots';
 import { sortListByDate } from '../../libs/helpers/sort';
+import { getClassificationSavedDate } from '../../libs/get_saved_date';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -376,6 +377,7 @@ const ProvisionalClassification = createReactClass({
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
+        const lastSavedDate = provisional.last_modified ? getClassificationSavedDate(provisional) : null;
 
         // If state has a snapshot UUID, use it; otherwise, check URL query parameters
         const snapshotUUID = this.state.publishSnapshotUUID ? this.state.publishSnapshotUUID :
@@ -491,7 +493,7 @@ const ProvisionalClassification = createReactClass({
                                                             <td colSpan="4">
                                                                 <div>{currentClassification}
                                                                     <br />
-                                                                    <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                    <span className="large">({moment(lastSavedDate).format("YYYY MMM DD, h:mm a")})</span>
                                                                 </div>
                                                             </td>
                                                         </tr>
