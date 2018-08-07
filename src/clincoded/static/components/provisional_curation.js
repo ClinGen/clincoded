@@ -67,7 +67,8 @@ var ProvisionalCuration = createReactClass({
                 twoVariantsNotProvenCount: 0, twoVariantsNotProvenPoints: 0,
                 // variables for segregation data
                 // segregationTotalPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
-                segregationCountCandidate: 0, segregationCountExome: 0, segregationPointsCandidate: 0, segregationPointsExome: 0,
+                segregationCountCandidate: 0, segregationCountExome: 0, segregationCountTotal: 0,
+                segregationPointsCandidate: 0, segregationPointsExome: 0,
                 segregationTotalPoints: 0, segregationPointsCounted: 0,
                 // variables for case-control data
                 caseControlCount: 0, caseControlPoints: 0, caseControlPointsCounted: 0,
@@ -270,6 +271,9 @@ var ProvisionalCuration = createReactClass({
             classificationPoints['segregation'] = {};
             classificationPoints['segregation']['evidenceCountCandidate'] = Number(scoreTableValues.segregationCountCandidate);
             classificationPoints['segregation']['evidenceCountExome'] = Number(scoreTableValues.segregationCountExome);
+            classificationPoints['segregation']['evidenceCountTotal'] = Number(scoreTableValues.segregationCountTotal);
+            classificationPoints['segregation']['evidencePointsCandidate'] = Number(scoreTableValues.segregationPointsCandidate);
+            classificationPoints['segregation']['evidencePointsExome'] = Number(scoreTableValues.segregationPointsExome);
             classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationTotalPoints);
             classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
             // Case-Control genetic evidence
@@ -714,25 +718,37 @@ var ProvisionalCuration = createReactClass({
         });
 
         // calculate segregation counted points
+        scoreTableValues['segregationCountTotal'] = scoreTableValues['segregationCountCandidate'] + scoreTableValues['segregationCountExome'];
         // Total LOD scores is calculated from the sum of all LOD scores from both sequencing methods
         scoreTableValues['segregationTotalPoints'] = this.classificationMathRound(scoreTableValues['segregationPointsCandidate'] + scoreTableValues['segregationPointsExome']);
         // Determine the min points (Candidate gene sequencing) and max points (Exome/genome or all genes sequenced in linkage region) given the total LOD scores
         let range = {min: 0, max: 0};
+        let awardedPoints = { candidate: 0, exome: 0 };
         if (scoreTableValues['segregationTotalPoints'] >= 0 && scoreTableValues['segregationTotalPoints'] <= 1.99) {
             range = {min: 0, max: 0};
+            awardedPoints = { candidate: 0, exome: 0 };
         } else if (scoreTableValues['segregationTotalPoints'] >= 2 && scoreTableValues['segregationTotalPoints'] <= 2.99) {
             range = {min: 0.5, max: 1};
+            awardedPoints = { candidate: 0.5, exome: 1 };
         } else if (scoreTableValues['segregationTotalPoints'] >= 3 && scoreTableValues['segregationTotalPoints'] <= 4.99) {
             range = {min: 1, max: 2};
+            awardedPoints = { candidate: 1, exome: 2 };
         } else if (scoreTableValues['segregationTotalPoints'] >= 5) {
             range = {min: 1.5, max: 3};
+            awardedPoints = { candidate: 1.5, exome: 3 };
         }
         // Calculate the segregation points counted given total LOD scores, min points and max points
-        scoreTableValues['segregationPointsCounted'] = scoreTableValues['segregationTotalPoints'] === parseFloat(0) ?
+        let calculatedSegregationScore = scoreTableValues['segregationTotalPoints'] === parseFloat(0) ?
             parseFloat(0)
             :
             this.classificationMathRound(((scoreTableValues['segregationPointsCandidate'] / scoreTableValues['segregationTotalPoints']) * range['min']) +
             ((scoreTableValues['segregationPointsExome'] / scoreTableValues['segregationTotalPoints']) * range['max']));
+        // Determine which score to use - the calculated or the awarded, given the total summed LOD score range (e.g. 3 - 4.99)
+        if (calculatedSegregationScore !== parseFloat(0)) {
+            scoreTableValues['segregationPointsCounted'] = awardedPoints['exome'] >= calculatedSegregationScore ? awardedPoints['exome'] : calculatedSegregationScore;
+        } else {
+            scoreTableValues['segregationPointsCounted'] = calculatedSegregationScore;
+        }
 
         // calculate other counted points
         let tempPoints = 0;
@@ -864,143 +880,146 @@ var ProvisionalCuration = createReactClass({
                                                     <table className="summary-matrix">
                                                         <tbody>
                                                             <tr className="header large bg-gray separator-below">
-                                                                <td colSpan="5">Evidence Type</td>
+                                                                <td colSpan="6">Evidence Type</td>
                                                                 <td>Count</td>
                                                                 <td>Total Points</td>
                                                                 <td>Points Counted</td>
                                                             </tr>
                                                             <tr>
-                                                                <td rowSpan="9" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
-                                                                <td rowSpan="7" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
+                                                                <td rowSpan="10" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
+                                                                <td rowSpan="8" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
                                                                 <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
                                                                 <td rowSpan="3" className="header">Autosomal Dominant OR X-linked Disorder</td>
-                                                                <td>Proband with other variant type with some evidence of gene impact</td>
+                                                                <td colSpan="2">Proband with other variant type with some evidence of gene impact</td>
                                                                 <td>{scoreTableValues['probandOtherVariantCount']}</td>
                                                                 <td>{scoreTableValues['probandOtherVariantPoints']}</td>
                                                                 <td>{scoreTableValues['probandOtherVariantPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Proband with predicted or proven null variant</td>
+                                                                <td colSpan="2">Proband with predicted or proven null variant</td>
                                                                 <td>{scoreTableValues['probandNullVariantCount']}</td>
                                                                 <td>{scoreTableValues['probandNullVariantPoints']}</td>
                                                                 <td>{scoreTableValues['probandNullVariantPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Variant is <i>de novo</i></td>
+                                                                <td colSpan="2">Variant is <i>de novo</i></td>
                                                                 <td>{scoreTableValues['variantDenovoCount']}</td>
                                                                 <td>{scoreTableValues['variantDenovoPoints']}</td>
                                                                 <td>{scoreTableValues['variantDenovoPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td rowSpan="2" className="header">Autosomal Recessive Disorder</td>
-                                                                <td>Two variants (not predicted/proven null) with some evidence of gene impact in <i>trans</i></td>
+                                                                <td colSpan="2">Two variants (not predicted/proven null) with some evidence of gene impact in <i>trans</i></td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
                                                                 <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
                                                                 <td rowSpan="2">{scoreTableValues['autosomalRecessivePointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
+                                                                <td colSpan="2">Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
                                                                 <td>{scoreTableValues['twoVariantsProvenCount']}</td>
                                                                 <td>{scoreTableValues['twoVariantsProvenPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td colSpan="2" rowSpan="2" className="header">Segregation</td>
+                                                                <td colSpan="2" rowSpan="3" className="header">Segregation</td>
                                                                 <td>Candidate gene sequencing</td>
+                                                                <td className="matrix-summed-lod"><i>Summed LOD:</i> {scoreTableValues['segregationPointsCandidate']}</td>
                                                                 <td>{scoreTableValues['segregationCountCandidate']}</td>
-                                                                <td rowSpan="2">
-                                                                    <span>{scoreTableValues['segregationPointsCounted']}</span>
-                                                                    &nbsp;(<abbr title="Combined LOD Score"><span>{scoreTableValues['segregationTotalPoints']}</span><strong>*</strong></abbr>)
-                                                                </td>
-                                                                <td rowSpan="2">{scoreTableValues['segregationPointsCounted']}</td>
+                                                                <td rowSpan="3"><span>{scoreTableValues['segregationPointsCounted']}</span></td>
+                                                                <td rowSpan="3">{scoreTableValues['segregationPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Exome/genome or all genes sequenced in linkage region</td>
+                                                                <td className="matrix-summed-lod"><i>Summed LOD:</i> {scoreTableValues['segregationPointsExome']}</td>
                                                                 <td>{scoreTableValues['segregationCountExome']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td colSpan="4" className="header">Case-Control</td>
+                                                                <td className="header">Total summed evidence</td>
+                                                                <td>{scoreTableValues['segregationTotalPoints']}</td>
+                                                                <td>{scoreTableValues['segregationCountTotal']}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colSpan="5" className="header">Case-Control</td>
                                                                 <td>{scoreTableValues['caseControlCount']}</td>
                                                                 <td>{scoreTableValues['caseControlPoints']}</td>
                                                                 <td>{scoreTableValues['caseControlPointsCounted']}</td>
                                                             </tr>
                                                             <tr className="header separator-below">
-                                                                <td colSpan="6">Genetic Evidence Total</td>
+                                                                <td colSpan="7">Genetic Evidence Total</td>
                                                                 <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td rowSpan="12" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
                                                                 <td colSpan="3" rowSpan="3" className="header">Functional</td>
-                                                                <td>Biochemical Functions</td>
+                                                                <td colSpan="2">Biochemical Functions</td>
                                                                 <td>{scoreTableValues['biochemicalFunctionCount']}</td>
                                                                 <td>{scoreTableValues['biochemicalFunctionPoints']}</td>
                                                                 <td rowSpan="3">{scoreTableValues['functionalPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Protein Interactions</td>
+                                                                <td colSpan="2">Protein Interactions</td>
                                                                 <td>{scoreTableValues['proteinInteractionsCount']}</td>
                                                                 <td>{scoreTableValues['proteinInteractionsPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Expression</td>
+                                                                <td colSpan="2">Expression</td>
                                                                 <td>{scoreTableValues['expressionCount']}</td>
                                                                 <td>{scoreTableValues['expressionPoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="3" rowSpan="2" className="header">Functional Alteration</td>
-                                                                <td>Patient cells</td>
+                                                                <td colSpan="2">Patient cells</td>
                                                                 <td>{scoreTableValues['patientCellsCount']}</td>
                                                                 <td>{scoreTableValues['patientCellsPoints']}</td>
                                                                 <td rowSpan="2">{scoreTableValues['functionalAlterationPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Non-patient cells</td>
+                                                                <td colSpan="2">Non-patient cells</td>
                                                                 <td>{scoreTableValues['nonPatientCellsCount']}</td>
                                                                 <td>{scoreTableValues['nonPatientCellsPoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="3" rowSpan="2" className="header">Models</td>
-                                                                <td>Non-human model organism</td>
+                                                                <td colSpan="2">Non-human model organism</td>
                                                                 <td>{scoreTableValues['nonHumanModelCount']}</td>
                                                                 <td>{scoreTableValues['nonHumanModelPoints']}</td>
                                                                 <td rowSpan="6">{scoreTableValues['modelsRescuePointsCounted']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Cell culture model</td>
+                                                                <td colSpan="2">Cell culture model</td>
                                                                 <td>{scoreTableValues['cellCultureCount']}</td>
                                                                 <td>{scoreTableValues['cellCulturePoints']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="3" rowSpan="4" className="header">Rescue</td>
-                                                                <td>Rescue in human</td>
+                                                                <td colSpan="2">Rescue in human</td>
                                                                 <td>{scoreTableValues['rescueHumanModelCount']}</td>
                                                                 <td>{scoreTableValues['rescueHumanModelPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Rescue in non-human model organism</td>
+                                                                <td colSpan="2">Rescue in non-human model organism</td>
                                                                 <td>{scoreTableValues['rescueNonHumanModelCount']}</td>
                                                                 <td>{scoreTableValues['rescueNonHumanModelPoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Rescue in cell culture model</td>
+                                                                <td colSpan="2">Rescue in cell culture model</td>
                                                                 <td>{scoreTableValues['rescueCellCultureCount']}</td>
                                                                 <td>{scoreTableValues['rescueCellCulturePoints']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Rescue in patient cells</td>
+                                                                <td colSpan="2">Rescue in patient cells</td>
                                                                 <td>{scoreTableValues['rescuePatientCellsCount']}</td>
                                                                 <td>{scoreTableValues['rescuePatientCellsPoints']}</td>
                                                             </tr>
                                                             <tr className="header separator-below">
-                                                                <td colSpan="6">Experimental Evidence Total</td>
+                                                                <td colSpan="7">Experimental Evidence Total</td>
                                                                 <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
                                                             </tr>
                                                             <tr className="total-row header">
-                                                                <td colSpan="7">Total Points</td>
+                                                                <td colSpan="8">Total Points</td>
                                                                 <td>{this.state.totalScore}</td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
-                                                    <strong>*</strong> &ndash; Combined LOD Score
                                                 </div>
                                                 <div className="summary-provisional-classification-description">
                                                     <p className="alert alert-warning">
