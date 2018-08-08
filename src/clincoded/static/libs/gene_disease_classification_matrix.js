@@ -61,20 +61,20 @@ class GeneDiseaseClassificationMatrix extends Component {
                         <tr>
                             <td colSpan="2" rowSpan="3" className="header">Segregation</td>
                             <td>Candidate gene sequencing</td>
-                            <td className="matrix-summed-lod"><i>Summed LOD:</i> {classificationPoints['segregation']['evidencePointsCandidate']}</td>
+                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{classificationPoints['segregation']['evidencePointsCandidate']}</span></td>
                             <td>{classificationPoints['segregation']['evidenceCountCandidate']}</td>
-                            <td rowSpan="3"><span>{classificationPoints['segregation']['pointsCounted']}</span></td>
+                            <td rowSpan="3">{classificationPoints['segregation']['pointsCounted']}</td>
                             <td rowSpan="3">{classificationPoints['segregation']['pointsCounted']}</td>
                         </tr>
                         <tr>
                             <td>Exome/genome or all genes sequenced in linkage region</td>
-                            <td className="matrix-summed-lod"><i>Summed LOD:</i> {classificationPoints['segregation']['evidencePointsExome']}</td>
+                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{classificationPoints['segregation']['evidencePointsExome']}</span></td>
                             <td>{classificationPoints['segregation']['evidenceCountExome']}</td>
                         </tr>
                         <tr>
-                            <td className="header">Total summed evidence</td>
-                            <td>{classificationPoints['segregation']['totalPointsGiven']}</td>
-                            <td>{classificationPoints['segregation']['evidenceCountTotal']}</td>
+                            <td className="header">Total summed segregation evidence</td>
+                            <td className="header">{classificationPoints['segregation']['totalPointsGiven']}</td>
+                            <td className="header">{classificationPoints['segregation']['evidenceCountTotal']}</td>
                         </tr>
                         <tr>
                             <td colSpan="5" className="header">Case-Control</td>
