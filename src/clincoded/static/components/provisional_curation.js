@@ -720,50 +720,58 @@ var ProvisionalCuration = createReactClass({
         // calculate segregation counted points
         scoreTableValues['segregationCountTotal'] = scoreTableValues['segregationCountCandidate'] + scoreTableValues['segregationCountExome'];
         // Total LOD scores is calculated from the sum of all LOD scores from both sequencing methods
-        scoreTableValues['segregationTotalPoints'] = this.classificationMathRound(scoreTableValues['segregationPointsCandidate'] + scoreTableValues['segregationPointsExome']);
+        scoreTableValues['segregationTotalPoints'] = this.classificationMathRound((scoreTableValues['segregationPointsCandidate'] + scoreTableValues['segregationPointsExome']), 2);
         // Determine the min points (Candidate gene sequencing) and max points (Exome/genome or all genes sequenced in linkage region) given the total LOD scores
         let range = {min: 0, max: 0};
-        let awardedPoints = { candidate: 0, exome: 0 };
         if (scoreTableValues['segregationTotalPoints'] >= 0 && scoreTableValues['segregationTotalPoints'] <= 1.99) {
             range = {min: 0, max: 0};
-            awardedPoints = { candidate: 0, exome: 0 };
         } else if (scoreTableValues['segregationTotalPoints'] >= 2 && scoreTableValues['segregationTotalPoints'] <= 2.99) {
             range = {min: 0.5, max: 1};
-            awardedPoints = { candidate: 0.5, exome: 1 };
         } else if (scoreTableValues['segregationTotalPoints'] >= 3 && scoreTableValues['segregationTotalPoints'] <= 4.99) {
             range = {min: 1, max: 2};
-            awardedPoints = { candidate: 1, exome: 2 };
         } else if (scoreTableValues['segregationTotalPoints'] >= 5) {
             range = {min: 1.5, max: 3};
-            awardedPoints = { candidate: 1.5, exome: 3 };
+        }
+        // Determine the 'awarded' exome points given the total exome LOD score
+        let awardedExomePoints = 0;
+        if (scoreTableValues['segregationPointsExome'] >= 0 && scoreTableValues['segregationPointsExome'] <= 1.99) {
+            awardedExomePoints = 0;
+        } else if (scoreTableValues['segregationPointsExome'] >= 2 && scoreTableValues['segregationPointsExome'] <= 2.99) {
+            awardedExomePoints = 1;
+        } else if (scoreTableValues['segregationPointsExome'] >= 3 && scoreTableValues['segregationPointsExome'] <= 4.99) {
+            awardedExomePoints = 2;
+        } else if (scoreTableValues['segregationTotalPoints'] >= 5) {
+            awardedExomePoints = 3;
         }
         // Calculate the segregation points counted given total LOD scores, min points and max points
         let calculatedSegregationScore = scoreTableValues['segregationTotalPoints'] === parseFloat(0) ?
             parseFloat(0)
             :
-            this.classificationMathRound(((scoreTableValues['segregationPointsCandidate'] / scoreTableValues['segregationTotalPoints']) * range['min']) +
-            ((scoreTableValues['segregationPointsExome'] / scoreTableValues['segregationTotalPoints']) * range['max']));
-        // Determine which score to use - the calculated or the awarded, given the total summed LOD score range (e.g. 3 - 4.99)
+            ((scoreTableValues['segregationPointsCandidate'] / scoreTableValues['segregationTotalPoints']) * range['min']) +
+            ((scoreTableValues['segregationPointsExome'] / scoreTableValues['segregationTotalPoints']) * range['max']);
+        // Determine which score to use - the calculated or the awarded Exome, given the total Exome LOD score range (e.g. 3 - 4.99)
+        // Example 1 - total Exome LOD score = 3.1, awarded Exome points = 2, calculated score = 1.720930233, then final score = 2
+        // Example 2 - total Exome LOD score = 2, awarded Exome points = 1, calculated score = 1.891644909, then final score = 1.9 (rounded to nearest 0.1)
         if (calculatedSegregationScore !== parseFloat(0) && scoreTableValues['segregationPointsExome'] !== parseFloat(0)) {
-            scoreTableValues['segregationPointsCounted'] = awardedPoints['exome'] >= calculatedSegregationScore ? awardedPoints['exome'] : calculatedSegregationScore;
+            scoreTableValues['segregationPointsCounted'] = awardedExomePoints >= calculatedSegregationScore ? awardedExomePoints : this.classificationMathRound(calculatedSegregationScore, 1);
         } else {
-            scoreTableValues['segregationPointsCounted'] = calculatedSegregationScore;
+            scoreTableValues['segregationPointsCounted'] = this.classificationMathRound(calculatedSegregationScore, 1);
         }
 
         // calculate other counted points
         let tempPoints = 0;
 
-        scoreTableValues['probandOtherVariantPoints'] = this.classificationMathRound(scoreTableValues['probandOtherVariantPoints']);
+        scoreTableValues['probandOtherVariantPoints'] = this.classificationMathRound(scoreTableValues['probandOtherVariantPoints'], 2);
         scoreTableValues['probandOtherVariantPointsCounted'] = scoreTableValues['probandOtherVariantPoints'] < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT ? scoreTableValues['probandOtherVariantPoints'] : MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
 
-        scoreTableValues['probandNullVariantPoints'] = this.classificationMathRound(scoreTableValues['probandNullVariantPoints']);
+        scoreTableValues['probandNullVariantPoints'] = this.classificationMathRound(scoreTableValues['probandNullVariantPoints'], 2);
         scoreTableValues['probandNullVariantPointsCounted'] = scoreTableValues['probandNullVariantPoints'] < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT ? scoreTableValues['probandNullVariantPoints'] : MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
 
-        scoreTableValues['variantDenovoPoints'] = this.classificationMathRound(scoreTableValues['variantDenovoPoints']);
+        scoreTableValues['variantDenovoPoints'] = this.classificationMathRound(scoreTableValues['variantDenovoPoints'], 2);
         scoreTableValues['variantDenovoPointsCounted'] = scoreTableValues['variantDenovoPoints'] < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO ? scoreTableValues['variantDenovoPoints'] : MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
 
-        scoreTableValues['twoVariantsProvenPoints'] = this.classificationMathRound(scoreTableValues['twoVariantsProvenPoints']);
-        scoreTableValues['twoVariantsNotProvenPoints'] = this.classificationMathRound(scoreTableValues['twoVariantsNotProvenPoints']);
+        scoreTableValues['twoVariantsProvenPoints'] = this.classificationMathRound(scoreTableValues['twoVariantsProvenPoints'], 2);
+        scoreTableValues['twoVariantsNotProvenPoints'] = this.classificationMathRound(scoreTableValues['twoVariantsNotProvenPoints'], 2);
         tempPoints = scoreTableValues['twoVariantsProvenPoints'] + scoreTableValues['twoVariantsNotProvenPoints'];
         scoreTableValues['autosomalRecessivePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE ? tempPoints : MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE;
 
@@ -780,15 +788,15 @@ var ProvisionalCuration = createReactClass({
         scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
 
         tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
-        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? this.classificationMathRound(tempPoints) : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
+        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? this.classificationMathRound(tempPoints, 2) : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
 
         tempPoints = scoreTableValues['functionalPointsCounted'] + scoreTableValues['functionalAlterationPointsCounted'] + scoreTableValues['modelsRescuePointsCounted'];
-        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? this.classificationMathRound(tempPoints) : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
+        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? this.classificationMathRound(tempPoints, 2) : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
 
         let totalScore = scoreTableValues['geneticEvidenceTotalPoints'] + scoreTableValues['experimentalEvidenceTotalPoints'];
 
         // set scoreTabValues state
-        this.setState({totalScore: this.classificationMathRound(totalScore), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
+        this.setState({totalScore: this.classificationMathRound(totalScore, 2), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
 
         // set classification
         this.calculateClassifications(totalScore, this.state.replicatedOverTime);
@@ -819,9 +827,11 @@ var ProvisionalCuration = createReactClass({
 
     /**
      * Simple Math.round method
+     * alternative #1 - Math.round(num * 10) / 10; //*** returns 1 decimal
+     * alternative #2 - Math.round((num + 0.00001) * 100) / 100; //*** returns 2 decimals
      */
-    classificationMathRound(number) {
-        return Math.round((number + 0.00001) * 100) / 100;
+    classificationMathRound(number, decimals) {
+        return Number(Math.round(number + ('e' + decimals)) + ('e-' + decimals));
     },
 
     /**
