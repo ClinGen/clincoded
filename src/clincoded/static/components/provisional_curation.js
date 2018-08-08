@@ -744,7 +744,7 @@ var ProvisionalCuration = createReactClass({
             this.classificationMathRound(((scoreTableValues['segregationPointsCandidate'] / scoreTableValues['segregationTotalPoints']) * range['min']) +
             ((scoreTableValues['segregationPointsExome'] / scoreTableValues['segregationTotalPoints']) * range['max']));
         // Determine which score to use - the calculated or the awarded, given the total summed LOD score range (e.g. 3 - 4.99)
-        if (calculatedSegregationScore !== parseFloat(0)) {
+        if (calculatedSegregationScore !== parseFloat(0) && scoreTableValues['segregationPointsExome'] !== parseFloat(0)) {
             scoreTableValues['segregationPointsCounted'] = awardedPoints['exome'] >= calculatedSegregationScore ? awardedPoints['exome'] : calculatedSegregationScore;
         } else {
             scoreTableValues['segregationPointsCounted'] = calculatedSegregationScore;
@@ -922,20 +922,20 @@ var ProvisionalCuration = createReactClass({
                                                             <tr>
                                                                 <td colSpan="2" rowSpan="3" className="header">Segregation</td>
                                                                 <td>Candidate gene sequencing</td>
-                                                                <td className="matrix-summed-lod"><i>Summed LOD:</i> {scoreTableValues['segregationPointsCandidate']}</td>
+                                                                <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{parseFloat(scoreTableValues['segregationPointsCandidate'])}</span></td>
                                                                 <td>{scoreTableValues['segregationCountCandidate']}</td>
-                                                                <td rowSpan="3"><span>{scoreTableValues['segregationPointsCounted']}</span></td>
+                                                                <td rowSpan="3">{scoreTableValues['segregationPointsCounted']}</td>
                                                                 <td rowSpan="3">{scoreTableValues['segregationPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Exome/genome or all genes sequenced in linkage region</td>
-                                                                <td className="matrix-summed-lod"><i>Summed LOD:</i> {scoreTableValues['segregationPointsExome']}</td>
+                                                                <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{parseFloat(scoreTableValues['segregationPointsExome'])}</span></td>
                                                                 <td>{scoreTableValues['segregationCountExome']}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td className="header">Total summed evidence</td>
-                                                                <td>{scoreTableValues['segregationTotalPoints']}</td>
-                                                                <td>{scoreTableValues['segregationCountTotal']}</td>
+                                                                <td className="header">Total summed segregation evidence</td>
+                                                                <td className="header">{parseFloat(scoreTableValues['segregationTotalPoints'])}</td>
+                                                                <td className="header">{scoreTableValues['segregationCountTotal']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="5" className="header">Case-Control</td>
