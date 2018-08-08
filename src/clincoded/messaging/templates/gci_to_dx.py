@@ -299,7 +299,7 @@ message_template = {
             'ExperimentalEvidenceTotal': ['$SCORE_DATA', ['resource', 'classificationPoints', 'experimentalEvidenceTotal'], True],
             'EvidencePointsTotal': ['$SCORE_DATA', ['resource', 'classificationPoints', 'evidencePointsTotal'], True],
             'CalculatedClassification': ['$PATH_TO_DATA', 'resource', 'autoClassification'],
-            'CalculatedClassificationDate': ['$PATH_TO_DATA', 'resource', 'provisionalDate'],
+            'CalculatedClassificationDate': ['$USE_FIRST_DATA', '', ['resource', 'classificationDate'], ['resource', 'provisionalDate']],
             'CuratorModifyCalculation': ['$CONVERT_DATA', ['resource', 'alteredClassification'],
                 {
                     'No Modification': 'NO',
@@ -307,10 +307,13 @@ message_template = {
                 }
             ],
             'CuratorClassification': ['$PATH_TO_DATA', 'resource', 'alteredClassification'],
-            'CuratorClassificationDate': ['$PATH_TO_DATA', 'resource', 'provisionalDate'],
+            'CuratorClassificationDate': ['$USE_FIRST_DATA', '', ['resource', 'classificationDate'], ['resource', 'provisionalDate']],
             'CuratorClassificationNotes': ['$PATH_TO_DATA', 'resource', 'reasons'],
+            'ProvisionalClassification': ['$PATH_TO_DATA', 'resource', 'alteredClassification'],
+            'ProvisionalClassificationDate': ['$USE_FIRST_DATA', '', ['resource', 'provisionalReviewDate'], ['resource', 'provisionalDate']],
+            'ProvisionalClassificationNotes': ['$PATH_TO_DATA', 'resource', 'reasons'],
             'FinalClassification': ['$USE_FIRST_DATA', 'No Modification', ['resource', 'alteredClassification'], ['resource', 'autoClassification']],
-            'FinalClassificationDate': ['$PATH_TO_DATA', 'resource', 'approvalDate'],
+            'FinalClassificationDate': ['$USE_FIRST_DATA', '', ['resource', 'approvalReviewDate'], ['resource', 'approvalDate']],
             'FinalClassificationNotes': ['$PATH_TO_DATA', 'resource', 'evidenceSummary']
         },
         'ReplicationOverTime': ['$CONVERT_DATA', ['resource', 'replicatedOverTime'],
