@@ -30,6 +30,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             user: null, // Logged-in user uuid
             gdm: null, // The gdm object associated with the eivdence
             provisional: {}, // Logged-in user's existing provisional object
+            snapshotPublishDate: null,
             caseLevelEvidenceList: [],
             segregationEvidenceList: [],
             caseControlEvidenceList: [],
@@ -74,6 +75,11 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 stateObj.gdm = data;
             } else if (data['@type'][0] === 'snapshot' && data.resourceType && data.resourceType === 'classification') {
                 stateObj.gdm = data.resourceParent.gdm;
+
+                // Retrieve data (from a snapshot) to indicate the published status of a classification
+                if (data.resource && data.resource.publishClassification && data.resource.publishDate) {
+                    stateObj.snapshotPublishDate = data.resource.publishDate;
+                }
             }
             // search for provisional owned by login user
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
@@ -655,7 +661,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
                     {!this.state.preview ?
-                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
+                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} snapshotPublishDate={this.state.snapshotPublishDate} />
                         : <div className="spacer">&nbsp;</div>}
                     {!this.state.preview && provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
