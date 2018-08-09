@@ -720,7 +720,7 @@ var ProvisionalCuration = createReactClass({
         // calculate segregation counted points
         scoreTableValues['segregationCountTotal'] = scoreTableValues['segregationCountCandidate'] + scoreTableValues['segregationCountExome'];
         // Total LOD scores is calculated from the sum of all LOD scores from both sequencing methods
-        scoreTableValues['segregationTotalPoints'] = this.classificationMathRound((scoreTableValues['segregationPointsCandidate'] + scoreTableValues['segregationPointsExome']), 2);
+        scoreTableValues['segregationTotalPoints'] = (scoreTableValues['segregationPointsCandidate'] + scoreTableValues['segregationPointsExome']);
         // Determine the min points (Candidate gene sequencing) and max points (Exome/genome or all genes sequenced in linkage region) given the total LOD scores
         let range = {min: 0, max: 0};
         if (scoreTableValues['segregationTotalPoints'] >= 0 && scoreTableValues['segregationTotalPoints'] <= 1.99) {
@@ -932,19 +932,19 @@ var ProvisionalCuration = createReactClass({
                                                             <tr>
                                                                 <td colSpan="2" rowSpan="3" className="header">Segregation</td>
                                                                 <td>Candidate gene sequencing</td>
-                                                                <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{parseFloat(scoreTableValues['segregationPointsCandidate'])}</span></td>
+                                                                <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{this.classificationMathRound(scoreTableValues['segregationPointsCandidate'], 2)}</span></td>
                                                                 <td>{scoreTableValues['segregationCountCandidate']}</td>
                                                                 <td rowSpan="3">{scoreTableValues['segregationPointsCounted']}</td>
                                                                 <td rowSpan="3">{scoreTableValues['segregationPointsCounted']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Exome/genome or all genes sequenced in linkage region</td>
-                                                                <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{parseFloat(scoreTableValues['segregationPointsExome'])}</span></td>
+                                                                <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{this.classificationMathRound(scoreTableValues['segregationPointsExome'], 2)}</span></td>
                                                                 <td>{scoreTableValues['segregationCountExome']}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td className="header">Total summed segregation evidence</td>
-                                                                <td className="header">{parseFloat(scoreTableValues['segregationTotalPoints'])}</td>
+                                                                <td className="header">{this.classificationMathRound(scoreTableValues['segregationTotalPoints'], 2)}</td>
                                                                 <td className="header">{scoreTableValues['segregationCountTotal']}</td>
                                                             </tr>
                                                             <tr>

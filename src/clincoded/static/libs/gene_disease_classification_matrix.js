@@ -11,6 +11,15 @@ class GeneDiseaseClassificationMatrix extends Component {
         super(props);
     }
 
+    /**
+     * Simple Math.round method
+     * alternative #1 - Math.round(num * 10) / 10; //*** returns 1 decimal
+     * alternative #2 - Math.round((num + 0.00001) * 100) / 100; //*** returns 2 decimals
+     */
+    classificationMathRound(number, decimals) {
+        return Number(Math.round(number + ('e' + decimals)) + ('e-' + decimals));
+    }
+
     render() {
         const classificationPoints = this.props.classificationPoints;
 
@@ -61,19 +70,19 @@ class GeneDiseaseClassificationMatrix extends Component {
                         <tr>
                             <td colSpan="2" rowSpan="3" className="header">Segregation</td>
                             <td>Candidate gene sequencing</td>
-                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{classificationPoints['segregation']['evidencePointsCandidate']}</span></td>
+                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{this.classificationMathRound(classificationPoints['segregation']['evidencePointsCandidate'], 2)}</span></td>
                             <td>{classificationPoints['segregation']['evidenceCountCandidate']}</td>
                             <td rowSpan="3">{classificationPoints['segregation']['pointsCounted']}</td>
                             <td rowSpan="3">{classificationPoints['segregation']['pointsCounted']}</td>
                         </tr>
                         <tr>
                             <td>Exome/genome or all genes sequenced in linkage region</td>
-                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{classificationPoints['segregation']['evidencePointsExome']}</span></td>
+                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{this.classificationMathRound(classificationPoints['segregation']['evidencePointsExome'], 2)}</span></td>
                             <td>{classificationPoints['segregation']['evidenceCountExome']}</td>
                         </tr>
                         <tr>
                             <td className="header">Total summed segregation evidence</td>
-                            <td className="header">{classificationPoints['segregation']['totalPointsGiven']}</td>
+                            <td className="header">{this.classificationMathRound(classificationPoints['segregation']['totalPointsGiven'], 2)}</td>
                             <td className="header">{classificationPoints['segregation']['evidenceCountTotal']}</td>
                         </tr>
                         <tr>
