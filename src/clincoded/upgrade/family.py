@@ -101,11 +101,6 @@ def family_4_5(value, system):
 def family_5_6(value, system):
     # https://github.com/ClinGen/clincoded/issues/1406
     # Add new genotype methods and update schema version
-    return
-
-
-@upgrade_step('family', '6', '7')
-def family_6_7(value, system):
     # https://github.com/ClinGen/clincoded/issues/1549
     # Add sequencing type to be associated with LOD score
     if 'segregation' in value:
