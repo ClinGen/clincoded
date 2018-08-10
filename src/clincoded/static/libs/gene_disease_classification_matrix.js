@@ -34,8 +34,8 @@ class GeneDiseaseClassificationMatrix extends Component {
                             <td>Points Counted</td>
                         </tr>
                         <tr>
-                            <td rowSpan="10" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
-                            <td rowSpan="8" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
+                            <td rowSpan="11" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
+                            <td rowSpan="9" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
                             <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
                             <td rowSpan="3" className="header">Autosomal Dominant OR X-linked Disorder</td>
                             <td colSpan="2">Proband with other variant type with some evidence of gene impact</td>
@@ -68,22 +68,27 @@ class GeneDiseaseClassificationMatrix extends Component {
                             <td>{classificationPoints['autosomalRecessiveDisorder']['twoVariantsInTransWithOneDeNovo']['totalPointsGiven']}</td>
                         </tr>
                         <tr>
-                            <td colSpan="2" rowSpan="3" className="header">Segregation</td>
+                            <td colSpan="2" rowSpan="4" className="header">Segregation</td>
+                            <td className="bg-gray"><span></span></td>
+                            <td className="header">Summed LOD</td>
+                            <td className="header">Family Count</td>
+                            <td rowSpan="4">{classificationPoints['segregation']['pointsCounted']}</td>
+                            <td rowSpan="4">{classificationPoints['segregation']['pointsCounted']}</td>
+                        </tr>
+                        <tr>
                             <td>Candidate gene sequencing</td>
-                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{this.classificationMathRound(classificationPoints['segregation']['evidencePointsCandidate'], 2)}</span></td>
+                            <td><span>{this.classificationMathRound(classificationPoints['segregation']['evidencePointsCandidate'], 2)}</span></td>
                             <td>{classificationPoints['segregation']['evidenceCountCandidate']}</td>
-                            <td rowSpan="3">{classificationPoints['segregation']['pointsCounted']}</td>
-                            <td rowSpan="3">{classificationPoints['segregation']['pointsCounted']}</td>
                         </tr>
                         <tr>
                             <td>Exome/genome or all genes sequenced in linkage region</td>
-                            <td className="classification-matrix-summed-lod"><i>Summed LOD:</i><br /><span>{this.classificationMathRound(classificationPoints['segregation']['evidencePointsExome'], 2)}</span></td>
+                            <td><span>{this.classificationMathRound(classificationPoints['segregation']['evidencePointsExome'], 2)}</span></td>
                             <td>{classificationPoints['segregation']['evidenceCountExome']}</td>
                         </tr>
                         <tr>
-                            <td className="header">Total summed segregation evidence</td>
+                            <td className="header">Total Summed LOD Score</td>
                             <td className="header">{this.classificationMathRound(classificationPoints['segregation']['totalPointsGiven'], 2)}</td>
-                            <td className="header">{classificationPoints['segregation']['evidenceCountTotal']}</td>
+                            <td className="bg-gray"><span></span></td>
                         </tr>
                         <tr>
                             <td colSpan="5" className="header">Case-Control</td>
