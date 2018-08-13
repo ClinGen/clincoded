@@ -236,6 +236,13 @@ write_files:
       initial_position = end_of_file
       log_group_name = Apache2-prod
 
+      [/var/log/apache2]
+      file = /var/log/apache2/error.log
+      buffer_duration = 5000
+      log_stream_name = {hostname}
+      initial_position = end_of_file
+      log_group_name = Apache2-error-log-prod
+
       [/var/log/postgresql]
       file = /var/log/postgresql/postgresql-9.4-main.log
       buffer_duration = 5000
