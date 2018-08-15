@@ -101,4 +101,10 @@ def family_4_5(value, system):
 def family_5_6(value, system):
     # https://github.com/ClinGen/clincoded/issues/1406
     # Add new genotype methods and update schema version
-    return
+    # https://github.com/ClinGen/clincoded/issues/1549
+    # Add sequencing type to be associated with LOD score
+    if 'segregation' in value:
+        if 'includeLodScoreInAggregateCalculation' in value['segregation']:
+            if value['segregation']['includeLodScoreInAggregateCalculation'] is True:
+                value['segregation']['sequencingMethod'] = 'Candidate gene sequencing'
+
