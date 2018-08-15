@@ -261,6 +261,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                             caseLevelEvidence['segregationPublishedLodScore'] = segregation && segregation.publishedLodScore ? segregation.publishedLodScore : null;
                             caseLevelEvidence['segregationEstimatedLodScore'] = segregation && segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
                             caseLevelEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
+                            caseLevelEvidence['sequencingMethod'] = segregation && segregation.sequencingMethod ? segregation.sequencingMethod : null;
                             // Put object into array
                             caseLevelEvidenceList.push(caseLevelEvidence);
                             this.setState({caseLevelEvidenceList: caseLevelEvidenceList}, () => {
@@ -364,6 +365,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
                     segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
                     segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
+                    segregationEvidence['sequencingMethod'] = segregation && segregation.sequencingMethod ? segregation.sequencingMethod : null;
                     // Put object into array
                     segregationEvidenceList.push(segregationEvidence);
                     this.setState({segregationEvidenceList: segregationEvidenceList}, () => {

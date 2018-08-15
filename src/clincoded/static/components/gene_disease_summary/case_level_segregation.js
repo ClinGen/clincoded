@@ -65,6 +65,10 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                 <td className="evidence-lod-score-counted">
                     {evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore ? <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span> : '-'}
                 </td>
+                <td className="evidence-sequencing-method">
+                    {(evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore) && evidence.includeLodScoreInAggregateCalculation && evidence.sequencingMethod ?
+                        evidence.sequencingMethod : ''}
+                </td>
             </tr>
         );
     }
@@ -126,6 +130,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     <th>Number of unaffected individuals</th>
                                     <th>LOD score</th>
                                     <th>LOD score counted</th>
+                                    <th>Sequencing method</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -134,7 +139,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                 })}
                                 <tr>
                                     <td colSpan="6" className="total-score-label">Total LOD score:</td>
-                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
+                                    <td colSpan="3" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
                         </table>

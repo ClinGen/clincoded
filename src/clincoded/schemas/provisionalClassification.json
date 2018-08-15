@@ -176,9 +176,33 @@
                     "description": "Segregation case-level evidence",
                     "type": "object",
                     "properties": {
-                        "evidenceCount": {
-                            "title": "Segregation Evidence Count",
-                            "description": "Number of scored evidence for Segregation case-level evidence",
+                        "evidenceCountCandidate": {
+                            "title": "Segregation Evidence Count for Candidate gene sequencing",
+                            "description": "Number of scored evidence for Segregation case-level evidence (Candidate gene sequencing)",
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "evidenceCountExome": {
+                            "title": "Segregation Evidence Count for Exome/genome or all genes sequenced in linkage region",
+                            "description": "Number of scored evidence for Segregation case-level evidence (Exome/genome or all genes sequenced in linkage region)",
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "evidenceCountTotal": {
+                            "title": "Segregation Evidence Total Count",
+                            "description": "Total number of scored evidence for both of Candidate gene sequencing and Exome/genome or all genes sequenced in linkage region",
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "evidencePointsCandidate": {
+                            "title": "Segregation summed points for Candidate gene sequencing",
+                            "description": "Combined LOD scores for Segregation case-level evidence (Candidate gene sequencing)",
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "evidencePointsExome": {
+                            "title": "Segregation summed points for Exome/genome or all genes sequenced in linkage region",
+                            "description": "Combined LOD scores for Segregation case-level evidence (Exome/genome or all genes sequenced in linkage region)",
                             "type": "number",
                             "minimum": 0
                         },
