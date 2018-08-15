@@ -84,6 +84,10 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 <td className="evidence-lod-score-counted">
                     {evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore ? <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span> : '-'}
                 </td>
+                <td className="evidence-sequencing-method">
+                    {(evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore) && evidence.includeLodScoreInAggregateCalculation && evidence.sequencingMethod ?
+                        evidence.sequencingMethod : ''}
+                </td>
                 <td className="evidence-previous-testing-description">
                     {evidence.previousTestingDescription}
                 </td>
@@ -171,7 +175,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2">Proband age</th>
                                     <th rowSpan="2">Proband ethnicity</th>
                                     <th rowSpan="2">Proband phenotypes</th>
-                                    <th colSpan="4">Segregations</th>
+                                    <th colSpan="5">Segregations</th>
                                     <th rowSpan="2">Proband previous testing</th>
                                     <th rowSpan="2">Proband methods of detection</th>
                                     <th rowSpan="2">Score status</th>
@@ -183,6 +187,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th># Unaff</th>
                                     <th>LOD score</th>
                                     <th>Counted</th>
+                                    <th>Sequencing</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -190,7 +195,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="15" className="total-score-label">Total points:</td>
+                                    <td colSpan="16" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
