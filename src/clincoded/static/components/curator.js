@@ -2376,7 +2376,7 @@ var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGe
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
     "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
     "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
-    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "reasonExplanation"];
+    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "sequencingMethod", "reasonExplanation"];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
