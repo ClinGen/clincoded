@@ -46,7 +46,7 @@ bootcmd:
 - sysctl "vm.swappiness=0"
 - swapon /swapfile
 
-package_upgrade: true
+package_upgrade: false
 
 packages:
 - apache2-mpm-worker
@@ -188,18 +188,18 @@ users:
   homedir: /srv/clincoded
 
 write_files:
-- path: /etc/apt/apt.conf.d/20auto-upgrades
-  content: |
-    APT::Periodic::Update-Package-Lists "1";
-    APT::Periodic::Unattended-Upgrade "1";
+#- path: /etc/apt/apt.conf.d/20auto-upgrades
+#  content: |
+#    APT::Periodic::Update-Package-Lists "1";
+#    APT::Periodic::Unattended-Upgrade "1";
 
-- path: /etc/apt/apt.conf.d/50unattended-upgrades
-  content: |
-    Unattended-Upgrade::Allowed-Origins {
-        "${distro_id} ${distro_codename}-security";
-    };
-    Unattended-Upgrade::Automatic-Reboot "true";
-    Unattended-Upgrade::Automatic-Reboot-Time "01:00";
+#- path: /etc/apt/apt.conf.d/50unattended-upgrades
+#  content: |
+#    Unattended-Upgrade::Allowed-Origins {
+#        "${distro_id} ${distro_codename}-security";
+#    };
+#    Unattended-Upgrade::Automatic-Reboot "true";
+#    Unattended-Upgrade::Automatic-Reboot-Time "01:00";
 
 - path: /etc/cron.d/cloudwatchmon
   content: |
