@@ -22,5 +22,5 @@ requests==2.5.1
 simplejson==3.6.5
 six==1.9.0
 stevedore==1.2.0
-https://github.com/lrowe/wal-e/archive/3b2187ef89.zip
+wal-e==0.9.2
 wsgiref==0.1.2
