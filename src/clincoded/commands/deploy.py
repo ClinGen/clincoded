@@ -114,7 +114,7 @@ def main():
         default='demo', const='test', dest='role',
         help="Deploy to production AWS")
     parser.add_argument(
-        '--image-id', default='ami-5189a661',
+        '--image-id', default='ami-4218403a',
         help="ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20150325")
     parser.add_argument(
         '--instance-type', default='t2.medium',
