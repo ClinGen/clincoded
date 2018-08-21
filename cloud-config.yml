@@ -212,7 +212,7 @@ write_files:
     # Use c4.2xlarge instance type for test instance with prod data
     if test "%(BACKUPDB)s" = "s3_data"
     then
-      ES_HEAP_SIZE=8g
+      ES_HEAP_SIZE=12g
     else
       ES_HEAP_SIZE=2g
     fi
@@ -235,6 +235,13 @@ write_files:
       log_stream_name = {hostname}
       initial_position = end_of_file
       log_group_name = Apache2-prod
+
+      [/var/log/apache2]
+      file = /var/log/apache2/error.log
+      buffer_duration = 5000
+      log_stream_name = {hostname}
+      initial_position = end_of_file
+      log_group_name = Apache2-error-log-prod
 
       [/var/log/postgresql]
       file = /var/log/postgresql/postgresql-9.4-main.log
