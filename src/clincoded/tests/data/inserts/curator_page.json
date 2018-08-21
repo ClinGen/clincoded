@@ -130,5 +130,11 @@
         "title": "Variant Interpretation Summary",
         "status": "released",
         "uuid": "a671021c-3ce1-4d6f-858c-9b0e43372b59"
+    },
+    {
+        "name": "gdm-all",
+        "title": "All GDMs",
+        "status": "released",
+        "uuid": "ab2f826a-f43c-4a72-9ecb-a777dbfe8ffa"
     }
 ]
