@@ -572,7 +572,7 @@ var Dashboard = createReactClass({
                                         <i className="icon icon-question-circle"></i>
                                     </a>
                                 </li>
-                                <li className="list-group-item"><a href="/gdm/">View list of all Gene-Disease Records</a></li>
+                                <li className="list-group-item"><a href="/gdm-all/">View list of all Gene-Disease Records</a></li>
                             </ul>
                         </div>
                         <div className="panel panel-primary">
