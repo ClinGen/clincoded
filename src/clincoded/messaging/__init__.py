@@ -72,8 +72,13 @@ def check_segregation_scoring(family, evidence, annotation):
 
     if 'includeLodScoreInAggregateCalculation' in segregation and segregation['includeLodScoreInAggregateCalculation']:
         if 'publishedLodScore' in segregation or 'estimatedLodScore' in segregation:
-            if is_article_new(evidence, 'segregation', annotation):
-                return (True, 'segregation')
+            if 'sequencingMethod' in segregation:
+                if segregation['sequencingMethod'] == 'Candidate gene sequencing':
+                    if is_article_new(evidence, 'segregation-candidate-sequencing', annotation):
+                        return (True, 'segregation-candidate-sequencing')
+                elif segregation['sequencingMethod'] == 'Exome/genome or all genes sequenced in linkage region':
+                    if is_article_new(evidence, 'segregation-exome-sequencing', annotation):
+                        return (True, 'segregation-exome-sequencing')
 
     return (False, )
 
@@ -82,6 +87,10 @@ def check_case_control_scoring(case_control, score, evidence, annotation):
     if 'studyType' in case_control:
         if case_control['studyType'] == 'Single variant analysis':
             if 'score' in score:
+                if 'case-control-single-count' not in evidence:
+                    evidence['case-control-single-count'] = 0
+                evidence['case-control-single-count'] += 1
+
                 if 'case-control-single-points' not in evidence:
                     evidence['case-control-single-points'] = 0
                 evidence['case-control-single-points'] += score['score']
@@ -91,6 +100,10 @@ def check_case_control_scoring(case_control, score, evidence, annotation):
 
         elif case_control['studyType'] == 'Aggregate variant analysis':
             if 'score' in score:
+                if 'case-control-aggregate-count' not in evidence:
+                    evidence['case-control-aggregate-count'] = 0
+                evidence['case-control-aggregate-count'] += 1
+
                 if 'case-control-aggregate-points' not in evidence:
                     evidence['case-control-aggregate-points'] = 0
                 evidence['case-control-aggregate-points'] += score['score']
@@ -137,11 +150,21 @@ def check_experimental_scoring(experimental, score, evidence, annotation):
                             if 'modelSystemsType' in experimental['modelSystems']:
                                 if experimental['modelSystems']['modelSystemsType'] in experimental_evidence_types['Model Systems']:
                                     evidence_category = experimental_evidence_types['Model Systems'][experimental['modelSystems']['modelSystemsType']]
+
+                                    if 'exp-model-systems-and-rescue-count' not in evidence:
+                                        evidence['exp-model-systems-and-rescue-count'] = 0
+                                    evidence['exp-model-systems-and-rescue-count'] += 1
+
                     elif experimental['evidenceType'] == 'Rescue':
                         if 'rescue' in experimental:
                             if 'rescueType' in experimental['rescue']:
                                 if experimental['rescue']['rescueType'] in experimental_evidence_types['Rescue']:
                                     evidence_category = experimental_evidence_types['Rescue'][experimental['rescue']['rescueType']]
+
+                                    if 'exp-model-systems-and-rescue-count' not in evidence:
+                                        evidence['exp-model-systems-and-rescue-count'] = 0
+                                    evidence['exp-model-systems-and-rescue-count'] += 1
+
                     else:
                         evidence_category = experimental_evidence_types[experimental['evidenceType']]
 
@@ -312,7 +335,7 @@ def gather_evidence_counts(points, return_result=False):
 
     for key, value in points.items():
         if isinstance(value, (int, float)):
-            if key != 'evidenceCount' or value <= 0:
+            if 'evidenceCount' not in key or value <= 0:
                 keys_to_delete.append(key)
 
         elif isinstance(value, dict):
@@ -330,16 +353,6 @@ def gather_evidence_counts(points, return_result=False):
 
     if return_result:
         return points
-
-# Add all segregation evidence (each article at a numbered key) to the message template
-def add_segregation_evidence(evidence, template):
-    if 'segregation' in evidence:
-        for index, article in enumerate(evidence['segregation'], start=1):
-            template[str(index)] = {
-                'Evidence': {
-                    'Publications': [article]
-                }
-            }
 
 # Add a yes/no value and all contradictory evidence to the message template
 def add_contradictory_evidence(data, evidence, template):
@@ -459,10 +472,25 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                     else:
                         template[key] = ''
 
+                # Add evidence count (using a data path list)
+                elif value[0] == '$EVIDENCE_COUNT':
+                    if value_length == 2:
+                        template[key] = get_data_by_path(evidence_counts, value[1])
+                    else:
+                        template[key] = ''
+
                 # Add score (using a data path list)
-                elif value[0] == '$SCORE_DATA':
+                elif value[0] == '$SCORE_DATA' or value[0] == '$SCORE_DATA_ROUNDED':
                     if value_length >= 3:
                         template[key] = get_data_by_path(data, value[1])
+
+                        if value[0] == '$SCORE_DATA_ROUNDED':
+                            try:
+                                template[key] = float(round(template[key] * 10 ** 2) * 10 ** -2)
+                                if template[key] == 0.0:
+                                    template[key] = 0
+                            except Exception:
+                                pass
 
                         # If score is zero, check if it should be included in message (e.g. if evidence count is non-zero)
                         if template[key] == 0:
@@ -476,10 +504,14 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                     else:
                         template[key] = ''
 
-                # Add evidence (articles) based on information type
+                # Add evidence (articles, counts or points) based on information type
                 elif value[0] == '$EVIDENCE_DATA':
-                    if value_length == 2 and value[1] in evidence:
+                    if (value_length == 2 or value_length == 3) and value[1] in evidence:
                         template[key] = evidence[value[1]]
+
+                        if not template[key] and value_length == 3 and value[2] == True:
+                            keep_falsy_data = True
+
                     else:
                         template[key] = ''
 
@@ -498,10 +530,8 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
         elif isinstance(value, dict):
             add_data_to_msg_template(data, evidence, evidence_counts, value)
 
-            # Special handling to incorporate segregation/contradictory evidence (articles)
-            if key == 'EvidenceOfSegregationInOneOrMoreFamilies':
-                add_segregation_evidence(evidence, value)
-            elif key == 'ValidContradictoryEvidence':
+            # Special handling to incorporate contradictory evidence (articles)
+            if key == 'ValidContradictoryEvidence':
                 add_contradictory_evidence(data, evidence, value)
 
             if not template[key]:
