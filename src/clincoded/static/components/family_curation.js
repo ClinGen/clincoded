@@ -617,6 +617,16 @@ var FamilyCuration = createReactClass({
                 }
             }
 
+            // Check that "Published Calculated LOD score" is greater than zero
+            if (this.getFormValue('SEGlodPublished') === 'Yes') {
+                const publishedLodScore = parseFloat(this.getFormValue('SEGpublishedLodScore'));
+
+                if (!isNaN(publishedLodScore) && publishedLodScore <= 0) {
+                    formError = true;
+                    this.setFormErrors('SEGpublishedLodScore', 'The published calculated LOD score must be greater than 0');
+                }
+            }
+
             // Check that segregation sequencing type value is not 'none'
             // when LOD score is included for calculation
             if (this.getFormValue('SEGincludeLodScoreInAggregateCalculation') === 'Yes' && this.getFormValue('SEGsequencingMethod') === 'none') {
