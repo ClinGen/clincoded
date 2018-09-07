@@ -274,9 +274,9 @@ var ProvisionalCuration = createReactClass({
             classificationPoints['segregation']['evidenceCountCandidate'] = Number(scoreTableValues.segregationCountCandidate);
             classificationPoints['segregation']['evidenceCountExome'] = Number(scoreTableValues.segregationCountExome);
             classificationPoints['segregation']['evidenceCountTotal'] = Number(scoreTableValues.segregationCountTotal);
-            classificationPoints['segregation']['evidencePointsCandidate'] = Number(scoreTableValues.segregationPointsCandidate);
-            classificationPoints['segregation']['evidencePointsExome'] = Number(scoreTableValues.segregationPointsExome);
-            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationTotalPoints);
+            classificationPoints['segregation']['evidencePointsCandidate'] = this.classificationMathRound(Number(scoreTableValues.segregationPointsCandidate), 2);
+            classificationPoints['segregation']['evidencePointsExome'] = this.classificationMathRound(Number(scoreTableValues.segregationPointsExome), 2);
+            classificationPoints['segregation']['totalPointsGiven'] = this.classificationMathRound(Number(scoreTableValues.segregationTotalPoints), 2);
             classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
             // Case-Control genetic evidence
             classificationPoints['caseControl'] = {};
