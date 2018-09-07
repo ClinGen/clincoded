@@ -8,6 +8,7 @@ import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritanc
 import { sortListByDate } from '../../libs/helpers/sort';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 
 class CurationSnapshots extends Component {
     constructor(props) {
@@ -21,18 +22,6 @@ class CurationSnapshots extends Component {
             window.open('/gene-disease-evidence-summary/?snapshot=' + snapshotUuid, '_blank');
         } else if (type === 'interpretation') {
             window.open('/variant-interpretation-summary/?snapshot=' + snapshotUuid, '_blank');
-        }
-    }
-
-    /**
-     * Method to display classification tag/label in the interpretation header
-     * @param {string} status - The status of a given classification in an interpretation
-     */
-    renderClassificationStatusTag(status) {
-        if (status === 'Provisioned') {
-            return <span className="label label-info">PROVISIONAL</span>;
-        } else if (status === 'Approved') {
-            return <span className="label label-success">APPROVED</span>;
         }
     }
 
@@ -238,7 +227,7 @@ class CurationSnapshots extends Component {
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-date">
                                         <dt><span>Date saved as Provisional:</span></dt>
                                         <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
-                                        {this.renderClassificationStatusTag(snapshot.approvalStatus)}
+                                        {renderSimpleStatusLabel(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-review-date">
                                         <dt><span>Date reviewed:</span></dt>
@@ -304,7 +293,7 @@ class CurationSnapshots extends Component {
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
                                         <dt><span>Date saved as Approved:</span></dt>
                                         <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
-                                        {this.renderClassificationStatusTag(snapshot.approvalStatus)}
+                                        {renderSimpleStatusLabel(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-review-date">
                                         <dt><span>Date approved:</span></dt>
