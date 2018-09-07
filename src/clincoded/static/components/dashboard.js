@@ -12,6 +12,11 @@ import { showActivityIndicator } from './activity_indicator';
 import { sortListByDate } from '../libs/helpers/sort';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { renderVariantTitle } from '../libs/render_variant_title';
+import { renderInProgressStatus } from '../libs/render_in_progress_status';
+import { renderProvisionalStatus } from '../libs/render_provisional_status';
+import { renderApprovalStatus } from '../libs/render_approval_status';
+import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
+import { renderPublishStatus } from '../libs/render_publish_status';
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
@@ -19,7 +24,8 @@ var Dashboard = createReactClass({
     propTypes: {
         session: PropTypes.object,
         href: PropTypes.string,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        context: PropTypes.object
     },
 
     getInitialState: function() {
@@ -67,108 +73,37 @@ var Dashboard = createReactClass({
      * @param {object} session - The session object
      */
     renderClassificationStatusTag(gdm, intepretation, affiliation, session) {
-        let status, classification = null, snapshots = [], filteredSnapshots = [];
+        const context = this.props.context;
+        let classification = null, snapshots = [];
         if (gdm && Object.keys(gdm).length) {
             // The rendering is for a GDM
             let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
             if (provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional) {
                 classification = provisionalClassification.provisional;
-                status = classification.classificationStatus;
                 snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
             }
         } else if (intepretation  && Object.keys(intepretation).length) {
             // The rendering is for an Interpretation
             if (intepretation && intepretation.provisional_variant && intepretation.provisional_variant.length) {
                 classification = intepretation.provisional_variant[0];
-                status = classification.classificationStatus;
                 snapshots = classification.associatedInterpretationSnapshots && classification.associatedInterpretationSnapshots.length ? classification.associatedInterpretationSnapshots : [];
             }
         }
-        // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
-            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
-            let sortedSnapshots = sortListByDate(snapshots, 'date_created');
-            // Only interested in knowing the presence of any "Approved" classification
-            filteredSnapshots = sortedSnapshots.filter(snapshot => snapshot.approvalStatus === 'Approved');
-
-            // Construct a label/tag to indicate the publish status of a GDM or Interpretation
-            let publishedStatusTag = null;
-            const publishedWarningMessage = (
-                <span className="publish-warning" data-toggle="tooltip" data-placement="top"
-                    data-tooltip="The current approved Classification is more recent than this published Classification.">
-                    <i className="icon icon-exclamation-triangle"></i>
+            return (
+                <span className="classification-status-wrapper">
+                    {renderProvisionalStatus(snapshots, gdm, context, false)}
+                    {renderApprovalStatus(snapshots, context)}
+                    {renderNewProvisionalStatus(snapshots, gdm, context, false)}
+                    {renderPublishStatus(snapshots)}
                 </span>
             );
-
-            for (let i = 0; i < filteredSnapshots.length; i++) {
-                if (filteredSnapshots[i].publishStatus) {
-                    publishedStatusTag = (
-                        <span className="publish-status">
-                            <span className="label publish-background">PUBLISHED</span>
-                            {i > 0 ? publishedWarningMessage : null}
-                        </span>
-                    );
-                    break;
-                }
-            }
-
-            if (status === 'In progress') {
-                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-success">APPROVED</span>
-                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                {publishedStatusTag}
-                            </span>
-                        );
-                    } else {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-info">PROVISIONAL</span>
-                            </span>
-                        );
-                    }
-                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
-                    return (
-                        <span className="classification-status-wrapper">
-                            <span className="label label-success">APPROVED</span>
-                            {publishedStatusTag}
-                        </span>
-                    );
-                }
-            } else {
-                if (status === 'Provisional') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-success">APPROVED</span>
-                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                {publishedStatusTag}
-                            </span>
-                        );
-                    } else {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-info">PROVISIONAL</span>
-                            </span>
-                        );
-                    }
-                } else if (status === 'Approved') {
-                    return (
-                        <span className="classification-status-wrapper">
-                            <span className="label label-success">APPROVED</span>
-                            {publishedStatusTag}
-                        </span>
-                    );
-                }
-            }
         } else {
-            if (status && status === 'In progress') {
-                return <span className="label label-warning">IN PROGRESS</span>;
-            } else {
-                return <span className="no-classification">None</span>;
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderInProgressStatus(classification)}
+                </span>
+            );
         }
     },
 
