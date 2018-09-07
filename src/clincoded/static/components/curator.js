@@ -18,6 +18,12 @@ import { GetProvisionalClassification } from '../libs/get_provisional_classifica
 import { getAffiliationName } from '../libs/get_affiliation_name';
 import { renderVariantTitle } from '../libs/render_variant_title';
 import { renderOtherClassifications } from '../libs/render_other_classifications';
+import { renderInProgressStatus } from '../libs/render_in_progress_status';
+import { renderNewSummaryStatus } from '../libs/render_new_summary_status';
+import { renderProvisionalStatus } from '../libs/render_provisional_status';
+import { renderApprovalStatus } from '../libs/render_approval_status';
+import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
+import { renderPublishStatus } from '../libs/render_publish_status';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -244,16 +250,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
     },
 
-    renderViewSnapshotSummaryLink(snapshots, status) {
-        let url;
-        let matchingSnapshots = snapshots && snapshots.length ? snapshots.filter(snapshot => snapshot.approvalStatus === status) : null;
-        const snapshotUuid = matchingSnapshots && matchingSnapshots.length ? matchingSnapshots[0]['uuid'] : null;
-        if (snapshotUuid) {
-            url = '/gene-disease-evidence-summary/?snapshot=' + snapshotUuid;
-        }
-        return url;
-    },
-
     /**
      * Method to display classification tag/label in gene-disease record header
      * @param {object} classification - A given classification within a GDM
@@ -261,95 +257,23 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
      */
     renderClassificationStatusTag(classification, gdm) {
         const context = this.props.context;
-        const status = classification.classificationStatus;
         let snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
-        let filteredSnapshots = [];
         // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
-            filteredSnapshots = snapshots.filter(snapshot => {
-                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
-            });
-            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
-            let sortedSnapshots = sortListByDate(snapshots, 'date_created');
-            if (status === 'In progress') {
-                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-success">APPROVED</span>
-                                {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
-                                    : null}
-                                <div className="new-provisional-status-row">
-                                    <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                    {context && context.name === 'curation-central' ?
-                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
-                                        : null}
-                                </div>
-                            </span>
-                        );
-                    } else {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-info">PROVISIONAL</span>
-                                {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
-                                    : null}
-                            </span>
-                        );
-                    }
-                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
-                    return (
-                        <span className="classification-status-wrapper">
-                            <span className="label label-success">APPROVED</span>
-                            {context && context.name === 'curation-central' ?
-                                <span>[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
-                                : null}
-                        </span>
-                    );
-                }
-            } else {
-                if (status === 'Provisional') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-success">APPROVED</span>
-                                {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
-                                    : null}
-                                <div className="new-provisional-status-row">
-                                    <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
-                                    {context && context.name === 'curation-central' ?
-                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
-                                        : null}
-                                </div>
-                            </span>
-                        );
-                    } else {
-                        return (
-                            <span className="classification-status-wrapper">
-                                <span className="label label-info">PROVISIONAL</span>
-                                {context && context.name === 'curation-central' ?
-                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
-                                    : null}
-                            </span>
-                        );
-                    }
-                } else if (status === 'Approved') {
-                    return (
-                        <span className="classification-status-wrapper">
-                            <span className="label label-success">APPROVED</span>
-                            {context && context.name === 'curation-central' ?
-                                <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
-                                : null}
-                        </span>
-                    );
-                }
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderProvisionalStatus(snapshots, gdm, context, true)}
+                    {renderApprovalStatus(snapshots, context)}
+                    {renderNewProvisionalStatus(snapshots, gdm, context, true)}
+                    {renderPublishStatus(snapshots)}
+                </span>
+            );
         } else {
-            if (status === 'In progress') {
-                return <span className="label label-warning">IN PROGRESS</span>;
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderInProgressStatus(classification)}
+                </span>
+            );
         }
     },
 
@@ -357,10 +281,10 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
      * Method to render the header of a given classification in the gene-disease record header
      * @param {object} classification - Any given classification in a GDM
      */
-    renderClassificationHeader(classification, gdm) {
+    renderMyClassificationStatus(classification, gdm) {
         return (
             <div className="header-classification">
-                <strong>Provisional/Approved Status:</strong>
+                <strong>Provisioned/Approved Status:</strong>
                 <span className="classification-status">
                     {classification && classification.classificationStatus ?
                         this.renderClassificationStatusTag(classification, gdm)
@@ -370,43 +294,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                 </span>
             </div>
         );
-    },
-
-    /**
-     * Method to display publication status of classification in gene-disease record header
-     * @param {array} snapshots - List of snapshots associated with classification
-     */
-    renderPublishStatus(snapshots) {
-        const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
-        let publishedSnapshot = null;
-        let publishedWarningMessage = null;
-
-        for (let snapshot of sortedSnapshots) {
-            if (snapshot.resource && snapshot.resource.publishClassification) {
-                publishedSnapshot = snapshot;
-                break;
-            }
-
-            if (snapshot.approvalStatus === 'Approved' && !publishedWarningMessage) {
-                publishedWarningMessage = (
-                    <span className="publish-warning" data-toggle="tooltip" data-placement="top"
-                        data-tooltip="The current approved Classification is more recent than this published Classification.">
-                        <i className="icon icon-exclamation-triangle"></i>
-                    </span>
-                );
-            }
-        }
-
-        if (publishedSnapshot) {
-            return (
-                <div className="header-classification">
-                    <strong className="header-classification-item">Date Published:</strong> {moment(publishedSnapshot.resource.publishDate).format("YYYY MMM DD, h:mm a")}
-                    <span className="classification-status"><span className="label publish-background">PUBLISHED</span>{publishedWarningMessage}</span>
-                </div>
-            );
-        } else {
-            return null;
-        }
     },
 
     /**
@@ -432,16 +319,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             }
         }
         return otherClassifications;
-    },
-
-    /**
-     * Method to render 'NEW SAVED SUMMARY' status tag in header
-     * @param {object} classification - The saved GDM classification
-     */
-    renderSummaryStatus(classification) {
-        if (classification.classificationStatus && classification.classificationStatus === 'In progress') {
-            return <span className="summary-status"><span className="label label-info">NEW SAVED SUMMARY</span></span>;
-        }
     },
 
     render: function() {
@@ -520,8 +397,8 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                 <div>
                     <div className="curation-data-title">
                         <div className="container">
-                            <div>
-                                <span>
+                            <div className="gene-disease-record-header">
+                                <div className="gene-disease-record-header-item title">
                                     <h1>{gene.symbol} – {disease.term}
                                         <span className="gdm-disease-edit">
                                             {userMatch(gdm.submitted_by, session) && !gdm.annotations.length ?
@@ -537,61 +414,19 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                         </span>
                                     </h1>
                                     <h2><i>{modeInheritanceAdjective ? mode + ' (' + modeInheritanceAdjective + ')' : mode}</i></h2>
-                                </span>
-                            </div>
-                            <div className="provisional-info-panel">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?
-                                                    <div className="header-classification-content">
-                                                        {provisionalClassification.provisional.affiliation ?
-                                                            <span className="header-classification-item"><strong>Affiliation:</strong> {getAffiliationName(provisionalClassification.provisional.affiliation)}</span>
-                                                            :
-                                                            <span className="header-classification-item"><strong>Curator:</strong> {provisionalClassification.provisional.submitted_by.title}</span>
-                                                        }
-                                                        {this.renderClassificationHeader(provisionalClassification.provisional, gdm)}
-                                                        <div className="header-classification">
-                                                            <strong className="header-classification-item">Classification Last Edited:</strong> {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}
-                                                            {provisionalClassification && provisionalClassification.provisional ? this.renderSummaryStatus(provisionalClassification.provisional) : null}
-                                                        </div>
-                                                        {this.renderPublishStatus(snapshots)}
-                                                    </div>
-                                                    :
-                                                    <div className="header-classification-content">
-                                                        <div className="header-classification">
-                                                            <strong>Provisional/Approved Status:</strong>
-                                                            <span className="classification-status"><span className="no-classification">None</span></span>
-                                                        </div>
-                                                    </div>
-                                                }
-                                            </td>
-                                            <td className="button-box">
-                                                { !summaryPage ?
-                                                    <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
-                                                    : null}
-                                                { summaryButton ?
-                                                    ( !summaryPage ?
-                                                        <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
-                                                        : null
-                                                    )
-                                                    : null}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            {otherClassifications.length ?
-                                <div className="other-classifications">
-                                    <strong>Other classifications by: </strong>
-                                    {otherClassifications.map((classification, i) => {
-                                        return (
-                                            <div key={i} className="header-classification">{renderOtherClassifications(classification, context)}</div>
-                                        );
-                                    })}
                                 </div>
-                                : null}
+                                <div className="gene-disease-record-header-item button-box">
+                                    { !summaryPage ?
+                                        <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
+                                        : null}
+                                    { summaryButton ?
+                                        ( !summaryPage ?
+                                            <a className="btn btn-primary btn-inline-spacer pull-right" role="button" href={'/provisional-curation/?gdm=' + gdm.uuid + (provisionalClassification.provisionalExist ? '&edit=yes' : '&calculate=yes')}>Classification Matrix <i className="icon icon-table"></i></a>
+                                            : null
+                                        )
+                                        : null}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div className="container curation-data">
@@ -601,6 +436,54 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                             <CuratorRecordHeader gdm={gdm} />
                         </div>
                     </div>
+                    {gdm.provisionalClassifications && gdm.provisionalClassifications.length ?
+                        <div className="container">
+                            <div className="panel panel-info all-existing-classifications">
+                                <div className="panel-heading">
+                                    <h3 className="panel-title">All classifications for this record in the Gene Curation Interface (GCI)</h3>
+                                </div>
+                                <ul className="panel-content-wrapper list-group">
+                                    {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?    
+                                        <li className="list-group-item">
+                                            <div className="my-classification">
+                                                <h5 className="text-primary"><i className="icon icon-chevron-right"></i> My classification
+                                                    {provisionalClassification.provisional.affiliation ?
+                                                        <span>&nbsp;({getAffiliationName(provisionalClassification.provisional.affiliation)})</span>
+                                                        :
+                                                        <span>&nbsp;({provisionalClassification.provisional.submitted_by.title})</span>
+                                                    }
+                                                </h5>
+                                                <div className="gene-disease-record-classification">
+                                                    {provisionalClassification.provisional.autoClassification ?
+                                                        <span><strong>Calculated:</strong> {provisionalClassification.provisional.autoClassification}</span>
+                                                        : null}
+                                                    {provisionalClassification.provisional.alteredClassification ?
+                                                        <span>;&nbsp;<strong>Modified:</strong> {provisionalClassification.provisional.alteredClassification}</span>
+                                                        : null}
+                                                    {provisionalClassification && provisionalClassification.provisional ? renderNewSummaryStatus(provisionalClassification.provisional): null}
+                                                </div>
+                                                <div className="gene-disease-record-classification">
+                                                    {this.renderMyClassificationStatus(provisionalClassification.provisional, gdm)}
+                                                </div>
+                                            </div>
+                                        </li>
+                                        : null}
+                                    {otherClassifications.length ?
+                                        <li className="list-group-item">
+                                            <div className="other-classifications">
+                                                <h5 className="text-warning"><i className="icon icon-chevron-right"></i> Other classifications</h5>
+                                                {otherClassifications.map((classification, i) => {
+                                                    return (
+                                                        <div key={i} className="gene-disease-record-classification">{renderOtherClassifications(classification, gdm, context)}</div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </li>
+                                        : null}
+                                </ul>
+                            </div>
+                        </div>
+                        : null}
                 </div>
             );
         } else {
@@ -2590,7 +2473,7 @@ function flattenProvisionalVariant(provisional_variant) {
 
 
 var snapshotSimpleProps = [
-    "uuid", "resourceId", "resourceType", "approvalStatus", "date_created"
+    "uuid", "resourceId", "resourceType", "approvalStatus", "date_created", "resource"
 ];
 
 function flattenSnapshot(snapshot) {
