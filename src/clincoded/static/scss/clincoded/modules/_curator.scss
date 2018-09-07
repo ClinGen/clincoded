@@ -31,7 +31,20 @@
     margin-bottom: 2px;
     color: #000;
     background-color: #c0c0c0;
-    text-align: center;
+
+    .gene-disease-record-header {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0.5em 0;
+
+        .button-box {
+            .btn .icon {
+                color: #fff;
+            }
+        }
+    }
 
     h1 {
         margin: 5px 0 2px;
@@ -858,39 +871,33 @@
 }
 
 // Summary and Provisional data in GDM title panel
-.provisional-info-panel {
-    width: 100%;
-    border-top: 2px solid #aaa;
-    padding-top: 6px;
+.all-existing-classifications {
+    margin-top: 12px;
 
-    table {
-        margin-bottom: 10px;
-        width: 100%;
-    }
+    .list-group {
+        padding-left: 0;
 
-    td {
-        text-align: left;
-    }
+        .list-group-item {
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            line-height: 180%;
+            list-style: none;
+            padding: 10px 15px;
+            position: relative;
 
-    h4 {
-        border-bottom: solid 1px #aaa;
-        margin-top: 15px;
-        margin-bottom: 6px;
-        padding-bottom: 4px;
-    }
-
-    .button-box {
-        width: auto;
-        padding-left: 15px;
-        text-align: right;
-        vertical-align: top;
-
-        .btn .icon {
-            color: #fff;
+            &:last-child {
+                margin-bottom: 0;
+            }
         }
     }
 
-    .header-classification {
+    h5 {
+        font-size: 110%;
+        margin-top: 3px;
+        margin-bottom: 6px;
+    }
+
+    .gene-disease-record-classification {
         text-align: left;
         
         strong {
@@ -898,11 +905,9 @@
         }
 
         .classification-status {
-            font-size: 1.1em;
-            margin-left: 8px;
-
             .label {
-                margin-right: 8px;
+                font-size: 0.825em;
+                margin-left: 14px;
                 padding-top: .3em;
 
                 .badge {
@@ -910,6 +915,10 @@
                     font-size: 85%;
                     margin-right: 2px;
                 }
+            }
+
+            .label:first-child {
+                margin-left: 8px;
             }
 
             .no-classification {
@@ -919,93 +928,30 @@
             }
 
             .classification-link-item {
-                font-size: 0.9em;
-                margin-right: 8px;
-            }
+                font-size: 105%;
+                margin: 0 5px;
+                position: relative;
+                top: 3px;
 
-            .new-provisional-status-row {
-                margin-left: 201px;
-                margin-top: 4px;
+                .icon-link {
+                    font-size: 1.2em;
+                    -moz-transform: scaleX(-1);
+                    -o-transform: scaleX(-1);
+                    -webkit-transform: scaleX(-1);
+                    transform: scaleX(-1);
+                    filter: FlipH;
+                    -ms-filter: "FlipH";
+                }
             }
 
             .publish-warning {
                 color: #b6238a;
+                margin-left: 4px;
 
                 i.icon-exclamation-triangle {
+                    color: #666;
                     vertical-align: middle;
                 }
-            }
-        }
-
-        .summary-status {
-            font-size: 1.1em;
-            margin-left: 8px;
-
-            .label.label-info {
-                background-color: #917bc4;
-                padding-top: .3em;
-            }
-        }
-    }
-
-    .provisional-data-left {
-        float: left;
-        text-align: left;
-        padding-left: 10px;
-        padding-right: 136px;
-
-        .header-classification-item {
-            display: block;
-        }
-    }
-
-    .provisional-data-center {
-        float: left;
-        text-align: left;
-        padding-left: 10px;
-
-        .header-classification-item {
-            display: block;
-        }
-    }
-
-    .provisional-button {
-        padding: 0;
-        margin: auto;
-
-        .btn {
-            margin: 10px 0 10px 0;
-        }
-    }
-}
-
-// Other classifications info in GDM title header panel
-.curation-data-title .other-classifications {
-    border-top: 1px solid #aaa;
-    padding: 6px 0 8px 0;
-    text-align: left;
-    width: 100%;
-
-    .header-classification {
-        margin: 2px 0;
-
-        .classification-status {
-            .label {
-                font-size: 82%;
-                margin: 0 8px;
-                padding-top: .3em;
-
-                .badge {
-                    background-color: #ff7700;
-                    font-size: 85%;
-                    margin-right: 2px;
-                }
-            }
-
-            .no-classification {
-                display: inline-block;
-                position: relative;
-                top: 1px;
             }
         }
 
