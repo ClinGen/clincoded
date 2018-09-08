@@ -480,17 +480,9 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Add score (using a data path list)
-                elif value[0] == '$SCORE_DATA' or value[0] == '$SCORE_DATA_ROUNDED':
+                elif value[0] == '$SCORE_DATA':
                     if value_length >= 3:
                         template[key] = get_data_by_path(data, value[1])
-
-                        if value[0] == '$SCORE_DATA_ROUNDED':
-                            try:
-                                template[key] = float(round(template[key] * 10 ** 2) * 10 ** -2)
-                                if template[key] == 0.0:
-                                    template[key] = 0
-                            except Exception:
-                                pass
 
                         # If score is zero, check if it should be included in message (e.g. if evidence count is non-zero)
                         if template[key] == 0:

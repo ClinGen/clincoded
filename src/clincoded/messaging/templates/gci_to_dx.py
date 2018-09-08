@@ -129,12 +129,12 @@ message_template = {
                     }
                 },
                 'SegregationEvidence': {
-                    'TotalPoints': ['$SCORE_DATA_ROUNDED', ['resource', 'classificationPoints', 'segregation', 'totalPointsGiven'],
+                    'TotalPoints': ['$SCORE_DATA', ['resource', 'classificationPoints', 'segregation', 'totalPointsGiven'],
                         ['segregation', 'evidenceCountTotal']],
                     'PointsCounted': ['$SCORE_DATA', ['resource', 'classificationPoints', 'segregation', 'pointsCounted'],
                         ['segregation', 'evidenceCountTotal']],
                     'CandidateSequencingMethod': {
-                        'SummedLod': ['$SCORE_DATA_ROUNDED', ['resource', 'classificationPoints', 'segregation', 'evidencePointsCandidate'],
+                        'SummedLod': ['$SCORE_DATA', ['resource', 'classificationPoints', 'segregation', 'evidencePointsCandidate'],
                             ['segregation', 'evidenceCountCandidate']],
                         'FamilyCount': ['$EVIDENCE_COUNT', ['segregation', 'evidenceCountCandidate']],
                         'Evidence': {
@@ -145,7 +145,7 @@ message_template = {
                         }
                     },
                     'ExomeSequencingMethod': {
-                        'SummedLod': ['$SCORE_DATA_ROUNDED', ['resource', 'classificationPoints', 'segregation', 'evidencePointsExome'],
+                        'SummedLod': ['$SCORE_DATA', ['resource', 'classificationPoints', 'segregation', 'evidencePointsExome'],
                             ['segregation', 'evidenceCountExome']],
                         'FamilyCount': ['$EVIDENCE_COUNT', ['segregation', 'evidenceCountExome']],
                         'Evidence': {
