@@ -13,7 +13,7 @@ import PopOverComponent from '../../../libs/bootstrap/popover';
 import { sortListByDate } from '../../../libs/helpers/sort';
 import { getAffiliationName } from '../../../libs/get_affiliation_name';
 import { renderInterpretationStatus } from '../../../libs/render_interpretation_status';
-import { renderSimpleStatusLabel } from '../../../libs/render_simple_status_label';
+import { renderInProgressStatus } from '../../../libs/render_in_progress_status';
 import { renderInterpretationStatusExplanation } from '../../../libs/render_interpretation_status_explanation';
 
 const SO_terms = require('./mapping/SO_term.json');
@@ -283,7 +283,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         : null}
                 </td>
                 <td className="interpretation-status">
-                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : renderSimpleStatusLabel('In progress')}
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : <span className="classification-status">{renderInProgressStatus()}</span>}
                 </td>
                 <td className="condition-mode-of-inheritance">
                     {interpretation.disease ?
