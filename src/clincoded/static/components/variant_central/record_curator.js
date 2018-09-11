@@ -202,10 +202,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                             {myInterpretation.provisional_variant ?
                                                 this.renderMyInterpretationStatus(myInterpretation.provisional_variant)
                                                 :
-                                                <div className="header-classification">
-                                                    <strong>Provisional/Approved Status:</strong>
-                                                    <span className="classification-status">{renderInProgressStatus()}</span>
-                                                </div>
+                                                <div className="header-classification"><strong>Provisional/Approved Status:</strong><span>&nbsp;{renderInProgressStatus()}</span></div>
                                             }
                                             <div>
                                                 {myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ?

@@ -283,7 +283,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         : null}
                 </td>
                 <td className="interpretation-status">
-                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : <span className="classification-status">{renderInProgressStatus()}</span>}
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : renderInProgressStatus()}
                 </td>
                 <td className="condition-mode-of-inheritance">
                     {interpretation.disease ?
