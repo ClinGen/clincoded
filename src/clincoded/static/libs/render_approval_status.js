@@ -12,12 +12,18 @@ import { sortListByDate } from './helpers/sort';
  * @param {string} userId - The user's UUID
  */
 export function renderApprovalStatus(snapshots, resourceType, context, affiliationId, userId) {
+    let showApprovalLink = false;
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been approved
     const approvedSnapshots = sortedSnapshots.filter(snapshot => {
         return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === resourceType;
     });
-
+    // Show the approval link if the following conditions are true
+    if (resourceType === 'classification' && context && context.name.match(/curation-central|provisional-curation|provisional-classification/) && (affiliationId || userId)) {
+        showApprovalLink = true;
+    } else if (resourceType === 'interpretation' && (affiliationId || userId)) {
+        showApprovalLink = true;
+    }
     if (approvedSnapshots && approvedSnapshots.length) {
         return (
             <span className="approval-status-wrapper">
@@ -25,9 +31,7 @@ export function renderApprovalStatus(snapshots, resourceType, context, affiliati
                     data-tooltip={'Approved on ' + moment(approvedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                     APPROVED
                 </span>
-                {(resourceType === 'classification' && context && context.name.match(/curation-central|provisional-curation|provisional-classification/)) || resourceType === 'interpretation' ?
-                    renderApprovalLink(approvedSnapshots[0], resourceType, affiliationId, userId)
-                    : null}
+                {showApprovalLink ? renderApprovalLink(approvedSnapshots[0], resourceType, affiliationId, userId) : null}
             </span>
         );
     } else {
