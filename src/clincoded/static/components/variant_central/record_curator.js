@@ -2,14 +2,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import moment from 'moment';
 import { queryKeyValue, external_url_map } from '../globals';
-import { getAffiliationName } from '../../libs/get_affiliation_name';
-import { sortListByDate } from '../../libs/helpers/sort';
-
-var _ = require('underscore');
-
 import PopOverComponent from '../../libs/bootstrap/popover';
+import { renderInProgressStatus } from '../../libs/render_in_progress_status';
+import { renderNewSummaryStatus } from '../../libs/render_new_summary_status';
+import { renderProvisionalStatus } from '../../libs/render_provisional_status';
+import { renderApprovalStatus } from '../../libs/render_approval_status';
+import { renderNewProvisionalStatus } from '../../libs/render_new_provisional_status';
+import { renderPublishStatus } from '../../libs/render_publish_status';
 
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = createReactClass({
@@ -76,49 +78,27 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     },
 
     /**
-     * Method to display classification tag/label in the interpretation header
-     * @param {string} status - The status of a given classification in an interpretation
+     * Method to render the interpretation status tag/label in the interpretation header
+     * @param {object} classification - A given classification associated with an interpretation
      */
     renderClassificationStatusTag(classification) {
-        let status = classification.classificationStatus;
         let snapshots = classification.associatedInterpretationSnapshots && classification.associatedInterpretationSnapshots.length ? classification.associatedInterpretationSnapshots : [];
-        let filteredSnapshots = [];
-        // Determine whether the classification had been previously approved
+        // Render the status labels given an array of snapshots
         if (snapshots && snapshots.length) {
-            filteredSnapshots = snapshots.filter(snapshot => {
-                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'interpretation';
-            });
-            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
-            if (status === 'In progress') {
-                let sortedSnapshots = sortListByDate(snapshots, 'date_created');
-                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
-                        );
-                    } else {
-                        return <span className="label label-info">PROVISIONAL</span>;
-                    }
-                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
-                    return <span className="label label-success">APPROVED</span>;
-                }
-            } else {
-                if (status === 'Provisional') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
-                        );
-                    } else {
-                        return <span className="label label-info">PROVISIONAL</span>;
-                    }
-                } else if (status === 'Approved') {
-                    return <span className="label label-success">APPROVED</span>;
-                }
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderProvisionalStatus(snapshots, 'interpretation')}
+                    {renderApprovalStatus(snapshots, 'interpretation')}
+                    {renderNewProvisionalStatus(snapshots, 'interpretation')}
+                    {renderPublishStatus(snapshots)}
+                </span>
+            );
         } else {
-            if (status === 'In progress') {
-                return <span className="label label-warning">IN PROGRESS</span>;
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderInProgressStatus(classification)}
+                </span>
+            );
         }
     },
 
@@ -126,7 +106,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
      * Method to render the header of a given classification in the interpretation header
      * @param {object} classification - A given classification in an interpretation
      */
-    renderClassificationHeader(classification) {
+    renderMyInterpretationStatus(classification) {
         return (
             <div className="header-classification">
                 <strong>Provisional/Approved Status:</strong>
@@ -219,12 +199,21 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                             </div>
                                             <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
                                             <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
-                                            {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
+                                            {myInterpretation.provisional_variant ?
+                                                this.renderMyInterpretationStatus(myInterpretation.provisional_variant)
+                                                :
+                                                <div className="header-classification">
+                                                    <strong>Provisional/Approved Status:</strong>
+                                                    <span className="classification-status">{renderInProgressStatus()}</span>
+                                                </div>
+                                            }
                                             <div>
-                                                {myInterpretation.provisional_variant ?
-                                                    <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant[0].last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                {myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ?
+                                                    <span>
+                                                        <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant[0].last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                        {renderNewSummaryStatus(myInterpretation.provisional_variant[0])}
+                                                    </span>
                                                     : null}
-                                                {myInterpretation.provisional_variant ? this.renderSummaryStatus(myInterpretation.provisional_variant) : null}
                                             </div>
                                         </td>
                                         {!interpretationUuid ?
@@ -239,54 +228,6 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                             </table>
                             : null}
                     </div>
-{/*
-                        <div className="clearfix">
-                            <h4>My Existing Interpretation</h4>
-                            {myInterpretation ?
-                                <table className="login-users-interpretations">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                {myInterpretation.disease ? <strong>{myInterpretation.disease.term}</strong> : <strong>No disease</strong>}
-                                                {myInterpretation.modeInheritance ?
-                                                    <span>-
-                                                        {myInterpretation.modeInheritance.indexOf('(HP:') === -1 ?
-                                                            <i>{myInterpretation.modeInheritance}</i>
-                                                            :
-                                                            <i>{myInterpretation.modeInheritance.substr(0, myInterpretation.modeInheritance.indexOf('(HP:')-1)}</i>
-                                                        }
-                                                        ,&nbsp;
-                                                    </span>
-                                                    :
-                                                    <span>, </span>
-                                                }
-                                                <span className="no-broken-item">
-                                                    {myInterpretation.affiliation ?
-                                                        <span><span>{getAffiliationName(myInterpretation.affiliation)}</span>,&nbsp;</span>
-                                                        :
-                                                        <span><span>{myInterpretation.submitted_by.title}</span>,&nbsp;</span>
-                                                    }
-                                                </span>
-                                                <span className="no-broken-item">
-                                                    <i>{myInterpretation.provisional_variant && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                        <span>{myInterpretation.provisional_variant[0].alteredClassification},&nbsp;</span>  : null}</i>
-                                                </span>
-                                                {myInterpretation.provisional_variant ?
-                                                    <span className="no-broken-item">last saved: {moment(myInterpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                    : null}
-                                                {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
-                                            </td>
-                                            <td className="icon-box">
-                                                <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
-                                                    <i className="icon icon-pencil-square large-icon"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                : null}
-                        </div>
-*/}
                 </div>
             </div>
         );
