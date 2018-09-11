@@ -1509,21 +1509,46 @@
 
                 .classification-status {
                     font-size: 1.1em;
-
-                    .classification-link-item {
-                        display: block;
-                        font-size: 14px;
-                        margin: 3px 0 4px 0;
-                    }
         
                     .label {
-                        margin-right: 8px;
+                        margin-left: 14px;
                         padding-top: .3em;
         
                         .badge {
                             background-color: #ff7700;
                             font-size: 85%;
                             margin-right: 2px;
+                        }
+                    }
+        
+                    .label:first-child {
+                        margin-left: 0;
+                    }
+
+                    .classification-link-item {
+                        font-size: 90%;
+                        margin: 0 5px;
+                        position: relative;
+                        top: 3px;
+        
+                        .icon-link {
+                            font-size: 1.2em;
+                            -moz-transform: scaleX(-1);
+                            -o-transform: scaleX(-1);
+                            -webkit-transform: scaleX(-1);
+                            transform: scaleX(-1);
+                            filter: FlipH;
+                            -ms-filter: "FlipH";
+                        }
+                    }
+        
+                    .publish-warning {
+                        color: #b6238a;
+                        margin-left: 4px;
+        
+                        i.icon-exclamation-triangle {
+                            color: #666;
+                            vertical-align: middle;
                         }
                     }
                 }
