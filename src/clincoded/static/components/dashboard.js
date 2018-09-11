@@ -74,9 +74,10 @@ var Dashboard = createReactClass({
      */
     renderClassificationStatusTag(gdm, intepretation, affiliation, session) {
         const context = this.props.context;
-        let classification = null, snapshots = [];
+        let classification = null, snapshots = [], resourceType = '';
         if (gdm && Object.keys(gdm).length) {
             // The rendering is for a GDM
+            resourceType = 'classification';
             let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
             if (provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional) {
                 classification = provisionalClassification.provisional;
@@ -84,6 +85,7 @@ var Dashboard = createReactClass({
             }
         } else if (intepretation  && Object.keys(intepretation).length) {
             // The rendering is for an Interpretation
+            resourceType = 'interpretation';
             if (intepretation && intepretation.provisional_variant && intepretation.provisional_variant.length) {
                 classification = intepretation.provisional_variant[0];
                 snapshots = classification.associatedInterpretationSnapshots && classification.associatedInterpretationSnapshots.length ? classification.associatedInterpretationSnapshots : [];
@@ -92,9 +94,9 @@ var Dashboard = createReactClass({
         if (snapshots && snapshots.length) {
             return (
                 <span className="classification-status-wrapper">
-                    {renderProvisionalStatus(snapshots, gdm, context, false)}
-                    {renderApprovalStatus(snapshots, context)}
-                    {renderNewProvisionalStatus(snapshots, gdm, context, false)}
+                    {renderProvisionalStatus(snapshots, resourceType, gdm, context, false)}
+                    {renderApprovalStatus(snapshots, resourceType, context)}
+                    {renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false)}
                     {renderPublishStatus(snapshots)}
                 </span>
             );

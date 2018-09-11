@@ -262,9 +262,9 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         if (snapshots && snapshots.length) {
             return (
                 <span className="classification-status-wrapper">
-                    {renderProvisionalStatus(snapshots, gdm, context, true)}
-                    {renderApprovalStatus(snapshots, context)}
-                    {renderNewProvisionalStatus(snapshots, gdm, context, true)}
+                    {renderProvisionalStatus(snapshots, 'classification', gdm, context, true)}
+                    {renderApprovalStatus(snapshots, 'classification', context)}
+                    {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, true)}
                     {renderPublishStatus(snapshots)}
                 </span>
             );
