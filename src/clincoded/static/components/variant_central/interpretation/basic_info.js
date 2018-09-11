@@ -13,6 +13,8 @@ import PopOverComponent from '../../../libs/bootstrap/popover';
 import { sortListByDate } from '../../../libs/helpers/sort';
 import { getAffiliationName } from '../../../libs/get_affiliation_name';
 import { renderInterpretationStatus } from '../../../libs/render_interpretation_status';
+import { renderSimpleStatusLabel } from '../../../libs/render_simple_status_label';
+import { renderInterpretationStatusExplanation } from '../../../libs/render_interpretation_status_explanation';
 
 const SO_terms = require('./mapping/SO_term.json');
 
@@ -275,13 +277,13 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <td className="clinical-significance">
                     {interpretation.provisional_variant && interpretation.provisional_variant[0].autoClassification ?
                         <span><strong>Calculated:</strong> {interpretation.provisional_variant[0].autoClassification}</span>
-                        : null}
+                        : '--'}
                     {interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
                         <span><br /><strong>Modified:</strong> {interpretation.provisional_variant[0].alteredClassification}</span>
                         : null}
                 </td>
                 <td className="interpretation-status">
-                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : null}
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : renderSimpleStatusLabel('In progress')}
                 </td>
                 <td className="condition-mode-of-inheritance">
                     {interpretation.disease ?
@@ -289,37 +291,15 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             {interpretation.disease.term}
                             <span>&nbsp;</span>
                             {!interpretation.disease.freetext ? 
-                                <span>
-                                    (
-                                    <a href={external_url_map['MondoSearch'] + interpretation.disease.diseaseId} target="_blank">{interpretation.disease.diseaseId.replace('_', ':')}</a>
-                                    {interpretation.disease.description && interpretation.disease.description.length ?
-                                        <span><span>,&nbsp;</span>
-                                            <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
-                                                {interpretation.disease.description}
-                                            </PopOverComponent>
-                                        </span>
-                                        : null}
-                                    )
-                                </span>
+                                <span>(<a href={external_url_map['MondoSearch'] + interpretation.disease.diseaseId} target="_blank">{interpretation.disease.diseaseId.replace('_', ':')}</a>)</span>
                                 :
                                 <span>
-                                    (
                                     {interpretation.disease.phenotypes && interpretation.disease.phenotypes.length ?
                                         <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
                                             actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
                                             {interpretation.disease.phenotypes.join(', ')}
                                         </PopOverComponent>
                                         : null}
-                                    {interpretation.disease.description && interpretation.disease.description.length ?
-                                        <span>{interpretation.disease.phenotypes && interpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
-                                            <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
-                                                {interpretation.disease.description}
-                                            </PopOverComponent>
-                                        </span>
-                                        : null}
-                                    )
                                 </span>
                             }
                         </span>
@@ -333,6 +313,15 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 :
                                 <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
                             }
+                            {interpretation.modeInheritanceAdjective ?
+                                <span className="condition-moi-separator">&nbsp;-&nbsp;
+                                    {interpretation.modeInheritanceAdjective.indexOf('(HP:') === -1 ?
+                                        <i>{interpretation.modeInheritanceAdjective}</i>
+                                        :
+                                        <i>{interpretation.modeInheritanceAdjective.substr(0, interpretation.modeInheritanceAdjective.indexOf('(HP:')-1)}</i>
+                                    }
+                                </span> 
+                                : null}
                         </span>
                         : null}
                 </td>
@@ -342,11 +331,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         :
                         <a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>
                     }
-                </td>
-                <td className="last-saved">
-                    {interpretation.provisional_variant ?
-                        <span>{moment(interpretation.provisional_variant[0].last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                        : null}
                 </td>
             </tr>
         );
@@ -563,7 +547,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info all-existing-interpretaions">
                     <div className="panel-heading">
-                        <h3 className="panel-title">All Existing Interpretations</h3>
+                        <h3 className="panel-title">All interpretations for this variant in the Variant Curation Interface (VCI){renderInterpretationStatusExplanation()}</h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {sortedInterpretations && sortedInterpretations.length > 0 ?
@@ -574,8 +558,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                             <th>Clinical significance</th>
                                             <th>Status</th>
                                             <th>Condition - <i>Mode of inheritance</i></th>
-                                            <th>Submitter</th>
-                                            <th>Last saved</th>
+                                            <th>Curator/Affiliation</th>
                                         </tr>
                                     </thead>
                                     <tbody>
