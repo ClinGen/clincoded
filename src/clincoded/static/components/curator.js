@@ -279,6 +279,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     /**
      * Method to render the header of a given classification in the gene-disease record header
      * @param {object} classification - Any given classification in a GDM
+     * @param {object} gdm - The gene-disease record
      */
     renderMyClassificationStatus(classification, gdm) {
         return (
