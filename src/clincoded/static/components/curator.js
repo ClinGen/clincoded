@@ -12,7 +12,6 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
-import { sortListByDate } from '../libs/helpers/sort';
 import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { getAffiliationName } from '../libs/get_affiliation_name';
