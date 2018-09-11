@@ -1,6 +1,5 @@
 'use strict';
 import React from 'react';
-import { sortListByDate } from './helpers/sort';
 import { getAffiliationName } from './get_affiliation_name';
 import { renderInProgressStatus } from './render_in_progress_status';
 import { renderProvisionalStatus } from './render_provisional_status';
@@ -22,9 +21,9 @@ export function renderOtherClassifications(classification, gdm, context) {
             <span className="classification-status">
                 {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
                 <span className="classification-status-wrapper">
-                    {renderProvisionalStatus(snapshots, gdm, context, false)}
-                    {renderApprovalStatus(snapshots, context, affiliationId, userId)}
-                    {renderNewProvisionalStatus(snapshots, gdm, context, false)}
+                    {renderProvisionalStatus(snapshots, 'classification', gdm, context, false)}
+                    {renderApprovalStatus(snapshots, 'classification', context, affiliationId, userId)}
+                    {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, false)}
                     {renderPublishStatus(snapshots)}
                 </span>
             </span>
