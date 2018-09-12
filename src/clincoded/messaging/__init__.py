@@ -218,7 +218,6 @@ def gather_evidence(data):
             families = get_data_by_path(group, ['familyIncluded'], [])
 
             for family in families:
-                family_has_scored_proband = False
                 individuals = get_data_by_path(family, ['individualIncluded'], [])
 
                 for individual in individuals:
@@ -226,9 +225,6 @@ def gather_evidence(data):
 
                     for score in scores:
                         if check_data_ownership(score, user_affiliation):
-                            if 'proband' in individual and individual['proband']:
-                                family_has_scored_proband = True
-
                             individual_score = check_individual_scoring(score, evidence_publications, annotation)
 
                             if individual_score[0]:
@@ -237,11 +233,10 @@ def gather_evidence(data):
                             break
 
                 if check_data_ownership(family, user_affiliation):
-                    if not family_has_scored_proband:
-                        segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
+                    segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
 
-                        if segregation_score[0]:
-                            evidence_publications[segregation_score[1]].append(save_article(annotation))
+                    if segregation_score[0]:
+                        evidence_publications[segregation_score[1]].append(save_article(annotation))
 
             individuals = get_data_by_path(group, ['individualIncluded'], [])
 
@@ -260,7 +255,6 @@ def gather_evidence(data):
         families = get_data_by_path(annotation, ['families'], [])
 
         for family in families:
-            family_has_scored_proband = False
             individuals = get_data_by_path(family, ['individualIncluded'], [])
 
             for individual in individuals:
@@ -268,9 +262,6 @@ def gather_evidence(data):
 
                 for score in scores:
                     if check_data_ownership(score, user_affiliation):
-                        if 'proband' in individual and individual['proband']:
-                            family_has_scored_proband = True
-
                         individual_score = check_individual_scoring(score, evidence_publications, annotation)
 
                         if individual_score[0]:
@@ -279,11 +270,10 @@ def gather_evidence(data):
                         break
 
             if check_data_ownership(family, user_affiliation):
-                if not family_has_scored_proband:
-                    segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
+                segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
 
-                    if segregation_score[0]:
-                        evidence_publications[segregation_score[1]].append(save_article(annotation))
+                if segregation_score[0]:
+                    evidence_publications[segregation_score[1]].append(save_article(annotation))
 
         individuals = get_data_by_path(annotation, ['individuals'], [])
 
