@@ -504,6 +504,18 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
     },
 
+    renderCriteriaEvalNote() {
+        return (
+            <span><i className="icon icon-info-circle"></i> ExAC Constraint Scores displayed on the Gene-centric tab</span>
+        );
+    },
+
+    renderCriteriaEvalLink() {
+        return (
+            <span><a href="https://www.clinicalgenome.org/working-groups/sequence-variant-interpretation/" target="_blank" rel="noopener noreferrer">SVI guidance</a></span>
+        );
+    },
+
     render: function() {
         var conservationStatic = computationStatic.conservation, otherPredStatic = computationStatic.other_predictors, clingenPredStatic = computationStatic.clingen;
         var conservation = (this.state.computationObj && this.state.computationObj.conservation) ? this.state.computationObj.conservation : null;
@@ -550,7 +562,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session}/>
+                                            affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalNote} />
                                     </div>
                                 </div>
                                 : null}
@@ -837,7 +849,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaLof1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
                                     </div>
                                 </div>
                                 : null}
@@ -987,8 +999,7 @@ function criteriaMissense1() {
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                false,
-                true
+                false
             )}
         </div>
     );
