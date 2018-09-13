@@ -136,5 +136,11 @@
         "title": "All GDMs",
         "status": "released",
         "uuid": "ab2f826a-f43c-4a72-9ecb-a777dbfe8ffa"
+    },
+    {
+        "name": "interpretation-all",
+        "title": "All Interpretations",
+        "status": "released",
+        "uuid": "81bffd15-fab5-4a43-8ad4-3234fc5599f0"
     }
 ]
