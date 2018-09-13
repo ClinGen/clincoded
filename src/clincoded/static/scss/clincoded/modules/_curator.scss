@@ -32,7 +32,8 @@
     color: #000;
     background-color: #c0c0c0;
 
-    .gene-disease-record-header {
+    .gene-disease-record-header,
+    .variant-interpretation-header {
         display: flex;
         flex-flow: row wrap;
         justify-content: space-between;
@@ -1526,7 +1527,7 @@
                     }
 
                     .classification-link-item {
-                        font-size: 90%;
+                        font-size: 95%;
                         margin: 0 5px;
                         position: relative;
                         top: 3px;
