@@ -256,13 +256,15 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
      */
     renderClassificationStatusTag(classification, gdm) {
         const context = this.props.context;
+        let affiliationId = classification.affiliation ? classification.affiliation : null;
+        let userId = classification.submitted_by.uuid;
         let snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
         // Determine whether the classification had been previously approved
         if (snapshots && snapshots.length) {
             return (
                 <span className="classification-status-wrapper">
                     {renderProvisionalStatus(snapshots, 'classification', gdm, context, true)}
-                    {renderApprovalStatus(snapshots, 'classification', context)}
+                    {renderApprovalStatus(snapshots, 'classification', context, affiliationId, userId)}
                     {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, true)}
                     {renderPublishStatus(snapshots)}
                 </span>
