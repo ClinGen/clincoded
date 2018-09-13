@@ -95,6 +95,12 @@
         margin: 2px 0 5px;
         font-size: 1.1rem;
         font-weight: 300;
+        line-height: 1.2;
+
+        .subtitle-mode-of-inheritance {
+            display: block;
+            font-style: italic;
+        }
     }
 
     a i {
@@ -1507,6 +1513,13 @@
 
             .basic-info .all-existing-interpretaions {
                 margin-bottom: 20px;
+
+                .provisional-status-wrapper,
+                .approval-status-wrapper,
+                .publication-status-wrapper {
+                    display: inline-block;
+                    margin-bottom: 3px;
+                }
 
                 .classification-status {
                     font-size: 1.1em;
