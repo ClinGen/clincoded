@@ -99,19 +99,23 @@ var Title = module.exports.Title = createReactClass({
         let summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
 
         return (
-            <div>
-                <h1>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}{this.props.children}</h1>
-                <h2>{this.renderSubtitle(interpretation, variant)}</h2>
-                {variant && calculatePatho_button ?
-                    <div className="btn-vertical-space">
-                        <div className="interpretation-record clearfix">
-                            <div className="pull-right">
-                                <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
-                                    title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
+            <div className="variant-interpretation-header">
+                <div className="variant-interpretation-header-item title">
+                    <h1>{renderVariantTitle(variant)}{renderVariantTitleExplanation()}{this.props.children}</h1>
+                    <h2>{this.renderSubtitle(interpretation, variant)}</h2>
+                </div>
+                <div className="variant-interpretation-header-item button-box">
+                    {variant && calculatePatho_button ?
+                        <div className="btn-vertical-space">
+                            <div className="interpretation-record clearfix">
+                                <div className="pull-right">
+                                    <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
+                                        title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    : null}
+                        : null}
+                </div>
             </div>
         );
     }
