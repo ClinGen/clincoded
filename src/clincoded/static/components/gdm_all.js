@@ -43,7 +43,6 @@ var GdmList = createReactClass({
     parseGdms() {
         let gdmObjList = [];
         let gdmObj = {};
-        // let gdms = this.props.context['@graph'];
         let filters = '?type=gdm&field=gene&field=disease&field=modeInheritance&field=date_created&field=affiliation&field=submitted_by';
         this.getRestData('/search/' + filters).then(data => {
             let gdms = data['@graph'];
@@ -88,7 +87,12 @@ var GdmList = createReactClass({
             let searchTerm = this.state.searchTerm;
             if (searchTerm && searchTerm.length) {
                 let filteredGdms = gdms.filter(function(gdm) {
-                    return gdm.gene_symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || gdm.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                    return (
+                        (gdm.gene_symbol.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (gdm.disease_term.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (gdm.affiliation && gdm.affiliation.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (gdm.submitter_last_name && gdm.submitter_last_name.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)
+                    );
                 });
                 this.setState({filteredGdms: filteredGdms});
             } else {
