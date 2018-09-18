@@ -130,5 +130,11 @@
         "title": "Variant Interpretation Summary",
         "status": "released",
         "uuid": "a671021c-3ce1-4d6f-858c-9b0e43372b59"
+    },
+    {
+        "name": "interpretation-all",
+        "title": "All Interpretations",
+        "status": "released",
+        "uuid": "709a7b40-bca9-4a34-b316-71264640112c"
     }
 ]
