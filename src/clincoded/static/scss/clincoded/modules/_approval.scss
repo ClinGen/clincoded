@@ -1,0 +1,391 @@
+/**
+ * Date Picker Input styles
+ */
+.DayPickerInput>input {
+    border-radius: 2px;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    line-height: 1.42857;
+    color: #555;
+    background-image: none;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+
+    &::placeholder {
+        color: #ccc;
+    }
+
+    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+        color: #ccc;
+    }
+
+    &::-moz-placeholder { /* Firefox 19+ */
+        color: #ccc;
+    }
+
+    &:-ms-input-placeholder { /* IE 10+ */
+        color: #ccc;
+    }
+
+    &:-moz-placeholder { /* Firefox 18- */
+        color: #ccc;
+    }
+}
+
+/**
+ * Approval button styles
+ */
+.provisional-form-buttons-wrapper,
+.approval-form-buttons-wrapper,
+.publish-form-buttons-wrapper {
+    padding: 0;
+
+    .button-group {
+        text-align: right;
+    }
+}
+
+.provisional-approval.in-progress {
+    margin-bottom: 10px;
+}
+
+.publish-background {
+    background-color: #b6238a;
+}
+
+.publish-background.unpublish {
+    background-color: #fff;
+    border: 1px solid #b6238a;
+    color: #b6238a;
+    font-weight: bold;
+    padding-bottom: 0.2em;
+}
+
+/**
+ * Approval snapshot style
+ */
+.snapshot-list.panel {
+    border-radius: 4px;
+    margin-bottom: 0;
+
+    .list-group {
+        list-style: none;
+        padding-left: 0;
+        position: relative;
+
+        .list-group-item {
+            background-color: #fff;
+            border-bottom: solid 3px #e1e1e1;
+    
+            table {
+                width: 100%;
+
+                .snapshot-content {
+                    padding: 15px 0px 13px 25px;
+                }
+
+                .snapshot-publish-approval {
+                    border-top: solid 1px #e1e1e1;
+                }
+    
+                dl {
+                    margin-bottom: 5px;
+
+                    .label {
+                        margin-left: 8px;
+                    }
+                }
+            }
+    
+            &:last-child {
+                border-bottom: none;
+            }
+
+            label {
+                background-color: red;
+                display: block;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                position: absolute;
+            }
+        }
+    }
+
+    .approval-snapshot-content {
+        padding: 14px 18px;
+        width: 80%;
+
+        dl {
+            margin-bottom: 5px;
+        }
+    }
+
+    .approval-snapshot-buttons {
+        padding: 27px 33px;
+        position: relative;
+        text-align: center;
+        vertical-align: bottom;
+        width: 20%;
+
+        input[type="button"] {
+            margin: 8px 0;
+        }
+
+        .btn-primary {
+            border: 1px solid #1663a0;
+        }
+
+        .btn-default {
+            background-color: #a6a6a6;
+            border: 1px solid #999;
+            color: #fff;
+
+            &:hover {
+                background-color: #777;
+            }
+        }
+
+        .btn.approve-provisional-link-item,
+        .btn.publish-link-item {
+            font-size: 91%;
+            margin-bottom: 5px;
+            padding: 6px 8px;
+        }
+
+        .btn.btn-default.publish-link-item {
+            background-color: #b6238a;
+
+            &:hover {
+                background-color: #911c6e;
+            }
+
+            &.unpublish {
+                background-color: #fff;
+                border: 1px solid #b6238a;
+                color: #b6238a;
+                font-weight: bold;
+
+                &:hover {
+                    background-color: #f7e9f3;
+                }
+            }
+        }
+
+        .snapshot-current-icon,
+        .snapshot-archive-icon {
+            font-size: 1.3rem;
+            position: absolute;
+            top: 12px;
+            right: 20px;
+
+            .icon {
+                font-size: 1.6rem;
+            }
+        }
+
+        .snapshot-current-icon {
+            color: #82c91e;
+        }
+
+        .snapshot-archive-icon {
+            color: #aaa;
+        }
+    }
+}
+
+/**
+ * Provisional approval panel UI styles
+ */
+.provisional-approval {
+    .provisional-form-content-wrapper {
+        border: none;
+        padding: 0;
+    
+        .col-sm-4 {
+            padding-left: 0;
+            padding-top: 7px;
+        }
+
+        .col-sm-3, .col-sm-5 {
+            padding-right: 0;
+    
+            label {
+                padding-right: 0;
+            }
+        }
+
+        .provisional-submitter-placeholder-text {
+            color: #ccc;
+        }
+    }
+
+    .provisional-preview {
+        .provisional-form-content-wrapper {
+            .col-sm-3, .col-sm-5 {
+                padding-top: 7px;
+            }
+        }
+    }
+
+    .provisional-preview-note {
+        margin-bottom: 15px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+/**
+ * Final approval panel UI styles
+ */
+.final-approval-content-wrapper,
+.publish-approval-content-wrapper {
+    .alert {
+        .icon-flag {
+            color: #82c91e;
+        }
+    }
+
+    .panel-heading h4 a {
+        background-color: #f0ad4e;
+
+        &:hover {
+            background-color: #ec971f;
+        }
+    }
+
+    .publish-approval .panel-heading h4 a {
+        background-color: #b6238a;
+
+        &:hover {
+            background-color: #911c6e;
+        }
+    }
+
+    &.unpublish {
+        .panel-heading {
+            h4 a {
+                background-color: #fff;
+                border: 1px solid #b6238a;
+                color: #b6238a;
+
+                &:hover {
+                    background-color: #f7e9f3;
+                }
+            }
+
+            .panel-header-indicator {
+                color: #b6238a;
+            }
+        }
+    }
+}
+
+.final-approval,
+.publish-approval {
+    .approval-form-content-wrapper,
+    .publish-form-content-wrapper {
+        border: none;
+        padding: 0;
+    
+        .col-sm-4 {
+            padding-left: 0;
+            padding-top: 7px;
+        }
+    
+        .col-sm-3, .col-sm-5 {
+            padding-right: 0;
+    
+            label {
+                padding-right: 0;
+            }
+        }
+
+        .classification-approver {
+            .form-group {
+                margin: 0;
+
+                label {
+                    padding-left: 0;
+                    text-align: left;
+                    width: auto;
+                }
+            }
+        }
+
+        .approval-submitter-placeholder-text,
+        .publish-placeholder-text {
+            color: #ccc;
+        }
+    }
+
+    .approval-preview,
+    .publish-preview {
+        .approval-form-content-wrapper,
+        .publish-form-content-wrapper {
+            .col-sm-3, .col-sm-5 {
+                padding-top: 7px;
+            }
+        }
+    }
+
+    .approval-preview-note,
+    .publish-preview-note {
+        margin-bottom: 15px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+.feedback-message.publish-error {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/**
+ * Interpretation approval styles
+ */
+.evaluation-summary {
+    .provisional-interpretation-note {
+        margin-top: 20px;
+    }
+
+    .provisional-approval-panel-content {
+        margin: 0 10px;
+    }
+
+    .final-approval-panel-content,
+    .publish-approval-panel-content {
+        margin: 0 10px;
+    }
+
+    .provisional-form-buttons-wrapper,
+    .approval-form-buttons-wrapper,
+    .publish-form-buttons-wrapper {
+        margin-bottom: 15px;
+    }
+
+    .final-approval,
+    .publish-approval {
+        margin-bottom: 10px;
+    }
+
+    .panel.panel-warning.approval-process {
+        border-color: #ffb22e;
+
+        &>.panel-heading {
+            color: #ffffff;
+            background-color: #fdc04d;
+            border-color: #ffb22e;
+
+            .panel-title {
+                font-weight: 500;
+            }
+        }
+    }
+}

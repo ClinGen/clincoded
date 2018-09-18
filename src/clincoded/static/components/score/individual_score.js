@@ -11,7 +11,8 @@ import { defaultScore } from './helpers/default_score';
 import { scoreRange } from './helpers/score_range';
 import { userScore } from './helpers/user_score';
 import { affiliationScore } from './helpers/affiliation_score';
-import { getPathogenicityFromVariant } from '../curator'
+import { getPathogenicityFromVariant } from '../curator';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 // Render scoring panel in Gene Curation Interface
 const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
@@ -32,7 +33,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         scoreError: PropTypes.bool, // TRUE if no explanation is given for modified score or no case info type
         scoreErrorMsg: PropTypes.string, // Text string in response to the type of score error
         affiliation: PropTypes.object, // Affiliation object passed from parent
-        gdmUuid: PropTypes.string,
+        gdm: PropTypes.object,
         pmid: PropTypes.string
     },
 
@@ -169,7 +170,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                             scoreExplanation: scoreExplanation ? scoreExplanation : null
                         }, () => {
                             this.refs.scoreStatus.setValue(scoreStatus ? scoreStatus : 'none');
-                            this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
+                            if (this.refs.scoreExplanation) this.refs.scoreExplanation.setValue(scoreExplanation ? scoreExplanation : '');
                             this.updateUserScoreObj();
                         });
                     }
@@ -500,7 +501,8 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
     },
 
     renderVariantCurationLinks(variants) {
-        let gdmUuid = this.props.gdmUuid ? this.props.gdmUuid : '';
+        const gdm = this.props.gdm;
+        let gdmUuid = gdm && gdm.uuid ? gdm.uuid : '';
         let pmid = this.props.pmid;
         let affiliation = this.props.affiliation;
         let userUuid = this.props.session && this.props.session.user_properties ? this.props.session.user_properties.uuid : '';
@@ -509,13 +511,13 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                 <strong>Curate Variant's Gene Impact:</strong>
                 {variants.map((variant, i) => {
                     // See if the variant has a pathogenicity curated in the current GDM
-                    let userPathogenicity = null, matchingPathogenicity;
+                    let userPathogenicity = null;
                     let inCurrentGdm = _(variant.associatedPathogenicities).find(function(pathogenicity) {
-                        let matchingGdm = _(pathogenicity.associatedGdm).find(function(associatedGdm) {
-                            return associatedGdm.uuid === gdmUuid;
-                        });
-                        if (matchingGdm) {
-                            matchingPathogenicity = pathogenicity;
+                        let matchingGdm = false;
+                        if (gdm && gdm.variantPathogenicity && gdm.variantPathogenicity.length) {
+                            matchingGdm = _(gdm.variantPathogenicity).find(function(item) {
+                                return item['@id'] === pathogenicity;
+                            });
                         }
                         return !!matchingGdm;
                     });
@@ -523,7 +525,6 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     if (inCurrentGdm) {
                         userPathogenicity = getPathogenicityFromVariant(gdm, userUuid, variant.uuid, affiliation);
                     }
-                    inCurrentGdm = userPathogenicity ? true : false;
 
                     let variantCurationUrl = '/variant-curation/?all&gdm=' + gdmUuid + (pmid ? '&pmid=' + pmid : '') + '&variant=' + variant.uuid;
                     variantCurationUrl += affiliation ? '&affiliation=' + affiliation.affiliation_id : (userUuid ? '&user=' + userUuid : '');
@@ -532,7 +533,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                     return (
                         <span key={i} className="variant-gene-impact-curation-link-item">
                             <a className="variant-gene-impact-curation-link" href={variantCurationUrl} target="_blank">
-                                {variant.clinvarVariantTitle ? <span>{variant.clinvarVariantTitle}</span> : <span>{variant.grch38} (GRCh38)</span>}
+                                <span>{renderVariantTitle(variant)}</span>
                             </a>
                         </span>
                     );

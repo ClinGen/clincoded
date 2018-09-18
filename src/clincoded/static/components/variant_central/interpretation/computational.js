@@ -17,10 +17,12 @@ import { CompleteSection } from './shared/complete_section';
 import { parseAndLogError } from '../../mixins';
 import { parseKeyValue } from '../helpers/parse_key_value';
 import PopOverComponent from '../../../libs/bootstrap/popover';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
 const extraEvidence = require('./shared/extra_evidence');
 
 const validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
@@ -101,7 +103,7 @@ const computationStatic = {
             'revel': 'https://sites.google.com/site/revelgenomics/about'
         },
         _pathoThreshold: {
-            'revel': '>0.5',
+            'revel': '>0.75',
             'cftr': '--'
         }
     }
@@ -122,7 +124,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         ext_singleNucleotide: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_clinvarEsearch: PropTypes.bool,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        selectedSubtab: PropTypes.string,
+        selectedCriteria: PropTypes.string
     },
 
     getInitialState: function() {
@@ -132,7 +136,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             interpretation: this.props.interpretation,
             hasConservationData: false,
             hasOtherPredData: false,
-            selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
+            selectedSubtab: this.props.selectedSubtab,
+            selectedCriteria: this.props.selectedCriteria,
             codonObj: {},
             computationObj: {
                 conservation: {
@@ -185,9 +190,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             codonObj.symbol = this.props.ext_clinVarEsearch.vci_symbol;
             this.setState({codonObj: codonObj});
         }
-
         if (this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, this.state.interpretation.evaluations);
+        }
+        if (this.state.selectedSubtab && this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
     },
 
@@ -208,6 +215,15 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.computationObj, nextProps.interpretation.evaluations);
+        }
+        if (nextProps.selectedSubtab) {
+            this.setState({selectedSubtab: nextProps.selectedSubtab}, () => {
+                if (nextProps.selectedCriteria) {
+                    this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                        setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
+                    });
+                }
+            });
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
@@ -435,6 +451,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             this.setState({selectedSubtab: subtab});
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', subtab));
         }
+        // Remove the criteria param whenever the subtab is changed
+        if (queryKeyValue('criteria', window.location.href)) {
+            window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'criteria', ''));
+        }
     },
 
     // Method to temporarily render other variant count in same codon and link out to clinvar
@@ -520,7 +540,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                 </ul>
                 {this.state.selectedSubtab == '' || this.state.selectedSubtab == 'missense' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Functional, Conservation, and Splicing Predictors" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-functional-conservation-splicing-predictors" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -529,7 +550,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            affiliation={affiliation} session={session}/>
                                     </div>
                                 </div>
                                 : null}
@@ -770,13 +791,14 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                         </Panel></PanelGroup>
 
-                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-other-variants-in-codon" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -797,7 +819,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </div>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="other-variants-in-codon" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="other-variants-in-codon" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -806,7 +828,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'lof' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Null variant analysis" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-null-variant-analysis" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -836,7 +859,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </thead>
                                 </table>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="null-variant-analysis" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="null-variant-analysis" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -845,7 +868,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'silent-intron' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Silent & Intron" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-molecular-consequence-silent-intron" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -865,7 +889,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-silent-intron" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="molecular-consequence-silent-intron" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -874,7 +898,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
                 {this.state.selectedSubtab == 'indel' ?
                     <div role="tabpanel" className="tab-panel">
-                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content" open>
+                        <PanelGroup accordion><Panel title="Molecular Consequence: Inframe indel" panelBodyClassName="panel-wide-content"
+                            panelClassName="tab-predictors-panel-molecular-consequence-inframe-indel" open>
                             {(this.state.data && this.state.interpretation) ?
                                 <div className="row">
                                     <div className="col-sm-12">
@@ -923,7 +948,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     </dl>
                                 </div>
                             </div>
-                            <extraEvidence.ExtraEvidenceTable category="predictors" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
+                            <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                 viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
@@ -932,7 +957,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                     : null}
 
                 {this.state.interpretation ?
-                    <CompleteSection interpretation={this.state.interpretation} tabName="predictors" updateInterpretationObj={this.props.updateInterpretationObj} />
+                    <CompleteSection interpretation={this.state.interpretation} tabName="variant-type" updateInterpretationObj={this.props.updateInterpretationObj} />
                     : null}
 
                 {renderDataCredit('myvariant')}
@@ -962,7 +987,8 @@ function criteriaMissense1() {
                 vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
                 vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                false
+                false,
+                true
             )}
         </div>
     );

@@ -5,12 +5,17 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
-import { curator_page, history_views, userMatch, queryKeyValue } from '../globals';
+import { curator_page, history_views, userMatch, queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
-import { parseAndLogError } from '../mixins';
 import { ClassificationDefinition } from './definition';
+import GeneDiseaseClassificationMatrix from '../../libs/gene_disease_classification_matrix';
+import { ProvisionalApproval } from './provisional';
+import { ClassificationApproval } from './approval';
+import { PublishApproval } from './publish';
+import CurationSnapshots from './snapshots';
+import { sortListByDate } from '../../libs/helpers/sort';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -24,57 +29,108 @@ const ProvisionalClassification = createReactClass({
     propTypes: {
         href: PropTypes.string,
         session: PropTypes.object,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        demoVersion: PropTypes.bool
     },
 
     getInitialState() {
+        // Set states to indicate user intends to publish/unpublish based on URL parameters
+        let isPublishActive = undefined;
+        let isUnpublishActive = undefined;
+
+        if (typeof window !== "undefined" && window.location && window.location.href) {
+            isPublishActive = queryKeyValue('publish', window.location.href);
+            isUnpublishActive = queryKeyValue('unpublish', window.location.href);
+        }
+
         return {
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
             provisional: {}, // login user's existing provisional object, must be null initially.
-            //assessments: null,  // list of all assessments, must be nul initially.
-            totalScore: null,
-            autoClassification: 'No Classification',
-            alteredClassification: 'No Modification',
-            replicatedOverTime: false,
-            reasons: '',
             classificationStatus: 'In progress',
-            classificationStatusChecked: false,
-            evidenceSummary: '',
-            contradictingEvidence: {
-                proband: false, caseControl: false, experimental: false
-            },
-            scoreTableValues: {
-                // variables for autosomal dominant data
-                probandOtherVariantCount: 0, probandOtherVariantPoints: 0, probandOtherVariantPointsCounted: 0,
-                probandNullVariantCount: 0, probandNullVariantPoints: 0, probandNullVariantPointsCounted: 0,
-                variantDenovoCount: 0, variantDenovoPoints: 0, variantDenovoPointsCounted: 0,
-                // variables for autosomal recessive data
-                autosomalRecessivePointsCounted: 0,
-                twoVariantsProvenCount: 0, twoVariantsProvenPoints: 0,
-                twoVariantsNotProvenCount: 0, twoVariantsNotProvenPoints: 0,
-                // variables for segregation data
-                // segregationPoints is actually the raw, unconverted score; segregationPointsCounted is calculated and displayed score
-                segregationCount: 0, segregationPoints: 0, segregationPointsCounted: 0,
-                // variables for case-control data
-                caseControlCount: 0, caseControlPoints: 0, caseControlPointsCounted: 0,
-                // variables for Experimental data
-                functionalPointsCounted: 0, functionalAlterationPointsCounted: 0, modelsRescuePointsCounted: 0,
-                biochemicalFunctionCount: 0, biochemicalFunctionPoints: 0,
-                proteinInteractionsCount: 0, proteinInteractionsPoints: 0,
-                expressionCount: 0, expressionPoints: 0,
-                patientCellsCount: 0, patientCellsPoints: 0,
-                nonPatientCellsCount: 0, nonPatientCellsPoints: 0,
-                nonHumanModelCount: 0, nonHumanModelPoints: 0,
-                cellCultureCount: 0, cellCulturePoints: 0,
-                rescueHumanModelCount: 0, rescueHumanModelPoints: 0,
-                rescueNonHumanModelCount: 0, rescueNonHumanModelPoints: 0,
-                rescueCellCultureCount: 0, rescueCellCulturePoints: 0,
-                rescuePatientCellsCount: 0, rescuePatientCellsPoints: 0,
-                // variables for total counts
-                geneticEvidenceTotalPoints: 0, experimentalEvidenceTotalPoints: 0
-            }
+            classificationSnapshots: [],
+            isApprovalActive: queryKeyValue('approval', this.props.href),
+            isPublishActive: isPublishActive,
+            isUnpublishActive: isUnpublishActive,
+            showProvisional: false,
+            showApproval: false,
+            publishProvisionalReady: false,
+            publishSnapshotListReady: false,
+            showPublish: false,
+            showUnpublish: false
         };
+    },
+
+    /**
+     * Method to retrieve the updated classification object and pass the updated state as a prop
+     * back to the child components (e.g. provisional, approval).
+     * Called as PropTypes.func in the child components upon the PUT request to update the classification.
+     * @param {string} provisionalId - The '@id' of the (provisional) classification object
+     * @param {boolean} publishProvisionalReady - Indicator that (provisional) classification is ready for publish component (optional, defaults to false)
+     */
+    updateProvisionalObj(provisionalId, publishProvisionalReady = false) {
+        let provisional = this.state.provisional;
+        this.getRestData(provisionalId).then(result => {
+            // Get an updated copy of the classification object
+            this.setState({provisional: result, classificationStatus: result.classificationStatus, publishProvisionalReady: publishProvisionalReady}, () => {
+                this.handleProvisionalApprovalVisibility();
+            });
+            return Promise.resolve(result);
+        }).then(data => {
+            // Get an updated copy of the gdm object
+            this.getRestData('/gdm/' + this.state.gdm.uuid).then(gdm => {
+                this.setState({gdm: gdm});
+            });
+        });
+    },
+
+    /**
+     * Method to retrieve the given snapshot object and concat with (or refresh) the existing snapshot list.
+     * Then pass the updated state as a prop back to the child components (e.g. provisional, approval).
+     * Called as PropTypes.func in the child components upon saving a new snapshot.
+     * @param {string} snapshotId - The '@id' of the newly saved snapshot object
+     * @param {boolean} publishSnapshotListReady - Indicator that list of snapshots is ready for publish component (optional, defaults to false)
+     */
+    updateSnapshotList(snapshotId, publishSnapshotListReady = false) {
+        let classificationSnapshots = this.state.classificationSnapshots;
+        let isNewSnapshot = true;
+        this.getRestData(snapshotId).then(result => {
+            for (let i = 0; i < classificationSnapshots.length; i++) {
+                if (classificationSnapshots[i]['@id'] === snapshotId) {
+                    classificationSnapshots[i] = result;
+                    isNewSnapshot = false;
+                    break;
+                }
+            }
+
+            if (isNewSnapshot) {
+                const newClassificationSnapshots = [result, ...classificationSnapshots];
+
+                if (publishSnapshotListReady) {
+                    this.setState({classificationSnapshots: newClassificationSnapshots, publishSnapshotListReady: publishSnapshotListReady}, () => {
+                        this.handleProvisionalApprovalVisibility();
+                    });
+                } else {
+                    this.setState({classificationSnapshots: newClassificationSnapshots});
+                }
+            } else {
+                this.setState({classificationSnapshots: classificationSnapshots});
+            }
+        });
+    },
+
+    /**
+     * Method to get a list of snapshots of a classification, either provisioned or approved,
+     * given the matching UUID of the classificaiton object.
+     * Called only once in the componentDidMount() lifecycle method via the loadData() method.
+     * @param {string} provisionalUuid - UUID of the saved classification object in a snapshot
+     */
+    getClassificationSnaphots(provisionalUuid) {
+        this.getRestData('/search/?type=snapshot&resourceId=' + provisionalUuid).then(result => {
+            this.setState({classificationSnapshots: result['@graph']});
+        }).catch(err => {
+            console.log('Classification Snapshots Fetch Error=: %o', err);
+        });
     },
 
     loadData() {
@@ -113,22 +169,17 @@ const ProvisionalClassification = createReactClass({
                     let creator = provisionalClassification.submitted_by;
                     if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
                         stateObj.provisional = provisionalClassification;
-                        stateObj.alteredClassification = stateObj.provisional.alteredClassification;
-                        stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
-                        stateObj.reasons = stateObj.provisional.reasons;
-                        stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress',
-                        stateObj.classificationStatusChecked = stateObj.provisional.classificationStatus !== 'In progress' ? true : false,
-                        stateObj.evidenceSummary = stateObj.provisional.hasOwnProperty('evidenceSummary') ? stateObj.provisional.evidenceSummary : '';
+                        stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
                     }
                 }
             }
             stateObj.previousUrl = url;
             this.setState(stateObj);
+            if (stateObj.provisional && stateObj.provisional.uuid) {
+                this.getClassificationSnaphots(stateObj.provisional.uuid);
+            }
 
             return Promise.resolve();
-        }).then(result => {
-            // once we have the GDM info, calculate the values for the score table
-            this.calculateScoreTable();
         }).catch(function(e) {
             console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
         });
@@ -136,11 +187,37 @@ const ProvisionalClassification = createReactClass({
 
     componentDidMount() {
         this.loadData();
+        this.handleProvisionalApprovalVisibility();
     },
 
     componentDidUpdate(prevProps, prevState) {
         // Need to delay the function call until the DOM is rendered
         setTimeout(this.scrollElementIntoView, 500);
+    },
+
+    // FIXME: This method is not working as expected in the resulted behavior
+    // Need to revisit in the next release
+    highlightMatchingSnapshots() {
+        // Color code each pair of Approval/Provisional snapshots
+        let provisionalList = document.querySelectorAll('li.snapshot-item[data-status="Provisioned"]');
+        let approvalList = document.querySelectorAll('li.snapshot-item[data-status="Approved"]');
+        let provisionalSnapshotNodes = Array.from(provisionalList);
+        let approvalSnapshotNodes = Array.from(approvalList);
+        if (approvalSnapshotNodes && approvalSnapshotNodes.length) {
+            approvalSnapshotNodes.forEach(approval => {
+                let label = document.createElement('LABEL');
+                approval.appendChild(label);
+
+                if (approval.getAttribute('data-associated').length) {
+                    let matchingProvisional = provisionalSnapshotNodes.filter(provisional => {
+                        return provisional.getAttribute('data-key') === approval.getAttribute('data-associated');
+                    });
+                    if (matchingProvisional && matchingProvisional.length) {
+                        matchingProvisional[0].appendChild(label);
+                    }
+                }
+            });
+        }
     },
 
     /**
@@ -151,334 +228,6 @@ const ProvisionalClassification = createReactClass({
         if (element) {
             element.scrollIntoView();
         }
-    },
-
-    handleReplicatedOverTime() {
-        let replicatedOverTime = this.state.replicatedOverTime;
-        if (!replicatedOverTime) {
-            replicatedOverTime = true;
-        } else {
-            replicatedOverTime = false;
-        }
-        this.setState({replicatedOverTime: replicatedOverTime}, this.calculateClassifications(this.state.totalScore, replicatedOverTime));
-    },
-
-    familyScraper(user, families, annotation, segregationCount, segregationPoints, individualMatched) {
-        // function for looping through family (of GDM or of group) and finding all relevent information needed for score calculations
-        // returns dictionary of relevant items that need to be updated within NewCalculation()
-        families.forEach(family => {
-            // get segregation of family, but only if it was made by user (may change later - MC)
-            let curatorAffiliation = this.props.affiliation;
-            if ((family.affiliation && curatorAffiliation && family.segregation && family.affiliation === curatorAffiliation.affiliation_id)
-                || (!family.affiliation && !curatorAffiliation && family.segregation && family.submitted_by.uuid === user)) {
-                // get lod score of segregation of family
-                if (family.segregation.includeLodScoreInAggregateCalculation) {
-                    if ("lodPublished" in family.segregation && family.segregation.lodPublished === true && family.segregation.publishedLodScore) {
-                        segregationCount += 1;
-                        segregationPoints += family.segregation.publishedLodScore;
-                    } else if ("lodPublished" in family.segregation && family.segregation.lodPublished === false && family.segregation.estimatedLodScore) {
-                        segregationCount += 1;
-                        segregationPoints += family.segregation.estimatedLodScore;
-                    }
-                }
-            }
-            // get proband individuals of family
-            if (family.individualIncluded && family.individualIncluded.length) {
-                individualMatched = this.individualScraper(family.individualIncluded, individualMatched);
-            }
-        });
-
-        return {
-            segregationCount: segregationCount,
-            segregationPoints: segregationPoints,
-            individualMatched: individualMatched
-        };
-    },
-
-    individualScraper(individuals, individualMatched) {
-        if (individuals) {
-            individuals.forEach(individual => {
-                if (individual.proband === true && (individual.scores && individual.scores.length)) {
-                    individualMatched.push(individual);
-                }
-            });
-        }
-        return individualMatched;
-    },
-
-    calculateScoreTable() {
-        // Generate a new summary for url ../provisional-curation/?gdm=GDMId&calculate=yes
-        // Calculation rules are defined by Small GCWG. See ClinGen_Interface_4_2015.pptx and Clinical Validity Classifications for detail
-        let gdm = this.state.gdm;
-        let scoreTableValues = this.state.scoreTableValues;
-        let contradictingEvidence = this.state.contradictingEvidence;
-        let curatorAffiliation = this.props.affiliation;
-
-        const MAX_SCORE_CONSTANTS = {
-            VARIANT_IS_DE_NOVO: 12,
-            PREDICTED_OR_PROVEN_NULL_VARIANT: 10,
-            OTHER_VARIANT_TYPE_WITH_GENE_IMPACT: 7,
-            AUTOSOMAL_RECESSIVE: 12,
-            SEGREGATION: 3,
-            CASE_CONTROL: 12,
-            FUNCTIONAL: 2,
-            FUNCTIONAL_ALTERATION: 2,
-            MODELS_RESCUE: 4,
-            GENETIC_EVIDENCE: 12,
-            EXPERIMENTAL_EVIDENCE: 6,
-            TOTAL: 18
-        };
-
-        /*****************************************************/
-        /* Find all proband individuals that had been scored */
-        /*****************************************************/
-        let probandTotal = []; // all probands
-        var proband_variants = [];
-        let tempFamilyScraperValues = {};
-        let caseControlTotal = [];
-
-        // scan gdm
-        let annotations = gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
-        annotations.forEach(annotation => {
-            let groups, families, individuals, experimentals;
-            let individualMatched = [];
-
-            // loop through groups
-            groups = annotation.groups && annotation.groups.length ? annotation.groups : [];
-            groups.forEach(group => {
-                // loop through families using FamilyScraper
-                families = group.familyIncluded && group.familyIncluded.length ? group.familyIncluded : [];
-                tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
-                scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
-                scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
-                individualMatched = tempFamilyScraperValues['individualMatched'];
-                // get proband individuals of group
-                if (group.individualIncluded && group.individualIncluded.length) {
-                    individualMatched = this.individualScraper(group.individualIncluded, individualMatched);
-                }
-            });
-
-            // loop through families using FamilyScraper
-            families = annotation.families && annotation.families.length ? annotation.families : [];
-            tempFamilyScraperValues = this.familyScraper(this.state.user, families, annotation, scoreTableValues['segregationCount'], scoreTableValues['segregationPoints'], individualMatched);
-            scoreTableValues['segregationCount'] = tempFamilyScraperValues['segregationCount'];
-            scoreTableValues['segregationPoints'] = tempFamilyScraperValues['segregationPoints'];
-            individualMatched = tempFamilyScraperValues['individualMatched'];
-
-            // push all matched individuals from families and families of groups to probandTotal
-            individualMatched.forEach(item => {
-                probandTotal.push(item);
-            });
-
-            // loop through individuals
-            if (annotation.individuals && annotation.individuals.length) {
-                // get proband individuals
-                individualMatched = [];
-                individualMatched = this.individualScraper(annotation.individuals, individualMatched);
-                // push all matched individuals to probandTotal
-                individualMatched.forEach(item => {
-                    probandTotal.push(item);
-                });
-            }
-
-            // loop through case-controls
-            let caseControlMatched = [];
-            if (annotation.caseControlStudies && annotation.caseControlStudies.length) {
-                annotation.caseControlStudies.forEach(caseControl => {
-                    if (caseControl.scores && caseControl.scores.length) {
-                        caseControl.scores.forEach(score => {
-                            if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id)
-                                || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === this.state.user)) {
-                                if ('score' in score && score.score !== 'none') {
-                                    scoreTableValues['caseControlCount'] += 1;
-                                    scoreTableValues['caseControlPoints'] += parseFloat(score.score);
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-
-            // loop through experimentals
-            experimentals = annotation.experimentalData && annotation.experimentalData.length ? annotation.experimentalData : [];
-            experimentals.forEach(experimental => {
-                // loop through scores, if any
-                if (experimental.scores && experimental.scores.length) {
-                    experimental.scores.forEach(score => {
-                        // only care about scores made by current user
-                        if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id) 
-                            || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === this.state.user)) {
-                            if (score.scoreStatus === 'Score') {
-                                // parse score of experimental
-                                let experimentalScore = 0;
-                                if ('score' in score && score.score !== 'none') {
-                                    experimentalScore = parseFloat(score.score); // Use the score selected by curator (if any)
-                                } else if ('calculatedScore' in score && score.calculatedScore !== 'none') {
-                                    experimentalScore = parseFloat(score.calculatedScore); // Otherwise, use default score (if any)
-                                }
-
-                                // assign score to correct sub-type depending on experiment type and other variables
-                                if (experimental.evidenceType && experimental.evidenceType === 'Biochemical Function') {
-                                    scoreTableValues['biochemicalFunctionCount'] += 1;
-                                    scoreTableValues['biochemicalFunctionPoints'] += experimentalScore;
-                                } else if (experimental.evidenceType && experimental.evidenceType === 'Protein Interactions') {
-                                    scoreTableValues['proteinInteractionsCount'] += 1;
-                                    scoreTableValues['proteinInteractionsPoints'] += experimentalScore;
-                                } else if (experimental.evidenceType && experimental.evidenceType === 'Expression') {
-                                    scoreTableValues['expressionCount'] += 1;
-                                    scoreTableValues['expressionPoints'] += experimentalScore;
-                                } else if (experimental.evidenceType && experimental.evidenceType === 'Functional Alteration') {
-                                    if (experimental.functionalAlteration.functionalAlterationType
-                                        && experimental.functionalAlteration.functionalAlterationType === 'Patient cells') {
-                                        scoreTableValues['patientCellsCount'] += 1;
-                                        scoreTableValues['patientCellsPoints'] += experimentalScore;
-                                    } else if (experimental.functionalAlteration.functionalAlterationType
-                                        && experimental.functionalAlteration.functionalAlterationType === 'Non-patient cells') {
-                                        scoreTableValues['nonPatientCellsCount'] += 1;
-                                        scoreTableValues['nonPatientCellsPoints'] += experimentalScore;
-                                    }
-                                } else if (experimental.evidenceType && experimental.evidenceType === 'Model Systems') {
-                                    if (experimental.modelSystems.modelSystemsType
-                                        && experimental.modelSystems.modelSystemsType === 'Non-human model organism') {
-                                        scoreTableValues['nonHumanModelCount'] += 1;
-                                        scoreTableValues['nonHumanModelPoints'] += experimentalScore;
-                                    } else if (experimental.modelSystems.modelSystemsType
-                                        && experimental.modelSystems.modelSystemsType === 'Cell culture model') {
-                                        scoreTableValues['cellCultureCount'] += 1;
-                                        scoreTableValues['cellCulturePoints'] += experimentalScore;
-                                    }
-                                } else if (experimental.evidenceType && experimental.evidenceType === 'Rescue') {
-                                    if (experimental.rescue.rescueType
-                                        && experimental.rescue.rescueType === 'Human') {
-                                        scoreTableValues['rescueHumanModelCount'] += 1;
-                                        scoreTableValues['rescueHumanModelPoints'] += experimentalScore;
-                                    } else if (experimental.rescue.rescueType
-                                        && experimental.rescue.rescueType === 'Non-human model organism') {
-                                        scoreTableValues['rescueNonHumanModelCount'] += 1;
-                                        scoreTableValues['rescueNonHumanModelPoints'] += experimentalScore;
-                                    } else if (experimental.rescue.rescueType
-                                        && experimental.rescue.rescueType === 'Cell culture model') {
-                                        scoreTableValues['rescueCellCultureCount'] += 1;
-                                        scoreTableValues['rescueCellCulturePoints'] += experimentalScore;
-                                    } else if (experimental.rescue.rescueType
-                                        && experimental.rescue.rescueType === 'Patient cells') {
-                                        scoreTableValues['rescuePatientCellsCount'] += 1;
-                                        scoreTableValues['rescuePatientCellsPoints'] += experimentalScore;
-                                    }
-                                }
-                            } else if (score.scoreStatus === 'Contradicts') {
-                                // set flag if a contradicting experimental evidence is found
-                                contradictingEvidence.experimental = true;
-                            }
-                        }
-                    });
-                }
-            });
-        });
-
-        // scan probands
-        probandTotal.forEach(proband => {
-            proband.scores.forEach(score => {
-                if ((score.affiliation && curatorAffiliation && score.affiliation === curatorAffiliation.affiliation_id)
-                    || (!score.affiliation && !curatorAffiliation && score.submitted_by.uuid === this.state.user)) {
-                    if (score.scoreStatus === 'Score') {
-                        // parse proband score
-                        let probandScore = 0;
-                        if ('score' in score && score.score !== 'none') {
-                            probandScore += parseFloat(score.score);
-                        } else if ('calculatedScore' in score && score.calculatedScore !== 'none') {
-                            probandScore += parseFloat(score.calculatedScore);
-                        }
-                        // assign score to correct sub-type depending on score type
-                        if (score.caseInfoType && score.caseInfoType === 'OTHER_VARIANT_TYPE_WITH_GENE_IMPACT' && score.scoreStatus === 'Score') {
-                            scoreTableValues['probandOtherVariantCount'] += 1;
-                            scoreTableValues['probandOtherVariantPoints'] += probandScore;
-                        } else if (score.caseInfoType && score.caseInfoType === 'PREDICTED_OR_PROVEN_NULL_VARIANT' && score.scoreStatus === 'Score') {
-                            scoreTableValues['probandNullVariantCount'] += 1;
-                            scoreTableValues['probandNullVariantPoints'] += probandScore;
-                        } else if (score.caseInfoType && score.caseInfoType === 'VARIANT_IS_DE_NOVO' && score.scoreStatus === 'Score') {
-                            scoreTableValues['variantDenovoCount'] += 1;
-                            scoreTableValues['variantDenovoPoints'] += probandScore;
-                        } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_WITH_GENE_IMPACT_IN_TRANS' && score.scoreStatus === 'Score') {
-                            scoreTableValues['twoVariantsNotProvenCount'] += 1;
-                            scoreTableValues['twoVariantsNotProvenPoints'] += probandScore;
-                        } else if (score.caseInfoType && score.caseInfoType === 'TWO_VARIANTS_IN_TRANS_WITH_ONE_DE_NOVO' && score.scoreStatus === 'Score') {
-                            scoreTableValues['twoVariantsProvenCount'] += 1;
-                            scoreTableValues['twoVariantsProvenPoints'] += probandScore;
-                        }
-                    } else if (score.scoreStatus === 'Contradicts') {
-                        // set flag if a contradicting proband evidence is found
-                        contradictingEvidence.proband = true;
-                    }
-                }
-            });
-        });
-
-        // calculate segregation counted points
-        scoreTableValues['segregationPoints'] = Math.round((scoreTableValues['segregationPoints'] + 0.00001) * 100) / 100;
-        if (scoreTableValues['segregationPoints'] >= 0.75 && scoreTableValues['segregationPoints'] <= 0.99) {
-            scoreTableValues['segregationPointsCounted'] = 1;
-        } else if (scoreTableValues['segregationPoints'] >= 1 && scoreTableValues['segregationPoints'] <= 1.24) {
-            scoreTableValues['segregationPointsCounted'] = .5;
-        } else if (scoreTableValues['segregationPoints'] >= 1.25 && scoreTableValues['segregationPoints'] <= 1.49) {
-            scoreTableValues['segregationPointsCounted'] = 2.5;
-        } else if (scoreTableValues['segregationPoints'] >= 1.5 && scoreTableValues['segregationPoints'] <= 1.74) {
-            scoreTableValues['segregationPointsCounted'] = 3;
-        } else if (scoreTableValues['segregationPoints'] >= 1.75) {
-            scoreTableValues['segregationPointsCounted'] = MAX_SCORE_CONSTANTS.SEGREGATION;
-        }
-
-        // calculate other counted points
-        let tempPoints = 0;
-
-        scoreTableValues['probandOtherVariantPointsCounted'] = scoreTableValues['probandOtherVariantPoints'] < MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT ? scoreTableValues['probandOtherVariantPoints'] : MAX_SCORE_CONSTANTS.OTHER_VARIANT_TYPE_WITH_GENE_IMPACT;
-
-        scoreTableValues['probandNullVariantPointsCounted'] = scoreTableValues['probandNullVariantPoints'] < MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT ? scoreTableValues['probandNullVariantPoints'] : MAX_SCORE_CONSTANTS.PREDICTED_OR_PROVEN_NULL_VARIANT;
-
-        scoreTableValues['variantDenovoPointsCounted'] = scoreTableValues['variantDenovoPoints'] < MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO ? scoreTableValues['variantDenovoPoints'] : MAX_SCORE_CONSTANTS.VARIANT_IS_DE_NOVO;
-
-        tempPoints = scoreTableValues['twoVariantsProvenPoints'] + scoreTableValues['twoVariantsNotProvenPoints'];
-        scoreTableValues['autosomalRecessivePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE ? tempPoints : MAX_SCORE_CONSTANTS.AUTOSOMAL_RECESSIVE;
-
-        scoreTableValues['caseControlPointsCounted'] = scoreTableValues['caseControlPoints'] < MAX_SCORE_CONSTANTS.CASE_CONTROL ? scoreTableValues['caseControlPoints'] : MAX_SCORE_CONSTANTS.CASE_CONTROL;
-
-        tempPoints = scoreTableValues['biochemicalFunctionPoints'] + scoreTableValues['proteinInteractionsPoints'] + scoreTableValues['expressionPoints'];
-        scoreTableValues['functionalPointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL;
-
-        tempPoints = scoreTableValues['patientCellsPoints'] + scoreTableValues['nonPatientCellsPoints'];
-        scoreTableValues['functionalAlterationPointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION ? tempPoints : MAX_SCORE_CONSTANTS.FUNCTIONAL_ALTERATION;
-
-        tempPoints = scoreTableValues['nonHumanModelPoints'] + scoreTableValues['cellCulturePoints'] + scoreTableValues['rescueHumanModelPoints'] + scoreTableValues['rescueNonHumanModelPoints']
-                    + scoreTableValues['rescueCellCulturePoints'] + scoreTableValues['rescuePatientCellsPoints'];
-        scoreTableValues['modelsRescuePointsCounted'] = tempPoints < MAX_SCORE_CONSTANTS.MODELS_RESCUE ? tempPoints : MAX_SCORE_CONSTANTS.MODELS_RESCUE;
-
-        tempPoints = scoreTableValues['probandOtherVariantPointsCounted'] + scoreTableValues['probandNullVariantPointsCounted'] + scoreTableValues['variantDenovoPointsCounted'] + scoreTableValues['autosomalRecessivePointsCounted'] + scoreTableValues['segregationPointsCounted'] + scoreTableValues['caseControlPointsCounted'];
-        scoreTableValues['geneticEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE ? parseFloat(tempPoints).toFixed(2) : MAX_SCORE_CONSTANTS.GENETIC_EVIDENCE;
-
-        tempPoints = scoreTableValues['functionalPointsCounted'] + scoreTableValues['functionalAlterationPointsCounted'] + scoreTableValues['modelsRescuePointsCounted'];
-        scoreTableValues['experimentalEvidenceTotalPoints'] = tempPoints < MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE ? parseFloat(tempPoints).toFixed(2) : MAX_SCORE_CONSTANTS.EXPERIMENTAL_EVIDENCE;
-
-        let totalScore = parseFloat(scoreTableValues['geneticEvidenceTotalPoints']) + parseFloat(scoreTableValues['experimentalEvidenceTotalPoints']);
-
-        // set scoreTabValues state
-        this.setState({totalScore: parseFloat(totalScore).toFixed(2), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
-
-        // set classification
-        this.calculateClassifications(totalScore, this.state.replicatedOverTime);
-    },
-
-    calculateClassifications(totalPoints, replicatedOverTime) {
-        let autoClassification = "No Classification";
-        if (totalPoints >= 0.1 && totalPoints <= 6) {
-            autoClassification = "Limited";
-        } else if (totalPoints > 6 && totalPoints <= 11) {
-            autoClassification = "Moderate";
-        } else if (totalPoints > 11 && totalPoints <= 18 && !replicatedOverTime) {
-            autoClassification = "Strong";
-        } else if (totalPoints > 11 && totalPoints <= 18 && replicatedOverTime) {
-            autoClassification = "Definitive";
-        }
-        this.setState({autoClassification: autoClassification});
     },
 
     getCurationCentral(e) {
@@ -493,29 +242,131 @@ const ProvisionalClassification = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid, '_blank');
     },
 
+    /**
+     * Method to show the Approval form entry panel
+     * Passed to the <Snapshots /> component as a prop
+     */
+    approveProvisional() {
+        const isApprovalActive = this.state.isApprovalActive;
+        if (!isApprovalActive) {
+            window.history.replaceState(window.state, '', addQueryKey(window.location.href, 'approval', 'yes'));
+            this.setState({isApprovalActive: 'yes'}, () => {
+                this.handleProvisionalApprovalVisibility();
+            });
+        }
+    },
+
+    /**
+     * Method to determine if user is allowed to publish
+     */
+    isUserAllowedToPublish() {
+        const curatorAffiliation = this.props.affiliation;
+
+        if (curatorAffiliation && curatorAffiliation.publish_approval) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    handleProvisionalApprovalVisibility() {
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+        const isPublishActive = this.state.isPublishActive;
+        const isUnpublishActive = this.state.isUnpublishActive;
+        const provisional = this.state.provisional;
+
+        if (classificationStatus === 'In progress') {
+            if (isApprovalActive && isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+            } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+            } else if (isUnpublishActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
+            } else {
+                this.setState({showProvisional: true, showApproval: false, showPublish: false, showUnpublish: false});
+            }
+        } else if (classificationStatus === 'Provisional') {
+            if (isApprovalActive && isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+            } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+            } else if (isUnpublishActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
+            } else {
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false}, () => {
+                    if (!isApprovalActive) {
+                        this.setState({isApprovalActive: 'yes'});
+                    }
+                });
+            }
+        } else if (classificationStatus === 'Approved') {
+            if (this.isUserAllowedToPublish()) {
+                if (!provisional || !provisional.publishClassification) {
+                    if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                        this.setState({isApprovalActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+                    } else if (isUnpublishActive === 'yes') {
+                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+                    } else if (this.state.publishProvisionalReady && this.state.publishSnapshotListReady) {
+                        this.setState({isApprovalActive: undefined, isPublishActive: 'auto', isUnpublishActive: undefined, showProvisional: false, showApproval: false, publishProvisionalReady: false, publishSnapshotListReady: false, showPublish: true, showUnpublish: false});
+                    } else {
+                    }
+                } else {
+                    if (isUnpublishActive === 'yes') {
+                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
+                    } else {
+                        this.setState({isApprovalActive: undefined, isPublishActive: undefined, isUnpublishActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+                    }
+                }
+            } else {
+                this.setState({isApprovalActive: undefined, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+            }
+        } else {
+            this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
+        }
+    },
+
+    /**
+     * Method to clear publish-related URL parameters and state data
+     * Called at the end of every publish event
+     */
+    clearPublishState() {
+        if (typeof window !== "undefined" && window.location && window.location.href && window.history) {
+            if (queryKeyValue('publish', window.location.href)) {
+                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'publish', null));
+            }
+
+            if (queryKeyValue('unpublish', window.location.href)) {
+                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'unpublish', null));
+            }
+
+            if (queryKeyValue('snapshot', window.location.href)) {
+                window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'snapshot', null));
+            }
+        }
+
+        this.setState({isPublishActive: undefined, isUnpublishActive: undefined, publishProvisionalReady: false,
+            publishSnapshotListReady: false, showPublish: false, showUnpublish: false});
+    },
+
     render() {
         this.queryValues.gdmUuid = queryKeyValue('gdm', this.props.href);
         let calculate = queryKeyValue('calculate', this.props.href);
         let edit = queryKeyValue('edit', this.props.href);
         let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
         let gdm = this.state.gdm ? this.state.gdm : null;
-        let autoClassification = this.state.autoClassification;
-        let scoreTableValues = this.state.scoreTableValues;
-
         let show_clsfctn = queryKeyValue('classification', this.props.href);
-        let summaryMatrix = queryKeyValue('summarymatrix', this.props.href);
-        let expMatrix = queryKeyValue('expmatrix', this.props.href);
-
         // set the 'Current Classification' appropriately only if previous provisional exists
-        let provisional = this.state.provisional;
-        let currentClassification = 'None';
-        if (provisional.last_modified) {
-            if (provisional.alteredClassification && provisional.alteredClassification !== 'No Modification') {
-                currentClassification = provisional.alteredClassification;
-            } else {
-                currentClassification = provisional.autoClassification ? provisional.autoClassification : this.state.autoClassification;
-            }
-        }
+        const provisional = this.state.provisional;
+        const autoClassification = provisional.autoClassification;
+        const classificationPoints = provisional.classificationPoints;
+        let currentClassification = provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification;
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+        const snapshotUUID = typeof window !== "undefined" && window.location && window.location.href ?
+            queryKeyValue('snapshot', window.location.href) : undefined;
+
         return (
             <div>
                 { show_clsfctn === 'display' ?
@@ -523,145 +374,13 @@ const ProvisionalClassification = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true} />
+                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
                                         <div className="form-group">
-                                            <div className="summary-matrix-wrapper">
-                                                <table className="summary-matrix">
-                                                    <tbody>
-                                                        <tr className="header large bg-gray separator-below">
-                                                            <td colSpan="5">Evidence Type</td>
-                                                            <td>Count</td>
-                                                            <td>Total Points</td>
-                                                            <td>Points Counted</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td rowSpan="8" className="header"><div className="rotate-text"><div>Genetic Evidence</div></div></td>
-                                                            <td rowSpan="6" className="header"><div className="rotate-text"><div>Case-Level</div></div></td>
-                                                            <td rowSpan="5" className="header"><div className="rotate-text"><div>Variant</div></div></td>
-                                                            <td rowSpan="3" className="header">Autosomal Dominant OR X-linked Disorder</td>
-                                                            <td>Proband with other variant type with some evidence of gene impact</td>
-                                                            <td>{scoreTableValues['probandOtherVariantCount']}</td>
-                                                            <td>{scoreTableValues['probandOtherVariantPoints']}</td>
-                                                            <td>{scoreTableValues['probandOtherVariantPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Proband with predicted or proven null variant</td>
-                                                            <td>{scoreTableValues['probandNullVariantCount']}</td>
-                                                            <td>{scoreTableValues['probandNullVariantPoints']}</td>
-                                                            <td>{scoreTableValues['probandNullVariantPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Variant is <i>de novo</i></td>
-                                                            <td>{scoreTableValues['variantDenovoCount']}</td>
-                                                            <td>{scoreTableValues['variantDenovoPoints']}</td>
-                                                            <td>{scoreTableValues['variantDenovoPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td rowSpan="2" className="header">Autosomal Recessive Disorder</td>
-                                                            <td>Two variants (not predicted/proven null) with some evidence of gene impact in <i>trans</i></td>
-                                                            <td>{scoreTableValues['twoVariantsNotProvenCount']}</td>
-                                                            <td>{scoreTableValues['twoVariantsNotProvenPoints']}</td>
-                                                            <td rowSpan="2">{scoreTableValues['autosomalRecessivePointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Two variants in <i>trans</i> and at least one <i>de novo</i> or a predicted/proven null variant</td>
-                                                            <td>{scoreTableValues['twoVariantsProvenCount']}</td>
-                                                            <td>{scoreTableValues['twoVariantsProvenPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colSpan="3" className="header">Segregation</td>
-                                                            <td>{scoreTableValues['segregationCount']}</td>
-                                                            <td><span>{scoreTableValues['segregationPointsCounted']}</span> (<abbr title="Combined LOD Score"><span>{scoreTableValues['segregationPoints']}</span><strong>*</strong></abbr>)</td>
-                                                            <td>{scoreTableValues['segregationPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colSpan="4" className="header">Case-Control</td>
-                                                            <td>{scoreTableValues['caseControlCount']}</td>
-                                                            <td>{scoreTableValues['caseControlPoints']}</td>
-                                                            <td>{scoreTableValues['caseControlPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr className="header separator-below">
-                                                            <td colSpan="6">Genetic Evidence Total</td>
-                                                            <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td rowSpan="12" className="header"><div className="rotate-text"><div>Experimental Evidence</div></div></td>
-                                                            <td colSpan="3" rowSpan="3" className="header">Functional</td>
-                                                            <td>Biochemical Functions</td>
-                                                            <td>{scoreTableValues['biochemicalFunctionCount']}</td>
-                                                            <td>{scoreTableValues['biochemicalFunctionPoints']}</td>
-                                                            <td rowSpan="3">{scoreTableValues['functionalPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Protein Interactions</td>
-                                                            <td>{scoreTableValues['proteinInteractionsCount']}</td>
-                                                            <td>{scoreTableValues['proteinInteractionsPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Expression</td>
-                                                            <td>{scoreTableValues['expressionCount']}</td>
-                                                            <td>{scoreTableValues['expressionPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colSpan="3" rowSpan="2" className="header">Functional Alteration</td>
-                                                            <td>Patient cells</td>
-                                                            <td>{scoreTableValues['patientCellsCount']}</td>
-                                                            <td>{scoreTableValues['patientCellsPoints']}</td>
-                                                            <td rowSpan="2">{scoreTableValues['functionalAlterationPointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Non-patient cells</td>
-                                                            <td>{scoreTableValues['nonPatientCellsCount']}</td>
-                                                            <td>{scoreTableValues['nonPatientCellsPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colSpan="3" rowSpan="2" className="header">Models</td>
-                                                            <td>Non-human model organism</td>
-                                                            <td>{scoreTableValues['nonHumanModelCount']}</td>
-                                                            <td>{scoreTableValues['nonHumanModelPoints']}</td>
-                                                            <td rowSpan="6">{scoreTableValues['modelsRescuePointsCounted']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Cell culture model</td>
-                                                            <td>{scoreTableValues['cellCultureCount']}</td>
-                                                            <td>{scoreTableValues['cellCulturePoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colSpan="3" rowSpan="4" className="header">Rescue</td>
-                                                            <td>Rescue in human</td>
-                                                            <td>{scoreTableValues['rescueHumanModelCount']}</td>
-                                                            <td>{scoreTableValues['rescueHumanModelPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Rescue in non-human model organism</td>
-                                                            <td>{scoreTableValues['rescueNonHumanModelCount']}</td>
-                                                            <td>{scoreTableValues['rescueNonHumanModelPoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Rescue in cell culture model</td>
-                                                            <td>{scoreTableValues['rescueCellCultureCount']}</td>
-                                                            <td>{scoreTableValues['rescueCellCulturePoints']}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Rescue in patient cells</td>
-                                                            <td>{scoreTableValues['rescuePatientCellsCount']}</td>
-                                                            <td>{scoreTableValues['rescuePatientCellsPoints']}</td>
-                                                        </tr>
-                                                        <tr className="header separator-below">
-                                                            <td colSpan="6">Experimental Evidence Total</td>
-                                                            <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
-                                                        </tr>
-                                                        <tr className="total-row header">
-                                                            <td colSpan="7">Total Points</td>
-                                                            <td>{this.state.totalScore}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <strong>*</strong> &ndash; Combined LOD Score
-                                            </div>
+                                            <GeneDiseaseClassificationMatrix classificationPoints={classificationPoints} />
                                             <div className="summary-provisional-classification-description">
                                                 <p className="alert alert-warning">
                                                     <i className="icon icon-exclamation-circle"></i> The <strong>Total Points</strong> shown above are based on the set of saved evidence and accompanying scores existing
@@ -683,10 +402,10 @@ const ProvisionalClassification = createReactClass({
                                                         </tr>
                                                         <tr className="header large bg-gray separator-below">
                                                             <td>Assigned Points</td>
-                                                            <td>{scoreTableValues['geneticEvidenceTotalPoints']}</td>
-                                                            <td>{scoreTableValues['experimentalEvidenceTotalPoints']}</td>
-                                                            <td>{this.state.totalScore}</td>
-                                                            <td>{this.state.replicatedOverTime ? <span>Yes</span> : <span>No</span>}</td>
+                                                            <td>{classificationPoints['geneticEvidenceTotal']}</td>
+                                                            <td>{classificationPoints['experimentalEvidenceTotal']}</td>
+                                                            <td>{classificationPoints['evidencePointsTotal']}</td>
+                                                            <td>{provisional['replicatedOverTime'] ? <span>Yes</span> : <span>No</span>}</td>
                                                         </tr>
                                                         <tr className="header large">
                                                             <td colSpan="3" rowSpan="4">Calculated Classification</td>
@@ -708,9 +427,8 @@ const ProvisionalClassification = createReactClass({
                                                         <tr>
                                                             <td colSpan="2" className="header large">Contradictory Evidence?</td>
                                                             <td colSpan="3">
-                                                                Proband: <strong>{this.state.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
-                                                                {/*Case-control: <strong>{this.state.contradictingEvidence.caseControl ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;*/}
-                                                                Experimental: <strong>{this.state.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                Proband: <strong>{provisional.contradictingEvidence.proband ? <span className='emphasis'>Yes</span> : 'No'}</strong>&nbsp;&nbsp;&nbsp;
+                                                                Experimental: <strong>{provisional.contradictingEvidence.experimental ? <span className='emphasis'>Yes</span> : 'No'}</strong>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -724,7 +442,7 @@ const ProvisionalClassification = createReactClass({
                                                                                     <span>Modify Calculated <a href="/provisional-curation/?classification=display" target="_block">Clinical Validity Classification</a>:</span>
                                                                                 </dt>
                                                                                 <dd>
-                                                                                    {this.state.alteredClassification}
+                                                                                    {provisional.alteredClassification}
                                                                                 </dd>
                                                                             </dl>
                                                                         </div>
@@ -734,29 +452,19 @@ const ProvisionalClassification = createReactClass({
                                                                                     <span>Explain Reason(s) for Change:</span>
                                                                                 </dt>
                                                                                 <dd>
-                                                                                    {this.state.reasons}
+                                                                                    {provisional.reasons}
                                                                                 </dd>
                                                                             </dl>
                                                                         </div>
                                                                     </div>
                                                                     <div className="col-xs-12 col-sm-6">
-                                                                        <div className="classification-status">
-                                                                            <dl className="inline-dl clearfix">
-                                                                                <dt>
-                                                                                    <span>Mark status as "Provisional Classification" <i>(optional)</i>:</span>
-                                                                                </dt>
-                                                                                <dd>
-                                                                                    {this.state.classificationStatusChecked ? <span>Yes</span> : <span>No</span>}
-                                                                                </dd>
-                                                                            </dl>
-                                                                        </div>
                                                                         <div className="classification-evidence-summary">
                                                                             <dl className="inline-dl clearfix">
                                                                                 <dt>
                                                                                     <span>Evidence Summary:</span>
                                                                                 </dt>
                                                                                 <dd>
-                                                                                    {this.state.evidenceSummary}
+                                                                                    {provisional.evidenceSummary}
                                                                                 </dd>
                                                                             </dl>
                                                                         </div>
@@ -767,34 +475,135 @@ const ProvisionalClassification = createReactClass({
                                                         <tr className="total-row header">
                                                             <td colSpan="2">Last Saved Summary Classification</td>
                                                             <td colSpan="4">
-                                                                {currentClassification == 'None' ?
-                                                                    <span>{currentClassification}</span>
-                                                                    :
-                                                                    <div>{currentClassification}
-                                                                        <br />
-                                                                        <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
-                                                                    </div>
-                                                                }
+                                                                <div>{currentClassification}
+                                                                    <br />
+                                                                    <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div>
-                                                <p className="alert alert-info">
-                                                    <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
-                                                    associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
-                                                </p>
-                                            </div>
+                                            {provisional && classificationStatus === 'In progress' ?
+                                                <div>
+                                                    <p className="alert alert-info">
+                                                        <i className="icon icon-info-circle"></i> Select "Edit Classification" to edit the Last Saved Classification or click "Evidence Summary" to view all evidence
+                                                        associated with the saved Classification. If you don't wish to save, click "Record Curation page" to add more evidence.
+                                                    </p>
+                                                </div>
+                                                : null}
                                         </div>
                                     </Panel>
                                 </PanelGroup>
-                                <div className='modal-footer'>
-                                    <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
-                                    <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
-                                    <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
-                                </div>
+                                {provisional && classificationStatus === 'In progress' ?
+                                    <div className='modal-footer'>
+                                        <button type="button" className="btn btn-default btn-inline-spacer" onClick={this.getCurationCentral}>Record Curation page <i className="icon icon-briefcase"></i></button>
+                                        <button type="button" className="btn btn-info btn-inline-spacer" onClick={this.editClassification}>Edit Classification <i className="icon icon-pencil"></i></button>
+                                        <button type="button" className="btn btn-primary btn-inline-spacer pull-right" onClick={this.viewEvidenceSummary}>Evidence Summary <i className="icon icon-file-text"></i></button>
+                                    </div>
+                                    : null}
                             </div>
+                            {provisional && this.state.showProvisional ?
+                                <div className="provisional-approval-content-wrapper">
+                                    <div className="container">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save this Classification as Provisional if you are ready to send it for Review. Once saved as Provisional, the saved Provisional
+                                            Classification may not be edited, but it will always be viewable and can be saved as Approved if their are no further changes required. If changes need to be made, existing
+                                            evidence can be edited and/or new evidence added to the Gene:Disease Record at any time and a new current Provisional Classification made based on those changes. <em>Note: saving
+                                            a Classification does not prevent existing evidence from being edited or scored and archived Provisional Classifications are always viewable</em>.
+                                        </p>
+                                    </div>
+                                    <div className={classificationStatus === 'In progress' ? "container approval-process provisional-approval in-progress" : "container approval-process provisional-approval"}>
+                                        <PanelGroup>
+                                            <Panel title="Save Classification as Provisional" panelClassName="panel-data" open>
+                                                <ProvisionalApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                </div>
+                                : null}
+                            {provisional && this.state.showApproval ?
+                                <div className="final-approval-content-wrapper">    
+                                    <div className="container">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save the current (<i className="icon icon-flag"></i>) Provisional Classification as an Approved Classification
+                                            when ready to do so by using the form below, or return at a later date and use the "Approved this Saved Provisional" button. Alternatively, you continue
+                                            to edit/alter the existing evidence but you will need to create a new Provisional Classification for Approval.
+                                        </p>
+                                    </div>
+                                    <div className="container approval-process final-approval">
+                                        <PanelGroup>
+                                            <Panel title="Approve Classification" panelClassName="panel-data" open>
+                                                <ClassificationApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                    snapshots={sortedSnapshotList}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                </div>
+                                : null}
+                            {sortedSnapshotList.length && (this.state.showPublish || this.state.showUnpublish) ?
+                                <div className={'publish-approval-content-wrapper' + (this.state.showUnpublish ? ' unpublish' : '')}>
+                                    <div className="container">
+                                        {this.state.isPublishActive === 'auto' ?
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> Publish the current (<i className="icon icon-flag"></i>) Approved Classification.
+                                            </p>
+                                            :
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> {this.state.showUnpublish ? 'Unpublish' : 'Publish'} the selected Approved Classification.
+                                            </p>
+                                        }
+                                    </div>
+                                    <div className="container approval-process publish-approval">
+                                        <PanelGroup>
+                                            <Panel title={this.state.showUnpublish ? 'Unpublish Classification' : 'Publish Classification'} panelClassName="panel-data" open>
+                                                <PublishApproval
+                                                    session={session}
+                                                    gdm={gdm}
+                                                    classification={currentClassification}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisional}
+                                                    affiliation={this.props.affiliation}
+                                                    snapshots={sortedSnapshotList}
+                                                    selectedSnapshotUUID={snapshotUUID}
+                                                    updateSnapshotList={this.updateSnapshotList}
+                                                    updateProvisionalObj={this.updateProvisionalObj}
+                                                    clearPublishState={this.clearPublishState}
+                                                />
+                                            </Panel>
+                                        </PanelGroup>
+                                    </div>
+                                </div>
+                                : null}
+                            {sortedSnapshotList.length ?
+                                <div className="container snapshot-list">
+                                    <PanelGroup>
+                                        <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
+                                            <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
+                                                isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} demoVersion={this.props.demoVersion}
+                                                allowPublishButton={this.isUserAllowedToPublish() && !(this.state.isPublishActive || this.state.isUnpublishActive)} />
+                                        </Panel>
+                                    </PanelGroup>
+                                </div>
+                                : null}
                         </div>
                         :
                         null

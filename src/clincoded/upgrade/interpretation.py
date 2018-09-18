@@ -169,3 +169,10 @@ def interpretation_4_5(value, system):
     # Add affiliation property and update schema version
     return
 
+
+@upgrade_step('interpretation', '5', '6')
+def interpretation_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1600
+    # Add canonical transcript title property and update schema version
+    return
+

@@ -8,6 +8,11 @@ import * as curator from '../../curator';
 import * as evidenceCodes from './mapping/evidence_code.json';
 import PopOverComponent from '../../../libs/bootstrap/popover';
 import AlertMessage from '../../../libs/bootstrap/alert';
+import { ProvisionalApproval } from '../../provisional_classification/provisional';
+import { ClassificationApproval } from '../../provisional_classification/approval';
+import CurationSnapshots from '../../provisional_classification/snapshots';
+import { renderSelectedModeInheritance } from '../../../libs/render_mode_inheritance';
+import { sortListByDate } from '../../../libs/helpers/sort';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -19,9 +24,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         calculatedAssertion: PropTypes.string,
         provisionalPathogenicity: PropTypes.string,
         provisionalReason: PropTypes.string,
-        provisionalInterpretation: PropTypes.bool,
         evidenceSummary: PropTypes.string,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        session: PropTypes.object,
+        classificationStatus: PropTypes.string,
+        classificationSnapshots: PropTypes.array,
+        updateSnapshotList: PropTypes.func,
+        updateProvisionalObj: PropTypes.func
     },
 
     getInitialState() {
@@ -32,38 +41,41 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             modifiedPathogenicity: null,
             provisionalPathogenicity: this.props.provisionalPathogenicity,
             provisionalReason: this.props.provisionalReason,
-            provisionalInterpretation: this.props.provisionalInterpretation,
             evidenceSummary: this.props.evidenceSummary,
-            disabledCheckbox: false,
             disabledFormSumbit: false,
             submitBusy: false, // spinner for Save button
             alertMsg: null, // status message for Save/Update button
             alertType: null,
-            showAlertMessage: false
+            showAlertMessage: false,
+            classificationStatus: this.props.classificationStatus,
+            classificationSnapshots: this.props.classificationSnapshots,
+            isClassificationViewOnly: false,
+            shouldProvisionClassification: false,
+            isClassificationSaved: false,
+            isApprovalActive: null,
+            showProvisional: false,
+            showApproval: false,
         };
     },
 
     componentDidMount() {
         if (this.props.interpretation && this.props.calculatedAssertion) {
-            // Uncheck pre-existing marked provisional checkbox and disable it if needed,
-            // given the calculated/modified pathogenicity
-            this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
             // Reset form values to last saved values
             let interpretation = this.props.interpretation;
             let provisional_variant = interpretation.provisional_variant ? interpretation.provisional_variant : null;
-            let markAsProvisional, alteredClassification, reason, evidenceSummary;
+            let alteredClassification, reason, evidenceSummary, classificationStatus;
             if (interpretation) {
-                markAsProvisional = interpretation.markAsProvisional;
                 if (provisional_variant && provisional_variant.length) {
                     alteredClassification = provisional_variant[0].alteredClassification;
                     reason = provisional_variant[0].reason;
                     evidenceSummary = provisional_variant[0].evidenceSummary ? provisional_variant[0].evidenceSummary : null;
+                    classificationStatus = provisional_variant[0].classificationStatus;
+                    this.setState({isClassificationViewOnly: false});
                 }
             }
             // FIXME: Why do we need to update parent component immediately after mounting?
             this.props.setProvisionalEvaluation('provisional-pathogenicity', alteredClassification ? alteredClassification : null);
             this.props.setProvisionalEvaluation('provisional-reason', reason ? reason : null);
-            this.props.setProvisionalEvaluation('provisional-interpretation', markAsProvisional);
             this.props.setProvisionalEvaluation('evidence-summary', evidenceSummary);
         }
     },
@@ -75,96 +87,71 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         if (nextProps.calculatedAssertion) {
             this.setState({calculatedAssertion: nextProps.calculatedAssertion});
         }
+        if (nextProps.classificationStatus) {
+            this.setState({classificationStatus: nextProps.classificationStatus});
+        }
+        if (nextProps.classificationSnapshots) {
+            this.setState({classificationSnapshots: nextProps.classificationSnapshots});
+        }
         // Because we accept null values for modified pathogenicity and reason,
         // the "if (nextProps.provisionalPathogenicity')" check doesn't apply
         this.setState({
             provisionalPathogenicity: nextProps.provisionalPathogenicity,
             provisionalReason: nextProps.provisionalReason,
-            provisionalInterpretation: nextProps.provisionalInterpretation,
             evidenceSummary: nextProps.evidenceSummary
         }, () => {
-            if (this.state.interpretation && this.state.interpretation.evaluations && this.state.interpretation.evaluations.length) {
-                if (!this.state.provisionalPathogenicity) {
-                    this.refs['provisional-pathogenicity'].resetSelectedOption();
-                    this.refs['provisional-reason'].resetValue();
+            const interpretation = this.state.interpretation;
+            if (!this.state.isClassificationViewOnly) {
+                if (interpretation && interpretation.evaluations && interpretation.evaluations.length) {
+                    if (!this.state.provisionalPathogenicity) {
+                        this.refs['provisional-pathogenicity'].resetSelectedOption();
+                        this.refs['provisional-reason'].resetValue();
+                    } else {
+                        this.refs['provisional-pathogenicity'].setValue(this.state.provisionalPathogenicity);
+                        this.refs['provisional-reason'].setValue(this.state.provisionalReason);
+                    }
+                }
+                if (!this.state.evidenceSummary) {
+                    this.refs['evaluation-evidence-summary'].resetValue();
                 } else {
-                    this.refs['provisional-pathogenicity'].setValue(this.state.provisionalPathogenicity);
-                    this.refs['provisional-reason'].setValue(this.state.provisionalReason);
+                    this.refs['evaluation-evidence-summary'].setValue(this.state.evidenceSummary);
                 }
             }
-            if (!this.state.evidenceSummary) {
-                this.refs['evaluation-evidence-summary'].resetValue();
-            } else {
-                this.refs['evaluation-evidence-summary'].setValue(this.state.evidenceSummary);
-            }
+            this.handleProvisionalApprovalVisibility();
         });
     },
 
-    // Method to display either mode of inheritance adjective,
-    // or just mode of inheritance if no adjective
-    renderSelectedModeInheritance(interpretation) {
-        let moi = '', moiAdjective = '';
-
-        if (interpretation.modeInheritance) {
-            moi = interpretation.modeInheritance;
-            if (interpretation.modeInheritanceAdjective) {
-                moiAdjective = interpretation.modeInheritanceAdjective;
-            }
-        }
-        return (
-            <span>{moi && moi.length ? this.renderModeInheritanceLink(moi, moiAdjective) : 'None'}</span>
-        );
+    componentWillUnmount() {
+        this.setState({
+            isClassificationViewOnly: false,
+            shouldProvisionClassification: false,
+            isApprovalActive: null,
+            isClassificationSaved: false,
+            showProvisional: false,
+            showApproval: false
+        });
     },
 
-    // Method to construct mode of inheritance linkout
-    renderModeInheritanceLink(modeInheritance, modeInheritanceAdjective) {
-        if (modeInheritance) {
-            let start = modeInheritance.indexOf('(');
-            let end = modeInheritance.indexOf(')');
-            let hpoNumber;
-            let adjective = modeInheritanceAdjective && modeInheritanceAdjective.length ? ' (' + modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] + ')' : null;
-            if (start && end) {
-                hpoNumber = modeInheritance.substring(start+1, end);
-            }
-            if (hpoNumber && hpoNumber.indexOf('HP:') > -1) {
-                let hpoLink = 'http://compbio.charite.de/hpoweb/showterm?id=' + hpoNumber;
-                return (
-                    <span><a href={hpoLink} target="_blank">{modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</a>{adjective}</span>
-                );
+    /**
+     * Method to evaluate whether we should render the provisional approval form
+     * @param {object} interpretation - The interpretation data object
+     */
+    handleShouldProvisionClassificaton(interpretation) {
+        let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
+        let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : this.state.provisionalPathogenicity;
+        // Should generally allow users to provision an interpretation classificaion unless the following conditions are present
+        if (modifiedPathogenicity) {
+            if (modifiedPathogenicity === 'Pathogenic' || modifiedPathogenicity === 'Likely pathogenic') {
+                this.setState({shouldProvisionClassification: interpretation.disease && interpretation.disease.term ? true : false});
             } else {
-                return (
-                    <span>{modeInheritance + adjective}</span>
-                );
+                this.setState({shouldProvisionClassification: true});
             }
-        }
-    },
-
-    // Method to set the boolean value to the 'markAsProvisional' property
-    // in the event in which the associated disease is deleted while either
-    // the calculated or modified pathogenicity are 'Likely Pathogenic' or 'Pathogenic'
-    handleProvisionalCheckBox(pathogenicity) {
-        if (!this.props.interpretation.disease) {
-            let assertion = this.props.calculatedAssertion;
-            if (assertion === 'Likely pathogenic' || assertion === 'Pathogenic') {
-                if(pathogenicity === 'Benign' ||
-                   pathogenicity === 'Likely benign' ||
-                   pathogenicity === 'Uncertain significance') {
-                    this.setState({disabledCheckbox: false});
-                } else {
-                    this.props.setProvisionalEvaluation('provisional-interpretation', false);
-                    this.setState({disabledCheckbox: true});
-                }
+        } else if (calculatedAssertion) {
+            if (calculatedAssertion === 'Pathogenic' || calculatedAssertion === 'Likely pathogenic') {
+                this.setState({shouldProvisionClassification: interpretation.disease && interpretation.disease.term ? true : false});
             } else {
-                if(pathogenicity === 'Likely pathogenic' ||
-                   pathogenicity === 'Pathogenic') {
-                    this.props.setProvisionalEvaluation('provisional-interpretation', false);
-                    this.setState({disabledCheckbox: true});
-                } else {
-                    this.setState({disabledCheckbox: false});
-                }
+                this.setState({shouldProvisionClassification: true});
             }
-        } else {
-            this.setState({disabledCheckbox: false});
         }
     },
 
@@ -199,7 +186,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     }
                     // If no disease is associated, we disable provisional checkbox
                     // when modified pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
-                    this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
+                    /* this.handleProvisionalCheckBox(this.state.provisionalPathogenicity); */
                 });
             } else {
                 this.setState({provisionalPathogenicity: null}, () => {
@@ -216,7 +203,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     }
                     // If no disease is associated, we disable provisional checkbox
                     // when modified pathogenicity is either 'Likely pathogenic' or 'Pathogenic'
-                    this.handleProvisionalCheckBox(this.state.provisionalPathogenicity);
+                    /* this.handleProvisionalCheckBox(this.state.provisionalPathogenicity); */
                 });
             }
         }
@@ -250,13 +237,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 });
             }
         }
-        // Handle provisional interpretation checkbox
-        if (ref === 'provisional-interpretation' && this.refs[ref]) {
-            this.setState({provisionalInterpretation: !this.state.provisionalInterpretation}, () => {
-                // Pass checkbox state change back to parent component
-                this.props.setProvisionalEvaluation('provisional-interpretation', this.state.provisionalInterpretation);
-            });
-        }
         // Handle freetext evaluation evidence summary
         if (ref === 'evaluation-evidence-summary') {
             let summary = this.refs[ref].getValue();
@@ -282,23 +262,36 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         this.setState({showAlertMessage: false});
     },
 
+    /**
+     * Method to handle editing interpretation classification form
+     */
+    handleEditClassification() {
+        this.setState({
+            isClassificationViewOnly: false,
+            shouldProvisionClassification: false,
+            isApprovalActive: null,
+            isClassificationSaved: false,
+            showProvisional: false,
+            showApproval: false
+        });
+    },
+
     submitForm(e) {
         e.preventDefault(); e.stopPropagation();
-        this.setState({submitBusy: true, alertMsg: null});
+        this.setState({submitBusy: true});
 
         const interpretation = this.state.interpretation;
-        const provisionalInterpretation = this.state.provisionalInterpretation;
 
         if (interpretation) {
             // Flattened interpretation object
             let flatInterpretationObj = curator.flatten(interpretation);
-            // Set 'markAsProvisional' property value in the flatten interpretation object
-            flatInterpretationObj.markAsProvisional = provisionalInterpretation;
-            if (!interpretation.provisional_variant || interpretation.provisional_variant.length < 1) {
+            if (!interpretation.provisional_variant || (interpretation.provisional_variant && !interpretation.provisional_variant.length)) {
                 // Configure 'provisional-variant' object properties
-                // Use case #1: user makes pathogenicity modification and marks the interpretation provisional
-                // Use case #2: user marks the interpretation provisional without any modification
+                // Use case #1: user makes pathogenicity modification and saves the interpretation classification
+                // Use case #2: user saves the interpretation classification without any modification
                 let provisionalObj = {};
+                // Reset the interpretation classification status to 'In progress' whenever the user saves it
+                provisionalObj['classificationStatus'] = 'In progress';
                 // At least save the calculated assertion
                 provisionalObj['autoClassification'] = this.state.calculatedAssertion;
                 // If evidence summary is not nil, save it as well
@@ -321,10 +314,13 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 this.postRestData('/provisional-variant/', provisionalObj).then(result => {
                     this.setState({
                         submitBusy: false,
+                        isClassificationViewOnly: true,
+                        isClassificationSaved: true,
                         autoClassification: result['@graph'][0]['autoClassification'],
                         modifiedPathogenicity: result['@graph'][0]['alteredClassification']
                     });
-                    this.showAlertMessage('alert-success', 'Provisional changes saved successfully!');
+                    // Evaluate the pathognicity/disease criteria
+                    this.handleShouldProvisionClassificaton(this.state.interpretation);
                     let provisionalObjUuid = result['@graph'][0]['@id'];
                     if (!('provisional_variant' in flatInterpretationObj)) {
                         flatInterpretationObj.provisional_variant = [provisionalObjUuid];
@@ -342,7 +338,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     });
                 }).catch(err => {
                     this.setState({submitBusy: false});
-                    this.showAlertMessage('alert-danger', 'Unable to save provisional changes.');
                     console.log(err);
                 });
             } else {
@@ -350,8 +345,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     // Get up-to-date copy of provisional-variant object and flatten it
                     let flatProvisionalVariantObj = curator.flatten(provisionalVariantObj);
                     // Configure 'provisional-variant' object properties
-                    // Use case #1: user updates pathogenicity modification and marks the interpretation provisional
+                    // Use case #1: user updates pathogenicity modification and saves the interpretation classification
                     // Use case #2: user removes pre-existing modification and updates the form
+                    flatProvisionalVariantObj['classificationStatus'] = 'In progress';
                     flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
                     // If evidence summary is not nil, save it as well
                     if (this.state.evidenceSummary && this.state.evidenceSummary.length) {
@@ -373,31 +369,108 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                             delete flatProvisionalVariantObj['reason'];
                         }
                     }
+                    // Reset provisional and approval data whenever the evaluation is changed/updated
+                    flatProvisionalVariantObj['provisionedClassification'] = false;
+                    if (flatProvisionalVariantObj['provisionalSubmitter']) delete flatProvisionalVariantObj['provisionalSubmitter'];
+                    if (flatProvisionalVariantObj['provisionalDate']) delete flatProvisionalVariantObj['provisionalDate'];
+                    if (flatProvisionalVariantObj['provisionalReviewDate']) delete flatProvisionalVariantObj['provisionalReviewDate'];
+                    if (flatProvisionalVariantObj['provisionalComment']) delete flatProvisionalVariantObj['provisionalComment'];
+                    flatProvisionalVariantObj['approvedClassification'] = false;
+                    if (flatProvisionalVariantObj['approvalSubmitter']) delete flatProvisionalVariantObj['approvalSubmitter'];
+                    if (flatProvisionalVariantObj['classificationApprover']) delete flatProvisionalVariantObj['classificationApprover'];
+                    if (flatProvisionalVariantObj['approvalDate']) delete flatProvisionalVariantObj['approvalDate'];
+                    if (flatProvisionalVariantObj['approvalReviewDate']) delete flatProvisionalVariantObj['approvalReviewDate'];
+                    if (flatProvisionalVariantObj['approvalComment']) delete flatProvisionalVariantObj['approvalComment'];
                     return Promise.resolve(flatProvisionalVariantObj);
                 }).then(newProvisionalVariantObj => {
                     this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, newProvisionalVariantObj).then(response => {
                         this.setState({
                             submitBusy: false,
+                            isClassificationViewOnly: true,
+                            isClassificationSaved: true,
+                            classificationStatus: response['@graph'][0]['classificationStatus'],
                             autoClassification: response['@graph'][0]['autoClassification'],
                             modifiedPathogenicity: response['@graph'][0]['alteredClassification']
                         });
-                        this.showAlertMessage('alert-success', 'Provisional changes updated successfully!');
-                        this.props.updateInterpretationObj();
+                        // Evaluate the pathognicity/disease criteria
+                        this.handleShouldProvisionClassificaton(this.state.interpretation);
+                        this.props.updateProvisionalObj(response['@graph'][0]['@id']);
                     }).catch(err => {
                         this.setState({submitBusy: false});
-                        this.showAlertMessage('alert-danger', 'Unable to update provisional changes.');
                         console.log(err);
                     });
                 }).catch(err => {
                     console.log(err);
                 });
-                // Also update the interpretation object in case the checkbox value has changed
-                this.putRestData('/interpretation/' + interpretation.uuid, flatInterpretationObj).then(obj => {
-                    this.props.updateInterpretationObj();
-                }).catch(err => {
-                    console.log(err);
-                });
             }
+        }
+    },
+
+    /**
+     * Method to display classification tag/label in the interpretation header
+     * @param {string} status - The status of a given classification in an interpretation
+     */
+    renderClassificationStatusTag(status) {
+        let snapshots = this.state.classificationSnapshots;
+        let filteredSnapshots = [];
+        // Determine whether the classification had been previously approved
+        if (snapshots && snapshots.length) {
+            filteredSnapshots = snapshots.filter(snapshot => {
+                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'interpretation';
+            });
+        }
+        if (status === 'In progress') {
+            return <span className="label label-warning">IN PROGRESS</span>;
+        } else if (status === 'Provisional') {
+            if (filteredSnapshots.length) {
+                return (
+                    <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
+                );
+            } else {
+                return <span className="label label-info">PROVISIONAL</span>;
+            }
+        } else if (status === 'Approved') {
+            return <span className="label label-success">APPROVED</span>;
+        }
+    },
+
+    /**
+     * Method to show the Approval form entry panel
+     * Passed to the <Snapshots /> component as a prop
+     */
+    approveProvisional() {
+        this.setState({
+            isApprovalActive: 'yes',
+            shouldProvisionClassification: false,
+            isClassificationViewOnly: true
+        }, () => {
+            this.handleProvisionalApprovalVisibility();
+        });
+    },
+
+    handleProvisionalApprovalVisibility() {
+        const classificationStatus = this.state.classificationStatus;
+        const isApprovalActive = this.state.isApprovalActive;
+        const isClassificationSaved = this.state.isClassificationSaved;
+
+        if (classificationStatus === 'In progress') {
+            if (isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else if (isClassificationSaved) {
+                this.setState({showProvisional: true, showApproval: false});
+            } else {
+                this.setState({showProvisional: false, showApproval: false});
+            }
+        } else if (classificationStatus === 'Provisional') {
+            if (isApprovalActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: true});
+            } else if (isClassificationSaved) {
+                this.setState({showProvisional: false, showApproval: true});
+            } else {
+                this.setState({showProvisional: false, showApproval: false});
+            }
+        } else {
+            this.setState({showProvisional: false, showApproval: false});
         }
     },
 
@@ -411,17 +484,15 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         let provisionalStatus = null;
         let provisionalPathogenicity = this.state.provisionalPathogenicity ? this.state.provisionalPathogenicity : 'none';
         let provisionalReason = this.state.provisionalReason ? this.state.provisionalReason : '';
-        let provisionalInterpretation = this.state.provisionalInterpretation ? this.state.provisionalInterpretation : false;
-        let disabledCheckbox = this.state.disabledCheckbox;
         let disabledFormSumbit = this.state.disabledFormSumbit;
         let evidenceSummary = this.state.evidenceSummary ? this.state.evidenceSummary : '';
 
         if (interpretation) {
-            if (interpretation.markAsProvisional) {
-                provisionalStatus = interpretation.markAsProvisional;
-            }
             if (interpretation.provisional_variant && interpretation.provisional_variant.length) {
                 provisionalVariant = interpretation.provisional_variant[0];
+                if (provisionalVariant.classificationStatus) {
+                    provisionalStatus = provisionalVariant.classificationStatus;
+                }
                 if (provisionalVariant.alteredClassification) {
                     alteredClassification = provisionalVariant.alteredClassification;
                 }
@@ -431,6 +502,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         // And thus we pull the stored value (if any) initially from the db
         // Then we pull the updated value from either REST post or put results
         let modifiedPathogenicity = this.state.modifiedPathogenicity ? this.state.modifiedPathogenicity : alteredClassification;
+        let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const classificationStatus = this.state.classificationStatus;
+        const shouldProvisionClassification = this.state.shouldProvisionClassification;
+        const isClassificationSaved = this.state.isClassificationSaved;
+        const isApprovalActive = this.state.isApprovalActive;
 
         return (
             <div className="container evaluation-summary">
@@ -452,10 +528,6 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                 <dt>Modified Pathogenicity:</dt>
                                                 <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
                                             </dl>
-                                            <dl className="inline-dl clearfix">
-                                                <dt>Provisional Interpretation Status:</dt>
-                                                <dd className="provisional-interpretation-status">{provisionalStatus ? 'Provisional' : 'In Progress'}</dd>
-                                            </dl>
                                         </div>
                                         <div className="col-xs-12 col-sm-6">
                                             <dl className="inline-dl clearfix">
@@ -464,66 +536,167 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                             </dl>
                                             <dl className="inline-dl clearfix">
                                                 <dt>Mode of Inheritance:</dt>
-                                                <dd className="modeInheritance">{this.renderSelectedModeInheritance(interpretation)}</dd>
+                                                <dd className="modeInheritance">{renderSelectedModeInheritance(interpretation)}</dd>
                                             </dl>
                                         </div>
                                     </div>
-                                    <div className="col-md-12 provisional-form-content-wrapper">
-                                        <div className="col-xs-12 col-sm-6">
-                                            <div className="evaluation-provision provisional-pathogenicity">
-                                                <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
-                                                    defaultValue={provisionalPathogenicity} handleChange={this.handleChange}
-                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                                                    <option value='none'>No Selection</option>
-                                                    <option disabled="disabled"></option>
-                                                    <option value="Benign">Benign</option>
-                                                    <option value="Likely benign">Likely Benign</option>
-                                                    <option value="Uncertain significance">Uncertain Significance</option>
-                                                    <option value="Likely pathogenic">Likely Pathogenic</option>
-                                                    <option value="Pathogenic">Pathogenic</option>
-                                                </Input>
-                                                <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>}
-                                                    value={provisionalReason} handleChange={this.handleChange} rows="5"
-                                                    placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
-                                                    labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
-                                            </div>
-                                        </div>
-                                        <div className="col-xs-12 col-sm-6">
-                                            <div className="evaluation-provision provisional-interpretation">
-                                                <div>
-                                                    <PopOverComponent popOverWrapperClass="popover-provisional-status-help" popOverStyleClass="alert alert-info"
-                                                        actuatorTitle={<i className="icon icon-question-circle"></i>} popOverRef={ref => (this.popover = ref)}>
-                                                        <span>
-                                                            An interpretation can still be edited after it's marked "Provisional." If the Interpretation is "Likely Pathogenic" or "Pathogenic,"
-                                                            it must be associated with a disease before it can be marked as "Provisional."
-                                                        </span>
-                                                    </PopOverComponent>
-                                                    <span>Mark status as "Provisional Interpretation" <i>(optional)</i>:</span>
-                                                    <Input type="checkbox" ref="provisional-interpretation" inputDisabled={disabledCheckbox} checked={provisionalInterpretation}
-                                                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" handleChange={this.handleChange} />
+                                    {!this.state.isClassificationViewOnly ?
+                                        <div>
+                                            <div className="col-md-12 provisional-form-content-wrapper">
+                                                <div className="col-xs-12 col-sm-6">
+                                                    <div className="evaluation-provision provisional-pathogenicity">
+                                                        <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
+                                                            defaultValue={provisionalPathogenicity} handleChange={this.handleChange}
+                                                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                                                            <option value='none'>No Selection</option>
+                                                            <option disabled="disabled"></option>
+                                                            <option value="Benign">Benign</option>
+                                                            <option value="Likely benign">Likely Benign</option>
+                                                            <option value="Uncertain significance">Uncertain Significance</option>
+                                                            <option value="Likely pathogenic">Likely Pathogenic</option>
+                                                            <option value="Pathogenic">Pathogenic</option>
+                                                        </Input>
+                                                        <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>}
+                                                            value={provisionalReason} handleChange={this.handleChange} rows="5"
+                                                            placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
+                                                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                                                    </div>
+                                                </div>
+                                                <div className="col-xs-12 col-sm-6">
+                                                    <div className="evaluation-provision evidence-summary">
+                                                        <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
+                                                            value={evidenceSummary} handleChange={this.handleChange}
+                                                            placeholder="Summary of the evidence and rationale for the clinical significance (optional)." rows="8"
+                                                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="evaluation-provision evidence-summary">
-                                                <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
-                                                    value={evidenceSummary} handleChange={this.handleChange}
-                                                    placeholder="Summary of the evidence and rationale for the clinical significance (optional)." rows="5"
-                                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
+                                            <div className="col-md-12 classification-submit clearfix">
+                                                <div className="classification-submit-note pull-left">
+                                                    <i className="icon icon-info-circle"></i> An Interpretation will remain In Progress until Saved as Provisional.
+                                                </div>
+                                                <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                                                    submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
                                             </div>
-                                            <div className="provisional-submit">
-                                                <Input type="submit" inputClassName={(provisionalVariant ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
-                                                    id="submit" title={provisionalVariant ? "Update" : "Save"} submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
-                                                <AlertMessage
-                                                    visible={this.state.showAlertMessage}
-                                                    type={this.state.alertType}
-                                                    message={this.state.alertMsg}
-                                                    customClasses="pull-right"
+                                        </div>
+                                        :
+                                        <div>
+                                            <div className="col-md-12 provisional-form-content-wrapper">
+                                                <div className="col-xs-12 col-sm-6">
+                                                    <div className="evaluation-provision provisional-pathogenicity">
+                                                        <div>    
+                                                            <dl className="inline-dl clearfix">
+                                                                <dt><span>Modify Pathogenicity:</span></dt>
+                                                                <dd>{provisionalPathogenicity}</dd>
+                                                            </dl>
+                                                        </div>
+                                                        <div>
+                                                            <dl className="inline-dl clearfix">
+                                                                <dt><span>Explain reason(s) for change:</span></dt>
+                                                                <dd>{provisionalReason && provisionalReason.length ? provisionalReason : 'None'}</dd>
+                                                            </dl>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-xs-12 col-sm-6">
+                                                    <div className="evaluation-provision evidence-summary">
+                                                        <dl className="inline-dl clearfix preview-provisional-comment">
+                                                            <dt><span>Evidence Summary:</span></dt>
+                                                            <dd><span>{evidenceSummary && evidenceSummary.length ? evidenceSummary : 'None'}</span></dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {classificationStatus === 'In progress' ?
+                                                <div className="col-md-12 classification-edit">
+                                                    <button type="button" className="btn btn-info btn-inline-spacer pull-right"
+                                                        onClick={this.handleEditClassification}>Edit <i className="icon icon-pencil"></i></button>
+                                                </div>
+                                                : null}
+                                        </div>
+                                    }
+                                </Form>
+                            </div>
+                        </div>
+                        {provisionalVariant && this.state.showProvisional ?
+                            <div className="provisional-approval-content-wrapper">
+                                {shouldProvisionClassification ?
+                                    <div>
+                                        <div className="provisional-interpretation-note">
+                                            <p className="alert alert-info">
+                                                <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you have finished all your evaluations and wish to mark it as complete. Once
+                                                you have saved it as Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current
+                                                one, with access to its Evaluation Summary.
+                                            </p>
+                                        </div>
+                                        <div className="panel panel-warning approval-process provisional-approval">
+                                            <div className="panel-heading">
+                                                <h3 className="panel-title">Save Interpretation as Provisional</h3>
+                                            </div>
+                                            <div className="panel-body">
+                                                <ProvisionalApproval
+                                                    session={this.props.session}
+                                                    interpretation={interpretation}
+                                                    classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                                    classificationStatus={classificationStatus}
+                                                    provisional={provisionalVariant}
+                                                    affiliation={this.props.affiliation}
+                                                    updateSnapshotList={this.props.updateSnapshotList}
+                                                    updateProvisionalObj={this.props.updateProvisionalObj}
+                                                    approveProvisional={this.approveProvisional}
                                                 />
                                             </div>
                                         </div>
                                     </div>
-                                </Form>
+                                    :
+                                    <div className="provisional-interpretation-note">
+                                        <p className="alert alert-warning">
+                                            <i className="icon icon-exclamation-circle"></i> The option to save an Interpretation as Provisional will not appear when the saved calculated or modified value
+                                            is "Likely Pathogenic" or "Pathogenic" and there is no associated disease.
+                                        </p>
+                                    </div>
+                                }
                             </div>
-                        </div>
+                            : null}
+                        {provisionalVariant && this.state.showApproval ?
+                            <div className="final-approval-content-wrapper"> 
+                                <div className="final-approval-note">
+                                    <p className="alert alert-info">
+                                        <i className="icon icon-info-circle"></i> When ready, you may save this Provisional Interpretation as Approved. Once you have saved it as Approved it will become
+                                        uneditable, but you will be able to save a new current Approved Interpretation, thus archiving this current one and retaining access to its Evaluation Summary.
+                                    </p>
+                                </div>
+                                <div className="panel panel-warning approval-process final-approval">
+                                    <div className="panel-heading">
+                                        <h3 className="panel-title">Approve Interpretation</h3>
+                                    </div>
+                                    <div className="panel-body">
+                                        <ClassificationApproval
+                                            session={this.props.session}
+                                            interpretation={interpretation}
+                                            classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                            classificationStatus={classificationStatus}
+                                            provisional={provisionalVariant}
+                                            affiliation={this.props.affiliation}
+                                            updateSnapshotList={this.props.updateSnapshotList}
+                                            updateProvisionalObj={this.props.updateProvisionalObj}
+                                            snapshots={sortedSnapshotList}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            : null}
+                        {sortedSnapshotList.length ?
+                            <div className="panel panel-info snapshot-list">
+                                <div className="panel-heading">
+                                    <h3 className="panel-title">Saved Provisional and Approved Interpretation(s)</h3>
+                                </div>
+                                <div className="panel-body">
+                                    <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
+                                        isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
+                                </div>
+                            </div>
+                            : null}
 
                         <div className="panel panel-info datasource-evaluation-summary">
                             <div className="panel-heading">

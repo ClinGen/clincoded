@@ -14,6 +14,7 @@ import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import { ScoreExperimental } from './score/experimental_score';
 import { ScoreViewer } from './score/viewer';
+import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -102,8 +103,7 @@ var ExperimentalCuration = createReactClass({
             submitBusy: false, // True while form is submitting
             userScoreObj: {}, // Logged-in user's score object
             uniprotId: '',
-            formError: false,
-            scoreDisabled: true // Flag to enable/disable scoring
+            formError: false
         };
     },
 
@@ -175,12 +175,6 @@ var ExperimentalCuration = createReactClass({
                 expressedInPatients: false,
                 patientVariantRescue: false,
                 wildTypeRescuePhenotype: false
-            }, () => {
-                if (this.state.experimentalType.indexOf('Functional Alteration') > -1 || this.state.experimentalType.indexOf('Model Systems') > -1) {
-                    this.setState({scoreDisabled: false});
-                } else {
-                    this.setState({scoreDisabled: true});
-                }
             });
             if (this.state.experimentalNameVisible) {
                 this.refs['experimentalName'].setValue('');
@@ -203,18 +197,7 @@ var ExperimentalCuration = createReactClass({
             }
         } else if (ref === 'experimentalSubtype') {
             var tempExperimentalSubtype = this.refs[ref].getValue();
-            this.setState({experimentalSubtype: tempExperimentalSubtype}, () => {
-                /**
-                 * Selecting the 'Biochemical Function' subtype 'B' option shall enable scoring
-                 */
-                if (this.state.experimentalType.indexOf('Biochemical Function') > -1) {
-                    if (this.state.experimentalSubtype.indexOf('B. Gene function consistent with phenotype(s)') > -1) {
-                        this.setState({scoreDisabled: false});
-                    } else {
-                        this.setState({scoreDisabled: true});
-                    }
-                }
-            });
+            this.setState({experimentalSubtype: tempExperimentalSubtype});
             // if assessmentTracker was set previously, reset its value
             if (this.cv.assessmentTracker) {
                 // set values for assessmentTracker
@@ -253,15 +236,11 @@ var ExperimentalCuration = createReactClass({
             }
             if (this.refs['normalExpression.expressedInTissue']) {
                 this.refs['normalExpression.expressedInTissue'].resetValue();
-                this.setState({expressedInTissue: false}, () => {
-                    this.toggleScoring(this.state.expressedInTissue);
-                });
+                this.setState({expressedInTissue: false});
             }
             if (this.refs['alteredExpression.expressedInPatients']) {
                 this.refs['alteredExpression.expressedInPatients'].resetValue();
-                this.setState({expressedInPatients: false}, () => {
-                    this.toggleScoring(this.state.expressedInPatients);
-                });
+                this.setState({expressedInPatients: false});
             }
             // If a subtype is not selected, do not let the user specify the experimental name
             if (tempExperimentalSubtype == 'none' || tempExperimentalSubtype === '') {
@@ -277,39 +256,23 @@ var ExperimentalCuration = createReactClass({
             }
         } else if (ref === 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease') {
             this.setState({geneImplicatedWithDisease: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.geneImplicatedWithDisease);
+                this.clrFormErrors('geneWithSameFunctionSameDisease.explanationOfOtherGenes');
             });
-            if (this.refs['geneWithSameFunctionSameDisease.geneImplicatedWithDisease'].getValue() === false) {
-                this.refs['geneWithSameFunctionSameDisease.explanationOfOtherGenes'].resetValue();
-                this.refs['geneWithSameFunctionSameDisease.evidenceInPaper'].resetValue();
-            }
         } else if (ref === 'geneImplicatedInDisease') {
             this.setState({geneImplicatedInDisease: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.geneImplicatedInDisease);
+                this.clrFormErrors('relationshipOfOtherGenesToDisese');
             });
-            if (this.refs['geneImplicatedInDisease'].getValue() === false) {
-                this.refs['relationshipOfOtherGenesToDisese'].resetValue();
-                this.refs['evidenceInPaper'].resetValue();
-            }
         } else if (ref === 'normalExpression.expressedInTissue') {
             this.setState({expressedInTissue: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.expressedInTissue);
+                this.clrFormErrors('normalExpression.evidence');
             });
-            if (this.refs['normalExpression.expressedInTissue'].getValue() === false) {
-                this.refs['normalExpression.evidence'].resetValue();
-                this.refs['normalExpression.evidenceInPaper'].resetValue();
-            }
         } else if (ref === 'alteredExpression.expressedInPatients') {
             this.setState({expressedInPatients: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.expressedInPatients);
+                this.clrFormErrors('alteredExpression.evidence');
             });
-            if (this.refs['alteredExpression.expressedInPatients'].getValue() === false) {
-                this.refs['alteredExpression.evidence'].resetValue();
-                this.refs['alteredExpression.evidenceInPaper'].resetValue();
-            }
         } else if (ref === 'wildTypeRescuePhenotype') {
             this.setState({wildTypeRescuePhenotype: this.refs[ref].toggleValue()}, () => {
-                this.toggleScoring(this.state.wildTypeRescuePhenotype);
+                this.clrFormErrors('explanation');
             });
         } else if (ref === 'patientVariantRescue') {
             this.setState({patientVariantRescue: this.refs[ref].toggleValue()});
@@ -546,15 +509,12 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease) {
-                            this.setState({geneImplicatedWithDisease: bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease}, () => {
-                                this.toggleScoring(this.state.geneImplicatedWithDisease);
-                            });
+                            this.setState({geneImplicatedWithDisease: bioFunc.geneWithSameFunctionSameDisease.geneImplicatedWithDisease});
                         }
                     } else if (!_.isEmpty(bioFunc.geneFunctionConsistentWithPhenotype)) {
                         this.setState({
                             experimentalSubtype: "B. Gene function consistent with phenotype(s)",
-                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B'),
-                            scoreDisabled: false
+                            experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
                         });
                         if (bioFunc.geneFunctionConsistentWithPhenotype.phenotypeHPO && bioFunc.geneFunctionConsistentWithPhenotype.phenotypeHPO.length > 0) {
                             this.setState({'biochemicalFunctionHPO': true});
@@ -571,9 +531,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({bioChemicalFunctionIF_FreeText: true}) : this.setState({bioChemicalFunctionIF_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Protein Interactions') {
                     if (stateObj.experimental.proteinInteractions.geneImplicatedInDisease) {
-                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease}, () => {
-                            this.toggleScoring(this.state.geneImplicatedInDisease);
-                        });
+                        this.setState({geneImplicatedInDisease: stateObj.experimental.proteinInteractions.geneImplicatedInDisease});
                     }
                 } else if (stateObj.experimental.evidenceType === 'Expression') {
                     let expression = stateObj.experimental.expression;
@@ -583,9 +541,7 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'A')
                         });
                         if (expression.normalExpression.expressedInTissue) {
-                            this.setState({expressedInTissue: expression.normalExpression.expressedInTissue}, () => {
-                                this.toggleScoring(this.state.expressedInTissue);
-                            });
+                            this.setState({expressedInTissue: expression.normalExpression.expressedInTissue});
                         }
                     } else if (!_.isEmpty(expression.alteredExpression)) {
                         this.setState({
@@ -593,9 +549,7 @@ var ExperimentalCuration = createReactClass({
                             experimentalTypeDescription: this.getExperimentalTypeDescription(stateObj.experimental.evidenceType, 'B')
                         });
                         if (expression.alteredExpression.expressedInPatients) {
-                            this.setState({expressedInPatients: expression.alteredExpression.expressedInPatients}, () => {
-                                this.toggleScoring(this.state.expressedInPatients);
-                            });
+                            this.setState({expressedInPatients: expression.alteredExpression.expressedInPatients});
                         }
                     }
                     // Set boolean state on 'required' prop for Expression 'Organ of Tissue' Uberon ID
@@ -606,7 +560,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({expressionOT_FreeText: true}) : this.setState({expressionOT_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Functional Alteration') {
                     let funcAlt = stateObj.experimental.functionalAlteration;
-                    this.setState({functionalAlterationType: funcAlt.functionalAlterationType, scoreDisabled: false});
+                    this.setState({functionalAlterationType: funcAlt.functionalAlterationType});
                     // Set boolean state on 'required' prop for Functional Alteration 'Patient Cell Type' CL Ontology
                     funcAlt.patientCells && funcAlt.patientCells.length ?
                         this.setState({functionalAlterationPCells_ClId: true}): this.setState({functionalAlterationPCells_ClId: false});
@@ -627,7 +581,7 @@ var ExperimentalCuration = createReactClass({
                         this.setState({functionalAlterationNFG_FreeText: true}) : this.setState({functionalAlterationNFG_FreeText: false});
                 } else if (stateObj.experimental.evidenceType === 'Model Systems') {
                     let modelSystems = stateObj.experimental.modelSystems;
-                    this.setState({modelSystemsType: modelSystems.modelSystemsType, scoreDisabled: false});
+                    this.setState({modelSystemsType: modelSystems.modelSystemsType});
                     modelSystems.phenotypeHPOObserved && modelSystems.phenotypeHPOObserved.length ?
                         this.setState({modelSystemsPOMSHPO: true}) : this.setState({modelSystemsPOMSHPO: false});
                     modelSystems.phenotypeFreetextObserved && modelSystems.phenotypeFreetextObserved.length ?
@@ -652,9 +606,7 @@ var ExperimentalCuration = createReactClass({
                         }
                     });
                     if (rescue.wildTypeRescuePhenotype) {
-                        this.setState({wildTypeRescuePhenotype: rescue.wildTypeRescuePhenotype}, () => {
-                            this.toggleScoring(this.state.wildTypeRescuePhenotype);
-                        });
+                        this.setState({wildTypeRescuePhenotype: rescue.wildTypeRescuePhenotype});
                     }
                     if (rescue.hasOwnProperty('patientVariantRescue')) {
                         this.setState({patientVariantRescue: rescue.patientVariantRescue});
@@ -670,10 +622,10 @@ var ExperimentalCuration = createReactClass({
                     rescue.patientCellsFreeText && rescue.patientCellsFreeText.length ?
                         this.setState({rescuePCells_FreeText: true}) : this.setState({rescuePCells_FreeText: false});
                     // Set boolean state on 'required' prop for Rescue 'Engineered Equivalent Cell Type' EFO ID
-                    rescue.engineeredEquivalentCellType && rescue.engineeredEquivalentCellType.length ?
+                    rescue.cellCulture && rescue.cellCulture.length ?
                         this.setState({rescueCC_EfoId: true}) : this.setState({rescueCC_EfoId: false});
                     // Set boolean state on 'required' prop for Rescue 'Engineered Equivalent Cell Type' free text
-                    rescue.engineeredEquivalentCellTypeFreeText && rescue.engineeredEquivalentCellTypeFreeText.length ?
+                    rescue.cellCultureFreeText && rescue.cellCultureFreeText.length ?
                         this.setState({rescueCC_FreeText: true}) : this.setState({rescueCC_FreeText: false});
                 }
 
@@ -692,7 +644,8 @@ var ExperimentalCuration = createReactClass({
                                     'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
                                     'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                     'carId': variants[i].carId ? variants[i].carId : null,
-                                    'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                    'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                    'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                     'uuid': variants[i].uuid
                                 };
                             }
@@ -756,14 +709,6 @@ var ExperimentalCuration = createReactClass({
         } else if (typeof prevState.experimentalSubtype !== undefined && prevState.experimentalSubtype !== this.state.experimentalSubtype) {
             this.setState({formErrors: []});
         }
-    },
-
-    /**
-     * Method to set the flag to enable scoring
-     * @param {bool} value - The value of checkbox.
-     */
-    toggleScoring(value) {
-        this.setState({scoreDisabled: !value});
     },
 
     // validate values and return error messages as needed
@@ -856,11 +801,6 @@ var ExperimentalCuration = createReactClass({
             var formError = false;
 
             if (this.state.experimentalType == 'Biochemical Function') {
-                // Check form for Biochemical Function panel
-                if (this.state.experimentalSubtype.charAt(0) == 'A' && !this.getFormValue('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')) {
-                    formError = true;
-                    this.setFormErrors('geneWithSameFunctionSameDisease.geneImplicatedWithDisease', "Please see note below.");
-                }
                 // Validate GO ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('identifiedFunction')) {
                     goSlimIDs = curator.capture.goslims(this.getFormValue('identifiedFunction'));
@@ -874,21 +814,11 @@ var ExperimentalCuration = createReactClass({
                 formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
             else if (this.state.experimentalType == 'Protein Interactions') {
-                // Check form for Protein Interactions panel
                 // check geneSymbols
-                if (!this.getFormValue('geneImplicatedInDisease')) {
-                    formError = true;
-                    this.setFormErrors('geneImplicatedInDisease', "Please see note below.");
-                }
                 geneSymbols = curator.capture.genes(this.getFormValue('interactingGenes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'interactingGenes');
             }
             else if (this.state.experimentalType == 'Expression') {
-                // Check form for Expression panel
-                if (this.state.experimentalSubtype.charAt(0) == 'B' && !this.getFormValue('alteredExpression.expressedInPatients')) {
-                    formError = true;
-                    this.setFormErrors('alteredExpression.expressedInPatients', "Please see note below.");
-                }
                 // Validate Uberon ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('organOfTissue')) {
                     uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
@@ -932,12 +862,7 @@ var ExperimentalCuration = createReactClass({
                 }
             }
             else if (this.state.experimentalType == 'Rescue') {
-                // Check form for Rescue panel
                 // Validate clIDs/efoIDs depending on form selection. Don't validate if free text is provided.
-                if (!this.getFormValue('wildTypeRescuePhenotype')) {
-                    formError = true;
-                    this.setFormErrors('wildTypeRescuePhenotype', "Please see note below.");
-                }
                 if (this.getFormValue('rescueType') === 'Patient cells' && this.getFormValue('rescue.patientCells')) {
                     clIDs = curator.capture.clids(this.getFormValue('rescue.patientCells'));
                     formError = this.validateFormTerms(formError, 'clIDs', clIDs, 'rescue.patientCells', 1);
@@ -1058,7 +983,7 @@ var ExperimentalCuration = createReactClass({
                     newExperimental.expression = {};
                     var EorganOfTissue = this.getFormValue('organOfTissue');
                     if (EorganOfTissue) {
-                        newExperimental.expression.organOfTissue = EorganOfTissue;
+                        newExperimental.expression.organOfTissue = EorganOfTissue.indexOf('_') > -1 ? EorganOfTissue.replace('_', ':') : EorganOfTissue;
                     }
                     var EorganOfTissueFreeText = this.getFormValue('organOfTissueFreeText');
                     if (EorganOfTissueFreeText) {
@@ -1098,7 +1023,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const FA_patientCells = this.getFormValue('funcalt.patientCells');
                     if (FA_patientCells) {
-                        newExperimental.functionalAlteration.patientCells = FA_patientCells;
+                        newExperimental.functionalAlteration.patientCells = FA_patientCells.indexOf('_') > -1 ? FA_patientCells.replace('_', ':') : FA_patientCells;
                     }
                     const FA_patientCellsFreeText = this.getFormValue('funcalt.patientCellsFreeText');
                     if (FA_patientCellsFreeText) {
@@ -1106,7 +1031,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const FA_nonPatientCells = this.getFormValue('funcalt.nonPatientCells');
                     if (FA_nonPatientCells) {
-                        newExperimental.functionalAlteration.nonPatientCells = FA_nonPatientCells;
+                        newExperimental.functionalAlteration.nonPatientCells = FA_nonPatientCells.indexOf('_') > -1 ? FA_nonPatientCells.replace('_', ':') : FA_nonPatientCells;
                     }
                     const FA_nonPatientCellsFreeText = this.getFormValue('funcalt.nonPatientCellsFreeText');
                     if (FA_nonPatientCellsFreeText) {
@@ -1147,7 +1072,7 @@ var ExperimentalCuration = createReactClass({
                     } else if (MS_modelSystemsType == 'Cell culture model') {
                         const MS_cellCulture = this.getFormValue('cellCulture');
                         if (MS_cellCulture) {
-                            newExperimental.modelSystems.cellCulture = MS_cellCulture;
+                            newExperimental.modelSystems.cellCulture = MS_cellCulture.indexOf('_') > -1 ? MS_cellCulture.replace('_', ':') : MS_cellCulture;
                         }
                         const MS_cellCultureFreeText = this.getFormValue('cellCultureFreeText');
                         if (MS_cellCultureFreeText) {
@@ -1191,7 +1116,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_patientCells = this.getFormValue('rescue.patientCells');
                     if (RES_patientCells) {
-                        newExperimental.rescue.patientCells = RES_patientCells;
+                        newExperimental.rescue.patientCells = RES_patientCells.indexOf('_') > -1 ? RES_patientCells.replace('_', ':') : RES_patientCells;
                     }
                     const RES_patientCellsFreeText = this.getFormValue('rescue.patientCellsFreeText');
                     if (RES_patientCellsFreeText) {
@@ -1199,7 +1124,7 @@ var ExperimentalCuration = createReactClass({
                     }
                     const RES_cellCulture = this.getFormValue('rescue.cellCulture');
                     if (RES_cellCulture) {
-                        newExperimental.rescue.cellCulture = RES_cellCulture;
+                        newExperimental.rescue.cellCulture = RES_cellCulture.indexOf('_') > -1 ? RES_cellCulture.replace('_', ':') : RES_cellCulture;
                     }
                     const RES_cellCultureFreeText = this.getFormValue('rescue.cellCultureFreeText');
                     if (RES_cellCultureFreeText) {
@@ -1309,7 +1234,8 @@ var ExperimentalCuration = createReactClass({
                     /*************************************************************/
                     /* Either update or create the score status object in the DB */
                     /*************************************************************/
-                    if (Object.keys(newUserScoreObj).length) {
+                    if (Object.keys(newUserScoreObj).length && newUserScoreObj.scoreStatus) {
+                        // Update and create score object when the score object has the scoreStatus key/value pair
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -1324,6 +1250,22 @@ var ExperimentalCuration = createReactClass({
                                 return Promise.resolve(evidenceScores);
                             });
                         }
+                    } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.scoreStatus) {
+                        // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                        // Then delete the score entry from the score list associated with the evidence
+                        if (this.state.userScoreObj.uuid) {
+                            newUserScoreObj['status'] = 'deleted';
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                evidenceScores.forEach(score => {
+                                    if (score === modifiedScoreObj['@graph'][0]['@id']) {
+                                        let index = evidenceScores.indexOf(score);
+                                        evidenceScores.splice(index, 1);
+                                    }
+                                });
+                                // Return the evidence score array without the deleted object
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
                     } else {
                         return Promise.resolve(null);
                     }
@@ -1335,7 +1277,11 @@ var ExperimentalCuration = createReactClass({
                         newExperimental.variants = experimentalDataVariants;
                     }
 
-                    // If we add a new score, add it to the experimental object
+                    // The scoreArray may contain:
+                    // 1. One new score
+                    // 2. New score and other curators' scores
+                    // 3. No new score but an updated score
+                    // 4. No score after the curator deletes the only score in the array
                     if (scoreArray && scoreArray.length) {
                         newExperimental.scores = scoreArray;
                     }
@@ -1426,7 +1372,8 @@ var ExperimentalCuration = createReactClass({
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
-                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid
             };
         } else {
@@ -1491,8 +1438,10 @@ var ExperimentalCuration = createReactClass({
         // Find any pre-existing scores associated with the evidence
         let evidenceScores = experimental && experimental.scores && experimental.scores.length ? experimental.scores : [];
         let experimentalEvidenceType;
-        if (this.state.experimentalType === 'Biochemical Function' || this.state.experimentalType === 'Protein Interactions' || this.state.experimentalType === 'Expression') {
+        if (this.state.experimentalType === 'Protein Interactions') {
             experimentalEvidenceType = null;
+        } else if (this.state.experimentalType === 'Biochemical Function' || this.state.experimentalType === 'Expression') {
+            experimentalEvidenceType = this.state.experimentalSubtype;
         } else if (this.state.experimentalType === 'Functional Alteration') {
             experimentalEvidenceType = this.state.functionalAlterationType;
         } else if (this.state.experimentalType === 'Model Systems') {
@@ -1587,7 +1536,7 @@ var ExperimentalCuration = createReactClass({
                                                     <Panel title="Experimental Data Score" panelClassName="experimental-evidence-score" open>
                                                         <ScoreExperimental evidence={experimental} experimentalType={this.state.experimentalType} experimentalEvidenceType={experimentalEvidenceType}
                                                             evidenceType="Experimental" session={session} handleUserScoreObj={this.handleUserScoreObj} formError={this.state.formError}
-                                                            scoreDisabled={this.state.scoreDisabled} affiliation={this.props.affiliation} />
+                                                            affiliation={this.props.affiliation} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1780,15 +1729,14 @@ function TypeBiochemicalFunctionA() {
                 error={this.getFormError('geneWithSameFunctionSameDisease.geneImplicatedWithDisease')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.geneImplicatedWithDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.geneImplicatedWithDisease} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene(s) entered above in this section have not been implicated in the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top alert alert-warning"><strong>Warning:</strong> not checking the above box indicates this criteria has not been met for this evidence; this should be taken into account during its evaluation.</p>
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.explanationOfOtherGenes" label="How has this other gene(s) been implicated in the above disease?:"
                 error={this.getFormError('geneWithSameFunctionSameDisease.explanationOfOtherGenes')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.explanationOfOtherGenes')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5" value={BF_explanationOfOtherGenes}
-                inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} required={this.state.geneImplicatedWithDisease} />
+                inputDisabled={this.cv.othersAssessed} required={this.state.geneImplicatedWithDisease} />
             <Input type="textarea" ref="geneWithSameFunctionSameDisease.evidenceInPaper" label="Additional comments:"
-                error={this.getFormError('geneWithSameFunctionSameDisease.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'geneWithSameFunctionSameDisease.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" rows="5"
-                value={BF_evidenceInPaper} inputDisabled={!this.state.geneImplicatedWithDisease || this.cv.othersAssessed} />
+                value={BF_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1902,16 +1850,15 @@ function TypeProteinInteractions() {
                 error={this.getFormError('geneImplicatedInDisease')} clearError={this.clrFormErrors.bind(null, 'geneImplicatedInDisease')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.geneImplicatedInDisease} defaultChecked="false" inputDisabled={this.cv.othersAssessed} handleChange={this.handleChange} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the interacting gene(s) have not been associated with the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top alert alert-warning"><strong>Warning:</strong> not checking the above box indicates this criteria has not been met for this evidence; this should be taken into account during its evaluation.</p>
             <Input type="textarea" ref="relationshipOfOtherGenesToDisese" label="Explanation of relationship of interacting gene(s):"
                 error={this.getFormError('relationshipOfOtherGenesToDisese')} clearError={this.clrFormErrors.bind(null, 'relationshipOfOtherGenesToDisese')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 rows="5" value={PI_relationshipOfOtherGenesToDisese}
-                inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} required={this.state.geneImplicatedInDisease} />
+                inputDisabled={this.cv.othersAssessed} required={this.state.geneImplicatedInDisease} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
-                error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={PI_evidenceInPaper}inputDisabled={!this.state.geneImplicatedInDisease || this.cv.othersAssessed} />
+                rows="5" value={PI_evidenceInPaper}inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -1946,7 +1893,7 @@ function TypeExpression() {
             <Input type="text" ref="organOfTissue" label={<span>Organ or tissue relevant to disease <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228" inputDisabled={this.cv.othersAssessed}
+                value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228 or UBERON_0015228" inputDisabled={this.cv.othersAssessed}
                 handleChange={this.handleChange} required={!this.state.expressionOT_FreeText}
                 customErrorMsg="Enter Uberon ID and/or free text" />
             <Input type="textarea" ref="organOfTissueFreeText" label={<span>Organ or tissue relevant to disease <span className="normal">(free text)</span>:</span>}
@@ -1983,15 +1930,14 @@ function TypeExpressionA() {
                 error={this.getFormError('normalExpression.expressedInTissue')} clearError={this.clrFormErrors.bind(null, 'normalExpression.expressedInTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.expressedInTissue} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the gene is not normally expressed in the above tissue, the criteria for counting this experimental evidence has not been met and cannot be submitted. Proceed to section B below or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Curation Central</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top alert alert-warning"><strong>Warning:</strong> not checking the above box indicates this criteria has not been met for this evidence; this should be taken into account during its evaluation.</p>
             <Input type="textarea" ref="normalExpression.evidence" label="Evidence for normal expression in disease tissue:"
                 error={this.getFormError('normalExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_normalExpression_evidence} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} required={this.state.expressedInTissue} />
+                rows="5" value={EXP_normalExpression_evidence} inputDisabled={this.cv.othersAssessed} required={this.state.expressedInTissue} />
             <Input type="textarea" ref="normalExpression.evidenceInPaper" label="Notes on where evidence found:"
-                error={this.getFormError('normalExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'normalExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_normalExpression_evidenceInPaper} inputDisabled={!this.state.expressedInTissue || this.cv.othersAssessed} />
+                rows="5" value={EXP_normalExpression_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -2013,15 +1959,14 @@ function TypeExpressionB() {
                 error={this.getFormError('alteredExpression.expressedInPatients')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.expressedInPatients')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.expressedInPatients} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the expression is not altered in patients who have the disease, the criteria for counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top alert alert-warning"><strong>Warning:</strong> not checking the above box indicates this criteria has not been met for this evidence; this should be taken into account during its evaluation.</p>
             <Input type="textarea" ref="alteredExpression.evidence" label="Evidence for altered expression in patients:"
                 error={this.getFormError('alteredExpression.evidence')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidence')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_alteredExpression_evidence} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} required={this.state.expressedInPatients} />
+                rows="5" value={EXP_alteredExpression_evidence} inputDisabled={this.cv.othersAssessed} required={this.state.expressedInPatients} />
             <Input type="textarea" ref="alteredExpression.evidenceInPaper" label="Notes on where evidence found in paper:"
-                error={this.getFormError('alteredExpression.evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'alteredExpression.evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={EXP_alteredExpression_evidenceInPaper} inputDisabled={!this.state.expressedInPatients || this.cv.othersAssessed} />
+                rows="5" value={EXP_alteredExpression_evidenceInPaper} inputDisabled={this.cv.othersAssessed} />
         </div>
     );
 }
@@ -2070,7 +2015,7 @@ function TypeFunctionalAlteration(uniprotId) {
                     <Input type="textarea" ref="funcalt.patientCells" label={<span>Patient cell type <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.patientCells')} clearError={this.clrFormErrors.bind(null, 'funcalt.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={FA_patientCells} placeholder="e.g. CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationPCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="funcalt.patientCellsFreeText" label={<span>Patient cell type <span className="normal">(free text)</span>:</span>}
@@ -2091,7 +2036,7 @@ function TypeFunctionalAlteration(uniprotId) {
                     <Input type="textarea" ref="funcalt.nonPatientCells" label={<span>Non-patient cell type <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('funcalt.nonPatientCells')} clearError={this.clrFormErrors.bind(null, 'funcalt.nonPatientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={FA_nonPatientCells} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={FA_nonPatientCells} placeholder="e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.functionalAlterationNPCells_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="funcalt.nonPatientCellsFreeText" label={<span>Non-patient cell type <span className="normal">(free text)</span>:</span>}
@@ -2217,7 +2162,7 @@ function TypeModelSystems() {
                     <Input type="textarea" ref="cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('cellCulture')} clearError={this.clrFormErrors.bind(null, 'cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={MS_cellCulture} placeholder="e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.modelSystemsCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
@@ -2372,7 +2317,7 @@ function TypeRescue() {
                     <Input type="textarea" ref="rescue.cellCulture" label={<span>Cell culture model type/line <span className="normal">(EFO or CL ID)</span>:</span>}
                         error={this.getFormError('rescue.cellCulture')} clearError={this.clrFormErrors.bind(null, 'rescue.cellCulture')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_cellCulture} placeholder="e.g. EFO_0001187, or CL_0000057 (if an EFO term is unavailable)" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={RES_cellCulture} placeholder="e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescueCC_FreeText}
                         customErrorMsg="Enter EFO or CL ID, and/or free text" />
                     <Input type="textarea" ref="rescue.cellCultureFreeText" label={<span>Cell culture model type/line <span className="normal">(free text)</span>:</span>}
@@ -2393,7 +2338,7 @@ function TypeRescue() {
                     <Input type="textarea" ref="rescue.patientCells" label={<span>Patient cell type/line <span className="normal">(CL ID)</span>:</span>}
                         error={this.getFormError('rescue.patientCells')} clearError={this.clrFormErrors.bind(null, 'rescue.patientCells')}
                         labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input no-resize"
-                        rows="1" value={RES_patientCells} placeholder="e.g. CL_0000057" inputDisabled={this.cv.othersAssessed}
+                        rows="1" value={RES_patientCells} placeholder="e.g. CL:0000057 or CL_0000057" inputDisabled={this.cv.othersAssessed}
                         handleChange={this.handleChange} required={!this.state.rescuePCells_FreeText}
                         customErrorMsg="Enter CL ID and/or free text" />
                     <Input type="textarea" ref="rescue.patientCellsFreeText" label={<span>Patient cell type/line <span className="normal">(free text)</span>:</span>}
@@ -2431,7 +2376,7 @@ function TypeRescue() {
                 error={this.getFormError('wildTypeRescuePhenotype')} clearError={this.clrFormErrors.bind(null, 'wildTypeRescuePhenotype')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                 checked={this.state.wildTypeRescuePhenotype} defaultChecked="false" handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} />
-            <p className="col-sm-7 col-sm-offset-5 hug-top"><strong>Note:</strong> If the wild-type version of the gene does not rescue the phenotype, the criteria of counting this experimental evidence has not been met and cannot be submitted. Curate <a href={"/experimental-curation/?gdm=" + this.state.gdm.uuid + "&evidence=" + this.state.annotation.uuid}>new Experimental Data</a> or return to <a href={"/curation-central/?gdm=" + this.state.gdm.uuid + "&pmid=" + this.state.annotation.article.pmid}>Record Curation page</a>.</p>
+            <p className="col-sm-7 col-sm-offset-5 hug-top alert alert-warning"><strong>Warning:</strong> not checking the above box indicates this criteria has not been met for this evidence; this should be taken into account during its evaluation.</p>
             {this.state.showPatientVariantRescue ?
                 <Input type="checkbox" ref="patientVariantRescue" label="Does patient variant rescue?:"
                     error={this.getFormError('patientVariantRescue')} clearError={this.clrFormErrors.bind(null, 'patientVariantRescue')} handleChange={this.handleChange}
@@ -2441,11 +2386,10 @@ function TypeRescue() {
             <Input type="textarea" ref="explanation" label="Explanation of rescue of phenotype:"
                 error={this.getFormError('explanation')} clearError={this.clrFormErrors.bind(null, 'explanation')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" value={RES_explanation} inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} required={this.state.wildTypeRescuePhenotype} />
+                rows="5" value={RES_explanation} inputDisabled={this.cv.othersAssessed} required={this.state.wildTypeRescuePhenotype} />
             <Input type="textarea" ref="evidenceInPaper" label="Information about where evidence can be found on paper"
-                error={this.getFormError('evidenceInPaper')} clearError={this.clrFormErrors.bind(null, 'evidenceInPaper')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                rows="5" inputDisabled={!this.state.wildTypeRescuePhenotype || this.cv.othersAssessed} value={RES_evidenceInPaper} />
+                rows="5" inputDisabled={this.cv.othersAssessed} value={RES_evidenceInPaper} />
         </div>
     );
 }
@@ -2480,14 +2424,7 @@ function ExperimentalDataVariant() {
                                             </dl>
                                         </div>
                                         : null }
-                                    {variant.clinvarVariantTitle ?
-                                        <div>
-                                            <dl className="dl-horizontal">
-                                                <dt>ClinVar Preferred Title</dt>
-                                                <dd>{variant.clinvarVariantTitle}</dd>
-                                            </dl>
-                                        </div>
-                                        : null }
+                                    {renderVariantLabelAndTitle(variant)}
                                     {variant.otherDescription ?
                                         <div>
                                             <dl className="dl-horizontal">
@@ -2533,24 +2470,13 @@ function ExperimentalDataVariant() {
                                                 <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].clinvarVariantTitle ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                            </div>
-                                            : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label>{LabelCARVariant(this.state.variantRequired)}</label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
-                                        {!this.state.variantInfo[i].clinvarVariantTitle && this.state.variantInfo[i].grch38 ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelCARVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
-                                            </div>
-                                            : null}
+                                        {renderVariantLabelAndTitle(this.state.variantInfo[i], true)}
                                     </div>
                                     : null}
                                 <Input type="text" ref={'variantUuid' + i} value={variant && variant.uuid ? variant.uuid : ''} handleChange={this.handleChange}
@@ -2595,16 +2521,8 @@ const LabelClinVarVariant = () => {
     return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</span>;
 };
 
-const LabelClinVarVariantTitle = () => {
-    return <span><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</span>;
-};
-
 const LabelCARVariant = variantRequired => {
     return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:{variantRequired ? ' *' : null}</strong></span>;
-};
-
-const LabelCARVariantTitle = () => {
-    return <span><strong>Genomic HGVS Title:</strong></span>;
 };
 
 /**
@@ -2663,39 +2581,79 @@ const ExperimentalViewer = createReactClass({
             /***********************************************************/
             /* Either update or create the user score object in the DB */
             /***********************************************************/
-            if (this.state.userScoreObj.uuid) {
-                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                    this.setState({submitBusy: false});
-                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
-            } else {
-                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
-                    let newScoreObjectUuid = null;
-                    if (newScoreObject) {
-                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
-                    }
-                    return Promise.resolve(newScoreObjectUuid);
-                }).then(newScoreObjectUuid => {
-                    return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
-                        // flatten both context and fresh experimental
-                        let newExperimental = curator.flatten(experimental);
-                        let freshFlatExperimental = curator.flatten(freshExperimental);
-                        // take only the scores from the fresh experimental to not overwrite changes
-                        // in newExperimental
-                        newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
-                        // push new score uuid to newExperimental's scores list
-                        newExperimental.scores.push(newScoreObjectUuid);
-
-                        return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
-                            this.setState({submitBusy: false});
-                            return Promise.resolve(updatedExperimentalObj['@graph'][0]);
-                        });
+            if (newUserScoreObj.scoreStatus) {
+                // Update and create score object when the score object has the scoreStatus key/value pair
+                if (this.state.userScoreObj.uuid) {
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                    }).then(data => {
+                        this.handlePageRedirect();
                     });
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
+                } else {
+                    return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                        let newScoreObjectUuid = null;
+                        if (newScoreObject) {
+                            newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(newScoreObjectUuid);
+                    }).then(newScoreObjectUuid => {
+                        return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
+                            // flatten both context and fresh experimental
+                            let newExperimental = curator.flatten(experimental);
+                            let freshFlatExperimental = curator.flatten(freshExperimental);
+                            // take only the scores from the fresh experimental to not overwrite changes
+                            // in newExperimental
+                            newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
+                            // push new score uuid to newExperimental's scores list
+                            newExperimental.scores.push(newScoreObjectUuid);
+
+                            return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
+            } else if (!newUserScoreObj.scoreStatus) {
+                // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                // Then delete the score entry from the score list associated with the evidence
+                if (this.state.userScoreObj.uuid) {
+                    newUserScoreObj['status'] = 'deleted';
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        let modifiedScoreObjectUuid = null;
+                        if (modifiedScoreObj) {
+                            modifiedScoreObjectUuid = modifiedScoreObj['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(modifiedScoreObjectUuid);
+                    }).then(modifiedScoreObjectUuid => {
+                        return this.getRestData('/experimental/' + experimental.uuid, null, true).then(freshExperimental => {
+                            // flatten both context and fresh experimental
+                            let newExperimental = curator.flatten(experimental);
+                            let freshFlatExperimental = curator.flatten(freshExperimental);
+                            // take only the scores from the fresh experimental to not overwrite changes
+                            // in newExperimental
+                            newExperimental.scores = freshFlatExperimental.scores ? freshFlatExperimental.scores : [];
+                            // push new score uuid to newIndividual's scores list
+                            if (newExperimental.scores.length) {
+                                newExperimental.scores.forEach(score => {
+                                    if (score === modifiedScoreObjectUuid) {
+                                        let index = newExperimental.scores.indexOf(score);
+                                        newExperimental.scores.splice(index, 1);
+                                    }
+                                });
+                            }
+                            return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedExperimentalObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
             }
         }
     },
@@ -2714,8 +2672,21 @@ const ExperimentalViewer = createReactClass({
             this.loadAssessmentTracker(user);
         }
 
-        if (experimental.evidenceType === 'Biochemical Function' || experimental.evidenceType === 'Protein Interactions' || experimental.evidenceType === 'Expression') {
+        if (experimental.evidenceType === 'Protein Interactions') {
             this.setState({experimentalEvidenceType: null});
+        } else if (experimental.evidenceType === 'Biochemical Function') {
+            if (experimental.biochemicalFunction.geneWithSameFunctionSameDisease && Object.keys(experimental.biochemicalFunction.geneWithSameFunctionSameDisease).length) {
+                this.setState({experimentalEvidenceType: 'A. Gene(s) with same function implicated in same disease'});
+            } else {
+                this.setState({experimentalEvidenceType: 'B. Gene function consistent with phenotype(s)'});
+            }
+            this.setState({experimentalEvidenceType: experimental.biochemicalFunction.functionalAlterationType});
+        } else if (experimental.evidenceType === 'Expression') {
+            if (experimental.expression.normalExpression && Object.keys(experimental.expression.normalExpression).length) {
+                this.setState({experimentalEvidenceType: 'A. Gene normally expressed in tissue relevant to the disease'});
+            } else {
+                this.setState({experimentalEvidenceType: 'B. Altered expression in Patients'});
+            }
         } else if (experimental.evidenceType === 'Functional Alteration') {
             this.setState({experimentalEvidenceType: experimental.functionalAlteration.functionalAlterationType});
         } else if (experimental.evidenceType === 'Model Systems') {
@@ -2751,9 +2722,9 @@ const ExperimentalViewer = createReactClass({
 
     handleSearchLinkById(id) {
         let searchURL;
-        if (id.indexOf('EFO_') > -1) {
+        if (id.indexOf('EFO') > -1) {
             searchURL = external_url_map['EFOSearch'];
-        } else if (id.indexOf('CL_') > -1) {
+        } else if (id.indexOf('CL') > -1) {
             searchURL = external_url_map['CLSearch'];
         }
         return searchURL;
@@ -2800,7 +2771,7 @@ const ExperimentalViewer = createReactClass({
         let isEvidenceScored = false;
         if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
+                if (scoreObj.scoreStatus && scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
                 }
             });
@@ -3010,12 +2981,12 @@ const ExperimentalViewer = createReactClass({
                                     {experimental.functionalAlteration.functionalAlterationType === 'Patient cells' ?
                                         <div>
                                             <dt>Patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.patientCells ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCells} title={"CL entry for " + experimental.functionalAlteration.patientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCells}</a> : null}</dd>
+                                            <dd>{experimental.functionalAlteration.patientCells ? <a href={external_url_map['CLSearch'] + experimental.functionalAlteration.patientCells.replace(':', '_')} title={"CL entry for " + experimental.functionalAlteration.patientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.patientCells}</a> : null}</dd>
                                         </div>
                                         :
                                         <div>
                                             <dt>Non-patient cell type</dt>
-                                            <dd>{experimental.functionalAlteration.nonPatientCells ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.nonPatientCells) + experimental.functionalAlteration.nonPatientCells} title={"EFO entry for " + experimental.functionalAlteration.nonPatientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.nonPatientCells}</a> : null}</dd>
+                                            <dd>{experimental.functionalAlteration.nonPatientCells ? <a href={this.handleSearchLinkById(experimental.functionalAlteration.nonPatientCells) + experimental.functionalAlteration.nonPatientCells.replace(':', '_')} title={"EFO entry for " + experimental.functionalAlteration.nonPatientCells + " in new tab"} target="_blank">{experimental.functionalAlteration.nonPatientCells}</a> : null}</dd>
                                         </div>
                                     }
 
@@ -3074,7 +3045,7 @@ const ExperimentalViewer = createReactClass({
                                         :
                                         <div>
                                             <dt>Cell culture model type</dt>
-                                            <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
+                                            <dd>{experimental.modelSystems.cellCulture ? <a href={this.handleSearchLinkById(experimental.modelSystems.cellCulture) + experimental.modelSystems.cellCulture.replace(':', '_')} title={"EFO entry for " + experimental.modelSystems.cellCulture + " in new tab"} target="_blank">{experimental.modelSystems.cellCulture}</a> : null}</dd>
                                         </div>
                                     }
 
@@ -3138,7 +3109,7 @@ const ExperimentalViewer = createReactClass({
                                         <div className="rescue-observed-group">
                                             <div>
                                                 <dt>Patient cell type</dt>
-                                                <dd>{experimental.rescue.patientCells ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCells} title={"CL entry for " + experimental.rescue.patientCells + " in new tab"} target="_blank">{experimental.rescue.patientCells}</a> : null}</dd>
+                                                <dd>{experimental.rescue.patientCells ? <a href={external_url_map['CLSearch'] + experimental.rescue.patientCells.replace(':', '_')} title={"CL entry for " + experimental.rescue.patientCells + " in new tab"} target="_blank">{experimental.rescue.patientCells}</a> : null}</dd>
                                             </div>
                                             <div>
                                                 <dt>Patient cell type (free text)</dt>
@@ -3151,7 +3122,7 @@ const ExperimentalViewer = createReactClass({
                                         <div className="rescue-observed-group">
                                             <div>
                                                 <dt>Cell culture model</dt>
-                                                <dd>{experimental.rescue.cellCulture ? <a href={this.handleSearchLinkById(experimental.rescue.cellCulture) + experimental.rescue.cellCulture} title={"EFO entry for " + experimental.rescue.cellCulture + " in new tab"} target="_blank">{experimental.rescue.cellCulture}</a> : null}</dd>
+                                                <dd>{experimental.rescue.cellCulture ? <a href={this.handleSearchLinkById(experimental.rescue.cellCulture) + experimental.rescue.cellCulture.replace(':', '_')} title={"EFO entry for " + experimental.rescue.cellCulture + " in new tab"} target="_blank">{experimental.rescue.cellCulture}</a> : null}</dd>
                                             </div>
                                             <div>
                                                 <dt>Cell culture model (free text)</dt>
@@ -3234,14 +3205,6 @@ const ExperimentalViewer = createReactClass({
                                                     </dl>
                                                 </div>
                                                 : null }
-                                            {variant.clinvarVariantTitle ?
-                                                <div>
-                                                    <dl className="dl-horizontal">
-                                                        <dt>ClinVar Preferred Title</dt>
-                                                        <dd>{variant.clinvarVariantTitle}</dd>
-                                                    </dl>
-                                                </div>
-                                                : null }
                                             {variant.carId ?
                                                 <div>
                                                     <dl className="dl-horizontal">
@@ -3250,14 +3213,7 @@ const ExperimentalViewer = createReactClass({
                                                     </dl>
                                                 </div>
                                                 : null }
-                                            {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
-                                                <div>
-                                                    <dl className="dl-horizontal">
-                                                        <dt>Genomic HGVS Title</dt>
-                                                        <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                                    </dl>
-                                                </div>
-                                                : null }
+                                            {renderVariantLabelAndTitle(variant)}
                                             {variant.otherDescription ?
                                                 <div>
                                                     <dl className="dl-horizontal">

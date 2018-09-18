@@ -12,8 +12,11 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import PopOverComponent from '../libs/bootstrap/popover';
+import { sortListByDate } from '../libs/helpers/sort';
 import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
+import { getAffiliationName } from '../libs/get_affiliation_name';
+import { renderVariantTitle } from '../libs/render_variant_title';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -74,12 +77,15 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         updateOmimId: PropTypes.func, // Function to call when OMIM ID changes
         linkGdm: PropTypes.bool, // whether or not to link GDM text back to GDM
         pmid: PropTypes.string,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        classificationSnapshots: PropTypes.array,
+        context: PropTypes.object
     },
 
     getInitialState() {
         return {
             gdm: this.props.gdm,
+            classificationSnapshots: this.props.classificationSnapshots,
             diseaseObj: {},
             diseaseUuid: null,
             diseaseError: null
@@ -89,6 +95,9 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     componentWillReceiveProps(nextProps) {
         if (nextProps.gdm) {
             this.setState({gdm: nextProps.gdm});
+        }
+        if (nextProps.classificationSnapshots) {
+            this.setState({classificationSnapshots: nextProps.classificationSnapshots});
         }
     },
 
@@ -234,6 +243,205 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         window.open('/gene-disease-evidence-summary/?gdm=' + this.state.gdm.uuid + '&preview=yes', '_blank');
     },
 
+    renderViewSnapshotSummaryLink(snapshots, status) {
+        let url;
+        let matchingSnapshots = snapshots && snapshots.length ? snapshots.filter(snapshot => snapshot.approvalStatus === status) : null;
+        const snapshotUuid = matchingSnapshots && matchingSnapshots.length ? matchingSnapshots[0]['uuid'] : null;
+        if (snapshotUuid) {
+            url = '/gene-disease-evidence-summary/?snapshot=' + snapshotUuid;
+        }
+        return url;
+    },
+
+    /**
+     * Method to display classification tag/label in gene-disease record header
+     * @param {string} status - The status of a given classification in a GDM
+     */
+    renderClassificationStatusTag(classification, gdm) {
+        const context = this.props.context;
+        const status = classification.classificationStatus;
+        let snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
+        let filteredSnapshots = [];
+        // Determine whether the classification had been previously approved
+        if (snapshots && snapshots.length) {
+            filteredSnapshots = snapshots.filter(snapshot => {
+                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'classification';
+            });
+            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
+            let sortedSnapshots = sortListByDate(snapshots, 'date_created');
+            if (status === 'In progress') {
+                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-success">APPROVED</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                    : null}
+                                <div className="new-provisional-status-row">
+                                    <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                    {context && context.name === 'curation-central' ?
+                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
+                                        : null}
+                                </div>
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-info">PROVISIONAL</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
+                                    : null}
+                            </span>
+                        );
+                    }
+                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
+                    return (
+                        <span className="classification-status-wrapper">
+                            <span className="label label-success">APPROVED</span>
+                            {context && context.name === 'curation-central' ?
+                                <span>[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                : null}
+                        </span>
+                    );
+                }
+            } else {
+                if (status === 'Provisional') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-success">APPROVED</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                    : null}
+                                <div className="new-provisional-status-row">
+                                    <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                    {context && context.name === 'curation-central' ?
+                                        <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
+                                        : null}
+                                </div>
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-info">PROVISIONAL</span>
+                                {context && context.name === 'curation-central' ?
+                                    <span className="classification-link-item">[ <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'}>View/Approve Current Provisional</a> ]</span>
+                                    : null}
+                            </span>
+                        );
+                    }
+                } else if (status === 'Approved') {
+                    return (
+                        <span className="classification-status-wrapper">
+                            <span className="label label-success">APPROVED</span>
+                            {context && context.name === 'curation-central' ?
+                                <span className="classification-link-item">[ <a href={this.renderViewSnapshotSummaryLink(sortedSnapshots, 'Approved')} target="_blank">View Current Approved</a> ]</span>
+                                : null}
+                        </span>
+                    );
+                }
+            }
+        } else {
+            if (status === 'In progress') {
+                return <span className="label label-warning">IN PROGRESS</span>;
+            }
+        }
+    },
+
+    /**
+     * Method to render the header of a given classification in the gene-disease record header
+     * @param {object} classification - Any given classification in a GDM
+     */
+    renderClassificationHeader(classification, gdm) {
+        return (
+            <div className="header-classification">
+                <strong>Provisional/Approved Status:</strong>
+                <span className="classification-status">
+                    {classification && classification.classificationStatus ?
+                        this.renderClassificationStatusTag(classification, gdm)
+                        :
+                        <span className="no-classification">None</span>
+                    }
+                </span>
+            </div>
+        );
+    },
+
+    /**
+     * Method to display publication status of classification in gene-disease record header
+     * @param {array} snapshots - List of snapshots associated with classification
+     */
+    renderPublishStatus(snapshots) {
+        const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
+        let publishedSnapshot = null;
+        let publishedWarningMessage = null;
+
+        for (let snapshot of sortedSnapshots) {
+            if (snapshot.resource && snapshot.resource.publishClassification) {
+                publishedSnapshot = snapshot;
+                break;
+            }
+
+            if (snapshot.approvalStatus === 'Approved' && !publishedWarningMessage) {
+                publishedWarningMessage = (
+                    <span className="publish-warning" data-toggle="tooltip" data-placement="top"
+                        data-tooltip="The current approved Classification is more recent than this published Classification.">
+                        <i className="icon icon-exclamation-triangle"></i>
+                    </span>
+                );
+            }
+        }
+
+        if (publishedSnapshot) {
+            return (
+                <div className="header-classification">
+                    <strong className="header-classification-item">Date Published:</strong> {moment(publishedSnapshot.resource.publishDate).format("YYYY MMM DD, h:mm a")}
+                    <span className="classification-status"><span className="label publish-background">PUBLISHED</span>{publishedWarningMessage}</span>
+                </div>
+            );
+        } else {
+            return null;
+        }
+    },
+
+    /**
+     * Method to get all other existing classifications (of a gdm) that are not owned by the logged-in user,
+     * or owned by the affiliation that the logged-in user is part of.
+     * @param {object} gdm - The gene-disease record
+     * @param {object} currClassification - The classification owned by the logged-in user or by an affiliation
+     */
+    getOtherClassifications(gdm, currClassification) {
+        const context = this.props.context;
+        let classificationList = gdm && gdm.provisionalClassifications ? gdm.provisionalClassifications : null;
+        let otherClassifications = [];
+        if (context && context.name === 'curation-central') {
+            if (classificationList && classificationList.length) {
+                if (currClassification && Object.keys(currClassification).length) {
+                    otherClassifications = classificationList.filter(classification => {
+                        return classification['@id'] !== currClassification['@id'];
+                    });
+                } else {
+                    otherClassifications = classificationList;
+                }
+                
+            }
+        }
+        return otherClassifications;
+    },
+
+    /**
+     * Method to render 'NEW SAVED SUMMARY' status tag in header
+     * @param {object} classification - The saved GDM classification
+     */
+    renderSummaryStatus(classification) {
+        if (classification.classificationStatus && classification.classificationStatus === 'In progress') {
+            return <span className="summary-status"><span className="label label-info">NEW SAVED SUMMARY</span></span>;
+        }
+    },
+
     render: function() {
         var gdm = this.state.gdm;
         var disease = gdm && gdm.disease;
@@ -243,7 +451,9 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         var variant = this.props.variant;
         var annotations = gdm && gdm.annotations;
 
-        let affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation;
+        const snapshots = this.state.classificationSnapshots;
+        const context = this.props.context;
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
@@ -254,6 +464,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             var i, j, k;
             // if provisional exist, show summary and classification, Edit link and Generate New Summary button.
             let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
+            let otherClassifications = this.getOtherClassifications(gdm, provisionalClassification.provisional);
 
             // go through all annotations, groups, families and individuals to find one proband individual with all variant assessed.
             var supportedVariants = getUserPathogenicity(gdm, session);
@@ -331,30 +542,30 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <div className="provisional-title">
-                                                    <strong>Classification</strong>
-                                                </div>
-                                                { provisionalClassification.provisionalExist ?
-                                                    <div>
-                                                        <div className="provisional-data-left">
-                                                            <span className="header-classification-item">Curator: {provisionalClassification.provisional.submitted_by.title}</span>
-                                                            {provisionalClassification.provisional.classificationStatus ? <span className="header-classification-item">Status: {provisionalClassification.provisional.classificationStatus}</span> : null}
+                                                {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?
+                                                    <div className="header-classification-content">
+                                                        {provisionalClassification.provisional.affiliation ?
+                                                            <span className="header-classification-item"><strong>Affiliation:</strong> {getAffiliationName(provisionalClassification.provisional.affiliation)}</span>
+                                                            :
+                                                            <span className="header-classification-item"><strong>Curator:</strong> {provisionalClassification.provisional.submitted_by.title}</span>
+                                                        }
+                                                        {this.renderClassificationHeader(provisionalClassification.provisional, gdm)}
+                                                        <div className="header-classification">
+                                                            <strong className="header-classification-item">Classification Last Edited:</strong> {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}
+                                                            {provisionalClassification && provisionalClassification.provisional ? this.renderSummaryStatus(provisionalClassification.provisional) : null}
                                                         </div>
-                                                        <div className="provisional-data-center">
-                                                            <span className="header-classification-item">
-                                                                Calculated Classification: {provisionalClassification.provisional.totalScore} ({provisionalClassification.provisional.autoClassification})
-                                                            </span>
-                                                            <span className="header-classification-item">
-                                                                Modified Classification: {provisionalClassification.provisional.alteredClassification === 'No Selection' ? 'None' : provisionalClassification.provisional.alteredClassification}
-                                                            </span>
-                                                            <span className="header-classification-item">Last Saved: {moment(provisionalClassification.provisional.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                        </div>
+                                                        {this.renderPublishStatus(snapshots)}
                                                     </div>
                                                     :
-                                                    <div className="provisional-data-left"><span>None</span></div>
+                                                    <div className="header-classification-content">
+                                                        <div className="header-classification">
+                                                            <strong>Provisional/Approved Status:</strong>
+                                                            <span className="classification-status"><span className="no-classification">None</span></span>
+                                                        </div>
+                                                    </div>
                                                 }
                                             </td>
-                                            <td className="button-box" rowSpan="2">
+                                            <td className="button-box">
                                                 { !summaryPage ?
                                                     <a className="btn btn-primary btn-inline-spacer" role="button" onClick={this.viewEvidenceSummary}>Preview Evidence Summary <i className="icon icon-file-text"></i></a>
                                                     : null}
@@ -366,7 +577,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                     : null}
                                             </td>
                                         </tr>
-                                        <tr style={{height:'10px'}}></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -376,7 +586,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                         <div className="row equal-height">
                             <GeneRecordHeader gene={gene} />
                             <DiseaseRecordHeader gdm={gdm} omimId={this.props.omimId} updateOmimId={this.props.updateOmimId} />
-                            <CuratorRecordHeader gdm={gdm} />
+                            <CuratorRecordHeader gdm={gdm} otherClassifications={otherClassifications} />
                         </div>
                     </div>
                 </div>
@@ -483,16 +693,6 @@ var searchProbandIndividual = function(individualList, variantList) {
     return false;
 };
 
-// function to get the preferred display title for variants. Current preferential order is clinvar variant title > clinvar variant ID
-// > grch38 hgvs term > CA ID
-var getVariantTitle = function(variant) {
-    let clinvarRepresentation = variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.clinvarVariantId ? variant.clinvarVariantId : null);
-    let carRepresentation = variant.hgvsNames && variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : (variant.carId ? variant.carId : null);
-    let variantTitle = clinvarRepresentation ? clinvarRepresentation : carRepresentation;
-
-    return variantTitle;
-};
-
 // Display the header of all variants involved with the current GDM.
 var VariantHeader = module.exports.VariantHeader = createReactClass({
     propTypes: {
@@ -517,7 +717,7 @@ var VariantHeader = module.exports.VariantHeader = createReactClass({
                         <p>Click a variant to View, Curate, or Edit it. The icon indicates curation by one or more curators.</p>
                         {Object.keys(collectedVariants).map(variantId => {
                             var variant = collectedVariants[variantId];
-                            var variantName = getVariantTitle(variant);
+                            var variantName = renderVariantTitle(variant);
                             var userPathogenicity = null, affiliatedPathogenicity = null;
 
                             // See if the variant has a pathogenicity curated in the current GDM
@@ -960,7 +1160,7 @@ var renderIndividual = function(individual, gdm, annotation, curatorMatch, evide
                     </span>
                 </div>
                 : null}
-            <a href={'/individual/' + individual.uuid} title="View individual in a new tab">View/Score</a>
+            <a href={'/individual/' + individual.uuid + '?gdm=' + gdm.uuid} title="View individual in a new tab">View/Score</a>
             {(individual.affiliation && curatorAffiliation && evidenceAffiliationMatch) || (!individual.affiliation && !curatorAffiliation && curatorMatch) ?
                 <span> | <a href={'/individual-curation/?editsc&gdm=' + gdm.uuid + '&evidence=' + annotation.uuid + '&individual=' + individual.uuid} title="Edit this individual">Edit</a></span>
                 : null}
@@ -1054,11 +1254,13 @@ var renderVariant = function(variant, gdm, annotation, curatorMatch, session, af
         return (labelA < labelB) ? -1 : ((labelA > labelB ? 1 : 0));
     });
 
-    let variantTitle = getVariantTitle(variant);
+    let variantTitle = renderVariantTitle(variant);
+    // Parse variant title text for the <span /> 'title' attribbute
+    let elementTitleAttribute = renderVariantTitle(variant, true);
 
     return (
         <div className="panel-evidence-group">
-            <h5><span className="title-ellipsis dotted" title={variantTitle}>{variantTitle}</span></h5>
+            <h5><span className="title-ellipsis dotted" title={elementTitleAttribute}>{variantTitle}</span></h5>
             <div className="evidence-curation-info">
                 {variant.submitted_by ?
                     <p className="evidence-curation-info">{variant.submitted_by.title}</p>
@@ -1302,13 +1504,26 @@ var AddOmimIdModal = createReactClass({
 // Display the curator data of the curation data
 var CuratorRecordHeader = createReactClass({
     propTypes: {
-        gdm: PropTypes.object // GDM with curator data to display
+        gdm: PropTypes.object, // GDM with curator data to display
+        otherClassifications: PropTypes.array
     },
 
-    render: function() {
-        var gdm = this.props.gdm;
-        var participants = findAllParticipants(gdm);
-        var latestRecord = gdm && findLatestRecord(gdm);
+    render() {
+        const gdm = this.props.gdm;
+        const otherClassifications = this.props.otherClassifications;
+        const participants = findAllParticipants(gdm);
+        const latestRecord = gdm && findLatestRecord(gdm);
+        // Concat owners into an array (with affiliation or not) of all other classifications
+        let otherClassificationOwners = [];
+        if (otherClassifications && otherClassifications.length) {
+            for (let item of otherClassifications) {
+                if (item.affiliation) {
+                    otherClassificationOwners.push(getAffiliationName(item.affiliation));
+                } else {
+                    otherClassificationOwners.push(item.submitted_by.title);
+                }
+            }
+        }
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
@@ -1331,10 +1546,16 @@ var CuratorRecordHeader = createReactClass({
                                     </dd>
                                     <dt>Last edited: </dt>
                                     <dd><a href={'mailto:' + latestRecord.submitted_by.email}>{latestRecord.submitted_by.title}</a> — {moment(latestRecord.last_modified).format('YYYY MMM DD, h:mm a')}</dd>
+                                    {otherClassificationOwners.length ?
+                                        <div>
+                                            <dt>Other classifications by: </dt>
+                                            <dd>{otherClassificationOwners.join(', ')}</dd>
+                                        </div>
+                                        : null}
                                 </div>
-                            : null}
+                                : null}
                         </dl>
-                    : null}
+                        : null}
                 </div>
             </div>
         );
@@ -1605,23 +1826,12 @@ var PmidDoiButtons = module.exports.PmidDoiButtons = createReactClass({
 });
 
 
-// Get the pathogenicity made by the curator with the given user UUID from the given variant.
-//var getPathogenicityFromVariant = function(variant, curatorUuid) {
-//  var pathogenicity = null;
-
-//    if (variant && variant.associatedPathogenicities.length > 0) {
-//        // At this point, we know the variant has a curation (pathogenicity)
-//        pathogenicity = _(variant.associatedPathogenicities).find(function(pathogenicity) {
-//            return pathogenicity.submitted_by.uuid === curatorUuid;
-//        });
-//    }
-//    return pathogenicity;
-//};
-var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = function(gdm, curatorUuid, variantUuid, affiliation) {
+// Get the pathogenicity made by the curator with the given user UUID from the given variant
+export function getPathogenicityFromVariant(gdm, curatorUuid, variantUuid, affiliation) {
     var pathogenicity = null;
-    if (gdm.variantPathogenicity && gdm.variantPathogenicity.length > 0) {
+    if (gdm && gdm.variantPathogenicity && gdm.variantPathogenicity.length) {
         for (let object of gdm.variantPathogenicity) {
-            if (affiliation && object.affiliation && object.affiliation === affiliation.affiliation_id) {
+            if (affiliation && object.affiliation && object.affiliation === affiliation.affiliation_id && object.variant.uuid === variantUuid) {
                 pathogenicity = object;
             } else if (!affiliation && !object.affiliation && object.submitted_by.uuid === curatorUuid && object.variant.uuid === variantUuid) {
                 pathogenicity = object;
@@ -1629,7 +1839,7 @@ var getPathogenicityFromVariant = module.exports.getPathogenicityFromVariant = f
         }
     }
     return pathogenicity;
-};
+}
 
 
 // Collect references to all families and individuals within an annotation that reference the given variant
@@ -1888,22 +2098,22 @@ module.exports.capture = {
 
     // Find all the comma-separated Uberon ID occurrences. Return all valid Uberon ID in an array.
     uberonids: function(s) {
-        return captureBase(s, /^\s*(UBERON:\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((UBERON_|UBERON:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO ID occurrences. Return all valid EFO IDs in an array.
     efoids: function(s) {
-        return captureBase(s, /^\s*(EFO_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated CL Ontology ID occurrences. Return all valid Uberon ID in an array.
     clids: function(s) {
-        return captureBase(s, /^\s*(CL_\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((CL_|CL:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated EFO/CLO ID occurrences. Return all valid EFO/CLO IDs in an array.
     efoclids: function(s) {
-        return captureBase(s, /^\s*((EFO_|CL_)\d{7})\s*$/i, true);
+        return captureBase(s, /^\s*((EFO_|EFO:|CL_|CL:)\d{7})\s*$/i, true);
     }
 };
 
@@ -1983,6 +2193,10 @@ var flatten = module.exports.flatten = function(obj, type) {
 
             case 'disease':
                 flat = flattenDisease(obj);
+                break;
+
+            case 'snapshot':
+                flat = flattenSnapshot(obj);
                 break;
 
             default:
@@ -2162,7 +2376,7 @@ var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGe
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
     "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
     "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
-    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "reasonExplanation"];
+    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "sequencingMethod", "reasonExplanation"];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
@@ -2349,8 +2563,11 @@ function flattenAssessment(assessment) {
 
 
 var provisionalSimpleProps = [
-    "date_created", "totalScore", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
-    "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation"
+    "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
+    "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "approvalSubmitter", "classificationApprover",
+    "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate", "provisionalReviewDate",
+    "provisionalComment", "publishSubmitter", "publishDate", "publishComment", "provisionedClassification", "approvedClassification",
+    "publishClassification", "associatedClassificationSnapshots"
 ];
 
 function flattenProvisional(provisional) {
@@ -2361,11 +2578,25 @@ function flattenProvisional(provisional) {
 
 
 var provisionalVariantSimpleProps = [
-    "autoClassification", "alteredClassification", "reasons", "evidenceSummary", "affiliation"
+    "autoClassification", "alteredClassification", "reason", "evidenceSummary", "affiliation", "classificationStatus",
+    "approvalSubmitter", "classificationApprover", "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
+    "provisionalDate", "provisionalReviewDate", "provisionalComment", "provisionedClassification", "approvedClassification",
+    "publishClassification", "associatedInterpretationSnapshots"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {
     var flat = cloneSimpleProps(provisional_variant, provisionalVariantSimpleProps);
+
+    return flat;
+}
+
+
+var snapshotSimpleProps = [
+    "uuid", "resourceId", "resourceType", "approvalStatus", "date_created"
+];
+
+function flattenSnapshot(snapshot) {
+    var flat = cloneSimpleProps(snapshot, snapshotSimpleProps);
 
     return flat;
 }
@@ -2421,7 +2652,7 @@ function flattenCaseControl(casecontrol) {
 }
 
 
-var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "markAsProvisional", "modeInheritanceAdjective", "affiliation"];
+var interpretationSimpleProps = ["modeInheritance", "active", "date_created", "completed_sections", "modeInheritanceAdjective", "affiliation"];
 
 function flattenInterpretation(interpretation) {
     // First copy simple properties before fixing the special properties
@@ -2625,7 +2856,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant Uberon term for the organ of the tissue relevant to disease whenever possible
-                        (e.g. UBERON:0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
+                        (e.g. UBERON:0015228 or UBERON_0015228). If you are unable to find an appropriate Uberon term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>
@@ -2633,7 +2864,7 @@ export function renderWarning(context) {
             { context === 'CL' ?
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
-                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL_0000057).
+                        Please enter the relevant Cell Ontology (CL) term for the cell type whenever possible (e.g. CL:0000057 or CL_0000057).
                         If you are unable to find an appropriate CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
@@ -2643,7 +2874,7 @@ export function renderWarning(context) {
                 <div className="col-sm-7 col-sm-offset-5 alert alert-warning">
                     <p>
                         Please enter the relevant EFO or Cell Ontology (CL) term for the cell line/cell type whenever possible
-                        (e.g. EFO_0001187, CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
+                        (e.g. EFO:0001187 or EFO_0001187; CL:0000057 or CL_0000057). If you are unable to find an appropriate EFO or CL term, use the free text box instead.
                         Please email <a href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a> for any ontology support.
                     </p>
                 </div>

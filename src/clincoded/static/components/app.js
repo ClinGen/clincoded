@@ -32,6 +32,27 @@ var portal = {
 };
 
 
+const demoAffiliations = [
+    {
+        "affiliation_id": "88888",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Curator Test Affiliation 1",
+        "approver": [
+            "Person A",
+            "Person B"
+        ]
+    },
+    {
+        "affiliation_id": "99999",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "ClinGen Curator Test Affiliation 2",
+        "approver": [
+            "Person X",
+            "Person Y"
+        ]
+    }
+];
+
 // Renders HTML common to all pages.
 var App = module.exports = createReactClass({
     mixins: [Auth0, HistoryAndTriggers, RestMixin],
@@ -54,6 +75,7 @@ var App = module.exports = createReactClass({
         } else if (!/^(www\.)?curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
             // if neither production nor curation URL, enable demoWarning.
             demoWarning = true;
+            AffiliationsList.push(...demoAffiliations);
         }
         return {
             context: this.props.context, // Close to anti-pattern, but puts *initial* context into state
@@ -240,9 +262,10 @@ var App = module.exports = createReactClass({
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <script src="https://cdn.auth0.com/js/lock/10.17.0/lock.min.js"></script>
+                    <script src="https://cdn.auth0.com/js/lock/11.7.2/lock.min.js"></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
+                    <link rel="stylesheet" href="https://unpkg.com/react-day-picker/lib/style.css" />
                     <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
@@ -252,7 +275,7 @@ var App = module.exports = createReactClass({
                     <div>
                         <Header session={this.state.session} href={this.props.href} affiliation={affiliation} />
                         {this.state.demoWarning ?
-                            <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Any data you enter will not be permanently saved.</span>} />
+                            <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Data entered will be deleted upon release of updated versions, which occurs roughly once per month. Please contact us with any questions at <a href="mailto:clingen-helpdesk@lists.stanford.edu" style={{color: '#FFFFFF'}}>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></span>} />
                             : null}
                         {this.state.productionWarning ?
                             <Notice noticeType='production' noticeMessage={<span><strong>Do not use this URL for entering data. Please use <a href="https://curation.clinicalgenome.org/">curation.clinicalgenome.org</a> instead.</strong></span>} />

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
 import HpoTerms from '../../libs/get_hpo_term';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
@@ -42,11 +43,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                     {evidence.variants.map((variant, i) => {
                         return (
                             <div key={i} className="variant-info">
-                                <span className="variant-title">
-                                    {variant.clinvarVariantTitle ?
-                                        variant.clinvarVariantTitle : (variant.hgvsNames && variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)
-                                    }
-                                </span>
+                                {renderVariantTitle(variant)}
                             </div>
                         );
                     })}
@@ -66,7 +63,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 <td className="evidence-phenotypes">
                     {evidence.hpoIdInDiagnosis.length ?
                         <span><strong>HPO term(s):</strong>
-                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} />
+                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         </span> 
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
@@ -86,6 +83,10 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 </td>
                 <td className="evidence-lod-score-counted">
                     {evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore ? <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span> : '-'}
+                </td>
+                <td className="evidence-sequencing-method">
+                    {(evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore) && evidence.includeLodScoreInAggregateCalculation && evidence.sequencingMethod ?
+                        evidence.sequencingMethod : ''}
                 </td>
                 <td className="evidence-previous-testing-description">
                     {evidence.previousTestingDescription}
@@ -174,7 +175,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2">Proband age</th>
                                     <th rowSpan="2">Proband ethnicity</th>
                                     <th rowSpan="2">Proband phenotypes</th>
-                                    <th colSpan="4">Segregations</th>
+                                    <th colSpan="5">Segregations</th>
                                     <th rowSpan="2">Proband previous testing</th>
                                     <th rowSpan="2">Proband methods of detection</th>
                                     <th rowSpan="2">Score status</th>
@@ -186,6 +187,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th># Unaff</th>
                                     <th>LOD score</th>
                                     <th>Counted</th>
+                                    <th>Sequencing</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -193,7 +195,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     return (self.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
-                                    <td colSpan="15" className="total-score-label">Total points:</td>
+                                    <td colSpan="16" className="total-score-label">Total points:</td>
                                     <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
@@ -210,7 +212,8 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
-    caseLevelEvidenceList: PropTypes.array
+    caseLevelEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;

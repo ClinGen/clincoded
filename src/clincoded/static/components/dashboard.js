@@ -1,20 +1,17 @@
 'use strict';
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, userMatch, external_url_map } from './globals';
+import { curator_page } from './globals';
 import { RestMixin } from './rest';
-import { Form, FormMixin, Input } from '../libs/bootstrap/form';
-import { Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { showActivityIndicator } from './activity_indicator';
-import { findNonEmptyArray } from '../libs/helpers/find_array';
-import * as curator from './curator';
-
-var fetched = require('./fetched');
+import { sortListByDate } from '../libs/helpers/sort';
+import { GetProvisionalClassification } from '../libs/get_provisional_classification';
+import { renderVariantTitle } from '../libs/render_variant_title';
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
@@ -61,6 +58,120 @@ var Dashboard = createReactClass({
         });
     },
 
+    /**
+     * Method to render status labels/tags for each row of GDMs and Interpretations
+     * Called during the rendering of each GDM or Interpretation
+     * @param {object} gdm - The GDM object
+     * @param {object} interpretation - The Interpretation object
+     * @param {object} affiliation - The affiliation object
+     * @param {object} session - The session object
+     */
+    renderClassificationStatusTag(gdm, intepretation, affiliation, session) {
+        let status, classification = null, snapshots = [], filteredSnapshots = [];
+        if (gdm && Object.keys(gdm).length) {
+            // The rendering is for a GDM
+            let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
+            if (provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional) {
+                classification = provisionalClassification.provisional;
+                status = classification.classificationStatus;
+                snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
+            }
+        } else if (intepretation  && Object.keys(intepretation).length) {
+            // The rendering is for an Interpretation
+            if (intepretation && intepretation.provisional_variant && intepretation.provisional_variant.length) {
+                classification = intepretation.provisional_variant[0];
+                status = classification.classificationStatus;
+                snapshots = classification.associatedInterpretationSnapshots && classification.associatedInterpretationSnapshots.length ? classification.associatedInterpretationSnapshots : [];
+            }
+        }
+        // Determine whether the classification had been previously approved
+        if (snapshots && snapshots.length) {
+            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
+            let sortedSnapshots = sortListByDate(snapshots, 'date_created');
+            // Only interested in knowing the presence of any "Approved" classification
+            filteredSnapshots = sortedSnapshots.filter(snapshot => snapshot.approvalStatus === 'Approved');
+
+            // Construct a label/tag to indicate the publish status of a GDM or Interpretation
+            let publishedStatusTag = null;
+            const publishedWarningMessage = (
+                <span className="publish-warning" data-toggle="tooltip" data-placement="top"
+                    data-tooltip="The current approved Classification is more recent than this published Classification.">
+                    <i className="icon icon-exclamation-triangle"></i>
+                </span>
+            );
+
+            for (let i = 0; i < filteredSnapshots.length; i++) {
+                if (filteredSnapshots[i].publishStatus) {
+                    publishedStatusTag = (
+                        <span className="publish-status">
+                            <span className="label publish-background">PUBLISHED</span>
+                            {i > 0 ? publishedWarningMessage : null}
+                        </span>
+                    );
+                    break;
+                }
+            }
+
+            if (status === 'In progress') {
+                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-success">APPROVED</span>
+                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                {publishedStatusTag}
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-info">PROVISIONAL</span>
+                            </span>
+                        );
+                    }
+                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
+                    return (
+                        <span className="classification-status-wrapper">
+                            <span className="label label-success">APPROVED</span>
+                            {publishedStatusTag}
+                        </span>
+                    );
+                }
+            } else {
+                if (status === 'Provisional') {
+                    if (filteredSnapshots.length) {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-success">APPROVED</span>
+                                <span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span>
+                                {publishedStatusTag}
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="classification-status-wrapper">
+                                <span className="label label-info">PROVISIONAL</span>
+                            </span>
+                        );
+                    }
+                } else if (status === 'Approved') {
+                    return (
+                        <span className="classification-status-wrapper">
+                            <span className="label label-success">APPROVED</span>
+                            {publishedStatusTag}
+                        </span>
+                    );
+                }
+            }
+        } else {
+            if (status && status === 'In progress') {
+                return <span className="label label-warning">IN PROGRESS</span>;
+            } else {
+                return <span className="no-classification">None</span>;
+            }
+        }
+    },
+
     getData(user) {
         // get 10 gdms and VCI interpretations created by user
         this.getRestDatas([
@@ -72,14 +183,14 @@ var Dashboard = createReactClass({
             // go through GDM results and get their data
             gdmURLs = data[0]['@graph'].map(res => { return res['@id']; });
             if (gdmURLs.length > 0) {
-                this.getRestDatas(gdmURLs, null, true).then(gdmResults => {
+                this.getRestDatas(gdmURLs).then(gdmResults => {
                     gdmResults.map(gdmResult => {
                         if (!gdmResult.affiliation) {
                             gdmList.push({
                                 uuid: gdmResult.uuid,
+                                gdm: gdmResult,
                                 gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
                                 gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
-                                status: gdmResult.gdm_status,
                                 date_created: gdmResult.date_created
                             });
                         }
@@ -92,18 +203,16 @@ var Dashboard = createReactClass({
             // go through VCI interpretation results and get their data
             vciInterpURLs = data[1]['@graph'].map(res => { return res['@id']; });
             if (vciInterpURLs.length > 0) {
-                this.getRestDatas(vciInterpURLs, null, true).then(vciInterpResults => {
+                this.getRestDatas(vciInterpURLs).then(vciInterpResults => {
                     vciInterpResults.map(vciInterpResult => {
                         if (!vciInterpResult.affiliation) {
                             vciInterpList.push({
                                 uuid: vciInterpResult.uuid,
+                                interpretation: vciInterpResult,
                                 variantUuid: vciInterpResult.variant.uuid,
-                                clinvarVariantTitle: vciInterpResult.variant.clinvarVariantTitle,
-                                hgvsName37: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh37 ? vciInterpResult.variant.hgvsNames.GRCh37 : null,
-                                hgvsName38: vciInterpResult.variant.hgvsNames && vciInterpResult.variant.hgvsNames.GRCh38 ? vciInterpResult.variant.hgvsNames.GRCh38 : null,
+                                variant: vciInterpResult.variant,
                                 diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
                                 modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
-                                status: vciInterpResult.interpretation_status,
                                 date_created: vciInterpResult.date_created
                             });
                         }
@@ -131,13 +240,13 @@ var Dashboard = createReactClass({
             // Handle gdm result
             gdmURLs = data[0]['@graph'].map(result => { return result['@id']; });
             if (gdmURLs.length > 0) {
-                this.getRestDatas(gdmURLs, null, true).then(gdms => {
+                this.getRestDatas(gdmURLs).then(gdms => {
                     gdms.map(affiliatedGdm => {
                         affiliatedGdms.push({
                             uuid: affiliatedGdm.uuid,
+                            gdm: affiliatedGdm,
                             gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
                             gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
-                            status: affiliatedGdm.gdm_status,
                             date_created: affiliatedGdm.date_created
                         });
                     });
@@ -149,17 +258,15 @@ var Dashboard = createReactClass({
             // Handle interpretations result
             interpretationURLs = data[1]['@graph'].map(result => { return result['@id']; });
             if (interpretationURLs.length > 0) {
-                this.getRestDatas(interpretationURLs, null, true).then(interpretationRecords => {
+                this.getRestDatas(interpretationURLs).then(interpretationRecords => {
                     interpretationRecords.map(interpretation => {
                         affiliatedInterpretations.push({
                             uuid: interpretation.uuid,
+                            interpretation: interpretation,
                             variantUuid: interpretation.variant.uuid,
-                            clinvarVariantTitle: interpretation.variant.clinvarVariantTitle,
-                            hgvsName37: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh37 ? interpretation.variant.hgvsNames.GRCh37 : null,
-                            hgvsName38: interpretation.variant.hgvsNames && interpretation.variant.hgvsNames.GRCh38 ? interpretation.variant.hgvsNames.GRCh38 : null,
+                            variant: interpretation.variant,
                             diseaseTerm: interpretation.disease ? interpretation.disease.term : null,
                             modeInheritance: interpretation.modeInheritance ? this.cleanHpoName(interpretation.modeInheritance) : null,
-                            status: interpretation.interpretation_status,
                             modified_by: interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title,
                             date_created: interpretation.date_created
                         });
@@ -245,6 +352,7 @@ var Dashboard = createReactClass({
      * @param {array} records - Individual curation evidence
      */
     renderIndividualRecords(records) {
+        const self = this;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
@@ -257,7 +365,7 @@ var Dashboard = createReactClass({
                             <thead>
                                 <tr>
                                     <th className="item-name">Gene-Disease Record</th>
-                                    <th className="item-status">Status</th>
+                                    <th className="item-status">Provisional/Approved Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
@@ -270,7 +378,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -290,6 +398,7 @@ var Dashboard = createReactClass({
      * @param {array} records - Affiliated curation evidence
      */
     renderAffiliatedGdms(records) {
+        const self = this;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
@@ -315,7 +424,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -335,6 +444,7 @@ var Dashboard = createReactClass({
      * @param {array} records - Individual variant interpretations
      */
     renderIndividualInterpretations(records) {
+        const self = this;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
@@ -348,7 +458,7 @@ var Dashboard = createReactClass({
                                 <tr>
                                     <th className="item-variant">Variant</th>
                                     <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-status">Status</th>
+                                    <th className="item-status">Provisional/Approved Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
@@ -360,16 +470,11 @@ var Dashboard = createReactClass({
                                                 <a key={item.uuid}
                                                     className="individual-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>
-                                                        {item.clinvarVariantTitle
-                                                            ? item.clinvarVariantTitle
-                                                            : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
-                                                        }
-                                                    </strong></span>
+                                                    <span className="variant-title"><strong>{renderVariantTitle(item.variant)}</strong></span>
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -389,6 +494,7 @@ var Dashboard = createReactClass({
      * @param {array} records - Affiliated variant interpretations
      */
     renderAffiliatedInterpretations(records) {
+        const self = this;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
@@ -402,7 +508,7 @@ var Dashboard = createReactClass({
                                 <tr>
                                     <th className="item-variant">Variant</th>
                                     <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-status">Status</th>
+                                    <th className="item-status">Provisional/Approved Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
                             </thead>
@@ -414,16 +520,11 @@ var Dashboard = createReactClass({
                                                 <a key={item.uuid}
                                                     className="affiliated-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>
-                                                        {item.clinvarVariantTitle
-                                                            ? item.clinvarVariantTitle
-                                                            : (item.hgvsName38 ? item.hgvsName38 : item.hgvsName37)
-                                                        }
-                                                    </strong></span>
+                                                    <span className="variant-title"><strong>{renderVariantTitle(item.variant)}</strong></span>
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{item.status}</td>
+                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );

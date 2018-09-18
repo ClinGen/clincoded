@@ -1,0 +1,80 @@
+.variant-interprertation-summary-wrapper {
+    background-color: #fff;
+    margin: 0 auto;
+
+    .evidence-panel-wrapper {
+        position: relative;
+
+        &.preview-only-overlay {
+            background-image: url(/static/img/preview-bg.svg);
+        }
+    }
+
+    .window-close-btn-wrapper {
+        text-align: right;
+        margin: 15px 0 0 0;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .panel {
+        @include border-radius(4px);
+        background-color: transparent;
+    }
+
+    .btn {
+        @include border-radius(4px);
+    }
+
+    .panel-body {
+        dl {
+            margin-bottom: 0;
+            padding-left: 0;
+            padding-right: 30px;
+        }
+    }
+
+    .panel-header,
+    .panel-evaluation-summary {
+        margin-bottom: 20px;
+    }
+
+    .print-info-note {
+        color: #878787;
+        text-align: right;
+    }
+
+    .pdf-download-wrapper {
+        text-align: right;
+        margin-bottom: 30px;
+    }
+
+    .evidence-summary {
+        &.panel-header {
+            .record-summary {
+                margin-top: 20px;
+
+                p {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+
+    .classificationStatus {
+        margin-left: 3px;
+
+        .label {
+            margin-right: 8px;
+            padding-top: .3em;
+
+            .badge {
+                background-color: #ff7700;
+                font-size: 85%;
+                margin-right: 2px;
+            }
+        }
+    }
+}

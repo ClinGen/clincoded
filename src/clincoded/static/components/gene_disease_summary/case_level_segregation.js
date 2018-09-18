@@ -44,7 +44,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                 <td className="evidence-phenotypes">
                     {evidence.hpoIdInDiagnosis.length ?
                         <span><strong>HPO term(s):</strong>
-                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} />
+                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         </span> 
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
@@ -64,6 +64,10 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                 </td>
                 <td className="evidence-lod-score-counted">
                     {evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore ? <span>{evidence.includeLodScoreInAggregateCalculation ? 'Yes' : 'No'}</span> : '-'}
+                </td>
+                <td className="evidence-sequencing-method">
+                    {(evidence.segregationPublishedLodScore || evidence.segregationEstimatedLodScore) && evidence.includeLodScoreInAggregateCalculation && evidence.sequencingMethod ?
+                        evidence.sequencingMethod : ''}
                 </td>
             </tr>
         );
@@ -126,6 +130,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     <th>Number of unaffected individuals</th>
                                     <th>LOD score</th>
                                     <th>LOD score counted</th>
+                                    <th>Sequencing method</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -134,7 +139,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                 })}
                                 <tr>
                                     <td colSpan="6" className="total-score-label">Total LOD score:</td>
-                                    <td colSpan="2" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
+                                    <td colSpan="3" className="total-score-value">{this.getTotalScore(sortedEvidenceList)}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -150,7 +155,8 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
 }
 
 GeneDiseaseEvidenceSummarySegregation.propTypes = {
-    segregationEvidenceList: PropTypes.array
+    segregationEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummarySegregation;

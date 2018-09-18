@@ -26,8 +26,6 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
         hasAssociatedDisease: PropTypes.bool,
         editKey: PropTypes.string,
         updateInterpretationObj: PropTypes.func,
-        calculatedAssertion: PropTypes.string,
-        provisionalPathogenicity: PropTypes.string,
         diseaseObj: PropTypes.object,
         updateDiseaseObj: PropTypes.func,
         session: PropTypes.object
@@ -138,6 +136,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
         let interpretationDisease, currInterpretation, flatInterpretation;
 
         if (diseaseObj && diseaseObj.term) {
+            // There is associated disease in the interpretation
             this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                 let diseaseUuid;
                 if (diseaseSearch.total === 0) {
@@ -204,22 +203,14 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                 parseAndLogError.bind(undefined, 'fetchedRequest');
             });
         } else {
+            // There is NO associated disease in the interpretation
             this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(interpretation => {
                 currInterpretation = interpretation;
                 // get up-to-date copy of interpretation object and flatten it
                 var flatInterpretation = curator.flatten(currInterpretation);
-                // if the interpretation object does not have a disease object, create it
+                // If the interpretation has an existing disease, delete it
                 if ('disease' in flatInterpretation) {
                     delete flatInterpretation['disease'];
-                    let provisionalPathogenicity = this.props.provisionalPathogenicity;
-                    let calculatedAssertion = this.props.calculatedAssertion;
-                    if (provisionalPathogenicity === 'Likely pathogenic' || provisionalPathogenicity === 'Pathogenic') {
-                        flatInterpretation['markAsProvisional'] = false;
-                    } else if (!provisionalPathogenicity) {
-                        if (calculatedAssertion === 'Likely pathogenic' || calculatedAssertion === 'Pathogenic' ) {
-                            flatInterpretation['markAsProvisional'] = false;
-                        }
-                    }
 
                     // Update the intepretation object partially with the new disease property value
                     this.putRestData('/interpretation/' + this.props.interpretation.uuid, flatInterpretation).then(result => {
@@ -283,12 +274,13 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
 
     /**
      * Handler for button press event to alert/confirm disease deletion
-     * if the interpretation had been marked as 'Provisional'
+     * if the interpretation had been saved as 'Provisional'
      */
     renderDeleteDiseaseBtn() {
         let interpretation = this.props.interpretation;
+        let classification = interpretation && interpretation.provisional_variant && interpretation.provisional_variant.length ? interpretation.provisional_variant[0] : null;
 
-        if (interpretation && interpretation.markAsProvisional) {
+        if (classification && classification.classificationStatus !== 'In progress') {
             return (
                 <ModalComponent modalTitle="Confirm disease deletion" modalClass="modal-default" modalWrapperClass="confirm-interpretation-delete-disease-modal pull-right"
                     bootstrapBtnClass="btn btn-danger disease-delete " actuatorClass="interpretation-delete-disease-btn" actuatorTitle={<span>Disease<i className="icon icon-trash-o"></i></span>}
@@ -296,10 +288,10 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                     <div>
                         <div className="modal-body">
                             <p>
-                                Warning: This interpretation is marked as "Provisional." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
+                                Warning: This interpretation is saved as "{classification.classificationStatus}." If it has a Modified Pathogenicity of "Likely pathogenic" or "Pathogenic,"
                                 or no Modified Pathogenicity but a Calculated Pathogenicity of "Likely pathogenic" or "Pathogenic," it must be associated with a disease.<br/><br/>
-                                <strong>If you still wish to delete the disease, select "Cancel," then select "View Summary" and remove the "Provisional" selection </strong>
-                                - otherwise, deleting the disease will automatically remove the "Provisional" status.
+                                <strong>If you still wish to delete the disease, select "Confirm," then select "View Summary" to update the "Evaluation Summary." </strong>
+                                You may then proceed with saving a new provisional and approved Interpretation due to this change.
                             </p>
                         </div>
                         <div className='modal-footer'>
@@ -309,7 +301,7 @@ const InterpretationDisease = module.exports.InterpretationDisease = createReact
                     </div>
                 </ModalComponent>
             );
-        } else if (interpretation && !interpretation.markAsProvisional) {
+        } else if ((classification && classification.classificationStatus === 'In progress') || !classification) {
             return (
                 <a className="btn btn-danger pull-right disease-delete" onClick={this.handleDeleteDisease}>
                     <span>Disease<i className="icon icon-trash-o"></i></span>

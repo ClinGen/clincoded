@@ -135,7 +135,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                                 interpretation={this.props.interpretation} editKey={this.props.editkey} updateInterpretationObj={this.props.updateInterpretationObj} />
                             <InterpretationDisease variantData={this.props.variantData} interpretation={this.props.interpretation} diseaseObj={this.state.diseaseObj} editKey={this.props.editkey}
                                 updateInterpretationObj={this.props.updateInterpretationObj} updateDiseaseObj={this.updateDiseaseObj} hasAssociatedDisease={this.state.hasAssociatedDisease}
-                                calculatedAssertion={this.props.calculatedAssertion} provisionalPathogenicity={this.props.provisionalPathogenicity} session={this.props.session} />
+                                session={this.props.session} />
                         </div>
                     </div>
                     :

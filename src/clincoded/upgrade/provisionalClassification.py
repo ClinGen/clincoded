@@ -27,3 +27,36 @@ def provisionalClassification_3_4(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+
+@upgrade_step('provisionalClassification', '4', '5')
+def provisionalClassification_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1417
+    # Add various points properties and update schema version
+    if 'totalScore' in value:
+        if 'classificationPoints' not in value:
+            value['classificationPoints'] = {}
+            value['classificationPoints']['evidencePointsTotal'] = value['totalScore']
+            value.pop('totalScore', None)
+
+    if 'classificationStatus' in value:
+        if value['classificationStatus'] == 'Provisional':
+            value['classificationStatus'] = 'In progress'
+
+
+@upgrade_step('provisionalClassification', '5', '6')
+def provisionalClassification_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1420
+    # Add publication properties and update schema version
+    return
+
+
+@upgrade_step('provisionalClassification', '6', '7')
+def provisionalClassification_6_7(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1549
+    # Add sequencing type to be associated with LOD score
+    if 'classificationPoints' in value:
+        if 'segregation' in value['classificationPoints']:
+            if 'evidenceCount' in value['classificationPoints']['segregation']:
+                value['classificationPoints']['segregation']['evidenceCountCandidate'] = value['classificationPoints']['segregation']['evidenceCount']
+                value['classificationPoints']['segregation'].pop('evidenceCount', None)

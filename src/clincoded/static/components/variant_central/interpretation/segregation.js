@@ -8,10 +8,12 @@ import { RestMixin } from '../../rest';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { CompleteSection } from './shared/complete_section';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
-var vciFormHelper = require('./shared/form');
-var CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-var extraEvidence = require('./shared/extra_evidence');
+const vciFormHelper = require('./shared/form');
+const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
+const extraEvidence = require('./shared/extra_evidence');
 
 // Display the curator data of the curation data
 var CurationInterpretationSegregation = module.exports.CurationInterpretationSegregation = createReactClass({
@@ -23,19 +25,32 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         updateInterpretationObj: PropTypes.func,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
-        session: PropTypes.object
+        session: PropTypes.object,
+        selectedCriteria: PropTypes.string
     },
 
     getInitialState() {
         return {
             data: this.props.data,
             clinvar_id: null,
-            interpretation: this.props.interpretation
+            interpretation: this.props.interpretation,
+            selectedCriteria: this.props.selectedCriteria
         };
+    },
+
+    componentDidMount() {
+        if (this.state.selectedCriteria) {
+            setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
+        }
     },
 
     componentWillReceiveProps(nextProps) {
         this.setState({data: nextProps.data, interpretation: nextProps.interpretation});
+        if (nextProps.selectedCriteria) {
+            this.setState({selectedCriteria: nextProps.selectedCriteria}, () => {
+                setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
+            });
+        }
     },
 
     render() {
@@ -43,7 +58,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
         return (
             <div className="variant-interpretation segregation">
-                <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-observed-in-healthy" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -61,7 +77,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-case-control" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -79,7 +96,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-segregation-data" open>
                     {(this.props.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -97,7 +115,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-de-novo" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -115,7 +134,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-allele-data" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -133,7 +153,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Alternate mechanism for disease" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Alternate mechanism for disease" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-alternate-mechanism" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -151,7 +172,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content" open>
+                <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content"
+                    panelClassName="tab-segegration-panel-specificity-of-phenotype" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
@@ -169,7 +191,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
                 </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source" open>
+                <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source"
+                    panelClassName="tab-segegration-panel-reputable-source" open>
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">

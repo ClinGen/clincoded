@@ -855,8 +855,10 @@
 .provisional-info-panel {
     width: 100%;
     border-top: 2px solid #aaa;
+    padding-top: 6px;
 
     table {
+        margin-bottom: 10px;
         width: 100%;
     }
 
@@ -864,20 +866,80 @@
         text-align: left;
     }
 
+    h4 {
+        border-bottom: solid 1px #aaa;
+        margin-top: 15px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+    }
+
     .button-box {
         width: auto;
         padding-left: 15px;
         text-align: right;
-        vertical-align: middle;
+        vertical-align: top;
 
         .btn .icon {
             color: #fff;
         }
     }
 
-    .provisional-title {
+    .header-classification {
         text-align: left;
-        padding-left: 10px;
+        
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+
+            .no-classification {
+                display: inline-block;
+                position: relative;
+                top: 1px;
+            }
+
+            .classification-link-item {
+                font-size: 0.9em;
+                margin-right: 8px;
+            }
+
+            .new-provisional-status-row {
+                margin-left: 201px;
+                margin-top: 4px;
+            }
+
+            .publish-warning {
+                color: #b6238a;
+
+                i.icon-exclamation-triangle {
+                    vertical-align: middle;
+                }
+            }
+        }
+
+        .summary-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label.label-info {
+                background-color: #917bc4;
+                padding-top: .3em;
+            }
+        }
     }
 
     .provisional-data-left {
@@ -1074,6 +1136,43 @@
             .altered-classification-reset-warning {
                 margin-top: -10px;
                 text-align: left;
+            }
+        }
+
+        .altered-classification-reasons,
+        .classification-evidence-summary {
+            textarea {
+                /* placeholder text color */
+                &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+                    color: #b6238a;
+                }
+                &::-moz-placeholder { /* Firefox 19+ */
+                    color: #b6238a;
+                }
+                &::-ms-input-placeholder { /* IE 10+ */
+                    color: #b6238a;
+                }
+                &::-moz-placeholder { /* Firefox 18- */
+                    color: #b6238a;
+                }
+                /* placeholder text color on focus */
+                &:focus::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+                    color: transparent;
+                }
+                &:focus::-moz-placeholder { /* Firefox 19+ */
+                    color: transparent;
+                }
+                &:focus::-ms-input-placeholder { /* IE 10+ */
+                    color: transparent;
+                }
+                &:focus::-moz-placeholder { /* Firefox 18- */
+                    color: transparent;
+                }
+            }
+
+            .label-note {
+                display: block;
+                font-weight: normal;
             }
         }
 
@@ -1277,11 +1376,19 @@
         dt {
             text-align: left;
             width: 300px;
+
+            &.variant-title-row {
+                display: table-cell;
+            }
         }
 
         dd {
             word-break: break-all;
             word-wrap: break-word;
+
+            &.variant-title-row {
+                display: table-cell;
+            }
         }
     }
 
@@ -1664,7 +1771,7 @@
     .interpretation-record {
         padding: 20px 0;
 
-         h2 {
+        h2 {
             left: 0;
             margin: 0;
             text-align: center;
@@ -1710,6 +1817,56 @@
             }
         }
     }
+
+    .header-classification {
+        margin-bottom: 3px;
+
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+}
+
+.curation-data-curator .current-user-interpretations,
+.curation-data-curator .login-users-interpretations,
+.curation-data-curator .other-users-interpretations {
+    .header-classification {
+        strong {
+            vertical-align: bottom;
+        }
+
+        .classification-status {
+            font-size: 1.1em;
+            margin-left: 8px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
 }
 
 .curation-variant  {
@@ -1743,6 +1900,18 @@
             border: none;
             padding: 0;
         }
+
+        .current-user-interpretations {
+            .summary-status {
+                font-size: 1.1em;
+                margin-left: 8px;
+
+                .label.label-info {
+                    background-color: #917bc4;
+                    padding-top: .3em;
+                }
+            }
+        }
     }
 
     .alert {
@@ -1774,6 +1943,20 @@
     }
 
     .header-note {
+        color: #1b809e;
+        font-size: 110%;
+        font-weight: normal;
+    }
+
+    .exac-note {
+        color: #1b809e;
+        font-size: 110%;
+        font-weight: normal;
+        padding-left: 30%;  
+        padding-top: 7%;  
+    }
+
+    .exac-pop-note {
         color: #1b809e;
         font-size: 110%;
         font-weight: normal;
@@ -1881,6 +2064,18 @@
 }
 
 /* variant curation interface - criteria bar */
+/* temp styles for note below criteria bar */
+.curation-criteria {
+    .criteria-usage-note {
+        color: #aaa;
+        font-size: 95%;
+        line-height: normal;
+        margin-bottom: 0;
+        position: relative;
+        top: -6px;
+    }
+}
+
 .criteria-group.btn-group-sm {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -1888,7 +2083,7 @@
 
 .criteria-group.btn-group-sm .btn {
     background-color: #fff;
-    cursor: default;
+    cursor: pointer;
     padding: 5px 0.665em;
     font-size: 12px;
     font-weight: bold;
@@ -2389,16 +2584,30 @@ dl.inline-dl {
             .provisional-interpretation-status:first-letter {
                 text-transform: capitalize;
             }
-
-            .modeInheritance {
-                font-style: italic;
-            }
         }
     }
 
     .provisional-static-content-wrapper {
         margin-bottom: 10px;
         padding: 0;
+
+        .provisional-interpretation-status {
+            line-height: 1.8;
+            margin-left: 3px;
+            position: relative;
+            top: -3px;
+
+            .label {
+                margin-right: 8px;
+                padding-top: .3em;
+
+                .badge {
+                    background-color: #ff7700;
+                    font-size: 85%;
+                    margin-right: 2px;
+                }
+            }
+        }
     }
 
     .provisional-form-content-wrapper {
@@ -2407,6 +2616,10 @@ dl.inline-dl {
         -webkit-border-radius: 2px;
         -moz-border-radius: 2px;
         border-radius: 2px;
+    }
+
+    .classification-submit, .classification-edit {
+        margin-top: 10px;
     }
 
     .evaluation-provision {
@@ -2528,8 +2741,6 @@ dl.inline-dl {
         }
 
         &.evidence-summary {
-            margin-top: 25px;
-
             label {
                 padding-right: 0;
                 padding-top: 0;
@@ -2644,6 +2855,13 @@ table.login-users-interpretations {
     }
 }
 
+.curation-data-curator .login-users-interpretations,
+.curation-data-curator .other-users-interpretations {
+    dl {
+        margin-bottom: 16px;
+    }
+}
+
 .other-users-interpretations {
     padding-left: 0;
     padding-top: 5px;
@@ -2655,6 +2873,10 @@ table.login-users-interpretations {
             span.no-broken-item {
                 display: inline-block;
             }
+        }
+
+        &:last-child {
+            margin-bottom: 6px;
         }
     }
 }
@@ -3357,7 +3579,18 @@ table.login-users-interpretations {
     }
 }
 
-.table-responsive {
-    margin-left: 30px;
-    margin-right: 30px;
+/* Styles for hovering tool tip upon mouseover variant title "i" icon */
+.variant-title-explanation {
+    font-size: 85%;
+    margin-left: 5px;
+
+    /* Overriding tool tip width */
+    [data-tooltip]:before {
+        margin-left: -180px;
+        width: 360px;
+    }
+}
+
+.variant-panel .variant-title-explanation {
+    font-size: 100%;
 }

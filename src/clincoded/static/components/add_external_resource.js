@@ -13,6 +13,8 @@ import * as CuratorHistory from './curator_history';
 import { parsePubmed } from '../libs/parse-pubmed';
 import { parseClinvar, parseCAR } from '../libs/parse-resources';
 import ModalComponent from '../libs/bootstrap/modal';
+import { getHgvsNotation } from './variant_central/helpers/hgvs_notation';
+import { getCanonicalTranscript } from '../libs/get_canonical_transcript';
 import * as curator from './curator';
 const variantHgvsRender = curator.variantHgvsRender;
 const PmidSummary = curator.PmidSummary;
@@ -775,7 +777,52 @@ function carQueryResource() {
                 });
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
-                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                let hgvs_notation = getHgvsNotation(data, 'GRCh38', true);
+                let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
+                if (hgvs_notation) {
+                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
+                        let ensemblTranscripts = response.length && response[0].transcript_consequences ? response[0].transcript_consequences : [];
+                        if (ensemblTranscripts && ensemblTranscripts.length) {
+                            let canonicalTranscript = getCanonicalTranscript(ensemblTranscripts);
+                            if (canonicalTranscript && canonicalTranscript.length && data.tempAlleles && data.tempAlleles.length) {
+                                data.tempAlleles.forEach(item => {
+                                    if (item.hgvs && item.hgvs.length) {
+                                        for (let transcript of item.hgvs) {
+                                            if (transcript === canonicalTranscript) {
+                                                let proteinChange;
+                                                let transcriptStart = transcript.split(':')[0];
+                                                let transcriptEnd = transcript.split(':')[1];
+                                                if (item.proteinEffect && item.proteinEffect.hgvs) {
+                                                    proteinChange = item.proteinEffect.hgvs.split(':')[1];
+                                                }
+                                                data['canonicalTranscriptTitle'] = transcriptStart + '(' + item.geneSymbol + '):' + transcriptEnd + ' (' + proteinChange + ')';
+                                                delete data['tempAlleles'];
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                            // Remove the 'tempAlleles' object at this point regardless
+                            // whether the preceding evaluations are executed
+                            if (data['tempAlleles']) delete data['tempAlleles'];
+                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        } else {
+                            // Fall back to CAR data without the canonical transcript title if there is no ensembl transcript
+                            if (data['tempAlleles']) delete data['tempAlleles'];
+                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        }
+                    }).catch(err => {
+                        // Error in VEP get request
+                        console.warn('Error in querying Ensembl VEP data = %o', err);
+                        // Fall back to CAR data
+                        if (data['tempAlleles']) delete data['tempAlleles'];
+                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                    });
+                } else {
+                    // Fall back to CAR data without the canonical transcript title if parsing fails
+                    if (data['tempAlleles']) delete data['tempAlleles'];
+                    this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                }
             } else {
                 // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');

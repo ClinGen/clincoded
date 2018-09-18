@@ -18,6 +18,7 @@ import { ScoreIndividual } from './score/individual_score';
 import { ScoreViewer } from './score/viewer';
 import ModalComponent from '../libs/bootstrap/modal';
 import { IndividualDisease } from './disease';
+import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -233,7 +234,8 @@ const IndividualCuration = createReactClass({
                                 'clinvarVariantId': variants[i].clinvarVariantId ? variants[i].clinvarVariantId : null,
                                 'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                 'carId': variants[i].carId ? variants[i].carId : null,
-                                'grch38': variants[i].hgvsNames && variants[i].hgvsNames.GRCh38 ? variants[i].hgvsNames.GRCh38 : null,
+                                'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                 'uuid': variants[i].uuid,
                                 'associatedPathogenicities': variants[i].associatedPathogenicities && variants[i].associatedPathogenicities.length ? variants[i].associatedPathogenicities : []
                             };
@@ -516,7 +518,8 @@ const IndividualCuration = createReactClass({
                     /*************************************************************/
                     /* Either update or create the score status object in the DB */
                     /*************************************************************/
-                    if (Object.keys(newUserScoreObj).length) {
+                    if (Object.keys(newUserScoreObj).length && newUserScoreObj.scoreStatus) {
+                        // Update and create score object when the score object has the scoreStatus key/value pair
                         if (this.state.userScoreObj.uuid) {
                             return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
                                 // Only need to update the evidence score object
@@ -528,6 +531,22 @@ const IndividualCuration = createReactClass({
                                     // Add the new score to array
                                     evidenceScores.push(newScoreObject['@graph'][0]['@id']);
                                 }
+                                return Promise.resolve(evidenceScores);
+                            });
+                        }
+                    } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.scoreStatus) {
+                        // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                        // Then delete the score entry from the score list associated with the evidence
+                        if (this.state.userScoreObj.uuid) {
+                            newUserScoreObj['status'] = 'deleted';
+                            return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                                evidenceScores.forEach(score => {
+                                    if (score === modifiedScoreObj['@graph'][0]['@id']) {
+                                        let index = evidenceScores.indexOf(score);
+                                        evidenceScores.splice(index, 1);
+                                    }
+                                });
+                                // Return the evidence score array without the deleted object
                                 return Promise.resolve(evidenceScores);
                             });
                         }
@@ -667,22 +686,46 @@ const IndividualCuration = createReactClass({
         if (value !== 'none') { newIndividual.sex = value; }
 
         value = this.getFormValue('country');
-        if (value !== 'none') { newIndividual.countryOfOrigin = value; }
+        if (value !== 'none') {
+            newIndividual.countryOfOrigin = value;
+        } else {
+            if (newIndividual && newIndividual.countryOfOrigin) {
+                delete newIndividual['countryOfOrigin'];
+            }
+        }
 
         value = this.getFormValue('ethnicity');
-        if (value !== 'none') { newIndividual.ethnicity = value; }
+        if (value !== 'none') {
+            newIndividual.ethnicity = value;
+        } else {
+            if (newIndividual && newIndividual.ethnicity) {
+                delete newIndividual['ethnicity'];
+            }
+        }
 
         value = this.getFormValue('race');
-        if (value !== 'none') { newIndividual.race = value; }
+        if (value !== 'none') {
+            newIndividual.race = value;
+        } else {
+            if (newIndividual && newIndividual.race) {
+                delete newIndividual['race'];
+            }
+        }
 
         value = this.getFormValue('agetype');
-        if (value !== 'none') { newIndividual.ageType = value; }
+        newIndividual.ageType = value !== 'none' ? value : '';
 
         value = this.getFormValueNumber('agevalue');
-        if (value) { newIndividual.ageValue = value; }
+        if (value) {
+            newIndividual.ageValue = value;
+        } else {
+            if (newIndividual && newIndividual.ageValue) {
+                delete newIndividual['ageValue'];
+            }
+        }
 
         value = this.getFormValue('ageunit');
-        if (value !== 'none') { newIndividual.ageUnit = value; }
+        newIndividual.ageUnit = value !== 'none' ? value : '';
 
         // Fill in the individual fields from the Additional panel
         value = this.getFormValue('additionalinfoindividual');
@@ -769,7 +812,8 @@ const IndividualCuration = createReactClass({
                 'clinvarVariantId': data.clinvarVariantId ? data.clinvarVariantId : null,
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
-                'grch38': data.hgvsNames && data.hgvsNames.GRCh38 ? data.hgvsNames.GRCh38 : null,
+                'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid,
                 'associatedPathogenicities': data.associatedPathogenicities && data.associatedPathogenicities.length ? data.associatedPathogenicities : []
             };
@@ -992,7 +1036,7 @@ const IndividualCuration = createReactClass({
                                                         <ScoreIndividual evidence={individual} modeInheritance={gdm.modeInheritance} evidenceType="Individual"
                                                             variantInfo={variantInfo} session={session} handleUserScoreObj={this.handleUserScoreObj}
                                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={this.props.affiliation}
-                                                            gdmUuid={gdm && gdm.uuid ? gdm.uuid : null} pmid={pmid ? pmid : null} />
+                                                            gdm={gdm} pmid={pmid ? pmid : null} />
                                                     </Panel>
                                                 </PanelGroup>
                                             </div>
@@ -1373,20 +1417,13 @@ function IndividualVariantInfo() {
                                             <dd><a href={`${external_url_map['ClinVarSearch']}${variant.clinvarVariantId}`} title={`ClinVar entry for variant ${variant.clinvarVariantId} in new tab`} target="_blank">{variant.clinvarVariantId}</a></dd>
                                         </div>
                                         : null}
-
-                                    {variant.clinvarVariantTitle ?
-                                        <div>
-                                            <dt>ClinVar Preferred Title</dt>
-                                            <dd>{variant.clinvarVariantTitle}</dd>
-                                        </div>
-                                        : null}
-
                                     {variant.carId ?
                                         <div>
                                             <dt>ClinGen Allele Registry ID</dt>
                                             <dd><a href={`http:${external_url_map['CARallele']}${variant.carId}.html`} title={`ClinGen Allele Registry entry for ${variant.carId} in new tab`} target="_blank">{variant.carId}</a></dd>
                                         </div>
                                         : null}
+                                    {renderVariantLabelAndTitle(variant)}
                                     {variant.uuid ?
                                         <div>
                                             <dt className="no-label"></dt>
@@ -1395,21 +1432,12 @@ function IndividualVariantInfo() {
                                             </dd>
                                         </div>
                                         : null}
-
-                                    {!variant.clinvarVariantTitle && variant.carId && variant.hgvsNames && variant.hgvsNames.GRCh38 ?
-                                        <div>
-                                            <dt>Genomic HGVS Title</dt>
-                                            <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                        </div>
-                                        : null}
-
                                     {variant.otherDescription && variant.otherDescription.length ?
                                         <div>
                                             <dt>Other description</dt>
                                             <dd>{variant.otherDescription}</dd>
                                         </div>
                                         : null}
-
                                     {individual.recessiveZygosity && i === 0 ?
                                         <div>
                                             <dt>If Recessive, select variant zygosity</dt>
@@ -1479,24 +1507,13 @@ function IndividualVariantInfo() {
                                                 <span className="col-sm-7 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.variantInfo[i].clinvarVariantId} target="_blank">{this.state.variantInfo[i].clinvarVariantId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].clinvarVariantTitle ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label>{<LabelClinVarVariantTitle />}</label></span>
-                                                <span className="col-sm-7 text-no-input clinvar-preferred-title">{this.state.variantInfo[i].clinvarVariantTitle}</span>
-                                            </div>
-                                            : null}
                                         {this.state.variantInfo[i].carId ?
                                             <div className="row">
                                                 <span className="col-sm-5 control-label"><label><LabelCARVariant /></label></span>
                                                 <span className="col-sm-7 text-no-input"><a href={`https:${external_url_map['CARallele']}${this.state.variantInfo[i].carId}.html`} target="_blank">{this.state.variantInfo[i].carId}</a></span>
                                             </div>
                                             : null}
-                                        {this.state.variantInfo[i].grch38 ?
-                                            <div className="row">
-                                                <span className="col-sm-5 control-label"><label><LabelCARVariantTitle /></label></span>
-                                                <span className="col-sm-7 text-no-input">{this.state.variantInfo[i].grch38} (GRCh38)</span>
-                                            </div>
-                                            : null}
+                                        {renderVariantLabelAndTitle(this.state.variantInfo[i], true)}
                                         <div className="row variant-curation">
                                             <span className="col-sm-5 control-label"><label></label></span>
                                             <span className="col-sm-7 text-no-input">
@@ -1570,16 +1587,8 @@ const LabelClinVarVariant = () => {
     return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Variation ID:</strong></span>;
 };
 
-const LabelClinVarVariantTitle = () => {
-    return <span><strong><a href={external_url_map['ClinVar']} target="_blank" title="ClinVar home page at NCBI in a new tab">ClinVar</a> Preferred Title:</strong></span>;
-};
-
 const LabelCARVariant = () => {
     return <span><strong><a href={external_url_map['CAR']} target="_blank" title="ClinGen Allele Registry in a new tab">ClinGen Allele Registry</a> ID:</strong></span>;
-};
-
-const LabelCARVariantTitle = () => {
-    return <span><strong>Genomic HGVS Title:</strong></span>;
 };
 
 const LabelOtherVariant = () => {
@@ -1648,11 +1657,23 @@ const IndividualViewer = createReactClass({
 
     getInitialState: function() {
         return {
+            gdmUuid: queryKeyValue('gdm', this.props.href),
+            gdm: null,
             userScoreObj: {}, // Logged-in user's score object
             submitBusy: false, // True while form is submitting
             scoreError: false,
             scoreErrorMsg: ''
         };
+    },
+
+    componentDidMount() {
+        if (this.state.gdmUuid) {
+            return this.getRestData('/gdm/' + this.state.gdmUuid).then(gdm => {
+                this.setState({gdm: gdm});
+            }).catch(err => {
+                console.log('Fetching gdm error =: %o', err);
+            });
+        }
     },
 
     // Called by child function props to update user score obj
@@ -1697,39 +1718,79 @@ const IndividualViewer = createReactClass({
             /***********************************************************/
             /* Either update or create the user score object in the DB */
             /***********************************************************/
-            if (this.state.userScoreObj.uuid) {
-                return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                    this.setState({submitBusy: false});
-                    return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
-            } else {
-                return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
-                    let newScoreObjectUuid = null;
-                    if (newScoreObject) {
-                        newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
-                    }
-                    return Promise.resolve(newScoreObjectUuid);
-                }).then(newScoreObjectUuid => {
-                    return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
-                        // flatten both context and fresh individual
-                        let newIndividual = curator.flatten(individual);
-                        let freshFlatIndividual = curator.flatten(freshIndividual);
-                        // take only the scores from the fresh individual to not overwrite changes
-                        // in newIndividual
-                        newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
-                        // push new score uuid to newIndividual's scores list
-                        newIndividual.scores.push(newScoreObjectUuid);
-
-                        return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
-                            this.setState({submitBusy: false});
-                            return Promise.resolve(updatedIndividualObj['@graph'][0]);
-                        });
+            if (newUserScoreObj.scoreStatus) {
+                // Update and create score object when the score object has the scoreStatus key/value pair
+                if (this.state.userScoreObj.uuid) {
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        this.setState({submitBusy: false});
+                        return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
+                    }).then(data => {
+                        this.handlePageRedirect();
                     });
-                }).then(data => {
-                    this.handlePageRedirect();
-                });
+                } else {
+                    return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
+                        let newScoreObjectUuid = null;
+                        if (newScoreObject) {
+                            newScoreObjectUuid = newScoreObject['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(newScoreObjectUuid);
+                    }).then(newScoreObjectUuid => {
+                        return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                            // flatten both context and fresh individual
+                            let newIndividual = curator.flatten(individual);
+                            let freshFlatIndividual = curator.flatten(freshIndividual);
+                            // take only the scores from the fresh individual to not overwrite changes
+                            // in newIndividual
+                            newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                            // push new score uuid to newIndividual's scores list
+                            newIndividual.scores.push(newScoreObjectUuid);
+
+                            return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
+            } else if (!newUserScoreObj.scoreStatus) {
+                // If an existing score object has no scoreStatus key/value pair, the user likely removed score
+                // Then delete the score entry from the score list associated with the evidence
+                if (this.state.userScoreObj.uuid) {
+                    newUserScoreObj['status'] = 'deleted';
+                    return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
+                        let modifiedScoreObjectUuid = null;
+                        if (modifiedScoreObj) {
+                            modifiedScoreObjectUuid = modifiedScoreObj['@graph'][0]['@id'];
+                        }
+                        return Promise.resolve(modifiedScoreObjectUuid);
+                    }).then(modifiedScoreObjectUuid => {
+                        return this.getRestData('/individual/' + individual.uuid, null, true).then(freshIndividual => {
+                            // flatten both context and fresh individual
+                            let newIndividual = curator.flatten(individual);
+                            let freshFlatIndividual = curator.flatten(freshIndividual);
+                            // take only the scores from the fresh individual to not overwrite changes
+                            // in newIndividual
+                            newIndividual.scores = freshFlatIndividual.scores ? freshFlatIndividual.scores : [];
+                            // push new score uuid to newIndividual's scores list
+                            if (newIndividual.scores.length) {
+                                newIndividual.scores.forEach(score => {
+                                    if (score === modifiedScoreObjectUuid) {
+                                        let index = newIndividual.scores.indexOf(score);
+                                        newIndividual.scores.splice(index, 1);
+                                    }
+                                });
+                            }
+                            return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
+                                this.setState({submitBusy: false});
+                                return Promise.resolve(updatedIndividualObj['@graph'][0]);
+                            });
+                        });
+                    }).then(data => {
+                        this.handlePageRedirect();
+                    });
+                }
             }
         }
     },
@@ -1750,7 +1811,7 @@ const IndividualViewer = createReactClass({
         let isEvidenceScored = false;
         if (evidenceScores.length) {
             evidenceScores.map(scoreObj => {
-                if (scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
+                if (scoreObj.scoreStatus && scoreObj.scoreStatus.match(/Score|Review|Contradicts/ig)) {
                     isEvidenceScored = true;
                 }
             });
@@ -1953,14 +2014,6 @@ const IndividualViewer = createReactClass({
                                                 </dl>
                                             </div>
                                             : null }
-                                        {variant.clinvarVariantTitle ?
-                                            <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>ClinVar Preferred Title</dt>
-                                                    <dd>{variant.clinvarVariantTitle}</dd>
-                                                </dl>
-                                            </div>
-                                            : null}
                                         {variant.carId ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -1969,14 +2022,7 @@ const IndividualViewer = createReactClass({
                                                 </dl>
                                             </div>
                                             : null }
-                                        {!variant.clinvarVariantTitle && (variant.hgvsNames && variant.hgvsNames.GRCh38) ?
-                                            <div>
-                                                <dl className="dl-horizontal">
-                                                    <dt>Genomic HGVS Title</dt>
-                                                    <dd>{variant.hgvsNames.GRCh38} (GRCh38)</dd>
-                                                </dl>
-                                            </div>
-                                            : null }
+                                        {renderVariantLabelAndTitle(variant)}
                                         {variant.otherDescription ?
                                             <div>
                                                 <dl className="dl-horizontal">
@@ -2038,7 +2084,7 @@ const IndividualViewer = createReactClass({
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation}
-                                            variantInfo={variants} gdmUuid={tempGdm && tempGdm.uuid ? tempGdm.uuid : null} pmid={tempPmid ? tempPmid : null} />
+                                            variantInfo={variants} gdm={this.state.gdm} pmid={tempPmid ? tempPmid : null} />
                                         : null}
                                     {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">
@@ -2098,9 +2144,10 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
         // It's possible to create a proband w/o variants at the moment
         newIndividual.variants = variants;
     }
-    if (zygosity) { newIndividual.recessiveZygosity = zygosity; }
-
-    if (affiliation) { newIndividual.affiliation = affiliation.affiliation_id; }
+    if (zygosity) newIndividual.recessiveZygosity = zygosity;
+    if (affiliation) newIndividual.affiliation = affiliation.affiliation_id;
+    const newMethod = {dateTime: moment().format()};
+    newIndividual.method = newMethod;
 
     // We created an individual; post it to the DB and return a promise with the new individual
     return context.postRestData('/individuals/', newIndividual).then(data => {

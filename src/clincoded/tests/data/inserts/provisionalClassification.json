@@ -4,7 +4,9 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2015-08-19T11:25:18.000000+00:00",
         "last_modified": "2015-08-21T21:35:18.000000+00:00",
-        "totalScore": 17,
+        "classificationPoints": {
+            "evidencePointsTotal": 17
+        },
         "autoClassification": "Definitive",
         "alteredClassification": "Definitive",
         "reasons": "",
@@ -15,7 +17,9 @@
         "submitted_by": "04442cec-6ab7-40d0-af26-1e5fefd535eb",
         "date_created": "2015-08-19T08:35:18.000000+00:00",
         "last_modified": "2015-08-20T18:15:02.000000+00:00",
-        "totalScore": 15,
+        "classificationPoints": {
+            "evidencePointsTotal": 15
+        },
         "autoClassification": "Strong",
         "alteredClassification": "Definitive",
         "reasons": "some reasons here too",
