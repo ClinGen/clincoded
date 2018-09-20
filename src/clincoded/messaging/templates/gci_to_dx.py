@@ -9,10 +9,10 @@ message_template = {
                     'interpretation': 'VCI'
                 }
             ],
-            2: '5.1'
+            2: '6'
         }
     ],    
-    'sopVersion': '5',
+    'sopVersion': '6',
     'curationVersion': 'TO BE DETERMINED',
     'title': ['$COMBINE_DATA', ' : ',
         {
