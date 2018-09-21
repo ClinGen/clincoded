@@ -8834,5 +8834,50 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "lbabb@broadinstitute.org",
+        "first_name": "Larry",
+        "last_name": "Babb",
+        "uuid": "a68ec071-a507-40eb-92c5-b753e9c73cb0",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "lspais@broadinstitute.org",
+        "first_name": "Lynn",
+        "last_name": "Pais",
+        "uuid": "84e4366d-7761-4053-88d9-a629d4411c13",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "roger.hahn@hvpatentlaw.com",
+        "first_name": "Roger",
+        "last_name": "Hahn",
+        "uuid": "7feb4ac3-fa46-40e2-bc2d-7ab4ed1b437e",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
