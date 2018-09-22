@@ -257,6 +257,9 @@
     {
         "affiliation_id": "10029",
         "affiliation_abbreviation": "",
-        "affiliation_fullname": "Broad Institute Rare Disease Group"
+        "affiliation_fullname": "Broad Institute Rare Disease Group",
+        "approver": [
+            "Samantha Baxter"
+        ]
     }
 ]
