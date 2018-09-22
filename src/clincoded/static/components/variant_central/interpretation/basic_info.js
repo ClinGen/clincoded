@@ -31,7 +31,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         ext_clinvarInterpretationSummary: PropTypes.object,
         loading_clinvarEutils: PropTypes.bool,
         loading_clinvarSCV: PropTypes.bool,
-        loading_ensemblHgvsVEP: PropTypes.bool
+        loading_ensemblHgvsVEP: PropTypes.bool,
+        session: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -272,6 +274,17 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
      * @param {integer} key - Unique identifier for each mapped node
      */
     renderAllExistingInterpretations(interpretation, key) {
+        const affiliation = this.props.affiliation;
+        const session = this.props.session;
+        // Evaluate whether to render link to provisional summary for current logged-in user
+        let showProvisionalLink = false;
+        if (interpretation.affiliation && affiliation && interpretation.affiliation === affiliation.affiliation_id) {
+            showProvisionalLink = true;
+        } else if (!interpretation.affiliation && !affiliation && interpretation.submitted_by.uuid === session.user_properties.uuid) {
+            showProvisionalLink = true;
+        } else {
+            showProvisionalLink = false;
+        }
         return (
             <tr key={key} className="approved-interpretation">
                 <td className="clinical-significance">
@@ -283,7 +296,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                         : null}
                 </td>
                 <td className="interpretation-status">
-                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0]) : renderInProgressStatus()}
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0], showProvisionalLink) : renderInProgressStatus()}
                 </td>
                 <td className="condition-mode-of-inheritance">
                     {interpretation.disease ?
