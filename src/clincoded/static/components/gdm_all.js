@@ -65,7 +65,7 @@ var GdmList = createReactClass({
                         created_date: moment(gdmCreatedDate).format('YYYY MMM DD'),
                         created_time: moment(gdmCreatedDate).format('h:mm a'),
                         date_created: gdm.date_created,
-                        affiliation: gdm.affiliation ? gdm.affiliation : null
+                        affiliation: gdm.affiliation ? getAffiliationName(gdm.affiliation) : null
                     };
                     gdmObjList.push(gdmObj);
                 });
@@ -157,7 +157,7 @@ var GdmList = createReactClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene or Disease"
+                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Gene, Disease, or Creator"
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
@@ -184,7 +184,7 @@ var GdmList = createReactClass({
                                         <div>{gdm.modeInheritance}</div>
                                     </div>
                                     <div className="table-cell-gdm">
-                                        <div>{gdm.submitter_last_name}, {gdm.submitter_first_name} {gdm.affiliation ? <span>({getAffiliationName(gdm.affiliation)})</span> : null}</div>
+                                        <div>{gdm.submitter_last_name}, {gdm.submitter_first_name} {gdm.affiliation ? <span>({gdm.affiliation})</span> : null}</div>
                                     </div>
                                     <div className="table-cell-gdm">
                                         <div>{gdm.created_date}</div>
