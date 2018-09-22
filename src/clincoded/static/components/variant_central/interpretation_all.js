@@ -167,7 +167,7 @@ var InterpretationList = createReactClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Variant or Disease"
+                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Variant, Disease, MOI, or Creator"
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
