@@ -512,7 +512,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 
     renderCriteriaEvalLink() {
         return (
-            <span><a href="https://www.clinicalgenome.org/working-groups/sequence-variant-interpretation/" target="_blank" rel="noopener noreferrer">SVI guidance</a></span>
+            <span>
+                <a href="https://www.clinicalgenome.org/working-groups/sequence-variant-interpretation/" target="_blank" rel="noopener noreferrer">
+                    Sequence Variant Interpretation (SVI) Working Group guidance
+                </a>
+            </span>
         );
     },
 
