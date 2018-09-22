@@ -19,8 +19,15 @@ export function renderOtherClassifications(classification, gdm, context) {
     if (snapshots && snapshots.length) {
         return (
             <span className="classification-status">
-                {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
+                {classification.affiliation ?
+                    <span>{getAffiliationName(classification.affiliation)}&nbsp;&mdash;&nbsp;</span>
+                    :
+                    <span>{classification.submitted_by.title}&nbsp;&mdash;&nbsp;</span>
+                }
+                {classification.autoClassification ? <span><strong>Calculated:</strong>&nbsp;{classification.autoClassification}</span> : null}
+                {classification.alteredClassification ? <span>;&nbsp;<strong>Modified:</strong>&nbsp;{classification.alteredClassification}</span> : null}
                 <span className="classification-status-wrapper">
+                    <span>;&nbsp;<strong>Status:</strong></span>
                     {renderProvisionalStatus(snapshots, 'classification', gdm, context, false)}
                     {renderApprovalStatus(snapshots, 'classification', context, affiliationId, userId)}
                     {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, false)}
@@ -31,8 +38,15 @@ export function renderOtherClassifications(classification, gdm, context) {
     } else {
         return (
             <span className="classification-status">
-                {classification.affiliation ? <span>{getAffiliationName(classification.affiliation)}:</span> : <span>{classification.submitted_by.title}:</span>}
+                {classification.affiliation ?
+                    <span>{getAffiliationName(classification.affiliation)}&nbsp;&mdash;&nbsp;</span>
+                    :
+                    <span>{classification.submitted_by.title}&nbsp;&mdash;&nbsp;</span>
+                }
+                {classification.autoClassification ? <span><strong>Calculated:</strong>&nbsp;{classification.autoClassification}</span> : null}
+                {classification.alteredClassification ? <span>;&nbsp;<strong>Modified:</strong>&nbsp;{classification.alteredClassification}</span> : null}
                 <span className="classification-status-wrapper">
+                    <span>;&nbsp;<strong>Status:</strong></span>
                     {renderInProgressStatus(classification)}
                 </span>
             </span>
