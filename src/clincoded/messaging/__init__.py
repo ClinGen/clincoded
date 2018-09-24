@@ -488,7 +488,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
 
                 # Add evidence (articles, counts or points) based on information type
                 elif value[0] == '$EVIDENCE_DATA':
-                    if (value_length == 2 or value_length == 3) and value[1] in evidence:
+                    if value_length in (2, 3) and value[1] in evidence:
                         template[key] = evidence[value[1]]
 
                         if not template[key] and value_length == 3 and value[2] == True:
