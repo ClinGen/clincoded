@@ -138,6 +138,9 @@ var NavItem = module.exports.NavItem = createReactClass({
         } else if (e.target === this.refs.menu_item_contact_helpdesk) {
             this.setState({dropdownActive: false});
             location.href = 'mailto:clingen-helpdesk@lists.stanford.edu';
+        } else if (e.target === this.refs.menu_item_sop) {
+            this.setState({dropdownActive: false});
+            window.open('https://www.clinicalgenome.org/curation-activities/gene-disease-validity/educational-and-training-materials/standard-operating-procedures/');
         } else {
             this.setState({dropdownActive: false});
         }
@@ -161,8 +164,9 @@ var NavItem = module.exports.NavItem = createReactClass({
                             <li><a href="#" ref="menu_item_gene_curation">Gene Curation</a></li>
                             <li><a href="#" ref="menu_item_variant_curation">Variant Curation</a></li>
                             <li><a href="#" ref="menu_item_contact_helpdesk">Contact Helpdesk</a></li>
+                            <li><a href="#" ref="menu_item_sop">Standard Operating Procedures</a></li>
                         </ul>
-                    : null}
+                        : null}
                 </div>
             );
         } else {

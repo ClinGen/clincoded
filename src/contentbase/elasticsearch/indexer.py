@@ -195,7 +195,7 @@ class Indexer(object):
             self.es.index(
                 index=self.index, doc_type=doctype, body=result,
                 id=str(uuid), version=xmin, version_type='external_gte',
-                request_timeout=30,
+                request_timeout=60,
             )
         except StatementError:
             # Can't reconnect until invalid transaction is rolled back
