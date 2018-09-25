@@ -908,9 +908,16 @@
         text-align: left;
 
         .classification-status {
+            .status-wrapper {
+                margin-left: 12px;
+            }
+
+            .status-wrapper:first-child {
+                margin-left: 8px;
+            }
+
             .label {
                 font-size: 0.825em;
-                margin-left: 14px;
                 padding-top: .3em;
 
                 .badge {
@@ -918,10 +925,6 @@
                     font-size: 85%;
                     margin-right: 2px;
                 }
-            }
-
-            .label:first-child {
-                margin-left: 8px;
             }
 
             .no-classification {
@@ -932,7 +935,7 @@
 
             .classification-link-item {
                 font-size: 105%;
-                margin: 0 5px;
+                margin-left: 5px;
                 position: relative;
                 top: 3px;
 
@@ -958,13 +961,9 @@
             }
         }
 
-        .summary-status {
-            font-size: 1.1em;
-            margin-left: 8px;
-
+        .new-summary {
             .label.label-info {
                 background-color: #917bc4;
-                padding-top: .3em;
             }
         }
     }
@@ -1510,15 +1509,13 @@
             .basic-info .all-existing-interpretaions {
                 margin-bottom: 20px;
 
-                .provisional-status-wrapper,
-                .approval-status-wrapper,
-                .publication-status-wrapper {
-                    display: inline-block;
-                    margin-bottom: 3px;
-                }
-
                 .classification-status {
                     font-size: 1.1em;
+
+                    .status-wrapper {
+                        display: inline-block;
+                        margin-bottom: 5px;
+                    }
         
                     .label {
                         margin-left: 14px;
@@ -1951,7 +1948,7 @@
         }
 
         .current-user-interpretations {
-            .summary-status {
+            .new-summary {
                 font-size: 1.1em;
                 margin-left: 8px;
 
