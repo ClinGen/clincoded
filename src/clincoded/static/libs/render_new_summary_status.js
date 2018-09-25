@@ -9,7 +9,7 @@ import moment from 'moment';
 export function renderNewSummaryStatus(classification) {
     if (classification && classification.classificationStatus && classification.classificationStatus === 'In progress') {
         return (
-            <span className="summary-status">
+            <span className="status-wrapper new-summary">
                 <span className="label label-info" data-toggle="tooltip" data-placement="top"
                     data-tooltip={'Last saved on ' + moment(classification.last_modified).format("YYYY MMM DD, h:mm a")}>
                         NEW SAVED SUMMARY

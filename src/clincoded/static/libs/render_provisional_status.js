@@ -29,7 +29,7 @@ export function renderProvisionalStatus(snapshots, resourceType, gdm, context, s
     }
     if (provisionedSnapshots && provisionedSnapshots.length && (!approvedSnapshots || (approvedSnapshots && !approvedSnapshots.length))) {
         return (
-            <span className="provisional-status-wrapper">
+            <span className="status-wrapper provisional">
                 <span className="label label-info status-item" data-toggle="tooltip" data-placement="top"
                     data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                     PROVISIONAL

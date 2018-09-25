@@ -34,7 +34,7 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
     }
     if (newProvisionalExist) {
         return (
-            <span className="provisional-status-wrapper">
+            <span className="status-wrapper new-provisional">
                 <span className="label label-info status-item" data-toggle="tooltip" data-placement="top"
                     data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                     <span className="badge">NEW</span> PROVISIONAL

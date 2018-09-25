@@ -25,7 +25,7 @@ export function renderPublishStatus(snapshots) {
 
     if (publishedSnapshots && publishedSnapshots.length > 0) {
         return (
-            <span className="publication-status-wrapper">
+            <span className="status-wrapper publication">
                 <span className="label publish-background status-item" data-toggle="tooltip" data-placement="top"
                     data-tooltip={'Published on ' + moment(publishedSnapshots[0].resource.publishDate).format("YYYY MMM DD, h:mm a")}>
                     PUBLISHED

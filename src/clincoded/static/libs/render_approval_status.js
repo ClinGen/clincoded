@@ -26,7 +26,7 @@ export function renderApprovalStatus(snapshots, resourceType, context, affiliati
     }
     if (approvedSnapshots && approvedSnapshots.length) {
         return (
-            <span className="approval-status-wrapper">
+            <span className="status-wrapper approval">
                 <span className="label label-success status-item" data-toggle="tooltip" data-placement="top"
                     data-tooltip={'Approved on ' + moment(approvedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                     APPROVED
