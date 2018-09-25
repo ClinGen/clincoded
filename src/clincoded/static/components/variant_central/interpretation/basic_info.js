@@ -14,7 +14,7 @@ import { sortListByDate } from '../../../libs/helpers/sort';
 import { getAffiliationName } from '../../../libs/get_affiliation_name';
 import { renderInterpretationStatus } from '../../../libs/render_interpretation_status';
 import { renderInProgressStatus } from '../../../libs/render_in_progress_status';
-import { renderInterpretationStatusExplanation } from '../../../libs/render_interpretation_status_explanation';
+import { renderStatusExplanation } from '../../../libs/render_status_explanation';
 
 const SO_terms = require('./mapping/SO_term.json');
 
@@ -560,7 +560,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info all-existing-interpretaions">
                     <div className="panel-heading">
-                        <h3 className="panel-title">All interpretations for this variant in the Variant Curation Interface (VCI){renderInterpretationStatusExplanation()}</h3>
+                        <h3 className="panel-title">All interpretations for this variant in the Variant Curation Interface (VCI){renderStatusExplanation('Interpretations')}</h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {sortedInterpretations && sortedInterpretations.length > 0 ?
