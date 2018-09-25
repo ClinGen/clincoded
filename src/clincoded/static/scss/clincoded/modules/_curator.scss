@@ -1994,14 +1994,6 @@
         font-weight: normal;
     }
 
-    .exac-note {
-        color: #1b809e;
-        font-size: 110%;
-        font-weight: normal;
-        padding-left: 30%;  
-        padding-top: 7%;  
-    }
-
     .exac-pop-note {
         color: #1b809e;
         font-size: 110%;
@@ -2501,6 +2493,12 @@ dl.inline-dl {
 
 .criteria-description {
     text-overflow: clip;
+}
+
+.criteria-eval-note {
+    color: #1b809e;
+    font-weight: normal;
+    padding: 8px 0 0 15px; 
 }
 
 /* View Summary button */

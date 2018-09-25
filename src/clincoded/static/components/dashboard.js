@@ -502,14 +502,14 @@ var Dashboard = createReactClass({
                                         <i className="icon icon-question-circle"></i>
                                     </a>
                                 </li>
-                                <li className="list-group-item"><a href="/interpretations/">View list of all Variant Interpretations</a></li>
+                                <li className="list-group-item"><a href="/interpretation-all/">View list of all Variant Interpretations</a></li>
                                 <li className="list-group-item">
                                     <a href="/create-gene-disease/">Create Gene-Disease Record</a>
                                     <a className="help-doc" href="https://github.com/ClinGen/clincoded/wiki/GCI-Curation-Help" title="Gene Curation Help" target="_blank">
                                         <i className="icon icon-question-circle"></i>
                                     </a>
                                 </li>
-                                <li className="list-group-item"><a href="/gdm/">View list of all Gene-Disease Records</a></li>
+                                <li className="list-group-item"><a href="/gdm-all/">View list of all Gene-Disease Records</a></li>
                             </ul>
                         </div>
                         <div className="panel panel-primary">
