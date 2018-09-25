@@ -16,13 +16,13 @@ import { GdmDisease } from './disease';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { getAffiliationName } from '../libs/get_affiliation_name';
 import { renderVariantTitle } from '../libs/render_variant_title';
-import { renderOtherClassifications } from '../libs/render_other_classifications';
+import { renderClassificationContent } from '../libs/render_classification_content';
 import { renderInProgressStatus } from '../libs/render_in_progress_status';
-import { renderNewSummaryStatus } from '../libs/render_new_summary_status';
 import { renderProvisionalStatus } from '../libs/render_provisional_status';
 import { renderApprovalStatus } from '../libs/render_approval_status';
 import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
 import { renderPublishStatus } from '../libs/render_publish_status';
+import { renderStatusExplanation } from '../libs/render_status_explanation';
 
 var CurationMixin = module.exports.CurationMixin = {
     getInitialState: function() {
@@ -250,55 +250,6 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     },
 
     /**
-     * Method to display classification tag/label in gene-disease record header
-     * @param {object} classification - A given classification within a GDM
-     * @param {object} gdm - The gene-disease record
-     */
-    renderClassificationStatusTag(classification, gdm) {
-        const context = this.props.context;
-        let affiliationId = classification.affiliation ? classification.affiliation : null;
-        let userId = classification.submitted_by.uuid;
-        let snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
-        // Determine whether the classification had been previously approved
-        if (snapshots && snapshots.length) {
-            return (
-                <span className="classification-status-wrapper">
-                    {renderProvisionalStatus(snapshots, 'classification', gdm, context, true)}
-                    {renderApprovalStatus(snapshots, 'classification', context, affiliationId, userId)}
-                    {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, true)}
-                    {renderPublishStatus(snapshots)}
-                </span>
-            );
-        } else {
-            return (
-                <span className="classification-status-wrapper">
-                    {renderInProgressStatus(classification)}
-                </span>
-            );
-        }
-    },
-
-    /**
-     * Method to render the header of a given classification in the gene-disease record header
-     * @param {object} classification - Any given classification in a GDM
-     * @param {object} gdm - The gene-disease record
-     */
-    renderMyClassificationStatus(classification, gdm) {
-        return (
-            <div className="header-classification">
-                <strong>Provisioned/Approved Status:</strong>
-                <span className="classification-status">
-                    {classification && classification.classificationStatus ?
-                        this.renderClassificationStatusTag(classification, gdm)
-                        :
-                        <span className="no-classification">None</span>
-                    }
-                </span>
-            </div>
-        );
-    },
-
-    /**
      * Method to get all other existing classifications (of a gdm) that are not owned by the logged-in user,
      * or owned by the affiliation that the logged-in user is part of.
      * @param {object} gdm - The gene-disease record
@@ -442,30 +393,15 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                         <div className="container">
                             <div className="panel panel-info all-existing-classifications">
                                 <div className="panel-heading">
-                                    <h3 className="panel-title">All classifications for this record in the Gene Curation Interface (GCI)</h3>
+                                    <h3 className="panel-title">All classifications for this record in the Gene Curation Interface (GCI){renderStatusExplanation('Classifications')}</h3>
                                 </div>
                                 <ul className="panel-content-wrapper list-group">
                                     {provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional ?    
                                         <li className="list-group-item">
                                             <div className="my-classification">
-                                                <h5 className="text-primary"><i className="icon icon-chevron-right"></i> My classification
-                                                    {provisionalClassification.provisional.affiliation ?
-                                                        <span>&nbsp;({getAffiliationName(provisionalClassification.provisional.affiliation)})</span>
-                                                        :
-                                                        <span>&nbsp;({provisionalClassification.provisional.submitted_by.title})</span>
-                                                    }
-                                                </h5>
+                                                <h5 className="text-primary"><i className="icon icon-chevron-right"></i> My classification</h5>
                                                 <div className="gene-disease-record-classification">
-                                                    {provisionalClassification.provisional.autoClassification ?
-                                                        <span><strong>Calculated:</strong> {provisionalClassification.provisional.autoClassification}</span>
-                                                        : null}
-                                                    {provisionalClassification.provisional.alteredClassification ?
-                                                        <span>;&nbsp;<strong>Modified:</strong> {provisionalClassification.provisional.alteredClassification}</span>
-                                                        : null}
-                                                    {provisionalClassification && provisionalClassification.provisional ? renderNewSummaryStatus(provisionalClassification.provisional): null}
-                                                </div>
-                                                <div className="gene-disease-record-classification">
-                                                    {this.renderMyClassificationStatus(provisionalClassification.provisional, gdm)}
+                                                    {renderClassificationContent(provisionalClassification.provisional, gdm, context, true)}
                                                 </div>
                                             </div>
                                         </li>
@@ -476,7 +412,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                 <h5 className="text-warning"><i className="icon icon-chevron-right"></i> Other classifications</h5>
                                                 {otherClassifications.map((classification, i) => {
                                                     return (
-                                                        <div key={i} className="gene-disease-record-classification">{renderOtherClassifications(classification, gdm, context)}</div>
+                                                        <div key={i} className="gene-disease-record-classification">{renderClassificationContent(classification, gdm, context, false)}</div>
                                                     );
                                                 })}
                                             </div>
@@ -500,25 +436,26 @@ var ViewRecordHeader = module.exports.ViewRecordHeader = createReactClass({
         gdm: PropTypes.object,
         pmid: PropTypes.string
     },
-    render: function() {
+    
+    render() {
         return (
             <div>
-            {this.props.gdm ?
-                <div className="curation-data-title">
-                    <div className="container">
-                        <div>
-                            <h1>{this.props.gdm.gene.symbol} – {this.props.gdm.disease.term}
-                                {this.props.gdm ?
-                                <span> <a href={"/curation-central/?gdm=" + this.props.gdm.uuid + "&pmid=" + this.props.pmid}>
-                                    <i className="icon icon-briefcase"></i>
-                                </a></span>
-                                : null}
-                            </h1>
-                            <h2>{this.props.gdm.modeInheritance}</h2>
+                {this.props.gdm ?
+                    <div className="curation-data-title">
+                        <div className="container">
+                            <div>
+                                <h1>{this.props.gdm.gene.symbol} – {this.props.gdm.disease.term}
+                                    {this.props.gdm ?
+                                        <span> <a href={"/curation-central/?gdm=" + this.props.gdm.uuid + "&pmid=" + this.props.pmid}>
+                                            <i className="icon icon-briefcase"></i>
+                                        </a></span>
+                                        : null}
+                                </h1>
+                                <h2>{this.props.gdm.modeInheritance}</h2>
+                            </div>
                         </div>
                     </div>
-                </div>
-            : null}
+                    : null}
             </div>
         );
     }
