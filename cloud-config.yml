@@ -207,12 +207,12 @@ write_files:
 
 - path: /etc/default/elasticsearch
   content: |
-    # Increase to 8g for instance with prod data
-    # Use c4.4xlarge instance type for prod instance
-    # Use c4.2xlarge instance type for test instance with prod data
+    # Increase to 12g for instance with prod data
+    # Use c4.8xlarge instance type for prod instance
+    # Use c4.4xlarge instance type for test instance with prod data
     if test "%(BACKUPDB)s" = "s3_data"
     then
-      ES_HEAP_SIZE=8g
+      ES_HEAP_SIZE=12g
     else
       ES_HEAP_SIZE=2g
     fi
