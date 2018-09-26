@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getClassificationSavedDate } from '../../libs/get_saved_date';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -13,24 +14,36 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
     /**
      * Method to display classification tag/label in the evidence summary header
      * @param {string} status - The status of a given classification in an interpretation
+     * @param {boolean} publishStatus - The publication status of a given classification
      */
-    renderClassificationStatusTag(status) {
+    renderClassificationStatusTag(status, publishStatus) {
         if (status === 'In progress') {
             return <span className="label label-warning">IN PROGRESS</span>;
         } else if (status === 'Provisional') {
             return <span className="label label-info">PROVISIONAL</span>;
         } else if (status === 'Approved') {
-            return <span className="label label-success">APPROVED</span>;
+            if (publishStatus) {
+                return (
+                    <span>
+                        <span className="label label-success">APPROVED</span>
+                        <span className="label publish-background">PUBLISHED</span>
+                    </span>
+                );
+            } else {
+                return <span className="label label-success">APPROVED</span>;
+            }
         }
     }
 
     render() {
-        const { gdm, provisional } = this.props;
+        const { gdm, provisional, snapshotPublishDate } = this.props;
         // Expecting the required fields of a GDM to always have values:
         // e.g. gene, disease, mode of inheritance
         const gene = gdm && gdm.gene, disease = gdm && gdm.disease;
         const modeInheritance = gdm && gdm.modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1];
         const modeInheritanceAdjective = gdm && gdm.modeInheritanceAdjective ? gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
+        const publishStatus = provisional.publishClassification || snapshotPublishDate ? true : false;
+        const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
 
         return (
             <div className="evidence-summary panel-header">
@@ -64,11 +77,17 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Classification status:</dt>
-                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? this.renderClassificationStatusTag(provisional.classificationStatus) : null}</dd>
+                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? this.renderClassificationStatusTag(provisional.classificationStatus, publishStatus) : null}</dd>
                             {provisional ?
                                 <div>
                                     <dt>Date classification saved:</dt>
-                                    <dd className="classificationSaved">{provisional.last_modified ? moment(provisional.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                    <dd className="classificationSaved">{provisional.last_modified ? moment(getClassificationSavedDate(provisional)).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                </div>
+                                : null}
+                            {publishStatus && publishDate ?
+                                <div>
+                                    <dt>Date classification published:</dt>
+                                    <dd className="classificationPublished">{moment(publishDate).format("YYYY MMM DD, h:mm a")}</dd>
                                 </div>
                                 : null}
                             <dt>Replication Over Time:</dt>
@@ -101,7 +120,8 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
 
 GeneDiseaseEvidenceSummaryHeader.propTypes = {
     gdm: PropTypes.object,
-    provisional: PropTypes.object
+    provisional: PropTypes.object,
+    snapshotPublishDate: PropTypes.string
 };
 
 export default GeneDiseaseEvidenceSummaryHeader;

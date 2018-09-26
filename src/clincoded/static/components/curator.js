@@ -377,7 +377,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
     renderPublishStatus(snapshots) {
         const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
         let publishedSnapshot = null;
-        let publishedWarningMessage = null;
+        let showWarning = false;
 
         for (let snapshot of sortedSnapshots) {
             if (snapshot.resource && snapshot.resource.publishClassification) {
@@ -385,13 +385,9 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                 break;
             }
 
-            if (snapshot.approvalStatus === 'Approved' && !publishedWarningMessage) {
-                publishedWarningMessage = (
-                    <span className="publish-warning" data-toggle="tooltip" data-placement="top"
-                        data-tooltip="The current approved Classification is more recent than this published Classification.">
-                        <i className="icon icon-exclamation-triangle"></i>
-                    </span>
-                );
+            // If the most recent approved snapshot hasn't been published, include warning with status
+            if (snapshot.approvalStatus === 'Approved') {
+                showWarning = true;
             }
         }
 
@@ -399,7 +395,15 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
             return (
                 <div className="header-classification">
                     <strong className="header-classification-item">Date Published:</strong> {moment(publishedSnapshot.resource.publishDate).format("YYYY MMM DD, h:mm a")}
-                    <span className="classification-status"><span className="label publish-background">PUBLISHED</span>{publishedWarningMessage}</span>
+                    <span className="classification-status">
+                        <span className="label publish-background">PUBLISHED</span>
+                        {showWarning ?
+                            <span className="publish-warning" data-toggle="tooltip" data-placement="top"
+                                data-tooltip="The current approved Classification is more recent than this published Classification.">
+                                <i className="icon icon-exclamation-triangle"></i>
+                            </span>
+                            : null}
+                    </span>
                 </div>
             );
         } else {
@@ -2564,10 +2568,10 @@ function flattenAssessment(assessment) {
 
 var provisionalSimpleProps = [
     "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
-    "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "approvalSubmitter", "classificationApprover",
-    "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate", "provisionalReviewDate",
-    "provisionalComment", "publishSubmitter", "publishDate", "publishComment", "provisionedClassification", "approvedClassification",
-    "publishClassification", "associatedClassificationSnapshots"
+    "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "classificationDate", "approvalSubmitter",
+    "classificationApprover", "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate",
+    "provisionalReviewDate", "provisionalComment", "publishSubmitter", "publishDate", "publishComment", "provisionedClassification",
+    "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
 ];
 
 function flattenProvisional(provisional) {
