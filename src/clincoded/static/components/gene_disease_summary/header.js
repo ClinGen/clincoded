@@ -4,36 +4,13 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
 import { sopVersionByScoring } from '../../libs/sop';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
         super(props);
-    }
-
-    /**
-     * Method to display classification tag/label in the evidence summary header
-     * @param {string} status - The status of a given classification in an interpretation
-     * @param {boolean} publishStatus - The publication status of a given classification
-     */
-    renderClassificationStatusTag(status, publishStatus) {
-        if (status === 'In progress') {
-            return <span className="label label-warning">IN PROGRESS</span>;
-        } else if (status === 'Provisional') {
-            return <span className="label label-info">PROVISIONAL</span>;
-        } else if (status === 'Approved') {
-            if (publishStatus) {
-                return (
-                    <span>
-                        <span className="label label-success">APPROVED</span>
-                        <span className="label publish-background">PUBLISHED</span>
-                    </span>
-                );
-            } else {
-                return <span className="label label-success">APPROVED</span>;
-            }
-        }
     }
 
     render() {
@@ -83,7 +60,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Classification status:</dt>
-                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? this.renderClassificationStatusTag(provisional.classificationStatus, publishStatus) : null}</dd>
+                            <dd className="classificationStatus">{provisional && provisional.classificationStatus ? renderSimpleStatusLabel(provisional.classificationStatus, publishStatus) : null}</dd>
                             {provisional ?
                                 <div>
                                     <dt>Date classification saved:</dt>

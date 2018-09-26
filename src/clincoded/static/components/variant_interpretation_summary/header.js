@@ -6,24 +6,11 @@ import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import { renderVariantTitle } from '../../libs/render_variant_title';
+import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 
 class VariantInterpretationSummaryHeader extends Component {
     constructor(props) {
         super(props);
-    }
-
-    /**
-     * Method to display classification tag/label in the interpretation header
-     * @param {string} status - The status of a given classification in an interpretation
-     */
-    renderClassificationStatusTag(status) {
-        if (status === 'In progress') {
-            return <span className="label label-warning">IN PROGRESS</span>;
-        } else if (status === 'Provisional') {
-            return <span className="label label-info">PROVISIONAL</span>;
-        } else if (status === 'Approved') {
-            return <span className="label label-success">APPROVED</span>;
-        }
     }
 
     render() {
@@ -68,7 +55,7 @@ class VariantInterpretationSummaryHeader extends Component {
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Interpretation status:</dt>
-                            <dd className="classificationStatus">{classification && classification.classificationStatus ? this.renderClassificationStatusTag(classification.classificationStatus) : null}</dd>
+                            <dd className="classificationStatus">{classification && classification.classificationStatus ? renderSimpleStatusLabel(classification.classificationStatus) : null}</dd>
                             {classification ?
                                 <div>
                                     <dt>Date classification saved:</dt>

@@ -95,16 +95,13 @@
             }
         }
 
-        .publish-status {
-            display: block;
-            padding-top: 5px;
+        .publish-warning {
+            color: #b6238a;
+            margin-left: -4px;
 
-            .publish-warning {
-                color: #b6238a;
-
-                i.icon-exclamation-triangle {
-                    vertical-align: middle;
-                }
+            i.icon-exclamation-triangle {
+                color: #666;
+                vertical-align: middle;
             }
         }
     }
