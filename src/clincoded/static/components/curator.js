@@ -281,6 +281,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
         const affiliation = this.props.affiliation;
         const snapshots = this.state.classificationSnapshots;
         const context = this.props.context;
+        let showClassifications = context && context.name.match(/curation-central|provisional-curation|provisional-classification/);
 
         if (gdm && gdm['@type'][0] === 'gdm') {
             var gene = this.props.gdm.gene;
@@ -384,7 +385,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                             <CuratorRecordHeader gdm={gdm} />
                         </div>
                     </div>
-                    {gdm.provisionalClassifications && gdm.provisionalClassifications.length ?
+                    {gdm.provisionalClassifications && gdm.provisionalClassifications.length && showClassifications ?
                         <div className="container">
                             <div className="panel panel-info all-existing-classifications">
                                 <div className="panel-heading">
