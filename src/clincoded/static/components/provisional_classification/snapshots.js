@@ -9,6 +9,7 @@ import { sortListByDate } from '../../libs/helpers/sort';
 import { isScoringForCurrentSOP } from '../../libs/sop';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 
 class CurationSnapshots extends Component {
     constructor(props) {
@@ -22,18 +23,6 @@ class CurationSnapshots extends Component {
             window.open('/gene-disease-evidence-summary/?snapshot=' + snapshotUuid, '_blank');
         } else if (type === 'interpretation') {
             window.open('/variant-interpretation-summary/?snapshot=' + snapshotUuid, '_blank');
-        }
-    }
-
-    /**
-     * Method to display classification tag/label in the interpretation header
-     * @param {string} status - The status of a given classification in an interpretation
-     */
-    renderClassificationStatusTag(status) {
-        if (status === 'Provisioned') {
-            return <span className="label label-info">PROVISIONAL</span>;
-        } else if (status === 'Approved') {
-            return <span className="label label-success">APPROVED</span>;
         }
     }
 
@@ -88,9 +77,9 @@ class CurationSnapshots extends Component {
      * @param {integer} index - The index of the object in the snapshots array
      */
     renderProvisionalSnapshotApprovalLink(resourceParent, index) {
-        let pathname = window.location.pathname;
+        const context = this.props.context;
         if (index.toString() === "0") {
-            if (pathname.indexOf('provisional-curation') > -1 && resourceParent['@type'][0] === 'gdm') {
+            if (context && context.name === 'provisional-curation' && resourceParent['@type'][0] === 'gdm') {
                 return (
                     <a className="btn btn-warning approve-provisional-link-item" role="button" href={'/provisional-classification/?gdm=' + resourceParent.uuid + '&approval=yes'}>
                         Approve this Saved Provisional
@@ -116,6 +105,7 @@ class CurationSnapshots extends Component {
         const allowPublishButton = this.props.allowPublishButton;
         const isPublishEventActive = this.props.isPublishEventActive;
         const isApprovalActive = this.props.isApprovalActive;
+        const context = this.props.context;
 
         // Universal criteria to render a publish button/link:
         // User has permission to publish (allowPublishButton) and neither a publish event (!isPublishEventActive) nor the
@@ -132,7 +122,7 @@ class CurationSnapshots extends Component {
             }
 
             // If already within the approval process, present publish link as a button (that triggers a state update in a parent component)
-            if (typeof window !== "undefined" && window.location && window.location.pathname && window.location.pathname.indexOf('provisional-classification') > -1) {
+            if (context && context.name === 'provisional-classification') {
                 if (this.props.addPublishState) {
                     return (
                         <button type="button" className={classData} role="button"
@@ -276,7 +266,7 @@ class CurationSnapshots extends Component {
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-date">
                                         <dt><span>Date saved as Provisional:</span></dt>
                                         <dd><span>{snapshot.resource.provisionalDate ? formatDate(snapshot.resource.provisionalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
-                                        {this.renderClassificationStatusTag(snapshot.approvalStatus)}
+                                        {renderSimpleStatusLabel(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-provisional-review-date">
                                         <dt><span>Date reviewed:</span></dt>
@@ -342,7 +332,7 @@ class CurationSnapshots extends Component {
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
                                         <dt><span>Date saved as Approved:</span></dt>
                                         <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
-                                        {this.renderClassificationStatusTag(snapshot.approvalStatus)}
+                                        {renderSimpleStatusLabel(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-review-date">
                                         <dt><span>Date approved:</span></dt>
@@ -406,7 +396,8 @@ CurationSnapshots.propTypes = {
     isPublishEventActive: PropTypes.bool,
     classificationStatus: PropTypes.string,
     allowPublishButton: PropTypes.bool,
-    demoVersion: PropTypes.bool
+    demoVersion: PropTypes.bool,
+    context: PropTypes.object
 };
 
 export default CurationSnapshots;

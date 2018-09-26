@@ -367,6 +367,8 @@ const ProvisionalClassification = createReactClass({
         let calculate = queryKeyValue('calculate', this.props.href);
         let edit = queryKeyValue('edit', this.props.href);
         let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        const context = this.props.context;
+        const currOmimId = this.state.currOmimId;
         let gdm = this.state.gdm ? this.state.gdm : null;
         let show_clsfctn = queryKeyValue('classification', this.props.href);
         // set the 'Current Classification' appropriately only if previous provisional exists
@@ -378,6 +380,10 @@ const ProvisionalClassification = createReactClass({
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
         const lastSavedDate = provisional.last_modified ? getClassificationSavedDate(provisional) : null;
+        const demoVersion = this.props.demoVersion;
+        const affiliation = this.props.affiliation;
+        const isPublishActive = this.state.isPublishActive;
+        const isUnpublishActive = this.state.isUnpublishActive;
 
         // If state has a snapshot UUID, use it; otherwise, check URL query parameters
         const snapshotUUID = this.state.publishSnapshotUUID ? this.state.publishSnapshotUUID :
@@ -390,8 +396,8 @@ const ProvisionalClassification = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
-                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
+                            <RecordHeader gdm={gdm} omimId={currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={affiliation} classificationSnapshots={sortedSnapshotList} context={context} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <PanelGroup>
                                     <Panel title="Calculated Classification Matrix" panelClassName="panel-data" open>
@@ -538,7 +544,7 @@ const ProvisionalClassification = createReactClass({
                                                     classification={currentClassification}
                                                     classificationStatus={classificationStatus}
                                                     provisional={provisional}
-                                                    affiliation={this.props.affiliation}
+                                                    affiliation={affiliation}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
                                                 />
@@ -565,7 +571,7 @@ const ProvisionalClassification = createReactClass({
                                                     classification={currentClassification}
                                                     classificationStatus={classificationStatus}
                                                     provisional={provisional}
-                                                    affiliation={this.props.affiliation}
+                                                    affiliation={affiliation}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
                                                     snapshots={sortedSnapshotList}
@@ -597,7 +603,7 @@ const ProvisionalClassification = createReactClass({
                                                     classification={currentClassification}
                                                     classificationStatus={classificationStatus}
                                                     provisional={provisional}
-                                                    affiliation={this.props.affiliation}
+                                                    affiliation={affiliation}
                                                     snapshots={sortedSnapshotList}
                                                     selectedSnapshotUUID={snapshotUUID}
                                                     updateSnapshotList={this.updateSnapshotList}
@@ -613,9 +619,16 @@ const ProvisionalClassification = createReactClass({
                                 <div className="container snapshot-list">
                                     <PanelGroup>
                                         <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
-                                            <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional} addPublishState={this.addPublishState}
-                                                isApprovalActive={isApprovalActive} isPublishEventActive={this.state.isPublishActive || this.state.isUnpublishActive ? true : false}
-                                                classificationStatus={classificationStatus} demoVersion={this.props.demoVersion} allowPublishButton={this.isUserAllowedToPublish()} />
+                                            <CurationSnapshots
+                                                snapshots={sortedSnapshotList}
+                                                approveProvisional={this.approveProvisional}
+                                                addPublishState={this.addPublishState}
+                                                isApprovalActive={isApprovalActive}
+                                                isPublishEventActive={isPublishActive || isUnpublishActive ? true : false}
+                                                classificationStatus={classificationStatus}
+                                                demoVersion={demoVersion}
+                                                allowPublishButton={this.isUserAllowedToPublish()}
+                                                context={context} />
                                         </Panel>
                                     </PanelGroup>
                                 </div>

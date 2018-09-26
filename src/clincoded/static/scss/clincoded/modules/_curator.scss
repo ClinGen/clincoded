@@ -31,7 +31,21 @@
     margin-bottom: 2px;
     color: #000;
     background-color: #c0c0c0;
-    text-align: center;
+
+    .gene-disease-record-header,
+    .variant-interpretation-header {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0.5em 0;
+
+        .button-box {
+            .btn .icon {
+                color: #fff;
+            }
+        }
+    }
 
     h1 {
         margin: 5px 0 2px;
@@ -81,6 +95,12 @@
         margin: 2px 0 5px;
         font-size: 1.1rem;
         font-weight: 300;
+        line-height: 1.2;
+
+        .subtitle-mode-of-inheritance {
+            display: block;
+            font-style: italic;
+        }
     }
 
     a i {
@@ -137,6 +157,12 @@
     .modal h4 {
         border-bottom: none;
         padding-bottom: 0;
+    }
+
+    dl.inline-dl {
+        dt, dd {
+            line-height: 1.42857;
+        }
     }
 }
 
@@ -852,51 +878,46 @@
 }
 
 // Summary and Provisional data in GDM title panel
-.provisional-info-panel {
-    width: 100%;
-    border-top: 2px solid #aaa;
-    padding-top: 6px;
+.all-existing-classifications {
+    margin-top: 12px;
 
-    table {
-        margin-bottom: 10px;
-        width: 100%;
+    .list-group {
+        padding-left: 0;
+
+        .list-group-item {
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            line-height: 180%;
+            list-style: none;
+            padding: 10px 15px;
+            position: relative;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
     }
 
-    td {
-        text-align: left;
-    }
-
-    h4 {
-        border-bottom: solid 1px #aaa;
-        margin-top: 15px;
+    h5 {
+        font-size: 110%;
+        margin-top: 3px;
         margin-bottom: 6px;
-        padding-bottom: 4px;
     }
 
-    .button-box {
-        width: auto;
-        padding-left: 15px;
-        text-align: right;
-        vertical-align: top;
-
-        .btn .icon {
-            color: #fff;
-        }
-    }
-
-    .header-classification {
+    .gene-disease-record-classification {
         text-align: left;
-        
-        strong {
-            vertical-align: bottom;
-        }
 
         .classification-status {
-            font-size: 1.1em;
-            margin-left: 8px;
+            .status-wrapper {
+                margin-left: 12px;
+            }
+
+            .status-wrapper:first-child {
+                margin-left: 8px;
+            }
 
             .label {
-                margin-right: 8px;
+                font-size: 0.825em;
                 padding-top: .3em;
 
                 .badge {
@@ -913,62 +934,37 @@
             }
 
             .classification-link-item {
-                font-size: 0.9em;
-                margin-right: 8px;
-            }
+                font-size: 105%;
+                margin-left: 5px;
+                position: relative;
+                top: 3px;
 
-            .new-provisional-status-row {
-                margin-left: 201px;
-                margin-top: 4px;
+                .icon-link {
+                    font-size: 1.2em;
+                    -moz-transform: scaleX(-1);
+                    -o-transform: scaleX(-1);
+                    -webkit-transform: scaleX(-1);
+                    transform: scaleX(-1);
+                    filter: FlipH;
+                    -ms-filter: "FlipH";
+                }
             }
 
             .publish-warning {
                 color: #b6238a;
+                margin-left: 4px;
 
                 i.icon-exclamation-triangle {
+                    color: #666;
                     vertical-align: middle;
                 }
             }
         }
 
-        .summary-status {
-            font-size: 1.1em;
-            margin-left: 8px;
-
+        .new-summary {
             .label.label-info {
                 background-color: #917bc4;
-                padding-top: .3em;
             }
-        }
-    }
-
-    .provisional-data-left {
-        float: left;
-        text-align: left;
-        padding-left: 10px;
-        padding-right: 136px;
-
-        .header-classification-item {
-            display: block;
-        }
-    }
-
-    .provisional-data-center {
-        float: left;
-        text-align: left;
-        padding-left: 10px;
-
-        .header-classification-item {
-            display: block;
-        }
-    }
-
-    .provisional-button {
-        padding: 0;
-        margin: auto;
-
-        .btn {
-            margin: 10px 0 10px 0;
         }
     }
 }
@@ -1505,6 +1501,66 @@
                 }
             }
 
+            .basic-info .all-existing-interpretaions .table th,
+            .basic-info .all-existing-interpretaions .table td {
+                width: 20%;
+            }
+
+            .basic-info .all-existing-interpretaions {
+                margin-bottom: 20px;
+
+                .classification-status {
+                    font-size: 1.1em;
+
+                    .status-wrapper {
+                        display: inline-block;
+                        margin-bottom: 5px;
+                    }
+        
+                    .label {
+                        margin-left: 14px;
+                        padding-top: .3em;
+        
+                        .badge {
+                            background-color: #ff7700;
+                            font-size: 85%;
+                            margin-right: 2px;
+                        }
+                    }
+        
+                    .label:first-child {
+                        margin-left: 0;
+                    }
+
+                    .classification-link-item {
+                        font-size: 95%;
+                        margin: 0 5px;
+                        position: relative;
+                        top: 3px;
+        
+                        .icon-link {
+                            font-size: 1.2em;
+                            -moz-transform: scaleX(-1);
+                            -o-transform: scaleX(-1);
+                            -webkit-transform: scaleX(-1);
+                            transform: scaleX(-1);
+                            filter: FlipH;
+                            -ms-filter: "FlipH";
+                        }
+                    }
+        
+                    .publish-warning {
+                        color: #b6238a;
+                        margin-left: 4px;
+        
+                        i.icon-exclamation-triangle {
+                            color: #666;
+                            vertical-align: middle;
+                        }
+                    }
+                }
+            }
+
             .basic-info .datasource-clinvar-interpretaions {
                 .clinvar-interpretation-summary {
                     padding-left: 0;
@@ -1527,18 +1583,8 @@
                 }
             }
 
-            .basic-info .datasource-clinvar-interpretaions .table th,
-            .basic-info .datasource-clinvar-interpretaions .table td {
-                width: 16.67%;
-            }
-
             .basic-info .datasource-clinvar-interpretaions {
                 margin-bottom: 20px;
-            }
-
-            .basic-info .datasource-clinvar-interpretaions .table th:last-child,
-            .basic-info .datasource-clinvar-interpretaions .table td:last-child {
-                width: 50%;
             }
 
             .basic-info .clinvar-interpretation .review-status:first-letter,
@@ -1902,7 +1948,7 @@
         }
 
         .current-user-interpretations {
-            .summary-status {
+            .new-summary {
                 font-size: 1.1em;
                 margin-left: 8px;
 
@@ -3578,7 +3624,8 @@ table.login-users-interpretations {
 }
 
 /* Styles for hovering tool tip upon mouseover variant title "i" icon */
-.variant-title-explanation {
+.variant-title-explanation,
+.interpretation-status-explanation {
     font-size: 85%;
     margin-left: 5px;
 

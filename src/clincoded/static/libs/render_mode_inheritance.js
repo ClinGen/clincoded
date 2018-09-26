@@ -28,7 +28,7 @@ function renderModeInheritanceLink(modeInheritance, modeInheritanceAdjective) {
         let start = modeInheritance.indexOf('(');
         let end = modeInheritance.indexOf(')');
         let hpoNumber;
-        let adjective = modeInheritanceAdjective && modeInheritanceAdjective.length ? ' (' + modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] + ')' : null;
+        let adjective = modeInheritanceAdjective && modeInheritanceAdjective.length ? ' (' + modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] + ')' : '';
         if (start && end) {
             hpoNumber = modeInheritance.substring(start+1, end);
         }
