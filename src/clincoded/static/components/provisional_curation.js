@@ -853,6 +853,8 @@ var ProvisionalCuration = createReactClass({
         let calculate = queryKeyValue('calculate', this.props.href);
         let edit = queryKeyValue('edit', this.props.href);
         let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        const context = this.props.context;
+        const currOmimId = this.state.currOmimId;
         let gdm = this.state.gdm ? this.state.gdm : null;
         let autoClassification = this.state.autoClassification;
         let scoreTableValues = this.state.scoreTableValues;
@@ -874,6 +876,9 @@ var ProvisionalCuration = createReactClass({
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
         const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval ? true : false;
         const lastSavedDate = currentClassification !== 'None' ? getClassificationSavedDate(provisional) : null;
+        const affiliation = this.props.affiliation;
+        const classificationStatus = this.state.classificationStatus;
+        const demoVersion = this.props.demoVersion;
 
         return (
             <div>
@@ -882,8 +887,8 @@ var ProvisionalCuration = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
-                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} context={this.props.context} />
+                            <RecordHeader gdm={gdm} omimId={currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={affiliation} classificationSnapshots={sortedSnapshotList} context={context} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <PanelGroup accordion>
@@ -1187,8 +1192,12 @@ var ProvisionalCuration = createReactClass({
                                     <div className="snapshot-list">
                                         <PanelGroup>
                                             <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
-                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus}
-                                                    allowPublishButton={allowPublishButton} demoVersion={this.props.demoVersion} />
+                                                <CurationSnapshots
+                                                    snapshots={sortedSnapshotList}
+                                                    classificationStatus={classificationStatus}
+                                                    allowPublishButton={allowPublishButton}
+                                                    demoVersion={demoVersion}
+                                                    context={context} />
                                             </Panel>
                                         </PanelGroup>
                                     </div>
