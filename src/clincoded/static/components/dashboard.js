@@ -9,7 +9,6 @@ import { RestMixin } from './rest';
 import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { showActivityIndicator } from './activity_indicator';
-import { sortListByDate } from '../libs/helpers/sort';
 import { GetProvisionalClassification } from '../libs/get_provisional_classification';
 import { renderVariantTitle } from '../libs/render_variant_title';
 import { renderInProgressStatus } from '../libs/render_in_progress_status';
