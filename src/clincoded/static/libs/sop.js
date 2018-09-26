@@ -5,7 +5,7 @@
  * @param {object} classificationPoints - Object containing a classification's evidence scoring
  */
 export function sopVersionByScoring(classificationPoints) {
-    if (classificationPoints && classificationPoints.segregation && 'evidenceCountCandidate' in classificationPoints.segregation) {
+    if (classificationPoints && classificationPoints.segregation && 'evidenceCountExome' in classificationPoints.segregation) {
         return '6';
     } else {
         return '5';
