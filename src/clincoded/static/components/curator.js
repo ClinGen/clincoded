@@ -17,11 +17,6 @@ import { GetProvisionalClassification } from '../libs/get_provisional_classifica
 import { getAffiliationName } from '../libs/get_affiliation_name';
 import { renderVariantTitle } from '../libs/render_variant_title';
 import { renderClassificationContent } from '../libs/render_classification_content';
-import { renderInProgressStatus } from '../libs/render_in_progress_status';
-import { renderProvisionalStatus } from '../libs/render_provisional_status';
-import { renderApprovalStatus } from '../libs/render_approval_status';
-import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
-import { renderPublishStatus } from '../libs/render_publish_status';
 import { renderStatusExplanation } from '../libs/render_status_explanation';
 
 var CurationMixin = module.exports.CurationMixin = {
