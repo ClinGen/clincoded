@@ -666,7 +666,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     render() {
         const gdm = this.state.gdm;
         const provisional = this.state.provisional;
-        const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
+        const snapshotPublishDate = this.state.snapshotPublishDate;
         const hpoTermsCollection = this.state.hpoTermsCollection;
 
         return (
@@ -677,7 +677,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
                     {!this.state.preview ?
-                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} snapshotPublishDate={this.state.snapshotPublishDate} />
+                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} snapshotPublishDate={snapshotPublishDate} />
                         : <div className="spacer">&nbsp;</div>}
                     {!this.state.preview && provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
