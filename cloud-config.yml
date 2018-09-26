@@ -94,6 +94,8 @@ runcmd:
 - sudo dpkg-reconfigure --frontend noninteractive tzdata
 - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+- wget --quiet -O - https://packages.confluent.io/deb/4.1/archive.key | sudo apt-key add -
+- sudo add-apt-repository "deb [arch=amd64] https://packages.confluent.io/deb/4.1 stable main"
 - sudo apt-get update
 - sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
 - sudo apt-get -y install postgresql-9.4
@@ -115,6 +117,8 @@ runcmd:
 - cd /srv/clincoded
 - sudo -u clincoded git clone --no-checkout https://github.com/ClinGen/clincoded.git .
 - sudo -u clincoded git checkout %(COMMIT)s
+# Enable messaging/publication code (committed as comment in order to pass Trusty-based Travis build testing)
+- sudo -u clincoded git checkout acb95eb480e608545cfd6dbe0dac6f86f6a04659 src/clincoded/__init__.py
 - mkdir /opt/cloudwatchmon
 - chown build:build /opt/cloudwatchmon
 - sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
@@ -146,6 +150,9 @@ runcmd:
 - fi
 - sudo -u clincoded python3.4 bootstrap.py -v 2.9.5 --setuptools-version 15.2
 - sudo -u clincoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
+# Install Kafka client after buildout to avoid package version conflicts
+- sudo apt-get -y install librdkafka-dev python-dev python3-pip
+- sudo /usr/bin/pip3 install confluent-kafka==0.11.4
 - until sudo -u postgres psql postgres -c ""; do sleep 10; done
 - sudo -u clincoded sh -c 'cat /dev/urandom | head -c 256 | base64 > session-secret.b64'
 - sudo -u clincoded bin/create-mapping production.ini --app-name app

@@ -6,6 +6,7 @@ import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import { sortListByDate } from '../../libs/helpers/sort';
+import { isScoringForCurrentSOP } from '../../libs/sop';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
@@ -96,23 +97,48 @@ class CurationSnapshots extends Component {
 
     /**
      * Method to render the button that allows users to publish/unpublish an approved classification
-     * The target="_self" attribute is included to ensure page is reloaded (to restart lifecycle of ProvisionalClassification component)
      * @param {object} resourceParent - The parent object of the classification in a snapshot
      * @param {string} snapshotUUID - The UUID of the source snapshot
      * @param {boolean} publishClassification - The published status of the classification (per the source snapshot)
      */
     renderPublishLink(resourceParent, snapshotUUID, publishClassification) {
-        if (resourceParent && resourceParent.uuid) {
-            if (!publishClassification) {
+        const allowPublishButton = this.props.allowPublishButton;
+        const isPublishEventActive = this.props.isPublishEventActive;
+        const isApprovalActive = this.props.isApprovalActive;
+
+        // Universal criteria to render a publish button/link:
+        // User has permission to publish (allowPublishButton) and neither a publish event (!isPublishEventActive) nor the
+        //  approval process (!isApprovalActive) is currently in progress
+        if (allowPublishButton && !isPublishEventActive && !isApprovalActive) {
+            let classData = 'btn btn-default publish-link-item';
+            let eventType = 'publish';
+            let buttonText = 'Publish Summary';
+
+            if (publishClassification) {
+                classData += ' unpublish';
+                eventType = 'unpublish';
+                buttonText = 'Unpublish Summary';
+            }
+
+            // If already within the approval process, present publish link as a button (that triggers a state update in a parent component)
+            if (typeof window !== "undefined" && window.location && window.location.pathname && window.location.pathname.indexOf('provisional-classification') > -1) {
+                if (this.props.addPublishState) {
+                    return (
+                        <button type="button" className={classData} role="button"
+                            onClick={this.props.addPublishState.bind(null, snapshotUUID, eventType)}>{buttonText}</button>
+                    );
+                } else {
+                    return null;
+                }
+
+            // Otherwise, present publish link as a link (that passes along required data in URL query parameters)
+            } else if (resourceParent && resourceParent.uuid) {
                 return (
-                    <a className="btn btn-default publish-link-item" role="button" href={'/provisional-classification/?gdm=' +
-                        resourceParent.uuid + '&snapshot=' + snapshotUUID + '&publish=yes'} target="_self">Publish Summary</a>
+                    <a className={classData} role="button" href={'/provisional-classification/?gdm=' +
+                        resourceParent.uuid + '&snapshot=' + snapshotUUID + '&' + eventType + '=yes'}>{buttonText}</a>
                 );
             } else {
-                return (
-                    <a className="btn btn-default publish-link-item unpublish" role="button" href={'/provisional-classification/?gdm=' +
-                        resourceParent.uuid + '&snapshot=' + snapshotUUID + '&unpublish=yes'} target="_self">Unpublish Summary</a>
-                );
+                return null;
             }
         } else {
             return null;
@@ -123,16 +149,18 @@ class CurationSnapshots extends Component {
      * Method to render publish/unpublish data for a snapshot
      * @param {object} snapshot - The snapshot object
      * @param {object} resourceParent - The parent object of the classification in a snapshot
-     * @param {boolean} isApprovalActive - Indicator that the panel to approve a classification is active/visible
+     * @param {boolean} isSnapshotOnCurrentSOP - Indicator that the snapshot is on the current SOP
      * @param {string} currentApprovedSnapshotID - The snapshot ID of the most recently approved classification
      */
-    renderSnapshotPublishData(snapshot, resourceParent, isApprovalActive, currentApprovedSnapshotID) {
+    renderSnapshotPublishData(snapshot, resourceParent, isSnapshotOnCurrentSOP, currentApprovedSnapshotID) {
         if (snapshot.resource && snapshot.resource.publishDate) {
             const snapshotUUID = snapshot.uuid ? snapshot.uuid : snapshot['@id'].split('/', 3)[2];
 
             if (snapshot.resource.publishClassification) {
+                const publishSiteLinkDate = !isSnapshotOnCurrentSOP ? snapshot.resource.approvalDate :
+                    snapshot.resource.approvalReviewDate ? snapshot.resource.approvalReviewDate : snapshot.resource.approvalDate;
                 const publishSiteURL = 'https://search' + (this.props.demoVersion ? '-staging' : '') + '.clinicalgenome.org/kb/gene-validity/' +
-                    snapshot.resource.uuid + '--' + moment(snapshot.resource.approvalDate).utc().format('Y-MM-DDTHH:mm:ss');
+                    snapshot.resource.uuid + '--' + moment(publishSiteLinkDate).utc().format('Y-MM-DDTHH:mm:ss');
                 const publishSiteLinkName = (resourceParent && resourceParent.gene && resourceParent.gene.symbol ?
                     resourceParent.gene.symbol + ' ' : '') + 'Classification Summary';
 
@@ -158,12 +186,15 @@ class CurationSnapshots extends Component {
                             </dl>
                         </td>
                         <td className="approval-snapshot-buttons">
-                            {this.props.allowPublishButton && resourceParent && !isApprovalActive ?
-                                this.renderPublishLink(resourceParent, snapshotUUID, snapshot.resource.publishClassification) : null}
+                            {this.renderPublishLink(resourceParent, snapshotUUID, snapshot.resource.publishClassification)}
                         </td>
                     </tr>
                 );
             } else {
+                // Special criteria to render a publish link (to the right of unpublish data):
+                // Given snapshot is on the current SOP (isSnapshotOnCurrentSOP) and is the current approved (snapshot['@id'] === currentApprovedSnapshotID)
+                const allowSnapshotPublish = isSnapshotOnCurrentSOP && snapshot['@id'] === currentApprovedSnapshotID;
+
                 return (
                     <tr className="snapshot-publish-approval">
                         <td className="snapshot-content">
@@ -182,8 +213,7 @@ class CurationSnapshots extends Component {
                             </dl>
                         </td>
                         <td className="approval-snapshot-buttons">
-                            {this.props.allowPublishButton && snapshot['@id'] === currentApprovedSnapshotID && resourceParent && !isApprovalActive ?
-                                this.renderPublishLink(resourceParent, snapshotUUID, snapshot.resource.publishClassification) : null}
+                            {allowSnapshotPublish ? this.renderPublishLink(resourceParent, snapshotUUID, snapshot.resource.publishClassification) : null}
                         </td>
                     </tr>
                 );
@@ -206,6 +236,14 @@ class CurationSnapshots extends Component {
         } else if (snapshot.resourceType === 'interpretation' && snapshot.resourceParent.interpretation) {
             resourceParent = snapshot.resourceParent.interpretation;
         }
+
+        // A snapshot must be on the current SOP (based on the data model of the evidence scoring) to be published
+        const isSnapshotOnCurrentSOP = snapshot.resource && isScoringForCurrentSOP(snapshot.resource.classificationPoints);
+
+        // Special criteria to render a publish link (above a "View Approved Summary" button):
+        // Given snapshot is on the current SOP (isSnapshotOnCurrentSOP), has no publish activity (!snapshot.resource.publishDate) and
+        //  is the current approved (snapshot['@id'] === currentApprovedSnapshotID)
+        const allowSnapshotPublish = isSnapshotOnCurrentSOP && !snapshot.resource.publishDate && snapshot['@id'] === currentApprovedSnapshotID;
 
         if (snapshot.approvalStatus === 'Provisioned') {
             return (
@@ -255,7 +293,7 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Provisioned')}
-                                    {resourceParent && !isApprovalActive && classificationStatus !== 'Approved' ?
+                                    {resourceParent && !this.props.isPublishEventActive && !isApprovalActive && classificationStatus !== 'Approved' ?
                                         this.renderProvisionalSnapshotApprovalLink(resourceParent, index)
                                         : null}
                                     <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Provisioned')} title="View Provisional Summary" 
@@ -321,13 +359,12 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Approved')}
-                                    {this.props.allowPublishButton && (!snapshot.resource || !snapshot.resource.publishDate) && snapshot['@id'] === currentApprovedSnapshotID &&
-                                        resourceParent && !isApprovalActive ? this.renderPublishLink(resourceParent, snapshotUUID, false) : null}
+                                    {allowSnapshotPublish ? this.renderPublishLink(resourceParent, snapshotUUID, false) : null}
                                     <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Approved')} title="View Approved Summary"
                                         clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
                                 </td>
                             </tr>
-                            {this.renderSnapshotPublishData(snapshot, resourceParent, isApprovalActive, currentApprovedSnapshotID)}
+                            {this.renderSnapshotPublishData(snapshot, resourceParent, isSnapshotOnCurrentSOP, currentApprovedSnapshotID)}
                         </tbody>
                     </table>
                 </li>
@@ -337,7 +374,7 @@ class CurationSnapshots extends Component {
 
     render() {
         const { snapshots, isApprovalActive, classificationStatus } = this.props;
-        const currentApprovedSnapshot = this.props.snapshots ? this.props.snapshots.find(snapshot => snapshot.approvalStatus === 'Approved') : {};
+        const currentApprovedSnapshot = snapshots ? snapshots.find(snapshot => snapshot.approvalStatus === 'Approved') : {};
         const currentApprovedSnapshotID = currentApprovedSnapshot ? currentApprovedSnapshot['@id'] : undefined;
 
         return (
@@ -353,7 +390,9 @@ class CurationSnapshots extends Component {
 CurationSnapshots.propTypes = {
     snapshots: PropTypes.array,
     approveProvisional: PropTypes.func,
+    addPublishState: PropTypes.func,
     isApprovalActive: PropTypes.string,
+    isPublishEventActive: PropTypes.bool,
     classificationStatus: PropTypes.string,
     allowPublishButton: PropTypes.bool,
     demoVersion: PropTypes.bool

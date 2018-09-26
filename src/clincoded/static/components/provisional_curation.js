@@ -14,6 +14,7 @@ import { parseAndLogError } from './mixins';
 import { ClassificationDefinition } from './provisional_classification/definition';
 import CurationSnapshots from './provisional_classification/snapshots';
 import { sortListByDate } from '../libs/helpers/sort';
+import { getClassificationSavedDate } from '../libs/get_saved_date';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -220,6 +221,7 @@ var ProvisionalCuration = createReactClass({
             newProvisional.replicatedOverTime = this.state.replicatedOverTime;
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
             newProvisional.classificationStatus = 'In progress';
+            newProvisional.classificationDate = moment().toISOString();
             newProvisional.provisionedClassification = false;
             if (newProvisional.provisionalSubmitter) delete newProvisional.provisionalSubmitter;
             if (newProvisional.provisionalDate) delete newProvisional.provisionalDate;
@@ -272,9 +274,9 @@ var ProvisionalCuration = createReactClass({
             classificationPoints['segregation']['evidenceCountCandidate'] = Number(scoreTableValues.segregationCountCandidate);
             classificationPoints['segregation']['evidenceCountExome'] = Number(scoreTableValues.segregationCountExome);
             classificationPoints['segregation']['evidenceCountTotal'] = Number(scoreTableValues.segregationCountTotal);
-            classificationPoints['segregation']['evidencePointsCandidate'] = Number(scoreTableValues.segregationPointsCandidate);
-            classificationPoints['segregation']['evidencePointsExome'] = Number(scoreTableValues.segregationPointsExome);
-            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationTotalPoints);
+            classificationPoints['segregation']['evidencePointsCandidate'] = this.classificationMathRound(Number(scoreTableValues.segregationPointsCandidate), 2);
+            classificationPoints['segregation']['evidencePointsExome'] = this.classificationMathRound(Number(scoreTableValues.segregationPointsExome), 2);
+            classificationPoints['segregation']['totalPointsGiven'] = this.classificationMathRound(Number(scoreTableValues.segregationTotalPoints), 2);
             classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
             // Case-Control genetic evidence
             classificationPoints['caseControl'] = {};
@@ -871,6 +873,7 @@ var ProvisionalCuration = createReactClass({
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
         const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval ? true : false;
+        const lastSavedDate = currentClassification !== 'None' ? getClassificationSavedDate(provisional) : null;
 
         return (
             <div>
@@ -1147,7 +1150,7 @@ var ProvisionalCuration = createReactClass({
                                                                         :
                                                                         <div>{currentClassification}
                                                                             <br />
-                                                                            <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                            <span className="large">({moment(lastSavedDate).format("YYYY MMM DD, h:mm a")})</span>
                                                                         </div>
                                                                     }
                                                                 </td>
