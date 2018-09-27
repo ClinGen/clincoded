@@ -261,5 +261,14 @@
         "approver": [
             "Samantha Baxter"
         ]
+    },
+    {
+        "affiliation_id": "10030",
+        "affiliation_abbreviation": "",
+        "affiliation_fullname": "General Gene Curation EP",
+        "publish_approval": true,
+        "approver": [
+            "Jenny Goldstein"
+        ]
     }
 ]
