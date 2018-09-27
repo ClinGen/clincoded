@@ -8105,5 +8105,59 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "petra.dusatkova@lfmotol.cuni.cz",
+        "first_name": "Petra",
+        "last_name": "Dusatkova",
+        "uuid": "eb1632c5-ca8f-4b65-8ff3-cf6979671a3f",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10016"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "shkwak@snu.ac.kr",
+        "first_name": "Soo-Heon",
+        "last_name": "Kwak",
+        "uuid": "4c480e2b-3851-43d3-ac12-b2e4a925a936",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10016"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "wojciech.mlynarski@umed.lodz.pl",
+        "first_name": "Wojciech",
+        "last_name": "Mlynarski",
+        "uuid": "082c1c1d-9037-476d-b081-d7961341a46c",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10016"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
