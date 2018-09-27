@@ -24,7 +24,16 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
     // If the current provisional Classification is more recent than this approved Classification, display 'New Provisional' status
     let newProvisionalExist = false;
     if (provisionedSnapshots && provisionedSnapshots.length && approvedSnapshots && approvedSnapshots.length) {
-        newProvisionalExist = moment(provisionedSnapshots[0].resource.provisionalDate).isAfter(approvedSnapshots[0].resource.approvalDate);
+        // The 'resource' object was absent in the flatten 'snapshot' object prior to R22 release.
+        // So for those snapshots saved into 'associatedClassificationSnapshots' array previously,
+        // comparing 'provisionalDate' to 'approvalDate' is impossible due to the absence of 'resource' obejct.
+        // Going forward, we still want the 'provisionalDate' to 'approvalDate' comparison because it's more accurate.
+        if (provisionedSnapshots[0].resource && provisionedSnapshots[0].resource.provisionalDate && approvedSnapshots[0].resource && approvedSnapshots[0].resource.approvalDate) {
+            newProvisionalExist = moment(provisionedSnapshots[0].resource.provisionalDate).isAfter(approvedSnapshots[0].resource.approvalDate);
+        } else {
+            // Fallback timestamp comparison for old snapshots prior to R22 release
+            newProvisionalExist = moment(provisionedSnapshots[0].date_created).isAfter(approvedSnapshots[0].date_created);
+        }
     }
     let showProvisionalLink = false;
     if (resourceType === 'classification' && context && context.name === 'curation-central' && showLink) {
