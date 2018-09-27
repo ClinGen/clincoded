@@ -17,6 +17,7 @@ import { PublishApproval } from './publish';
 import CurationSnapshots from './snapshots';
 import { sortListByDate } from '../../libs/helpers/sort';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
+import { isScoringForCurrentSOP } from '../../libs/sop';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -294,7 +295,7 @@ const ProvisionalClassification = createReactClass({
                 this.setState({showProvisional: true, showApproval: false, showPublish: false, showUnpublish: false});
             }
         } else if (classificationStatus === 'Approved') {
-            if (this.isUserAllowedToPublish()) {
+            if (this.isUserAllowedToPublish() && isScoringForCurrentSOP(provisional.classificationPoints)) {
 
                 // Check if the current classification has been published
                 if (!provisional || !provisional.publishClassification) {
