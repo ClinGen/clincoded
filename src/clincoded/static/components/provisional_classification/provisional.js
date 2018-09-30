@@ -35,7 +35,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             provisionalComment: this.props.provisional && this.props.provisional.provisionalComment ? this.props.provisional.provisionalComment : undefined,
             provisionalSubmitter: this.props.provisional && this.props.provisional.provisionalSubmitter ? this.props.provisional.provisionalSubmitter : undefined,
             isProvisionalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Provisional' ? true : false,
-            isProvisionalEdit: false
+            isProvisionalEdit: false,
+            submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
@@ -108,7 +109,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                 delete newProvisional['provisionalComment'];
             }
         }
-
+        // Prevent users from incurring multiple submissions
+        this.setState({submitBusy: true});
         if (this.props.gdm && Object.keys(this.props.gdm).length) {
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
@@ -126,7 +128,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
                 // get a fresh copy of the gdm object
-                this.getRestData('/gdm/' + this.props.gdm.uuid, null, true).then(newGdm => {
+                this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
                     let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,
@@ -151,6 +153,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
                         });
+                        this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving provisional snapshot error = : %o', err);
                     });
@@ -176,7 +179,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
                 // get a fresh copy of the interpretation object
-                this.getRestData('/interpretation/' + this.props.interpretation.uuid, null, true).then(newInterpretation => {
+                this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(newInterpretation => {
                     let parentSnapshot = {interpretation: newInterpretation};
                     let newSnapshot = {
                         resourceId: result.uuid,
@@ -201,6 +204,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
                         });
+                        this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving provisional snapshot error = : %o', err);
                     });
@@ -221,6 +225,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
+        const submitBusy = this.state.submitBusy;
 
         return (
             <div className="provisional-approval-panel-content">
@@ -326,14 +331,15 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         {this.state.isProvisionalPreview ?
                             <div className="button-group">
                                 <button type="button" className="btn btn-default btn-inline-spacer"
-                                    onClick={this.handleCancelProvisional}>
+                                    onClick={this.handleCancelProvisional} disabled={submitBusy}>
                                     Cancel Provisional
                                 </button>
                                 <button type="button" className="btn btn-info btn-inline-spacer"
-                                    onClick={this.handleEditProvisional}>
+                                    onClick={this.handleEditProvisional} disabled={submitBusy}>
                                     Edit <i className="icon icon-pencil"></i>
                                 </button>
-                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right">
+                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right" disabled={submitBusy}>
+                                    {submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}
                                     Submit Provisional <i className="icon icon-check-square-o"></i>
                                 </button>
                             </div>

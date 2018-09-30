@@ -38,7 +38,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approvalSubmitter: this.props.provisional && this.props.provisional.approvalSubmitter ? this.props.provisional.approvalSubmitter : undefined,
             affiliationApprovers: undefined,
             isApprovalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Approved' ? true : false,
-            isApprovalEdit: false
+            isApprovalEdit: false,
+            submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
@@ -156,7 +157,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         }
 
         let provisionalSnapshots = this.props.snapshots && this.props.snapshots.length ? this.props.snapshots.filter(snapshot => snapshot.approvalStatus === 'Provisioned') : [];
-
+        // Prevent users from incurring multiple submissions
+        this.setState({submitBusy: true});
         if (this.props.gdm && Object.keys(this.props.gdm).length) {
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
@@ -174,7 +176,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
                 // get a fresh copy of the gdm object
-                this.getRestData('/gdm/' + this.props.gdm.uuid, null, true).then(newGdm => {
+                this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
                     let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,
@@ -200,6 +202,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id'], true);
                         });
+                        this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);
                     });
@@ -224,7 +227,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
                 // get a fresh copy of the interpretation object
-                this.getRestData('/interpretation/' + this.props.interpretation.uuid, null, true).then(newInterpretation => {
+                this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(newInterpretation => {
                     let parentSnapshot = {interpretation: newInterpretation};
                     let newSnapshot = {
                         resourceId: result.uuid,
@@ -250,6 +253,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
                         });
+                        this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);
                     });
@@ -272,6 +276,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
+        const submitBusy = this.state.submitBusy;
 
         return (
             <div className="final-approval-panel-content">
@@ -407,14 +412,15 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         {this.state.isApprovalPreview ?
                             <div className="button-group">
                                 <button type="button" className="btn btn-default btn-inline-spacer"
-                                    onClick={this.handleCancelApproval}>
+                                    onClick={this.handleCancelApproval} disabled={submitBusy}>
                                     Cancel Approval
                                 </button>
                                 <button type="button" className="btn btn-info btn-inline-spacer"
-                                    onClick={this.handleEditApproval}>
+                                    onClick={this.handleEditApproval} disabled={submitBusy}>
                                     Edit <i className="icon icon-pencil"></i>
                                 </button>
-                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right">
+                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right" disabled={submitBusy}>
+                                    {submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}
                                     Submit Approval <i className="icon icon-check-square-o"></i>
                                 </button>
                             </div>
