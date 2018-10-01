@@ -1192,7 +1192,7 @@ var ProvisionalCuration = createReactClass({
                                     </div>
                                 </Form>
                                 {!allowPublishButton ?
-                                    <div className="container">
+                                    <div>
                                         <p className="alert alert-info">
                                             <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following
                                                 apply: 1) your affiliation does not have permission to publish, 2) the mode of inheritance Is not supported by the Clinical Validity
