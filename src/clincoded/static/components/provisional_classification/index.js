@@ -620,7 +620,7 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                 </div>
                                 : null}
-                            {!this.state.showPublish || !this.isUserAllowedToPublish() ?
+                            {!this.state.showProvisional && !this.state.showApproval && !this.isUserAllowedToPublish() ?
                                 <div className="container">
                                     <p className="alert alert-info">
                                         <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following
