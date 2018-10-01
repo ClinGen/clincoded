@@ -874,7 +874,10 @@ var ProvisionalCuration = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
-        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval ? true : false;
+        let validModeInheritance = gdm && gdm.modeInheritance &&
+            gdm.modeInheritance.match(/Autosomal dominant inheritance (HP:0000006)|Autosomal recessive inheritance (HP:0000007)|X-linked inheritance (HP:0001417)/);
+        let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
+        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval && validModeInheritance && hasMondoId ? true : false;
         const lastSavedDate = currentClassification !== 'None' ? getClassificationSavedDate(provisional) : null;
         const affiliation = this.props.affiliation;
         const classificationStatus = this.state.classificationStatus;
