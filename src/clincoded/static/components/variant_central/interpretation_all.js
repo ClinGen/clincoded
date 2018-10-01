@@ -60,7 +60,8 @@ var InterpretationList = createReactClass({
                 this.getRestDatas(vciInterpURLs).then(vciInterpResults => {
                     let filteredInterpretations = vciInterpResults.filter(interpretation => {
                         let provisional = interpretation.provisional_variant[0];
-                        return provisional && provisional.approvedClassification && provisional.classificationStatus === 'Approved' && interpretation.status !== 'deleted';
+                        return provisional && provisional.approvedClassification && provisional.classificationStatus === 'Approved'
+                            && interpretation.status !== 'deleted' && provisional.approvalDate && moment(provisional.approvalDate).isAfter('2018-09-20T10:00:00.000Z');
                     });
                     console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
                 });
