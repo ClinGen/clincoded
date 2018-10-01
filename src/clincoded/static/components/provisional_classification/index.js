@@ -264,8 +264,7 @@ const ProvisionalClassification = createReactClass({
     isUserAllowedToPublish() {
         const curatorAffiliation = this.props.affiliation;
         const gdm = this.state.gdm;
-        let validModeInheritance = gdm && gdm.modeInheritance &&
-            gdm.modeInheritance.match(/Autosomal dominant inheritance (HP:0000006)|Autosomal recessive inheritance (HP:0000007)|X-linked inheritance (HP:0001417)/);
+        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1);
         let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
 
         if (curatorAffiliation && curatorAffiliation.publish_approval && validModeInheritance && hasMondoId) {
