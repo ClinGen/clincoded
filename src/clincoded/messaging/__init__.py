@@ -72,8 +72,13 @@ def check_segregation_scoring(family, evidence, annotation):
 
     if 'includeLodScoreInAggregateCalculation' in segregation and segregation['includeLodScoreInAggregateCalculation']:
         if 'publishedLodScore' in segregation or 'estimatedLodScore' in segregation:
-            if is_article_new(evidence, 'segregation', annotation):
-                return (True, 'segregation')
+            if 'sequencingMethod' in segregation:
+                if segregation['sequencingMethod'] == 'Candidate gene sequencing':
+                    if is_article_new(evidence, 'segregation-candidate-sequencing', annotation):
+                        return (True, 'segregation-candidate-sequencing')
+                elif segregation['sequencingMethod'] == 'Exome/genome or all genes sequenced in linkage region':
+                    if is_article_new(evidence, 'segregation-exome-sequencing', annotation):
+                        return (True, 'segregation-exome-sequencing')
 
     return (False, )
 
@@ -82,6 +87,10 @@ def check_case_control_scoring(case_control, score, evidence, annotation):
     if 'studyType' in case_control:
         if case_control['studyType'] == 'Single variant analysis':
             if 'score' in score:
+                if 'case-control-single-count' not in evidence:
+                    evidence['case-control-single-count'] = 0
+                evidence['case-control-single-count'] += 1
+
                 if 'case-control-single-points' not in evidence:
                     evidence['case-control-single-points'] = 0
                 evidence['case-control-single-points'] += score['score']
@@ -91,6 +100,10 @@ def check_case_control_scoring(case_control, score, evidence, annotation):
 
         elif case_control['studyType'] == 'Aggregate variant analysis':
             if 'score' in score:
+                if 'case-control-aggregate-count' not in evidence:
+                    evidence['case-control-aggregate-count'] = 0
+                evidence['case-control-aggregate-count'] += 1
+
                 if 'case-control-aggregate-points' not in evidence:
                     evidence['case-control-aggregate-points'] = 0
                 evidence['case-control-aggregate-points'] += score['score']
@@ -137,11 +150,21 @@ def check_experimental_scoring(experimental, score, evidence, annotation):
                             if 'modelSystemsType' in experimental['modelSystems']:
                                 if experimental['modelSystems']['modelSystemsType'] in experimental_evidence_types['Model Systems']:
                                     evidence_category = experimental_evidence_types['Model Systems'][experimental['modelSystems']['modelSystemsType']]
+
+                                    if 'exp-model-systems-and-rescue-count' not in evidence:
+                                        evidence['exp-model-systems-and-rescue-count'] = 0
+                                    evidence['exp-model-systems-and-rescue-count'] += 1
+
                     elif experimental['evidenceType'] == 'Rescue':
                         if 'rescue' in experimental:
                             if 'rescueType' in experimental['rescue']:
                                 if experimental['rescue']['rescueType'] in experimental_evidence_types['Rescue']:
                                     evidence_category = experimental_evidence_types['Rescue'][experimental['rescue']['rescueType']]
+
+                                    if 'exp-model-systems-and-rescue-count' not in evidence:
+                                        evidence['exp-model-systems-and-rescue-count'] = 0
+                                    evidence['exp-model-systems-and-rescue-count'] += 1
+
                     else:
                         evidence_category = experimental_evidence_types[experimental['evidenceType']]
 
@@ -195,7 +218,6 @@ def gather_evidence(data):
             families = get_data_by_path(group, ['familyIncluded'], [])
 
             for family in families:
-                family_has_scored_proband = False
                 individuals = get_data_by_path(family, ['individualIncluded'], [])
 
                 for individual in individuals:
@@ -203,9 +225,6 @@ def gather_evidence(data):
 
                     for score in scores:
                         if check_data_ownership(score, user_affiliation):
-                            if 'proband' in individual and individual['proband']:
-                                family_has_scored_proband = True
-
                             individual_score = check_individual_scoring(score, evidence_publications, annotation)
 
                             if individual_score[0]:
@@ -214,11 +233,10 @@ def gather_evidence(data):
                             break
 
                 if check_data_ownership(family, user_affiliation):
-                    if not family_has_scored_proband:
-                        segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
+                    segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
 
-                        if segregation_score[0]:
-                            evidence_publications[segregation_score[1]].append(save_article(annotation))
+                    if segregation_score[0]:
+                        evidence_publications[segregation_score[1]].append(save_article(annotation))
 
             individuals = get_data_by_path(group, ['individualIncluded'], [])
 
@@ -237,7 +255,6 @@ def gather_evidence(data):
         families = get_data_by_path(annotation, ['families'], [])
 
         for family in families:
-            family_has_scored_proband = False
             individuals = get_data_by_path(family, ['individualIncluded'], [])
 
             for individual in individuals:
@@ -245,9 +262,6 @@ def gather_evidence(data):
 
                 for score in scores:
                     if check_data_ownership(score, user_affiliation):
-                        if 'proband' in individual and individual['proband']:
-                            family_has_scored_proband = True
-
                         individual_score = check_individual_scoring(score, evidence_publications, annotation)
 
                         if individual_score[0]:
@@ -256,11 +270,10 @@ def gather_evidence(data):
                         break
 
             if check_data_ownership(family, user_affiliation):
-                if not family_has_scored_proband:
-                    segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
+                segregation_score = check_segregation_scoring(family, evidence_publications, annotation)
 
-                    if segregation_score[0]:
-                        evidence_publications[segregation_score[1]].append(save_article(annotation))
+                if segregation_score[0]:
+                    evidence_publications[segregation_score[1]].append(save_article(annotation))
 
         individuals = get_data_by_path(annotation, ['individuals'], [])
 
@@ -312,7 +325,7 @@ def gather_evidence_counts(points, return_result=False):
 
     for key, value in points.items():
         if isinstance(value, (int, float)):
-            if key != 'evidenceCount' or value <= 0:
+            if 'evidenceCount' not in key or value <= 0:
                 keys_to_delete.append(key)
 
         elif isinstance(value, dict):
@@ -330,16 +343,6 @@ def gather_evidence_counts(points, return_result=False):
 
     if return_result:
         return points
-
-# Add all segregation evidence (each article at a numbered key) to the message template
-def add_segregation_evidence(evidence, template):
-    if 'segregation' in evidence:
-        for index, article in enumerate(evidence['segregation'], start=1):
-            template[str(index)] = {
-                'Evidence': {
-                    'Publications': [article]
-                }
-            }
 
 # Add a yes/no value and all contradictory evidence to the message template
 def add_contradictory_evidence(data, evidence, template):
@@ -388,11 +391,11 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
 
             if value_length > 0:
                 # Retrieve data using data path lists
-                if value[0] == '# path to data #':
+                if value[0] == '$PATH_TO_DATA':
                     template[key] = get_data_by_path(data, value[1:])
 
                 # Keep first, non-excluded data found (using data path lists)
-                elif value[0] == '# use first data #':
+                elif value[0] == '$USE_FIRST_DATA':
                     if value_length > 2:
                         for data_path in value[2:]:
                             temp_result = get_data_by_path(data, data_path)
@@ -408,7 +411,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Use one of two provided values, based on data (from a data path list)
-                elif value[0] == '# check for data #':
+                elif value[0] == '$CHECK_FOR_DATA':
                     if value_length == 4:
                         if get_data_by_path(data, value[1]):
                             template[key] = value[2]
@@ -418,7 +421,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Replace data (from a data path list) using the provided strings
-                elif value[0] == '# replace data #':
+                elif value[0] == '$REPLACE_DATA':
                     if value_length == 4:
                         temp_result = get_data_by_path(data, value[1])
 
@@ -430,10 +433,10 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Convert data (from a data path list) using the provided map
-                elif value[0] == '# convert data #':
+                elif value[0] == '$CONVERT_DATA':
                     if value_length == 3:
                         temp_result = get_data_by_path(data, value[1])
-                        default_result_key = '# default #'
+                        default_result_key = '$DEFAULT'
 
                         if temp_result in value[2]:
                             template[key] = value[2][temp_result]
@@ -445,7 +448,7 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Combine data (from dictionary of data path lists) with a separator
-                elif value[0] == '# combine data #':
+                elif value[0] == '$COMBINE_DATA':
                     if value_length == 3:
                         add_data_to_msg_template(data, evidence, evidence_counts, value[2])
                         template[key] = value[1].join(value[2].values())
@@ -453,14 +456,21 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Lookup an affiliation name by ID (from a data path list)
-                elif value[0] == '# lookup affiliation name #':
+                elif value[0] == '$LOOKUP_AFFILIATION_NAME':
                     if value_length == 2:
                         template[key] = lookup_affiliation_name(get_data_by_path(data, value[1]))
                     else:
                         template[key] = ''
 
+                # Add evidence count (using a data path list)
+                elif value[0] == '$EVIDENCE_COUNT':
+                    if value_length == 2:
+                        template[key] = get_data_by_path(evidence_counts, value[1])
+                    else:
+                        template[key] = ''
+
                 # Add score (using a data path list)
-                elif value[0] == '# score data #':
+                elif value[0] == '$SCORE_DATA':
                     if value_length >= 3:
                         template[key] = get_data_by_path(data, value[1])
 
@@ -476,10 +486,14 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                     else:
                         template[key] = ''
 
-                # Add evidence (articles) based on information type
-                elif value[0] == '# evidence data #':
-                    if value_length == 2 and value[1] in evidence:
+                # Add evidence (articles, counts or points) based on information type
+                elif value[0] == '$EVIDENCE_DATA':
+                    if value_length in (2, 3) and value[1] in evidence:
                         template[key] = evidence[value[1]]
+
+                        if not template[key] and value_length == 3 and value[2] == True:
+                            keep_falsy_data = True
+
                     else:
                         template[key] = ''
 
@@ -498,10 +512,8 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
         elif isinstance(value, dict):
             add_data_to_msg_template(data, evidence, evidence_counts, value)
 
-            # Special handling to incorporate segregation/contradictory evidence (articles)
-            if key == 'EvidenceOfSegregationInOneOrMoreFamilies':
-                add_segregation_evidence(evidence, value)
-            elif key == 'ValidContradictoryEvidence':
+            # Special handling to incorporate contradictory evidence (articles)
+            if key == 'ValidContradictoryEvidence':
                 add_contradictory_evidence(data, evidence, value)
 
             if not template[key]:

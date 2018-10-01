@@ -46,6 +46,7 @@ var formMapSegregation = {
     'SEGpublishedLodScore': 'publishedLodScore',
     'SEGestimatedLodScore': 'estimatedLodScore',
     'SEGincludeLodScoreInAggregateCalculation': 'includeLodScoreInAggregateCalculation',
+    'SEGsequencingMethod': 'sequencingMethod',
     'SEGreasonExplanation': 'reasonExplanation',
     'SEGaddedsegregationinfo': 'additionalInformation'
 };
@@ -98,6 +99,7 @@ var FamilyCuration = createReactClass({
             lodPublished: null, // Switch to show either calculated or estimated LOD score
             estimatedLodScore: null, // track estimated LOD value
             publishedLodScore: null, // track published LOD value
+            includeLodScore: false,
             lodLocked: true, // indicate whether or not the LOD score field should be user-editable or not
             lodCalcMode: null, // track which type of calculation we should do for LOD score, if applicable
             diseaseObj: {},
@@ -136,20 +138,24 @@ var FamilyCuration = createReactClass({
                 publishedLodScore = this.state.family.segregation.publishedLodScore;
             }
             if (lodPublished === 'Yes') {
-                this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null}, () => {
+                this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null, includeLodScore: false}, () => {
                     if (!this.state.publishedLodScore) {
                         this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                     }
                 });
             } else if (lodPublished === 'No') {
-                this.setState({lodPublished: 'No', publishedLodScore: null});
+                this.setState({lodPublished: 'No', publishedLodScore: null, includeLodScore: false});
                 if (!this.state.estimatedLodScore) {
                     this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                 }
             } else {
                 this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
-                this.setState({lodPublished: null, publishedLodScore: null});
+                this.setState({lodPublished: null, publishedLodScore: null, includeLodScore: false});
             }
+        } else if (ref === 'SEGincludeLodScoreInAggregateCalculation') {
+            let includeLodScore = this.refs[ref].getValue();
+            this.setState({includeLodScore: includeLodScore === 'Yes' ? true : false});
+            
         } else if (ref === 'zygosityHomozygous') {
             if (this.refs[ref].toggleValue()) {
                 this.setState({recessiveZygosity: 'Homozygous'});
@@ -451,6 +457,10 @@ var FamilyCuration = createReactClass({
                     } else if (segregation.lodPublished === null || typeof segregation.lodPublished === 'undefined') {
                         this.setState({lodPublished: null});
                     }
+                    // Check whether a saved LOD score is included for classification calculation
+                    if (segregation.includeLodScoreInAggregateCalculation) {
+                        this.setState({includeLodScore: true});
+                    }
 
                     // Find the current user's segregation assessment from the segregation's assessment list
                     if (segregation.assessments && segregation.assessments.length) {
@@ -605,6 +615,23 @@ var FamilyCuration = createReactClass({
                     // Make a search string for these terms
                     familyVariants.push('/variants/' + variantId);
                 }
+            }
+
+            // Check that "Published Calculated LOD score" is greater than zero
+            if (this.getFormValue('SEGlodPublished') === 'Yes') {
+                const publishedLodScore = parseFloat(this.getFormValue('SEGpublishedLodScore'));
+
+                if (!isNaN(publishedLodScore) && publishedLodScore <= 0) {
+                    formError = true;
+                    this.setFormErrors('SEGpublishedLodScore', 'The published calculated LOD score must be greater than 0');
+                }
+            }
+
+            // Check that segregation sequencing type value is not 'none'
+            // when LOD score is included for calculation
+            if (this.getFormValue('SEGincludeLodScoreInAggregateCalculation') === 'Yes' && this.getFormValue('SEGsequencingMethod') === 'none') {
+                formError = true;
+                this.setFormErrors('SEGsequencingMethod', 'A sequencing method is required');
             }
 
             if (!formError) {
@@ -1012,6 +1039,12 @@ var FamilyCuration = createReactClass({
             value1 = this.getFormValue('SEGincludeLodScoreInAggregateCalculation');
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGincludeLodScoreInAggregateCalculation']] = value1 === 'Yes';
+            }
+            value1 = this.getFormValue('SEGsequencingMethod');
+            if (value1 && value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGsequencingMethod']] = value1;
+            } else {
+                if (newSegregation[formMapSegregation['SEGsequencingMethod']]) delete newSegregation[formMapSegregation['SEGsequencingMethod']];
             }
             value1 = this.getFormValue('SEGreasonExplanation');
             if (value1) {
@@ -1704,6 +1737,17 @@ function FamilySegregation() {
                     For autosomal recessive conditions, only include families with at least 3 affected individuals. See the Gene Curation SOP for additional details.
                 </p>
             </div>
+            {this.state.includeLodScore ?
+                <Input type="select" ref="SEGsequencingMethod" label="Sequencing Method: *"
+                    defaultValue="none" value={segregation.sequencingMethod ? segregation.sequencingMethod : 'none'}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                    error={this.getFormError('SEGsequencingMethod')} clearError={this.clrFormErrors.bind(null, 'SEGsequencingMethod')}>
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option value="Candidate gene sequencing">Candidate gene sequencing</option>
+                    <option value="Exome/genome or all genes sequenced in linkage region">Exome/genome or all genes sequenced in linkage region</option>
+                </Input>
+                : null}
             <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5"
                 value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -2353,6 +2397,13 @@ const FamilySegregationViewer = (segregation, assessments, open) => {
                     <dt>Include LOD score in final aggregate calculation?</dt>
                     <dd>{segregation && segregation.includeLodScoreInAggregateCalculation === true ? 'Yes' : (segregation.includeLodScoreInAggregateCalculation === false ? 'No' : '')}</dd>
                 </div>
+
+                {segregation && segregation.includeLodScoreInAggregateCalculation ?
+                    <div>
+                        <dt>Sequencing Method</dt>
+                        <dd>{segregation && segregation.sequencingMethod}</dd>
+                    </div>
+                    : null}
 
                 <div>
                     <dt>Reason for including LOD or not</dt>

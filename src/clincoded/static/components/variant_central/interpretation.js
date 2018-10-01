@@ -195,7 +195,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
-                            loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP} />
+                            loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
+                            affiliation={this.props.affiliation} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'population' ?

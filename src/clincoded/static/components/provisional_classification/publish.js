@@ -30,16 +30,31 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     },
 
     getInitialState() {
-        const selectedSnapshot = this.props.selectedSnapshotUUID && this.props.gdm && this.props.gdm.uuid && this.props.snapshots ?
-            this.props.snapshots.find(snapshot => (snapshot['@id'] && snapshot['@id'].split('/', 3)[2] === this.props.selectedSnapshotUUID &&
-                snapshot.resourceParent && snapshot.resourceParent.gdm && snapshot.resourceParent.gdm.uuid === this.props.gdm.uuid)) :
-            this.props.snapshots ? this.props.snapshots.find(snapshot => snapshot.approvalStatus === 'Approved') : {};
+        let selectedSnapshot = {};
+
+        // If both the data to identify a "selected" snapshot (this.props.selectedSnapshotUUID and this.props.gdm.uuid) and a list of
+        // snapshots to search (this.props.snapshots) exist, then try to find the specified snapshot
+        if (this.props.selectedSnapshotUUID && this.props.gdm && this.props.gdm.uuid && this.props.snapshots) {
+            selectedSnapshot = this.props.snapshots.find(snapshot => (snapshot['@id'] &&
+                snapshot['@id'].split('/', 3)[2] === this.props.selectedSnapshotUUID &&
+                snapshot.resourceParent && snapshot.resourceParent.gdm &&
+                snapshot.resourceParent.gdm.uuid === this.props.gdm.uuid));
+
+        // Otherwise, find the current approved snapshot (this.props.snapshots is assumed to be sorted)
+        } else if (this.props.snapshots) {
+            selectedSnapshot = this.props.snapshots.find(snapshot => snapshot.approvalStatus === 'Approved');
+        }
+
+        // If a "selected" snapshot exists, retrieve the "selected" provisional from it
         const selectedProvisional = selectedSnapshot && selectedSnapshot.resource ? selectedSnapshot.resource : {};
-        const isSelectedProvisionalCurrent = selectedProvisional.provisionalDate === this.props.provisional.provisionalDate &&
+
+        // Check if the "selected" provisional is also the current one (using data other than the shared UUID)
+        const isSelectedProvisionalCurrent = this.props.provisional &&
+            selectedProvisional.provisionalDate === this.props.provisional.provisionalDate &&
             selectedProvisional.provisionalSubmitter === this.props.provisional.provisionalSubmitter &&
             selectedProvisional.approvalDate === this.props.provisional.approvalDate &&
             selectedProvisional.approvalSubmitter === this.props.provisional.approvalSubmitter &&
-            selectedProvisional.affiliation === this.props.provisional.affiliation ? true : false;
+            selectedProvisional.affiliation === this.props.provisional.affiliation;
 
         return {
             selectedSnapshot: selectedSnapshot,
@@ -125,9 +140,6 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
             if (objType && objUUID) {
                 this.getRestData('/publish?type=' + objType + '&uuid=' + objUUID, null, false).then(result => {
                     if (result.status === 'Success') {
-                        // alertType = 'alert-success';
-                        // alertMsg = 'Message sent (partition = ' + result.partition + ', offset = ' + result.offset + ')';
-                        // this.showAlert(alertType, alertMsg);
                         resolve(result);
                     } else {
                         console.log('Message delivery failure: %s', result.message);
@@ -167,10 +179,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
 
                 if (this.state.publishComment && this.state.publishComment.length) {
                     publishProvisional.publishComment = this.state.publishComment;
-                } else {
-                    if (publishProvisional.publishComment) {
-                        delete publishProvisional['publishComment'];
-                    }
+                } else if (publishProvisional.publishComment) {
+                    delete publishProvisional['publishComment'];
                 }
 
                 // Additional provisional data that would otherwise be lost (when snapshot object is sent to the DB)
@@ -185,32 +195,32 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
 
                     if (this.state.publishComment && this.state.publishComment.length) {
                         currentProvisional.publishComment = this.state.publishComment;
-                    } else {
-                        if (currentProvisional.publishComment) {
-                            delete currentProvisional['publishComment'];
-                        }
+                    } else if (currentProvisional.publishComment) {
+                        delete currentProvisional['publishComment'];
                     }
                 }
 
                 // Always update the "publishStatus" field (set to "true" for published snapshot, deleted for unpublished)
                 // within current provisional object's "associatedClassificationSnapshots" array
                 if (currentProvisional.associatedClassificationSnapshots && currentProvisional.associatedClassificationSnapshots.length) {
-                    for (let i = 0; i < currentProvisional.associatedClassificationSnapshots.length; i++) {
-                        if (currentProvisional.associatedClassificationSnapshots[i].approvalStatus === 'Approved') {
-                            if (currentProvisional.associatedClassificationSnapshots[i].uuid === this.state.selectedSnapshot['@id'].split('/', 3)[2]) {
+                    for (let snapshot of currentProvisional.associatedClassificationSnapshots) {
+                        if (snapshot.approvalStatus === 'Approved') {
+                            if (snapshot.uuid === this.state.selectedSnapshot['@id'].split('/', 3)[2]) {
                                 if (publishProvisional.publishClassification) {
-                                    currentProvisional.associatedClassificationSnapshots[i].publishStatus = true;
-                                } else if (currentProvisional.associatedClassificationSnapshots[i].publishStatus) {
-                                    delete currentProvisional.associatedClassificationSnapshots[i]['publishStatus'];
+                                    snapshot.publishStatus = true;
+                                } else if (snapshot.publishStatus) {
+                                    delete snapshot['publishStatus'];
                                 }
-                            } else if (publishProvisional.publishClassification && currentProvisional.associatedClassificationSnapshots[i].publishStatus) {
-                                delete currentProvisional.associatedClassificationSnapshots[i]['publishStatus'];
+                            } else if (publishProvisional.publishClassification && snapshot.publishStatus) {
+                                delete snapshot['publishStatus'];
                             }
                         }
                     }
                 }
 
                 if (this.props.gdm && Object.keys(this.props.gdm).length) {
+
+                    // Send updated current provisional object to the DB
                     return this.putRestData('/provisional/' + this.props.provisional.uuid, currentProvisional).then(responseProvisional => {
                         if (responseProvisional.status === 'success' && responseProvisional['@graph'] && responseProvisional['@graph'].length) {
                             return Promise.resolve(responseProvisional['@graph'][0]);
@@ -218,6 +228,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                             return Promise.reject(responseProvisional);
                         }
                     }).then(resultProvisional => {
+
+                        // Create selected/published snapshot object, updated with publish event data
                         const publishSnapshot = {
                             resourceId: publishProvisional.uuid,
                             resourceType: this.state.selectedSnapshot.resourceType,
@@ -228,6 +240,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                             date_created: this.state.selectedSnapshot.date_created
                         };
 
+                        // Send updated selected/published snapshot object to the DB
                         this.putRestData(this.state.selectedSnapshot['@id'], publishSnapshot).then(responseSnapshot => {
                             if (responseSnapshot.status === 'success' && responseSnapshot['@graph'] && responseSnapshot['@graph'].length) {
                                 this.props.updateSnapshotList(responseSnapshot['@graph'][0]['@id']);
@@ -236,15 +249,20 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 return Promise.reject(responseSnapshot);
                             }
                         }).then(resultSnapshot => {
+
+                            // Only update provisional state object when publish event is on current approved snapshot
                             if (this.state.isSelectedProvisionalCurrent) {
                                 this.props.updateProvisionalObj(resultProvisional['@id']);
                             }
 
+                            // When publish event is a publish, automatically unpublish a previously-published snapshot (if one exists)
                             if (publishProvisional.publishClassification) {
                                 const previouslyPublishedSnapshot = this.props.snapshots ? this.props.snapshots.find(snapshot => (snapshot.resource &&
                                     snapshot.resource.publishClassification && snapshot['@id'] !== this.state.selectedSnapshot['@id'])) : {};
 
                                 if (previouslyPublishedSnapshot && previouslyPublishedSnapshot.resource) {
+
+                                    // Update previously-published snapshot with automatic unpublish data
                                     previouslyPublishedSnapshot.resource.publishComment = 'Classification previously published by ' +
                                         previouslyPublishedSnapshot.resource.publishSubmitter + ' on ' +
                                         moment(previouslyPublishedSnapshot.resource.publishDate).format('YYYY MMM DD') +
@@ -267,6 +285,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                         date_created: previouslyPublishedSnapshot.date_created
                                     };
 
+                                    // Send updated (unpublished) previously-published snapshot object to the DB
                                     this.putRestData(previouslyPublishedSnapshot['@id'], autoUnpublishSnapshot).then(responseSnapshot => {
                                         if (responseSnapshot.status === 'success' && responseSnapshot['@graph'] && responseSnapshot['@graph'].length) {
                                             this.props.updateSnapshotList(responseSnapshot['@graph'][0]['@id']);
@@ -280,6 +299,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 }
                             }
 
+                            // Clear publish-related URL query parameters and state data
                             this.props.clearPublishState();
                         }).catch(error => {
                             console.log('Publishing snapshot error = : %o', error);

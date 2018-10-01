@@ -1,8 +1,8 @@
 'use strict';
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
-import { curator_page, userMatch, queryKeyValue, external_url_map } from '../globals';
+import { curator_page, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
 import GeneDiseaseEvidenceSummaryHeader from './header';
 import GeneDiseaseEvidenceSummaryCaseLevel from './case_level';
@@ -30,6 +30,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             user: null, // Logged-in user uuid
             gdm: null, // The gdm object associated with the eivdence
             provisional: {}, // Logged-in user's existing provisional object
+            snapshotPublishDate: null,
             caseLevelEvidenceList: [],
             segregationEvidenceList: [],
             caseControlEvidenceList: [],
@@ -60,7 +61,10 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     loadData() {
         const gdmUuid = queryKeyValue('gdm', this.props.href);
         const snapshotUuid = queryKeyValue('snapshot', this.props.href);
-        let uri;
+        const status = queryKeyValue('status', this.props.href);
+        const affiliationId = queryKeyValue('affiliationId', this.props.href);
+        const userId = queryKeyValue('userId', this.props.href);
+        let uri, user, curatorAffiliation;
         if (gdmUuid) {
             uri = '/gdm/' + gdmUuid;
         } else if (snapshotUuid) {
@@ -74,14 +78,32 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 stateObj.gdm = data;
             } else if (data['@type'][0] === 'snapshot' && data.resourceType && data.resourceType === 'classification') {
                 stateObj.gdm = data.resourceParent.gdm;
+
+                // Retrieve data (from a snapshot) to indicate the published status of a classification
+                if (data.resource && data.resource.publishClassification && data.resource.publishDate) {
+                    stateObj.snapshotPublishDate = data.resource.publishDate;
+                }
             }
-            // search for provisional owned by login user
+            // Allow logged-in user/affiliation to view classifications
+            // approved by other users/affiliations, or to view the
+            // approved classification owned by the logged-in user/affiliation
+            if (status === 'Approved' && (affiliationId || userId)) {
+                if (affiliationId) {
+                    curatorAffiliation = {};
+                    curatorAffiliation['affiliation_id'] = affiliationId;
+                } else if (userId) {
+                    user = userId;
+                }
+            } else {
+                curatorAffiliation = this.props.affiliation;
+                user = stateObj.user;
+            }
+            // Then find the classification either by affiliation or by user id
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
                 for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
-                    let curatorAffiliation = this.props.affiliation;
                     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
                     let creator = provisionalClassification.submitted_by;
-                    if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
+                    if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === user)) {
                         stateObj.provisional = provisionalClassification;
                         stateObj.alteredClassification = stateObj.provisional.alteredClassification;
                         stateObj.replicatedOverTime = stateObj.provisional.replicatedOverTime;
@@ -94,10 +116,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             return Promise.resolve();
         }).then(result => {
             // Once we have the GDM data, invoke other processes such as parsing, calculation and rendering
-            const user = this.state.user;
             const gdm = this.state.gdm;
             const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
-            const curatorAffiliation = this.props.affiliation;
             // Parse proband evidence and its associated segregation data
             this.parseCaseLevelEvidence(annotations, user, curatorAffiliation);
             // Parse segregation evidence with LOD scores but without proband
@@ -255,6 +275,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                             caseLevelEvidence['segregationPublishedLodScore'] = segregation && segregation.publishedLodScore ? segregation.publishedLodScore : null;
                             caseLevelEvidence['segregationEstimatedLodScore'] = segregation && segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
                             caseLevelEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
+                            caseLevelEvidence['sequencingMethod'] = segregation && segregation.sequencingMethod ? segregation.sequencingMethod : null;
                             // Put object into array
                             caseLevelEvidenceList.push(caseLevelEvidence);
                             this.setState({caseLevelEvidenceList: caseLevelEvidenceList}, () => {
@@ -358,6 +379,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     segregationEvidence['segregationPublishedLodScore'] = segregation.publishedLodScore ? segregation.publishedLodScore : null;
                     segregationEvidence['segregationEstimatedLodScore'] = segregation.estimatedLodScore ? segregation.estimatedLodScore : null;
                     segregationEvidence['includeLodScoreInAggregateCalculation'] = segregation && segregation.hasOwnProperty('includeLodScoreInAggregateCalculation') && segregation.includeLodScoreInAggregateCalculation;
+                    segregationEvidence['sequencingMethod'] = segregation && segregation.sequencingMethod ? segregation.sequencingMethod : null;
                     // Put object into array
                     segregationEvidenceList.push(segregationEvidence);
                     this.setState({segregationEvidenceList: segregationEvidenceList}, () => {
@@ -644,7 +666,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     render() {
         const gdm = this.state.gdm;
         const provisional = this.state.provisional;
-        const annotations = gdm && gdm.annotations && gdm.annotations.length ? gdm.annotations : [];
+        const snapshotPublishDate = this.state.snapshotPublishDate;
         const hpoTermsCollection = this.state.hpoTermsCollection;
 
         return (
@@ -655,7 +677,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 <div className={this.state.preview && this.state.preview === 'yes' ?
                     'evidence-panel-wrapper preview-only-overlay' : 'evidence-panel-wrapper'}>
                     {!this.state.preview ?
-                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} />
+                        <GeneDiseaseEvidenceSummaryHeader gdm={gdm} provisional={provisional} snapshotPublishDate={snapshotPublishDate} />
                         : <div className="spacer">&nbsp;</div>}
                     {!this.state.preview && provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />

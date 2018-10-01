@@ -190,6 +190,12 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                         <option value="5.5">5.5</option>
                         <option value="6">6</option>
                     </Input>
+                    {this.props.isDisabled ?
+                        <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                            <p className="alert alert-warning"><i className="icon icon-info-circle"></i> A Study type must be selected
+                                to Score this Case-Control evidence.</p>
+                        </div>
+                        : null}
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">

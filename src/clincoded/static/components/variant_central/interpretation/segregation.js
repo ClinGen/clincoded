@@ -53,6 +53,16 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         }
     },
 
+    renderCriteriaEvalLink() {
+        return (
+            <span>
+                <a href="https://www.clinicalgenome.org/working-groups/sequence-variant-interpretation/" target="_blank" rel="noopener noreferrer">
+                    Sequence Variant Interpretation (SVI) Working Group guidance
+                </a>
+            </span>
+        );
+    },
+
     render() {
         const affiliation = this.props.affiliation, session = this.props.session;
 
@@ -124,7 +134,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
                             </div>
                         </div>
                         : null}

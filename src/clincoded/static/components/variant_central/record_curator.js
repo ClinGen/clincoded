@@ -2,14 +2,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
+import _ from 'underscore';
 import moment from 'moment';
 import { queryKeyValue, external_url_map } from '../globals';
-import { getAffiliationName } from '../../libs/get_affiliation_name';
-import { sortListByDate } from '../../libs/helpers/sort';
-
-var _ = require('underscore');
-
 import PopOverComponent from '../../libs/bootstrap/popover';
+import { renderInProgressStatus } from '../../libs/render_in_progress_status';
+import { renderNewSummaryStatus } from '../../libs/render_new_summary_status';
+import { renderProvisionalStatus } from '../../libs/render_provisional_status';
+import { renderApprovalStatus } from '../../libs/render_approval_status';
+import { renderNewProvisionalStatus } from '../../libs/render_new_provisional_status';
+import { renderPublishStatus } from '../../libs/render_publish_status';
 
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = createReactClass({
@@ -76,49 +78,27 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
     },
 
     /**
-     * Method to display classification tag/label in the interpretation header
-     * @param {string} status - The status of a given classification in an interpretation
+     * Method to render the interpretation status tag/label in the interpretation header
+     * @param {object} classification - A given classification associated with an interpretation
      */
     renderClassificationStatusTag(classification) {
-        let status = classification.classificationStatus;
         let snapshots = classification.associatedInterpretationSnapshots && classification.associatedInterpretationSnapshots.length ? classification.associatedInterpretationSnapshots : [];
-        let filteredSnapshots = [];
-        // Determine whether the classification had been previously approved
+        // Render the status labels given an array of snapshots
         if (snapshots && snapshots.length) {
-            filteredSnapshots = snapshots.filter(snapshot => {
-                return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === 'interpretation';
-            });
-            // The "In progress" label shouldn't be shown after any given number of Provisional/Approval had been saved
-            if (status === 'In progress') {
-                let sortedSnapshots = sortListByDate(snapshots, 'date_created');
-                if (sortedSnapshots[0].approvalStatus === 'Provisioned') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
-                        );
-                    } else {
-                        return <span className="label label-info">PROVISIONAL</span>;
-                    }
-                } else if (sortedSnapshots[0].approvalStatus === 'Approved') {
-                    return <span className="label label-success">APPROVED</span>;
-                }
-            } else {
-                if (status === 'Provisional') {
-                    if (filteredSnapshots.length) {
-                        return (
-                            <span><span className="label label-success">APPROVED</span><span className="label label-info"><span className="badge">NEW</span> PROVISIONAL</span></span>
-                        );
-                    } else {
-                        return <span className="label label-info">PROVISIONAL</span>;
-                    }
-                } else if (status === 'Approved') {
-                    return <span className="label label-success">APPROVED</span>;
-                }
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderProvisionalStatus(snapshots, 'interpretation')}
+                    {renderApprovalStatus(snapshots, 'interpretation')}
+                    {renderNewProvisionalStatus(snapshots, 'interpretation')}
+                    {renderPublishStatus(snapshots)}
+                </span>
+            );
         } else {
-            if (status === 'In progress') {
-                return <span className="label label-warning">IN PROGRESS</span>;
-            }
+            return (
+                <span className="classification-status-wrapper">
+                    {renderInProgressStatus(classification)}
+                </span>
+            );
         }
     },
 
@@ -126,7 +106,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
      * Method to render the header of a given classification in the interpretation header
      * @param {object} classification - A given classification in an interpretation
      */
-    renderClassificationHeader(classification) {
+    renderMyInterpretationStatus(classification) {
         return (
             <div className="header-classification">
                 <strong>Provisional/Approved Status:</strong>
@@ -157,165 +137,94 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
         let myInterpretation = this.state.interpretation ? this.state.interpretation
             : (sortedInterpretations && sortedInterpretations.affiliatedInterpretation ? sortedInterpretations.affiliatedInterpretation
                 : (sortedInterpretations && sortedInterpretations.myInterpretation ? sortedInterpretations.myInterpretation : null));
-        let otherInterpretations = sortedInterpretations && sortedInterpretations.otherInterpretations.length ? sortedInterpretations.otherInterpretations : null;
         let calculatedPathogenicity = this.state.calculatedPathogenicity ? this.state.calculatedPathogenicity
             : (myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ? myInterpretation.provisional_variant[0].autoClassification : 'None');
         let modifiedPathogenicity = myInterpretation && myInterpretation.provisional_variant && myInterpretation.provisional_variant.length && myInterpretation.provisional_variant[0].alteredClassification ?
-            myInterpretation.provisional_variant[0].alteredClassification : 'None';
+            myInterpretation.provisional_variant[0].alteredClassification : 'Not provided';
         let self = this;
 
         return (
             <div className="col-xs-12 col-sm-6 gutter-exc">
                 <div className="curation-data-curator">
-                    {interpretationUuid ?
-                        <div className="clearfix">
-                            <h4>My Interpretation</h4>
-                            {myInterpretation ?
-                                <div className="current-user-interpretations">
-                                    <div className="associated-disease"><strong>Disease:</strong>&nbsp;
-                                        {myInterpretation && myInterpretation.disease ?
-                                            <span>
-                                                {myInterpretation.disease.term}
-                                                <span>&nbsp;</span>
-                                                {!myInterpretation.disease.freetext ? 
+                    <div className="clearfix">
+                        <h4>My Interpretation</h4>
+                        {myInterpretation ?
+                            <table className="login-users-interpretations current-user-interpretations">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div className="associated-disease"><strong>Disease:</strong>&nbsp;
+                                                {myInterpretation && myInterpretation.disease ?
                                                     <span>
-                                                        (
-                                                        <a href={external_url_map['MondoSearch'] + myInterpretation.disease.diseaseId} target="_blank">{myInterpretation.disease.diseaseId.replace('_', ':')}</a>
-                                                        {myInterpretation.disease.description && myInterpretation.disease.description.length ?
-                                                            <span><span>,&nbsp;</span>
-                                                                <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                                    actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
-                                                                    {myInterpretation.disease.description}
-                                                                </PopOverComponent>
+                                                        {myInterpretation.disease.term}
+                                                        <span>&nbsp;</span>
+                                                        {!myInterpretation.disease.freetext ? 
+                                                            <span>
+                                                                (
+                                                                <a href={external_url_map['MondoSearch'] + myInterpretation.disease.diseaseId} target="_blank">{myInterpretation.disease.diseaseId.replace('_', ':')}</a>
+                                                                {myInterpretation.disease.description && myInterpretation.disease.description.length ?
+                                                                    <span><span>,&nbsp;</span>
+                                                                        <PopOverComponent popOverWrapperClass="interpretation-disease-description"
+                                                                            actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                            {myInterpretation.disease.description}
+                                                                        </PopOverComponent>
+                                                                    </span>
+                                                                    : null}
+                                                                )
                                                             </span>
-                                                            : null}
-                                                        )
-                                                    </span>
-                                                    :
-                                                    <span>
-                                                        (
-                                                        {myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ?
-                                                            <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
-                                                                actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
-                                                                {myInterpretation.disease.phenotypes.join(', ')}
-                                                            </PopOverComponent>
-                                                            : null}
-                                                        {myInterpretation.disease.description && myInterpretation.disease.description.length ?
-                                                            <span>{myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
-                                                                <PopOverComponent popOverWrapperClass="interpretation-disease-description"
-                                                                    actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
-                                                                    {myInterpretation.disease.description}
-                                                                </PopOverComponent>
-                                                            </span>
-                                                            : null}
-                                                        )
-                                                    </span>
-                                                }
-                                            </span>
-                                            :
-                                            <span>Not associated</span>
-                                        }
-                                    </div>
-                                    <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
-                                    <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
-                                    {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
-                                    <div>
-                                        {myInterpretation.provisional_variant ?
-                                            <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                            : null}
-                                        {myInterpretation.provisional_variant ? this.renderSummaryStatus(myInterpretation.provisional_variant) : null}
-                                    </div>
-                                </div>
-                                : null}
-                        </div>
-                        :
-                        <div className="clearfix">
-                            <h4>All Existing Interpretations</h4>
-                            {myInterpretation ?
-                                <table className="login-users-interpretations">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                {myInterpretation.disease ? <strong>{myInterpretation.disease.term}</strong> : <strong>No disease</strong>}
-                                                {myInterpretation.modeInheritance ?
-                                                    <span>-
-                                                        {myInterpretation.modeInheritance.indexOf('(HP:') === -1 ?
-                                                            <i>{myInterpretation.modeInheritance}</i>
                                                             :
-                                                            <i>{myInterpretation.modeInheritance.substr(0, myInterpretation.modeInheritance.indexOf('(HP:')-1)}</i>
+                                                            <span>
+                                                                (
+                                                                {myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ?
+                                                                    <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                                                        actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                                                        {myInterpretation.disease.phenotypes.join(', ')}
+                                                                    </PopOverComponent>
+                                                                    : null}
+                                                                {myInterpretation.disease.description && myInterpretation.disease.description.length ?
+                                                                    <span>{myInterpretation.disease.phenotypes && myInterpretation.disease.phenotypes.length ? <span>,&nbsp;</span> : null}
+                                                                        <PopOverComponent popOverWrapperClass="interpretation-disease-description"
+                                                                            actuatorTitle="View definition" popOverRef={ref => (this.popoverDesc = ref)}>
+                                                                            {myInterpretation.disease.description}
+                                                                        </PopOverComponent>
+                                                                    </span>
+                                                                    : null}
+                                                                )
+                                                            </span>
                                                         }
-                                                        ,&nbsp;
                                                     </span>
                                                     :
-                                                    <span>, </span>
+                                                    <span>Not provided</span>
                                                 }
-                                                <span className="no-broken-item">
-                                                    {myInterpretation.affiliation ?
-                                                        <span><span>{getAffiliationName(myInterpretation.affiliation)}</span>,&nbsp;</span>
-                                                        :
-                                                        <span><span>{myInterpretation.submitted_by.title}</span>,&nbsp;</span>
-                                                    }
-                                                </span>
-                                                <span className="no-broken-item">
-                                                    <i>{myInterpretation.provisional_variant && myInterpretation.provisional_variant[0].alteredClassification ?
-                                                        <span>{myInterpretation.provisional_variant[0].alteredClassification},&nbsp;</span>  : null}</i>
-                                                </span>
-                                                {myInterpretation.provisional_variant ?
-                                                    <span className="no-broken-item">last saved: {moment(myInterpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                            </div>
+                                            <div><strong>Calculated Pathogenicity:</strong> {calculatedPathogenicity}</div>
+                                            <div><strong>Modified Pathogenicity:</strong> {modifiedPathogenicity}</div>
+                                            {myInterpretation.provisional_variant ?
+                                                this.renderMyInterpretationStatus(myInterpretation.provisional_variant)
+                                                :
+                                                <div className="header-classification"><strong>Provisional/Approved Status:</strong><span>&nbsp;{renderInProgressStatus()}</span></div>
+                                            }
+                                            <div>
+                                                {myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ?
+                                                    <span>
+                                                        <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant[0].last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                        {renderNewSummaryStatus(myInterpretation.provisional_variant[0])}
+                                                    </span>
                                                     : null}
-                                                {myInterpretation.provisional_variant ? this.renderClassificationHeader(myInterpretation.provisional_variant) : null}
-                                            </td>
+                                            </div>
+                                        </td>
+                                        {!interpretationUuid ?
                                             <td className="icon-box">
                                                 <a className="continue-interpretation" href="#" onClick={this.goToInterpretationPage} title="Edit interpretation">
                                                     <i className="icon icon-pencil-square large-icon"></i>
                                                 </a>
                                             </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                : null}
-                            {otherInterpretations && otherInterpretations.length ?
-                                <div className="col-lg-12 other-users-interpretations">
-                                    {otherInterpretations.map(function(interpretation, i) {
-                                        return (
-                                            <dl key={i}>
-                                                <dd>
-                                                    {interpretation.disease ? <strong>{interpretation.disease.term}</strong> : <strong>No disease</strong>}
-                                                    {interpretation.modeInheritance ?
-                                                        <span>-
-                                                            {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
-                                                                <i>{interpretation.modeInheritance}</i>
-                                                                :
-                                                                <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
-                                                            }
-                                                            ,&nbsp;
-                                                        </span>
-                                                        :
-                                                        <span>, </span>
-                                                    }
-                                                    <span className="no-broken-item">
-                                                        {interpretation.affiliation ?
-                                                            <span><span>{getAffiliationName(interpretation.affiliation)}</span>,&nbsp;</span>
-                                                            :
-                                                            <span><a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>,&nbsp;</span>
-                                                        }
-                                                    </span>
-                                                    <span className="no-broken-item">
-                                                        <i>{interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
-                                                            <span>{interpretation.provisional_variant[0].alteredClassification},&nbsp;</span> : null}</i>
-                                                    </span>
-                                                    {interpretation.provisional_variant ?
-                                                        <span className="no-broken-item">last saved: {moment(interpretation.provisional_variant.last_modified).format("YYYY MMM DD, h:mm a")}</span>
-                                                        : null}
-                                                    {interpretation.provisional_variant ? self.renderClassificationHeader(interpretation.provisional_variant) : null}
-                                                </dd>
-                                            </dl>
-                                        );
-                                    })}
-                                </div>
-                                : null}
-                        </div>
-                    }
+                                            : null}
+                                    </tr>
+                                </tbody>
+                            </table>
+                            : null}
+                    </div>
                 </div>
             </div>
         );
