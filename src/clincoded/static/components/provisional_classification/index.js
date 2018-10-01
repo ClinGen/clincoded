@@ -263,8 +263,11 @@ const ProvisionalClassification = createReactClass({
      */
     isUserAllowedToPublish() {
         const curatorAffiliation = this.props.affiliation;
+        const gdm = this.state.gdm;
+        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1);
+        let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
 
-        if (curatorAffiliation && curatorAffiliation.publish_approval) {
+        if (curatorAffiliation && curatorAffiliation.publish_approval && validModeInheritance && hasMondoId) {
             return true;
         } else {
             return false;
@@ -614,6 +617,15 @@ const ProvisionalClassification = createReactClass({
                                             </Panel>
                                         </PanelGroup>
                                     </div>
+                                </div>
+                                : null}
+                            {!this.state.showProvisional && !this.state.showApproval && !this.isUserAllowedToPublish() ?
+                                <div className="container">
+                                    <p className="alert alert-info">
+                                        <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following
+                                            apply: 1) your affiliation does not have permission to publish, 2) the mode of inheritance is not supported by the Clinical Validity
+                                            Classification framework, 3) the associated disease does not have a MONDO ID, 4) it is based on a previous version of the SOP.
+                                    </p>
                                 </div>
                                 : null}
                             {sortedSnapshotList.length ?
