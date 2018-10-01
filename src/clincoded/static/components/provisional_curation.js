@@ -14,6 +14,7 @@ import { parseAndLogError } from './mixins';
 import { ClassificationDefinition } from './provisional_classification/definition';
 import CurationSnapshots from './provisional_classification/snapshots';
 import { sortListByDate } from '../libs/helpers/sort';
+import { getClassificationSavedDate } from '../libs/get_saved_date';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -220,6 +221,7 @@ var ProvisionalCuration = createReactClass({
             newProvisional.replicatedOverTime = this.state.replicatedOverTime;
             newProvisional.contradictingEvidence = this.state.contradictingEvidence;
             newProvisional.classificationStatus = 'In progress';
+            newProvisional.classificationDate = moment().toISOString();
             newProvisional.provisionedClassification = false;
             if (newProvisional.provisionalSubmitter) delete newProvisional.provisionalSubmitter;
             if (newProvisional.provisionalDate) delete newProvisional.provisionalDate;
@@ -272,9 +274,9 @@ var ProvisionalCuration = createReactClass({
             classificationPoints['segregation']['evidenceCountCandidate'] = Number(scoreTableValues.segregationCountCandidate);
             classificationPoints['segregation']['evidenceCountExome'] = Number(scoreTableValues.segregationCountExome);
             classificationPoints['segregation']['evidenceCountTotal'] = Number(scoreTableValues.segregationCountTotal);
-            classificationPoints['segregation']['evidencePointsCandidate'] = Number(scoreTableValues.segregationPointsCandidate);
-            classificationPoints['segregation']['evidencePointsExome'] = Number(scoreTableValues.segregationPointsExome);
-            classificationPoints['segregation']['totalPointsGiven'] = Number(scoreTableValues.segregationTotalPoints);
+            classificationPoints['segregation']['evidencePointsCandidate'] = this.classificationMathRound(Number(scoreTableValues.segregationPointsCandidate), 2);
+            classificationPoints['segregation']['evidencePointsExome'] = this.classificationMathRound(Number(scoreTableValues.segregationPointsExome), 2);
+            classificationPoints['segregation']['totalPointsGiven'] = this.classificationMathRound(Number(scoreTableValues.segregationTotalPoints), 2);
             classificationPoints['segregation']['pointsCounted'] = Number(scoreTableValues.segregationPointsCounted);
             // Case-Control genetic evidence
             classificationPoints['caseControl'] = {};
@@ -851,6 +853,8 @@ var ProvisionalCuration = createReactClass({
         let calculate = queryKeyValue('calculate', this.props.href);
         let edit = queryKeyValue('edit', this.props.href);
         let session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
+        const context = this.props.context;
+        const currOmimId = this.state.currOmimId;
         let gdm = this.state.gdm ? this.state.gdm : null;
         let autoClassification = this.state.autoClassification;
         let scoreTableValues = this.state.scoreTableValues;
@@ -870,7 +874,13 @@ var ProvisionalCuration = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
-        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval ? true : false;
+        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1);
+        let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
+        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval && validModeInheritance && hasMondoId ? true : false;
+        const lastSavedDate = currentClassification !== 'None' ? getClassificationSavedDate(provisional) : null;
+        const affiliation = this.props.affiliation;
+        const classificationStatus = this.state.classificationStatus;
+        const demoVersion = this.props.demoVersion;
 
         return (
             <div>
@@ -879,8 +889,8 @@ var ProvisionalCuration = createReactClass({
                     :
                     ( gdm ?
                         <div>
-                            <RecordHeader gdm={gdm} omimId={this.state.currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
-                                affiliation={this.props.affiliation} classificationSnapshots={sortedSnapshotList} />
+                            <RecordHeader gdm={gdm} omimId={currOmimId} updateOmimId={this.updateOmimId} session={session} summaryPage={true} linkGdm={true}
+                                affiliation={affiliation} classificationSnapshots={sortedSnapshotList} context={context} />
                             <div className="container summary-provisional-classification-wrapper">
                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                     <PanelGroup accordion>
@@ -1147,7 +1157,7 @@ var ProvisionalCuration = createReactClass({
                                                                         :
                                                                         <div>{currentClassification}
                                                                             <br />
-                                                                            <span className="large">({moment(provisional.last_modified).format("YYYY MMM DD, h:mm a")})</span>
+                                                                            <span className="large">({moment(lastSavedDate).format("YYYY MMM DD, h:mm a")})</span>
                                                                         </div>
                                                                     }
                                                                 </td>
@@ -1180,12 +1190,25 @@ var ProvisionalCuration = createReactClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
+                                {sortedSnapshotList.length && !allowPublishButton ?
+                                    <div>
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following
+                                                apply: 1) your affiliation does not have permission to publish, 2) the mode of inheritance is not supported by the Clinical Validity
+                                                Classification framework, 3) the associated disease does not have a MONDO ID, 4) it is based on a previous version of the SOP.
+                                        </p>
+                                    </div>
+                                    : null}
                                 {sortedSnapshotList.length ?
                                     <div className="snapshot-list">
                                         <PanelGroup>
                                             <Panel title="Saved Provisional and Approved Classification(s)" panelClassName="panel-data" open>
-                                                <CurationSnapshots snapshots={sortedSnapshotList} classificationStatus={this.state.classificationStatus}
-                                                    allowPublishButton={allowPublishButton} demoVersion={this.props.demoVersion} />
+                                                <CurationSnapshots
+                                                    snapshots={sortedSnapshotList}
+                                                    classificationStatus={classificationStatus}
+                                                    allowPublishButton={allowPublishButton}
+                                                    demoVersion={demoVersion}
+                                                    context={context} />
                                             </Panel>
                                         </PanelGroup>
                                     </div>

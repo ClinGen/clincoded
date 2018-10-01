@@ -37,7 +37,8 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         disableEvalForm: PropTypes.bool, // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
         affiliation: PropTypes.object,
-        session: PropTypes.object
+        session: PropTypes.object,
+        criteriaEvalNote: PropTypes.func
     },
 
     contextTypes: {
@@ -410,6 +411,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
                     {this.props.renderedFormContent.call(this, this.props.disableEvalForm)}
                 </div>
                 <div className="curation-submit clearfix">
+                    {typeof this.props.criteriaEvalNote === 'function' ?
+                        <div className="pull-left criteria-eval-note">{this.props.criteriaEvalNote()}</div>
+                        : null}
                     <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
                         id="submit" title={this.state.evaluationExists ? "Update" : "Save"} submitBusy={this.state.submitBusy}
                         inputDisabled={(this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated) || this.props.disableEvalForm} />
@@ -431,7 +435,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
 // dropdownContent should be a call to evalFormDropdownSectionWrapper() - see below
 // explanationContent should be a call to evalFormExplanationSectionWrapper() - see below
 // divider is a boolean to indicate whether or not a gray divider bar should be rendered at the bottom of the group (for use if there is a subsequent form group before the Save button)
-export function evalFormSectionWrapper(noteContent, dropdownContent, explanationContent, divider, geneNote) {
+export function evalFormSectionWrapper(noteContent, dropdownContent, explanationContent, divider) {
     return (
         <div>
             <div className="col-sm-4">
@@ -439,11 +443,6 @@ export function evalFormSectionWrapper(noteContent, dropdownContent, explanation
             </div>
             <div className="col-sm-4 pad-top">
                 {dropdownContent}
-                {geneNote ? 
-                <div className="bs-callout-info">
-                    <p className="exac-note">Note: ExAC Constraint Scores displayed on the Gene-centric tab</p>
-                </div>
-                : null}
             </div>
             <div className="col-sm-4 pad-top">
                 {explanationContent}

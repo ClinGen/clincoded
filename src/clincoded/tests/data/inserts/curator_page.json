@@ -132,9 +132,15 @@
         "uuid": "a671021c-3ce1-4d6f-858c-9b0e43372b59"
     },
     {
+        "name": "gdm-all",
+        "title": "All GDMs",
+        "status": "released",
+        "uuid": "ab2f826a-f43c-4a72-9ecb-a777dbfe8ffa"
+    },
+    {
         "name": "interpretation-all",
         "title": "All Interpretations",
         "status": "released",
-        "uuid": "709a7b40-bca9-4a34-b316-71264640112c"
+        "uuid": "81bffd15-fab5-4a43-8ad4-3234fc5599f0"
     }
 ]

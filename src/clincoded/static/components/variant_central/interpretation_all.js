@@ -204,7 +204,7 @@ var InterpretationList = createReactClass({
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">
-                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Variant or Disease"
+                        <input type="text" name="filterTerm" id="filterTerm" placeholder="Filter by Variant, Disease, or Creator"
                             value={this.state.searchTerm} onChange={this.handleChange} className="form-control" />
                     </div>
                 </div>
@@ -247,7 +247,7 @@ var InterpretationList = createReactClass({
                                         {interpretation.modeInheritance ? interpretation.modeInheritance : null}
                                     </div>
                                     <div className="table-cell-gdm">
-                                        <div>{interpretation.submitter_last_name}, {interpretation.submitter_first_name}</div>
+                                        <div>{interpretation.submitter_last_name}, {interpretation.submitter_first_name} {interpretation.affiliation ? <span>({interpretation.affiliation})</span> : null}</div>
                                     </div>
                                     <div className="table-cell-gdm">
                                         <div>{interpretation.created_date}</div>

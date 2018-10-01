@@ -22,6 +22,7 @@ require('./variant_central/interpretation_all');
 require('./create_gene_disease');
 require('./dashboard');
 require('./gdm');
+require('./gdm_all');
 require('./group_curation');
 require('./group_submit');
 require('./family_curation');
