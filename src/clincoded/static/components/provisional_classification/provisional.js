@@ -153,7 +153,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
                         });
-                        this.setState({submitBusy: false});
+                        // this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving provisional snapshot error = : %o', err);
                     });
@@ -204,7 +204,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
                         });
-                        this.setState({submitBusy: false});
+                        // this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving provisional snapshot error = : %o', err);
                     });

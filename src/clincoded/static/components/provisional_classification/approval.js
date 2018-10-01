@@ -202,7 +202,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id'], true);
                         });
-                        this.setState({submitBusy: false});
+                        // this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);
                     });
@@ -253,7 +253,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.putRestData(this.props.provisional['@id'], newClassification).then(provisionalObj => {
                             this.props.updateProvisionalObj(provisionalObj['@graph'][0]['@id']);
                         });
-                        this.setState({submitBusy: false});
+                        // this.setState({submitBusy: false});
                     }).catch(err => {
                         console.log('Saving approval snapshot error = : %o', err);
                     });
