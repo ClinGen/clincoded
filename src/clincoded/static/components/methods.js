@@ -86,11 +86,19 @@ module.exports = {
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
+                    <option value="Chromosomal microarray">Chromosomal microarray</option>
+                    <option value="Denaturing gradient gel">Denaturing gradient gel</option>
                     <option value="Exome sequencing">Exome sequencing</option>
                     <option value="Genotyping">Genotyping</option>
                     <option value="High resolution melting">High resolution melting</option>
+                    <option value="Homozygosity mapping">Homozygosity mapping</option>
+                    <option value="Linkage analysis">Linkage analysis</option>
+                    <option value="Next generation sequencing panels">Next generation sequencing panels</option>
+                    <option value="Other">Other</option>
                     <option value="PCR">PCR</option>
+                    <option value="Restriction digest">Restriction digest</option>
                     <option value="Sanger sequencing">Sanger sequencing</option>
+                    <option value="SSCP">SSCP</option>
                     <option value="Whole genome shotgun sequencing">Whole genome shotgun sequencing</option>
                 </Input>
                 {hasParentMethods ? curator.renderParentEvidence('Method 2 Associated with ' + parentName + ':', parentMethod.genotypingMethods[1]) : null}
@@ -100,11 +108,19 @@ module.exports = {
                     inputDisabled={prefix ? (prefix === 'caseCohort_' ? this.state.caseCohort_genotyping2Disabled : this.state.controlCohort_genotyping2Disabled) : this.state.genotyping2Disabled}>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
+                    <option value="Chromosomal microarray">Chromosomal microarray</option>
+                    <option value="Denaturing gradient gel">Denaturing gradient gel</option>
                     <option value="Exome sequencing">Exome sequencing</option>
                     <option value="Genotyping">Genotyping</option>
                     <option value="High resolution melting">High resolution melting</option>
+                    <option value="Homozygosity mapping">Homozygosity mapping</option>
+                    <option value="Linkage analysis">Linkage analysis</option>
+                    <option value="Next generation sequencing panels">Next generation sequencing panels</option>
+                    <option value="Other">Other</option>
                     <option value="PCR">PCR</option>
+                    <option value="Restriction digest">Restriction digest</option>
                     <option value="Sanger sequencing">Sanger sequencing</option>
+                    <option value="SSCP">SSCP</option>
                     <option value="Whole genome shotgun sequencing">Whole genome shotgun sequencing</option>
                 </Input>
                 {hasParentMethods ? curator.renderParentEvidence('Description of genotyping method Associated with ' + parentName + ':', parentMethod.specificMutationsGenotypedMethod) : null}

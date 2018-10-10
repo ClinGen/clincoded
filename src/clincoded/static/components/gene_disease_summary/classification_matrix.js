@@ -1,7 +1,9 @@
 'use strict';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { isScoringForCurrentSOP } from '../../libs/sop';
 import GeneDiseaseClassificationMatrix from '../../libs/gene_disease_classification_matrix';
+import GeneDiseaseClassificationMatrixSOPv5 from '../../libs/gene_disease_classification_matrix_sop_v5';
 
 class GeneDiseaseEvidenceSummaryClassificationMatrix extends Component {
     constructor(props) {
@@ -18,7 +20,11 @@ class GeneDiseaseEvidenceSummaryClassificationMatrix extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Calculated Classification Matrix</h3>
                     </div>
-                    <GeneDiseaseClassificationMatrix classificationPoints={classificationPoints} />
+                    {isScoringForCurrentSOP(classificationPoints) ?
+                        <GeneDiseaseClassificationMatrix classificationPoints={classificationPoints} />
+                    :
+                        <GeneDiseaseClassificationMatrixSOPv5 classificationPoints={classificationPoints} />
+                    }
                 </div>
             </div>
         );

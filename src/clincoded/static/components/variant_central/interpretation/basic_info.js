@@ -5,15 +5,18 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import { RestMixin } from '../../rest';
-import { parseClinvar } from '../../../libs/parse-resources';
-import { dbxref_prefix_map, external_url_map } from '../../globals';
+import { external_url_map } from '../../globals';
 import { setContextLinks } from './shared/externalLinks';
 import { renderDataCredit } from './shared/credit';
 import { showActivityIndicator } from '../../activity_indicator';
 import PopOverComponent from '../../../libs/bootstrap/popover';
+import { sortListByDate } from '../../../libs/helpers/sort';
+import { getAffiliationName } from '../../../libs/get_affiliation_name';
+import { renderInterpretationStatus } from '../../../libs/render_interpretation_status';
+import { renderInProgressStatus } from '../../../libs/render_in_progress_status';
+import { renderStatusExplanation } from '../../../libs/render_status_explanation';
 
-var SO_terms = require('./mapping/SO_term.json');
-var genomic_chr_mapping = require('./mapping/NC_genomic_chr_format.json');
+const SO_terms = require('./mapping/SO_term.json');
 
 // Display the curator data of the curation data
 var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasicInfo = createReactClass({
@@ -28,7 +31,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         ext_clinvarInterpretationSummary: PropTypes.object,
         loading_clinvarEutils: PropTypes.bool,
         loading_clinvarSCV: PropTypes.bool,
-        loading_ensemblHgvsVEP: PropTypes.bool
+        loading_ensemblHgvsVEP: PropTypes.bool,
+        session: PropTypes.object,
+        affiliation: PropTypes.object
     },
 
     getInitialState: function() {
@@ -263,6 +268,87 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         }
     },
 
+    /**
+     * Method to render all existing 'approved' interpretations on a given variant
+     * @param {object} interpretation - The variant interpretation object
+     * @param {integer} key - Unique identifier for each mapped node
+     */
+    renderAllExistingInterpretations(interpretation, key) {
+        const affiliation = this.props.affiliation;
+        const session = this.props.session;
+        // Evaluate whether to render link to provisional summary for current logged-in user
+        let showProvisionalLink = false;
+        if (interpretation.affiliation && affiliation && interpretation.affiliation === affiliation.affiliation_id) {
+            showProvisionalLink = true;
+        } else if (!interpretation.affiliation && !affiliation && interpretation.submitted_by.uuid === session.user_properties.uuid) {
+            showProvisionalLink = true;
+        } else {
+            showProvisionalLink = false;
+        }
+        return (
+            <tr key={key} className="approved-interpretation">
+                <td className="clinical-significance">
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].autoClassification ?
+                        <span><strong>Calculated:</strong> {interpretation.provisional_variant[0].autoClassification}</span>
+                        : '--'}
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].alteredClassification ?
+                        <span><br /><strong>Modified:</strong> {interpretation.provisional_variant[0].alteredClassification}</span>
+                        : null}
+                </td>
+                <td className="interpretation-status">
+                    {interpretation.provisional_variant && interpretation.provisional_variant[0].classificationStatus ? renderInterpretationStatus(interpretation.provisional_variant[0], showProvisionalLink) : renderInProgressStatus()}
+                </td>
+                <td className="condition-mode-of-inheritance">
+                    {interpretation.disease ?
+                        <span>
+                            {interpretation.disease.term}
+                            <span>&nbsp;</span>
+                            {!interpretation.disease.freetext ? 
+                                <span>(<a href={external_url_map['MondoSearch'] + interpretation.disease.diseaseId} target="_blank">{interpretation.disease.diseaseId.replace('_', ':')}</a>)</span>
+                                :
+                                <span>
+                                    {interpretation.disease.phenotypes && interpretation.disease.phenotypes.length ?
+                                        <PopOverComponent popOverWrapperClass="gdm-disease-phenotypes"
+                                            actuatorTitle="View HPO term(s)" popOverRef={ref => (this.popoverPhenotypes = ref)}>
+                                            {interpretation.disease.phenotypes.join(', ')}
+                                        </PopOverComponent>
+                                        : null}
+                                </span>
+                            }
+                        </span>
+                        :
+                        <span>Not provided</span>
+                    }
+                    {interpretation.modeInheritance ?
+                        <span><span className="condition-moi-separator">&nbsp;-&nbsp;</span>
+                            {interpretation.modeInheritance.indexOf('(HP:') === -1 ?
+                                <i>{interpretation.modeInheritance}</i>
+                                :
+                                <i>{interpretation.modeInheritance.substr(0, interpretation.modeInheritance.indexOf('(HP:')-1)}</i>
+                            }
+                            {interpretation.modeInheritanceAdjective ?
+                                <span className="condition-moi-separator">&nbsp;-&nbsp;
+                                    {interpretation.modeInheritanceAdjective.indexOf('(HP:') === -1 ?
+                                        <i>{interpretation.modeInheritanceAdjective}</i>
+                                        :
+                                        <i>{interpretation.modeInheritanceAdjective.substr(0, interpretation.modeInheritanceAdjective.indexOf('(HP:')-1)}</i>
+                                    }
+                                </span> 
+                                : null}
+                        </span>
+                        : null}
+                </td>
+                <td className="submitter">
+                    {interpretation.affiliation ?
+                        <span>{getAffiliationName(interpretation.affiliation)}</span>
+                        :
+                        <a href={'mailto:' + interpretation.submitted_by.email}>{interpretation.submitted_by.title }</a>
+                    }
+                </td>
+            </tr>
+        );
+    },
+
     // Method to contruct linkouts for assertion methods
     // based on a given url or pubmed id
     handleAssertionMethodLinkOut(item) {
@@ -434,25 +520,18 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     render: function() {
-        var clinvar_id = this.state.clinvar_id;
-        var car_id = this.state.car_id;
-        var dbSNP_id = this.state.dbSNP_id;
-        var nucleotide_change = this.state.nucleotide_change;
-        var molecular_consequence = this.state.molecular_consequence;
-        var protein_change = this.state.protein_change;
-        var ensembl_data = this.state.ensembl_transcripts;
-        var sequence_location = this.state.sequence_location;
-        var gene_symbol = this.state.gene_symbol;
-        var uniprot_id = this.state.uniprot_id;
-        var GRCh37 = this.state.hgvs_GRCh37;
-        var GRCh38 = this.state.hgvs_GRCh38;
-        var primary_transcript = this.state.primary_transcript;
-        var clinVarSCV = this.state.clinVarSCV;
-        var clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
-        var self = this;
+        const variant = this.props.data;
+        const clinvar_id = this.state.clinvar_id;
+        const ensembl_data = this.state.ensembl_transcripts;
+        const GRCh37 = this.state.hgvs_GRCh37;
+        const GRCh38 = this.state.hgvs_GRCh38;
+        const primary_transcript = this.state.primary_transcript;
+        const clinVarSCV = this.state.clinVarSCV;
+        const clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
+        const self = this;
 
-        var links_38 = null;
-        var links_37 = null;
+        let links_38 = null;
+        let links_37 = null;
         if (GRCh38) {
             links_38 = setContextLinks(GRCh38, 'GRCh38');
         }
@@ -465,6 +544,8 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             transcriptsWithHgvsc = ensembl_data.filter(item => item.hgvsc && item.hgvsc.length);
         }
 
+        let sortedInterpretations = variant && variant.associatedInterpretations && variant.associatedInterpretations.length ? sortListByDate(variant.associatedInterpretations, 'date_created') : null;
+
         return (
             <div className="variant-interpretation basic-info">
                 <div className="bs-callout bs-callout-info clearfix">
@@ -474,6 +555,35 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                             {(GRCh38) ? <li className="hgvs-term"><span className="title-ellipsis title-ellipsis-short">{GRCh38}</span><span> (GRCh38)</span></li> : null}
                             {(GRCh37) ? <li className="hgvs-term"><span className="title-ellipsis title-ellipsis-short">{GRCh37}</span><span> (GRCh37)</span></li> : null}
                         </ul>
+                    </div>
+                </div>
+
+                <div className="panel panel-info all-existing-interpretaions">
+                    <div className="panel-heading">
+                        <h3 className="panel-title">All interpretations for this variant in the Variant Curation Interface (VCI){renderStatusExplanation('Interpretations')}</h3>
+                    </div>
+                    <div className="panel-content-wrapper">
+                        {sortedInterpretations && sortedInterpretations.length > 0 ?
+                            <div className="all-existing-interpretaions-content-wrapper">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Clinical significance</th>
+                                            <th>Status</th>
+                                            <th>Condition - <i>Mode of inheritance</i></th>
+                                            <th>Curator/Affiliation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {sortedInterpretations.map((interpretation, i) => {
+                                            return (self.renderAllExistingInterpretations(interpretation, i));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            :
+                            <div className="panel-body"><span>This variant has no existing interpretations.</span></div>
+                        }
                     </div>
                 </div>
 
