@@ -1,6 +1,7 @@
 'use strict';
 import React from 'react';
 import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { RestMixin } from './rest';
 import { curator_page } from './globals';
@@ -31,6 +32,11 @@ const findAllObjectIds = gdm => {
 
 const AddAffiliation = createReactClass({
     mixins: [FormMixin, RestMixin],
+
+    propTypes: {
+        context: PropTypes.object,
+        session: PropTypes.object
+    },
 
     getInitialState() {
         return {
@@ -143,28 +149,37 @@ const AddAffiliation = createReactClass({
 
     render() {
         const submitErrClass = 'submit-err pull-right' + (this.state.errorMsg ? '' : ' hidden');
+        const title = this.props.context.title;
+        const user = this.props.session.user_properties;
+        let group = user && user.groups && user.groups.length ? user.groups[0] : null;
 
         return (
             <div className="container">
-                <h1>{this.props.context.title}</h1>
-                <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-add-affiliation">
-                    <Panel panelClassName="panel-add-affiliation">
-                        <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                            <div className="row">
-                                <Input type="text" ref="affiliation_id" label="Affiliation ID" handleChange={this.handleChange}
-                                    error={this.getFormError('affiliation_id')} clearError={this.clrFormErrors.bind(null, 'affiliation_id')}
-                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
-                                <Input type="text" ref="gdm_uuid" label="GDM UUID" handleChange={this.handleChange}
-                                    error={this.getFormError('gdm_uuid')} clearError={this.clrFormErrors.bind(null, 'gdm_uuid')}
-                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
-                                <div className="curation-submit clearfix">
-                                    <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Submit" submitBusy={this.state.submitBusy} />
-                                    <div className={submitErrClass}>{this.state.errorMsg}</div>
-                                </div>
-                            </div>
-                        </Form>
-                    </Panel>
-                </div>
+                {group === 'admin' ?
+                    <div>
+                        <h1>{title}</h1>
+                        <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-add-affiliation">
+                            <Panel panelClassName="panel-add-affiliation">
+                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                    <div className="row">
+                                        <Input type="text" ref="affiliation_id" label="Affiliation ID" handleChange={this.handleChange}
+                                            error={this.getFormError('affiliation_id')} clearError={this.clrFormErrors.bind(null, 'affiliation_id')}
+                                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
+                                        <Input type="text" ref="gdm_uuid" label="GDM UUID" handleChange={this.handleChange}
+                                            error={this.getFormError('gdm_uuid')} clearError={this.clrFormErrors.bind(null, 'gdm_uuid')}
+                                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
+                                        <div className="curation-submit clearfix">
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Submit" submitBusy={this.state.submitBusy} />
+                                            <div className={submitErrClass}>{this.state.errorMsg}</div>
+                                        </div>
+                                    </div>
+                                </Form>
+                            </Panel>
+                        </div>
+                    </div>
+                    :
+                    <div><h3><i className="icon icon-exclamation-triangle"></i> Sorry. You do not have access to this page.</h3></div>
+                }
             </div>
         );
     }
