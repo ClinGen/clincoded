@@ -14,11 +14,11 @@ import { getAllGdmObjects } from '../libs/get_all_gdm_objects';
  * Return an array of '@id' from the annotations, evidence, scores, classifications
  * @param {object} gdm - The gene-disease record data object
  */
-const findAllObjectIds = gdm => {
+const findAllObjectIds = (gdm, contributorUuids) => {
     let allObjects = getAllGdmObjects(gdm);
     // Remove objects not created by the same user who started the GDM
     let filteredObjects = allObjects.filter(obj => {
-        return obj.submitted_by.uuid === gdm.submitted_by.uuid;
+        return contributorUuids.indexOf(obj.submitted_by.uuid) > -1;
     });
     // Extract the '@id' values from the filtered objects array into a new array
     let objIds = filteredObjects.map(object => {
@@ -80,11 +80,15 @@ const AddAffiliation = createReactClass({
 
         const affiliationId = this.getFormValue('affiliation_id');
         const gdmUuid = this.getFormValue('gdm_uuid');
+        const contributorUuids = this.getFormValue('contributor_uuid');
+        // Convert contributor(s) UUIDs string into array
+        const re = /\s*(?:,|$)\s*/;
+        var contributorUuidList = contributorUuids.split(re);
         if (this.validateDefault() && affiliationId && gdmUuid) {
             // Get up-to-date gdm object
             this.getRestData('/gdm/' + gdmUuid, null, true).then(gdmObj => {
                 // Gather all objects' '@id', including the GDM's
-                const objIds = findAllObjectIds(gdmObj);
+                const objIds = findAllObjectIds(gdmObj, contributorUuidList);
                 objIds.push('/gdm/' + gdmUuid);
                 return Promise.resolve(objIds);
             }).then(ObjectIds => {
@@ -168,6 +172,10 @@ const AddAffiliation = createReactClass({
                                         <Input type="text" ref="gdm_uuid" label="GDM UUID" handleChange={this.handleChange}
                                             error={this.getFormError('gdm_uuid')} clearError={this.clrFormErrors.bind(null, 'gdm_uuid')}
                                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
+                                        <Input type="text" ref="contributor_uuid" label="Contributor UUID(s)" handleChange={this.handleChange}
+                                            error={this.getFormError('contributor_uuid')} clearError={this.clrFormErrors.bind(null, 'contributor_uuid')}
+                                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group"
+                                            placeholder="Separate UUIDs with commas" required />
                                         <div className="curation-submit clearfix">
                                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Submit" submitBusy={this.state.submitBusy} />
                                             <div className={submitErrClass}>{this.state.errorMsg}</div>
