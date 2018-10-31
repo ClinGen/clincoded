@@ -163,7 +163,7 @@ module.exports.dbxref_prefix_map = {
 };
 
 module.exports.external_url_map = {
-    'PubMedSearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&id=',
+    'PubMedSearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key=986bd80f43a3ba6ec1bc7a50e7bda60c1b09&db=PubMed&retmode=xml&id=',
     'PubMed': 'https://www.ncbi.nlm.nih.gov/pubmed/',
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'OrphanetHome': 'http://www.orpha.net/',
@@ -176,9 +176,9 @@ module.exports.external_url_map = {
     'OMIMEntry': 'http://www.omim.org/entry/',
     'ClinVar': 'https://www.ncbi.nlm.nih.gov/clinvar/',
     'ClinVarSearch': 'https://www.ncbi.nlm.nih.gov/clinvar/variation/',
-    'ClinVarEfetch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar',
-    'ClinVarEutils': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=',
-    'ClinVarEsearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?',
+    'ClinVarEfetch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key=986bd80f43a3ba6ec1bc7a50e7bda60c1b09&db=clinvar',
+    'ClinVarEutils': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key=986bd80f43a3ba6ec1bc7a50e7bda60c1b09&db=clinvar&rettype=variation&id=',
+    'ClinVarEsearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?api_key=986bd80f43a3ba6ec1bc7a50e7bda60c1b09&',
     'HPO': 'http://compbio.charite.de/hpoweb/showterm?id=',
     'HPOBrowser': 'http://compbio.charite.de/hpoweb/showterm?id=HP:0000118',
     'Uberon': 'http://www.ebi.ac.uk/ols/ontologies/uberon',
