@@ -148,5 +148,11 @@
         "title": "All Interpretations",
         "status": "released",
         "uuid": "81bffd15-fab5-4a43-8ad4-3234fc5599f0"
+    },
+    {
+        "name": "admin",
+        "title": "ClinGen Curation Interfaces Admin Console",
+        "status": "released",
+        "uuid": "72232361-8eae-4e55-9c38-e967aa6d9bd2"
     }
 ]

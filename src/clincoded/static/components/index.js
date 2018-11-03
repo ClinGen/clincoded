@@ -45,5 +45,6 @@ require('./add_affiliation');
 require('./gene_disease_summary');
 require('./provisional_classification');
 require('./variant_interpretation_summary');
+require('./admin');
 
 module.exports = require('./app');
