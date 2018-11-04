@@ -1,11 +1,9 @@
 .admin-page {
-    max-height: 100vh;
-    overflow-y: hidden;
+    height: 100vh;
 
     .admin-page-header {
         background-color: #337ab7;
         color: #fff;
-        position: static;
         padding: 0.8em 1.6em;
 
         h3 {
@@ -25,13 +23,19 @@
 
     .admin-page-body {
         display: flex;
+        flex-direction: row;
+        height: 100vh;
+        margin-top: 48.375px;
 
         .side-navigation {
             background-color: rgb(244, 245, 247);
             height: 100vh;
+            min-height: 100vh;
             order: 1;
-            position: relative;
+            position: fixed;
+            top: 48.375px;
             width: 300px;
+            z-index: 1020;
 
             .side-navigation-item-list {
                 color: rgb(66, 82, 110);
@@ -55,7 +59,8 @@
             box-sizing: border-box;
             clear: both;
             flex-grow: 3;
-            margin: 10px 35px;
+            height: 100vh;
+            margin: 10px 35px 10px 335px;
             order: 2;
             position: relative;
 
@@ -82,6 +87,20 @@
                         margin-right: 20px;
                     }
                 }
+            }
+
+            .report-content {
+                .report-header-cell {
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: #ededed;
+                    }
+                }
+            }
+
+            .report-data-download {
+                margin-bottom: 30px;
             }
         }
     }
