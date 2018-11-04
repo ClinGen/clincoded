@@ -203,6 +203,14 @@
             "title": "Evaluations",
             "type": "string"
         },
+        "provisional_variant": {
+            "title": "Provisional Classifications",
+            "type": "array"
+        },
+        "affiliation": {
+            "title": "Affiliation",
+            "type": "string"
+        },
         "submitted_by.last_name": {
             "title": "Creator Last Name",
             "type": "string"
