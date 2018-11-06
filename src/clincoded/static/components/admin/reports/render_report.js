@@ -44,7 +44,7 @@ export const RenderGeneDiseaseRecordQuarterlyNIH = (props) => {
                 <thead>
                     <tr>
                         <th className="report-header-cell" onClick={() => props.sortBy('affiliationName')}>Expert Panel</th>
-                        <th className="report-header-cell" onClick={() => props.sortBy('totalGDMs')}>Total Gene-Disease records (started)</th>
+                        <th className="report-header-cell" onClick={() => props.sortBy('totalGdms')}>Total Gene-Disease records (started)</th>
                         <th className="report-header-cell" onClick={() => props.sortBy('gdmsWithSavedSummary')}>Gene-Disease records with saved classifications (not provisioned or approved or published)</th>
                         <th className="report-header-cell" onClick={() => props.sortBy('gdmsProvisional')}>Gene-Disease records provisioned</th>
                         <th className="report-header-cell" onClick={() => props.sortBy('gdmsApproved')}>Gene-Disease records approved</th>
