@@ -193,6 +193,10 @@
         "affiliation": {
             "title": "Affiliation",
             "type": "string"
+        },
+        "provisionalClassifications": {
+            "title": "Provisional Classification",
+            "type": "array"
         }
     },
     "boost_values": {
