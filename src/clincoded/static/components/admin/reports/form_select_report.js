@@ -50,6 +50,7 @@ class AdminReportSelectionForm extends Component {
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
                                 <option value="Interpretations Quarterly for NIH">Interpretations Quarterly for NIH</option>
+                                <option value="Gene-Disease Records Quarterly for NIH">Gene-Disease Records Quarterly for NIH</option>
                             </select>
                         </div>
                     </div>
