@@ -168,7 +168,7 @@ const AdminReports = createReactClass({
         const matched = classifications && classifications.length ? classifications.filter(classification => {
             return classification.affiliation && classification.affiliation === affiliationId;
         }) : null;
-        return affiliatedClassification = matched[0];
+        return affiliatedClassification = matched && matched.length ? matched[0] : null;
     },
 
     /**
