@@ -164,10 +164,11 @@ const AdminReports = createReactClass({
      * @param {string} affiliationId - The affiliation id
      */
     findAffiliatedClassification(classifications, affiliationId) {
-        const affiliatedClassification = classifications && classifications.length ? classifications.filter(classification => {
+        let affiliatedClassification;
+        const matched = classifications && classifications.length ? classifications.filter(classification => {
             return classification.affiliation && classification.affiliation === affiliationId;
         }) : null;
-        return affiliatedClassification;
+        return affiliatedClassification = matched[0];
     },
 
     /**
