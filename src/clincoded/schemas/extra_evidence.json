@@ -45,6 +45,11 @@
                 "linkTo": "article"
             }
         },
+        "evidenceCriteria": {
+            "title": "Criteria",
+            "description": "Criteria associated with the PMID",
+            "type": "array"
+        },
         "evidenceDescription": {
             "title": "Description",
             "description": "Description for external evidence",
@@ -62,8 +67,16 @@
         }
     },
     "columns": {
+        "evidenceCriteria": {
+            "title": "Criteria",
+            "type": "array"
+        },
         "evidenceDescription": {
             "title": "Description",
+            "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
             "type": "string"
         },
         "submitted_by.title": {
