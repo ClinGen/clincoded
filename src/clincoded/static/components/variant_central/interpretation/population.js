@@ -1396,7 +1396,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BA1', 'BS1', 'PM2']} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?
@@ -1418,7 +1418,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 // code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
     let criteriaList1 = ['BA1', 'BS1', 'PM2'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+        hiddenList1 = [false, false, false]; // array indicating hidden status of explanation boxes for above list of criteria codes
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
@@ -1430,12 +1430,8 @@ var criteriaGroup1 = function() {
     );
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, mafCutoffInput, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {mafCutoffInput}
         </div>
     );
 };
