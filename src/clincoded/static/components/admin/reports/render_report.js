@@ -1,9 +1,9 @@
 import React from 'react';
 
 /**
- * Method to render variant interpretations quarterly report for NIH
+ * Method to render variant interpretation stats
  */
-export const RenderInterpretationQuarterlyNIH = (props) => {
+export const RenderInterpretationStats = (props) => {
     return (
         <div className="report-content">
             <table className="table table-striped table-bordered table-report">
@@ -35,9 +35,9 @@ export const RenderInterpretationQuarterlyNIH = (props) => {
 }
 
 /**
- * Method to render gene-disease records quarterly report for NIH
+ * Method to render gene-disease record stats
  */
-export const RenderGeneDiseaseRecordQuarterlyNIH = (props) => {
+export const RenderGeneDiseaseRecordStats = (props) => {
     return (
         <div className="report-content">
             <table className="table table-striped table-bordered table-report">
