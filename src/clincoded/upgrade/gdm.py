@@ -164,3 +164,10 @@ def gdm_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+
+@upgrade_step('gdm', '5', '6')
+def gdm_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1818
+    # Add provisionalClassifications field in search result
+    return

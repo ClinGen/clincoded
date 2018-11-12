@@ -25,3 +25,14 @@ export function sortListByField(list, field) {
     }
     return sortedList;
 }
+
+/**
+ * Sort list by number field value in descending order
+ */
+export function sortListByNumber(list, field) {
+    let sortedList = [];
+    if (list.length) {
+        sortedList = list.sort((x, y) => Number.parseFloat(x[field]) !== Number.parseFloat(y[field]) ? Number.parseFloat(x[field]) > Number.parseFloat(y[field]) ? -1 : 1 : 0);
+    }
+    return sortedList;
+}

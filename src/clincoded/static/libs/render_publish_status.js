@@ -18,7 +18,7 @@ export function renderPublishStatus(snapshots) {
         return snapshot.approvalStatus === 'Approved' && ((snapshot.resource && !snapshot.resource.publishClassification) || !snapshot.publishStatus);
     });
     // If the current approved Classification is more recent than this published Classification, show warning message
-    let publishedWarningMessage = false, publishDate; 
+    let publishedWarningMessage = false; 
     if (approvedSnapshots && approvedSnapshots.length && publishedSnapshots && publishedSnapshots.length) {
         // The 'resource' object was absent in the flatten 'snapshot' object prior to R22 release.
         // So for those snapshots saved into 'associatedClassificationSnapshots' array previously,
@@ -26,7 +26,6 @@ export function renderPublishStatus(snapshots) {
         // Going forward, we still want the 'approvalDate' to 'publishDate' comparison because it's more accurate.
         if (approvedSnapshots[0].resource && approvedSnapshots[0].resource.approvalDate && publishedSnapshots[0].resource && publishedSnapshots[0].resource.publishDate) {
             publishedWarningMessage = moment(approvedSnapshots[0].resource.approvalDate).isAfter(publishedSnapshots[0].resource.publishDate);
-            publishDate = publishedSnapshots[0].resource.publishDate;
         } else {
             // For snapshots saved into 'associatedClassificationSnapshots' array prior to R22 release,
             // we fallback to compare their 'date_created' timestamps - current approved vs. previously approved/published
@@ -34,7 +33,8 @@ export function renderPublishStatus(snapshots) {
         }
     }
 
-    if (publishedSnapshots && publishedSnapshots.length > 0) {
+    if (publishedSnapshots && publishedSnapshots.length) {
+        let publishDate = publishedSnapshots[0].resource && publishedSnapshots[0].resource.publishDate ? publishedSnapshots[0].resource.publishDate : null;
         return (
             <span className="status-wrapper publication">
                 {publishDate ?

@@ -1,0 +1,107 @@
+.admin-page {
+    height: 100vh;
+
+    .admin-page-header {
+        background-color: #337ab7;
+        color: #fff;
+        padding: 0.8em 1.6em;
+
+        h3 {
+            margin: 0;
+        }
+
+        span {
+            font-size: 16px;
+
+            a {
+                color: #fff;
+                font-size: 18px;
+                margin-right: 15px;
+            }
+        }
+    }
+
+    .admin-page-body {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        margin-top: 48.375px;
+
+        .side-navigation {
+            background-color: rgb(244, 245, 247);
+            height: 100vh;
+            min-height: 100vh;
+            order: 1;
+            position: fixed;
+            top: 48.375px;
+            width: 300px;
+            z-index: 1020;
+
+            .side-navigation-item-list {
+                color: rgb(66, 82, 110);
+                display: flex;
+                flex-direction: column;
+                list-style: none;
+                margin: 0;
+                padding-top: 16px;
+                padding-left: 24px;
+                width: 100%;
+
+                .side-navigation-item {
+                    cursor: pointer;
+                    font-size: 16px;
+                    margin-bottom: 16px;
+                }
+            }
+        }
+
+        .content {
+            box-sizing: border-box;
+            clear: both;
+            flex-grow: 3;
+            height: 100vh;
+            margin: 10px 35px 10px 335px;
+            order: 2;
+            position: relative;
+
+            .form-report-criteria-content {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                padding: 15px 18px;
+
+                .form-group {
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    margin-bottom: 0;
+
+                    label {
+                        white-space: nowrap;
+                        margin-right: 12px;
+                    }
+
+                    &>div {
+                        display: flex;
+                        align-items: center;
+                        margin-right: 20px;
+                    }
+                }
+            }
+
+            .report-content {
+                .report-header-cell {
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: #ededed;
+                    }
+                }
+            }
+
+            .report-data-download {
+                margin-bottom: 30px;
+            }
+        }
+    }
+}
