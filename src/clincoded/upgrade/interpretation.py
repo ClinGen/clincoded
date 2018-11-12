@@ -176,3 +176,10 @@ def interpretation_5_6(value, system):
     # Add canonical transcript title property and update schema version
     return
 
+
+@upgrade_step('interpretation', '6', '7')
+def interpretation_6_7(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1818
+    # Add provisional_variant & affiliation fields in search result
+    return
+
