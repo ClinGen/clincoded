@@ -49,8 +49,8 @@ class AdminReportSelectionForm extends Component {
                             <select className="form-control" value={selectedReport} onChange={this.handleChange}>
                                 <option value="none">No Selection</option>
                                 <option disabled="disabled"></option>
-                                <option value="Interpretations Quarterly for NIH">Interpretations Quarterly for NIH</option>
-                                <option value="Gene-Disease Records Quarterly for NIH">Gene-Disease Records Quarterly for NIH</option>
+                                <option value="Interpretation Stats for Expert Panels">Interpretation Stats for Expert Panels</option>
+                                <option value="Gene-Disease Record Stats for Expert Panels">Gene-Disease Record Stats for Expert Panels</option>
                             </select>
                         </div>
                     </div>
