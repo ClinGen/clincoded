@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { RestMixin } from '../../rest';
 import AdminReportSelectionForm from './form_select_report';
-import { RenderInterpretationQuarterlyNIH, RenderGeneDiseaseRecordQuarterlyNIH } from './render_report';
-import { sortListByField } from '../../../libs/helpers/sort';
+import { RenderInterpretationStats, RenderGeneDiseaseRecordStats } from './render_report';
+import { sortListByField, sortListByDate } from '../../../libs/helpers/sort';
 import { exportCSV } from '../../../libs/export_csv';
 
 const AffiliationsList = require('../../affiliation/affiliations.json');
@@ -23,18 +23,6 @@ const AdminReports = createReactClass({
     },
 
     /**
-     * Filter & pre-sort the affiliation list
-     */
-    sortedAffiliationList() {
-        let affiliationsListCopy = [...AffiliationsList];
-        let filteredAffiliationList = AffiliationsList.filter(affiliation => {
-            return affiliation.affiliation_id !== '10024' || affiliation.affiliation_id !== '88888' || affiliation.affiliation_id !== '99999';
-        })
-        let sortedAffiliationList = sortListByField(filteredAffiliationList, 'affiliation_fullname');
-        this.setState({sortedAffiliationList: sortedAffiliationList});
-    },
-
-    /**
      * FIXME - Errors on setState while extends React.Component but not in React.createClass
      */
     onSubmit(value) {
@@ -44,13 +32,13 @@ const AdminReports = createReactClass({
         if (value && value.length) {
             this.setState({selectedReport: value}, () => {
                 const selectedReport = this.state.selectedReport;
-                if (selectedReport && selectedReport === 'Interpretations Quarterly for NIH') {
+                if (selectedReport && selectedReport === 'Interpretation Stats for Expert Panels') {
                     this.setState({affiliatedGDMsList: []}, () => {
-                        this.fetchInterpretationsQuarterlyNIH(sortedAffiliationList);
+                        this.fetchInterpretationStats(sortedAffiliationList);
                     });
-                } else if (selectedReport && selectedReport === 'Gene-Disease Records Quarterly for NIH') {
+                } else if (selectedReport && selectedReport === 'Gene-Disease Record Stats for Expert Panels') {
                     this.setState({affiliatedInterpreationsList: []}, () => {
-                        this.fetchGDMsQuarterlyNIH(sortedAffiliationList);
+                        this.fetchGdmStats(sortedAffiliationList);
                     });
                 } else {
                     return false;
@@ -63,7 +51,7 @@ const AdminReports = createReactClass({
      * Handle fetching interpretation data
      * FIXME - Should convert to an external functional stateless component
      */
-    fetchInterpretationsQuarterlyNIH(sortedAffiliationList) {
+    fetchInterpretationStats(sortedAffiliationList) {
         let affiliatedInterpreationsList = [];
 
         for (let affiliation of sortedAffiliationList) {
@@ -73,7 +61,7 @@ const AdminReports = createReactClass({
                 affiliationName: affiliation.affiliation_fullname
             };
             this.getRestData('/search/?type=interpretation&affiliation=' + affiliation.affiliation_id).then(response => {
-                const interpretations = response['@graph'];
+                const interpretations = response['@graph'].filter(interpretation => interpretation.status !== 'deleted');
                 // Number of interpretations that have a saved evaluation summary but not yet provisioned or approved
                 const interpretationsWithSavedSummary = interpretations.length ? interpretations.filter(interpretation => {
                     return interpretation.provisional_count > 0 && interpretation.provisional_variant[0].classificationStatus === 'In progress';
@@ -106,7 +94,7 @@ const AdminReports = createReactClass({
      * Handle fetching gene-disease record data
      * FIXME - Should convert to an external functional stateless component
      */
-    fetchGDMsQuarterlyNIH(sortedAffiliationList) {
+    fetchGdmStats(sortedAffiliationList) {
         let affiliatedGDMsList = [];
 
         for (let affiliation of sortedAffiliationList) {
@@ -116,36 +104,40 @@ const AdminReports = createReactClass({
                 affiliationName: affiliation.affiliation_fullname
             };
             this.getRestData('/search/?type=gdm&affiliation=' + affiliation.affiliation_id).then(response => {
-                const gdms = response['@graph'];
+                const gdms = response['@graph'].filter(gdm => gdm.status !== 'deleted');
                 // Number of GDMs that have saved classifications but not yet provisioned or approved or published
                 const gdmsWithSavedSummary = gdms.length ? gdms.filter(gdm => {
                     const classifications = gdm.provisionalClassifications;
                     const affiliatedClassification = this.findAffiliatedClassification(classifications, affiliation.affiliation_id);
-                    return affiliatedClassification && affiliatedClassification.classificationStatus === 'In progress' && !affiliatedClassification.publishClassification;
+                    return affiliatedClassification && affiliatedClassification.classificationStatus === 'In progress';
                 }) : [];
-                // Number of GDMs that have been provisioned but not yet approved
+                // Number of GDMs whose classifications have been provisioned but not yet approved
                 const gdmsProvisional = gdms.length ? gdms.filter(gdm => {
                     const classifications = gdm.provisionalClassifications;
                     const affiliatedClassification = this.findAffiliatedClassification(classifications, affiliation.affiliation_id);
-                    return affiliatedClassification && affiliatedClassification.classificationStatus === 'Provisional' && !affiliatedClassification.publishClassification;
+                    return affiliatedClassification && affiliatedClassification.classificationStatus === 'Provisional';
                 }) : [];
-                // Number of GDMs that have been approved but not yet published
+                // Number of GDMs whose classifications have been approved, including ones that had been published
                 const gdmsApproved = gdms.length ? gdms.filter(gdm => {
                     const classifications = gdm.provisionalClassifications;
                     const affiliatedClassification = this.findAffiliatedClassification(classifications, affiliation.affiliation_id);
-                    return affiliatedClassification && affiliatedClassification.classificationStatus === 'Approved' && !affiliatedClassification.publishClassification;
+                    return affiliatedClassification && affiliatedClassification.classificationStatus === 'Approved';
                 }) : [];
-                // Number of GDMs that have been published
+                // Number of GDMs whose classifications have been published
                 const gdmsPublished = gdms.length ? gdms.filter(gdm => {
                     const classifications = gdm.provisionalClassifications;
                     const affiliatedClassification = this.findAffiliatedClassification(classifications, affiliation.affiliation_id);
-                    return affiliatedClassification && affiliatedClassification.publishClassification;
+                    // Get the most recently published snapshot
+                    const snapshots = affiliatedClassification.associatedClassificationSnapshots;
+                    const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
+                    const publishedSnapshot = sortedSnapshots.find(snapshot => snapshot.approvalStatus === 'Approved' && snapshot.publishStatus);
+                    return typeof publishedSnapshot === 'object' && Object.keys(publishedSnapshot).length;
                 }) : [];
                 // Fill in the rest of the affiliation's interpretation data object key/value pairs
                 affiliatedGdmStats['totalGdms'] = gdms.length ? Number(gdms.length) : Number(0);
                 affiliatedGdmStats['gdmsWithSavedSummary'] = gdmsWithSavedSummary.length ? Number(gdmsWithSavedSummary.length) : Number(0);
                 affiliatedGdmStats['gdmsProvisional'] = gdmsProvisional.length ? Number(gdmsProvisional.length) : Number(0);
-                affiliatedGdmStats['gdmsApproved'] = gdmsApproved.length ? Number(gdmsApproved.length) : Number(0);
+                affiliatedGdmStats['gdmsApproved'] = gdmsApproved.length ? Number(gdmsApproved.length) - Number(gdmsPublished.length) : Number(0);
                 affiliatedGdmStats['gdmsPublished'] = gdmsPublished.length ? Number(gdmsPublished.length) : Number(0);
                 affiliatedGDMsList.push(affiliatedGdmStats);
                 return Promise.resolve(affiliatedGDMsList);
@@ -164,11 +156,10 @@ const AdminReports = createReactClass({
      * @param {string} affiliationId - The affiliation id
      */
     findAffiliatedClassification(classifications, affiliationId) {
-        let affiliatedClassification;
-        const matched = classifications && classifications.length ? classifications.filter(classification => {
+        let affiliatedClassification = classifications && classifications.length ? classifications.find(classification => {
             return classification.affiliation && classification.affiliation === affiliationId;
         }) : null;
-        return affiliatedClassification = matched && matched.length ? matched[0] : null;
+        return affiliatedClassification;
     },
 
     /**
@@ -260,7 +251,7 @@ const AdminReports = createReactClass({
                 </div>
                 {affiliatedInterpreationsList.length ?
                     <div>
-                        <RenderInterpretationQuarterlyNIH
+                        <RenderInterpretationStats
                             affiliatedInterpreationsList={affiliatedInterpreationsList}
                             sortBy={this.sortBy}
                         />
@@ -277,7 +268,7 @@ const AdminReports = createReactClass({
                     : null}
                 {affiliatedGDMsList.length ?
                     <div>
-                        <RenderGeneDiseaseRecordQuarterlyNIH
+                        <RenderGeneDiseaseRecordStats
                             affiliatedGDMsList={affiliatedGDMsList}
                             sortBy={this.sortBy}
                         />
