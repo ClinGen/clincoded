@@ -235,6 +235,10 @@ var CreateGeneDisease = createReactClass({
             <div className="container">
                 <h1>{this.props.context.title}</h1>
                 <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-create-gene-disease">
+                    <p className="alert alert-warning note-gene-tracking-system">
+                        <span><i className="icon icon-exclamation-triangle"></i> Before proceeding with curation, make sure all relevant precuration has been
+                            performed and catalogued into the <a href="http://clingen.sirs.unc.edu" target="_blank">Gene Tracking System</a></span>
+                    </p>
                     <Panel panelClassName="panel-create-gene-disease">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
