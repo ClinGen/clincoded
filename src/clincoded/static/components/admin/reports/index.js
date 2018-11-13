@@ -128,7 +128,7 @@ const AdminReports = createReactClass({
                     const classifications = gdm.provisionalClassifications;
                     const affiliatedClassification = this.findAffiliatedClassification(classifications, affiliation.affiliation_id);
                     // Get the most recently published snapshot
-                    const snapshots = affiliatedClassification.associatedClassificationSnapshots;
+                    const snapshots = affiliatedClassification && affiliatedClassification.associatedClassificationSnapshots ? affiliatedClassification.associatedClassificationSnapshots : null;
                     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
                     const publishedSnapshot = sortedSnapshots.find(snapshot => snapshot.approvalStatus === 'Approved' && snapshot.publishStatus);
                     return typeof publishedSnapshot === 'object' && Object.keys(publishedSnapshot).length;
