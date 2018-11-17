@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "gene": {
             "title": "HGNC Symbol",
@@ -193,6 +193,10 @@
         "affiliation": {
             "title": "Affiliation",
             "type": "string"
+        },
+        "provisionalClassifications": {
+            "title": "Provisional Classification",
+            "type": "array"
         }
     },
     "boost_values": {
