@@ -51,7 +51,7 @@ var InterpretationList = createReactClass({
     */
 
     filterInterpretations() {
-        let filters = '?type=interpretation&provisional_count=1&affiliation=10015';
+        let filters = '?type=interpretation&provisional_count=1&affiliation=10002';
         this.getRestData('/search/' + filters).then(data => {
             let vciInterpURLs = [];
             // go through VCI interpretation results and get their data
@@ -60,8 +60,7 @@ var InterpretationList = createReactClass({
                 this.getRestDatas(vciInterpURLs).then(vciInterpResults => {
                     let filteredInterpretations = vciInterpResults.filter(interpretation => {
                         let provisional = interpretation.provisional_variant[0];
-                        return provisional && provisional.approvedClassification && provisional.classificationStatus === 'Approved'
-                            && interpretation.status !== 'deleted' && provisional.approvalDate && moment(provisional.approvalDate).isAfter('2018-09-20T10:00:00.000Z');
+                        return provisional && provisional.approvedClassification && provisional.classificationStatus === 'Approved' && interpretation.status !== 'deleted';
                     });
                     console.log('filteredInterpretations === ' + JSON.stringify(filteredInterpretations));
                 });
