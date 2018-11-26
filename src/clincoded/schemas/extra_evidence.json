@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "variant": {
             "title": "Variant",
@@ -47,8 +47,13 @@
         },
         "evidenceCriteria": {
             "title": "Criteria",
-            "description": "Criteria associated with the PMID",
-            "type": "array"
+            "description": "One or more criteria associated with the PMID",
+            "type": "array",
+            "items": {
+                "title": "Criterion code",
+                "description": "Criterion code",
+                "type": "string"
+            }
         },
         "evidenceDescription": {
             "title": "Description",
