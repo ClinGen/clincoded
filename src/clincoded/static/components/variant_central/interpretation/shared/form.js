@@ -457,17 +457,20 @@ export function renderEvalFormSection(criteriaList, disableEvalForm) {
         <div className="evaluation-form-section-wrapper">
             {criteriaList.map((criteria, i) => {
                 return (
-                    <div className="panel panel-info evalation-form-item" key={i}>
-                        <div className="panel-heading">
-                            <strong className="criteria-definition">{criteria}</strong>: <span dangerouslySetInnerHTML={ { __html: evidenceCodes[criteria].definitionLong } }></span>
-                            {evidenceCodes[criteria].diseaseDependent ? <span className="label label-warning">Disease-specific</span> : null}
-                        </div>
-                        <div className="panel-body">
-                            <div className="evaluation-form-input clearfix">
-                                <div className="col-md-3">{evalFormValueDropdown.call(this, criteria, disableEvalForm)}</div>
-                                <div className="col-md-9">{evalFormExplanationDefaultInput.call(this, criteria, disableEvalForm)}</div>
+                    <div key={i}>
+                        <div className="panel panel-info evalation-form-item">
+                            <div className="panel-heading">
+                                <strong className="criteria-definition">{criteria}</strong>: <span dangerouslySetInnerHTML={ { __html: evidenceCodes[criteria].definitionLong } }></span>
+                                {evidenceCodes[criteria].diseaseDependent ? <span className="label label-warning">Disease-specific</span> : null}
+                            </div>
+                            <div className="panel-body">
+                                <div className="evaluation-form-input clearfix">
+                                    <div className="col-md-3">{evalFormValueDropdown.call(this, criteria, disableEvalForm)}</div>
+                                    <div className="col-md-9">{evalFormExplanationDefaultInput.call(this, criteria, disableEvalForm)}</div>
+                                </div>
                             </div>
                         </div>
+                        {i < criteriaList.length - 1 ? <div className="eval-form-or-divider"><span>- OR -</span></div> : null}
                     </div>
                 );
             })}
@@ -526,7 +529,8 @@ function evalFormValueDropdown(criteria, disableEvalForm) {
     return (
         <Input type="select" ref={criteria + "-status"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
             error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
-            labelClassName="control-label" wrapperClassName="col-xs-12" groupClassName="form-group" inputDisabled={disableEvalForm}>
+            labelClassName="control-label" wrapperClassName="col-xs-12 eval-form-criteria-dropdown" groupClassName="form-group"
+            inputDisabled={disableEvalForm}>
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
@@ -573,7 +577,7 @@ function evalFormExplanationDefaultInput(criteria, disableEvalForm) {
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
         <Input type="textarea" ref={criteria + "-explanation"} rows="2" label="Explanation:"
-            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group"
+            labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10 eval-form-criteria-explanation" groupClassName="form-group"
             handleChange={this.handleFormChange.bind(null, criteria + '-explanation')} inputDisabled={disableEvalForm} />
     );
 }
