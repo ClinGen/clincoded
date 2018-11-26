@@ -27,7 +27,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         affiliation: PropTypes.object, // user's affiliation data object
-        criteriaList: PropTypes.criteriaList // criteria code(s) pertinent to the category/subcategory
+        criteriaList: PropTypes.array // criteria code(s) pertinent to the category/subcategory
     },
 
     contextTypes: {
