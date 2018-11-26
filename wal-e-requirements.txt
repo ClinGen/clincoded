@@ -18,7 +18,7 @@ python-dateutil==2.4.0
 python-keystoneclient==1.0.0
 python-swiftclient==2.3.1
 pytz==2014.10
-requests==2.5.1
+requests==2.20.0
 simplejson==3.6.5
 six==1.9.0
 stevedore==1.2.0
