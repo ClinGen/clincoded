@@ -991,7 +991,8 @@ function criteriaMissense1() {
         criteriaList2 = ['BP1', 'PP2']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, true)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            <div className="clear criteria-evaluation-divider"></div>
             {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
         </div>
     );
@@ -1014,7 +1015,8 @@ function criteriaMissense2() {
         criteriaList2 = ['PS1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, true)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            <div className="clear criteria-evaluation-divider"></div>
             {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
         </div>
     );
