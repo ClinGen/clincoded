@@ -206,6 +206,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     {(this.state.data && this.state.interpretation) ?
                         <div className="row">
                             <div className="col-sm-12">
+                                <p className="alert alert-warning">ClinGen has determined that the following rules should not be applied in any context.</p>
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup8} criteria={['BP6', 'PP5']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
                                     formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']}

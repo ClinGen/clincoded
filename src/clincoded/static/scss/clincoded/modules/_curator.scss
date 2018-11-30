@@ -3641,36 +3641,6 @@ table.login-users-interpretations {
     }
 }
 
- /* Styles for hovering tool tip upon mouseover disabled criteria */
-.reputable-source .evaluation {
-    .eval-form-criteria-dropdown {
-        position: relative;
-
-        &:after {
-            content: "ClinGen has determined that this rule should not be applied in any context.";
-            background-color: #000;
-            background-color: hsla(0, 0%, 20%, 0.9);
-            color: #fff;
-            text-align: left;
-            border-radius: 4px;
-            padding: 8px 11px;
-            position: absolute;
-            visibility: hidden;
-            width: 232px;
-            font-size: 14px;
-            font-family: "Helvetica Neue", "Lato";
-            font-weight: normal;
-            z-index: 999;
-            top: -76px;
-            left: 15px;
-        }
-
-        &:hover:after {
-            visibility: visible;
-        }
-    }
-}
-
 /* Styles for hovering tool tip upon mouseover variant title "i" icon */
 .variant-title-explanation,
 .interpretation-status-explanation {
