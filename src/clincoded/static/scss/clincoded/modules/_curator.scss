@@ -3642,8 +3642,8 @@ table.login-users-interpretations {
 }
 
  /* Styles for hovering tool tip upon mouseover disabled criteria */
- .reputable-source .evaluation {
-    .col-xs-9 {
+.reputable-source .evaluation {
+    .eval-form-criteria-dropdown {
         position: relative;
 
         &:after {
