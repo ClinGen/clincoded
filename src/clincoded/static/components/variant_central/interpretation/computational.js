@@ -838,7 +838,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="other-variants-in-codon" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PP3', 'BP4', 'BP1', 'PP2']} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -878,7 +878,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="null-variant-analysis" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Null variant analysis)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PVS1']} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -908,7 +908,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="molecular-consequence-silent-intron" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Silent & Intron)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP7']} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -967,7 +967,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="molecular-consequence-inframe-indel" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Molecular Consequence: Inframe indel)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP3', 'PM4']} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -988,23 +988,11 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
  */
 function criteriaMissense1() {
     let criteriaList1 = ['BP4', 'PP3'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [true, false], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList2 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
-        hiddenList2 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+        criteriaList2 = ['BP1', 'PP2']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
-                true
-            )}
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, true)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
         </div>
     );
 }
@@ -1034,23 +1022,11 @@ function criteriaMissense1Change(ref, e) {
  */
 function criteriaMissense2() {
     let criteriaList1 = ['PM5'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false], // array indicating hidden status of explanation boxes for above list of criteria codes
-        criteriaList2 = ['PS1'], // array of criteria code handled subgroup of this section
-        hiddenList2 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
+        criteriaList2 = ['PS1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
-                true
-            )}
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList2),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList2),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList2, hiddenList2, null, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, true)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
         </div>
     );
 }
@@ -1068,16 +1044,10 @@ function criteriaMissense2Update(nextProps) {
  * Code for rendering of this group of interpretation forms
  */
 function criteriaLof1() {
-    let criteriaList1 = ['PVS1'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['PVS1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
         </div>
     );
 }
@@ -1095,16 +1065,10 @@ function criteriaLof1Update(nextProps) {
  * Code for rendering of this group of interpretation forms
  */
 function criteriaSilentIntron1() {
-    let criteriaList1 = ['BP7'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BP7']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
         </div>
     );
 }
@@ -1122,16 +1086,10 @@ function criteriaSilentIntron1Update(nextProps) {
  * Code for rendering of this group of interpretation forms
  */
 function criteriaIndel1() {
-    let criteriaList1 = ['BP3', 'PM4'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BP3', 'PM4']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, null, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
         </div>
     );
 }
