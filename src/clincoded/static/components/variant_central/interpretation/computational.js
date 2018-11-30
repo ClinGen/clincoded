@@ -126,7 +126,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         loading_clinvarEsearch: PropTypes.bool,
         affiliation: PropTypes.object,
         selectedSubtab: PropTypes.string,
-        selectedCriteria: PropTypes.string
+        selectedCriteria: PropTypes.string,
+        getSelectedSubTab: PropTypes.func
     },
 
     getInitialState: function() {
@@ -445,10 +446,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     // set selectedSubtab to whichever tab the user switches to, and update the address accordingly
     handleSubtabSelect: function (subtab) {
         if (subtab == 'missense' || validTabs.indexOf(subtab) == -1) {
-            this.setState({selectedSubtab: 'missense'});
+            this.setState({selectedSubtab: 'missense'}, () => this.props.getSelectedSubTab(this.state.selectedSubtab));
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', null));
         } else {
-            this.setState({selectedSubtab: subtab});
+            this.setState({selectedSubtab: subtab}, () => this.props.getSelectedSubTab(this.state.selectedSubtab));
             window.history.replaceState(window.state, '', editQueryValue(window.location.href, 'subtab', subtab));
         }
         // Remove the criteria param whenever the subtab is changed

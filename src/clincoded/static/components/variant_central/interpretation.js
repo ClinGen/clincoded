@@ -32,6 +32,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         href_url: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
         getSelectedTab: PropTypes.func,
+        getSelectedSubTab: PropTypes.func,
         ext_pageData: PropTypes.object,
         ext_myVariantInfo: PropTypes.object,
         ext_ensemblVariation: PropTypes.object,
@@ -227,7 +228,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             affiliation={this.props.affiliation}
                             selectedSubtab={this.state.selectedSubtab}
-                            selectedCriteria={this.state.selectedCriteria} />
+                            selectedCriteria={this.state.selectedCriteria}
+                            getSelectedSubTab={this.props.getSelectedSubTab} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'experimental' ?
