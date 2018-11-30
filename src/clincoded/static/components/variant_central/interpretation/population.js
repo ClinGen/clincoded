@@ -1417,8 +1417,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 // code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList1 = ['BA1', 'BS1', 'PM2'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, false, false]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BA1', 'BS1', 'PM2']; // array of criteria code handled subgroup of this section
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
@@ -1451,8 +1450,6 @@ var criteriaGroup1Update = function(nextProps) {
 };
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
-    // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
