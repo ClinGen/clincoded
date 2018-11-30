@@ -562,7 +562,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                 <div className="row">
                                     <div className="col-sm-12">
                                         <CurationInterpretationForm renderedFormContent={criteriaMissense1}
-                                            evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag} formChangeHandler={criteriaMissense1Change}
+                                            evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag}
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
@@ -810,7 +810,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PP3', 'BP4', 'BP1', 'PP2']} />
                         </Panel></PanelGroup>
 
                         <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content"
@@ -838,7 +838,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="other-variants-in-codon" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Other Variants in Same Codon)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PP3', 'BP4', 'BP1', 'PP2']} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PM5', 'PS1']} />
                         </Panel></PanelGroup>
                     </div>
                     : null}
@@ -921,7 +921,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     <div className="col-sm-12">
                                         <CurationInterpretationForm renderedFormContent={criteriaIndel1} criteria={['BP3', 'PM4']}
                                             evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
-                                            formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']} formChangeHandler={criteriaIndel1Change}
+                                            formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                             affiliation={affiliation} session={session} />
                                     </div>
@@ -1004,17 +1004,6 @@ function criteriaMissense1() {
  */
 function criteriaMissense1Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['PP3', 'BP4', 'BP1', 'PP2'], null);
-}
-
-/**
- * Code for handling logic within the form
- * @param {string} ref 
- * @param {array} e 
- */
-function criteriaMissense1Change(ref, e) {
-    // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.call(this, ref, ['BP4', 'PP3']);
-    vciFormHelper.shareExplanation.call(this, ref, ['BP1', 'PP2']);
 }
 
 /**
@@ -1103,12 +1092,3 @@ function criteriaIndel1Update(nextProps) {
     vciFormHelper.updateEvalForm.call(this, nextProps, ['BP3', 'PM4'], null);
 }
 
-/**
- * Code for handling logic within the form
- * @param {string} ref 
- * @param {array} e 
- */
-function criteriaIndel1Change(ref, e) {
-    // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.call(this, ref, ['BP3', 'PM4']);
-}
