@@ -47,7 +47,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             criteriaInput: 'none', // state to store one or more selected criteria
             editCriteriaInput: 'none', // state to store one or more edited criteria
             variant: this.props.variant, // parent variant object
-            interpretation: this.props.interpretation ? this.props.interpretation : null // parent interpretation object
+            interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
+            criteriaList: this.props.criteriaList ? this.props.criteriaList : []
         };
     },
 
@@ -59,6 +60,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         // Update interpretation object when received
         if (nextProps.interpretation) {
             this.setState({interpretation: nextProps.interpretation});
+        }
+        // Update criteria list specific to the PMID
+        if (nextProps.criteriaList) {
+            this.setState({criteriaList: nextProps.criteriaList});
         }
     },
 
@@ -89,7 +94,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 category: this.props.category,
                 subcategory: this.props.subcategory,
                 articles: [this.state.tempEvidence.pmid],
-                evidenceCriteria: this.refs['criteria-selection'].getValue(),
+                evidenceCriteria: this.state.criteriaInput,
                 evidenceDescription: this.refs['description'].getValue()
             };
 
@@ -161,7 +166,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             category: this.props.category,
             subcategory: this.props.subcategory,
             articles: [this.refs['edit-pmid'].getValue()],
-            evidenceCriteria: this.refs['edit-criteria-selection'].getValue(),
+            evidenceCriteria: this.state.editCriteriaInput,
             evidenceDescription: this.refs['edit-description'].getValue()
         };
 
@@ -235,11 +240,12 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
         let affiliation = this.props.affiliation, session = this.props.session;
+        let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
         // for rendering the evidence in tabular format
         return (
             <tr key={extra_evidence.uuid}>
                 <td className="col-md-4"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
-                <td className="col-md-1"><p>{extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria.length ? extra_evidence.evidenceCriteria.join(', ') : '--'}</p></td>
+                <td className="col-md-1"><p>{criteriaInput}</p></td>
                 <td className="col-md-3"><p className="word-break">{extra_evidence.evidenceDescription}</p></td>
                 <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{extra_evidence.submitted_by.title}</td>
                 <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
@@ -263,17 +269,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
      * Method to handle criteria selection change
      */
     handleCriteriaChange(ref, e) {
-        let options = e.target.options;
-        let criteriaArray = [];
-        for (let option of options) {
-            if (option.selected) {
-                criteriaArray.push(option.value);
-            }
-        }
         if (ref === 'criteria-selection') {
-            this.setState({criteriaInput: criteriaArray});
+            this.setState({criteriaInput: this.refs[ref].getValue()});
         } else if (ref === 'edit-criteria-selection') {
-            this.setState({editCriteriaInput: criteriaArray});
+            this.setState({editCriteriaInput: this.refs[ref].getValue()});
         }
     },
 
@@ -286,24 +285,38 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         }
     },
 
+    shouldDisableSaveButton(action) {
+        let disabled = true;
+        if (action === 'add') {
+            if ((this.state.descriptionInput && this.state.descriptionInput.length) || this.state.criteriaInput !== 'none') {
+                disabled = false;
+            }
+        } else if (action === 'edit') {
+            if ((this.state.editDescriptionInput && this.state.editDescriptionInput.length) || this.state.editCriteriaInput !== 'none') {
+                disabled = false;
+            }
+        }
+        return disabled;
+    },
+
     renderInterpretationExtraEvidenceEdit: function(extra_evidence) {
-        const criteriaList = this.props.criteriaList.values();
+        const criteriaList = this.state.criteriaList;
+        let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria.length ? extra_evidence.evidenceCriteria : this.state.criteriaInput;
 
         return (
             <tr key={extra_evidence.uuid}>
-                <td colSpan="5">
+                <td colSpan="6">
                     <PmidSummary article={extra_evidence.articles[0]} className="alert alert-info" pmidLinkout />
                     <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
                         <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
                         <Input type="text" ref="edit-pmid" value={extra_evidence.articles[0].pmid} inputDisabled={true} groupClassName="hidden" />
                         <div className="pmid-evidence-form clearfix">
                             <div className="col-xs-6 col-md-4 pmid-evidence-form-item criteria-selection">
-                                <Input type="select" ref="edit-criteria-selection" label="Criteria:" handleChange={this.handleCriteriaChange}
-                                    defaultValue={extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria.length ? extra_evidence.evidenceCriteria[0] : 'none'}
-                                    value={extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria.length ? extra_evidence.evidenceCriteria[0] : 'none'}
+                                <Input type="select" ref="edit-criteria-selection" label="Criteria:"
+                                    defaultValue={criteriaInput} value={criteriaInput} handleChange={this.handleCriteriaChange}
                                     error={this.getFormError("edit-criteria-selection")} clearError={this.clrFormErrors.bind(null, "edit-criteria-selection")}
-                                    labelClassName="col-xs-6 col-md-4 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-8" groupClassName="form-group" multiple>
-                                    <option value="none">Select one or more criteria</option>
+                                    labelClassName="col-xs-6 col-md-4 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-8" groupClassName="form-group">
+                                    <option value="none">Select criteria code</option>
                                     <option disabled="disabled"></option>
                                     {criteriaList.map((item, i) => {
                                         return <option key={i} value={item}>{item}</option>;
@@ -318,7 +331,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         <div className="clearfix">
                             <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
                             <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                submitBusy={this.state.editBusy} inputDisabled={!(this.state.editDescriptionInput && this.state.editDescriptionInput.length > 0)} />
+                                submitBusy={this.state.editBusy} inputDisabled={this.shouldDisableSaveButton('edit')} />
                             {this.state.updateMsg ?
                                 <div className="submit-info pull-right">{this.state.updateMsg}</div>
                                 : null}
@@ -349,7 +362,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             '@type': ['evidenceList'],
             'evidenceList': relevantEvidenceList
         */};
-        const criteriaList = this.props.criteriaList.values();
+        const criteriaList = this.state.criteriaList;
+        const criteriaInput = this.state.criteriaInput;
 
         return (
             <div className="panel panel-info">
@@ -371,17 +385,17 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         <tbody>
                             {!this.props.viewOnly ?
                                 <tr>
-                                    <td colSpan="5">
+                                    <td colSpan="6">
                                         {this.state.tempEvidence ?
                                             <span>
                                                 <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
                                                 <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                                                     <div className="pmid-evidence-form clearfix">
                                                         <div className="col-xs-6 col-md-4 pmid-evidence-form-item criteria-selection">
-                                                            <Input type="select" ref="criteria-selection" defaultValue="none" label="Criteria:" handleChange={this.handleCriteriaChange}
+                                                            <Input type="select" ref="criteria-selection" defaultValue={criteriaInput} label="Criteria:" handleChange={this.handleCriteriaChange}
                                                                 error={this.getFormError("criteria-selection")} clearError={this.clrFormErrors.bind(null, "criteria-selection")}
-                                                                labelClassName="col-xs-6 col-md-4 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-8" groupClassName="form-group" multiple>
-                                                                <option value="none">Select one or more criteria</option>
+                                                                labelClassName="col-xs-6 col-md-3 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-9" groupClassName="form-group">
+                                                                <option value="none">Select criteria code</option>
                                                                 <option disabled="disabled"></option>
                                                                 {criteriaList.map((item, i) => {
                                                                     return <option key={i} value={item}>{item}</option>;
@@ -398,7 +412,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                             buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
                                                         <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
                                                         <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                            submitBusy={this.state.submitBusy} inputDisabled={!(this.state.descriptionInput && this.state.descriptionInput.length > 0)} />
+                                                            submitBusy={this.state.submitBusy} inputDisabled={this.shouldDisableSaveButton('add')} />
                                                         {this.state.updateMsg ?
                                                             <div className="submit-info pull-right">{this.state.updateMsg}</div>
                                                             : null}
