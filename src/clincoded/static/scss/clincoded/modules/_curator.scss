@@ -3657,3 +3657,11 @@ table.login-users-interpretations {
 .variant-panel .variant-title-explanation {
     font-size: 100%;
 }
+
+.pmid-evidence-form {
+    .pmid-evidence-form-item.criteria-selection {
+        label {
+            text-align: left;
+        }
+    }
+}
