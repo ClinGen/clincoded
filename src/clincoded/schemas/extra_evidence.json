@@ -47,13 +47,8 @@
         },
         "evidenceCriteria": {
             "title": "Criteria",
-            "description": "One or more criteria associated with the PMID",
-            "type": "array",
-            "items": {
-                "title": "Criterion code",
-                "description": "Criterion code",
-                "type": "string"
-            }
+            "description": "the criteria associated with the PMID",
+            "type": "string"
         },
         "evidenceDescription": {
             "title": "Description",
@@ -74,7 +69,7 @@
     "columns": {
         "evidenceCriteria": {
             "title": "Criteria",
-            "type": "array"
+            "type": "string"
         },
         "evidenceDescription": {
             "title": "Description",
