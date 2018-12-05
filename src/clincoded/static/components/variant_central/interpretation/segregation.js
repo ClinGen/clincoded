@@ -68,6 +68,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
         return (
             <div className="variant-interpretation segregation">
+                {this.state.interpretation ?
+                    <p className="alert alert-warning">Users should not enter unique or sensitive information that is likely to identify an individual.
+                        Users should not publish data found in this interface without permission from the individual(s) who entered the data. For publication
+                        of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.</p>
+                    : null }
                 <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content"
                     panelClassName="tab-segegration-panel-observed-in-healthy" open>
                     {(this.state.data && this.state.interpretation) ?
