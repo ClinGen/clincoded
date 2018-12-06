@@ -10335,5 +10335,107 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "gcheung@stanford.edu",
+        "first_name": "Gloria",
+        "last_name": "Cheung",
+        "uuid": "add95449-476e-443f-9d01-4bbd7766eeed",
+        "groups": [
+            "admin"
+        ],
+        "affiliation": [
+            "88888",
+            "99999"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "gloria.cheung@stanford.edu",
+        "first_name": "Gloria",
+        "last_name": "Cheung",
+        "uuid": "687833aa-48c9-4529-9cc9-0abaf437ca0c",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "markmand@stanford.edu",
+        "first_name": "Mark",
+        "last_name": "Mandell",
+        "uuid": "efbea3d3-06e2-423d-a1b6-807456ed5fa4",
+        "groups": [
+            "admin"
+        ],
+        "affiliation": [
+            "88888",
+            "99999"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "mark.mandell@stanford.edu",
+        "first_name": "Mark",
+        "last_name": "Mandell",
+        "uuid": "d374a5dd-5862-47da-a701-e951baf8b30d",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "edolfo@stanford.edu",
+        "first_name": "Edolfo",
+        "last_name": "Garza-Licudine",
+        "uuid": "0168728a-81e8-4aa5-bf28-2c52ba66b911",
+        "groups": [
+            "admin"
+        ],
+        "affiliation": [
+            "88888",
+            "99999"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "edolfo.garza-licudine@stanford.edu",
+        "first_name": "Edolfo",
+        "last_name": "Garza-Licudine",
+        "uuid": "b7e568a6-c250-472a-b866-ed9f8de21197",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
