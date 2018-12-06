@@ -235,7 +235,8 @@ module.exports.external_url_map = {
     'gnomAD': '//gnomad.broadinstitute.org/variant/',
     'gnomADHome': 'http://gnomad.broadinstitute.org/',
     'gnomADRegion': 'http://gnomad.broadinstitute.org/region/',
-    'PAGE': 'https://popgen.uchicago.edu/dev-integrated/api/variant/PAGE-broad-filtered/'
+    'PAGE': 'https://popgen.uchicago.edu/dev-integrated/api/variant/PAGE-broad-filtered/',
+    'CIViC': 'https://www.civicdb.org/links/allele_registry/'
 };
 
 

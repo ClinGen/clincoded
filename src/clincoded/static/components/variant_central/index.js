@@ -467,6 +467,11 @@ var VariantCurationHub = createReactClass({
         this.setState({selectedTab: selectedTab});
     },
 
+    // Method to update the selected subtab state
+    getSelectedSubTab(selectedSubtab) {
+        this.setState({selectedSubtab: selectedSubtab});
+    },
+
     // Method to update the selected subtab state and update the url
     updateSelectedCriteria(selectedTab, selectedSubtab, selectedCriteria) {
         this.setState({
@@ -525,6 +530,7 @@ var VariantCurationHub = createReactClass({
                             affiliation={affiliation} />
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
+                            getSelectedSubTab={this.getSelectedSubTab}
                             ext_myGeneInfo={my_gene_info}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}

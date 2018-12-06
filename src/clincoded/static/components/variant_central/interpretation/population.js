@@ -1396,7 +1396,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     <extraEvidence.ExtraEvidenceTable category="population" subcategory="population" session={session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Population)</span>}
                         variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} />
+                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BA1', 'BS1', 'PM2']} />
                 </Panel></PanelGroup>
 
                 {this.state.interpretation ?
@@ -1417,25 +1417,21 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 // code for rendering of this group of interpretation forms
 var criteriaGroup1 = function() {
-    let criteriaList1 = ['BA1', 'BS1', 'PM2'], // array of criteria code handled subgroup of this section
-        hiddenList1 = [false, true, true]; // array indicating hidden status of explanation boxes for above list of criteria codes
+    let criteriaList1 = ['BA1', 'BS1', 'PM2']; // array of criteria code handled subgroup of this section
     let mafCutoffInput = (
         <span>
             <Input type="number" ref="maf-cutoff" label="MAF cutoff:" minVal={0} maxVal={100} maxLength="2" handleChange={this.handleFormChange}
                 value={this.state.evidenceData && this.state.evidenceData.mafCutoff ? this.state.evidenceData.mafCutoff : "5"} inputDisabled={true}
-                labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-3 input-right" groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
-            <span className="col-xs-5 after-input">%</span>
+                labelClassName="col-xs-1 control-label maf-cutoff-input-label" wrapperClassName="col-xs-1 input-right maf-cutoff-input"
+                groupClassName="form-group" onBlur={mafCutoffBlur.bind(this)} />
+            <span className="col-xs-1 after-input">%</span>
             <div className="clear"></div>
         </span>
     );
     return (
         <div>
-            {vciFormHelper.evalFormSectionWrapper.call(this,
-                vciFormHelper.evalFormNoteSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormDropdownSectionWrapper.call(this, criteriaList1),
-                vciFormHelper.evalFormExplanationSectionWrapper.call(this, criteriaList1, hiddenList1, mafCutoffInput, null),
-                false
-            )}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {mafCutoffInput}
         </div>
     );
 };
@@ -1454,8 +1450,6 @@ var criteriaGroup1Update = function(nextProps) {
 };
 // code for handling logic within the form
 var criteriaGroup1Change = function(ref, e) {
-    // Both explanation boxes for both criteria of each group must be the same
-    vciFormHelper.shareExplanation.call(this, ref, ['BA1', 'PM2', 'BS1']);
     // if the MAF cutoff field is changed, update the populationObj payload with the updated value
     if (ref === 'maf-cutoff') {
         let tempEvidenceData = this.state.evidenceData;
