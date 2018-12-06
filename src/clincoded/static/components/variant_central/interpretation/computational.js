@@ -244,7 +244,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
     // function to compare current external data with external data saved with a previous interpretation
     compareExternalDatas: function(newData, savedEvals) {
         for (var i in savedEvals) {
-            if (['PP3', 'BP4', 'BP1', 'PP2'].indexOf(savedEvals[i].criteria) > -1) {
+            if (['BP1', 'PP2', 'PP3', 'BP4'].indexOf(savedEvals[i].criteria) > -1) {
                 var tempCompare = this.findDiffKeyValues(newData, savedEvals[i].computational.computationalData);
                 this.setState({computationObjDiff: tempCompare[0], computationObjDiffFlag: tempCompare[1]});
                 break;
@@ -565,7 +565,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                         <CurationInterpretationForm renderedFormContent={criteriaMissense1}
                                             evidenceData={this.state.computationObj} evidenceDataUpdated={computationObjDiffFlag}
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
-                                            criteria={['PP3', 'BP4', 'BP1', 'PP2']} criteriaCrossCheck={[['PP3', 'BP4'], ['BP1', 'PP2']]}
+                                            criteria={['BP1', 'PP2', 'PP3', 'BP4']} criteriaCrossCheck={[['BP1', 'PP2'], ['PP3', 'BP4']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                             affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalNote} />
                                     </div>
@@ -811,7 +811,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <extraEvidence.ExtraEvidenceTable category="variant-type" subcategory="functional-conservation-splicing-predictors" session={this.props.session}
                                 href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Functional, Conservation, and Splicing Predictors)</span>}
                                 variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PP3', 'BP4', 'BP1', 'PP2']} />
+                                viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP1', 'PP2', 'PP3', 'BP4']} />
                         </Panel></PanelGroup>
 
                         <PanelGroup accordion><Panel title="Other Variants in Same Codon" panelBodyClassName="panel-wide-content"
@@ -988,8 +988,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
  * Code for rendering of this group of interpretation forms
  */
 function criteriaMissense1() {
-    let criteriaList1 = ['BP4', 'PP3'], // array of criteria code handled subgroup of this section
-        criteriaList2 = ['BP1', 'PP2']; // array of criteria code handled subgroup of this section
+    let criteriaList1 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
+        criteriaList2 = ['PP3', 'BP4']; // array of criteria code handled subgroup of this section
     return (
         <div>
             {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
@@ -1005,7 +1005,7 @@ function criteriaMissense1() {
  * @param {object} nextProps 
  */
 function criteriaMissense1Update(nextProps) {
-    vciFormHelper.updateEvalForm.call(this, nextProps, ['PP3', 'BP4', 'BP1', 'PP2'], null);
+    vciFormHelper.updateEvalForm.call(this, nextProps, ['BP1', 'PP2', 'PP3', 'BP4'], null);
 }
 
 /**
