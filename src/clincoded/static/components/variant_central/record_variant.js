@@ -30,9 +30,6 @@ class CurationRecordVariant extends Component {
                             {carId ?
                                 <dd>ClinGen Allele Registry ID:&nbsp;<a href={'http://reg.genome.network/allele/' + carId + '.html'} target="_blank" title={'GlinGen Allele Registry page for ' + carId + ' in a new window'}>{carId}</a></dd>
                                 : null}
-                            {carId ?
-                                <dd>CIViC:&nbsp;<a href={external_url_map['CIViC'] + carId} target="_blank" title={'CIViC for ' + carId + ' in a new window'}>{carId}</a></dd>
-                                : null}
                             {dbSNPId ?
                                 <dd>dbSNP ID:&nbsp;<a href={'https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=' + dbSNPId.replace('rs', '')} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a></dd>
                                 : null}
