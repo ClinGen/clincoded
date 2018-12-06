@@ -244,5 +244,10 @@
     {
         "affiliation_id": "10032",
         "affiliation_fullname": "Stanford Center for Inherited Cardiovascular Disease"
+    },
+    {
+        "affiliation_id": "10033",
+        "affiliation_fullname": "Germline/Somatic Variant Subcommittee",
+        "publish_approval": true
     }
 ]
