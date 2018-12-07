@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import { Title } from './title';
-import { CurationRecordVariant } from './record_variant';
+import CurationRecordVariant from './record_variant';
 import { CurationRecordGeneDisease } from './record_gene_disease';
 import { CurationRecordCurator } from './record_curator';
 

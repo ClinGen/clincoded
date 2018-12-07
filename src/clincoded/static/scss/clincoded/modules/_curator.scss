@@ -1365,6 +1365,54 @@
         margin-bottom: 20px;
         border-bottom: 1px solid #ddd;
     }
+
+    .criteria-evaluation-divider {
+        margin: 20px 0;
+        border-bottom: 1px solid #bce8f1;
+    }
+
+    .evaluation-form-section-wrapper {
+        .evalation-form-item {
+            .panel-heading {
+                .label {
+                    position: relative;
+                    margin-left: 12px;
+                    top: -1px;
+                }
+            }
+        }
+        .eval-form-criteria-dropdown {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .eval-form-criteria-explanation {
+            padding-right: 0;
+        }
+
+        .eval-form-or-divider {
+            font-weight: 600;
+            margin: 0 auto;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    }
+
+    .maf-cutoff-input-label {
+        text-align: left;
+        white-space: nowrap;
+        padding-left: 0;
+    }
+
+    .maf-cutoff-input {
+        padding-left: 0;
+        padding-right: 8px;
+        width: 6%;
+
+        .form-error {
+            display: none;
+        }
+    }
 }
 
 .panel-data {
@@ -3593,36 +3641,6 @@ table.login-users-interpretations {
     }
 }
 
- /* Styles for hovering tool tip upon mouseover disabled criteria */
- .reputable-source .evaluation {
-    .col-xs-9 {
-        position: relative;
-
-        &:after {
-            content: "ClinGen has determined that this rule should not be applied in any context.";
-            background-color: #000;
-            background-color: hsla(0, 0%, 20%, 0.9);
-            color: #fff;
-            text-align: left;
-            border-radius: 4px;
-            padding: 8px 11px;
-            position: absolute;
-            visibility: hidden;
-            width: 232px;
-            font-size: 14px;
-            font-family: "Helvetica Neue", "Lato";
-            font-weight: normal;
-            z-index: 999;
-            top: -76px;
-            left: 15px;
-        }
-
-        &:hover:after {
-            visibility: visible;
-        }
-    }
-}
-
 /* Styles for hovering tool tip upon mouseover variant title "i" icon */
 .variant-title-explanation,
 .interpretation-status-explanation {
@@ -3638,4 +3656,12 @@ table.login-users-interpretations {
 
 .variant-panel .variant-title-explanation {
     font-size: 100%;
+}
+
+.pmid-evidence-form {
+    .pmid-evidence-form-item.criteria-selection {
+        label {
+            text-align: left;
+        }
+    }
 }

@@ -452,6 +452,32 @@ export function evalFormSectionWrapper(noteContent, dropdownContent, explanation
     );
 }
 
+export function renderEvalFormSection(criteriaList, disableEvalForm) {
+    return (
+        <div className="evaluation-form-section-wrapper">
+            {criteriaList.map((criteria, i) => {
+                return (
+                    <div key={i}>
+                        <div className="panel panel-info evalation-form-item">
+                            <div className="panel-heading">
+                                <strong className="criteria-definition">{criteria}</strong>: <span dangerouslySetInnerHTML={ { __html: evidenceCodes[criteria].definitionLong } }></span>
+                                {evidenceCodes[criteria].diseaseDependent ? <span className="label label-warning">Disease-specific</span> : null}
+                            </div>
+                            <div className="panel-body">
+                                <div className="evaluation-form-input clearfix">
+                                    <div className="col-md-3">{evalFormValueDropdown.call(this, criteria, disableEvalForm)}</div>
+                                    <div className="col-md-9">{evalFormExplanationDefaultInput.call(this, criteria, disableEvalForm)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {i < criteriaList.length - 1 ? <div className="eval-form-or-divider"><span>- OR -</span></div> : null}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
 // wrapper for rendering the note section of eval form group. criteriaList should be an array of criteria codes being handled in the section.
 // description and disease-dependency are ascertained from evidence_codes.json
 export function evalFormNoteSectionWrapper(criteriaList) {
@@ -501,9 +527,10 @@ function evalFormValueDropdown(criteria, disableEvalForm) {
     // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
-        <Input type="select" ref={criteria + "-status"} label={criteria + ":"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
+        <Input type="select" ref={criteria + "-status"} defaultValue="not-evaluated" handleChange={this.handleDropdownChange}
             error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
-            labelClassName="col-xs-3 control-label" wrapperClassName="col-xs-9" groupClassName="form-group" inputDisabled={disableEvalForm}>
+            labelClassName="control-label" wrapperClassName="col-xs-12 eval-form-criteria-dropdown" groupClassName="form-group"
+            inputDisabled={disableEvalForm}>
             <option value="not-evaluated">Not Evaluated</option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
@@ -527,12 +554,12 @@ function evalFormValueDropdown(criteria, disableEvalForm) {
  * @param {array} criteriaList - The list of criteria to be evaluated (e.g. ['BP6', 'PP5'])
  * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
  */
-export function evalFormExplanationSectionWrapper(criteriaList, hiddenList, customContentBefore, customContentAfter, disableEvalForm) {
+export function evalFormExplanationSectionWrapper(criteriaList, customContentBefore, customContentAfter, disableEvalForm) {
     return (
         <div>
             {customContentBefore ? customContentBefore : null}
             {criteriaList.map((criteria, i) => {
-                return (<span key={i}>{evalFormExplanationDefaultInput.call(this, criteria, hiddenList[i], disableEvalForm)}</span>);
+                return (<span key={i}>{evalFormExplanationDefaultInput.call(this, criteria, disableEvalForm)}</span>);
             })}
             {customContentAfter ? customContentAfter : null}
         </div>
@@ -545,13 +572,13 @@ export function evalFormExplanationSectionWrapper(criteriaList, hiddenList, cust
  * @param {boolean} hidden - The flag to hide the form element in UI
  * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
  */
-function evalFormExplanationDefaultInput(criteria, hidden, disableEvalForm) {
+function evalFormExplanationDefaultInput(criteria, disableEvalForm) {
     // ADD FOLLOWING LINE TO <INPUT> BELOW FOR DISEASE DEPENDENCY RESTRICTION
     // inputDisabled={evidenceCodes[criteria].diseaseDependent && !this.state.diseaseAssociated}
     return (
-        <Input type="textarea" ref={criteria + "-explanation"} rows="3" label="Explanation:"
-            labelClassName="col-xs-4 control-label" wrapperClassName="col-xs-8" groupClassName={hidden ? "hidden" : "form-group"}
-            handleChange={this.handleFormChange} inputDisabled={disableEvalForm} />
+        <Input type="textarea" ref={criteria + "-explanation"} rows="2" label="Explanation:"
+            labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10 eval-form-criteria-explanation" groupClassName="form-group"
+            handleChange={this.handleFormChange.bind(null, criteria + '-explanation')} inputDisabled={disableEvalForm} />
     );
 }
 
