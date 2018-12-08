@@ -101,6 +101,21 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
     },
 
     /**
+     * Method to handle user's response (Agree/Disagree) to PHI Disclaimer modal (presented when user attempts to start a new interpretation)
+     * @param {object} e - The submitted event object
+     * @param {string} buttonSelected - String value of the button/response selected by the user
+     */
+    handlePHIDisclaimerResponse: function(e, buttonSelected) {
+        this.child.closeModal();
+
+        if (buttonSelected === 'Agree') {
+            this.handleInterpretationEvent(e);
+        } else {
+            e.preventDefault(); e.stopPropagation();
+        }
+    },
+
+    /**
      * Update the 'diseaseObj' state used to save data upon form submission
      */
     updateDiseaseObj(diseaseObj) {
@@ -143,9 +158,17 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                         <h2><span>Evidence View</span></h2>
                         <div className="btn-group">
                             {!hasExistingInterpretation ?
-                                <button className="btn btn-primary pull-right" onClick={this.handleInterpretationEvent}>
-                                    Interpretation <i className="icon icon-plus-circle"></i>
-                                </button>
+                                <ModalComponent modalTitle="PHI Disclaimer" modalClass="modal-warning" modalWrapperClass="phi-disclaimer-modal" bootstrapBtnClass="btn btn-primary pull-right"
+                                    actuatorClass="" actuatorTitle={<span>Interpretation <i className="icon icon-plus-circle"></i></span>} onRef={ref => (this.child = ref)}>
+                                    <div className="modal-body">Users should not enter unique or sensitive information that is likely to identify an individual. Users
+                                        should not publish data found in this interface without permission from the individual(s) who entered the data. For publication
+                                        of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.
+                                        <br /><br />Do you agree to these terms?</div>
+                                    <div className="modal-footer">
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={(e) => this.handlePHIDisclaimerResponse(e, 'Agree')} title="Agree" />
+                                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={(e) => this.handlePHIDisclaimerResponse(e, 'Disagree')} title="Disagree" />
+                                    </div>
+                                </ModalComponent>
                                 : null}
                         </div>
                     </div>

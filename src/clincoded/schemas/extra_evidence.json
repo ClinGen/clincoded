@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "variant": {
             "title": "Variant",
@@ -45,6 +45,11 @@
                 "linkTo": "article"
             }
         },
+        "evidenceCriteria": {
+            "title": "Criteria",
+            "description": "the criteria associated with the PMID",
+            "type": "string"
+        },
         "evidenceDescription": {
             "title": "Description",
             "description": "Description for external evidence",
@@ -62,8 +67,16 @@
         }
     },
     "columns": {
+        "evidenceCriteria": {
+            "title": "Criteria",
+            "type": "string"
+        },
         "evidenceDescription": {
             "title": "Description",
+            "type": "string"
+        },
+        "affiliation": {
+            "title": "Affiliation",
             "type": "string"
         },
         "submitted_by.title": {

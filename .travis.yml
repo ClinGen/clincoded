@@ -55,7 +55,7 @@ before_script:
         --pidfile $SC_PIDFILE \
         --tunnel-identifier $TRAVIS_JOB_NUMBER \
         --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
-      while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do 
+      while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do
         sleep 0.5
       done
     fi
@@ -73,7 +73,8 @@ script:
         --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
         --browser-arg-int idleTimeout 600 \
         --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
-        --browser-arg browser "$BROWSER"
+        --browser-arg browser "$BROWSER" \
+        --browser-arg platform "Linux"
     fi
 after_script:
   - >
