@@ -51,7 +51,7 @@ var InterpretationList = createReactClass({
     */
 
     filterInterpretations() {
-        let filters = '?type=interpretation&provisional_count=1&affiliation=10002';
+        let filters = '?type=interpretation&provisional_count=1&affiliation=10014';
         this.getRestData('/search/' + filters).then(data => {
             let vciInterpURLs = [];
             // go through VCI interpretation results and get their data
