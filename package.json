@@ -4,7 +4,6 @@
   "description": "jquery, domready held back.",
   "scripts": {
     "test": "jest --verbose --no-watchman",
-    "postinstall": "sh postinstall.sh"
   },
   "author": "",
   "license": "MIT",
