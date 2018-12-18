@@ -301,7 +301,7 @@ var VariantCurationHub = createReactClass({
             // Then look into HGVS term for non-SNV type patterns
             if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
                 this.setState({ext_singleNucleotide: false});
-            } else if (variant.variationType && variant.variationType !== 'Deletion' && variant.variationType && variant.variationType !== 'Duplication') {
+            } else if (variant.variationType && variant.variationType !== 'Deletion' && variant.variationType && variant.variationType !== 'Duplication' && variant.variationType && variant.variationType !== 'Insertion') {
                 this.setState({ext_indelVariant: false})
             } else if (genomicHGVS) {
                 ncGenomic = genomicHGVS.substring(genomicHGVS.indexOf(':'));
