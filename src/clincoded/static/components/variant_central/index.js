@@ -55,6 +55,7 @@ var VariantCurationHub = createReactClass({
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
             ext_singleNucleotide: true,
+            ext_indelVariant: true,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarSCV: true,
@@ -283,7 +284,7 @@ var VariantCurationHub = createReactClass({
     },
 
     // Method to parse variant type
-    // Won't show population/predictor data if subject is not single nucleotide variant
+    // Won't show population/predictor data if subject is not single nucleotide variant or indel
     parseVariantType: function(variant) {
         if (variant) {
             // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
@@ -300,6 +301,8 @@ var VariantCurationHub = createReactClass({
             // Then look into HGVS term for non-SNV type patterns
             if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
                 this.setState({ext_singleNucleotide: false});
+            } else if (variant.variationType && variant.variationType !== 'Deletion' && variant.variationType && variant.variationType !== 'Duplication') {
+                this.setState({ext_indelVariant: false})
             } else if (genomicHGVS) {
                 ncGenomic = genomicHGVS.substring(genomicHGVS.indexOf(':'));
                 seqChangeTypes.forEach(type => {
@@ -543,6 +546,7 @@ var VariantCurationHub = createReactClass({
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            ext_indelVariant={this.state.ext_indelVariant}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
