@@ -43,6 +43,7 @@ var VariantCurationHub = createReactClass({
             variantObj: null,
             ext_pageData: null,
             ext_myVariantInfo: null,
+            ext_myVariantInfo_metadata: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
@@ -222,11 +223,18 @@ var VariantCurationHub = createReactClass({
      */
     fetchMyVariantInfo(variant) {
         if (variant) {
+            // read in the myvariant.info metadata 
+            this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfoMetadata']).then(meta_response => {
+                if (meta_response) {
+                    this.setState({ext_myVariantInfo_metadata: meta_response});
+                }
+            });
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
                     this.setState({ext_myVariantInfo: response, loading_myVariantInfo: false});
                     this.parseMyVariantInfo(response);
+
                 }).catch(err => {
                     this.setState({
                         loading_myVariantInfo: false
@@ -534,6 +542,9 @@ var VariantCurationHub = createReactClass({
                             ext_myGeneInfo={my_gene_info}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
+                            ext_exacVersion={this.state.ext_exacVersion}
+                            ext_gnomadVersion={this.state.ext_gnomadVersion}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}

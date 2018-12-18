@@ -35,6 +35,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         getSelectedSubTab: PropTypes.func,
         ext_pageData: PropTypes.object,
         ext_myVariantInfo: PropTypes.object,
+        ext_myVariantInfo_metadata: PropTypes.object,
         ext_ensemblVariation: PropTypes.object,
         ext_ensemblHgvsVEP: PropTypes.array,
         ext_clinvarEutils: PropTypes.object,
@@ -66,6 +67,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_pageData: this.props.ext_pageData,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
+            ext_myVariantInfo_metadata: this.props.ext_myVariantInfo_metadata,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
@@ -102,6 +104,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
+            this.setState({ext_myVariantInfo_metadata: nextProps.ext_myVariantInfo_metadata});
         }
         if (nextProps.ext_ensemblVariation) {
             this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
@@ -206,6 +209,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
