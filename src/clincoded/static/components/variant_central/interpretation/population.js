@@ -121,10 +121,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_ensemblVariation: this.props.loading_ensemblVariation,
-            selectedCriteria: this.props.selectedCriteria,
-            // ??? not needed
-            ext_exacVersion: this.props.exacVersion,
-            ext_gnomadVersion: this.props.gnomadVersion,
+            selectedCriteria: this.props.selectedCriteria
         };
     },
 
@@ -146,8 +143,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseEspData(this.props.ext_myVariantInfo);
             this.calculateHighestMAF();
             this.setState({ext_myVariantInfo_metadata: this.props.ext_myVariantInfo_metadata});
-            this.setState({ext_exacVersion: this.props.ext_exacVersion});
-            this.setState({ext_gnomadVersion: this.props.ext_gnomadVersion});
         }
         
         if (this.props.ext_ensemblHgvsVEP) {
@@ -196,15 +191,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
             });
         }
-        // ???
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
+            ext_myVariantInfo_metadata: nextProps.ext_myVariantInfo_metadata,
             loading_ensemblVariation: nextProps.loading_ensemblVariation,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
-            loading_pageData: nextProps.loading_pageData,
-            ext_myVariantInfo_metadata: nextProps.ext_myVariantInfo_metadata,
-            ext_exacVersion: nextProps.ext_exacVersion,
-            ext_gnomadVersion: nextProps.ext_gnomadVersion
+            loading_pageData: nextProps.loading_pageData
         });
     },
 

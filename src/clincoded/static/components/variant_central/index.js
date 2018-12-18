@@ -234,7 +234,6 @@ var VariantCurationHub = createReactClass({
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {
                     this.setState({ext_myVariantInfo: response, loading_myVariantInfo: false});
                     this.parseMyVariantInfo(response);
-
                 }).catch(err => {
                     this.setState({
                         loading_myVariantInfo: false
@@ -543,8 +542,6 @@ var VariantCurationHub = createReactClass({
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
-                            ext_exacVersion={this.state.ext_exacVersion}
-                            ext_gnomadVersion={this.state.ext_gnomadVersion}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
