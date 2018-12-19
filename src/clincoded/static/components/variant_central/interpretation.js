@@ -44,7 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblGeneId: PropTypes.string,
         ext_geneSynonyms: PropTypes.array,
         ext_singleNucleotide: PropTypes.bool,
-        ext_indelVariant: PropTypes.bool,
+        ext_gnomadExac: PropTypes.bool,
         loading_clinvarEutils: PropTypes.bool,
         loading_clinvarEsearch: PropTypes.bool,
         loading_clinvarSCV: PropTypes.bool,
@@ -76,7 +76,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
-            ext_indelVariant: this.props.ext_indelVariant,
+            ext_gnomadExac: this.props.ext_gnomadExac,
             loading_clinvarEutils: this.props.loading_clinvarEutils,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch,
             loading_clinvarSCV: this.props.loading_clinvarSCV,
@@ -140,7 +140,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
-            ext_indelVariant: nextProps.ext_indelVariant,
+            ext_gnomadExac: nextProps.ext_gnomadExac,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
             loading_pageData: nextProps.loading_pageData,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
@@ -212,7 +212,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
-                            ext_indelVariant={this.state.ext_indelVariant}
+                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
@@ -228,7 +228,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
-                            ext_indelVariant={this.state.ext_indelVariant}
+                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             affiliation={this.props.affiliation}
