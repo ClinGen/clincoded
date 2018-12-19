@@ -1194,7 +1194,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
                             {!singleNucleotide && !indelVariant ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants and indels. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'gnomAD')}</span>
+                                    <span>Data is currently only returned for single nucleotide variants and for some small duplications, insertions, and deletions. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'gnomAD')}</span>
                                 </div>
                                 :
                                 <div>
@@ -1238,7 +1238,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
                             {!singleNucleotide && !indelVariant ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants and indels. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'ExAC')}</span>
+                                    <span>Data is currently only returned for single nucleotide variants and for some small duplications, insertions, and deletions. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'ExAC')}</span>
                                 </div>
                                 :
                                 <div>
