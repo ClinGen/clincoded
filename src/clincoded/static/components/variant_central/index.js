@@ -159,6 +159,7 @@ var VariantCurationHub = createReactClass({
             if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
                 this.fetchPageData(this.state.variantObj);
             }
+            this.fetchMyVariantInfoMetadata();
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -214,6 +215,16 @@ var VariantCurationHub = createReactClass({
         }
     },
 
+    // Retrieve MyVariantInfo metadata for the src_version
+    fetchMyVariantInfoMetadata() {
+        // read in the myvariant.info metadata 
+        this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfoMetadata']).then(meta_response => {
+            if (meta_response) {
+                this.setState({ext_myVariantInfo_metadata: meta_response});
+            }
+        });
+    },
+
     /**
      * Retrieve data from MyVariantInfo
      * REVEL data is no longer queried from Bustamante lab
@@ -223,12 +234,6 @@ var VariantCurationHub = createReactClass({
      */
     fetchMyVariantInfo(variant) {
         if (variant) {
-            // read in the myvariant.info metadata 
-            this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfoMetadata']).then(meta_response => {
-                if (meta_response) {
-                    this.setState({ext_myVariantInfo_metadata: meta_response});
-                }
-            });
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37');
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfo'] + hgvs_notation).then(response => {

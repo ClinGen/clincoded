@@ -142,7 +142,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.parseGnomadData(this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata);
             this.parseEspData(this.props.ext_myVariantInfo);
             this.calculateHighestMAF();
-            this.setState({ext_myVariantInfo_metadata: this.props.ext_myVariantInfo_metadata});
         }
         
         if (this.props.ext_ensemblHgvsVEP) {
@@ -193,7 +192,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
-            ext_myVariantInfo_metadata: nextProps.ext_myVariantInfo_metadata,
             loading_ensemblVariation: nextProps.loading_ensemblVariation,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_pageData: nextProps.loading_pageData
@@ -965,14 +963,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // Set the source version
             if (metadata && metadata.src_version) {
                 version = (datasetName === 'ExAC') ? metadata.src_version.exac : (datasetName === 'gnomAD') ? metadata.src_version.gnomad : '';
-                if (version) {
-                    version = "Version: " + version;
-                }
             }
         }
 
         return (
-            <h3 className="panel-title">{datasetName}{datasetVariant} {version}
+            <h3 className="panel-title">{datasetName}{datasetVariant} {version ? <span>Version: {version}</span> : null}
                 <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                 {datasetLink}
             </h3>
