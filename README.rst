@@ -1,6 +1,6 @@
-========================
+=======================================
 ClinGen Curation Database and Interface
-========================
+=======================================
 DEV
 ***
 .. image:: https://travis-ci.org/ClinGen/clincoded.svg?branch=dev
@@ -16,23 +16,73 @@ This software creates an object store and user interface for the collection of m
 Baseline Dependendencies
 =========================
 
+You will need a system with at least 2GB of available memory - ``npm install`` will need
+about 1GB to succeed, while elasticsearch will need at least 2GB for the JVM.
+
 Mac OSX
 --------
-Step 1a: Verify that homebrew is working properly::
+If you do not have homebrew installed, you can get it at `brew.sh
+<https://brew.sh/>`_  You may also want to have it globally available; if you run
+bash, you can append ``export PATH=/usr/local/opt/postgresql@9.4/bin:$PATH`` to your ``~/.bash_profile`` file.
+
+#. Verify that homebrew is working properly::
 
     $ brew doctor
 
 
-Step 2a: Install or update dependencies::
+#.  Install or update dependencies
 
-    $ brew install libevent libmagic libxml2 libxslt elasticsearch openssl postgresql graphviz
-    $ brew install freetype libjpeg libtiff littlecms webp chromedriver # Required by Pillow
+    ::
 
-Note: For Mac < 10.9, the system python doesn't work. You should install Python with Homebrew::
+    $ brew install libevent libmagic libxml2 libxslt openssl graphviz
+    $ brew install freetype libjpeg libtiff littlecms webp
+    $ brew tap homebrew/cask
+    $ brew cask install chromedriver # required for pillow
 
-    $ brew install python3
 
-Install Node v6 (v6 is the current LTS version https://github.com/nodejs/LTS#lts-schedule ):
+    Note: For Mac < 10.9, the system python doesn't work. You should install Python 3.4.x; the
+    preferred method is to use pyEnv, covered further down the list
+
+#. Install postgres
+   ::
+
+    $ brew install postgres@9.4
+
+#. Install elasticsearch
+
+   - First, download `v1.7.4 <https://www.elastic.co/downloads/past-releases/elasticsearch-1-7-4>`_.
+   - Next, unpack the tarball into a directory of your choice; suggested location is ``/opt/elasticsearch``.
+   - Finally, create symbolic links to the install location
+
+   ::
+
+        $ ln -s [install location]/bin/elasticsearch /usr/local/bin/elasticsearch
+        $ ln -s [install location]/bin/elasticsearch.in.sh /usr/local/bin/elasticsearch.in.sh
+
+
+#. Install pyEnv and python 3.4
+
+   ::
+
+   $ brew install pyenv
+   $ pyenv install 3.4.3
+
+
+   If pyEnv fails on installation, this may help: https://github.com/pyenv/pyenv/wiki/Common-build-problems
+
+   To make the newly-installed version of python the system default
+
+   ::
+
+        $ pyenv global 3.4.3
+
+   And to confirm the results
+
+   ::
+
+        $ python —version
+
+#. Install Node v6 (v6 is the current LTS version https://github.com/nodejs/LTS#lts-schedule ):
 
   * check node version::
 
@@ -63,7 +113,7 @@ You can also use the Makefile to set up for a clean buildout::
 
     $ make clean
 
-Then proceed to step 1b.
+Then proceed to the section on installing python, node, and ruby depdendencies.
 
 Linux
 -----
@@ -112,7 +162,7 @@ Indexing will then proceed in a background thread similar to the production setu
 Browse to the interface at http://localhost:6543/.
 
 Run the tests locally  (tests also run on travis-ci with every push)
-========================
+====================================================================
 
 To run specific tests locally::
 
@@ -143,7 +193,7 @@ Or if you need to supply command line arguments::
     $ ./node_modules/.bin/jest
 
 Notes on modifying the local (Postgres) database
-=====================================
+================================================
 
 Note:  The below is generally superceeded by the dev-servers command which creates a temporary PG db, then throws it away.  But this might be useful for some deep debugging.
 
@@ -171,8 +221,8 @@ To dump a postgres database:
 To restore a postgres database:
     pg_restore -d clincoded FILE_NAME (as user clincoded on demo vm)
 
-Notes on manually creation of ElasticSearch mapping
---------------------------------------
+Notes on manual creation of ElasticSearch mapping
+-------------------------------------------------
     $ bin/create-mapping production.ini
 
 Notes on SASS/Compass
@@ -212,7 +262,7 @@ And of course::
 
 
 Notes on SublimeLinter
-=============
+======================
 
 To setup SublimeLinter with Sublime Text 3, first install the linters::
 
@@ -224,7 +274,25 @@ After first setting up `Package Control`_ (follow install and usage instructions
 
     * sublimelinter
     * sublimelinter-flake8
-    * SublimeLinter-contrib-eslint (`instructions <https://github.com/roadhump/SublimeLinter-eslint#plugin-installation>`_)
-    * babel (`instructions <https://github.com/babel/babel-sublime#setting-as-the-default-syntax>`_)
+    * SublimeLinter-contrib-eslint (`eslint instructions <https://github.com/roadhump/SublimeLinter-eslint#plugin-installation>`_)
+    * babel (`babel instructions <https://github.com/babel/babel-sublime#setting-as-the-default-syntax>`_)
 
 .. _`Package Control`: https://sublime.wbond.net/
+
+Troubleshooting the install
+===========================
+- The ``[parts, bin]`` directories are generated by the bootstrapping process.  It's safe to delete this directory and re-run the bootstrapper if you run into errors during the buildout step
+- **OSX**: nvm may fail with xcode related issues.  If so, this may help: https://github.com/nodejs/node-gyp/issues/569
+- Postgres server not responding?  Start the Postgres server if it hasn't yet started.  You can check by running:
+
+  ::
+
+        $ psql --username=postgres --host=/tmp/clincoded/pgdata/
+
+  This should put you into the Potgres CLI.  If it's not running, you can start it by running:
+
+  ::
+
+        $ pg_ctl -D /tmp/clincoded/pgdata -l psql_log.log start
+
+  Note that the ``-l`` option indicates a log file - suggested location is ``/var/log/postgres``
