@@ -1,19 +1,22 @@
 'use strict';
+// Third-party libs
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { RestMixin } from '../../rest';
-import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
-import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
-import { CompleteSection } from './shared/complete_section';
-import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
+// import { Form, FormMixin, Input } from 'libs/bootstrap/form';
+import { PanelGroup, Panel } from 'libs/bootstrap/panel';
 
-const vciFormHelper = require('./shared/form');
+// Internal libs
+import { RestMixin } from 'components/rest';
+import { CompleteSection } from 'components/variant_central/interpretation/shared/complete_section';
+import { scrollElementIntoView } from 'libs/helpers/scroll_into_view';
+
+const vciFormHelper = require('components/variant_central/interpretation/shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-const evaluation_section_mapping = require('./mapping/evaluation_section.json');
-const extraEvidence = require('./shared/extra_evidence');
+const evaluation_section_mapping = require('components/variant_central/interpretation/mapping/evaluation_section.json');
+import { ExtraEvidenceTable } from 'components/variant_central/interpretation/segregation/addEvidence';
 
 // Display the curator data of the curation data
 var CurationInterpretationSegregation = module.exports.CurationInterpretationSegregation = createReactClass({
@@ -64,7 +67,173 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     render() {
+        let that = this;
+        function getVariantUUID() {
+            if (that.state && that.state.data) {
+                return that.state.data['@id'];
+            }
+            return null;
+        }
         const affiliation = this.props.affiliation, session = this.props.session;
+        let panel_data = [
+            {
+                title: 'Observed in healthy adult(s)',
+                key: 1,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-observed-in-healthy',
+                criteria: ['BS2'],
+                curation: {
+                    content: criteriaGroup1,
+                    formDataUpdater: criteriaGroup1Update
+                },
+                extraEvidence: {
+                    subcategory: 'observed-in-healthy',
+                    tableName: <span>Curated Evidence (Observed in healthy adult(s))</span>
+                }
+            },
+            {
+                title: 'Case-control',
+                key: 2,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-case-control',
+                criteria: ['PS4'],
+                curation: {
+                    content: criteriaGroup2,
+                    formDataUpdater: criteriaGroup2Update
+                },
+                extraEvidence: {
+                    subcategory: 'case-control',
+                    tableName: <span>Curated Literature Evidence (Case-control)</span>
+                }
+            },
+            {
+                title: 'Segregation data',
+                key: 3,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-segregation-data',
+                criteria: ['BS4', 'PP1'],
+                curation: {
+                    content: criteriaGroup3,
+                    formDataUpdater: criteriaGroup3Update
+                },
+                extraEvidence: {
+                    subcategory: 'segregation-data',
+                    tableName: <span>Curated Literature Evidence (Segregation data)</span>
+                }
+            },
+            {
+                title: <h4><i>de novo</i> occurrence</h4>,
+                key: 4,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-de-novo',
+                criteria: ['PM6', 'PS2'],
+                curation: {
+                    content: criteriaGroup4,
+                    formDataUpdater: criteriaGroup4Update
+                },
+                extraEvidence: {
+                    subcategory: 'de-novo',
+                    tableName: <span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>
+                }
+            },
+            {
+                title: <h4>Allele data (<i>cis/trans</i>)</h4>,
+                key: 5,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-allele-data',
+                criteria: ['BP2', 'PM3'],
+                curation: {
+                    content: criteriaGroup5,
+                    formDataUpdater: criteriaGroup5Update
+                },
+                extraEvidence: {
+                    subcategory: 'allele-data',
+                    tableName: <span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>
+                }
+            },
+            {
+                title: 'Alternate mechanism for disease',
+                key: 6,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-alternate-mechanism',
+                criteria: ['BP5'],
+                curation: {
+                    content: criteriaGroup6,
+                    formDataUpdater: criteriaGroup6Update
+                },
+                extraEvidence: {
+                    subcategory: 'alternate-mechanism',
+                    tableName: <span>Curated Literature Evidence (Alternate mechanism for disease)</span>
+                }
+            },
+            {
+                title: 'Specificity of phenotype',
+                key: 7,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-specificity-of-phenotype',
+                criteria: ['PP4'],
+                curation: {
+                    content: criteriaGroup7,
+                    formDataUpdater: criteriaGroup7Update
+                },
+                extraEvidence: {
+                    subcategory: 'specificity-of-phenotype',
+                    tableName: <span>Curated Literature Evidence (Specificity of phenotype)</span>
+                }
+            }
+        ];
+
+        const panels = panel_data.map(panel => {
+            let interpretationForm = null;
+            if (this.state.data && this.state.interpretation) {
+              interpretationForm = <div className="row">
+                  <div className="col-sm-12">
+                    <CurationInterpretationForm
+                        // Specific configutations
+                        renderedFormContent={panel.curation.content}
+                        criteria={panel.criteria}
+                        formDataUpdater={panel.curation.formDataUpdater}
+                        
+                        // Common configurations
+                        evidenceData={null}
+                        evidenceDataUpdated={true}
+                        variantUuid={getVariantUUID()}
+                        interpretation={this.state.interpretation}
+                        updateInterpretationObj={this.props.updateInterpretationObj}
+                        affiliation={this.props.affiliation}
+                        session={this.props.session}
+                    />
+                  </div>
+                </div>
+            }
+            let extraEvidenceForm = <ExtraEvidenceTable 
+                // Specific configurations
+                subcategory={panel.extraEvidence.subcategory}
+                tableName={panel.extraEvidence.tableName}
+                criteriaList={panel.criteria}
+
+                // Common configurations
+                category="case-segregation"
+                session={this.props.session}
+                href_url={this.props.href_url}
+                variant={this.state.data}
+                interpretation={this.state.interpretation}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                viewOnly={this.state.data && !this.state.interpretation}
+                affiliation={this.props.affiliation}
+            />
+            return <PanelGroup accordion key={panel.key}>
+                <Panel
+                    title={panel.title}
+                    panelBodyClassName={panel.bodyClassName}
+                    panelClassName={panel.panelClassName}
+                    open
+                    >
+                        {interpretationForm}
+                        {extraEvidenceForm}
+                </Panel>
+            </PanelGroup>
+        });
 
         return (
             <div className="variant-interpretation segregation">
@@ -73,138 +242,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         Users should not publish data found in this interface without permission from the individual(s) who entered the data. For publication
                         of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.</p>
                     : null }
-                <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-observed-in-healthy" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup1} criteria={['BS2']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="observed-in-healthy" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Observed in healthy adult(s))</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BS2']} />
-                </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-case-control" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['PS4']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="case-control" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Case-control)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PS4']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-segregation-data" open>
-                    {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup3} criteria={['BS4', 'PP1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup3Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segregation-data" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Segregation data)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BS4', 'PP1']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-de-novo" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup4} criteria={['PM6', 'PS2']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="de-novo" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PM6', 'PS2']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-allele-data" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup5} criteria={['BP2', 'PM3']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup5Update} variantUuid={this.props.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="allele-data" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP2', 'PM3']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title="Alternate mechanism for disease" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-alternate-mechanism" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup6} criteria={['BP5']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup6Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="alternate-mechanism" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Alternate mechanism for disease)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP5']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-specificity-of-phenotype" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup7} criteria={['PP4']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup7Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="specificity-of-phenotype" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Specificity of phenotype)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PP4']} />
-                </Panel></PanelGroup>
+                {panels}
 
                 <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source"
                     panelClassName="tab-segegration-panel-reputable-source" open>

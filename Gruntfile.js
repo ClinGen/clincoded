@@ -4,11 +4,14 @@ if (process.env.NODE_ENV == 'production'){
     console.log("\n****** PRODUCTION ENVIRONMENT ******\n");
 }
 
+process.env.NODE_PATH = 'src/clincoded/static/';
+
 //eslint directive to ignore "undefined" global variables 
 /* global __dirname process */
 
 module.exports = function(grunt) {
     var path = require('path');
+    require('time-grunt')(grunt);
 
     function compressPath(p) {
         var src = 'src/clincoded/static/';
@@ -21,6 +24,8 @@ module.exports = function(grunt) {
 
     grunt.config('env', grunt.option('env') || process.env.GRUNT_ENV || 'production');
     var minifyEnabled = grunt.config('minifyEnabled', grunt.config('env') === 'production');
+    minifyEnabled = false;
+    console.log('minifyEnabled: ', minifyEnabled);
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -98,14 +103,27 @@ module.exports = function(grunt) {
                         compressPath: compressPath,
                         uglify: {mangle: process.env.NODE_ENV == 'production'}
                     }]
-                ]
+                ],
+                options: {
+                    watch : true, // use watchify for incremental builds!
+                    // keepAlive : true, // watchify will exit unless task is kept alive
+                    browserifyOptions : {
+                        debug : true // source mapping
+                    },
+                    // insertGlobals: true
+                }
             },
             server: {
                 dest: './src/clincoded/static/build/renderer.js',
                 src: ['./src/clincoded/static/server.js'],
                 options: {
                     builtins: false,
-                    detectGlobals: false
+                    detectGlobals: false,
+                    watch : true, // use watchify for incremental builds!
+                    // keepAlive : true, // watchify will exit unless task is kept alive
+                    browserifyOptions : {
+                        debug : true // source mapping
+                    }
                 },
                 transform: [
                     ['babelify', {sourceMaps: true, babelrc: true}],
@@ -215,6 +233,7 @@ module.exports = function(grunt) {
 
     grunt.registerMultiTask('browserify', function () {
         var browserify = require('browserify');
+        var watchify = require('watchify');
         var _ = grunt.util._;
         var path = require('path');
         var fs = require('fs');
@@ -223,10 +242,11 @@ module.exports = function(grunt) {
         var options = _.extend({
             debug: true,
             cache: {},
-            packageCache: {}
+            packageCache: {},
         }, data.options);
 
         var b = browserify(options);
+        b.plugin(watchify);
         var i;
         var reqs = [];
         (data.src || []).forEach(function (src) {

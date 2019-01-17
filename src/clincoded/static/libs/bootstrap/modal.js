@@ -29,6 +29,9 @@ export default class ModalComponent extends Component {
 
     componentDidMount() {
         this.props.onRef(this);
+        if (this.props.modalOpen === true) {
+            this.openModal();
+        }
     }
 
     componentWillUnmount() {
@@ -52,11 +55,17 @@ export default class ModalComponent extends Component {
     }
 
     render() {
+        const disabled = this.props.disabled ? true : false;
+        const className = this.props.bootstrapBtnClass ? this.props.bootstrapBtnClass + this.props.actuatorClass : "btn btn-default " + this.props.actuatorClass;
         return (
             <div className={this.props.modalWrapperClass}>
                 {this.props.actuatorTitle ?
-                    <a className={this.props.bootstrapBtnClass ? this.props.bootstrapBtnClass + this.props.actuatorClass : "btn btn-default " + this.props.actuatorClass}
-                        onClick={() => this.openModal()}>{this.props.actuatorTitle}</a>
+                    <a  className={className}
+                        onClick={() => this.openModal()}
+                        disabled={disabled}
+                        >
+                        {this.props.actuatorTitle}
+                    </a>
                 : null}
                 <Modal isOpen={this.state.isModalOpen}>
                     {this.props.modalTitle ?
@@ -77,6 +86,7 @@ ModalComponent.propTypes = {
     modalWrapperClass: PropTypes.string, // CSS class for modal DOM wrapper
     bootstrapBtnClass: PropTypes.string, // Bootstrap class for button (e.g. btn-default, btn-primary)
     actuatorClass: PropTypes.string, // CSS class for link/button to invoke modal
+    actuatorDisabled: PropTypes.bool,  // If the link/button is disabled
     actuatorTitle: PropTypes.oneOfType([ // Text for link/button to invoke modal
         PropTypes.object,
         PropTypes.string
@@ -84,7 +94,7 @@ ModalComponent.propTypes = {
     children: PropTypes.node // JSX such as input field(s), dropdown(s), buttons
 };
 
-class Modal extends Component {
+export class Modal extends Component {
     render() {
         if (this.props.isOpen === false) {
             return null;

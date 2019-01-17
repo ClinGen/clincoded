@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import * as curator from '../curator';
+
 import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
-import { renderVariantTitle } from '../../libs/render_variant_title';
+import { renderVariantTitle } from 'libs/render_variant_title';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';

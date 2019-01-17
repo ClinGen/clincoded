@@ -13,8 +13,12 @@ import { AddResourceId } from 'components/add_external_resource';
 var curator = require('components/curator');
 var PmidSummary = curator.PmidSummary;
 var CuratorHistory = require('components/curator_history');
+import { NewEvidenceModalMetadata } from 'components/variant_central/interpretation/segregation/newEvidenceModalMetadata';
+import { EvidenceSheet } from 'components/variant_central/interpretation/segregation/evidenceSheet';
+import { EvidenceTable } from 'components/variant_central/interpretation/segregation/evidenceTable';
 
 // Class to render the extra evidence table in VCI, and handle any interactions with it
+// export default ExtraEvidenceTable = createReactClass({
 var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     mixins: [RestMixin, FormMixin, CuratorHistory],
 
@@ -50,7 +54,12 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             editCriteriaInput: 'none', // state to store one or more edited criteria
             variant: this.props.variant, // parent variant object
             interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
-            criteriaList: this.props.criteriaList ? this.props.criteriaList : []
+            criteriaList: this.props.criteriaList ? this.props.criteriaList : [],
+            evidenceType: null,  // One of PMID, clinical_lab, clinic, research_lab, public_database, registered_curator, other
+            modalOpen: false,  // Modal to input details associated with a given evidence type
+            newEvidence: [],
+            modalMetadata: {},
+            nextModal: false
         };
     },
 
@@ -344,6 +353,68 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         );
     },
 
+    setEvidenceType: function(ref, event) {
+        this.setState({evidenceType: event.target.value});
+    },
+
+    addEvidenceText: function() {
+        let text = 'Click "Add Evidence" to curate and save a piece of evidence.';
+        if (this.state.evidenceType == null) {
+            text = 'Select an evidence source above';
+        }
+        return (
+            <span style={{marginLeft: '5px'}}>{text}</span>
+        )
+    },
+
+    metadataDone(next, metadata) {
+        if (next) {
+            this.setState({
+                modalMetadata: metadata,
+                nextModal: true
+            });
+        } else {
+            this.setState({
+                modalMetadata: null,
+                nextModal: false
+            });
+        }
+    },
+
+    evidenceCollectionDone(finished, newEvidence) {
+        if (!finished) {
+            this.setState({
+                nextModal: false,
+                modalMetadata: null
+            });
+        } else {
+            let metadata = this.state.modalMetadata;  // from previous modal
+            let prevState = this.state.newEvidence;   // any evidence we've collected so far
+            Object.assign(metadata, newEvidence);
+            metadata['_submitted_by'] = `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}`;
+            metadata['_last_edited'] = 'PLACEHOLDER';
+            metadata['relevant_criteria'] = this.state.criteriaList.join(', ');
+            prevState.push(metadata);
+            this.setState({
+                newEvidence: prevState,
+                nextModal: false,
+                modalMetadata: null
+            });
+            
+        }
+    },
+    
+    evidenceSheet() {
+        if (!this.state.nextModal) {
+            return null;
+        } else {
+            return <EvidenceSheet
+                        ready={this.state.nextModal}
+                        evidenceCollectionDone={this.evidenceCollectionDone}>
+                    </EvidenceSheet>
+        }
+    },
+
     render: function() {
         let relevantEvidenceListRaw = [];
         if (this.state.variant && this.state.variant.associatedInterpretations) {
@@ -423,10 +494,32 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                             </span>
                                             :
                                             <span>
-                                                <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
-                                                    buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-
-                                                &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
+                                                <div className="row">
+                                                    <div className="col-md-12">
+                                                        <Input type="select" defaultValue="select-source" handleChange={this.setEvidenceType}>
+                                                            <option value="select-source">Select Source</option>
+                                                            <option disabled="disabled"></option>
+                                                            <option value="PMID">PMID</option>
+                                                            <option value="clinical_lab">Clinical Lab</option>
+                                                            <option value="clinic">Clinic</option>
+                                                            <option value="research_lab">Research Lab</option>
+                                                            <option value="public_database">Public Database</option>
+                                                            <option value="registered_curator">Registered Curator</option>
+                                                            <option value="other">Other</option>
+                                                        </Input>
+                                                    </div>
+                                                    <div className="col-md-12">
+                                                        <div className="inline-button-wrapper">
+                                                            <NewEvidenceModalMetadata
+                                                                evidenceType={this.state.evidenceType}
+                                                                metadataDone={this.metadataDone}
+                                                                nextModal={this.state.nextModal}
+                                                            />
+                                                            {this.evidenceSheet()}
+                                                        </div>
+                                                        {this.addEvidenceText()}
+                                                    </div>
+                                                </div>
                                             </span>
                                         }
                                     </td>
@@ -441,6 +534,13 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                 : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
+                    <EvidenceTable
+                        criteriaList={this.state.criteriaList}
+                        session={this.props.session}
+                        tableData={this.state.newEvidence}
+                        subcategory={this.props.subcategory}
+                    >
+                    </EvidenceTable>
                 </div>
             </div>
         );

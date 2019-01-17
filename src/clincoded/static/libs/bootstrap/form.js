@@ -68,6 +68,11 @@ var FormMixin = module.exports.FormMixin = {
         return this.formValues[ref];
     },
 
+    // Return an object with all form values
+    getAllFormValues: function() {
+        return this.formValues;
+    },
+
     // Retrieves the saved value of the Input with the given 'ref' value, and the Input
     // value must be numeric. If the Input had no entered value at all, the empty string is
     // returned. If the Input had an entered value but it wasn't numeric, null is returned.
@@ -245,14 +250,15 @@ var Input = module.exports.Input = createReactClass({
             PropTypes.number
         ]),
         defaultValue: PropTypes.string, // Default value for <select>
-        required: PropTypes.bool, // T to make this a required field
-        clickHandler: PropTypes.func, // Called to handle button click
-        submitHandler: PropTypes.func, // Called to handle submit button click
-        cancelHandler: PropTypes.func, // Called to handle cancel button click
-        submitBusy: PropTypes.bool, //
+        required: PropTypes.bool,       // T to make this a required field
+        clickHandler: PropTypes.func,   // Called to handle button click
+        submitHandler: PropTypes.func,  // Called to handle submit button click
+        cancelHandler: PropTypes.func,  // Called to handle cancel button click
+        submitBusy: PropTypes.bool,     //
         onBlur: PropTypes.func,
-        minVal: PropTypes.number, // Minimum value for a number formatted input
-        maxVal: PropTypes.number // Maximum value for a number formatted input
+        minVal: PropTypes.number,       // Minimum value for a number formatted input
+        maxVal: PropTypes.number,       // Maximum value for a number formatted input
+        key: PropTypes.string           // Passed to react if this is part of a list of inputs
     },
 
     getInitialState: function() {
@@ -369,7 +375,7 @@ var Input = module.exports.Input = createReactClass({
             case 'text':
             case 'email':
             case 'number':
-                var inputType = this.props.type === 'number' ? 'text' : this.props.type;
+                var inputType = this.props.type === 'number' ? 'number' : this.props.type;
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
@@ -515,7 +521,10 @@ var Input = module.exports.Input = createReactClass({
             default:
                 break;
         }
-
-        return <span>{input}</span>;
+        if (this.props.key) {
+            return <span key={this.props.key}>{input}</span>;
+        } else {
+            return <span>{input}</span>;
+        }
     }
 });
