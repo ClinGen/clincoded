@@ -95,7 +95,7 @@ const evidenceInputs = [{
     },
     {
         cols: [{
-            label: 'Disease associated with proband(s) (HPO)',
+            label: 'Disease associated with proband(s) (HPO) (Check here if unaffected)',
             name: 'is_disease_associated_with_probands',
             kind: 'checkbox',
             width: 12
@@ -163,7 +163,7 @@ const evidenceInputs = [{
             },
             {
                 label: 'Comment',
-                name: 'num_control_with_variant___total_controls___comment',
+                name: 'num_control_with_variant_comment',
                 kind: 'text',
                 width: 8
             }
@@ -179,7 +179,7 @@ const evidenceInputs = [{
             },
             {
                 label: 'Comment',
-                name: 'num_segregations_comments',
+                name: 'num_segregations_comment',
                 kind: 'text',
                 width: 8
             }
@@ -205,13 +205,13 @@ const evidenceInputs = [{
         cols: [
             {
                 label: '# proband de novo occurrences (with unknown or no parental identity confirmation)',
-                name: 'num_proband_de_novo',
+                name: 'num_de_novo_unconfirmed',
                 kind: 'number',
                 width: 4
             },
             {
                 label: 'Comment',
-                name: 'num_proband_de_novo_comment',
+                name: 'num_de_novo_unconfirmed_comment',
                 kind: 'text',
                 width: 8
             },
@@ -220,14 +220,14 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: '# de novo occurrences (with parental identity confirmation)',
-                name: 'num_de_novo',
+                label: '# proband de novo occurrences (with parental identity confirmation)',
+                name: 'num_de_novo_confirmed',
                 kind: 'number',
                 width: 4
             },
             {
                 label: 'Comment',
-                name: 'num_de_novo_comment',
+                name: 'num_de_novo_confirmed_comment',
                 kind: 'text',
                 width: 8
             }
@@ -333,6 +333,14 @@ const sheetToTableMapping = [
         'cols': [{
             key: 'num_unaffected_family_with_variant',
             title: '# Unaffected Variant Carriers'
+        },
+        {
+            key: 'num_control_with_variant',
+            title: '# controls with variant'
+        },
+        {
+            key: 'total_controls',
+            title: '# total controls'
         }]
     },
     {
@@ -342,16 +350,34 @@ const sheetToTableMapping = [
                 title: '# Probands with consistent phenotypes'
             }, {
                 key: 'num_control_with_variant',
-                title: '# Controls with variants'
+                title: '# controls with variants'
+            }, 
+            {
+                key: 'total_controls',
+                title: '# total controls'
             }]
     },
     {
         'subcategory': 'segregation-data',
-        'cols': []
+        'cols': [{
+            key: 'num_segregations',
+            title: '# segregations'
+        },
+        {
+            key: 'num_non_segregations',
+            title: '# non-segregations'
+        }]
     },
     {
         'subcategory': 'de-novo',
-        'cols': []
+        'cols': [{
+            key: 'num_de_novo_unconfirmed',
+            title: '# de-novo, unconfirmed'
+        },
+        {
+            key: 'num_de_novo_confirmed',
+            title: '# de-novo, unconfirmed'
+        }]
     },
     {
         'subcategory': 'allele-data',
@@ -359,11 +385,29 @@ const sheetToTableMapping = [
     },
     {
         'subcategory': 'alternate-mechanism',
-        'cols': []
+        'cols': [{
+            key:'num_probands_with_alt_genetic_cause',
+            title: '# probands with alternate genetic cause'
+        }]
     },
     {
         'subcategory': 'specificity-of-phenotype',
-        'cols': []
+        'cols': [{
+            key: 'num_probands_relevant_phenotype',
+            title: '# probands with relevant phenotype'
+        },
+        {
+            key: 'num_unaffected_family_with_variant',
+            title: '# unaffected family members with variant'
+        },
+        {
+            key: 'num_de_novo_unconfirmed',
+            title: '# de-novo, unconfirmed'
+        },
+        {
+            key: 'num_de_novo_confirmed',
+            title: '# de-novo, unconfirmed'
+        }]
     },
 ]
 
