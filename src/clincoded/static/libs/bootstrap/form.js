@@ -258,7 +258,8 @@ var Input = module.exports.Input = createReactClass({
         onBlur: PropTypes.func,
         minVal: PropTypes.number,       // Minimum value for a number formatted input
         maxVal: PropTypes.number,       // Maximum value for a number formatted input
-        key: PropTypes.string           // Passed to react if this is part of a list of inputs
+        key: PropTypes.string,          // Passed to react if this is part of a list of inputs
+        inputDisabled: PropTypes.bool   // If we should disable the input
     },
 
     getInitialState: function() {

@@ -64,6 +64,11 @@
             "title": "Affiliation",
             "description": "The affiliation this classification is associated with.",
             "type": "string"
+        },
+        "source": {
+            "title": "Sources",
+            "description": "Additional evidence from a variety of sources (Pubmed, Clinical lab, Research lab, Clinic, Public Database, Registered Curator, Other)",
+            "type": "object"
         }
     },
     "columns": {

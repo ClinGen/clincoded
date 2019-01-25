@@ -13,9 +13,9 @@ import { AddResourceId } from 'components/add_external_resource';
 var curator = require('components/curator');
 var PmidSummary = curator.PmidSummary;
 var CuratorHistory = require('components/curator_history');
-import { NewEvidenceModalMetadata } from 'components/variant_central/interpretation/segregation/newEvidenceModalMetadata';
-import { EvidenceSheet } from 'components/variant_central/interpretation/segregation/evidenceSheet';
+
 import { EvidenceTable } from 'components/variant_central/interpretation/segregation/evidenceTable';
+import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
 
 // Class to render the extra evidence table in VCI, and handle any interactions with it
 // export default ExtraEvidenceTable = createReactClass({
@@ -55,11 +55,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             variant: this.props.variant, // parent variant object
             interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
             criteriaList: this.props.criteriaList ? this.props.criteriaList : [],
-            evidenceType: null,  // One of PMID, clinical_lab, clinic, research_lab, public_database, registered_curator, other
-            modalOpen: false,  // Modal to input details associated with a given evidence type
-            newEvidence: [],
-            modalMetadata: {},
-            nextModal: false
+            evidenceType: null  // One of PMID, clinical_lab, clinic, research_lab, public_database, registered_curator, other
         };
     },
 
@@ -208,7 +204,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         let deleteTargetId = evidence['@id'];
         let flatInterpretation = null;
         let freshInterpretation = null;
-
         // since the extra_evidence object is really simple, and the description is the only thing changing,
         // make a new one instead of getting an updated and flattened one
         let extra_evidence = {
@@ -216,6 +211,53 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             category: this.props.category,
             subcategory: this.props.subcategory,
             articles: [evidence.articles[0]['@id']],
+            evidenceCriteria: evidence.evidenceCriteria,
+            evidenceDescription: evidence.evidenceDescription,
+            status: 'deleted'
+        };
+        this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
+            return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
+                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                    // get updated interpretation object, then flatten it
+                    freshInterpretation = interpretation;
+                    flatInterpretation = curator.flatten(freshInterpretation);
+
+                    // remove removed evidence from evidence list
+                    flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
+
+                    // update the interpretation object
+                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    });
+                });
+            }).then(interpretation => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({deleteBusy: false});
+                this.props.updateInterpretationObj();
+            });
+        }).catch(error => {
+            this.setState({deleteBusy: false});
+            console.log(error);
+        });
+    },
+
+    deleteEvidenceFunc: function(evidence) {
+        //TODO: Update evidence object or re-create it so that it passes the update validation.  See the open screenshot for details.
+
+        this.setState({deleteBusy: true});
+
+        let deleteTargetId = evidence['@id'];
+        let flatInterpretation = null;
+        let freshInterpretation = null;
+
+        let extra_evidence = {
+            variant: evidence.variant,
+            category: this.props.category,
+            subcategory: this.props.subcategory,
+            // articles: [evidence.articles[0]['@id']],
+            articles: [],
             evidenceCriteria: evidence.evidenceCriteria,
             evidenceDescription: evidence.evidenceDescription,
             status: 'deleted'
@@ -245,8 +287,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             });
         }).catch(error => {
             this.setState({deleteBusy: false});
-            console.log(error);
+            console.error(error);
         });
+
     },
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
@@ -354,7 +397,11 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     },
 
     setEvidenceType: function(ref, event) {
-        this.setState({evidenceType: event.target.value});
+        if (event.target.value === 'select-source') {
+            this.setState({evidenceType: null});
+        } else {
+            this.setState({evidenceType: event.target.value});
+        }
     },
 
     addEvidenceText: function() {
@@ -367,51 +414,97 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         )
     },
 
-    metadataDone(next, metadata) {
-        if (next) {
-            this.setState({
-                modalMetadata: metadata,
-                nextModal: true
-            });
-        } else {
-            this.setState({
-                modalMetadata: null,
-                nextModal: false
-            });
-        }
-    },
-
-    evidenceCollectionDone(finished, newEvidence) {
+    /**
+     * 
+     * @param {*bool} finished      If we have finished with data collection
+     * @param {*object} evidence    The evidence itself
+     * @param {*bool} isNew         True -> this is a new piece of evidence.  False -> we are editing evidence
+     */
+    evidenceCollectionDone(finished, evidence, isNew) {
         if (!finished) {
-            this.setState({
-                nextModal: false,
-                modalMetadata: null
-            });
+            return;
         } else {
-            let metadata = this.state.modalMetadata;  // from previous modal
-            let prevState = this.state.newEvidence;   // any evidence we've collected so far
-            Object.assign(metadata, newEvidence);
-            metadata['_submitted_by'] = `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}`;
-            metadata['_last_edited'] = 'PLACEHOLDER';
-            metadata['relevant_criteria'] = this.state.criteriaList.join(', ');
-            prevState.push(metadata);
-            this.setState({
-                newEvidence: prevState,
-                nextModal: false,
-                modalMetadata: null
-            });
-            
-        }
-    },
+            this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
+            if (isNew) {
+                evidence['_submitted_by'] = `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}`;
+                evidence['relevant_criteria'] = this.state.criteriaList;
+            }
+
+            let flatInterpretation = null;
+            let freshInterpretation = null;
+
+            this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                // get updated interpretation object, then flatten it
+                freshInterpretation = interpretation;
+                flatInterpretation = curator.flatten(freshInterpretation);
+
+                // create extra_evidence object to be inserted
+                let extra_evidence = {
+                    variant: this.state.interpretation.variant['@id'],
+                    category: this.props.category,
+                    subcategory: this.props.subcategory,
+                    // articles: [this.refs['edit-pmid'].getValue()],
+                    articles: [],
+                    evidenceCriteria: this.state.editCriteriaInput,
+                    // evidenceDescription: this.refs['edit-description'].getValue(),
+                    evidenceDescription: '',
+                    source: isNew ? evidence : evidence.source
+                };
     
-    evidenceSheet() {
-        if (!this.state.nextModal) {
-            return null;
-        } else {
-            return <EvidenceSheet
-                        ready={this.state.nextModal}
-                        evidenceCollectionDone={this.evidenceCollectionDone}>
-                    </EvidenceSheet>
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!extra_evidence.affiliation) {
+                        extra_evidence.affiliation = this.props.affiliation.affiliation_id;
+                    }
+                }
+                if (isNew) {
+                    return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
+                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
+                        if (!flatInterpretation.extra_evidence_list) {
+                            flatInterpretation.extra_evidence_list = [];
+                        }
+                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+        
+                        // update interpretation object
+                        return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
+                            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                                return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                                    return Promise.resolve(data['@graph'][0]);
+                                });
+        
+                            });
+                        });
+        
+                    });
+                } else {
+                    return this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
+                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
+                        if (!flatInterpretation.extra_evidence_list) {
+                            flatInterpretation.extra_evidence_list = [];
+                        }
+                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+        
+                        // update interpretation object
+                        return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
+                            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                                return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                                    return Promise.resolve(data['@graph'][0]);
+                                });
+        
+                            });
+                        });
+        
+                    });
+                }
+            }).then(interpretation => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({submitBusy: false, tempEvidence: null, editCriteriaSelection: 'none', descriptionInput: null});
+                this.props.updateInterpretationObj();
+            }).catch(error => {
+                this.setState({submitBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
+                console.error(error);
+            });
         }
     },
 
@@ -443,18 +536,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
                 <div className="panel-content-wrapper">
                     <table className="table">
-                        {relevantEvidenceList.length > 0 ?
-                            <thead>
-                                <tr>
-                                    <th>Article</th>
-                                    <th>Criteria</th>
-                                    <th>Evidence</th>
-                                    <th>Last edited by</th>
-                                    <th>Last edited</th>
-                                    {!this.state.viewOnly? <th></th> : null}
-                                </tr>
-                            </thead>
-                            : null}
                         <tbody>
                             {!this.props.viewOnly ?
                                 <tr>
@@ -509,14 +590,15 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                         </Input>
                                                     </div>
                                                     <div className="col-md-12">
-                                                        <div className="inline-button-wrapper">
-                                                            <NewEvidenceModalMetadata
-                                                                evidenceType={this.state.evidenceType}
-                                                                metadataDone={this.metadataDone}
-                                                                nextModal={this.state.nextModal}
-                                                            />
-                                                            {this.evidenceSheet()}
-                                                        </div>
+                                                        <EvidenceModalManager
+                                                            data = {null}
+                                                            criteriaList = {this.props.criteriaList}
+                                                            evidenceType = {this.state.evidenceType}
+                                                            subcategory = {this.props.subcategory}
+                                                            evidenceCollectionDone = {this.evidenceCollectionDone}
+                                                            isNew = {true}
+                                                        >
+                                                        </EvidenceModalManager>
                                                         {this.addEvidenceText()}
                                                     </div>
                                                 </div>
@@ -525,20 +607,13 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                     </td>
                                 </tr>
                                 : null}
-                            {relevantEvidenceList.length > 0 ?
-                                relevantEvidenceList.map(evidence => {
-                                    return (this.state.editEvidenceId === evidence['@id']
-                                        ? this.renderInterpretationExtraEvidenceEdit(evidence)
-                                        : this.renderInterpretationExtraEvidence(evidence));
-                                })
-                                : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                         </tbody>
                     </table>
                     <EvidenceTable
-                        criteriaList={this.state.criteriaList}
-                        session={this.props.session}
-                        tableData={this.state.newEvidence}
-                        subcategory={this.props.subcategory}
+                        tableData = {relevantEvidenceList}
+                        subcategory = {this.props.subcategory}
+                        deleteEvidenceFunc = {this.deleteEvidenceFunc}
+                        evidenceCollectionDone = {this.evidenceCollectionDone}
                     >
                     </EvidenceTable>
                 </div>

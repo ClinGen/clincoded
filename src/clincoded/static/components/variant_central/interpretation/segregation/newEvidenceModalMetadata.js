@@ -1,6 +1,7 @@
 // stdlib
 import React from 'react';
 import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
 
 // shared lib
 import { Form, FormMixin, Input } from 'libs/bootstrap/form';
@@ -11,14 +12,18 @@ import { extraEvidence } from 'components/variant_central/interpretation/segrega
  
 let NewEvidenceModalMetadata = createReactClass({
     mixins: [FormMixin],
+    propTypes: {
+        data: PropTypes.object,
+        evidenceType: PropTypes.string,
+        metadataDone: PropTypes.func,
+        isNew: PropTypes.bool
+    },
     getInitialState() {
         return {
-            // Keys are the evidence types.  Names are for internal referencing, descriptions are for human readability.
-            newEvidence: [],
             loadNextModal: false,
-            fields: {}
+            data: this.props.data
         };
-    }, 
+    },
 
     title(evidenceType) {
         if (evidenceType && evidenceType in extraEvidence.typeMapping) {
@@ -38,7 +43,7 @@ let NewEvidenceModalMetadata = createReactClass({
                         id={pair['name']}
                         name={pair['name']}
                         handleChange={this.handleAdditionalEvidenceInputChange}
-                        value={this.state.fields[pair['name']]}
+                        value={this.props.isNew ? '' : this.state.data[pair['name']]}
                         ref={pair['name']}
                         required
                     />
@@ -62,7 +67,8 @@ let NewEvidenceModalMetadata = createReactClass({
 
         this.saveAllFormValues();
         let formValues = this.getAllFormValues();
-        formValues['_kind'] = extraEvidence.typeMapping[this.props.evidenceType]['name'];
+        formValues['_kind_title'] = extraEvidence.typeMapping[this.props.evidenceType]['name'];
+        formValues['_kind_key'] = this.props.evidenceType;
         this.handleModalClose();
         this.resetAllFormValues();
         this.props.metadataDone(true, formValues);
@@ -77,6 +83,22 @@ let NewEvidenceModalMetadata = createReactClass({
         this.child.closeModal();
     },
 
+    actuatorTitle() {
+        if (this.props.isNew) {
+            return 'Add Evidence';
+        }
+        return 'Edit';
+    },
+
+    isActuatorDisabled() {
+        if (!this.props.evidenceType) {
+            return true;
+        } else if (this.props.evidenceType.length == 0) {
+            return true;
+        }
+        return false;
+    },
+
     render() {
         return (
             <div>
@@ -85,8 +107,8 @@ let NewEvidenceModalMetadata = createReactClass({
                         modalClass="modal-default"
                         modalWrapperClass="input-inline add-resource-id-modal"
                         onRef={ref => (this.child = ref)}
-                        disabled={this.props.evidenceType == null}
-                        actuatorTitle='Add Evidence'
+                        actuatorDisabled={this.isActuatorDisabled()}
+                        actuatorTitle={this.actuatorTitle()}
                         actuatorClass="btn btn-default btn-primary"
                     >
                     <div className="form-std">

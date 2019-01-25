@@ -2,12 +2,13 @@
 
 // stdlib
 import React from 'react';
-import PropTypes from 'prop-types';;
+import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 
 // third-party lib
 import ModalComponent from 'libs/bootstrap/modal';
 import { Form, FormMixin, Input } from 'libs/bootstrap/form';
+import _ from 'underscore';
 
 // Internal lib
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
@@ -17,12 +18,20 @@ let EvidenceSheet = createReactClass({
 
     propTypes: {
         evidenceCollectionDone: PropTypes.func,
-        ready: PropTypes.bool
+        ready: PropTypes.bool,
+        data: PropTypes.object,
+        isNew: PropTypes.bool,
+        reset: PropTypes.func,
+        subcategory: PropTypes.string
     },
 
     getInitialState: function() {
+        let data =  {};
+        if (this.props.data) {
+            data = this.props.data;
+        }
         return {
-
+            data: data
         };
     },
 
@@ -31,7 +40,7 @@ let EvidenceSheet = createReactClass({
     },
 
     cancel() {
-        this.props.evidenceCollectionDone(false, null);
+        this.props.sheetDone(null);
         this.handleModalClose();
     },
 
@@ -41,22 +50,66 @@ let EvidenceSheet = createReactClass({
 
         this.saveAllFormValues();
         const formValues = this.getAllFormValues();
+        let allData = null;
+        if (this.props.isNew) {
+            allData = Object.assign(this.props.data, formValues);
+        } else {
+            allData = Object.assign({}, this.props.data);
+            Object.assign(allData, formValues);
+        }
         this.handleModalClose();
-        this.props.evidenceCollectionDone(true, formValues);
+
+        this.props.sheetDone(allData);
+    },
+
+    /**
+     * Given the subcategory, return a list of allowed fields.
+     * This is used to set the field's 'disabled' status.
+     */
+    allowedFields() {
+        let tableObj = _.find(extraEvidence.tableCols(), o => o.subcategory === this.props.subcategory);
+        let fields = tableObj.cols.map(col => col.key);
+        let commentFields = []
+        fields.forEach(field => commentFields.push(`${field}_comment`));  // Allow for any associated comment fields
+        fields = fields.concat(commentFields);
+        fields = fields.concat(extraEvidence.sharedEvidenceInputs);
+        return fields;
     },
 
     inputs() {
+        let jsx = [];
         let i = 0;
-        return extraEvidence.evidenceInputs.map(inpt => 
-            <div key = {i++}>
-                <Input
-                    type = {inpt.kind}
-                    label = {inpt.label}
-                    name = {inpt.name}
-                    ref = {inpt.name}
-                />
-            </div>
-            );
+        let outerStyle = {
+            'display': 'flex',
+            'alignItems': 'flex-end'
+        };
+
+        // Get a list of allowed fields
+        let fields = this.allowedFields();
+
+        extraEvidence.evidenceInputs.forEach(row => {
+            let inner = [];
+            row.cols.forEach(col => {
+                let value = '';
+                if (this.state.data != null && Object.keys(this.state.data).length > 0) {
+                    value = this.state.data[col.name]
+                }
+                let node = <div className={`col-md-${col.width}`} key={i++}>
+                    <Input 
+                        type = {col.kind}
+                        label = {col.label}
+                        name = {col.name}
+                        ref = {col.name}
+                        value = {value}
+                        inputDisabled = {fields.indexOf(col.name) == -1 ? true : false}
+                    />
+                </div>
+                inner.push(node);
+            });
+            let outer = <div className="row" style={outerStyle} key={i++}>{inner}</div>
+            jsx.push(outer);
+        });
+        return jsx;
     },
 
     render() {
@@ -67,6 +120,7 @@ let EvidenceSheet = createReactClass({
             onRef={ref => (this.child = ref)}
             disabled={!this.props.ready}
             modalOpen={this.props.ready}
+            modalWidthPct={90}
         >
         <div className="form-std">
             <div className="modal-body">
