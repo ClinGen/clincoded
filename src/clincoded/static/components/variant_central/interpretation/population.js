@@ -933,7 +933,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render ExAC/gnomAD population table header content
-    renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, singleNucleotide, response, datasetName) {
+    renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, gnomadExac, response, datasetName) {
         let datasetVariant = '';
         let datasetLink;
 
@@ -947,7 +947,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
         }
 
-        if (datasetCheck && !loading_myVariantInfo && singleNucleotide) {
+        if (datasetCheck && !loading_myVariantInfo && gnomadExac) {
             const datasetVariantURLKey = (datasetName === 'ExAC') ? 'EXAC' : (datasetName === 'gnomAD') ? 'gnomAD' : null;
             const datasetURL = 'http:' + external_url_map[datasetVariantURLKey] + dataset._extra.chrom + '-' + dataset._extra.pos + '-' + dataset._extra.ref + '-' + dataset._extra.alt;
             datasetLink = <a className="panel-subtitle pull-right" href={datasetURL} target="_blank">See data in {datasetName}</a>
@@ -1188,7 +1188,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-gnomAD">
                         <div className="panel-heading">
-                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_myVariantInfo, gnomAD, singleNucleotide, this.props.ext_myVariantInfo, 'gnomAD')}
+                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_myVariantInfo, gnomAD, gnomadExac, this.props.ext_myVariantInfo, 'gnomAD')}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
@@ -1232,7 +1232,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading">
-                            {this.renderExacGnomadHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide, this.props.ext_myVariantInfo, 'ExAC')}
+                            {this.renderExacGnomadHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, gnomadExac, this.props.ext_myVariantInfo, 'ExAC')}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
