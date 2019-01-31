@@ -12,9 +12,11 @@ import _ from 'underscore';
 
 // Internal lib
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
+import { external_url_map } from 'components/globals';
+import { RestMixin } from 'components/rest';
 
 let EvidenceSheet = createReactClass({
-    mixins: [FormMixin],
+    mixins: [FormMixin, RestMixin],
 
     propTypes: {
         evidenceCollectionDone: PropTypes.func,
@@ -31,7 +33,8 @@ let EvidenceSheet = createReactClass({
             data = this.props.data;
         }
         return {
-            data: data
+            data: data,
+            hpo: null
         };
     },
 
@@ -58,7 +61,10 @@ let EvidenceSheet = createReactClass({
             Object.assign(allData, formValues);
         }
         this.handleModalClose();
-
+        this.resetAllFormValues();
+        this.setState({
+            data: {}
+        });
         this.props.sheetDone(allData);
     },
 
@@ -94,7 +100,7 @@ let EvidenceSheet = createReactClass({
                 if (this.state.data != null && Object.keys(this.state.data).length > 0) {
                     value = this.state.data[col.name]
                 }
-                let node = <div className={`col-md-${col.width}`} key={i++}>
+                let node = [<div className={`col-md-${col.width}`} key={i++}>
                     <Input 
                         type = {col.kind}
                         label = {col.label}
@@ -103,13 +109,63 @@ let EvidenceSheet = createReactClass({
                         value = {value}
                         inputDisabled = {fields.indexOf(col.name) == -1 ? true : false}
                     />
-                </div>
+                </div>]
+                // if ('lookup' in col) {
+                //     node.push(<div className="col-md-1">
+                //         <Input 
+                //             type = "button"
+                //             inputClassName="btn-default btn-inline-spacer"
+                //             title="Lookup"
+                //             clickHandler={() => this.lookupTerm(col.lookup, col.name)}
+                //             style={{'alignSelf': 'center'}}
+                //         >
+                //         </Input>
+                //         {this.renderLookupResult()}
+                //     </div>);
+                // }
                 inner.push(node);
             });
-            let outer = <div className="row" style={outerStyle} key={i++}>{inner}</div>
+            let outer = <div className="row" style={outerStyle} key={i++}>
+                {inner}
+            </div>
             jsx.push(outer);
         });
         return jsx;
+    },
+
+    renderLookupResult() {
+        if (this.state.hpo == null) {
+            return null;
+        }
+        let node = <div className="row">
+            <p>
+                <strong>{this.state.hpo.label}</strong>
+                {this.state.hpo.description[0]}
+            </p>
+            <a 
+                href={this.state.hpo.iri} 
+                title={"Open HPO term " + this.state.hpo.short_form + " in new tab"}
+                target="_blank"
+            >
+                {this.state.hpo.short_form}
+            </a>
+        </div>
+        return node;
+    },
+
+    lookupTerm(termType, fieldName) {
+        let uri = external_url_map[termType];
+        this.saveAllFormValues();
+        const formValues = this.getAllFormValues();
+        if (termType === 'HPOApi') {
+            uri += formValues[fieldName].replace(':', '_');
+            this.getRestData(uri).then(result => {
+                let term = result['_embedded']['terms'][0];
+                this.setState({
+                    hpo: term
+                });
+            });
+        }
     },
 
     render() {

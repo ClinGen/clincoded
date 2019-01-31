@@ -6,12 +6,16 @@ import PropTypes from 'prop-types';
 // shared lib
 import { Form, FormMixin, Input } from 'libs/bootstrap/form';
 import ModalComponent from 'libs/bootstrap/modal';
+import { parsePubmed } from 'libs/parse-pubmed';
 
 // Internal lib
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
+import { RestMixin } from 'components/rest';
+import { external_url_map } from 'components/globals';
+import { PmidSummary } from 'components/curator';
  
 let NewEvidenceModalMetadata = createReactClass({
-    mixins: [FormMixin],
+    mixins: [FormMixin, RestMixin],
     propTypes: {
         data: PropTypes.object,
         evidenceType: PropTypes.string,
@@ -21,7 +25,8 @@ let NewEvidenceModalMetadata = createReactClass({
     getInitialState() {
         return {
             loadNextModal: false,
-            data: this.props.data
+            data: this.props.data,
+            pmidResult: null
         };
     },
 
@@ -35,23 +40,75 @@ let NewEvidenceModalMetadata = createReactClass({
     additionalEvidenceInputFields() {
         let key = this.props.evidenceType;
         if (key && key in extraEvidence.typeMapping) {
-            return extraEvidence.typeMapping[key]['fields'].map(pair => 
-                <div key={pair['name']}>
-                    <Input 
-                        type="text"
-                        label={pair['description']}
-                        id={pair['name']}
-                        name={pair['name']}
-                        handleChange={this.handleAdditionalEvidenceInputChange}
-                        value={this.props.isNew ? '' : this.state.data[pair['name']]}
-                        ref={pair['name']}
-                        required
-                    />
-                </div>
-            )
+            let nodes = [];
+            extraEvidence.typeMapping[key]['fields'].forEach(pair => {
+                    let node = [<div key={pair['name']}>
+                            <Input 
+                                type="text"
+                                label={pair['description']}
+                                id={pair['name']}
+                                name={pair['name']}
+                                handleChange={this.handleAdditionalEvidenceInputChange}
+                                value = { this.getInputValue(pair.name) }
+                                ref={pair['name']}
+                                required
+                            />
+                        </div>];
+                    if (key === 'PMID') {
+                        node.push(<Input
+                                type="button"
+                                inputClassName="btn-default btn-inline-spacer pull-right"
+                                clickHandler={this.searchPMID}
+                                title="Preview PubMed Article"
+                            />);
+                    }
+                    nodes.push(node);
+                }
+            );
+            return nodes;
         } else {
             return null;
         }
+    },
+
+    getInputValue(name) {
+        if (this.props.isNew) {
+            return '';
+        }
+        return this.props.data[name];
+    },
+
+    searchPMID() {
+        this.saveAllFormValues();
+        let formValues = this.getAllFormValues();
+        let pmid = formValues['pmid'];
+
+        const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+        this.getRestData('/articles/' + id).then(article => {
+            // article already exists in db
+            this.setState({
+                pmidResult: article
+            });
+        }, () => {
+            // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+            this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                var data = parsePubmed(xml);
+                if (data.pmid) {
+                    // found the result we want
+                    this.setState({
+                        pmidResult: data
+                    });
+                } else {
+                    // no result from ClinVar
+                    this.setState({
+                        pmidResult: 'error'
+                    });
+                }
+            });
+        }).catch(e => {
+            // error handling for PubMed query
+            console.error(e);
+        });
     },
 
     handleAdditionalEvidenceInputChange(ref, event) {
@@ -67,11 +124,30 @@ let NewEvidenceModalMetadata = createReactClass({
 
         this.saveAllFormValues();
         let formValues = this.getAllFormValues();
+
         formValues['_kind_title'] = extraEvidence.typeMapping[this.props.evidenceType]['name'];
         formValues['_kind_key'] = this.props.evidenceType;
         this.handleModalClose();
         this.resetAllFormValues();
+        this.setState({
+            pmidResult: null
+        });
         this.props.metadataDone(true, formValues);
+    },
+
+    renderPMIDResult() {
+        if (!this.state.pmidResult) {
+            return null;
+        } 
+        return <div>
+                    <span className="col-sm-10 col-sm-offset-1">
+                        <PmidSummary
+                            article={this.state.pmidResult}
+                            displayJournal
+                            pmidLinkout
+                        />
+                    </span>
+                </div>
     },
 
     cancel() {
@@ -115,6 +191,7 @@ let NewEvidenceModalMetadata = createReactClass({
                         <div className="modal-body">
                             <Form submitHandler={this.submitAdditionalEvidenceHandler} formClassName="form-horizontal form-std">
                                 {this.additionalEvidenceInputFields()}
+                                {this.renderPMIDResult()}
                                 <div className="row">&nbsp;<br />&nbsp;</div>
                                 <div className='modal-footer'>
                                     <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Next" id="submit"/>

@@ -34,11 +34,15 @@ let EvidenceModalManager = createReactClass({
         isNew: PropTypes.bool                       // If we are adding a new piece of evidence or editing an existing piece
     },
 
-    getInitialState: function() {
-        let data = {
+    getInitData: function(){
+        return {
             'metadata': {},
             'data': {}
         };
+    },
+
+    getInitialState: function() {
+        let data = this.getInitData();
         if (this.props.data) {
             data = this.props.data;
         }
@@ -46,6 +50,16 @@ let EvidenceModalManager = createReactClass({
             nextModal: false,
             data: data
         };
+    },
+
+    componentDidMount: function(){
+        let data = this.getInitData();
+        if (this.props.data) {
+            data = this.props.data;
+        }
+        this.setState({
+            data: data
+        });
     },
 
     metadataDone(next, metadata) {
@@ -70,9 +84,10 @@ let EvidenceModalManager = createReactClass({
     },
 
     reset() {
+        let data = this.getInitData();
         this.setState({
             nextModal: false,
-            data: {},
+            data: data,
             isNew: null
         });
     },
@@ -91,14 +106,25 @@ let EvidenceModalManager = createReactClass({
             } else {
                 Object.assign(newData.source.data, data);
             }
-
-            this.setState({
-                data: newData,
-                nextModal: false
-            });
-            this.props.evidenceCollectionDone(true, this.state.data, this.props.isNew);
+            
+            this.reset();
+            this.props.evidenceCollectionDone(true, newData, this.props.isNew);
         }
         
+    },
+
+    getSheetData() {
+        if (this.props.isNew) {
+            return this.state.data.data;
+        }
+        return this.props.data.source.data;
+    },
+
+    getMetadata() {
+        if (this.props.isNew) {
+            return this.state.data.metadata;
+        }
+        return this.props.data.source.metadata;
     },
 
     evidenceSheet() {
@@ -108,7 +134,7 @@ let EvidenceModalManager = createReactClass({
             return <EvidenceSheet
                         ready = {this.state.nextModal}
                         sheetDone = {this.sheetDone}
-                        data = {this.props.isNew ? this.state.data.data : this.state.data.source.data}
+                        data = {this.getSheetData()}
                         isNew = {this.props.isNew}
                         reset = {this.reset}
                         subcategory = {this.props.subcategory}
@@ -122,7 +148,7 @@ let EvidenceModalManager = createReactClass({
             <NewEvidenceModalMetadata
                 evidenceType = {this.props.evidenceType}
                 metadataDone = {this.metadataDone}
-                data = {this.props.isNew ? this.state.data.metadata : this.state.data.source.metadata }
+                data = {this.getMetadata()}
                 isNew = {this.props.isNew}
             />
             {this.evidenceSheet()}

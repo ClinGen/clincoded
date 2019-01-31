@@ -103,9 +103,10 @@ const evidenceInputs = [{
     },
     {
         cols: [{
-            label: 'Phenotypic feture(s) associated with proband(s) (HPO)',
+            label: 'Phenotypic feature(s) associated with proband(s) (HPO)',
             name: 'proband_hpo_ids',
             kind: 'text',
+            lookup: 'HPOApi',
             width: 12
         }]
     },
