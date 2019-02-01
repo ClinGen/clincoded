@@ -263,7 +263,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             status: 'deleted'
         };
 
-        this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
+        return this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
             return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
                 return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
                     // get updated interpretation object, then flatten it

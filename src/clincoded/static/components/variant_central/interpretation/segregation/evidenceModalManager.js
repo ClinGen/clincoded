@@ -87,7 +87,6 @@ let EvidenceModalManager = createReactClass({
         let data = this.getInitData();
         this.setState({
             nextModal: false,
-            data: data,
             isNew: null
         });
     },
@@ -136,7 +135,6 @@ let EvidenceModalManager = createReactClass({
                         sheetDone = {this.sheetDone}
                         data = {this.getSheetData()}
                         isNew = {this.props.isNew}
-                        reset = {this.reset}
                         subcategory = {this.props.subcategory}
                     >
                     </EvidenceSheet>

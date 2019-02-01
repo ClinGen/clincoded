@@ -1,80 +1,84 @@
 import _ from 'underscore';
 
 const typeMapping = {
-    'PMID': {
-        'name': 'Pubmed',
-        'fields': [{
-            'name': 'pmid',
-            'description': 'PMID'
+    PMID: {
+        name: 'Pubmed',
+        fields: [{
+            name: 'pmid',
+            description: 'PMID',
+            required: true
         }]
     },
-    'clinical_lab': {
-        'name': 'Clinical lab',
-        'fields': [{
-            'name': 'lab_directory',
-            'description': 'Laboratory Director'
+    clinical_lab: {
+        name: 'Clinical lab',
+        fields: [{
+            name: 'lab_name',
+            description: 'Laboratory Name',
+            required: true
         }, {
-            'name': 'clinvar_gtr_labid',
-            'description': 'ClinVar/GTR LabID'
+            name: 'clinvar_gtr_labid',
+            description: 'ClinVar/GTR LabID',
+            required: true
         }, {
-            'name': 'contact',
-            'description': 'Contact (Individual)'
+            name: 'contact',
+            description: 'Data Contact',
+            required: false
         }]
     },
-    'clinic': {
-        'name': 'Clinic',
-        'fields': [{
-            'name': 'attending_physician',
-            'description': 'Attending Physician'
+    clinic: {
+        name: 'Clinic',
+        fields: [{
+            name: 'healthcare_provider',
+            description: 'Healthcare Provider',
+            required: true
         }, {
-            'name': 'clinic_affiliation',
-            'description': 'Clinic Affiliation'
+            name: 'institutional_affiliation',
+            description: 'institutional Affiliation',
+            required: true
         }, {
-            'name': 'orcid_id',
-            'description': 'ORCID ID'
+            name: 'department_affiliation',
+            description: 'Department Affiliation',
+            required: false
+        }, {
+            name: 'orcid_id',
+            description: 'ORCID ID',
+            required: false
         }]
     },
-    'research_lab': {
-        'name': 'Research lab',
-        'fields': [{
-            'name': 'pi_lab_director',
-            'description': 'Principal Investigator/Lab Director'
+    research_lab: {
+        name: 'Research lab',
+        fields: [{
+            name: 'pi_lab_director',
+            description: 'Principal Investigator/Lab Director',
+            required: true
         }, {
-            'name': 'institution',
-            'description': 'Institution'
+            name: 'institution',
+            description: 'Institution',
+            required: true
         }, {
-            'name': 'orcid_id',
-            'description': 'ORCID ID'
+            name: 'orcid_id',
+            description: 'ORCID ID',
+            required: false
         }]
     },
-    'public_database': {
-        'name': 'Public Database',
-        'fields': [{
-            'name': 'name',
-            'description': 'Name of Database'
+    public_database: {
+        name: 'Public Database',
+        fields: [{
+            name: 'name',
+            description: 'Name of Database',
+            required: true
         }, {
-            'name': 'url',
-            'description': 'Database URL'
+            name: 'url',
+            description: 'Database URL',
+            required: true
         }]
     },
-    'registered_curator': {
-        'name': 'Registered Curator',
-        'fields': [{
-            'name': 'no',
-            'description': 'no fields'
-        }, {
-            'name': 'were',
-            'description': 'were provided'
-        }, {
-            'name': 'mockup',
-            'description': 'in the mockup'
-        }]
-    },
-    'other': {
-        'name': 'Other',
-        'fields': [{
-            'name': 'source',
-            'description': 'Describe Source'
+    other: {
+        name: 'Other',
+        fields: [{
+            name: 'source',
+            description: 'Describe Source',
+            required: true
         }]
     }
 };
@@ -324,12 +328,55 @@ const subcategories = [
 ];
 
 /**
+ * Tuples of (criteria codes, field name)
+ */
+const fieldToCriteriaCodeMapping = [
+    {
+        key: 'num_unaffected_family_with_variant',
+        codes: ['BS2', 'PP4']
+    },
+    {
+        key: 'num_control_with_variant',
+        codes: ['BS2', 'PS4']
+    },
+    {
+        key: 'total_controls',
+        codes: ['BS2', 'PS4']
+    },
+    {
+        key: 'num_probands_relevant_phenotype',
+        codes: ['PS4', 'PP4']
+    },
+    {
+        key: 'num_segregations',
+        codes: ['BS4', 'PP1']
+    },
+    {
+        key: 'num_non_segregations',
+        codes: ['BS4', 'PP1']
+    },
+    {
+        key: 'num_de_novo_unconfirmed',
+        codes: ['PM6', 'PS2', 'PP4']
+    },
+    {
+        key: 'num_de_novo_confirmed',
+        codes: ['PM6', 'PS2', 'PP4']
+    },
+    {
+        key: 'num_probands_with_alt_genetic_cause',
+        codes: ['BP5']
+    }
+];
+
+/**
  * For each subcategory, what columns from the sheet do we display?
  * 
- * The rest of the columns are the fields we grey out and disable in the sheet.
+ * The rest of the columns are the fields we do not highlight in the sheet.
  */
 const sheetToTableMapping = [
     {
+        // BS2
         'subcategory': 'observed-in-healthy',
         'cols': [{
             key: 'num_unaffected_family_with_variant',
@@ -345,6 +392,7 @@ const sheetToTableMapping = [
         }]
     },
     {
+        // PS4
         'subcategory': 'case-control',
         'cols': [{
                 key: 'num_probands_relevant_phenotype',
@@ -359,6 +407,7 @@ const sheetToTableMapping = [
             }]
     },
     {
+        // BS4, PP1
         'subcategory': 'segregation-data',
         'cols': [{
             key: 'num_segregations',
@@ -370,6 +419,7 @@ const sheetToTableMapping = [
         }]
     },
     {
+        // PM6, PS2
         'subcategory': 'de-novo',
         'cols': [{
             key: 'num_de_novo_unconfirmed',
@@ -381,10 +431,12 @@ const sheetToTableMapping = [
         }]
     },
     {
+        // BP2, PM3
         'subcategory': 'allele-data',
         'cols': []
     },
     {
+        // BP5
         'subcategory': 'alternate-mechanism',
         'cols': [{
             key:'num_probands_with_alt_genetic_cause',
@@ -392,6 +444,7 @@ const sheetToTableMapping = [
         }]
     },
     {
+        // PP4
         'subcategory': 'specificity-of-phenotype',
         'cols': [{
             key: 'num_probands_relevant_phenotype',
@@ -407,7 +460,7 @@ const sheetToTableMapping = [
         },
         {
             key: 'num_de_novo_confirmed',
-            title: '# de-novo, unconfirmed'
+            title: '# de-novo, confirmed'
         }]
     },
 ]
@@ -496,6 +549,7 @@ module.exports = {
         typeMapping: typeMapping,
         evidenceInputs: evidenceInputs,
         tableCols: tableCols,
-        sharedEvidenceInputs: sharedEvidenceInputs
+        sharedEvidenceInputs: sharedEvidenceInputs,
+        fieldToCriteriaCodeMapping: fieldToCriteriaCodeMapping
     }
 };

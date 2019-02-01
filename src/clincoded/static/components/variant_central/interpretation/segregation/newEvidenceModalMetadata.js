@@ -26,7 +26,9 @@ let NewEvidenceModalMetadata = createReactClass({
         return {
             loadNextModal: false,
             data: this.props.data,
-            pmidResult: null
+            pmidResult: null,
+            pmidLookupBusy: false,
+            isNextDisabled: this.props.isNew ? true : false
         };
     },
 
@@ -35,6 +37,29 @@ let NewEvidenceModalMetadata = createReactClass({
             return `Add ${extraEvidence.typeMapping[evidenceType]['name']} Evidence`;
         }
         return null;
+    },
+
+    handleChange(ref, e) {
+        // ref is the name, since that's how we defined it
+        let data = this.state.data;
+        data[ref] = e.target.value;
+        let disabled = false;
+
+        extraEvidence.typeMapping[this.props.evidenceType].fields.forEach(pair => {
+            if (pair.required) {
+                let name = pair.name;
+                if (!(name in data)) {
+                    disabled = true;
+                } else if (data[name] === undefined || data[name] === null || data[name] === '') {
+                    disabled = true;
+                }
+            }
+        });
+
+        this.setState({
+            isNextDisabled: disabled,
+            data: data
+        });
     },
 
     additionalEvidenceInputFields() {
@@ -48,18 +73,20 @@ let NewEvidenceModalMetadata = createReactClass({
                                 label={pair['description']}
                                 id={pair['name']}
                                 name={pair['name']}
-                                handleChange={this.handleAdditionalEvidenceInputChange}
                                 value = { this.getInputValue(pair.name) }
                                 ref={pair['name']}
-                                required
+                                required={pair['required']}
+                                handleChange={ this.handleChange }
                             />
                         </div>];
                     if (key === 'PMID') {
                         node.push(<Input
-                                type="button"
-                                inputClassName="btn-default btn-inline-spacer pull-right"
-                                clickHandler={this.searchPMID}
-                                title="Preview PubMed Article"
+                                type = "button-button"
+                                inputClassName = "btn-default btn-inline-spacer pull-right"
+                                clickHandler = {this.searchPMID}
+                                title = "Preview PubMed Article"
+                                submitBusy = {this.state.pmidLookupBusy}
+                                required
                             />);
                     }
                     nodes.push(node);
@@ -79,41 +106,45 @@ let NewEvidenceModalMetadata = createReactClass({
     },
 
     searchPMID() {
-        this.saveAllFormValues();
-        let formValues = this.getAllFormValues();
-        let pmid = formValues['pmid'];
-
-        const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
-        this.getRestData('/articles/' + id).then(article => {
-            // article already exists in db
-            this.setState({
-                pmidResult: article
-            });
-        }, () => {
-            // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-            this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
-                var data = parsePubmed(xml);
-                if (data.pmid) {
-                    // found the result we want
-                    this.setState({
-                        pmidResult: data
-                    });
-                } else {
-                    // no result from ClinVar
-                    this.setState({
-                        pmidResult: 'error'
-                    });
-                }
-            });
-        }).catch(e => {
-            // error handling for PubMed query
-            console.error(e);
-        });
-    },
-
-    handleAdditionalEvidenceInputChange(ref, event) {
         this.setState({
-            errorMsg: ''
+            pmidLookupBusy: true
+        }, () => {
+            this.saveAllFormValues();
+            let formValues = this.getAllFormValues();
+            let pmid = formValues['pmid'];
+
+            const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+            this.getRestData('/articles/' + id).then(article => {
+                // article already exists in db
+                this.setState({
+                    pmidResult: article
+                });
+            }, () => {
+                // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                    var data = parsePubmed(xml);
+                    if (data.pmid) {
+                        // found the result we want
+                        this.setState({
+                            pmidResult: data
+                        });
+                    } else {
+                        // no result from ClinVar
+                        this.setState({
+                            pmidResult: 'error'
+                        });
+                    }
+                });
+            })
+            .then(() => {
+                this.setState({
+                    pmidLookupBusy: false
+                });
+            })
+            .catch(e => {
+                // error handling for PubMed query
+                console.error(e);
+            });
         });
     },
 
@@ -130,7 +161,8 @@ let NewEvidenceModalMetadata = createReactClass({
         this.handleModalClose();
         this.resetAllFormValues();
         this.setState({
-            pmidResult: null
+            pmidResult: null,
+            isNextDisabled: this.props.isNew ? true : false
         });
         this.props.metadataDone(true, formValues);
     },
@@ -153,6 +185,10 @@ let NewEvidenceModalMetadata = createReactClass({
     cancel() {
         this.props.metadataDone(false, null);
         this.handleModalClose();
+        this.setState({
+            data: this.props.data,
+            isNextDisabled: this.props.isNew ? true : false
+        });
     },
 
     handleModalClose() {
@@ -176,6 +212,7 @@ let NewEvidenceModalMetadata = createReactClass({
     },
 
     render() {
+        const additionalEvidenceFields = this.additionalEvidenceInputFields();
         return (
             <div>
                 <ModalComponent 
@@ -190,11 +227,11 @@ let NewEvidenceModalMetadata = createReactClass({
                     <div className="form-std">
                         <div className="modal-body">
                             <Form submitHandler={this.submitAdditionalEvidenceHandler} formClassName="form-horizontal form-std">
-                                {this.additionalEvidenceInputFields()}
+                                {additionalEvidenceFields}
                                 {this.renderPMIDResult()}
                                 <div className="row">&nbsp;<br />&nbsp;</div>
                                 <div className='modal-footer'>
-                                    <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Next" id="submit"/>
+                                    <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Next" id="submit" inputDisabled={this.state.isNextDisabled}/>
                                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
                                 </div>
                             </Form>

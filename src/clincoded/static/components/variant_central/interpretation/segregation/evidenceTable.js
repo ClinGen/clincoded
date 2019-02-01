@@ -25,10 +25,24 @@ let EvidenceTable = createReactClass({
 
     getInitialState: function() {
         let tableFormat = _.find(extraEvidence.tableCols(), (table) => table.subcategory == this.props.subcategory);
+
         return {
             tableFormat: tableFormat,
-            rows: this.props.tableData
+            rows: this.props.tableData,
+            deleteBusy: false
         };
+    },
+
+    clickDelete(row) {
+        this.setState({
+            deleteBusy: true
+        });
+        this.props.deleteEvidenceFunc(row)
+        .then(() => {
+            this.setState({
+                deleteBusy: false
+            });
+        });
     },
 
     additionalEvidenceRows: function() {
@@ -71,13 +85,14 @@ let EvidenceTable = createReactClass({
 
             inner.push(editButton);
 
-            let deleteButton = <td key={`delete_${i++}`}>
+            let deleteKey = `delete+${i++}`;
+            let deleteButton = <td key={deleteKey}>
                 <Input 
                     type="button-button"
                     inputClassName="btn btn-danger"
                     title="Delete"
                     submitBusy={this.state.deleteBusy}
-                    clickHandler={() => this.props.deleteEvidenceFunc(row)}
+                    clickHandler={() => this.clickDelete(row)}
                 />
             </td>;
             inner.push(deleteButton);

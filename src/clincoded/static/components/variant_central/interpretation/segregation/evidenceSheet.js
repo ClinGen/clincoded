@@ -23,7 +23,6 @@ let EvidenceSheet = createReactClass({
         ready: PropTypes.bool,
         data: PropTypes.object,
         isNew: PropTypes.bool,
-        reset: PropTypes.func,
         subcategory: PropTypes.string
     },
 
@@ -34,7 +33,8 @@ let EvidenceSheet = createReactClass({
         }
         return {
             data: data,
-            hpo: null
+            hpo: null,
+            backgroundGreen: '#00FF0030'
         };
     },
 
@@ -70,15 +70,14 @@ let EvidenceSheet = createReactClass({
 
     /**
      * Given the subcategory, return a list of allowed fields.
-     * This is used to set the field's 'disabled' status.
+     * This is used to highlight the input.
      */
     allowedFields() {
         let tableObj = _.find(extraEvidence.tableCols(), o => o.subcategory === this.props.subcategory);
         let fields = tableObj.cols.map(col => col.key);
-        let commentFields = []
-        fields.forEach(field => commentFields.push(`${field}_comment`));  // Allow for any associated comment fields
-        fields = fields.concat(commentFields);
-        fields = fields.concat(extraEvidence.sharedEvidenceInputs);
+        if (fields.indexOf('comments') != -1) {
+            fields.splice(fields.indexOf('comments'), 1);
+        }
         return fields;
     },
 
@@ -100,14 +99,24 @@ let EvidenceSheet = createReactClass({
                 if (this.state.data != null && Object.keys(this.state.data).length > 0) {
                     value = this.state.data[col.name]
                 }
+
+                // Set up the label for the input
+                let codes = extraEvidence.fieldToCriteriaCodeMapping
+                    .filter(obj => obj.key === col.name)
+                    .map(obj => obj.codes);
+                let label = col.label;
+                if (codes.length > 0) {
+                    label += ` (${codes.join(', ')})`;
+                }
+
                 let node = [<div className={`col-md-${col.width}`} key={i++}>
                     <Input 
                         type = {col.kind}
-                        label = {col.label}
+                        label = {label}
                         name = {col.name}
                         ref = {col.name}
                         value = {value}
-                        inputDisabled = {fields.indexOf(col.name) == -1 ? true : false}
+                        fieldStyle = { fields.indexOf(col.name) == -1 ? null : {backgroundColor: this.state.backgroundGreen} }
                     />
                 </div>]
                 // if ('lookup' in col) {
@@ -180,6 +189,9 @@ let EvidenceSheet = createReactClass({
         >
         <div className="form-std">
             <div className="modal-body">
+                <h4>
+                    Fields marked in a <span style={{backgroundColor: this.state.backgroundGreen}}>green background</span> are specifically relevant to this Criteria Code.
+                </h4>
                 <Form submitHandler={this.submitNewEvidence} formClassName="form-horizontal form-std">
                 {this.inputs()}
                 <div className="row">&nbsp;<br />&nbsp;</div>
