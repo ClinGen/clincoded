@@ -21,7 +21,8 @@ let EvidenceSheet = createReactClass({
     propTypes: {
         evidenceCollectionDone: PropTypes.func,
         ready: PropTypes.bool,
-        data: PropTypes.object,
+        data: PropTypes.object,         // Data relevant to this particular piece of evidence
+        allData: PropTypes.object,      // All extra evidence across all entries for this variant
         isNew: PropTypes.bool,
         subcategory: PropTypes.string
     },

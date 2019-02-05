@@ -416,9 +416,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
 
     /**
      * 
-     * @param {*bool} finished      If we have finished with data collection
-     * @param {*object} evidence    The evidence itself
-     * @param {*bool} isNew         True -> this is a new piece of evidence.  False -> we are editing evidence
+     * @param {bool} finished      If we have finished with data collection
+     * @param {object} evidence    The evidence itself
+     * @param {bool} isNew         True -> this is a new piece of evidence.  False -> we are editing evidence
      */
     evidenceCollectionDone(finished, evidence, isNew) {
         if (!finished) {
@@ -513,11 +513,14 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         if (this.state.variant && this.state.variant.associatedInterpretations) {
             this.state.variant.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
-                    interpretation.extra_evidence_list.map(extra_evidence => {
-                        if (extra_evidence.subcategory === this.props.subcategory) {
-                            relevantEvidenceListRaw.push(extra_evidence);
-                        }
+                    interpretation.extra_evidence_list.forEach(extra_evidence => {
+                        relevantEvidenceListRaw.push(extra_evidence);
                     });
+                    // interpretation.extra_evidence_list.map(extra_evidence => {
+                    //     if (extra_evidence.subcategory === this.props.subcategory) {
+                    //         relevantEvidenceListRaw.push(extra_evidence);
+                    //     }
+                    // });
                 }
             });
         }
@@ -530,7 +533,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         */};
         const criteriaList = this.state.criteriaList;
         const criteriaInput = this.state.criteriaInput;
-
+        let extraEvidenceData = [];
+        if (this.state.interpretation != null && 'extra_evidence_list' in this.state.interpretation) {
+            extraEvidenceData = this.state.interpretation.extra_evidence_list
+        }
         return (
             <div className="panel panel-info">
                 <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
@@ -592,6 +598,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                     <div className="col-md-12">
                                                         <EvidenceModalManager
                                                             data = {null}
+                                                            allData = {relevantEvidenceList}
                                                             criteriaList = {this.props.criteriaList}
                                                             evidenceType = {this.state.evidenceType}
                                                             subcategory = {this.props.subcategory}
@@ -610,6 +617,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         </tbody>
                     </table>
                     <EvidenceTable
+                        allData = {extraEvidenceData}
                         tableData = {relevantEvidenceList}
                         subcategory = {this.props.subcategory}
                         deleteEvidenceFunc = {this.deleteEvidenceFunc}

@@ -223,9 +223,11 @@ var FormMixin = module.exports.FormMixin = {
 var Input = module.exports.Input = createReactClass({
     propTypes: {
         type: PropTypes.string.isRequired, // Type of input
-        label: PropTypes.oneOfType([ // <label> for input; string or another React component
-            PropTypes.string,
-            PropTypes.object
+        label: PropTypes.oneOfType([ // <label> for input
+            PropTypes.string,       // Just a string
+            PropTypes.object,       // Another React component
+            PropTypes.array,        // Some JSX
+            PropTypes.element       // Some JSX
         ]),
         hasModal: PropTypes.bool,
         inputGroupBtn: PropTypes.oneOfType([ // <button> for input-group

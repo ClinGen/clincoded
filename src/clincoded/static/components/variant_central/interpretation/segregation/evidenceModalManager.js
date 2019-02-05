@@ -27,6 +27,7 @@ let EvidenceModalManager = createReactClass({
 
     propTypes: {
         data: PropTypes.object,                     // If null, we are adding.  Otherwise, we are editing.
+        allData: PropTypes.array,                   // All extra evidence we've collected
         criteriaList: PropTypes.array,              // criteria code(s) pertinent to the category/subcategory
         evidenceType: PropTypes.string,
         subcategory: PropTypes.string,              // subcategory (usually the panel) the evidence is part of
@@ -48,7 +49,8 @@ let EvidenceModalManager = createReactClass({
         }
         return {
             nextModal: false,
-            data: data
+            data: data,
+            isNew: this.props.isNew  // This may change from T -> F if a matching identifier is found.  See metadataDone() for details.
         };
     },
 
@@ -62,15 +64,51 @@ let EvidenceModalManager = createReactClass({
         });
     },
 
+    getExistingEvidence(metadata){
+        let identifierCol = extraEvidence.typeMapping[this.props.evidenceType].fields
+            .filter(o => o.identifier === true)
+            .map(o => o.name);
+
+        // Determine if this is meant to be linked to an existing piece of evidence
+        let candidate = this.props.allData
+            .filter(o => identifierCol in o.source.metadata
+                && o.source.metadata[identifierCol] === metadata[identifierCol]);
+        if (candidate.length > 0) {
+            // Hopefully only one item, otherwise we have run into consistency issues
+            return candidate[0];
+        }
+        return false;
+    },
+
+    /**
+     * Here, we need to check the identifier field against all other known identifier fields.  If we get a match,
+     * then we know that even if we were told this is a new entry, it's really an edit of an existing entry that
+     * was initially entered in a separate panel.
+     *
+     * @param {bool} next           T -> Move to next screen, F -> Cancel was clicked
+     * @param {object} metadata     The metadata object returned from the modal
+     */
     metadataDone(next, metadata) {
         if (next) {
+            let candidate = this.getExistingEvidence(metadata);
             let newData = Object.assign({}, this.state.data);
             if (this.props.isNew) {
-                Object.assign(newData.metadata, metadata);
+                if (candidate) {
+                    // Editing a piece of evidence initially input in a different panel
+                    Object.assign(candidate.source.metadata, metadata);
+                    Object.assign(newData, candidate);
+                    this.setState({
+                        isNew: false
+                    });
+                } else {
+                    // Totally new piece of evidence
+                    Object.assign(newData.metadata, metadata);
+                }
             } else {
+                // Editing
                 Object.assign(newData.source.metadata, metadata);
             }
-            
+
             this.setState({
                 data: newData,
                 nextModal: true
@@ -84,7 +122,6 @@ let EvidenceModalManager = createReactClass({
     },
 
     reset() {
-        let data = this.getInitData();
         this.setState({
             nextModal: false,
             isNew: null
@@ -96,27 +133,36 @@ let EvidenceModalManager = createReactClass({
             this.setState({
                 nextModal: false
             });
-            this.props.evidenceCollectionDone(false, this.state.data, this.props.isNew);
+            this.props.evidenceCollectionDone(false, this.state.data, this.state.isNew);
         }
         else {
-            let newData = Object.assign({}, this.state.data);
-            if (this.props.isNew) {
-                Object.assign(newData.data, data);
+            let metadata = null;
+            if ('source' in this.state.data) {
+                metadata = this.state.data.source.metadata;
             } else {
-                Object.assign(newData.source.data, data);
+                metadata = this.state.data.metadata;
             }
-            
+            let candidate = this.getExistingEvidence(metadata);
+            let newData = Object.assign({}, this.state.data);
+            if (candidate) {
+                Object.assign(newData.source.data, data);
+            } else {
+                Object.assign(newData.data, data);
+            }
+            this.props.evidenceCollectionDone(true, newData, this.state.isNew);
             this.reset();
-            this.props.evidenceCollectionDone(true, newData, this.props.isNew);
         }
-        
     },
 
     getSheetData() {
-        if (this.props.isNew) {
-            return this.state.data.data;
+        // return this.state.data;
+        let data = null;
+        if (this.state.isNew) {
+            data = this.state.data.data;
+        } else {
+            data = this.state.data.source.data;
         }
-        return this.props.data.source.data;
+        return data;
     },
 
     getMetadata() {
@@ -134,7 +180,8 @@ let EvidenceModalManager = createReactClass({
                         ready = {this.state.nextModal}
                         sheetDone = {this.sheetDone}
                         data = {this.getSheetData()}
-                        isNew = {this.props.isNew}
+                        allData = {this.props.data}
+                        isNew = {this.state.isNew}
                         subcategory = {this.props.subcategory}
                     >
                     </EvidenceSheet>

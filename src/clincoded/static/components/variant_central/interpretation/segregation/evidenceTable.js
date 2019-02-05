@@ -8,16 +8,18 @@ import PropTypes from 'prop-types';;
 // third party lib
 import _ from 'underscore';
 import { Form, FormMixin, Input } from 'libs/bootstrap/form';
-import ModalComponent from 'libs/bootstrap/modal';
+import { ContextualHelp } from 'libs/bootstrap/contextual_help';
 import moment from 'moment';
 
 // Internal lib
 import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
+import { external_url_map } from 'components/globals';
 
 let EvidenceTable = createReactClass({
     propTypes: {
-        tableData: PropTypes.array,
+        tableData: PropTypes.array,                 // Evidence data for this table
+        allData: PropTypes.array,                   // All extra evidence we've collected
         subcategory: PropTypes.string,
         deleteEvidenceFunc: PropTypes.func,
         evidenceCollectionDone: PropTypes.func
@@ -50,6 +52,8 @@ let EvidenceTable = createReactClass({
         let rows = [];
         
         let colNames = this.state.tableFormat.cols.map(col => col.key);
+        // Don't read the kind_title property so we can handle each case separately.
+        colNames.splice(colNames.indexOf('_kind_title'), 1);
 
         this.props.tableData.forEach(row => {
             let obj = row.source.data;
@@ -60,8 +64,30 @@ let EvidenceTable = createReactClass({
             obj['_submitted_by'] = row.source['_submitted_by'];
 
             let inner =  [];
+            let nodeContent = null;
+            if (row.source.metadata['_kind_key'] === 'PMID') {
+                let pmid = row.source.metadata.pmid;
+                nodeContent = <a
+                        href = {external_url_map['PubMed'] + pmid}
+                        target = "_blank"
+                        title = {`PubMed Article ID: ${pmid}`}
+                    >
+                        PMID {pmid}
+                    </a>
+            } else {
+                let content = Object.keys(row.source.metadata)
+                    .filter(k => !k.startsWith('_'))
+                    .map(k => row.source.metadata[k])
+                    .join(', ');
+
+                nodeContent = <span>
+                    {obj['_kind_title']} <ContextualHelp content={content}></ContextualHelp>
+                </span>;
+            }
+            inner.push(<td key={`cell_${i++}`}>{nodeContent}</td>)
+
             colNames.forEach(col => {
-                let nodeContent = null;
+                nodeContent = null;
                 if (col in obj) {
                     nodeContent = obj[col];
                 }
@@ -74,6 +100,7 @@ let EvidenceTable = createReactClass({
             let editButton = <td key={`edit_${i++}`} >
                 <EvidenceModalManager
                     data = {row}
+                    allData = {this.props.allData}
                     criteriaList = {row.source['relevant_criteria']}
                     evidenceType = {row.source.metadata['_kind_key']}
                     subcategory = {this.props.subcategory}

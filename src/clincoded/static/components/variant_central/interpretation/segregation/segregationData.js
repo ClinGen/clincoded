@@ -6,7 +6,8 @@ const typeMapping = {
         fields: [{
             name: 'pmid',
             description: 'PMID',
-            required: true
+            required: true,
+            identifier: true
         }]
     },
     clinical_lab: {
@@ -14,15 +15,18 @@ const typeMapping = {
         fields: [{
             name: 'lab_name',
             description: 'Laboratory Name',
-            required: true
+            required: true,
+            identifier: false
         }, {
             name: 'clinvar_gtr_labid',
             description: 'ClinVar/GTR LabID',
-            required: true
+            required: true,
+            identifier: true
         }, {
             name: 'contact',
             description: 'Data Contact',
-            required: false
+            required: false,
+            identifier: false
         }]
     },
     clinic: {
@@ -30,19 +34,23 @@ const typeMapping = {
         fields: [{
             name: 'healthcare_provider',
             description: 'Healthcare Provider',
-            required: true
+            required: true,
+            identifier: true
         }, {
             name: 'institutional_affiliation',
             description: 'institutional Affiliation',
-            required: true
+            required: true,
+            identifier: false
         }, {
             name: 'department_affiliation',
             description: 'Department Affiliation',
-            required: false
+            required: false,
+            identifier: false
         }, {
             name: 'orcid_id',
             description: 'ORCID ID',
-            required: false
+            required: false,
+            identifier: false
         }]
     },
     research_lab: {
@@ -50,15 +58,18 @@ const typeMapping = {
         fields: [{
             name: 'pi_lab_director',
             description: 'Principal Investigator/Lab Director',
-            required: true
+            required: true,
+            identifier: true
         }, {
             name: 'institution',
             description: 'Institution',
-            required: true
+            required: true,
+            identifier: false
         }, {
             name: 'orcid_id',
             description: 'ORCID ID',
-            required: false
+            required: false,
+            identifier: false
         }]
     },
     public_database: {
@@ -66,11 +77,13 @@ const typeMapping = {
         fields: [{
             name: 'name',
             description: 'Name of Database',
-            required: true
+            required: true,
+            identifier: false
         }, {
             name: 'url',
             description: 'Database URL',
-            required: true
+            required: true,
+            identifier: true
         }]
     },
     other: {
@@ -78,7 +91,8 @@ const typeMapping = {
         fields: [{
             name: 'source',
             description: 'Describe Source',
-            required: true
+            required: true,
+            identifier: true
         }]
     }
 };

@@ -13,6 +13,7 @@ import { extraEvidence } from 'components/variant_central/interpretation/segrega
 import { RestMixin } from 'components/rest';
 import { external_url_map } from 'components/globals';
 import { PmidSummary } from 'components/curator';
+import { ContextualHelp } from 'libs/bootstrap/contextual_help';
  
 let NewEvidenceModalMetadata = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -66,32 +67,37 @@ let NewEvidenceModalMetadata = createReactClass({
         let key = this.props.evidenceType;
         if (key && key in extraEvidence.typeMapping) {
             let nodes = [];
-            extraEvidence.typeMapping[key]['fields'].forEach(pair => {
-                    let node = [<div key={pair['name']}>
-                            <Input 
-                                type="text"
-                                label={pair['description']}
-                                id={pair['name']}
-                                name={pair['name']}
-                                value = { this.getInputValue(pair.name) }
-                                ref={pair['name']}
-                                required={pair['required']}
-                                handleChange={ this.handleChange }
-                            />
-                        </div>];
-                    if (key === 'PMID') {
-                        node.push(<Input
-                                type = "button-button"
-                                inputClassName = "btn-default btn-inline-spacer pull-right"
-                                clickHandler = {this.searchPMID}
-                                title = "Preview PubMed Article"
-                                submitBusy = {this.state.pmidLookupBusy}
-                                required
-                            />);
-                    }
-                    nodes.push(node);
+            extraEvidence.typeMapping[key]['fields'].forEach(obj => {
+            let lbl = [<span key={`span_${obj['name']}`}>{obj['description']}</span>];
+                if (obj.identifier) {
+                    let help = <span key={`span_help_${obj['name']}`}> <ContextualHelp content="This field will be used as an identifier for this piece of evidence."></ContextualHelp></span>;
+                    lbl.push(help);
                 }
-            );
+
+                let node = [<div key={obj['name']}>
+                        <Input
+                            type="text"
+                            label={lbl}
+                            id={obj['name']}
+                            name={obj['name']}
+                            value = { this.getInputValue(obj.name) }
+                            ref={obj['name']}
+                            required={obj['required']}
+                            handleChange={ this.handleChange }
+                        />
+                    </div>];
+                if (key === 'PMID') {
+                    node.push(<Input
+                            type = "button-button"
+                            inputClassName = "btn-default btn-inline-spacer pull-right"
+                            clickHandler = {this.searchPMID}
+                            title = "Preview PubMed Article"
+                            submitBusy = {this.state.pmidLookupBusy}
+                            required
+                        />);
+                }
+                nodes.push(node);
+            });
             return nodes;
         } else {
             return null;
