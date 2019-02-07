@@ -64,6 +64,19 @@ let EvidenceModalManager = createReactClass({
         });
     },
 
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.data != null && nextProps.data !== this.state.data) {
+            this.setState({
+                data: nextProps.data
+            });
+        }
+        if (nextProps.isNew != null && nextProps.isNew !== this.state.isNew) {
+            this.setState({
+                isNew: nextProps.isNew
+            });
+        }
+    },
+
     getExistingEvidence(metadata){
         let identifierCol = extraEvidence.typeMapping[this.props.evidenceType].fields
             .filter(o => o.identifier === true)
@@ -103,6 +116,9 @@ let EvidenceModalManager = createReactClass({
                 } else {
                     // Totally new piece of evidence
                     Object.assign(newData.metadata, metadata);
+                    this.setState({
+                        isNew: true
+                    });
                 }
             } else {
                 // Editing
@@ -116,7 +132,8 @@ let EvidenceModalManager = createReactClass({
         } else {
             // cancelled
             this.setState({
-                nextModal: false
+                nextModal: false,
+                data: this.getInitData()
             });
         }
     },
@@ -124,16 +141,18 @@ let EvidenceModalManager = createReactClass({
     reset() {
         this.setState({
             nextModal: false,
-            isNew: null
+            isNew: true,
+            data: this.getInitData()
         });
     },
 
     sheetDone(data) {
         if (data === null) {
-            this.setState({
-                nextModal: false
-            });
             this.props.evidenceCollectionDone(false, this.state.data, this.state.isNew);
+            this.setState({
+                nextModal: false,
+                isNew: null
+            });
         }
         else {
             let metadata = null;
@@ -155,21 +174,17 @@ let EvidenceModalManager = createReactClass({
     },
 
     getSheetData() {
-        // return this.state.data;
-        let data = null;
-        if (this.state.isNew) {
-            data = this.state.data.data;
-        } else {
-            data = this.state.data.source.data;
+        if ('source' in this.state.data) {
+            return this.state.data.source.data;
         }
-        return data;
+        return this.state.data.data;
     },
 
     getMetadata() {
-        if (this.props.isNew) {
-            return this.state.data.metadata;
+        if ('source' in this.state.data) {
+            return this.state.data.source.metadata;
         }
-        return this.props.data.source.metadata;
+        return this.state.data.metadata;
     },
 
     evidenceSheet() {

@@ -17,6 +17,7 @@ const vciFormHelper = require('components/variant_central/interpretation/shared/
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const evaluation_section_mapping = require('components/variant_central/interpretation/mapping/evaluation_section.json');
 import { ExtraEvidenceTable } from 'components/variant_central/interpretation/segregation/addEvidence';
+import { MasterEvidenceTable } from 'components/variant_central/interpretation/segregation/masterTable';
 
 // Display the curator data of the curation data
 var CurationInterpretationSegregation = module.exports.CurationInterpretationSegregation = createReactClass({
@@ -64,6 +65,13 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 </a>
             </span>
         );
+    },
+
+    renderMasterTable() {
+        return <MasterEvidenceTable
+                    interpretation = {this.state.interpretation}
+                >
+                </MasterEvidenceTable>
     },
 
     render() {
@@ -243,6 +251,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.</p>
                     : null }
 
+                {this.renderMasterTable()}
                 {panels}
 
                 <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source"

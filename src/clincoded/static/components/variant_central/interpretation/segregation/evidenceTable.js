@@ -55,7 +55,9 @@ let EvidenceTable = createReactClass({
         // Don't read the kind_title property so we can handle each case separately.
         colNames.splice(colNames.indexOf('_kind_title'), 1);
 
-        this.props.tableData.forEach(row => {
+        let tableData = this.props.tableData.filter(item => item.status != 'deleted');
+
+        tableData.forEach(row => {
             let obj = row.source.data;
             obj['last_modified'] = row['last_modified'];
             obj['_kind_title'] = row.source.metadata['_kind_title']

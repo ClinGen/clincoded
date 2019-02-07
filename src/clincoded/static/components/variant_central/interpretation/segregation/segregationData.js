@@ -318,6 +318,22 @@ const evidenceInputs = [{
     }
 ];
 
+function masterTable() {
+    let fields = [];
+    evidenceInputs.forEach(input => {
+        input.cols.forEach(col => {
+            if (col.kind === 'number') {
+                let obj = {
+                    key: col.name,
+                    label: col.label
+                };
+                fields.push(obj);
+            }
+        });
+    });
+    return fields;
+}
+
 /**
  * Fields that are shared across all subcategories.
  * As this is meant only to be a cross-reference, We store only their keys.
@@ -564,6 +580,7 @@ module.exports = {
         evidenceInputs: evidenceInputs,
         tableCols: tableCols,
         sharedEvidenceInputs: sharedEvidenceInputs,
-        fieldToCriteriaCodeMapping: fieldToCriteriaCodeMapping
-    }
+        fieldToCriteriaCodeMapping: fieldToCriteriaCodeMapping,
+    },
+    masterTable: masterTable
 };
