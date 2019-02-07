@@ -301,17 +301,25 @@ const evidenceInputs = [{
         ]
     },
     {
-        cols: [{
-            label: 'Additional comments',
-            name: 'comments',
-            kind: 'textarea',
-            width: 12
-        }]
+        cols: [
+            {
+                label: '# proband compound het occurrences',
+                name: 'num_probands_compound_het',
+                kind: 'number',
+                width: 4
+            },
+            {
+                label: 'Comment',
+                name: 'num_probands_compound_het_comment',
+                kind: 'text',
+                width: 8
+            }
+        ]
     },
     {
         cols: [{
-            label: 'Additional Population/Allele Frequency data',
-            name: 'additional_pop_data',
+            label: 'Additional comments',
+            name: 'comments',
             kind: 'textarea',
             width: 12
         }]
@@ -342,7 +350,6 @@ const sharedEvidenceInputs = ['label',
     'is_disease_associated_with_probands',
     'proband_hpo_ids',
     'proband_free_text',
-    'additional_pop_data',
     'comments'
 ]
 
@@ -363,39 +370,55 @@ const subcategories = [
 const fieldToCriteriaCodeMapping = [
     {
         key: 'num_unaffected_family_with_variant',
-        codes: ['BS2', 'PP4']
+        codes: ['BS2']
     },
     {
         key: 'num_control_with_variant',
-        codes: ['BS2', 'PS4']
-    },
-    {
-        key: 'total_controls',
-        codes: ['BS2', 'PS4']
+        codes: ['BS2']
     },
     {
         key: 'num_probands_relevant_phenotype',
-        codes: ['PS4', 'PP4']
+        codes: ['PS4']
     },
     {
         key: 'num_segregations',
-        codes: ['BS4', 'PP1']
+        codes: ['PP1']
     },
     {
         key: 'num_non_segregations',
-        codes: ['BS4', 'PP1']
+        codes: ['BS4']
     },
     {
         key: 'num_de_novo_unconfirmed',
-        codes: ['PM6', 'PS2', 'PP4']
+        codes: ['PS2']
     },
     {
         key: 'num_de_novo_confirmed',
-        codes: ['PM6', 'PS2', 'PP4']
+        codes: ['PM6']
     },
     {
         key: 'num_probands_with_alt_genetic_cause',
         codes: ['BP5']
+    },
+    {
+        key: 'proband_hpo_ids',
+        codes: ['PP4']
+    },
+    {
+        key: 'proband_free_text',
+        codes: ['PP4']
+    },
+    {
+        key: 'num_proband_hom',
+        codes: ['PM3']
+    },
+    {
+        key: 'num_proband_double_het',
+        codes: ['BP2']
+    },
+    {
+        key: 'num_probands_compound_het',
+        codes: ['PM3']
     }
 ];
 
@@ -415,10 +438,6 @@ const sheetToTableMapping = [
         {
             key: 'num_control_with_variant',
             title: '# controls with variant'
-        },
-        {
-            key: 'total_controls',
-            title: '# total controls'
         }]
     },
     {
@@ -426,14 +445,7 @@ const sheetToTableMapping = [
         'subcategory': 'case-control',
         'cols': [{
                 key: 'num_probands_relevant_phenotype',
-                title: '# Probands with consistent phenotypes'
-            }, {
-                key: 'num_control_with_variant',
-                title: '# controls with variants'
-            }, 
-            {
-                key: 'total_controls',
-                title: '# total controls'
+                title: '# Probands with relevant phenotypes'
             }]
     },
     {
@@ -441,11 +453,11 @@ const sheetToTableMapping = [
         'subcategory': 'segregation-data',
         'cols': [{
             key: 'num_segregations',
-            title: '# segregations'
+            title: 'Number of segregations (genotype +; phenotype +)'
         },
         {
             key: 'num_non_segregations',
-            title: '# non-segregations'
+            title: 'Number of non-segregations (phenotype +; genotype -)'
         }]
     },
     {
@@ -453,17 +465,29 @@ const sheetToTableMapping = [
         'subcategory': 'de-novo',
         'cols': [{
             key: 'num_de_novo_unconfirmed',
-            title: '# de-novo, unconfirmed'
+            title: '# assumed de novo counts'
         },
         {
             key: 'num_de_novo_confirmed',
-            title: '# de-novo, unconfirmed'
+            title: '# confirmed de novo counts'
         }]
     },
     {
         // BP2, PM3
         'subcategory': 'allele-data',
-        'cols': []
+        'cols': [{
+                key: 'num_probands_compound_het',
+                title: '# proband compound het occurrences'
+            },
+            {
+                key: 'num_proband_hom',
+                title: '# proband homozygous occurrences'
+            },
+            {
+                key: 'num_proband_double_het',
+                title: '# proband double het occurrences'
+            }
+        ]
     },
     {
         // BP5
@@ -477,21 +501,14 @@ const sheetToTableMapping = [
         // PP4
         'subcategory': 'specificity-of-phenotype',
         'cols': [{
-            key: 'num_probands_relevant_phenotype',
-            title: '# probands with relevant phenotype'
-        },
-        {
-            key: 'num_unaffected_family_with_variant',
-            title: '# unaffected family members with variant'
-        },
-        {
-            key: 'num_de_novo_unconfirmed',
-            title: '# de-novo, unconfirmed'
-        },
-        {
-            key: 'num_de_novo_confirmed',
-            title: '# de-novo, confirmed'
-        }]
+                key: 'proband_free_text',
+                title: 'Phenotype(s) associated with proband(s) (free text)'
+            },
+            {
+                key: 'proband_hpo_ids',
+                title: 'Phenotype(s) associated with proband(s) (HPO)'
+            }
+        ]
     },
 ]
 

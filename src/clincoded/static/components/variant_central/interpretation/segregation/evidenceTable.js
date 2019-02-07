@@ -22,7 +22,8 @@ let EvidenceTable = createReactClass({
         allData: PropTypes.array,                   // All extra evidence we've collected
         subcategory: PropTypes.string,
         deleteEvidenceFunc: PropTypes.func,
-        evidenceCollectionDone: PropTypes.func
+        evidenceCollectionDone: PropTypes.func,
+        criteriaList: PropTypes.array               // ACMG criteria
     },
 
     getInitialState: function() {
@@ -61,7 +62,7 @@ let EvidenceTable = createReactClass({
             let obj = row.source.data;
             obj['last_modified'] = row['last_modified'];
             obj['_kind_title'] = row.source.metadata['_kind_title']
-            obj['relevant_criteria'] = row.source['relevant_criteria'].join(', ');
+            obj['relevant_criteria'] = this.props.criteriaList.join(', ');
             obj['last_modified'] = moment(obj['last_modified']).format('YYYY MMM DD, h:mm a');
             obj['_submitted_by'] = row.source['_submitted_by'];
 
@@ -83,7 +84,7 @@ let EvidenceTable = createReactClass({
                     .join(', ');
 
                 nodeContent = <span>
-                    {obj['_kind_title']} <ContextualHelp content={content}></ContextualHelp>
+                    {content }<ContextualHelp content={obj['_kind_title']}></ContextualHelp>
                 </span>;
             }
             inner.push(<td key={`cell_${i++}`}>{nodeContent}</td>)
