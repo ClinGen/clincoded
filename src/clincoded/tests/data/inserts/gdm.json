@@ -65,7 +65,7 @@
         "uuid": "aa005efa-16d9-11e5-97aa-60f81dc5b05a",
         "gene": "SMAD3",
         "disease": "c5694e37-cd5b-42a3-b6db-e3fb6a629e63",
-        "modeInheritance": "Unknown",
+        "modeInheritance": "Undetermined mode of inheritance (HP:0000005)",
         "modeCode": "5",
         "omimId": "613795",
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",

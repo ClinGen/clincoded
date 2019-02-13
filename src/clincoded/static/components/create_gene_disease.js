@@ -117,7 +117,7 @@ var CreateGeneDisease = createReactClass({
             /**
              * FIXME: Need to delete orphanet reference
              */
-            // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
+            // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1]
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');

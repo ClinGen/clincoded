@@ -36,7 +36,7 @@
             "enum": [
                 "Autosomal dominant inheritance (HP:0000006)",
                 "Autosomal recessive inheritance (HP:0000007)",
-                "Unknown",
+                "Undetermined mode of inheritance (HP:0000005)",
                 "Mitochondrial inheritance (HP:0001427)",
                 "Multifactorial inheritance (HP:0001426)",
                 "Somatic mutation (HP:0001428)",

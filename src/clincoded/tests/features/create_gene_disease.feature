@@ -39,7 +39,7 @@ Feature: Create Gene Disease
         And I select "Other" from dropdown "form-control modeOfInheritance"
         And I select "Y-linked inheritance (HP:0001450)" from dropdown "form-control moiAdjective"
 
-        And I select "Unknown" from dropdown "form-control modeOfInheritance"
+        And I select "Undetermined mode of inheritance (HP:0000005)" from dropdown "form-control modeOfInheritance"
 
         And I click the element with the css selector ".btn-default"
         Then I should not see "Required"
