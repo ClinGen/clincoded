@@ -324,7 +324,6 @@ var AssociateInheritance = createReactClass({
             currInterpretation = interpretation;
             // get up-to-date copy of interpretation object and flatten it
             var flatInterpretation = curator.flatten(currInterpretation);
-            debugger;
 
             // if modeInheritance is set to none, either delete the key in interpretation object, or if
             // the key is already blank, return null and close modal
