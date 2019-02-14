@@ -687,7 +687,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
             // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
             // Or there is no ExAC/gnomAD data object in the returned myvariant.info JSON response
-            if (!this.state.ext_gnomadExac || !this.state.ext_singleNucleotide || !datasetCheck) {
+            if (!this.state.ext_gnomadExac || !datasetCheck) {
                 datasetLink = external_url_map[datasetRegionURLKey] + chrom + '-' + regionStart + '-' + regionEnd;
                 linkText = 'View the coverage of this region (+/- 30 bp) in ' + datasetName;
             }

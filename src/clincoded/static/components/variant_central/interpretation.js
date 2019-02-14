@@ -228,7 +228,6 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
                             ext_clinVarEsearch={this.state.ext_clinVarEsearch}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
-                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             affiliation={this.props.affiliation}

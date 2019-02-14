@@ -300,7 +300,7 @@ var VariantCurationHub = createReactClass({
             // Filter variant by its change type
             // Look for the <VariantType> node value in first pass
             // Then look into HGVS term for non-SNV type patterns
-            if (variant.variationType && variant.variationType) {
+            if (variant.variationType) {
                 if (popVariantTypes.indexOf(variant.variationType.toLowerCase()) > -1) {
                     this.setState({ext_gnomadExac: true })
                 }
