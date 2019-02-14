@@ -56,6 +56,7 @@ var VariantCurationHub = createReactClass({
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
             ext_singleNucleotide: true,
+            ext_gnomadExac: false,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarSCV: true,
@@ -295,10 +296,11 @@ var VariantCurationHub = createReactClass({
     },
 
     // Method to parse variant type
-    // Won't show population/predictor data if subject is not single nucleotide variant
+    // Won't show population/predictor data if subject is not single nucleotide variant or indel
     parseVariantType: function(variant) {
         if (variant) {
             // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
+            const popVariantTypes = ['single nucleotide variant', 'deletion', 'insertion', 'duplication']
             let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
             let genomicHGVS, ncGenomic;
 
@@ -310,6 +312,11 @@ var VariantCurationHub = createReactClass({
             // Filter variant by its change type
             // Look for the <VariantType> node value in first pass
             // Then look into HGVS term for non-SNV type patterns
+            if (variant.variationType) {
+                if (popVariantTypes.indexOf(variant.variationType.toLowerCase()) > -1) {
+                    this.setState({ext_gnomadExac: true })
+                }
+            }
             if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
                 this.setState({ext_singleNucleotide: false});
             } else if (genomicHGVS) {
@@ -556,6 +563,7 @@ var VariantCurationHub = createReactClass({
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
