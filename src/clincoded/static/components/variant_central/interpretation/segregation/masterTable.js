@@ -30,9 +30,12 @@ let MasterEvidenceTable = createReactClass({
         }
     },
 
-    getHeader(){
+    getHeader() {
         let header = [];
-        header.push(<th key="header.number">Number (#)</th>);
+        header.push(<th key="header.number" style={{border: 'none'}}>Evidence Type</th>);
+        header.push(<th key="header.sums" className="rotate">
+            <div><span>Sum</span></div>
+        </th>);
         this.state.rows.forEach(row => {
             if (row.source.metadata['_kind_key'] === 'PMID') {
                 let pmid = row.source.metadata.pmid;
@@ -43,28 +46,37 @@ let MasterEvidenceTable = createReactClass({
                 >
                     PMID {pmid}
                 </a>
-                header.push(<th key={`header.${pmid}`}>{element}</th>)
+                header.push(<th key={`header.${pmid}`} className="rotate"><div><span>{element}</span></div></th>)
             } else {
                 let evidence_category = row.source.metadata['_kind_title'];
                 let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
                 let evidence_detail = `${identifier.description}: ${row.source.metadata[identifier.name]}`;
                 let s = `${evidence_category} (${evidence_detail})`;
-                header.push(<th key={`header.${evidence_detail}`}>{s}</th>);
+                header.push(<th key={`header.${evidence_detail}`} className="rotate"><div><span>{s}</span></div></th>);
             }
         });
         return header;
     },
 
-    getRows(){
+    getRows() {
         let tds = [];
         let cell_num = 0;  // Used to set a key
+        let sums = this.getSums();
 
-        // Initialize the left-hand column
+        // Initialize the left-hand columns
         masterTable().forEach(row => {
-            let td = <td key={`cell_${cell_num++}`}><strong>{row.label}</strong></td>
-            tds.push([td]);  // Note we are pushing an array
+            let label_td = <td key={`cell_${cell_num++}`}><strong>{row.label}</strong></td>
+            let sum_td = null;
+            if (row.key in sums) {
+                sum_td = <td key={`cell_${cell_num++}`}>{sums[row.key]}</td>;
+            } else {
+                sum_td = <td key={`cell_${cell_num++}`}></td>;
+            }
+            
+            tds.push([label_td, sum_td]);  // Note we are pushing an array
         });
 
+        // Middle columns
         // This needs to be the outer loop to ensure it lines up with our header
         this.state.rows.forEach(row => {
             let rowNum = 0;
@@ -77,6 +89,7 @@ let MasterEvidenceTable = createReactClass({
                 rowNum++;
             });
         });
+
         let result = [];
         let row_num = 0;
         tds.forEach(td_set => {
@@ -86,17 +99,36 @@ let MasterEvidenceTable = createReactClass({
     },
 
     getSums() {
+        let sums = {};
         this.state.rows.forEach(row => {
-            //
+            let data = row.source.data;
+            Object.keys(data).forEach(name => {
+                if (name.startsWith('num_') && !name.endsWith('_comment')) {
+                    let val = parseInt(data[name]);
+                    if (Object.keys(sums).indexOf(name) === -1) {
+                        if (isNaN(val)) {
+                            sums[name] = 0;
+                        } else {
+                            sums[name] = val;
+                        }
+                    } else {
+                        if (!isNaN(val)) {
+                            sums[name] += val;
+                        }
+                    }
+                }
+            })
         });
+        return sums;
     },
 
     render() {
         if (!this.state.rows || this.state.rows.length == 0) {
             return null;
         }
+        this.getSums();
 
-        let table = <table className="table">
+        let table = <table className="table masterTable table-bordered">
             <thead>
                 <tr>
                     {this.getHeader()}

@@ -240,3 +240,30 @@ $status-types:
     margin-left: 5px;
     font-size: 0.9rem;
 }
+
+.masterTable {
+    width: 100%;
+    display: block;
+    overflow: scroll;
+}
+.masterTable thead tr th:first-child,
+.masterTable tbody tr td:first-child {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+
+.masterTable thead tr th.rotate {
+    height: 400px;
+    white-space: nowrap;
+    vertical-align: inherit;
+    border: none;
+}
+.masterTable thead tr th.rotate > div {
+    transform: translate(20px, 177px) rotate(-45deg);
+    width: 30px;
+}
+.masterTable thead tr th.rotate > div > span {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}

@@ -591,7 +591,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                             <option value="clinic">Clinic</option>
                                                             <option value="research_lab">Research Lab</option>
                                                             <option value="public_database">Public Database</option>
-                                                            <option value="registered_curator">Registered Curator</option>
                                                             <option value="other">Other</option>
                                                         </Input>
                                                     </div>

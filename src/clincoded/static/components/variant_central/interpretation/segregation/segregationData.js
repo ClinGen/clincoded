@@ -102,6 +102,12 @@ const typeMapping = {
  * Each root object is a row, which itself contains one or more columns.  Each column
  * has a specified width, which is used to configure the css class within bootstrap's
  * 12-width grid system.
+ * 
+ * The 'name' field is formatted in such a way as to allow for programmatic access and
+ * manipulation:
+ * - Comments are always text, and the name field always has '_comment' appended to the
+ *   corresponding field.
+ * - Numbers always have the name field prepanded with 'num_'
  */
 const evidenceInputs = [{
         cols: [{
@@ -176,7 +182,7 @@ const evidenceInputs = [{
             },
             {
                 label: 'Total control individuals tested',
-                name: 'total_controls',
+                name: 'num_total_controls',
                 kind: 'number',
                 width: 2
             },
@@ -330,13 +336,11 @@ function masterTable() {
     let fields = [];
     evidenceInputs.forEach(input => {
         input.cols.forEach(col => {
-            if (col.kind === 'number') {
-                let obj = {
-                    key: col.name,
-                    label: col.label
-                };
-                fields.push(obj);
-            }
+            let obj = {
+                key: col.name,
+                label: col.label
+            };
+            fields.push(obj);
         });
     });
     return fields;
@@ -598,6 +602,7 @@ module.exports = {
         tableCols: tableCols,
         sharedEvidenceInputs: sharedEvidenceInputs,
         fieldToCriteriaCodeMapping: fieldToCriteriaCodeMapping,
+        sheetToTableMapping: sheetToTableMapping
     },
     masterTable: masterTable
 };

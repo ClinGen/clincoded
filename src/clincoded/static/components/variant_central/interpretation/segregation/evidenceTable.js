@@ -59,77 +59,95 @@ let EvidenceTable = createReactClass({
         let tableData = this.props.tableData.filter(item => item.status != 'deleted');
 
         tableData.forEach(row => {
-            let obj = row.source.data;
-            obj['last_modified'] = row['last_modified'];
-            obj['_kind_title'] = row.source.metadata['_kind_title']
-            obj['relevant_criteria'] = this.props.criteriaList.join(', ');
-            obj['last_modified'] = moment(obj['last_modified']).format('YYYY MMM DD, h:mm a');
-            obj['_submitted_by'] = row.source['_submitted_by'];
+            if (this.showRow(row)) {
+                let obj = row.source.data;
+                let metadata = row.source.metadata;
+                obj['last_modified'] = row['last_modified'];
+                obj['_kind_title'] = metadata['_kind_title']
+                obj['relevant_criteria'] = this.props.criteriaList.join(', ');
+                obj['last_modified'] = moment(obj['last_modified']).format('YYYY MMM DD, h:mm a');
+                obj['_submitted_by'] = row.source['_submitted_by'];
 
-            let inner =  [];
-            let nodeContent = null;
-            if (row.source.metadata['_kind_key'] === 'PMID') {
-                let pmid = row.source.metadata.pmid;
-                nodeContent = <a
-                        href = {external_url_map['PubMed'] + pmid}
-                        target = "_blank"
-                        title = {`PubMed Article ID: ${pmid}`}
-                    >
-                        PMID {pmid}
-                    </a>
-            } else {
-                let content = Object.keys(row.source.metadata)
-                    .filter(k => !k.startsWith('_'))
-                    .map(k => row.source.metadata[k])
-                    .join(', ');
-
-                nodeContent = <span>
-                    {content }<ContextualHelp content={obj['_kind_title']}></ContextualHelp>
-                </span>;
-            }
-            inner.push(<td key={`cell_${i++}`}>{nodeContent}</td>)
-
-            colNames.forEach(col => {
-                nodeContent = null;
-                if (col in obj) {
-                    nodeContent = obj[col];
+                let inner =  [];
+                let nodeContent = null;
+                if (metadata['_kind_key'] === 'PMID') {
+                    let pmid = metadata.pmid;
+                    nodeContent = <a
+                            href = {external_url_map['PubMed'] + pmid}
+                            target = "_blank"
+                            title = {`PubMed Article ID: ${pmid}`}
+                        >
+                            PMID {pmid}
+                        </a>
+                } else {
+                    let content = null;
+                    let help = null;
+                    if (metadata['_kind_key'] === 'clinical_lab') {
+                        content = metadata.lab_name;
+                        help = `Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}, Contact: ${metadata.contact}`;
+                    } else if (metadata['_kind_key'] === 'clinic') {
+                        content = metadata.healthcare_provider;
+                        help = `Institutional Affiliation: ${metadata.institutional_affiliation}, Department: ${metadata.department_affiliation}, ORCID ID: ${metadata.orcid_id}`;
+                    } else if (metadata['_kind_key'] === 'research_lab') {
+                        content = metadata.pi_lab_director;
+                        help = `Institution: ${metadata.institution}, ORCID ID: ${metadata.orcid_id}`;
+                    } else if (metadata['_kind_key'] === 'public_database') {
+                        content = metadata.name;
+                        help = metadata.url;
+                    } else {
+                        content = Object.keys(metadata)
+                            .filter(k => !k.startsWith('_'))
+                            .map(k => metadata[k])
+                            .join(', ');
+                        help = obj['_kind_title'];
+                    }
+                    nodeContent = <span>
+                        {content} <ContextualHelp content={help}></ContextualHelp>
+                    </span>;
                 }
-                let node = <td key={`cell_${i++}`}>
-                    {nodeContent}
+                inner.push(<td key={`cell_${i++}`}>{nodeContent}</td>)
+
+                colNames.forEach(col => {
+                    nodeContent = null;
+                    if (col in obj) {
+                        nodeContent = obj[col];
+                    }
+                    let node = <td key={`cell_${i++}`}>
+                        {nodeContent}
+                    </td>
+                    inner.push(node);
+                });
+
+                let editButton = <td key={`edit_${i++}`} >
+                    <EvidenceModalManager
+                        data = {row}
+                        allData = {this.props.allData}
+                        criteriaList = {row.source['relevant_criteria']}
+                        evidenceType = {row.source.metadata['_kind_key']}
+                        subcategory = {this.props.subcategory}
+                        evidenceCollectionDone = {this.props.evidenceCollectionDone}
+                        isNew = {false}
+                    >
+                    </EvidenceModalManager>
                 </td>
-                inner.push(node);
-            });
 
-            let editButton = <td key={`edit_${i++}`} >
-                <EvidenceModalManager
-                    data = {row}
-                    allData = {this.props.allData}
-                    criteriaList = {row.source['relevant_criteria']}
-                    evidenceType = {row.source.metadata['_kind_key']}
-                    subcategory = {this.props.subcategory}
-                    evidenceCollectionDone = {this.props.evidenceCollectionDone}
-                    isNew = {false}
-                >
-                </EvidenceModalManager>
-            </td>
+                inner.push(editButton);
 
-            inner.push(editButton);
+                let deleteKey = `delete+${i++}`;
+                let deleteButton = <td key={deleteKey}>
+                    <Input 
+                        type="button-button"
+                        inputClassName="btn btn-danger"
+                        title="Delete"
+                        submitBusy={this.state.deleteBusy}
+                        clickHandler={() => this.clickDelete(row)}
+                    />
+                </td>;
+                inner.push(deleteButton);
 
-            let deleteKey = `delete+${i++}`;
-            let deleteButton = <td key={deleteKey}>
-                <Input 
-                    type="button-button"
-                    inputClassName="btn btn-danger"
-                    title="Delete"
-                    submitBusy={this.state.deleteBusy}
-                    clickHandler={() => this.clickDelete(row)}
-                />
-            </td>;
-            inner.push(deleteButton);
-
-            let outer = <tr key={`row_${i++}`}>{inner}</tr>
-            rows.push(outer)
-            
+                let outer = <tr key={`row_${i++}`}>{inner}</tr>
+                rows.push(outer)
+            }
         });
         return rows;
     },
@@ -141,8 +159,44 @@ let EvidenceTable = createReactClass({
         return cols;
     },
 
+    hasTableData: function() {
+        // relevant columns non empty -> return true
+        // relevant columns empty -> return False
+        let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
+        let cols = relevantData.cols.map(o => o.key);
+        let foundData = false;
+        this.props.tableData.forEach(row => {
+            let obj = row.source.data;
+            if (foundData) {
+                return;
+            }
+            cols.forEach(col => {
+                if (obj[col] != '') {
+                    foundData = true;
+                    return;
+                }
+            });
+        });
+        return foundData;
+    },
+
+    showRow: function(row) {
+        // relevant columns non empty -> return True
+        // relevant columns empty -> return False
+        let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
+        let cols = relevantData.cols.map(o => o.key);
+        let show = false;
+        cols.forEach(col => {
+            if (row.source.data[col] != '') {
+                show = true;
+                return;
+            }
+        });
+        return show;
+    },
+
     render() {
-        if (this.props.tableData.length == 0) {
+        if (this.props.tableData.length == 0 || !this.hasTableData()) {
             return <div style={{paddingBottom: '5px'}}><span>&nbsp;&nbsp;No evidence added.</span></div>
         }
         return (
