@@ -278,7 +278,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
             // get the source version
-            if (metadata.src_version && metadata.src_version.exac) {
+            if (metadata && metadata.src_version && metadata.src_version.exac) {
                 populationObj.exac.version = metadata.src_version.exac;
             }
             // update populationObj, and set flag indicating that we have ExAC data
@@ -475,7 +475,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
 
             // Get the source version
-            if (metadata.src_version && metadata.src_version.gnomad) {
+            if (metadata && metadata.src_version && metadata.src_version.gnomad) {
                 populationObj.gnomAD.version = metadata.src_version.gnomad;
             }
         }
