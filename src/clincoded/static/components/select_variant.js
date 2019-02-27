@@ -82,7 +82,10 @@ var SelectVariant = createReactClass({
                                 </div>
                                 <div className="row">
                                     <div className="alert alert-danger">
-                                        Note: <strong>This version of the interface currently returns evidence for SNVs (single nucleotide variants) only.</strong> We are currently working to optimize the evidence returned for non-SNVs. However, the interface supports the evaluation/interpretation of any variant.
+                                        Note: <strong>This version of the interface returns evidence for SNVs (single nucleotide variants) 
+                                        and for some small duplications, insertions, and deletions. </strong> 
+                                        We are currently working to optimize the evidence returned for other variant types. 
+                                        However, the interface supports the evaluation/interpretation of any variant.
                                     </div>
                                     <div className="alert alert-info">
                                         Instructions (please follow this order to determine correct ID for variant)<br /><br />
