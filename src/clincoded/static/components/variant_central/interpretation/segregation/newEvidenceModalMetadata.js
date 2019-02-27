@@ -10,18 +10,20 @@ import { parsePubmed } from 'libs/parse-pubmed';
 
 // Internal lib
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
+
 import { RestMixin } from 'components/rest';
 import { external_url_map } from 'components/globals';
 import { PmidSummary } from 'components/curator';
 import { ContextualHelp } from 'libs/bootstrap/contextual_help';
- 
+
 let NewEvidenceModalMetadata = createReactClass({
     mixins: [FormMixin, RestMixin],
     propTypes: {
         data: PropTypes.object,
         evidenceType: PropTypes.string,
         metadataDone: PropTypes.func,
-        isNew: PropTypes.bool
+        isNew: PropTypes.bool,
+        disableActuator: PropTypes.bool
     },
     getInitialState() {
         return {
@@ -111,7 +113,8 @@ let NewEvidenceModalMetadata = createReactClass({
         return this.props.data[name];
     },
 
-    searchPMID() {
+    searchPMID(e) {
+        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.setState({
             pmidLookupBusy: true
         }, () => {
@@ -211,7 +214,9 @@ let NewEvidenceModalMetadata = createReactClass({
     isActuatorDisabled() {
         if (!this.props.evidenceType) {
             return true;
-        } else if (this.props.evidenceType.length == 0) {
+        } else if (this.props.evidenceType.length === 0) {
+            return true;
+        } else if (this.props.disableActuator === true) {
             return true;
         }
         return false;

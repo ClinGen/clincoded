@@ -30,47 +30,88 @@ let MasterEvidenceTable = createReactClass({
         }
     },
 
-    getHeader() {
+    getEvidenceTypes() {
+        let evidence_types = {};
+        for(let row of this.props.interpretation.extra_evidence_list) {
+            let evidence_type = row.source.metadata['_kind_key'];
+            if (!(evidence_type in evidence_types)) {
+                evidence_types[evidence_type] = this.props.interpretation.extra_evidence_list.filter(row => row.source.metadata['_kind_key'] === evidence_type);
+            }
+        }
+        return evidence_types;
+    },
+
+    getHeader(evidence_types) {
         let header = [];
-        header.push(<th key="header.number" style={{border: 'none'}}>Evidence Type</th>);
-        header.push(<th key="header.sums" className="rotate">
+        let first_row = [];
+        let second_row = [];
+
+        first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="2"></td>)
+        Object.keys(evidence_types).forEach(evidence_type => {
+            let num_items = evidence_types[evidence_type].length;
+            first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
+                {extraEvidence.typeMapping[evidence_type].name}
+            </th>)
+        });
+
+        second_row.push(<th key="header.number" style={{border: 'none'}}>Evidence Type</th>);
+        second_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}>
             <div><span>Sum</span></div>
         </th>);
-        this.state.rows.forEach(row => {
-            if (row.source.metadata['_kind_key'] === 'PMID') {
-                let pmid = row.source.metadata.pmid;
-                let element = <a
-                    href = {external_url_map['PubMed'] + pmid}
-                    target = '_blank'
-                    title = {`PubMed Article ID: ${pmid}`}
-                >
-                    PMID {pmid}
-                </a>
-                header.push(<th key={`header.${pmid}`} className="rotate"><div><span>{element}</span></div></th>)
-            } else {
-                let evidence_category = row.source.metadata['_kind_title'];
-                let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
-                let evidence_detail = `${identifier.description}: ${row.source.metadata[identifier.name]}`;
-                let s = `${evidence_category} (${evidence_detail})`;
-                header.push(<th key={`header.${evidence_detail}`} className="rotate"><div><span>{s}</span></div></th>);
-            }
+        Object.keys(evidence_types).forEach(evidence_type => {
+            let rows = evidence_types[evidence_type];
+            rows.forEach(row => {
+                if (row.source.metadata['_kind_key'] === 'PMID') {
+                    let pmid = row.source.metadata.pmid;
+                    let element = <a
+                        href = {external_url_map['PubMed'] + pmid}
+                        target = '_blank'
+                        title = {`PubMed Article ID: ${pmid}`}
+                    >
+                        PMID {pmid}
+                    </a>
+                    second_row.push(<th key={`header.${pmid}`} style={{borderBottom: 'none'}}>
+                        <div style={{textAlign: 'center'}}>
+                            <span>{element}</span>
+                        </div>
+                    </th>)
+                } else {
+                    let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
+                    let evidence_detail = `${identifier.description}: ${row.source.metadata[identifier.name]}`;
+                    second_row.push(<th key={`header.${evidence_detail}`}>
+                        <div style={{textAlign: 'center'}}>
+                            <span>{evidence_detail}</span>
+                        </div>
+                    </th>);
+                }
+            });
         });
+        header.push(<tr key="header_row_1">{first_row}</tr>)
+        header.push(<tr key="header_row_2">{second_row}</tr>);
         return header;
     },
 
-    getRows() {
+    getRows(evidence_types) {
         let tds = [];
         let cell_num = 0;  // Used to set a key
         let sums = this.getSums();
 
         // Initialize the left-hand columns
         masterTable().forEach(row => {
-            let label_td = <td key={`cell_${cell_num++}`}><strong>{row.label}</strong></td>
+            let label_td = <td key={`cell_${cell_num++}`}>
+                <div>
+                    <strong>{row.label}</strong>
+                </div>
+            </td>
             let sum_td = null;
             if (row.key in sums) {
-                sum_td = <td key={`cell_${cell_num++}`}>{sums[row.key]}</td>;
+                sum_td = <td key={`cell_${cell_num++}`}>
+                    <div>{sums[row.key]}</div>
+                </td>;
             } else {
-                sum_td = <td key={`cell_${cell_num++}`}></td>;
+                sum_td = <td key={`cell_${cell_num++}`}>
+                    <div></div>
+                </td>;
             }
             
             tds.push([label_td, sum_td]);  // Note we are pushing an array
@@ -78,17 +119,20 @@ let MasterEvidenceTable = createReactClass({
 
         // Middle columns
         // This needs to be the outer loop to ensure it lines up with our header
-        this.state.rows.forEach(row => {
-            let rowNum = 0;
-            masterTable().forEach(masterRow => {
-                let val = row.source.data[masterRow.key];
-                let entry = <td key={`cell_${cell_num++}`}>
-                    {val}
-                </td>
-                tds[rowNum].push(entry);
-                rowNum++;
+            Object.keys(evidence_types).forEach(evidence_type => {
+                let rows = evidence_types[evidence_type];
+                rows.forEach(row => {
+                    let rowNum = 0;
+                    masterTable().forEach(masterRow => {
+                        let val = row.source.data[masterRow.key];
+                        let entry = <td key={`cell_${cell_num++}`}>
+                            <div>{val}</div>
+                        </td>
+                        tds[rowNum].push(entry);
+                        rowNum++;
+                    });
+                });
             });
-        });
 
         let result = [];
         let row_num = 0;
@@ -100,7 +144,7 @@ let MasterEvidenceTable = createReactClass({
 
     getSums() {
         let sums = {};
-        this.state.rows.forEach(row => {
+        this.props.interpretation.extra_evidence_list.forEach(row => {
             let data = row.source.data;
             Object.keys(data).forEach(name => {
                 if (name.startsWith('num_') && !name.endsWith('_comment')) {
@@ -123,19 +167,20 @@ let MasterEvidenceTable = createReactClass({
     },
 
     render() {
-        if (!this.state.rows || this.state.rows.length == 0) {
+        if (!this.props.interpretation ||
+            !this.props.interpretation.extra_evidence_list || 
+            this.props.interpretation.extra_evidence_list.length == 0) {
             return null;
         }
         this.getSums();
+        let evidenceTypes = this.getEvidenceTypes();
 
         let table = <table className="table masterTable table-bordered">
             <thead>
-                <tr>
-                    {this.getHeader()}
-                </tr>
+                {this.getHeader(evidenceTypes)}
             </thead>
             <tbody>
-                {this.getRows()}
+                {this.getRows(evidenceTypes)}
             </tbody>
         </table>;
         return table;

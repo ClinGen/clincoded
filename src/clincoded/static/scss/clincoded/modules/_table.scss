@@ -244,15 +244,19 @@ $status-types:
 .masterTable {
     width: 100%;
     display: block;
-    overflow: scroll;
+    overflow-x: scroll;
 }
-.masterTable thead tr th:first-child,
-.masterTable tbody tr td:first-child {
+.masterTable thead tr th:first-child > div,
+.masterTable tbody tr td:first-child > div {
     width: 250px;
     min-width: 250px;
     max-width: 250px;
+    min-height:37px;
+    max-height:77px;
 }
-
+.masterTable tbody tr td:nth-child(n+2), .masterTable thead tr th:nth-child(n+2){
+    max-width: 250px;
+}
 .masterTable thead tr th.rotate {
     height: 400px;
     white-space: nowrap;
@@ -264,6 +268,9 @@ $status-types:
     width: 30px;
 }
 .masterTable thead tr th.rotate > div > span {
-    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
     padding-bottom: 10px;
+    padding-left: 33px;
+    margin-left: -33px;
+    padding-top: 4px;
 }

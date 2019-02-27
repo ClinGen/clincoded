@@ -622,6 +622,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         deleteEvidenceFunc = {this.deleteEvidenceFunc}
                         evidenceCollectionDone = {this.evidenceCollectionDone}
                         criteriaList = {this.props.criteriaList}
+                        session = {this.props.session}
                     >
                     </EvidenceTable>
                 </div>

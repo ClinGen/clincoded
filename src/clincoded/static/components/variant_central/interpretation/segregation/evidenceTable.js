@@ -23,7 +23,8 @@ let EvidenceTable = createReactClass({
         subcategory: PropTypes.string,
         deleteEvidenceFunc: PropTypes.func,
         evidenceCollectionDone: PropTypes.func,
-        criteriaList: PropTypes.array               // ACMG criteria
+        criteriaList: PropTypes.array,              // ACMG criteria
+        session: PropTypes.object                   // Session object
     },
 
     getInitialState: function() {
@@ -46,6 +47,47 @@ let EvidenceTable = createReactClass({
                 deleteBusy: false
             });
         });
+    },
+
+    getEditButton: function(key, row) {
+        let curr_user = this.props.session.user_properties['@id'];
+        let created_user = row.submitted_by['@id'];
+        let disableActuator = false;
+        if (curr_user != created_user) {
+            disableActuator = true;
+        }
+        return <td key={key} >
+            <EvidenceModalManager
+                data = {row}
+                allData = {this.props.allData}
+                criteriaList = {row.source['relevant_criteria']}
+                evidenceType = {row.source.metadata['_kind_key']}
+                subcategory = {this.props.subcategory}
+                evidenceCollectionDone = {this.props.evidenceCollectionDone}
+                isNew = {false}
+                disableActuator = {disableActuator}
+            >
+            </EvidenceModalManager>
+        </td>
+    },
+
+    getDeleteButton: function(deleteKey, row) {
+        let curr_user = this.props.session.user_properties['@id'];
+        let created_user = row.submitted_by['@id'];
+        let disableActuator = false;
+        if (curr_user != created_user) {
+            disableActuator = true;
+        }
+        return <td key={deleteKey}>
+            <Input 
+                type="button-button"
+                inputClassName="btn btn-danger"
+                title="Delete"
+                submitBusy={this.state.deleteBusy}
+                clickHandler={() => this.clickDelete(row)}
+                inputDisabled = {disableActuator}
+            />
+        </td>;
     },
 
     additionalEvidenceRows: function() {
@@ -118,31 +160,12 @@ let EvidenceTable = createReactClass({
                     inner.push(node);
                 });
 
-                let editButton = <td key={`edit_${i++}`} >
-                    <EvidenceModalManager
-                        data = {row}
-                        allData = {this.props.allData}
-                        criteriaList = {row.source['relevant_criteria']}
-                        evidenceType = {row.source.metadata['_kind_key']}
-                        subcategory = {this.props.subcategory}
-                        evidenceCollectionDone = {this.props.evidenceCollectionDone}
-                        isNew = {false}
-                    >
-                    </EvidenceModalManager>
-                </td>
+                let editButton = this.getEditButton(`edit_${i++}`, row)
 
                 inner.push(editButton);
 
                 let deleteKey = `delete+${i++}`;
-                let deleteButton = <td key={deleteKey}>
-                    <Input 
-                        type="button-button"
-                        inputClassName="btn btn-danger"
-                        title="Delete"
-                        submitBusy={this.state.deleteBusy}
-                        clickHandler={() => this.clickDelete(row)}
-                    />
-                </td>;
+                let deleteButton = this.getDeleteButton(deleteKey, row);
                 inner.push(deleteButton);
 
                 let outer = <tr key={`row_${i++}`}>{inner}</tr>

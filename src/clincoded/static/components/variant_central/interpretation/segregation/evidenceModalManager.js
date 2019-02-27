@@ -14,8 +14,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class'
 
 // Third-party lib
-import ModalComponent from 'libs/bootstrap/modal';
-import { Form, FormMixin, Input } from 'libs/bootstrap/form';
+import { FormMixin } from 'libs/bootstrap/form';
 
 // Internal lib
 import { EvidenceSheet } from 'components/variant_central/interpretation/segregation/evidenceSheet';
@@ -32,7 +31,8 @@ let EvidenceModalManager = createReactClass({
         evidenceType: PropTypes.string,
         subcategory: PropTypes.string,              // subcategory (usually the panel) the evidence is part of
         evidenceCollectionDone: PropTypes.func,     // Function to call when we finish with modal 2
-        isNew: PropTypes.bool                       // If we are adding a new piece of evidence or editing an existing piece
+        isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
+        disableActuator: PropTypes.bool
     },
 
     getInitData: function(){
@@ -210,6 +210,7 @@ let EvidenceModalManager = createReactClass({
                 metadataDone = {this.metadataDone}
                 data = {this.getMetadata()}
                 isNew = {this.props.isNew}
+                disableActuator = {this.props.disableActuator}
             />
             {this.evidenceSheet()}
         </div>;
