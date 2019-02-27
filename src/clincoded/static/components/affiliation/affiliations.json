@@ -1,8 +1,14 @@
 [
     {
         "affiliation_id": "10001",
-        "affiliation_fullname": "Cardiovascular KCNQ1 EP",
+        "affiliation_fullname": "KCNQ1",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50001",
+                "fullname": "KCNQ1 VCEP"
+            }
+        },
         "approver": [
             "Lisa Kurtz",
             "Michael Gollob"
@@ -10,8 +16,14 @@
     },
     {
         "affiliation_id": "10002",
-        "affiliation_fullname": "Cardiovascular Cardiomyopathy EP",
+        "affiliation_fullname": "Cardiomyopathy",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50002",
+                "fullname": "Cardiomyopathy VCEP"
+            }
+        },
         "approver": [
             "Birgit Funke",
             "Lisa Kurtz",
@@ -20,8 +32,14 @@
     },
     {
         "affiliation_id": "10003",
-        "affiliation_fullname": "Cardiovascular Dilated Cardiomyopathy EP",
+        "affiliation_fullname": "Arrythmogenic Right Ventricular Cardiomyopathy",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40003",
+                "fullname": "Arrythmogenic Right Ventricular Cardiomyopathy GCEP"
+            }
+        },
         "approver": [
             "Cindy James",
             "Jan Jongbloed",
@@ -32,8 +50,14 @@
     },
     {
         "affiliation_id": "10004",
-        "affiliation_fullname": "Cardiovascular Familial Hypercholesterolemia EP",
+        "affiliation_fullname": "Familial Hypercholesterolemia",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50004",
+                "fullname": "Familial Hypercholesterolemia VCEP"
+            }
+        },
         "approver": [
             "Lisa Kurtz",
             "Mafalda Bourbon"
@@ -41,18 +65,40 @@
     },
     {
         "affiliation_id": "10005",
-        "affiliation_fullname": "Epilepsy EP",
-        "publish_approval": true
+        "affiliation_fullname": "Epilepsy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40005",
+                "fullname": "Epilepsy GCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10006",
-        "affiliation_fullname": "Autism and Intellectual Disability EP",
-        "publish_approval": true
+        "affiliation_fullname": "Intellectual Disability and Autism",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40006",
+                "fullname": "Intellectual Disability and Autism GCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10007",
-        "affiliation_fullname": "Hearing Loss EP",
+        "affiliation_fullname": "Hearing Loss",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40007",
+                "fullname": "Hearing Loss GCEP"
+            },
+            "vcep": {
+                "id": "50007",
+                "fullname": "Hearing Loss VCEP"
+            }
+        },
         "approver": [
             "Ahmad Tayoun",
             "Heidi Rehm",
@@ -61,8 +107,14 @@
     },
     {
         "affiliation_id": "10008",
-        "affiliation_fullname": "Hypertrophic Cardiomyopathy EP",
+        "affiliation_fullname": "Hypertrophic Cardiomyopathy",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40008",
+                "fullname": "Hypertrophic Cardiomyopathy GCEP"
+            }
+        },
         "approver": [
             "Courtney Thaxton",
             "Jen McGlaughon",
@@ -71,13 +123,29 @@
     },
     {
         "affiliation_id": "10009",
-        "affiliation_fullname": "Storage Diseases EP",
-        "publish_approval": true
+        "affiliation_fullname": "Storage Diseases",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50009",
+                "fullname": "Storage Diseases VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10010",
-        "affiliation_fullname": "Fatty Acid Oxidation Disorders EP",
+        "affiliation_fullname": "Fatty Acid Oxidation Disorders",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40010",
+                "fullname": "Fatty Acid Oxidation Disorders GCEP"
+            },
+            "vcep": {
+                "id": "50010",
+                "fullname": "Fatty Acid Oxidation Disorders VCEP"
+            }
+        },
         "approver": [
             "Heather Baudet",
             "Jen McGlaughon"
@@ -85,21 +153,47 @@
     },
     {
         "affiliation_id": "10011",
-        "affiliation_fullname": "Aminoacidopathy EP",
-        "publish_approval": true
+        "affiliation_fullname": "Aminoacidopathy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40011",
+                "fullname": "Aminoacidopathy GCEP"
+            },
+            "vcep": {
+                "id": "50011",
+                "fullname": "Aminoacidopathy VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10012",
-        "affiliation_fullname": "PTEN EP",
+        "affiliation_fullname": "PTEN",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40012",
+                "fullname": "PTEN GCEP"
+            },
+            "vcep": {
+                "id": "50012",
+                "fullname": "PTEN VCEP"
+            }
+        },
         "approver": [
             "Jessica Mester"
         ]
     },
     {
         "affiliation_id": "10013",
-        "affiliation_fullname": "TP53 EP",
+        "affiliation_fullname": "TP53",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50013",
+                "fullname": "TP53 VCEP"
+            }
+        },
         "approver": [
             "Jessica Mester",
             "Kristy Lee",
@@ -108,8 +202,14 @@
     },
     {
         "affiliation_id": "10014",
-        "affiliation_fullname": "CDH1 EP",
+        "affiliation_fullname": "CDH1",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50014",
+                "fullname": "CDH1 VCEP"
+            }
+        },
         "approver": [
             "Intan Schrader",
             "Kristy Lee",
@@ -120,8 +220,14 @@
     },
     {
         "affiliation_id": "10015",
-        "affiliation_fullname": "PAH EP",
+        "affiliation_fullname": "Phenylketonuria",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50015",
+                "fullname": "Phenylketonuria VCEP"
+            }
+        },
         "approver": [
             "Amanda Thomas",
             "Diane Zastrow"
@@ -129,8 +235,14 @@
     },
     {
         "affiliation_id": "10016",
-        "affiliation_fullname": "Monogenic Diabetes EP",
+        "affiliation_fullname": "Monogenic Diabetes",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50016",
+                "fullname": "Monogenic Diabetes VCEP"
+            }
+        },
         "approver": [
             "Kristin Maloney",
             "Linda Jeng",
@@ -140,7 +252,13 @@
     {
         "affiliation_id": "10017",
         "affiliation_fullname": "Sequence Variant Discrepancy Resolution",
-        "publish_approval": true
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50017",
+                "fullname": "Sequence Variant Discrepancy Resolution WG"
+            }
+        }
     },
     {
         "affiliation_id": "10018",
@@ -159,8 +277,18 @@
     },
     {
         "affiliation_id": "10020",
-        "affiliation_fullname": "Brain Malformations EP",
+        "affiliation_fullname": "Brain Malformations",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40020",
+                "fullname": "Brain Malformations GCEP"
+            },
+            "vcep": {
+                "id": "50020",
+                "fullname": "Brain Malformations VCEP"
+            }
+        },
         "approver": [
             "Annapurna Poduri",
             "Tim Yu"
@@ -168,20 +296,48 @@
     },
     {
         "affiliation_id": "10021",
-        "affiliation_fullname": "RASopathy EP",
-        "publish_approval": true
+        "affiliation_fullname": "RASopathy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40021",
+                "fullname": "RASopathy GCEP"
+            },
+            "vcep": {
+                "id": "50021",
+                "fullname": "RASopathy VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10022",
-        "affiliation_fullname": "Rett Angelman EP",
-        "publish_approval": true
+        "affiliation_fullname": "Rett and Angelman-like Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40022",
+                "fullname": "Rett and Angelman-like Disorders GCEP"
+            },
+            "vcep": {
+                "id": "50022",
+                "fullname": "Rett and Angelman-like Disorders VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10023",
-        "affiliation_fullname": "Hereditary Cancer EP",
+        "affiliation_fullname": "Hereditary Cancer",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40023",
+                "fullname": "Hereditary Cancer GCEP"
+            }
+        },
         "approver": [
-            "Sharon Plon"
+            "Sharon Plon",
+            "Katherine Nathanson",
+            "Karen Gripp"
         ]
     },
     {
@@ -193,8 +349,14 @@
     },
     {
         "affiliation_id": "10025",
-        "affiliation_fullname": "Cardiovascular LQTS EP",
+        "affiliation_fullname": "Long QT Syndrome",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40025",
+                "fullname": "Long QT Syndrome GCEP"
+            }
+        },
         "approver": [
             "Amy Sturm",
             "Arthur Wilde",
@@ -206,8 +368,14 @@
     },
     {
         "affiliation_id": "10026",
-        "affiliation_fullname": "General Gene Curation EP",
+        "affiliation_fullname": "General Gene Curation",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40026",
+                "fullname": "General GCEP"
+            }
+        },
         "approver": [
             "Christa Martin",
             "Heidi Rehm",
@@ -218,13 +386,29 @@
     },
     {
         "affiliation_id": "10027",
-        "affiliation_fullname": "Mitochondrial Diseases EP",
-        "publish_approval": true
+        "affiliation_fullname": "Mitochondrial Diseases",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40027",
+                "fullname": "Mitochondrial Diseases GCEP"
+            },
+            "vcep": {
+                "id": "50027",
+                "fullname": "Mitochondrial Diseases VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10028",
-        "affiliation_fullname": "Hemostasis/Thrombosis EP",
-        "publish_approval": true
+        "affiliation_fullname": "Hemostasis Thrombosis",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40028",
+                "fullname": "Hemostasis Thrombosis GCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10029",
@@ -235,8 +419,18 @@
     },
     {
         "affiliation_id": "10031",
-        "affiliation_fullname": "Congenital Myopathies EP",
+        "affiliation_fullname": "Congenital Myopathies",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50031",
+                "fullname": "Congenital Myopathies VCEP"
+            },
+            "gcep": {
+                "id": "40031",
+                "fullname": "Congenital Myopathies GCEP"
+            }
+        },
         "approver": [
             "Ozge Birsoy"
         ]
@@ -249,5 +443,188 @@
         "affiliation_id": "10033",
         "affiliation_fullname": "Germline/Somatic Variant Subcommittee",
         "publish_approval": true
+    },
+    {
+        "affiliation_id": "10034",
+        "affiliation_fullname": "Myeloid Malignancy",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50034",
+                "fullname": "Myeloid Malignancy VCEP"
+            }
+        },
+        "approver": [
+            "David Wu",
+            "Justyne Ross",
+            "Lucy Godley",
+            "Sharon Plon",
+            "Xi Luo",
+            "Ying Wang",
+            "Shruthi Mohan",
+            "Simone Feurstein"
+        ]
+    },
+    {
+        "affiliation_id": "10035",
+        "affiliation_fullname": "Dilated Cardiomyopathy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40035",
+                "fullname": "Dilated Cardiomyopathy GCEP"
+            }
+        },
+        "approver": [
+            "Ray Hershberger",
+            "Peter van Tintelen",
+            "Jan Jongbloed",
+            "Cindy James",
+            "Lisa Kurtz"
+        ]
+    },
+    {
+        "affiliation_id": "10036",
+        "affiliation_fullname": "VHL",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50036",
+                "fullname": "VHL VCEP"
+            }
+        },
+        "approver": [
+            "Sharon Plon",
+            "Raymond Kim"
+        ]
+    },
+    {
+        "affiliation_id": "10037",
+        "affiliation_fullname": "Hereditary Hemorrhagic Telangiectasia",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50037",
+                "fullname": "Hereditary Hemorrhagic Telangiectasia VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10038",
+        "affiliation_fullname": "Malignant Hyperthermia Susceptibility",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50038",
+                "fullname": "Malignant Hyperthermia Susceptibility VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10039",
+        "affiliation_fullname": "Hereditary Breast, Ovarian and Pancreatic Cancer",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50039",
+                "fullname": "Hereditary Breast, Ovarian and Pancreatic Cancer VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10040",
+        "affiliation_fullname": "Platelet Disorder",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50040",
+                "fullname": "Platelet Disorder VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10041",
+        "affiliation_fullname": "Coagulation Factor Deficiencies",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50041",
+                "fullname": "Coagulation Factor Deficiencies VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10042",
+        "affiliation_fullname": "Breast/Ovarian Cancer",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40042",
+                "fullname": "Breast/Ovarian Cancer GCEP"
+            }
+        },
+        "approver": [
+            "Sharon Plon"
+        ]
+    },
+    {
+        "affiliation_id": "10043",
+        "affiliation_fullname": "Colon Cancer",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40043",
+                "fullname": "Colon Cancer GCEP"
+            }
+        },
+        "approver": [
+            "Sharon Plon",
+            "Matthew Ferber",
+            "Marc Greenblat"
+        ]
+    },
+    {
+        "affiliation_id": "10044",
+        "affiliation_fullname": "Familial Thoracic Aortic Aneurysm and Dissection",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40044",
+                "fullname": "Familial Thoracic Aortic Aneurysm and Dissection GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10045",
+        "affiliation_fullname": "Brugada Syndrome",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40045",
+                "fullname": "Brugada Syndrome GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10046",
+        "affiliation_fullname": "FBN1",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50046",
+                "fullname": "FBN1 VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10047",
+        "affiliation_fullname": "Cerebral Creatine Deficiency Syndromes",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50047",
+                "fullname": "Cerebral Creatine Deficiency Syndromes VCEP"
+            }
+        }
     }
 ]

@@ -171,3 +171,9 @@ def gdm_5_6(value, system):
     # https://github.com/ClinGen/clincoded/issues/1818
     # Add provisionalClassifications field in search result
     return
+
+@upgrade_step('gdm', '6', '7')
+def gdm_6_7(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1847
+     if value['modeInheritance'] == 'Unknown':
+        value['modeInheritance'] = 'Undetermined mode of inheritance (HP:0000005)'
