@@ -738,15 +738,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
-        return (
-            <tr key={key} className={className ? className : ''}>
-                <td>{rowName}</td>
-                <td>{dataset[key].ac || dataset[key].ac === 0 ? dataset[key].ac : '--'}</td>
-                <td>{dataset[key].an || dataset[key].an === 0 ? dataset[key].an : '--'}</td>
-                <td>{dataset[key].hom || dataset[key].hom === 0 ? dataset[key].hom : '--'}</td>
-                <td>{dataset[key].af || dataset[key].af === 0 ? this.parseFloatShort(dataset[key].af) : '--'}</td>
-            </tr>
-        );
+        if (key !== 'version') {
+					return (
+						<tr key={key} className={className ? className : ''}>
+							<td>{rowName}</td>
+							<td>{dataset[key].ac || dataset[key].ac === 0 ? dataset[key].ac : '--'}</td>
+							<td>{dataset[key].an || dataset[key].an === 0 ? dataset[key].an : '--'}</td>
+							<td>{dataset[key].hom || dataset[key].hom === 0 ? dataset[key].hom : '--'}</td>
+							<td>{dataset[key].af || dataset[key].af === 0 ? this.parseFloatShort(dataset[key].af) : '--'}</td>
+						</tr>
+					);
+        }
     },
 
     // method to render a row of data for the 1000Genomes table
