@@ -93,10 +93,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 desiredCI: 95,
                 mafCutoff: 5,
                 exac: {
-                    version: '', afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                    _version: '', afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 gnomAD: {
-                    version: '', afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                    _version: '', afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 tGenomes: {
                     afr: {ac: {}, af: {}, gc: {}, gf: {}},
@@ -738,17 +738,15 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (key == '_tot') {
             rowName = rowNameCustom;
         }
-        if (key !== 'version') {
-					return (
-						<tr key={key} className={className ? className : ''}>
-							<td>{rowName}</td>
-							<td>{dataset[key].ac || dataset[key].ac === 0 ? dataset[key].ac : '--'}</td>
-							<td>{dataset[key].an || dataset[key].an === 0 ? dataset[key].an : '--'}</td>
-							<td>{dataset[key].hom || dataset[key].hom === 0 ? dataset[key].hom : '--'}</td>
-							<td>{dataset[key].af || dataset[key].af === 0 ? this.parseFloatShort(dataset[key].af) : '--'}</td>
-						</tr>
-					);
-        }
+        return (
+          <tr key={key} className={className ? className : ''}>
+            <td>{rowName}</td>
+            <td>{dataset[key].ac || dataset[key].ac === 0 ? dataset[key].ac : '--'}</td>
+            <td>{dataset[key].an || dataset[key].an === 0 ? dataset[key].an : '--'}</td>
+            <td>{dataset[key].hom || dataset[key].hom === 0 ? dataset[key].hom : '--'}</td>
+            <td>{dataset[key].af || dataset[key].af === 0 ? this.parseFloatShort(dataset[key].af) : '--'}</td>
+          </tr>
+        );
     },
 
     // method to render a row of data for the 1000Genomes table
@@ -949,7 +947,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, gnomadExac, response, metadata, datasetName) {
         let datasetVariant = '';
         let datasetLink;
-        let version;
+        let _version;
 
         if (datasetCheck) {
             datasetVariant = ' ' + dataset._extra.chrom + ':' + dataset._extra.pos + ' ' + dataset._extra.ref + '/' + dataset._extra.alt + ' (GRCh37)';
@@ -969,11 +967,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
         // Set the source version
         if (metadata && metadata.src_version) {
-            version = (datasetName === 'ExAC') ? metadata.src_version.exac : (datasetName === 'gnomAD') ? metadata.src_version.gnomad : '';
+            _version = (datasetName === 'ExAC') ? metadata.src_version.exac : (datasetName === 'gnomAD') ? metadata.src_version.gnomad : '';
         }
 
         return (
-            <h3 className="panel-title">{datasetName}{datasetVariant} {version ? <span>Version: {version}</span> : null}
+            <h3 className="panel-title">{datasetName}{datasetVariant} {_version ? <span>Version: {_version}</span> : null}
                 <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                 {datasetLink}
             </h3>
