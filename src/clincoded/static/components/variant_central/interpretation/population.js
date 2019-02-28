@@ -93,10 +93,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 desiredCI: 95,
                 mafCutoff: 5,
                 exac: {
-                    version: '', afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                    _version: '', afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 gnomAD: {
-                    version: '', afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                    _version: '', afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 tGenomes: {
                     afr: {ac: {}, af: {}, gc: {}, gf: {}},
@@ -279,7 +279,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
             // get the source version
             if (metadata && metadata.src_version && metadata.src_version.exac) {
-                populationObj.exac.version = metadata.src_version.exac;
+                populationObj.exac._version = metadata.src_version.exac;
             }
             // update populationObj, and set flag indicating that we have ExAC data
             this.setState({hasExacData: true, populationObj: populationObj});
@@ -476,7 +476,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
             // Get the source version
             if (metadata && metadata.src_version && metadata.src_version.gnomad) {
-                populationObj.gnomAD.version = metadata.src_version.gnomad;
+                populationObj.gnomAD._version = metadata.src_version.gnomad;
             }
         }
 
