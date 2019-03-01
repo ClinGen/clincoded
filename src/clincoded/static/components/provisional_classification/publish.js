@@ -63,6 +63,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
             publishDate: undefined,
             publishComment: undefined,
             publishSubmitter: undefined,
+            publishAffiliation: undefined,
             isPublishPreview: false,
             showAlertMessage: false,
             alertType: null,
@@ -76,8 +77,11 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
      */
     handlePreviewPublish() {
         const publishComment = this.publishCommentInput.getValue();
+        const publishAffiliation = this.props.affiliation && this.props.affiliation.subgroups && this.props.affiliation.subgroups.gcep &&
+            this.props.affiliation.subgroups.gcep.id ? this.props.affiliation.subgroups.gcep.id : undefined;
         this.setState({
             publishSubmitter: this.props.session.user_properties.title,
+            publishAffiliation: publishAffiliation,
             publishComment: publishComment.length ? publishComment : undefined,
             isPublishPreview: true
         });
@@ -89,6 +93,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     handleCancelPublish() {
         this.setState({
             publishSubmitter: undefined,
+            publishAffiliation: undefined,
             publishComment: undefined,
             isPublishPreview: false
         });
@@ -175,6 +180,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 // Update published (or unpublished) provisional with form data (to be included when selected/published snapshot object is sent to the DB)
                 publishProvisional.publishClassification = !this.state.selectedProvisional.publishClassification;
                 publishProvisional.publishSubmitter = this.state.publishSubmitter;
+                publishProvisional.publishAffiliation = this.state.publishAffiliation;
                 publishProvisional.publishDate = moment(submissionTimestamp).toISOString();
 
                 if (this.state.publishComment && this.state.publishComment.length) {
@@ -191,6 +197,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 if (this.state.isSelectedProvisionalCurrent) {
                     currentProvisional.publishClassification = !this.props.provisional.publishClassification;
                     currentProvisional.publishSubmitter = this.state.publishSubmitter;
+                    currentProvisional.publishAffiliation = this.state.publishAffiliation;
                     currentProvisional.publishDate = moment(submissionTimestamp).toISOString();
 
                     if (this.state.publishComment && this.state.publishComment.length) {
@@ -271,6 +278,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     previouslyPublishedSnapshot.resource.publishClassification = false;
                                     previouslyPublishedSnapshot.resource.publishSubmitter = publishProvisional.publishSubmitter +
                                         ' (automatic due to publication of another classification)';
+                                    previouslyPublishedSnapshot.resource.publishAffiliation = publishProvisional.publishAffiliation;
                                     previouslyPublishedSnapshot.resource.publishDate = publishProvisional.publishDate;
                                     previouslyPublishedSnapshot.resource.last_modified = publishProvisional.last_modified;
                                     previouslyPublishedSnapshot.resource.modified_by = publishProvisional.modified_by;
@@ -337,7 +345,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     <div className="publish-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                            <dd>{affiliation ? getAffiliationName(affiliation, "gcep") : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">
@@ -376,7 +384,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     <div className="publish-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                            <dd>{affiliation ? getAffiliationName(affiliation, "gcep") : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">

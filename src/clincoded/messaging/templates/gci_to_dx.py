@@ -30,7 +30,9 @@ message_template = {
     'type': 'clinicalValidity',
     'affiliation': {
         'id': ['$PATH_TO_DATA', 'resource', 'affiliation'],
-        'name': ['$LOOKUP_AFFILIATION_NAME', ['resource', 'affiliation']]
+        'name': ['$LOOKUP_AFFILIATION_DATA', ['resource', 'affiliation'], 'affiliation_fullname'],
+        'gcep_id': ['$LOOKUP_AFFILIATION_DATA', ['resource', 'affiliation'], 'gcep', 'id'],
+        'gcep_name': ['$LOOKUP_AFFILIATION_DATA', ['resource', 'affiliation'], 'gcep', 'fullname']
     },
     'genes': [
         {

@@ -8,6 +8,8 @@ import json
 from .templates.gci_to_dx import message_template
 from datetime import datetime
 
+saved_affiliation = None
+
 def includeme(config):
     config.add_route('publish', '/publish')
     config.scan(__name__)
@@ -360,19 +362,34 @@ def add_contradictory_evidence(data, evidence, template):
     else:
         template['Value'] = 'NO'
 
-# Lookup an affiliation name associated with a provided ID (using a JSON file maintained for the UI)
-def lookup_affiliation_name(affiliation_id):
-    if affiliation_id:
-        affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
+# Lookup affiliation data associated with a provided ID (using a JSON file maintained for the UI)
+def lookup_affiliation_data(affiliation_id, affiliation_key, affiliation_subgroup=None):
+    global saved_affiliation
 
-        if affiliation_data:
-            for affiliation in affiliation_data:
-                if affiliation_id == affiliation['affiliation_id']:
-                    return affiliation['affiliation_fullname']
+    if affiliation_id and affiliation_key:
+        if not saved_affiliation or 'affiliation_id' not in saved_affiliation or affiliation_id != saved_affiliation['affiliation_id']:
+            try:
+                affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
 
-            return None
-        else:
-            return None
+                for affiliation in affiliation_data:
+                    if affiliation_id == affiliation['affiliation_id']:
+                        saved_affiliation = affiliation
+                        break
+
+            except Exception:
+                pass
+                return None
+
+        try:
+            if affiliation_subgroup:
+                return saved_affiliation['subgroups'][affiliation_subgroup][affiliation_key]
+            else:
+                return saved_affiliation[affiliation_key]
+
+        except Exception:
+            pass
+
+        return None
     else:
         return None
 
@@ -456,9 +473,11 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Lookup an affiliation name by ID (from a data path list)
-                elif value[0] == '$LOOKUP_AFFILIATION_NAME':
-                    if value_length == 2:
-                        template[key] = lookup_affiliation_name(get_data_by_path(data, value[1]))
+                elif value[0] == '$LOOKUP_AFFILIATION_DATA':
+                    if value_length == 4:
+                        template[key] = lookup_affiliation_data(get_data_by_path(data, value[1]), value[3], value[2])
+                    elif value_length == 3:
+                        template[key] = lookup_affiliation_data(get_data_by_path(data, value[1]), value[2])
                     else:
                         template[key] = ''
 

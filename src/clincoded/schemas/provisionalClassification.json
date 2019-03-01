@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "7"
+            "default": "8"
         },
         "classificationPoints": {
             "title": "Calculated scores and points from the scored evidence",
@@ -635,6 +635,11 @@
             "description": "Curator who published the classification",
             "type": "string"
         },
+        "publishAffiliation": {
+            "title": "Publish Affiliation",
+            "description": "Affiliation that published the classification (if different than the 'associated' one)",
+            "type": "string"
+        },
         "publishDate": {
             "title": "Date Published",
             "description": "Date when the classification was published",
@@ -758,6 +763,10 @@
         },
         "publishSubmitter": {
             "title": "Publish Submitter",
+            "type": "string"
+        },
+        "publishAffiliation": {
+            "title": "Publish Affiliation",
             "type": "string"
         },
         "publishDate": {

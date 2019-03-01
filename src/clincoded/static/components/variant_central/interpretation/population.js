@@ -59,9 +59,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         updateInterpretationObj: PropTypes.func,
         ext_pageData: PropTypes.object,
         ext_myVariantInfo: PropTypes.object,
+        ext_myVariantInfo_metadata: PropTypes.object,
         ext_ensemblHgvsVEP: PropTypes.array,
         ext_ensemblVariation: PropTypes.object,
         ext_singleNucleotide: PropTypes.bool,
+        ext_gnomadExac: PropTypes.bool,
         loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_ensemblVariation: PropTypes.bool,
@@ -91,10 +93,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 desiredCI: 95,
                 mafCutoff: 5,
                 exac: {
-                    afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                    _version: '', afr: {}, amr: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 gnomAD: {
-                    afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
+                    _version: '', afr: {}, amr: {}, asj: {}, eas: {}, fin: {}, nfe: {}, oth: {}, sas: {}, _tot: {}, _extra: {}
                 },
                 tGenomes: {
                     afr: {ac: {}, af: {}, gc: {}, gf: {}},
@@ -117,6 +119,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             populationObjDiff: null,
             populationObjDiffFlag: false,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
+            ext_gnomadExac: this.props.ext_gnomadExac,
             loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_ensemblVariation: this.props.loading_ensemblVariation,
@@ -137,11 +140,12 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.setState({hasPageData: true});
         }
         if (this.props.ext_myVariantInfo) {
-            this.parseExacData(this.props.ext_myVariantInfo);
-            this.parseGnomadData(this.props.ext_myVariantInfo);
+            this.parseExacData(this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata);
+            this.parseGnomadData(this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata);
             this.parseEspData(this.props.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
+        
         if (this.props.ext_ensemblHgvsVEP) {
             this.parseAlleleFrequencyData(this.props.ext_ensemblHgvsVEP);
             this.calculateHighestMAF();
@@ -167,8 +171,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             this.setState({hasPageData: true});
         }
         if (nextProps.ext_myVariantInfo) {
-            this.parseExacData(nextProps.ext_myVariantInfo);
-            this.parseGnomadData(nextProps.ext_myVariantInfo);
+            this.parseExacData(nextProps.ext_myVariantInfo, nextProps.ext_myVariantInfo_metadata);
+            this.parseGnomadData(nextProps.ext_myVariantInfo, nextProps.ext_myVariantInfo_metadata);
             this.parseEspData(nextProps.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
@@ -190,6 +194,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
+            ext_gnomadExac: nextProps.ext_gnomadExac,
             loading_ensemblVariation: nextProps.loading_ensemblVariation,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
             loading_pageData: nextProps.loading_pageData
@@ -242,7 +247,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to assign ExAC population data to global population object
-    parseExacData: function(response) {
+    parseExacData: function(response, metadata) {
         // Not all variants can be found in ExAC
         // Do nothing if the exac{...} object is not returned from myvariant.info
         if (response.exac) {
@@ -272,13 +277,17 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     populationObj.exac._extra.filter = [response.exac.filter];
                 }
             }
+            // get the source version
+            if (metadata && metadata.src_version && metadata.src_version.exac) {
+                populationObj.exac._version = metadata.src_version.exac;
+            }
             // update populationObj, and set flag indicating that we have ExAC data
             this.setState({hasExacData: true, populationObj: populationObj});
         }
     },
 
     // Method to assign gnomAD population data to global population object
-    parseGnomadData: function(response) {
+    parseGnomadData: function(response, metadata) {
         let populationObj = this.state.populationObj;
 
         // Parse gnomAD exome data in myvariant.info response
@@ -463,6 +472,11 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 } else {
                     populationObj.gnomAD._extra.genome_filter = [response.gnomad_genome.filter];
                 }
+            }
+
+            // Get the source version
+            if (metadata && metadata.src_version && metadata.src_version.gnomad) {
+                populationObj.gnomAD._version = metadata.src_version.gnomad;
             }
         }
 
@@ -684,7 +698,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
             // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
             // Or there is no ExAC/gnomAD data object in the returned myvariant.info JSON response
-            if (!this.state.ext_singleNucleotide || !datasetCheck) {
+            if (!this.state.ext_gnomadExac || !datasetCheck) {
                 datasetLink = external_url_map[datasetRegionURLKey] + chrom + '-' + regionStart + '-' + regionEnd;
                 linkText = 'View the coverage of this region (+/- 30 bp) in ' + datasetName;
             }
@@ -930,9 +944,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to render ExAC/gnomAD population table header content
-    renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, singleNucleotide, response, datasetName) {
+    renderExacGnomadHeader: function(datasetCheck, loading_myVariantInfo, dataset, gnomadExac, response, metadata, datasetName) {
         let datasetVariant = '';
         let datasetLink;
+        let version;
 
         if (datasetCheck) {
             datasetVariant = ' ' + dataset._extra.chrom + ':' + dataset._extra.pos + ' ' + dataset._extra.ref + '/' + dataset._extra.alt + ' (GRCh37)';
@@ -944,14 +959,19 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
         }
 
-        if (datasetCheck && !loading_myVariantInfo && singleNucleotide) {
+        if (datasetCheck && !loading_myVariantInfo && gnomadExac) {
             const datasetVariantURLKey = (datasetName === 'ExAC') ? 'EXAC' : (datasetName === 'gnomAD') ? 'gnomAD' : null;
             const datasetURL = 'http:' + external_url_map[datasetVariantURLKey] + dataset._extra.chrom + '-' + dataset._extra.pos + '-' + dataset._extra.ref + '-' + dataset._extra.alt;
             datasetLink = <a className="panel-subtitle pull-right" href={datasetURL} target="_blank">See data in {datasetName}</a>
         }
 
+        // Set the source version
+        if (metadata && metadata.src_version) {
+            version = (datasetName === 'ExAC') ? metadata.src_version.exac : (datasetName === 'gnomAD') ? metadata.src_version.gnomad : '';
+        }
+
         return (
-            <h3 className="panel-title">{datasetName}{datasetVariant}
+            <h3 className="panel-title">{datasetName}{datasetVariant} {version ? <span>Version: {version}</span> : null}
                 <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
                 {datasetLink}
             </h3>
@@ -1121,6 +1141,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         var desiredCI = this.state.populationObj && this.state.populationObj.desiredCI ? this.state.populationObj.desiredCI : CI_DEFAULT;
         var populationObjDiffFlag = this.state.populationObjDiffFlag;
         var singleNucleotide = this.state.ext_singleNucleotide;
+        var gnomadExac = this.state.ext_gnomadExac;
         let exacSortedAlleleFrequency = this.sortObjKeys(exac);
         let gnomADSortedAlleleFrequency = this.sortObjKeys(gnomAD);
         const affiliation = this.props.affiliation, session = this.props.session;
@@ -1184,13 +1205,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-gnomAD">
                         <div className="panel-heading">
-                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_myVariantInfo, gnomAD, singleNucleotide, this.props.ext_myVariantInfo, 'gnomAD')}
+                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_myVariantInfo, gnomAD, gnomadExac, this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata, 'gnomAD')}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                            {!singleNucleotide ?
+                            {!gnomadExac ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'gnomAD')}</span>
+                                    <span>Data is currently only returned for single nucleotide variants and for some small duplications, insertions, and deletions. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'gnomAD')}</span>
                                 </div>
                                 :
                                 <div>
@@ -1228,13 +1249,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-ExAC">
                         <div className="panel-heading">
-                            {this.renderExacGnomadHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, singleNucleotide, this.props.ext_myVariantInfo, 'ExAC')}
+                            {this.renderExacGnomadHeader(this.state.hasExacData, this.state.loading_myVariantInfo, exac, gnomadExac, this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata, 'ExAC')}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
-                            {!singleNucleotide ?
+                            {!gnomadExac ?
                                 <div className="panel-body">
-                                    <span>Data is currently only returned for single nucleotide variants. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'ExAC')}</span>
+                                    <span>Data is currently only returned for single nucleotide variants and for some small duplications, insertions, and deletions. {this.renderExacGnomadLinkout(this.props.ext_myVariantInfo, 'ExAC')}</span>
                                 </div>
                                 :
                                 <div>

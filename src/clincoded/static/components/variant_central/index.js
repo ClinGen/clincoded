@@ -43,6 +43,7 @@ var VariantCurationHub = createReactClass({
             variantObj: null,
             ext_pageData: null,
             ext_myVariantInfo: null,
+            ext_myVariantInfo_metadata: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
@@ -55,6 +56,7 @@ var VariantCurationHub = createReactClass({
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
             ext_singleNucleotide: true,
+            ext_gnomadExac: false,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarSCV: true,
@@ -158,6 +160,7 @@ var VariantCurationHub = createReactClass({
             if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
                 this.fetchPageData(this.state.variantObj);
             }
+            this.fetchMyVariantInfoMetadata();
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -211,6 +214,16 @@ var VariantCurationHub = createReactClass({
                 });
             }
         }
+    },
+
+    // Retrieve MyVariantInfo metadata for the src_version
+    fetchMyVariantInfoMetadata() {
+        // read in the myvariant.info metadata 
+        this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfoMetadata']).then(meta_response => {
+            if (meta_response) {
+                this.setState({ext_myVariantInfo_metadata: meta_response});
+            }
+        });
     },
 
     /**
@@ -283,10 +296,11 @@ var VariantCurationHub = createReactClass({
     },
 
     // Method to parse variant type
-    // Won't show population/predictor data if subject is not single nucleotide variant
+    // Won't show population/predictor data if subject is not single nucleotide variant or indel
     parseVariantType: function(variant) {
         if (variant) {
             // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
+            const popVariantTypes = ['single nucleotide variant', 'deletion', 'insertion', 'duplication']
             let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
             let genomicHGVS, ncGenomic;
 
@@ -298,6 +312,11 @@ var VariantCurationHub = createReactClass({
             // Filter variant by its change type
             // Look for the <VariantType> node value in first pass
             // Then look into HGVS term for non-SNV type patterns
+            if (variant.variationType) {
+                if (popVariantTypes.indexOf(variant.variationType.toLowerCase()) > -1) {
+                    this.setState({ext_gnomadExac: true })
+                }
+            }
             if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
                 this.setState({ext_singleNucleotide: false});
             } else if (genomicHGVS) {
@@ -534,6 +553,7 @@ var VariantCurationHub = createReactClass({
                             ext_myGeneInfo={my_gene_info}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
@@ -543,6 +563,7 @@ var VariantCurationHub = createReactClass({
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             loading_clinvarSCV={this.state.loading_clinvarSCV}

@@ -874,9 +874,9 @@ var ProvisionalCuration = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
-        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1);
+        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1 || gdm.modeInheritance.indexOf('Undetermined') > -1);
         let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
-        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval && validModeInheritance && hasMondoId ? true : false;
+        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval && (!this.props.affiliation.subgroups || this.props.affiliation.subgroups.gcep) && validModeInheritance && hasMondoId ? true : false;
         const lastSavedDate = currentClassification !== 'None' ? getClassificationSavedDate(provisional) : null;
         const affiliation = this.props.affiliation;
         const classificationStatus = this.state.classificationStatus;
@@ -1194,7 +1194,7 @@ var ProvisionalCuration = createReactClass({
                                     <div>
                                         <p className="alert alert-info">
                                             <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following
-                                                apply: 1) your affiliation does not have permission to publish, 2) the mode of inheritance is not supported by the Clinical Validity
+                                                apply: 1) your affiliation does not have permission to publish in the GCI, 2) the mode of inheritance is not supported by the Clinical Validity
                                                 Classification framework, 3) the associated disease does not have a MONDO ID, 4) it is based on a previous version of the SOP.
                                         </p>
                                     </div>

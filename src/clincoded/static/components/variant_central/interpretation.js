@@ -35,6 +35,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         getSelectedSubTab: PropTypes.func,
         ext_pageData: PropTypes.object,
         ext_myVariantInfo: PropTypes.object,
+        ext_myVariantInfo_metadata: PropTypes.object,
         ext_ensemblVariation: PropTypes.object,
         ext_ensemblHgvsVEP: PropTypes.array,
         ext_clinvarEutils: PropTypes.object,
@@ -44,6 +45,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_ensemblGeneId: PropTypes.string,
         ext_geneSynonyms: PropTypes.array,
         ext_singleNucleotide: PropTypes.bool,
+        ext_gnomadExac: PropTypes.bool,
         loading_clinvarEutils: PropTypes.bool,
         loading_clinvarEsearch: PropTypes.bool,
         loading_clinvarSCV: PropTypes.bool,
@@ -66,6 +68,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_myGeneInfo: this.props.ext_myGeneInfo,
             ext_pageData: this.props.ext_pageData,
             ext_myVariantInfo: this.props.ext_myVariantInfo,
+            ext_myVariantInfo_metadata: this.props.ext_myVariantInfo_metadata,
             ext_ensemblVariation: this.props.ext_ensemblVariation,
             ext_ensemblHgvsVEP: this.props.ext_ensemblHgvsVEP,
             ext_clinvarEutils: this.props.ext_clinvarEutils,
@@ -75,6 +78,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
+            ext_gnomadExac: this.props.ext_gnomadExac,
             loading_clinvarEutils: this.props.loading_clinvarEutils,
             loading_clinvarEsearch: this.props.loading_clinvarEsearch,
             loading_clinvarSCV: this.props.loading_clinvarSCV,
@@ -102,6 +106,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         if (nextProps.ext_myVariantInfo) {
             this.setState({ext_myVariantInfo: nextProps.ext_myVariantInfo});
+            this.setState({ext_myVariantInfo_metadata: nextProps.ext_myVariantInfo_metadata});
         }
         if (nextProps.ext_ensemblVariation) {
             this.setState({ext_ensemblVariation: nextProps.ext_ensemblVariation});
@@ -138,6 +143,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         }
         this.setState({
             ext_singleNucleotide: nextProps.ext_singleNucleotide,
+            ext_gnomadExac: nextProps.ext_gnomadExac,
             loading_myGeneInfo: nextProps.loading_myGeneInfo,
             loading_pageData: nextProps.loading_pageData,
             loading_myVariantInfo: nextProps.loading_myVariantInfo,
@@ -206,9 +212,11 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}

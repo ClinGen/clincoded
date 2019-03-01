@@ -60,3 +60,9 @@ def provisionalClassification_6_7(value, system):
             if 'evidenceCount' in value['classificationPoints']['segregation']:
                 value['classificationPoints']['segregation']['evidenceCountCandidate'] = value['classificationPoints']['segregation']['evidenceCount']
                 value['classificationPoints']['segregation'].pop('evidenceCount', None)
+
+@upgrade_step('provisionalClassification', '7', '8')
+def provisionalClassification_7_8(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1854
+    # Add property for publishing affiliation
+    return

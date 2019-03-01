@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
-import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import { sortListByDate } from '../../libs/helpers/sort';
 import { isScoringForCurrentSOP } from '../../libs/sop';
@@ -158,6 +158,8 @@ class CurationSnapshots extends Component {
             const snapshotUUID = snapshot.uuid ? snapshot.uuid : snapshot['@id'].split('/', 3)[2];
 
             if (snapshot.resource.publishClassification) {
+                const publishAffiliation = snapshot.resource.publishAffiliation ? ' (' +
+                    getAffiliationNameBySubgroupID('gcep', snapshot.resource.publishAffiliation) + ')' : '';
                 const publishSiteLinkDate = !isSnapshotOnCurrentSOP ? snapshot.resource.approvalDate :
                     snapshot.resource.approvalReviewDate ? snapshot.resource.approvalReviewDate : snapshot.resource.approvalDate;
                 const publishSiteURL = 'https://search' + (this.props.demoVersion ? '-staging' : '') + '.clinicalgenome.org/kb/gene-validity/' +
@@ -170,7 +172,7 @@ class CurationSnapshots extends Component {
                         <td className="snapshot-content">
                             <dl className="inline-dl clearfix snapshot-publish-approval-submitter">
                                 <dt><span>Published by:</span></dt>
-                                <dd>{snapshot.resource.publishSubmitter}</dd>
+                                <dd>{snapshot.resource.publishSubmitter + publishAffiliation}</dd>
                             </dl>
                             <dl className="inline-dl clearfix snapshot-publish-approval-date">
                                 <dt><span>Date published:</span></dt>

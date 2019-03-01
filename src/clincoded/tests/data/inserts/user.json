@@ -10437,5 +10437,43 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "christip@stanford.edu",
+        "first_name": "Christine",
+        "last_name": "Preston",
+        "uuid": "55af6f87-8264-4336-a239-ba894bf3316b",
+        "groups": [
+            "admin"
+        ],
+        "affiliation": [
+            "88888",
+            "99999"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "g1572359@stanford.edu",
+        "first_name": "Gilberto",
+        "last_name": "De La Vega",
+        "uuid": "91c9c5ec-e059-4b76-b22c-95e4350bbdc3",
+        "groups": [
+            "admin"
+        ],
+        "affiliation": [
+            "88888",
+            "99999"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
