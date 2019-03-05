@@ -3,6 +3,7 @@
     color: #fff;
 }
 
+
 .table-count {
     line-height: $input-height-base;
 }
@@ -240,3 +241,12 @@ $status-types:
     margin-left: 5px;
     font-size: 0.9rem;
 }
+
+//style for the text displaying the number of entries for each gdm search and for each interpretation search
+
+.number-of-entries {
+    color: grey;
+    font-size: 50%
+}
+
+
