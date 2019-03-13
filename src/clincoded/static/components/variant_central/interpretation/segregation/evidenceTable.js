@@ -24,7 +24,9 @@ let EvidenceTable = createReactClass({
         deleteEvidenceFunc: PropTypes.func,
         evidenceCollectionDone: PropTypes.func,
         criteriaList: PropTypes.array,              // ACMG criteria
-        session: PropTypes.object                   // Session object
+        session: PropTypes.object,                  // Session object
+        affiliation: PropTypes.object,              // User's affiliation
+        viewOnly: PropTypes.bool                    // If the page is in read-only mode
     },
 
     getInitialState: function() {
@@ -49,13 +51,30 @@ let EvidenceTable = createReactClass({
         });
     },
 
-    getEditButton: function(key, row) {
+    canModify(row) {
+        if (this.props.viewOnly === true) {
+            return false;
+        }
+
+        // First check for affiliation, then check user ID
+        let created_affiliation = row.affiliation;
+        if (created_affiliation !== null) {
+            if (this.props.affiliation == created_affiliation) {
+                return true;
+            }
+        }
+
+        // User ID check
         let curr_user = this.props.session.user_properties['@id'];
         let created_user = row.submitted_by['@id'];
-        let disableActuator = false;
-        if (curr_user != created_user) {
-            disableActuator = true;
+        if (curr_user === created_user) {
+            return true;
         }
+        return false;
+    },
+
+    getEditButton: function(key, row) {
+        let disableActuator = !this.canModify(row);
         return <td key={key} >
             <EvidenceModalManager
                 data = {row}
@@ -66,18 +85,15 @@ let EvidenceTable = createReactClass({
                 evidenceCollectionDone = {this.props.evidenceCollectionDone}
                 isNew = {false}
                 disableActuator = {disableActuator}
+                affiliation = {this.props.affiliation}
+                session = {this.props.session}
             >
             </EvidenceModalManager>
         </td>
     },
 
     getDeleteButton: function(deleteKey, row) {
-        let curr_user = this.props.session.user_properties['@id'];
-        let created_user = row.submitted_by['@id'];
-        let disableActuator = false;
-        if (curr_user != created_user) {
-            disableActuator = true;
-        }
+        let disableActuator = !this.canModify(row);
         return <td key={deleteKey}>
             <Input 
                 type="button-button"

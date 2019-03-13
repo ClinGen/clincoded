@@ -340,6 +340,12 @@ function masterTable() {
                 key: col.name,
                 label: col.label
             };
+            let mapping = _.find(fieldToCriteriaCodeMapping, o => {
+                return o.key === col.name
+            });
+            if (mapping != undefined) {
+                obj['criteria_codes'] = mapping['codes'];
+            }
             fields.push(obj);
         });
     });

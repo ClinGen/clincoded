@@ -32,13 +32,25 @@ let EvidenceModalManager = createReactClass({
         subcategory: PropTypes.string,              // subcategory (usually the panel) the evidence is part of
         evidenceCollectionDone: PropTypes.func,     // Function to call when we finish with modal 2
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
-        disableActuator: PropTypes.bool
+        disableActuator: PropTypes.bool,
+        affiliation: PropTypes.object,              // The user's affiliation
+        session: PropTypes.object                   // The session object
     },
 
     getInitData: function(){
+        let data = {};
+        let metadata = {};
+        if (this.props.data) {
+            data = this.props.data;
+            if ('source' in data) {
+                if ('metadata' in data['source']) {
+                    metadata = data['source']['metadata'];
+                }
+            }
+        }
         return {
-            'metadata': {},
-            'data': {}
+            'metadata': metadata,
+            'data': data
         };
     },
 
@@ -87,8 +99,12 @@ let EvidenceModalManager = createReactClass({
             .filter(o => identifierCol in o.source.metadata
                 && o.source.metadata[identifierCol] === metadata[identifierCol]);
         if (candidate.length > 0) {
-            // Hopefully only one item, otherwise we have run into consistency issues
-            return candidate[0];
+            if (candidate[0].affiliation && candidate[0].affiliation === this.props.affiliation.affiliation_id) {
+                // Hopefully only one item, otherwise we have run into consistency issues
+                return candidate[0];
+            } else if (candidate[0].submitted_by['@id'] === this.props.session.user_properties['@id']) {
+                return candidate[0];
+            }
         }
         return false;
     },
@@ -168,6 +184,7 @@ let EvidenceModalManager = createReactClass({
             } else {
                 Object.assign(newData.data, data);
             }
+            newData['affiliation'] = this.props.affiliation;
             this.props.evidenceCollectionDone(true, newData, this.state.isNew);
             this.reset();
         }

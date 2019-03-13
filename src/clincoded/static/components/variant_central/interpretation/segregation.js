@@ -69,9 +69,26 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
     renderMasterTable() {
         return <MasterEvidenceTable
-                    interpretation = {this.state.interpretation}
+                    evidence_arr = {this.getAllInterpretations()}
                 >
                 </MasterEvidenceTable>
+    },
+
+    getAllInterpretations() {
+        let relevantEvidenceListRaw = [];
+        if (this.props.data && this.props.data.associatedInterpretations) {
+            this.props.data.associatedInterpretations.map(interpretation => {
+                if (interpretation.extra_evidence_list) {
+                    interpretation.extra_evidence_list.forEach(extra_evidence => {
+                        relevantEvidenceListRaw.push(extra_evidence);
+                    });
+                }
+            });
+        }
+        let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
+            return evidence.date_created;
+        }).reverse();
+        return relevantEvidenceList;
     },
 
     render() {

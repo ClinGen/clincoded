@@ -11,31 +11,30 @@ import { external_url_map } from 'components/globals';
 
 let MasterEvidenceTable = createReactClass({
     propTypes: {
-        interpretation: PropTypes.object    // Master interpretation document
+        evidence_arr: PropTypes.array    // All pieces of evidence added to this variant
     },
 
     getInitialState() {
         return {
-            rows: this.props.interpretation
+            rows: this.props.evidence_objects
         };
     },
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.interpretation != null &&
-            nextProps.interpretation.extra_evidence_list != null &&
-            nextProps.interpretation.extra_evidence_list != this.state.rows) {
+        if (nextProps.evidence_arr != null &&
+            nextProps.evidence_arr != this.state.rows) {
                 this.setState({
-                    rows: nextProps.interpretation.extra_evidence_list
+                    rows: nextProps.evidence_arr
                 });
         }
     },
 
     getEvidenceTypes() {
         let evidence_types = {};
-        for(let row of this.props.interpretation.extra_evidence_list) {
+        for(let row of this.props.evidence_arr) {
             let evidence_type = row.source.metadata['_kind_key'];
             if (!(evidence_type in evidence_types)) {
-                evidence_types[evidence_type] = this.props.interpretation.extra_evidence_list.filter(row => row.source.metadata['_kind_key'] === evidence_type);
+                evidence_types[evidence_type] = this.props.evidence_arr.filter(row => row.source.metadata['_kind_key'] === evidence_type);
             }
         }
         return evidence_types;
@@ -70,14 +69,14 @@ let MasterEvidenceTable = createReactClass({
                     >
                         PMID {pmid}
                     </a>
-                    second_row.push(<th key={`header.${pmid}`} style={{borderBottom: 'none'}}>
+                    second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
                         <div style={{textAlign: 'center'}}>
                             <span>{element}</span>
                         </div>
                     </th>)
                 } else {
                     let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
-                    let evidence_detail = `${identifier.description}: ${row.source.metadata[identifier.name]}`;
+                    let evidence_detail = `${row.source.metadata[identifier.name]}`;
                     second_row.push(<th key={`header.${evidence_detail}`}>
                         <div style={{textAlign: 'center'}}>
                             <span>{evidence_detail}</span>
@@ -98,9 +97,13 @@ let MasterEvidenceTable = createReactClass({
 
         // Initialize the left-hand columns
         masterTable().forEach(row => {
+            let contents = `${row.label}`;
+            if ('criteria_codes' in row) {
+                contents = `[${row['criteria_codes'].join(', ')}] ${contents}`;
+            }
             let label_td = <td key={`cell_${cell_num++}`}>
                 <div>
-                    <strong>{row.label}</strong>
+                    <strong>{contents}</strong>
                 </div>
             </td>
             let sum_td = null;
@@ -144,7 +147,7 @@ let MasterEvidenceTable = createReactClass({
 
     getSums() {
         let sums = {};
-        this.props.interpretation.extra_evidence_list.forEach(row => {
+        this.props.evidence_arr.forEach(row => {
             let data = row.source.data;
             Object.keys(data).forEach(name => {
                 if (name.startsWith('num_') && !name.endsWith('_comment')) {
@@ -167,9 +170,7 @@ let MasterEvidenceTable = createReactClass({
     },
 
     render() {
-        if (!this.props.interpretation ||
-            !this.props.interpretation.extra_evidence_list || 
-            this.props.interpretation.extra_evidence_list.length == 0) {
+        if (!this.props.evidence_arr || this.props.evidence_arr.length == 0) {
             return null;
         }
         this.getSums();
