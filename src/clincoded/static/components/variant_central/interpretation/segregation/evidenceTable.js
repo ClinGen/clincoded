@@ -192,7 +192,14 @@ let EvidenceTable = createReactClass({
     },
 
     tableHeader: function() {
-        let cols = this.state.tableFormat.cols.map(col => <th key={col.key}>{ col.title }</th>);
+    let cols = this.state.tableFormat.cols.map(col => {
+        let criteriaCodes = extraEvidence.fieldToCriteriaCodeMapping.filter(o => o.key === col.key);
+        if (criteriaCodes.length > 0) {
+            criteriaCodes = criteriaCodes[0].codes;
+            return <th key={col.key}>{`${col.title} [${criteriaCodes.join(',')}]`}</th>
+        }
+        return <th key={col.key}>{ col.title }</th>;
+    });
         cols.push(<th key="edit">Edit</th>)
         cols.push(<th key="delete">Delete</th>)
         return cols;

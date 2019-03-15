@@ -566,11 +566,8 @@ function tableCols() {
         let cols = [{
             key: '_kind_title',
             title: 'Source'
-        },
-        {
-            key: 'relevant_criteria',
-            title: 'Relevant Criteria'
-        }];
+        }
+    ];
 
         // construct obj middle cols
         let mapping = _.find(sheetToTableMapping, o => o.subcategory === cat);
