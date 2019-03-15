@@ -9,7 +9,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            mounted: false
+            mounted: false,
+            sortCol: 'variantType',
+            reversed: false
         };
     }
 
@@ -18,11 +20,23 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     }
 
     /**
-     * Method to render individual table row of the logged-in user's scored evidence
-     * @param {object} evidence - scored evidence and its associated case-control evidence
-     * @param {number} key - unique key
+     * Handle clicks in the table column header for sorting
+     * @param {string} colName - column name
      */
-    renderCaseLevelEvidence(evidence, key) {
+     handleClickHeader(event, colName) {
+        let sortCol = colName;
+        let reversed = false;
+        if (this.state && this.state.sortCol) {
+            reversed = colName === this.state.sortCol ? !this.state.reversed : false;
+            this.setState({sortCol: sortCol, reversed: reversed});
+        }
+    }
+
+    /**
+     * Method to assemble the authors list for the given evidence
+     * @param {object} evidence - scored evidence and its associated case-control evidence
+     */
+    getEvidenceAuthors(evidence) {
         let authors;
         if (evidence.authors && evidence.authors.length) {
             if (evidence.authors.length > 1) {
@@ -31,6 +45,17 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 authors = evidence.authors[0];
             }
         }
+        return authors;
+    }
+
+    /**
+     * Method to render individual table row of the logged-in user's scored evidence
+     * @param {object} evidence - scored evidence and its associated case-control evidence
+     * @param {number} key - unique key
+     */
+    renderCaseLevelEvidence(evidence, key) {
+        let authors = this.getEvidenceAuthors(evidence);
+
         return (
             <tr key={key} className="scored-case-level-evidence">
                 <td className="evidence-label">
@@ -143,19 +168,39 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 
     /**
      * Sort table rows given a list of evidence and column name
+     * @param {array} evidenceList - A list of evidence items
+     * @param {string} colName - sort by column name
      */
     sortListbyColName(evidenceList, colName) {
         let sortedList = [];
+        let dir = this.state.reversed ? -1 : 1;
         if (evidenceList.length) {
-            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() !== y[colName].toLowerCase() ? x[colName].toLowerCase() < y[colName].toLowerCase() ? -1 : 1 : 0);
+            switch (colName) {
+                case 'reference':
+                    sortedList = evidenceList.sort((x,y) => { 
+                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
+                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
+                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
+                    });
+                    break;
+                case 'variantType':
+                case 'scoreStatus':
+                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
+                    break;
+                default:
+                    sortedList = evidenceList;
+                    break;
+            }
         }
         return sortedList;
     }
 
     render() {
         const caseLevelEvidenceList = this.props.caseLevelEvidenceList;
-        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseLevelEvidenceList, 'variantType') : caseLevelEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseLevelEvidenceList, this.state.sortCol) : caseLevelEvidenceList;
         let self = this;
+        let sortIconClass = {variantType: 'tcell-sort', reference: 'tcell-sort', scoreStatus: 'tcell-sort'};
+        sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         return (
             <div className="evidence-summary panel-case-level">
@@ -168,9 +213,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                             <thead>
                                 <tr>
                                     <th rowSpan="2">Label</th>
-                                    <th rowSpan="2">Variant type</th>
+                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'variantType')}>Variant type<span className={sortIconClass.variantType}></span></th>
                                     <th rowSpan="2">Variant</th>
-                                    <th rowSpan="2">Reference</th>
+                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
                                     <th rowSpan="2">Proband sex</th>
                                     <th rowSpan="2">Proband age</th>
                                     <th rowSpan="2">Proband ethnicity</th>
@@ -178,7 +223,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th colSpan="5">Segregations</th>
                                     <th rowSpan="2">Proband previous testing</th>
                                     <th rowSpan="2">Proband methods of detection</th>
-                                    <th rowSpan="2">Score status</th>
+                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'scoreStatus')}>Score status<span className={sortIconClass.scoreStatus}></span></th>
                                     <th rowSpan="2">Proband points (default points)</th>
                                     <th rowSpan="2">Reason for changed score</th>
                                 </tr>
