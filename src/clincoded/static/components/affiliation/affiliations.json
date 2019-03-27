@@ -638,5 +638,16 @@
                 "fullname": "Cerebral Creatine Deficiency Syndromes VCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10048",
+        "affiliation_fullname": "ACADVL",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50048",
+                "fullname": "ACADVL VCEP"
+            }
+        }
     }
 ]
