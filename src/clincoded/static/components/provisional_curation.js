@@ -15,6 +15,8 @@ import { ClassificationDefinition } from './provisional_classification/definitio
 import CurationSnapshots from './provisional_classification/snapshots';
 import { sortListByDate } from '../libs/helpers/sort';
 import { getClassificationSavedDate } from '../libs/get_saved_date';
+import { allowPublishGlobal } from '../libs/allow_publish';
+import { isScoringForCurrentSOP } from '../libs/sop';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -235,6 +237,7 @@ var ProvisionalCuration = createReactClass({
             if (newProvisional.approvalComment) delete newProvisional.approvalComment;
             newProvisional.publishClassification = false;
             if (newProvisional.publishSubmitter) delete newProvisional.publishSubmitter;
+            if (newProvisional.publishAffiliation) delete newProvisional.publishAffiliation;
             if (newProvisional.publishDate) delete newProvisional.publishDate;
             if (newProvisional.publishComment) delete newProvisional.publishComment;
             newProvisional.evidenceSummary = this.state.evidenceSummary;
@@ -874,12 +877,11 @@ var ProvisionalCuration = createReactClass({
             }
         }
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
-        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1 || gdm.modeInheritance.indexOf('Undetermined') > -1);
-        let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
-        const allowPublishButton = this.props.affiliation && this.props.affiliation.publish_approval && (!this.props.affiliation.subgroups || this.props.affiliation.subgroups.gcep) && validModeInheritance && hasMondoId ? true : false;
         const lastSavedDate = currentClassification !== 'None' ? getClassificationSavedDate(provisional) : null;
         const affiliation = this.props.affiliation;
         const classificationStatus = this.state.classificationStatus;
+        const allowPublishButton = gdm && gdm.disease ? allowPublishGlobal(affiliation, 'classification', gdm.modeInheritance, gdm.disease.diseaseId) : false;
+        const currentSOP = provisional ? isScoringForCurrentSOP(provisional.classificationPoints) : false;
         const demoVersion = this.props.demoVersion;
 
         return (
@@ -1190,7 +1192,7 @@ var ProvisionalCuration = createReactClass({
                                         <Input type="submit" inputClassName="btn-primary btn-inline-spacer pull-right" id="submit" title="Save" />
                                     </div>
                                 </Form>
-                                {sortedSnapshotList.length && !allowPublishButton ?
+                                {sortedSnapshotList.length && (!allowPublishButton || !currentSOP)?
                                     <div>
                                         <p className="alert alert-info">
                                             <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following

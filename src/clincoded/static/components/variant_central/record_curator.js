@@ -12,6 +12,7 @@ import { renderProvisionalStatus } from '../../libs/render_provisional_status';
 import { renderApprovalStatus } from '../../libs/render_approval_status';
 import { renderNewProvisionalStatus } from '../../libs/render_new_provisional_status';
 import { renderPublishStatus } from '../../libs/render_publish_status';
+import { getClassificationSavedDate } from '../../libs/get_saved_date';
 
 // Display in-progress or provisional interpretations associated with variant
 var CurationRecordCurator = module.exports.CurationRecordCurator = createReactClass({
@@ -207,7 +208,7 @@ var CurationRecordCurator = module.exports.CurationRecordCurator = createReactCl
                                             <div>
                                                 {myInterpretation.provisional_variant && myInterpretation.provisional_variant.length ?
                                                     <span>
-                                                        <span><strong>Interpretation Last Saved:</strong> {moment(myInterpretation.provisional_variant[0].last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                                                        <span><strong>Interpretation Last Saved:</strong> {moment(getClassificationSavedDate(myInterpretation.provisional_variant[0])).format("YYYY MMM DD, h:mm a")}</span>
                                                         {renderNewSummaryStatus(myInterpretation.provisional_variant[0])}
                                                     </span>
                                                     : null}

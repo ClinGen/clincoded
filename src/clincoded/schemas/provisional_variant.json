@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "autoClassification": {
             "title": "Classification",
@@ -50,6 +50,11 @@
         "affiliation": {
             "title": "Affiliation",
             "description": "The affiliation this classification is associated with.",
+            "type": "string"
+        },
+        "classificationDate": {
+            "title": "Classification Date",
+            "description": "Date when the classification was last created/saved",
             "type": "string"
         },
         "approvalSubmitter": {
@@ -95,6 +100,26 @@
         "provisionalComment": {
             "title": "Provisional Comments",
             "description": "Provisional comments for the classification",
+            "type": "string"
+        },
+        "publishSubmitter": {
+            "title": "Publish Submitter",
+            "description": "Curator who published the classification",
+            "type": "string"
+        },
+        "publishAffiliation": {
+            "title": "Publish Affiliation",
+            "description": "Affiliation that published the classification (if different than the 'associated' one)",
+            "type": "string"
+        },
+        "publishDate": {
+            "title": "Date Published",
+            "description": "Date when the classification was published",
+            "type": "string"
+        },
+        "publishComment": {
+            "title": "Publish Comments",
+            "description": "Publish comments for the classification",
             "type": "string"
         },
         "provisionedClassification": {
@@ -154,6 +179,10 @@
             "title": "Affiliation",
             "type": "string"
         },
+        "classificationDate": {
+            "title": "Classification Date",
+            "type": "string"
+        },
         "approvalSubmitter": {
             "title": "Approval Submitter",
             "type": "string"
@@ -188,6 +217,22 @@
         },
         "provisionalComment": {
             "title": "Provisional Comments",
+            "type": "string"
+        },
+        "publishSubmitter": {
+            "title": "Publish Submitter",
+            "type": "string"
+        },
+        "publishAffiliation": {
+            "title": "Publish Affiliation",
+            "type": "string"
+        },
+        "publishDate": {
+            "title": "Date Published",
+            "type": "string"
+        },
+        "publishComment": {
+            "title": "Publish Comments",
             "type": "string"
         },
         "provisionedClassification": {
