@@ -127,12 +127,12 @@
     },
     {
         "affiliation_id": "10009",
-        "affiliation_fullname": "Storage Diseases",
+        "affiliation_fullname": "Lysosomal Storage Disorders",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50009",
-                "fullname": "Storage Diseases VCEP"
+                "fullname": "Lysosomal Storage Disorders VCEP"
             }
         }
     },
