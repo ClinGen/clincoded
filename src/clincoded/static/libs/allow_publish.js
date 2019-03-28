@@ -13,7 +13,7 @@ function isUserAllowedToPublish(userAffiliation, resourceToPublish) {
         affiliationGuidelinesCheck = true;
     } else if (resourceToPublish === 'interpretation') {
         affiliationSubgroup = 'vcep';
-        affiliationGuidelinesCheck = userAffiliation.subgroups && userAffiliation.subgroups[affiliationSubgroup] &&
+        affiliationGuidelinesCheck = userAffiliation && userAffiliation.subgroups && userAffiliation.subgroups[affiliationSubgroup] &&
             userAffiliation.subgroups[affiliationSubgroup].guidelines_url ? true : false;
     }
 
