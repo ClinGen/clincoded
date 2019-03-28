@@ -7,6 +7,7 @@ import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import { renderVariantTitle } from '../../libs/render_variant_title';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
+import { getClassificationSavedDate } from '../../libs/get_saved_date';
 
 class VariantInterpretationSummaryHeader extends Component {
     constructor(props) {
@@ -18,6 +19,8 @@ class VariantInterpretationSummaryHeader extends Component {
         const variant = interpretation && interpretation.variant, disease = interpretation && interpretation.disease;
         let clinVarId = variant && variant.clinvarVariantId ? variant.clinvarVariantId : null;
         let carId = variant && variant.carId ? variant.carId : null;
+        const publishStatus = classification ? classification.publishClassification : false;
+        const publishDate = classification ? classification.publishDate : null;
 
         return (
             <div className="evidence-summary panel-header">
@@ -55,11 +58,17 @@ class VariantInterpretationSummaryHeader extends Component {
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">
                             <dt>Interpretation status:</dt>
-                            <dd className="classificationStatus">{classification && classification.classificationStatus ? renderSimpleStatusLabel(classification.classificationStatus) : null}</dd>
+                            <dd className="classificationStatus">{classification && classification.classificationStatus ? renderSimpleStatusLabel(classification.classificationStatus, publishStatus) : null}</dd>
                             {classification ?
                                 <div>
-                                    <dt>Date classification saved:</dt>
-                                    <dd className="classificationSaved">{classification.last_modified ? moment(classification.last_modified).format("YYYY MMM DD, h:mm a") : null}</dd>
+                                    <dt>Date interpretation saved:</dt>
+                                    <dd className="classificationSaved">{moment(getClassificationSavedDate(classification)).format("YYYY MMM DD, h:mm a")}</dd>
+                                </div>
+                                : null}
+                            {publishStatus && publishDate ?
+                                <div>
+                                    <dt>Date interpretation published:</dt>
+                                    <dd className="classificationPublished">{moment(publishDate).format("YYYY MMM DD, h:mm a")}</dd>
                                 </div>
                                 : null}
                             <dt>Disease:</dt>

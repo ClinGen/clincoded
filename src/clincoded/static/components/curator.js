@@ -2225,8 +2225,8 @@ var provisionalSimpleProps = [
     "date_created", "classificationPoints", "replicatedOverTime", "contradictingEvidence", "autoClassification", "alteredClassification",
     "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "classificationDate", "approvalSubmitter",
     "classificationApprover", "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter", "provisionalDate",
-    "provisionalReviewDate", "provisionalComment", "publishSubmitter", "publishDate", "publishComment", "provisionedClassification",
-    "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
+    "provisionalReviewDate", "provisionalComment", "publishSubmitter", "publishAffiliation", "publishDate", "publishComment",
+    "provisionedClassification", "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
 ];
 
 function flattenProvisional(provisional) {
@@ -2237,10 +2237,10 @@ function flattenProvisional(provisional) {
 
 
 var provisionalVariantSimpleProps = [
-    "autoClassification", "alteredClassification", "reason", "evidenceSummary", "affiliation", "classificationStatus",
+    "autoClassification", "alteredClassification", "reason", "evidenceSummary", "affiliation", "classificationDate", "classificationStatus",
     "approvalSubmitter", "classificationApprover", "approvalDate", "approvalReviewDate", "approvalComment", "provisionalSubmitter",
-    "provisionalDate", "provisionalReviewDate", "provisionalComment", "provisionedClassification", "approvedClassification",
-    "publishClassification", "associatedInterpretationSnapshots"
+    "provisionalDate", "provisionalReviewDate", "provisionalComment", "publishSubmitter", "publishAffiliation", "publishDate", "publishComment",
+    "provisionedClassification", "approvedClassification", "publishClassification", "associatedInterpretationSnapshots"
 ];
 
 function flattenProvisionalVariant(provisional_variant) {

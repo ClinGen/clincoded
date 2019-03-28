@@ -14,3 +14,9 @@ def provisional_variant_2_3(value, system):
     # Add new properties for approval process and update schema version
     return
 
+@upgrade_step('provisional_variant', '3', '4')
+def provisional_variant_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1802
+    # Add publication properties and update schema version
+    return
+
