@@ -21,7 +21,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50002",
-                "fullname": "Cardiomyopathy VCEP"
+                "fullname": "Cardiomyopathy VCEP",
+                "guidelines_name": "ClinGen Cardiomyopathy Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50002/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -96,7 +98,9 @@
             },
             "vcep": {
                 "id": "50007",
-                "fullname": "Hearing Loss VCEP"
+                "fullname": "Hearing Loss VCEP",
+                "guidelines_name": "ClinGen Hearing Loss Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50007/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -123,12 +127,12 @@
     },
     {
         "affiliation_id": "10009",
-        "affiliation_fullname": "Storage Diseases",
+        "affiliation_fullname": "Lysosomal Storage Disorders",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50009",
-                "fullname": "Storage Diseases VCEP"
+                "fullname": "Lysosomal Storage Disorders VCEP"
             }
         }
     },
@@ -177,7 +181,9 @@
             },
             "vcep": {
                 "id": "50012",
-                "fullname": "PTEN VCEP"
+                "fullname": "PTEN VCEP",
+                "guidelines_name": "ClinGen PTEN Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50012/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -207,7 +213,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50014",
-                "fullname": "CDH1 VCEP"
+                "fullname": "CDH1 VCEP",
+                "guidelines_name": "ClinGen CDH1 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50014/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -225,7 +233,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50015",
-                "fullname": "Phenylketonuria VCEP"
+                "fullname": "Phenylketonuria VCEP",
+                "guidelines_name": "ClinGen PAH Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50015/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -305,7 +315,9 @@
             },
             "vcep": {
                 "id": "50021",
-                "fullname": "RASopathy VCEP"
+                "fullname": "RASopathy VCEP",
+                "guidelines_name": "ClinGen RASopathy Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50021/docs/assertion-criteria"
             }
         }
     },
@@ -624,6 +636,17 @@
             "vcep": {
                 "id": "50047",
                 "fullname": "Cerebral Creatine Deficiency Syndromes VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10048",
+        "affiliation_fullname": "ACADVL",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50048",
+                "fullname": "ACADVL VCEP"
             }
         }
     }

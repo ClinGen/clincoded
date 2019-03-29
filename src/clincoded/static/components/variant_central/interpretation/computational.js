@@ -30,7 +30,7 @@ const validTabs = ['missense', 'lof', 'silent-intron', 'indel'];
 const computationStatic = {
     conservation: {
         _order: ['phylop7way', 'phylop20way', 'phastconsp7way', 'phastconsp20way', 'gerp', 'siphy'],
-        _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP20way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons20way', 'gerp': 'GERP++', 'siphy': 'SiPhy'},
+        _labels: {'phylop7way': 'phyloP100way', 'phylop20way': 'phyloP30way', 'phastconsp7way': 'phastCons100way', 'phastconsp20way': 'phastCons30way', 'gerp': 'GERP++', 'siphy': 'SiPhy'},
         _url: {
             'phylop7way': 'http://compgen.cshl.edu/phast/index.php',
             'phylop20way': 'http://compgen.cshl.edu/phast/index.php',
@@ -361,9 +361,9 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
             let dbnsfp = response.dbnsfp;
             // get scores from dbnsfp
             computationObj.conservation.phylop7way = (dbnsfp.phylo.p7way) ? this.numToString(dbnsfp.phylo.p7way.vertebrate) : this.numToString(dbnsfp.phylo.p100way.vertebrate);
-            computationObj.conservation.phylop20way = this.numToString(dbnsfp.phylo.p20way.mammalian);
+            computationObj.conservation.phylop20way = (dbnsfp.phylo.p20way) ? this.numToString(dbnsfp.phylo.p20way.mammalian) : this.numToString(dbnsfp.phylo.p30way.mammalian);
             computationObj.conservation.phastconsp7way = (dbnsfp.phastcons['7way']) ? this.numToString(dbnsfp.phastcons['7way'].vertebrate) : this.numToString(dbnsfp.phastcons['100way'].vertebrate);
-            computationObj.conservation.phastconsp20way = this.numToString(dbnsfp.phastcons['20way'].mammalian);
+            computationObj.conservation.phastconsp20way = (dbnsfp.phastcons['20way']) ? this.numToString(dbnsfp.phastcons['20way'].mammalian) : this.numToString(dbnsfp.phastcons['30way'].mammalian);
             computationObj.conservation.gerp = this.numToString(dbnsfp['gerp++'].rs);
             computationObj.conservation.siphy = this.numToString(dbnsfp.siphy_29way.logodds);
             // update computationObj, and set flag indicating that we have conservation analysis data

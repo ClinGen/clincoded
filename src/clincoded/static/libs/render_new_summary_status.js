@@ -1,6 +1,7 @@
 'use strict';
 import React from 'react';
 import moment from 'moment';
+import { getClassificationSavedDate } from './get_saved_date';
 
 /**
  * Method to render 'NEW SAVED SUMMARY' status tag/label for a given classification
@@ -11,7 +12,7 @@ export function renderNewSummaryStatus(classification) {
         return (
             <span className="status-wrapper new-summary">
                 <span className="label label-info" data-toggle="tooltip" data-placement="top"
-                    data-tooltip={'Last saved on ' + moment(classification.last_modified).format("YYYY MMM DD, h:mm a")}>
+                    data-tooltip={'Last saved on ' + moment(getClassificationSavedDate(classification)).format("YYYY MMM DD, h:mm a")}>
                         NEW SAVED SUMMARY
                 </span>
             </span>

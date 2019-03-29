@@ -153,7 +153,7 @@ var GdmList = createReactClass({
             <div className="container">
                 <div className="row gdm-header">
                     <div className="col-sm-12 col-md-8">
-                        <h1>All Gene-Disease Records</h1>
+                        <h1>All Gene-Disease Records <span className="number-of-entries"> number of entries: {gdms.length} </span> </h1>
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">

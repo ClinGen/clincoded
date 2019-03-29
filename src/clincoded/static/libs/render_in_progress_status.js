@@ -1,6 +1,7 @@
 'use strict';
 import React from 'react';
 import moment from 'moment';
+import { getClassificationSavedDate } from './get_saved_date';
 
 /**
  * Method to render 'IN PROGRESS' status tag/label for a given classification
@@ -11,7 +12,7 @@ export function renderInProgressStatus(classification) {
         return (
             <span className="status-wrapper in-progress">
                 <span className="label label-warning" data-toggle="tooltip" data-placement="top"
-                    data-tooltip={'Last saved on ' + moment(classification.last_modified).format("YYYY MMM DD, h:mm a")}>
+                    data-tooltip={'Last saved on ' + moment(getClassificationSavedDate(classification)).format("YYYY MMM DD, h:mm a")}>
                     IN PROGRESS
                 </span>
             </span>
