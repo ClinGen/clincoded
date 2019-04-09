@@ -16,7 +16,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "clinvarVariantId": {
             "title": "Variant ID",
@@ -61,6 +61,15 @@
         "dbSNPIds": {
             "title": "dbSNP ID",
             "description": "List of dbSNP ids related of the variant",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
+        },
+        "otherNameList": {
+            "title": "Other Name List",
+            "description": "List of legacy names associated with the variant",
             "type": "array",
             "default": [],
             "items": {
