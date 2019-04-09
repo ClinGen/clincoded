@@ -17,6 +17,7 @@ import { PublishApproval } from './publish';
 import CurationSnapshots from './snapshots';
 import { sortListByDate } from '../../libs/helpers/sort';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
+import { allowPublishGlobal } from '../../libs/allow_publish';
 import { isScoringForCurrentSOP } from '../../libs/sop';
 import * as methods from '../methods';
 import * as curator from '../curator';
@@ -258,22 +259,6 @@ const ProvisionalClassification = createReactClass({
         }
     },
 
-    /**
-     * Method to determine if user is allowed to publish
-     */
-    isUserAllowedToPublish() {
-        const curatorAffiliation = this.props.affiliation;
-        const gdm = this.state.gdm;
-        let validModeInheritance = gdm && gdm.modeInheritance && (gdm.modeInheritance.indexOf('Autosomal') > -1 || gdm.modeInheritance.indexOf('X-linked') > -1);
-        let hasMondoId = gdm && gdm.disease && gdm.disease.diseaseId && gdm.disease.diseaseId.indexOf('MONDO') > -1;
-
-        if (curatorAffiliation && curatorAffiliation.publish_approval && validModeInheritance && hasMondoId) {
-            return true;
-        } else {
-            return false;
-        }
-    },
-
     handleProvisionalApprovalVisibility() {
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
@@ -298,7 +283,12 @@ const ProvisionalClassification = createReactClass({
                 this.setState({showProvisional: true, showApproval: false, showPublish: false, showUnpublish: false});
             }
         } else if (classificationStatus === 'Approved') {
-            if (this.isUserAllowedToPublish() && isScoringForCurrentSOP(provisional.classificationPoints)) {
+            const gdm = this.state.gdm;
+            const affiliation = this.props.affiliation;
+            const allowPublish = gdm && gdm.disease ? allowPublishGlobal(affiliation, 'classification', gdm.modeInheritance, gdm.disease.diseaseId) : false;
+            const currentSOP = provisional ? isScoringForCurrentSOP(provisional.classificationPoints) : false;
+
+            if (allowPublish && currentSOP) {
 
                 // Check if the current classification has been published
                 if (!provisional || !provisional.publishClassification) {
@@ -388,6 +378,8 @@ const ProvisionalClassification = createReactClass({
         const affiliation = this.props.affiliation;
         const isPublishActive = this.state.isPublishActive;
         const isUnpublishActive = this.state.isUnpublishActive;
+        const allowPublishButton = gdm && gdm.disease ? allowPublishGlobal(affiliation, 'classification', gdm.modeInheritance, gdm.disease.diseaseId) : false;
+        const currentSOP = isScoringForCurrentSOP(classificationPoints);
 
         // If state has a snapshot UUID, use it; otherwise, check URL query parameters
         const snapshotUUID = this.state.publishSnapshotUUID ? this.state.publishSnapshotUUID :
@@ -619,11 +611,11 @@ const ProvisionalClassification = createReactClass({
                                     </div>
                                 </div>
                                 : null}
-                            {!this.state.showProvisional && !this.state.showApproval && !this.isUserAllowedToPublish() ?
+                            {!this.state.showProvisional && !this.state.showApproval && (!allowPublishButton || !currentSOP) ?
                                 <div className="container">
                                     <p className="alert alert-info">
                                         <i className="icon icon-info-circle"></i> The option to publish an approved classification is unavailable when any of the following
-                                            apply: 1) your affiliation does not have permission to publish, 2) the mode of inheritance is not supported by the Clinical Validity
+                                            apply: 1) your affiliation does not have permission to publish in the GCI, 2) the mode of inheritance is not supported by the Clinical Validity
                                             Classification framework, 3) the associated disease does not have a MONDO ID, 4) it is based on a previous version of the SOP.
                                     </p>
                                 </div>
@@ -640,7 +632,7 @@ const ProvisionalClassification = createReactClass({
                                                 isPublishEventActive={isPublishActive || isUnpublishActive ? true : false}
                                                 classificationStatus={classificationStatus}
                                                 demoVersion={demoVersion}
-                                                allowPublishButton={this.isUserAllowedToPublish()}
+                                                allowPublishButton={allowPublishButton}
                                                 context={context} />
                                         </Panel>
                                     </PanelGroup>

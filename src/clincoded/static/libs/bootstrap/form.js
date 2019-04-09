@@ -258,6 +258,7 @@ var Input = module.exports.Input = createReactClass({
         cancelHandler: PropTypes.func,  // Called to handle cancel button click
         submitBusy: PropTypes.bool,     //
         onBlur: PropTypes.func,
+        giveFocus: PropTypes.bool,
         minVal: PropTypes.number,       // Minimum value for a number formatted input
         maxVal: PropTypes.number,       // Maximum value for a number formatted input
         key: PropTypes.string,          // Passed to react if this is part of a list of inputs
@@ -268,6 +269,12 @@ var Input = module.exports.Input = createReactClass({
 
     getInitialState: function() {
         return {value: this.props.value};
+    },
+
+    componentDidMount: function() {
+        if (this.refs.input && this.props.giveFocus) {
+            this.refs.input.focus();
+        }
     },
 
     // Get the text the user entered from the text-type field. Meant to be called from

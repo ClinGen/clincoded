@@ -26,6 +26,7 @@ var VariantCurationHub = createReactClass({
         href: PropTypes.string,
         href_url: PropTypes.object,
         session: PropTypes.object,
+        demoVersion: PropTypes.bool,
         affiliation: PropTypes.object
     },
 
@@ -43,6 +44,7 @@ var VariantCurationHub = createReactClass({
             variantObj: null,
             ext_pageData: null,
             ext_myVariantInfo: null,
+            ext_myVariantInfo_metadata: null,
             ext_ensemblVariation: null,
             ext_ensemblHgvsVEP: null,
             ext_clinvarEutils: null,
@@ -55,6 +57,7 @@ var VariantCurationHub = createReactClass({
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
             ext_singleNucleotide: true,
+            ext_gnomadExac: false,
             loading_clinvarEutils: true,
             loading_clinvarEsearch: true,
             loading_clinvarSCV: true,
@@ -71,6 +74,8 @@ var VariantCurationHub = createReactClass({
             classification: {},
             classificationStatus: 'In progress',
             classificationSnapshots: [],
+            publishProvisionalReady: false,
+            publishSnapshotListReady: false
         };
     },
 
@@ -103,29 +108,49 @@ var VariantCurationHub = createReactClass({
      * back to the child components (e.g. provisional, approval).
      * Called as PropTypes.func in the child components upon the PUT request to update the classification.
      * @param {string} provisionalId - The '@id' of the (provisional) classification object
+     * @param {boolean} publishProvisionalReady - Indicator that (provisional) classification is ready for publish component (optional, defaults to false)
      */
-    updateProvisionalObj(provisionalId) {
+    updateProvisionalObj(provisionalId, publishProvisionalReady = false) {
         this.getRestData(provisionalId).then(result => {
             // Get an updated copy of the classification object
             this.setState({classification: result, classificationStatus: result.classificationStatus});
             return Promise.resolve(result);
         }).then(data => {
             // Get an updated copy of the interpretation object
-            this.updateInterpretationObj();
+            this.updateInterpretationObj(publishProvisionalReady);
         });
     },
 
     /**
-     * Method to retrieve the given snapshot object and concat with the existing snapshot list.
+     * Method to retrieve the given snapshot object and concat with (or refresh) the existing snapshot list.
      * Then pass the updated state as a prop back to the child components (e.g. provisional, approval).
      * Called as PropTypes.func in the child components upon saving a new snapshot.
      * @param {string} snapshotId - The '@id' of the newly saved snapshot object
+     * @param {boolean} publishSnapshotListReady - Indicator that list of snapshots is ready for publish component (optional, defaults to false)
      */
-    updateSnapshotList(snapshotId) {
+    updateSnapshotList(snapshotId, publishSnapshotListReady = false) {
         let classificationSnapshots = this.state.classificationSnapshots;
+        let isNewSnapshot = true;
         this.getRestData(snapshotId).then(result => {
-            const newClassificationSnapshots = [result, ...classificationSnapshots];
-            this.setState({classificationSnapshots: newClassificationSnapshots});
+            for (let snapshot of classificationSnapshots) {
+                if (snapshot['@id'] === snapshotId) {
+                    snapshot = result;
+                    isNewSnapshot = false;
+                    break;
+                }
+            }
+
+            if (isNewSnapshot) {
+                const newClassificationSnapshots = [result, ...classificationSnapshots];
+
+                if (publishSnapshotListReady) {
+                    this.setState({classificationSnapshots: newClassificationSnapshots, publishSnapshotListReady: publishSnapshotListReady});
+                } else {
+                    this.setState({classificationSnapshots: newClassificationSnapshots});
+                }
+            } else {
+                this.setState({classificationSnapshots: classificationSnapshots});
+            }
         });
     },
 
@@ -158,6 +183,7 @@ var VariantCurationHub = createReactClass({
             if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
                 this.fetchPageData(this.state.variantObj);
             }
+            this.fetchMyVariantInfoMetadata();
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -211,6 +237,16 @@ var VariantCurationHub = createReactClass({
                 });
             }
         }
+    },
+
+    // Retrieve MyVariantInfo metadata for the src_version
+    fetchMyVariantInfoMetadata() {
+        // read in the myvariant.info metadata
+        this.getRestData(this.props.href_url.protocol + external_url_map['MyVariantInfoMetadata']).then(meta_response => {
+            if (meta_response) {
+                this.setState({ext_myVariantInfo_metadata: meta_response});
+            }
+        });
     },
 
     /**
@@ -283,10 +319,11 @@ var VariantCurationHub = createReactClass({
     },
 
     // Method to parse variant type
-    // Won't show population/predictor data if subject is not single nucleotide variant
+    // Won't show population/predictor data if subject is not single nucleotide variant or indel
     parseVariantType: function(variant) {
         if (variant) {
             // Reference to http://www.hgvs.org/mutnomen/recs-DNA.html
+            const popVariantTypes = ['single nucleotide variant', 'deletion', 'insertion', 'duplication']
             let seqChangeTypes = ['del', 'dup', 'ins', 'indels', 'inv', 'con'];
             let genomicHGVS, ncGenomic;
 
@@ -298,6 +335,11 @@ var VariantCurationHub = createReactClass({
             // Filter variant by its change type
             // Look for the <VariantType> node value in first pass
             // Then look into HGVS term for non-SNV type patterns
+            if (variant.variationType) {
+                if (popVariantTypes.indexOf(variant.variationType.toLowerCase()) > -1) {
+                    this.setState({ext_gnomadExac: true })
+                }
+            }
             if (variant.variationType && variant.variationType !== 'single nucleotide variant') {
                 this.setState({ext_singleNucleotide: false});
             } else if (genomicHGVS) {
@@ -445,16 +487,29 @@ var VariantCurationHub = createReactClass({
         }
     },
 
-    // method to update the interpretation object and send it down to child components on demand
-    updateInterpretationObj: function() {
+    /**
+     * Method to update the interpretation object and send it down to child components on demand
+     * @param {boolean} publishProvisionalReady - Indicator that (provisional) classification is ready for publish component (optional, defaults to false)
+     */
+    updateInterpretationObj: function(publishProvisionalReady = false) {
         this.getRestData('/variants/' + this.state.variantUuid).then(variant => {
             this.setState({variantObj: variant});
             return Promise.resolve(variant);
         }).then(result => {
             this.getRestData('/interpretation/' + this.state.interpretationUuid).then(interpretation => {
-                this.setState({interpretation: interpretation});
+                this.setState({interpretation: interpretation, publishProvisionalReady: publishProvisionalReady});
             });
         });
+    },
+
+    /**
+     * Method to reset publish-related state data
+     * Called when "ready to publish" flags can be reset:
+     * 1) After they've been used to automatically display the publish panel
+     * 2) At the end of every publish event
+     */
+    resetPublishReadyState() {
+        this.setState({publishProvisionalReady: false, publishSnapshotListReady: false});
     },
 
     // Method to update status of summary page visibility
@@ -507,6 +562,10 @@ var VariantCurationHub = createReactClass({
         const selectedTab = this.state.selectedTab;
         const selectedSubtab = this.state.selectedSubtab;
         const selectedCriteria = this.state.selectedCriteria;
+        const publishProvisionalReady = this.state.publishProvisionalReady;
+        const publishSnapshotListReady = this.state.publishSnapshotListReady;
+        const publishClassification = this.state.classification ? this.state.classification.publishClassification : false;
+        const demoVersion = this.props.demoVersion;
         const affiliation = this.props.affiliation;
         let interpretation = (this.state.interpretation) ? this.state.interpretation : null;
         let interpretationUuid = (this.state.interpretationUuid) ? this.state.interpretationUuid : null;
@@ -534,6 +593,7 @@ var VariantCurationHub = createReactClass({
                             ext_myGeneInfo={my_gene_info}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
+                            ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
                             ext_ensemblVariation={this.state.ext_ensemblVariation}
                             ext_ensemblHgvsVEP={this.state.ext_ensemblHgvsVEP}
                             ext_clinvarEutils={this.state.ext_clinvarEutils}
@@ -543,6 +603,7 @@ var VariantCurationHub = createReactClass({
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
+                            ext_gnomadExac={this.state.ext_gnomadExac}
                             loading_clinvarEutils={this.state.loading_clinvarEutils}
                             loading_clinvarEsearch={this.state.loading_clinvarEsearch}
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
@@ -563,11 +624,16 @@ var VariantCurationHub = createReactClass({
                         provisionalReason={this.state.provisionalReason}
                         evidenceSummary={this.state.evidenceSummary}
                         session={session}
+                        demoVersion={demoVersion}
                         affiliation={affiliation}
                         classificationStatus={this.state.classificationStatus}
                         classificationSnapshots={this.state.classificationSnapshots}
                         updateSnapshotList={this.updateSnapshotList}
-                        updateProvisionalObj={this.updateProvisionalObj} />
+                        updateProvisionalObj={this.updateProvisionalObj}
+                        publishProvisionalReady={publishProvisionalReady}
+                        publishSnapshotListReady={publishSnapshotListReady}
+                        publishClassification={publishClassification}
+                        resetPublishReadyState={this.resetPublishReadyState} />
                 }
             </div>
         );

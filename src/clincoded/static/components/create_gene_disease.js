@@ -173,7 +173,7 @@ var CreateGeneDisease = createReactClass({
                         return this.postRestData('/gdm/', newGdm).then(data => {
                             var newGdm = data['@graph'][0];
 
-                            // Record history of adding a GDM
+                            // Record history of adding a GDM 
                             var meta = {
                                 gdm: {
                                     operation: 'add',

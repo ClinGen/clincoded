@@ -347,6 +347,13 @@
     text-align: center;
 }
 
+.feedback-message.evidence-repository-info {
+    display: inline-block;
+    margin-left: 20px;
+    padding: 3px 15px;
+    text-align: center;
+}
+
 /**
  * Interpretation approval styles
  */
@@ -376,12 +383,45 @@
     }
 
     .panel.panel-warning.approval-process {
-        border-color: #ffb22e;
+        &.provisional-approval {
+            border-color: $color-trim;
+
+            &>.panel-heading {
+                background-color: $color-trim;
+                border-color: $color-trim;
+                color: #ffffff;
+            }
+        }
+
+        &.final-approval {
+            border-color: #f0ad4e;
+
+            &>.panel-heading {
+                background-color: #f0ad4e;
+                border-color: #f0ad4e;
+                color: #ffffff;
+            }
+        }
+
+        &.publish-approval {
+            border-color: #b6238a;
+
+            &>.panel-heading {
+                background-color: #b6238a;
+                border-color: #b6238a;
+                color: #ffffff;
+            }
+
+            &.unpublish>.panel-heading {
+                background-color: #ffffff;
+                border-color: #b6238a;
+                color: #b6238a;
+            }
+        }
 
         &>.panel-heading {
-            color: #ffffff;
-            background-color: #fdc04d;
-            border-color: #ffb22e;
+            border-top-left-radius: 0px;
+            border-top-right-radius: 0px;
 
             .panel-title {
                 font-weight: 500;

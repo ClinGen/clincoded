@@ -5,8 +5,9 @@ import os
 import urllib.request
 import requests
 import json
-from .templates.gci_to_dx import message_template
-from datetime import datetime
+import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx
+
+saved_affiliation = None
 
 def includeme(config):
     config.add_route('publish', '/publish')
@@ -201,15 +202,13 @@ def save_article(annotation):
     return publication
 
 # Build evidence dictionary
-def gather_evidence(data):
+def gather_evidence(data, user_affiliation):
     evidence_publications = {}
-
-    user_affiliation = get_data_by_path(data, ['resource', 'affiliation'])
 
     if not user_affiliation:
         return None
 
-    annotations = get_data_by_path(data, ['resourceParent', 'gdm', 'annotations'], [])
+    annotations = get_data_by_path(data, ['annotations'], [])
 
     for annotation in annotations:
         groups = get_data_by_path(annotation, ['groups'], [])
@@ -360,19 +359,34 @@ def add_contradictory_evidence(data, evidence, template):
     else:
         template['Value'] = 'NO'
 
-# Lookup an affiliation name associated with a provided ID (using a JSON file maintained for the UI)
-def lookup_affiliation_name(affiliation_id):
-    if affiliation_id:
-        affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
+# Lookup affiliation data associated with a provided ID (using a JSON file maintained for the UI)
+def lookup_affiliation_data(affiliation_id, affiliation_key, affiliation_subgroup=None):
+    global saved_affiliation
 
-        if affiliation_data:
-            for affiliation in affiliation_data:
-                if affiliation_id == affiliation['affiliation_id']:
-                    return affiliation['affiliation_fullname']
+    if affiliation_id and affiliation_key:
+        if not saved_affiliation or 'affiliation_id' not in saved_affiliation or affiliation_id != saved_affiliation['affiliation_id']:
+            try:
+                affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
 
-            return None
-        else:
-            return None
+                for affiliation in affiliation_data:
+                    if affiliation_id == affiliation['affiliation_id']:
+                        saved_affiliation = affiliation
+                        break
+
+            except Exception:
+                pass
+                return None
+
+        try:
+            if affiliation_subgroup:
+                return saved_affiliation['subgroups'][affiliation_subgroup][affiliation_key]
+            else:
+                return saved_affiliation[affiliation_key]
+
+        except Exception:
+            pass
+
+        return None
     else:
         return None
 
@@ -456,9 +470,11 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
                         template[key] = ''
 
                 # Lookup an affiliation name by ID (from a data path list)
-                elif value[0] == '$LOOKUP_AFFILIATION_NAME':
-                    if value_length == 2:
-                        template[key] = lookup_affiliation_name(get_data_by_path(data, value[1]))
+                elif value[0] == '$LOOKUP_AFFILIATION_DATA':
+                    if value_length == 4:
+                        template[key] = lookup_affiliation_data(get_data_by_path(data, value[1]), value[3], value[2])
+                    elif value_length == 3:
+                        template[key] = lookup_affiliation_data(get_data_by_path(data, value[1]), value[2])
                     else:
                         template[key] = ''
 
@@ -523,6 +539,69 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
     for key in keys_to_delete:
         del template[key]
 
+# Remove unnecessary data from interpretation (before sending it to transformation service)
+def remove_data_from_msg_template(delete_list, template):
+    for data_path in delete_list:
+        try:
+            data_to_delete = template
+            data_to_delete_check = True
+
+            # Subsequent for loop expects a path (list of keys), not a string
+            if isinstance(data_path, str):
+                data_path = delete_list
+
+            # Check if data exists at specified path (up to second-to-last element)
+            for key in data_path[:-1]:
+                if key in data_to_delete:
+                    data_to_delete = data_to_delete[key]
+                else:
+                    data_to_delete_check = False
+                    break
+
+            if data_to_delete_check:
+                # If last path element is a list, expect remaining data to be structured as a list of dictionaries
+                if isinstance(data_path[-1], list):
+                    for element in data_to_delete:
+                        remove_data_from_msg_template(data_path[-1], element)
+
+                elif data_path[-1] in data_to_delete:
+                    del data_to_delete[data_path[-1]]
+
+        # Continue processing deletion list if/when a single path has problems
+        except (IndexError, KeyError):
+            pass
+
+# Transform interpretation to SEPIO format (via transformation service)
+def transform_interpretation(source_data, request_host):
+    # Prepare interpretation to be sent to transformation service
+    try:
+        source_data_str = json.dumps(source_data, separators=(',', ':'))
+
+    except Exception:
+        raise Exception('Failed to build complete message')
+
+    # Send interpretation to transformation service
+    try:
+        service_url = 'http://localhost:3000'
+
+        if request_host != 'localhost:6543':
+            service_url = 'https://g3xjft14o7.execute-api.us-west-2.amazonaws.com/default/VCI-to-CG_SEPIO'
+
+        transform_result = requests.post('{}/vci2cgsepio'.format(service_url), headers={'Content-Type': 'application/json'}, data=source_data_str, timeout=10)
+
+    except Exception:
+        raise Exception('Data transformation service unavailable')
+
+    if transform_result.status_code != requests.codes.ok:
+        raise Exception('Data transformation failed')
+
+    # Return result of transformation service as JSON-encoded content
+    try:
+        return transform_result.json()
+
+    except Exception:
+        raise Exception('Result of data transformation not in expected format')
+
 # Publish the message
 @view_config(route_name='publish', request_method='GET')
 def publish(request):
@@ -561,8 +640,21 @@ def publish(request):
         return return_object
 
     # Check that data has expected elements
-    if ('_source' not in resultJSON or 'embedded' not in resultJSON['_source'] or 'resource' not in resultJSON['_source']['embedded'] or
-        'classificationPoints' not in resultJSON['_source']['embedded']['resource']):
+    try:
+        data_type_to_publish = resultJSON['_source']['embedded']['resourceType']
+
+        if data_type_to_publish == 'classification':
+            evidence_to_publish = resultJSON['_source']['embedded']['resourceParent']['gdm']
+            publishing_affiliation = resultJSON['_source']['embedded']['resource']['affiliation']
+            evidence_counts_to_publish = resultJSON['_source']['embedded']['resource']['classificationPoints']
+
+        elif data_type_to_publish == 'interpretation':
+            evidence_to_publish = resultJSON['_source']['embedded']['resourceParent']['interpretation']
+
+        else:
+            raise Exception
+
+    except Exception as e:
         return_object['message'] = 'Retrieved data missing expected elements'
         return return_object
 
@@ -570,13 +662,34 @@ def publish(request):
 
     # Construct message
     try:
-        message_template_copy = deepcopy(message_template)
-        classification_points_copy = deepcopy(resultJSON['_source']['embedded']['resource']['classificationPoints'])
-        add_data_to_msg_template(resultJSON['_source']['embedded'], gather_evidence(resultJSON['_source']['embedded']), gather_evidence_counts(classification_points_copy, True), message_template_copy)
-        message = json.dumps(message_template_copy, separators=(',', ':'))
+        if data_type_to_publish == 'interpretation':
+            message_template = deepcopy(clincoded.messaging.templates.vci_to_dx.message_template)
+            data_to_remove = clincoded.messaging.templates.vci_to_dx.data_to_remove
+            add_data_to_msg_template(resultJSON['_source']['embedded'], None, None, message_template)
+
+        else:
+            message_template = deepcopy(clincoded.messaging.templates.gci_to_dx.message_template)
+            classification_points = deepcopy(evidence_counts_to_publish)
+            add_data_to_msg_template(resultJSON['_source']['embedded'], gather_evidence(evidence_to_publish, publishing_affiliation),
+                gather_evidence_counts(classification_points, True), message_template)
+            message = json.dumps(message_template, separators=(',', ':'))
 
     except Exception as e:
         return_object['message'] = 'Failed to build complete message'
+        return return_object
+
+    # Transform message (if necessary, via independent service)
+    try:
+        if data_type_to_publish == 'interpretation':
+            remove_data_from_msg_template(data_to_remove, message_template['interpretation'])
+            message_template['interpretation'] = transform_interpretation(message_template['interpretation'], request.host)
+            message = json.dumps(message_template, separators=(',', ':'))
+
+    except Exception as e:
+        if e.args:
+            return_object['message'] = e.args
+        else:
+            return_object['message'] = 'Failed to build complete message'
         return return_object
 
     # Configure message delivery parameters
@@ -604,10 +717,13 @@ def publish(request):
             'ssl.certificate.location': 'etc/certs/dataexchange/client.crt',
             'ssl.ca.location': 'etc/certs/dataexchange/server.crt'}
 
-        if request.host == 'curation.clinicalgenome.org':
-            kafka_topic = 'gene_validity'
+        if data_type_to_publish == 'interpretation':
+            kafka_topic = 'variant_interpretation'
         else:
-            kafka_topic = 'gene_validity_dev'
+            kafka_topic = 'gene_validity'
+
+        if request.host != 'curation.clinicalgenome.org':
+            kafka_topic += '_dev'
 
     # Send message
     p = Producer(**kafka_conf)

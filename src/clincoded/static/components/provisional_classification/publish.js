@@ -26,19 +26,23 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         selectedSnapshotUUID: PropTypes.string,
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
+        triggerPublishLinkAlert: PropTypes.func,
         clearPublishState: PropTypes.func
     },
 
     getInitialState() {
         let selectedSnapshot = {};
 
-        // If both the data to identify a "selected" snapshot (this.props.selectedSnapshotUUID and this.props.gdm.uuid) and a list of
+        // Determine which type of resource (GCI GDM or VCI interpretation) is being published
+        const selectedResourceType = this.props.gdm && this.props.gdm.uuid ? 'gdm' : this.props.interpretation && this.props.interpretation.uuid ? 'interpretation' : null;
+
+        // If both the data to identify a "selected" snapshot (this.props.selectedSnapshotUUID and this.props[selectedResourceType].uuid) and a list of
         // snapshots to search (this.props.snapshots) exist, then try to find the specified snapshot
-        if (this.props.selectedSnapshotUUID && this.props.gdm && this.props.gdm.uuid && this.props.snapshots) {
+        if (this.props.selectedSnapshotUUID && selectedResourceType && this.props.snapshots) {
             selectedSnapshot = this.props.snapshots.find(snapshot => (snapshot['@id'] &&
                 snapshot['@id'].split('/', 3)[2] === this.props.selectedSnapshotUUID &&
-                snapshot.resourceParent && snapshot.resourceParent.gdm &&
-                snapshot.resourceParent.gdm.uuid === this.props.gdm.uuid));
+                snapshot.resourceParent && snapshot.resourceParent[selectedResourceType] &&
+                snapshot.resourceParent[selectedResourceType].uuid === this.props[selectedResourceType].uuid));
 
         // Otherwise, find the current approved snapshot (this.props.snapshots is assumed to be sorted)
         } else if (this.props.snapshots) {
@@ -57,12 +61,14 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
             selectedProvisional.affiliation === this.props.provisional.affiliation;
 
         return {
+            selectedResourceType: selectedResourceType,
             selectedSnapshot: selectedSnapshot,
             selectedProvisional: selectedProvisional,
             isSelectedProvisionalCurrent: isSelectedProvisionalCurrent,
             publishDate: undefined,
             publishComment: undefined,
             publishSubmitter: undefined,
+            publishAffiliation: undefined,
             isPublishPreview: false,
             showAlertMessage: false,
             alertType: null,
@@ -75,9 +81,23 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
      * Method to handle previewing publish form
      */
     handlePreviewPublish() {
+        let affiliationSubgroup;
+        const selectedResourceType = this.state.selectedResourceType;
+        const affiliation = this.props.affiliation;
+
+        // Set variables based on the (parent) resource type
+        if (selectedResourceType === 'gdm') {
+            affiliationSubgroup = 'gcep';
+        } else if (selectedResourceType === 'interpretation') {
+            affiliationSubgroup = 'vcep';
+        }
+
         const publishComment = this.publishCommentInput.getValue();
+        const publishAffiliation = affiliation && affiliation.subgroups && affiliation.subgroups[affiliationSubgroup] &&
+            affiliation.subgroups[affiliationSubgroup].id ? affiliation.subgroups[affiliationSubgroup].id : undefined;
         this.setState({
             publishSubmitter: this.props.session.user_properties.title,
+            publishAffiliation: publishAffiliation,
             publishComment: publishComment.length ? publishComment : undefined,
             isPublishPreview: true
         });
@@ -89,6 +109,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     handleCancelPublish() {
         this.setState({
             publishSubmitter: undefined,
+            publishAffiliation: undefined,
             publishComment: undefined,
             isPublishPreview: false
         });
@@ -167,14 +188,29 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         e.stopPropagation();
 
         if (this.state.selectedSnapshot && this.state.selectedSnapshot['@type'] && this.state.selectedSnapshot['@id']) {
+            let associatedResourceSnapshots, resourceProperName, resourceName;
+            const selectedResourceType = this.state.selectedResourceType;
+
+            // Set variables based on the (parent) resource type
+            if (selectedResourceType === 'gdm') {
+                associatedResourceSnapshots = 'associatedClassificationSnapshots';
+                resourceProperName = 'Classification';
+                resourceName = 'classification';
+            } else if (selectedResourceType === 'interpretation') {
+                associatedResourceSnapshots = 'associatedInterpretationSnapshots';
+                resourceProperName = 'Interpretation';
+                resourceName = 'interpretation';
+            }
+
             this.publishToDataExchange(this.state.selectedSnapshot['@type'][0], this.state.selectedSnapshot['@id'].split('/', 3)[2]).then(response => {
                 let publishProvisional = this.state.selectedProvisional && this.state.selectedProvisional.uuid ? this.state.selectedProvisional : {};
-                let currentProvisional = this.props.provisional && this.props.provisional.uuid ? curator.flatten(this.props.provisional) : {};
+                let currentProvisional = this.props.provisional && this.props.provisional['@id'] ? curator.flatten(this.props.provisional) : {};
                 const submissionTimestamp = new Date();
 
                 // Update published (or unpublished) provisional with form data (to be included when selected/published snapshot object is sent to the DB)
                 publishProvisional.publishClassification = !this.state.selectedProvisional.publishClassification;
                 publishProvisional.publishSubmitter = this.state.publishSubmitter;
+                publishProvisional.publishAffiliation = this.state.publishAffiliation;
                 publishProvisional.publishDate = moment(submissionTimestamp).toISOString();
 
                 if (this.state.publishComment && this.state.publishComment.length) {
@@ -191,6 +227,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 if (this.state.isSelectedProvisionalCurrent) {
                     currentProvisional.publishClassification = !this.props.provisional.publishClassification;
                     currentProvisional.publishSubmitter = this.state.publishSubmitter;
+                    currentProvisional.publishAffiliation = this.state.publishAffiliation;
                     currentProvisional.publishDate = moment(submissionTimestamp).toISOString();
 
                     if (this.state.publishComment && this.state.publishComment.length) {
@@ -201,9 +238,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 }
 
                 // Always update the "publishStatus" field (set to "true" for published snapshot, deleted for unpublished)
-                // within current provisional object's "associatedClassificationSnapshots" array
-                if (currentProvisional.associatedClassificationSnapshots && currentProvisional.associatedClassificationSnapshots.length) {
-                    for (let snapshot of currentProvisional.associatedClassificationSnapshots) {
+                // within current provisional object's associated snapshots array (e.g. associatedClassificationSnapshots)
+                if (currentProvisional[associatedResourceSnapshots] && currentProvisional[associatedResourceSnapshots].length) {
+                    for (let snapshot of currentProvisional[associatedResourceSnapshots]) {
                         if (snapshot.approvalStatus === 'Approved') {
                             if (snapshot.uuid === this.state.selectedSnapshot['@id'].split('/', 3)[2]) {
                                 if (publishProvisional.publishClassification) {
@@ -211,105 +248,129 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 } else if (snapshot.publishStatus) {
                                     delete snapshot['publishStatus'];
                                 }
+
+                                if (snapshot.resource) {
+                                    snapshot.resource.publishClassification = publishProvisional.publishClassification;
+                                    snapshot.resource.publishSubmitter = publishProvisional.publishSubmitter;
+                                    snapshot.resource.publishAffiliation = publishProvisional.publishAffiliation;
+                                    snapshot.resource.publishDate = publishProvisional.publishDate;
+
+                                    if (publishProvisional.publishComment) {
+                                        snapshot.resource.publishComment = publishProvisional.publishComment;
+                                    } else if (snapshot.resource.publishComment) {
+                                        delete snapshot.resource['publishComment'];
+                                    }
+                                }
                             } else if (publishProvisional.publishClassification && snapshot.publishStatus) {
                                 delete snapshot['publishStatus'];
+
+                                if (snapshot.resource) {
+                                    snapshot.resource.publishClassification = !publishProvisional.publishClassification;
+                                    delete snapshot.resource['publishSubmitter'];
+                                    delete snapshot.resource['publishAffiliation'];
+                                    delete snapshot.resource['publishDate'];
+                                    delete snapshot.resource['publishComment'];
+                                }
                             }
                         }
                     }
                 }
 
-                if (this.props.gdm && Object.keys(this.props.gdm).length) {
+                // Send updated current provisional object to the DB
+                return this.putRestData(this.props.provisional['@id'], currentProvisional).then(responseProvisional => {
+                    if (responseProvisional.status === 'success' && responseProvisional['@graph'] && responseProvisional['@graph'].length) {
+                        return Promise.resolve(responseProvisional['@graph'][0]);
+                    } else {
+                        return Promise.reject(responseProvisional);
+                    }
+                }).then(resultProvisional => {
 
-                    // Send updated current provisional object to the DB
-                    return this.putRestData('/provisional/' + this.props.provisional.uuid, currentProvisional).then(responseProvisional => {
-                        if (responseProvisional.status === 'success' && responseProvisional['@graph'] && responseProvisional['@graph'].length) {
-                            return Promise.resolve(responseProvisional['@graph'][0]);
+                    // Create selected/published snapshot object, updated with publish event data
+                    const publishSnapshot = {
+                        resourceId: publishProvisional.uuid,
+                        resourceType: this.state.selectedSnapshot.resourceType,
+                        approvalStatus: this.state.selectedSnapshot.approvalStatus,
+                        resource: publishProvisional,
+                        resourceParent: this.state.selectedSnapshot.resourceParent,
+                        associatedSnapshot: this.state.selectedSnapshot.associatedSnapshot,
+                        date_created: this.state.selectedSnapshot.date_created
+                    };
+
+                    // Send updated selected/published snapshot object to the DB
+                    this.putRestData(this.state.selectedSnapshot['@id'], publishSnapshot).then(responseSnapshot => {
+                        if (responseSnapshot.status === 'success' && responseSnapshot['@graph'] && responseSnapshot['@graph'].length) {
+                            this.props.updateSnapshotList(responseSnapshot['@graph'][0]['@id']);
+                            return Promise.resolve(responseSnapshot['@graph'][0]);
                         } else {
-                            return Promise.reject(responseProvisional);
+                            return Promise.reject(responseSnapshot);
                         }
-                    }).then(resultProvisional => {
+                    }).then(resultSnapshot => {
 
-                        // Create selected/published snapshot object, updated with publish event data
-                        const publishSnapshot = {
-                            resourceId: publishProvisional.uuid,
-                            resourceType: this.state.selectedSnapshot.resourceType,
-                            approvalStatus: this.state.selectedSnapshot.approvalStatus,
-                            resource: publishProvisional,
-                            resourceParent: this.state.selectedSnapshot.resourceParent,
-                            associatedSnapshot: this.state.selectedSnapshot.associatedSnapshot,
-                            date_created: this.state.selectedSnapshot.date_created
-                        };
+                        // Only update provisional state object when publish event is on current approved snapshot
+                        if (this.state.isSelectedProvisionalCurrent) {
+                            this.props.updateProvisionalObj(resultProvisional['@id']);
+                        }
 
-                        // Send updated selected/published snapshot object to the DB
-                        this.putRestData(this.state.selectedSnapshot['@id'], publishSnapshot).then(responseSnapshot => {
-                            if (responseSnapshot.status === 'success' && responseSnapshot['@graph'] && responseSnapshot['@graph'].length) {
-                                this.props.updateSnapshotList(responseSnapshot['@graph'][0]['@id']);
-                                return Promise.resolve(responseSnapshot['@graph'][0]);
-                            } else {
-                                return Promise.reject(responseSnapshot);
-                            }
-                        }).then(resultSnapshot => {
+                        // When publish event is a publish, automatically unpublish a previously-published snapshot (if one exists)
+                        if (publishProvisional.publishClassification) {
+                            const previouslyPublishedSnapshot = this.props.snapshots ? this.props.snapshots.find(snapshot => (snapshot.resource &&
+                                snapshot.resource.publishClassification && snapshot['@id'] !== this.state.selectedSnapshot['@id'])) : {};
 
-                            // Only update provisional state object when publish event is on current approved snapshot
-                            if (this.state.isSelectedProvisionalCurrent) {
-                                this.props.updateProvisionalObj(resultProvisional['@id']);
-                            }
+                            if (previouslyPublishedSnapshot && previouslyPublishedSnapshot.resource) {
 
-                            // When publish event is a publish, automatically unpublish a previously-published snapshot (if one exists)
-                            if (publishProvisional.publishClassification) {
-                                const previouslyPublishedSnapshot = this.props.snapshots ? this.props.snapshots.find(snapshot => (snapshot.resource &&
-                                    snapshot.resource.publishClassification && snapshot['@id'] !== this.state.selectedSnapshot['@id'])) : {};
+                                // Update previously-published snapshot with automatic unpublish data
+                                previouslyPublishedSnapshot.resource.publishComment = resourceProperName + ' previously published by ' +
+                                    previouslyPublishedSnapshot.resource.publishSubmitter + ' on ' +
+                                    moment(previouslyPublishedSnapshot.resource.publishDate).format('YYYY MMM DD') +
+                                    (previouslyPublishedSnapshot.resource.publishComment ? ' with the following comment: ' +
+                                        previouslyPublishedSnapshot.resource.publishComment : '');
+                                previouslyPublishedSnapshot.resource.publishClassification = false;
+                                previouslyPublishedSnapshot.resource.publishSubmitter = publishProvisional.publishSubmitter +
+                                    ' (automatic due to publication of another ' + resourceName + ')';
+                                previouslyPublishedSnapshot.resource.publishAffiliation = publishProvisional.publishAffiliation;
+                                previouslyPublishedSnapshot.resource.publishDate = publishProvisional.publishDate;
+                                previouslyPublishedSnapshot.resource.last_modified = publishProvisional.last_modified;
+                                previouslyPublishedSnapshot.resource.modified_by = publishProvisional.modified_by;
 
-                                if (previouslyPublishedSnapshot && previouslyPublishedSnapshot.resource) {
+                                const autoUnpublishSnapshot = {
+                                    resourceId: previouslyPublishedSnapshot.resource.uuid,
+                                    resourceType: previouslyPublishedSnapshot.resourceType,
+                                    approvalStatus: previouslyPublishedSnapshot.approvalStatus,
+                                    resource: previouslyPublishedSnapshot.resource,
+                                    resourceParent: previouslyPublishedSnapshot.resourceParent,
+                                    associatedSnapshot: previouslyPublishedSnapshot.associatedSnapshot,
+                                    date_created: previouslyPublishedSnapshot.date_created
+                                };
 
-                                    // Update previously-published snapshot with automatic unpublish data
-                                    previouslyPublishedSnapshot.resource.publishComment = 'Classification previously published by ' +
-                                        previouslyPublishedSnapshot.resource.publishSubmitter + ' on ' +
-                                        moment(previouslyPublishedSnapshot.resource.publishDate).format('YYYY MMM DD') +
-                                        (previouslyPublishedSnapshot.resource.publishComment ? ' with the following comment: ' +
-                                            previouslyPublishedSnapshot.resource.publishComment : '');
-                                    previouslyPublishedSnapshot.resource.publishClassification = false;
-                                    previouslyPublishedSnapshot.resource.publishSubmitter = publishProvisional.publishSubmitter +
-                                        ' (automatic due to publication of another classification)';
-                                    previouslyPublishedSnapshot.resource.publishDate = publishProvisional.publishDate;
-                                    previouslyPublishedSnapshot.resource.last_modified = publishProvisional.last_modified;
-                                    previouslyPublishedSnapshot.resource.modified_by = publishProvisional.modified_by;
-
-                                    const autoUnpublishSnapshot = {
-                                        resourceId: previouslyPublishedSnapshot.resource.uuid,
-                                        resourceType: previouslyPublishedSnapshot.resourceType,
-                                        approvalStatus: previouslyPublishedSnapshot.approvalStatus,
-                                        resource: previouslyPublishedSnapshot.resource,
-                                        resourceParent: previouslyPublishedSnapshot.resourceParent,
-                                        associatedSnapshot: previouslyPublishedSnapshot.associatedSnapshot,
-                                        date_created: previouslyPublishedSnapshot.date_created
-                                    };
-
-                                    // Send updated (unpublished) previously-published snapshot object to the DB
-                                    this.putRestData(previouslyPublishedSnapshot['@id'], autoUnpublishSnapshot).then(responseSnapshot => {
-                                        if (responseSnapshot.status === 'success' && responseSnapshot['@graph'] && responseSnapshot['@graph'].length) {
-                                            this.props.updateSnapshotList(responseSnapshot['@graph'][0]['@id']);
-                                            return Promise.resolve(responseSnapshot['@graph'][0]);
-                                        } else {
-                                            return Promise.reject(responseSnapshot);
-                                        }
-                                    }).catch(error => {
-                                        console.log('Automatic unpublishing snapshot error = : %o', error);
-                                    });
-                                }
+                                // Send updated (unpublished) previously-published snapshot object to the DB
+                                this.putRestData(previouslyPublishedSnapshot['@id'], autoUnpublishSnapshot).then(responseSnapshot => {
+                                    if (responseSnapshot.status === 'success' && responseSnapshot['@graph'] && responseSnapshot['@graph'].length) {
+                                        this.props.updateSnapshotList(responseSnapshot['@graph'][0]['@id']);
+                                        return Promise.resolve(responseSnapshot['@graph'][0]);
+                                    } else {
+                                        return Promise.reject(responseSnapshot);
+                                    }
+                                }).catch(error => {
+                                    console.log('Automatic unpublishing snapshot error = : %o', error);
+                                });
                             }
 
-                            // Clear publish-related URL query parameters and state data
-                            this.props.clearPublishState();
-                        }).catch(error => {
-                            console.log('Publishing snapshot error = : %o', error);
-                        });
+                            // When publishing an interpretation (to the Evidence Repository), display a temporary "link may not work immediately" alert
+                            if (selectedResourceType === 'interpretation') {
+                                this.props.triggerPublishLinkAlert();
+                            }
+                        }
+
+                        // Clear publish-related URL query parameters and state data
+                        this.props.clearPublishState();
                     }).catch(error => {
-                        console.log('Updating provisional error = : %o', error);
+                        console.log('Publishing snapshot error = : %o', error);
                     });
-                }
+                }).catch(error => {
+                    console.log('Updating provisional error = : %o', error);
+                });
             }).catch(error => {
-                console.log('Classification publication error = : %o', error);
+                console.log('%s publication error = : %o', resourceProperName, error);
             });
         }
     },
@@ -326,6 +387,15 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         const publishEvent = provisional.publishClassification ? 'Unpublish' : 'Publish';
         const publishEventLower = provisional.publishClassification ? 'unpublished' : 'published';
         const publicationEventLower = provisional.publishClassification ? 'unpublication' : 'publication';
+        const selectedResourceType = this.state.selectedResourceType;
+        let affiliationSubgroup;
+
+        // Set variables based on the (parent) resource type
+        if (selectedResourceType === 'gdm') {
+            affiliationSubgroup = 'gcep';
+        } else if (selectedResourceType === 'interpretation') {
+            affiliationSubgroup = 'vcep';
+        }
 
         return (
             <div className="publish-approval-panel-content">
@@ -337,7 +407,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     <div className="publish-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                            <dd>{affiliation ? getAffiliationName(affiliation, affiliationSubgroup) : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">
@@ -376,7 +446,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     <div className="publish-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                            <dd>{affiliation ? getAffiliationName(affiliation, affiliationSubgroup) : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">
@@ -397,7 +467,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 <div className="col-xs-12 col-sm-5">
                                     <div className="publish-comments">
                                         <Input type="textarea" ref={(input) => { this.publishCommentInput = input; }}
-                                            label="Additional comments:" value={publishComment} rows="5"
+                                            label="Additional comments:" value={publishComment} rows="5" giveFocus={true}
                                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                     </div>
                                 </div>

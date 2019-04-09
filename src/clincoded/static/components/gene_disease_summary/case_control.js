@@ -8,7 +8,9 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            mounted: false
+            mounted: false,
+            sortCol: 'studyType',
+            reversed: false
         };
     }
 
@@ -17,11 +19,23 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     }
 
     /**
-     * Method to render individual table row of the logged-in user's scored evidence
-     * @param {object} evidence - scored evidence and its associated case-control evidence
-     * @param {number} key - unique key
+     * Handle clicks in the table column header for sorting
+     * @param {string} colName - column name
      */
-    renderCaseControlEvidence(evidence, key) {
+    handleClickHeader(event, colName) {
+        let sortCol = colName;
+        let reversed = false;
+        if (this.state && this.state.sortCol) {
+            reversed = colName === this.state.sortCol ? !this.state.reversed : false;
+            this.setState({sortCol: sortCol, reversed: reversed});
+        }
+    }
+
+    /**
+     * Method to assemble the authors list for the given evidence
+     * @param {object} evidence - scored evidence and its associated case-control evidence
+     */
+    getEvidenceAuthors(evidence) {
         let authors;
         if (evidence.authors && evidence.authors.length) {
             if (evidence.authors.length > 1) {
@@ -30,6 +44,17 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 authors = evidence.authors[0];
             }
         }
+        return authors;
+    }
+
+    /**
+     * Method to render individual table row of the logged-in user's scored evidence
+     * @param {object} evidence - scored evidence and its associated case-control evidence
+     * @param {number} key - unique key
+     */
+    renderCaseControlEvidence(evidence, key) {
+        let authors = this.getEvidenceAuthors(evidence);
+
         return (
             <tr key={key} className="scored-case-control-evidence">
                 <td className="evidence-label">
@@ -119,19 +144,38 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
 
     /**
      * Sort table rows given a list of evidence and column name
+     * @param {array} evidenceList - A list of evidence items
+     * @param {string} colName - sort by column name
      */
     sortListbyColName(evidenceList, colName) {
         let sortedList = [];
+        let dir = this.state.reversed ? -1 : 1;
         if (evidenceList.length) {
-            sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase() !== y[colName].toLowerCase() ? x[colName].toLowerCase() < y[colName].toLowerCase() ? -1 : 1 : 0);
+            switch (colName) {
+                case 'reference':
+                    sortedList = evidenceList.sort((x,y) => {
+                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
+                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
+                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
+                    });
+                    break;
+                case 'studyType':
+                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
+                    break;
+                default:
+                    sortedList = evidenceList;
+                    break;
+            }
         }
         return sortedList;
     }
 
     render() {
         const caseControlEvidenceList = this.props.caseControlEvidenceList;
-        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseControlEvidenceList, 'studyType') : caseControlEvidenceList;
+        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseControlEvidenceList, this.state.sortCol) : caseControlEvidenceList;
         let self = this;
+        let sortIconClass = {reference: 'tcell-sort'};
+        sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         return (
             <div className="evidence-summary panel-case-control">
@@ -144,7 +188,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                             <thead>
                                 <tr>
                                     <th rowSpan="2">Label</th>
-                                    <th rowSpan="2">Reference (PMID)</th>
+                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference (PMID)<span className={sortIconClass.reference}></span></th>
                                     <th rowSpan="2">Disease (Case)</th>
                                     <th rowSpan="2">Study type</th>
                                     <th rowSpan="2">Detection method (Case)</th>

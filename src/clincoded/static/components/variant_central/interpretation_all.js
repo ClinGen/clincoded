@@ -163,7 +163,7 @@ var InterpretationList = createReactClass({
             <div className="container">
                 <div className="row gdm-header">
                     <div className="col-sm-12 col-md-8">
-                        <h1>All Interpretations</h1>
+                        <h1>All Interpretations <span className="number-of-entries"> number of entries: {interpretations.length} </span> </h1>
                     </div>
                     <div className="col-md-1"></div>
                     <div className="col-sm-12 col-md-3">

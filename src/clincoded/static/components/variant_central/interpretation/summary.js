@@ -1,6 +1,7 @@
 'use strict';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import createReactClass from 'create-react-class';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { RestMixin } from '../../rest';
@@ -10,9 +11,11 @@ import PopOverComponent from '../../../libs/bootstrap/popover';
 import AlertMessage from '../../../libs/bootstrap/alert';
 import { ProvisionalApproval } from '../../provisional_classification/provisional';
 import { ClassificationApproval } from '../../provisional_classification/approval';
+import { PublishApproval } from '../../provisional_classification/publish';
 import CurationSnapshots from '../../provisional_classification/snapshots';
 import { renderSelectedModeInheritance } from '../../../libs/render_mode_inheritance';
 import { sortListByDate } from '../../../libs/helpers/sort';
+import { allowPublishGlobal } from '../../../libs/allow_publish';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -27,10 +30,15 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         evidenceSummary: PropTypes.string,
         affiliation: PropTypes.object,
         session: PropTypes.object,
+        demoVersion: PropTypes.bool,
         classificationStatus: PropTypes.string,
         classificationSnapshots: PropTypes.array,
         updateSnapshotList: PropTypes.func,
-        updateProvisionalObj: PropTypes.func
+        updateProvisionalObj: PropTypes.func,
+        publishProvisionalReady: PropTypes.bool,
+        publishSnapshotListReady: PropTypes.bool,
+        publishClassification: PropTypes.bool,
+        resetPublishReadyState: PropTypes.func
     },
 
     getInitialState() {
@@ -53,8 +61,14 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             shouldProvisionClassification: false,
             isClassificationSaved: false,
             isApprovalActive: null,
+            isPublishActive: null,
+            isUnpublishActive: null,
             showProvisional: false,
             showApproval: false,
+            publishSnapshotUUID: null,
+            showPublish: false,
+            showUnpublish: false,
+            showPublishLinkAlert: false
         };
     },
 
@@ -128,7 +142,10 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             isApprovalActive: null,
             isClassificationSaved: false,
             showProvisional: false,
-            showApproval: false
+            showApproval: false,
+            showPublish: false,
+            showUnpublish: false,
+            showPublishLinkAlert: false
         });
     },
 
@@ -272,7 +289,9 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
             isApprovalActive: null,
             isClassificationSaved: false,
             showProvisional: false,
-            showApproval: false
+            showApproval: false,
+            showPublish: false,
+            showUnpublish: false
         });
     },
 
@@ -292,6 +311,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                 let provisionalObj = {};
                 // Reset the interpretation classification status to 'In progress' whenever the user saves it
                 provisionalObj['classificationStatus'] = 'In progress';
+                provisionalObj['classificationDate'] = moment().toISOString();
                 // At least save the calculated assertion
                 provisionalObj['autoClassification'] = this.state.calculatedAssertion;
                 // If evidence summary is not nil, save it as well
@@ -348,6 +368,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     // Use case #1: user updates pathogenicity modification and saves the interpretation classification
                     // Use case #2: user removes pre-existing modification and updates the form
                     flatProvisionalVariantObj['classificationStatus'] = 'In progress';
+                    flatProvisionalVariantObj['classificationDate'] = moment().toISOString();
                     flatProvisionalVariantObj['autoClassification'] = this.state.calculatedAssertion;
                     // If evidence summary is not nil, save it as well
                     if (this.state.evidenceSummary && this.state.evidenceSummary.length) {
@@ -381,6 +402,11 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                     if (flatProvisionalVariantObj['approvalDate']) delete flatProvisionalVariantObj['approvalDate'];
                     if (flatProvisionalVariantObj['approvalReviewDate']) delete flatProvisionalVariantObj['approvalReviewDate'];
                     if (flatProvisionalVariantObj['approvalComment']) delete flatProvisionalVariantObj['approvalComment'];
+                    flatProvisionalVariantObj['publishClassification'] = false;
+                    if (flatProvisionalVariantObj['publishSubmitter']) delete flatProvisionalVariantObj['publishSubmitter'];
+                    if (flatProvisionalVariantObj['publishAffiliation']) delete flatProvisionalVariantObj['publishAffiliation'];
+                    if (flatProvisionalVariantObj['publishDate']) delete flatProvisionalVariantObj['publishDate'];
+                    if (flatProvisionalVariantObj['publishComment']) delete flatProvisionalVariantObj['publishComment'];
                     return Promise.resolve(flatProvisionalVariantObj);
                 }).then(newProvisionalVariantObj => {
                     this.putRestData('/provisional-variant/' + interpretation.provisional_variant[0].uuid, newProvisionalVariantObj).then(response => {
@@ -451,27 +477,106 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     handleProvisionalApprovalVisibility() {
         const classificationStatus = this.state.classificationStatus;
         const isApprovalActive = this.state.isApprovalActive;
+        const isPublishActive = this.state.isPublishActive;
+        const isUnpublishActive = this.state.isUnpublishActive;
         const isClassificationSaved = this.state.isClassificationSaved;
 
-        if (classificationStatus === 'In progress') {
+        if (classificationStatus === 'In progress' || classificationStatus === 'Provisional') {
             if (isApprovalActive === 'yes') {
-                this.setState({showProvisional: false, showApproval: true});
+                this.setState({showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+            } else if (isPublishActive === 'yes' || isPublishActive === 'auto') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+            } else if (isUnpublishActive === 'yes') {
+                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
             } else if (isClassificationSaved) {
-                this.setState({showProvisional: true, showApproval: false});
+
+                // Automatic display of the approval panel (system directing user through approval process)
+                if (classificationStatus === 'Provisional') {
+                    this.setState({isApprovalActive: 'yes', showProvisional: false, showApproval: true, showPublish: false, showUnpublish: false});
+
+                // Automatic display of the provisional panel (system directing user through approval process)
+                } else {
+                    this.setState({showProvisional: true, showApproval: false, showPublish: false, showUnpublish: false});
+                }
             } else {
-                this.setState({showProvisional: false, showApproval: false});
+                this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
             }
-        } else if (classificationStatus === 'Provisional') {
-            if (isApprovalActive === 'yes') {
-                this.setState({showProvisional: false, showApproval: true});
-            } else if (isClassificationSaved) {
-                this.setState({showProvisional: false, showApproval: true});
+        } else if (classificationStatus === 'Approved') {
+            const publishProvisionalReady = this.props.publishProvisionalReady;
+            const publishSnapshotListReady = this.props.publishSnapshotListReady;
+            const publishClassification = this.props.publishClassification;
+            const affiliation = this.props.affiliation;
+            const allowPublish = allowPublishGlobal(affiliation, 'interpretation');
+
+            if (allowPublish) {
+
+                // Before displaying the publish panel, check that the current interpretation has not been published (!publishClassification)
+                if (!publishClassification && (isPublishActive === 'yes' || isPublishActive === 'auto')) {
+                    this.setState({showProvisional: false, showApproval: false, showPublish: true, showUnpublish: false});
+
+                // Only update state data (to automatically display publish panel) when the approval step is complete
+                } else if (!publishClassification && publishProvisionalReady && publishSnapshotListReady) {
+                    this.setState({isApprovalActive: null, isPublishActive: 'auto', showProvisional: false,
+                        showApproval: false, showPublish: true, showUnpublish: false}, () => {
+                        this.props.resetPublishReadyState();
+                    });
+                } else if (isUnpublishActive === 'yes') {
+                    this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: true});
+                }
+
+            // End approval process (for users without publication rights)
             } else {
-                this.setState({showProvisional: false, showApproval: false});
+                this.setState({isApprovalActive: null, showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
             }
         } else {
-            this.setState({showProvisional: false, showApproval: false});
+            this.setState({showProvisional: false, showApproval: false, showPublish: false, showUnpublish: false});
         }
+    },
+
+    /**
+     * Method to add publish-related state data
+     * Under certain circumstances (when user clicks the publish/unpublish button), called at the start of a publish event
+     * @param {string} snapshotUUID - The UUID of the source snapshot
+     * @param {string} eventType - The type of event being initiated (publish or unpublish)
+     */
+    addPublishState(snapshotUUID, eventType) {
+        if (snapshotUUID) {
+            if (eventType === 'publish') {
+                this.setState({isPublishActive: 'yes', isUnpublishActive: null, publishSnapshotUUID: snapshotUUID}, () => {
+                    this.handleProvisionalApprovalVisibility();
+                });
+            } else if (eventType === 'unpublish') {
+                this.setState({isPublishActive: null, isUnpublishActive: 'yes', publishSnapshotUUID: snapshotUUID}, () => {
+                    this.handleProvisionalApprovalVisibility();
+                });
+            }
+        }
+    },
+
+    /**
+     * Method to clear publish-related state data
+     * Called at the end of every publish event
+     */
+    clearPublishState() {
+        this.setState({isPublishActive: null, isUnpublishActive: null, publishSnapshotUUID: null, showPublish: false, showUnpublish: false}, () => {
+            this.props.resetPublishReadyState();
+        });
+    },
+
+    /**
+     * Method to update state data in order to trigger the display of an alert near the publish link (in the published snapshot panel)
+     * Called after publishing an interpretation (to the Evidence Repository)
+     */
+    triggerPublishLinkAlert() {
+        this.setState({showPublishLinkAlert: true});
+    },
+
+    /**
+     * Method to clear state data responsible for displaying an alert near the publish link (in the published snapshot panel)
+     * Called after the state data (to trigger the alert) has been acted upon
+     */
+    clearPublishLinkAlert() {
+        this.setState({showPublishLinkAlert: false});
     },
 
     render() {
@@ -507,6 +612,17 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         const shouldProvisionClassification = this.state.shouldProvisionClassification;
         const isClassificationSaved = this.state.isClassificationSaved;
         const isApprovalActive = this.state.isApprovalActive;
+        const isPublishActive = this.state.isPublishActive;
+        const isUnpublishActive = this.state.isUnpublishActive;
+        const showProvisional = this.state.showProvisional;
+        const showApproval = this.state.showApproval;
+        const snapshotUUID = this.state.publishSnapshotUUID;
+        const showPublish = this.state.showPublish;
+        const showUnpublish = this.state.showUnpublish;
+        const showPublishLinkAlert = this.state.showPublishLinkAlert;
+        const demoVersion = this.props.demoVersion;
+        const affiliation = this.props.affiliation;
+        const allowPublishButton = allowPublishGlobal(affiliation, 'interpretation');
 
         return (
             <div className="container evaluation-summary">
@@ -618,7 +734,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 </Form>
                             </div>
                         </div>
-                        {provisionalVariant && this.state.showProvisional ?
+                        {provisionalVariant && showProvisional ?
                             <div className="provisional-approval-content-wrapper">
                                 {shouldProvisionClassification ?
                                     <div>
@@ -640,7 +756,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                                     classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
                                                     classificationStatus={classificationStatus}
                                                     provisional={provisionalVariant}
-                                                    affiliation={this.props.affiliation}
+                                                    affiliation={affiliation}
                                                     updateSnapshotList={this.props.updateSnapshotList}
                                                     updateProvisionalObj={this.props.updateProvisionalObj}
                                                     approveProvisional={this.approveProvisional}
@@ -658,7 +774,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 }
                             </div>
                             : null}
-                        {provisionalVariant && this.state.showApproval ?
+                        {provisionalVariant && showApproval ?
                             <div className="final-approval-content-wrapper"> 
                                 <div className="final-approval-note">
                                     <p className="alert alert-info">
@@ -677,7 +793,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                             classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
                                             classificationStatus={classificationStatus}
                                             provisional={provisionalVariant}
-                                            affiliation={this.props.affiliation}
+                                            affiliation={affiliation}
                                             updateSnapshotList={this.props.updateSnapshotList}
                                             updateProvisionalObj={this.props.updateProvisionalObj}
                                             snapshots={sortedSnapshotList}
@@ -686,14 +802,69 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                 </div>
                             </div>
                             : null}
+                        {provisionalVariant && (showPublish || showUnpublish) ?
+                            <div className={'publish-approval-content-wrapper' + (showUnpublish ? ' unpublish' : '')}>
+                                <div className="publish-approval-note">
+                                    {isPublishActive === 'auto' ?
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Publish the current (<i className="icon icon-flag"></i>)
+                                                Approved Interpretation to the Evidence Repository.
+                                        </p>
+                                        :
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> {showUnpublish ? 'Unpublish' : 'Publish'} the selected
+                                                Approved Interpretation {showUnpublish ? 'from' : 'to'} the Evidence Repository.
+                                        </p>
+                                    }
+                                </div>
+                                <div className={'panel panel-warning approval-process publish-approval' + (showUnpublish ? ' unpublish' : '')}>
+                                    <div className="panel-heading">
+                                        <h3 className="panel-title">{showUnpublish ? 'Unpublish Interpretation from' : 'Publish Interpretation to'} the Evidence Repository</h3>
+                                    </div>
+                                    <div className="panel-body">
+                                        <PublishApproval
+                                            session={this.props.session}
+                                            interpretation={interpretation}
+                                            classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                            classificationStatus={classificationStatus}
+                                            provisional={provisionalVariant}
+                                            affiliation={affiliation}
+                                            updateSnapshotList={this.props.updateSnapshotList}
+                                            updateProvisionalObj={this.props.updateProvisionalObj}
+                                            snapshots={sortedSnapshotList}
+                                            selectedSnapshotUUID={snapshotUUID}
+                                            triggerPublishLinkAlert={this.triggerPublishLinkAlert}
+                                            clearPublishState={this.clearPublishState}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            : null}
+                        {!showProvisional && !showApproval && !allowPublishButton ?
+                            <div className="publish-unavailable-note">
+                                <p className="alert alert-info">
+                                    <i className="icon icon-info-circle"></i> The option to publish an approved interpretation to the Evidence Repository is
+                                        currently only available for VCEPs that have guidelines approved by the Sequence Variant Interpretation Working Group.
+                                </p>
+                            </div>
+                            : null}
                         {sortedSnapshotList.length ?
                             <div className="panel panel-info snapshot-list">
                                 <div className="panel-heading">
                                     <h3 className="panel-title">Saved Provisional and Approved Interpretation(s)</h3>
                                 </div>
                                 <div className="panel-body">
-                                    <CurationSnapshots snapshots={sortedSnapshotList} approveProvisional={this.approveProvisional}
-                                        isApprovalActive={isApprovalActive} classificationStatus={classificationStatus} />
+                                    <CurationSnapshots
+                                        snapshots={sortedSnapshotList}
+                                        approveProvisional={this.approveProvisional}
+                                        addPublishState={this.addPublishState}
+                                        isApprovalActive={isApprovalActive}
+                                        isPublishEventActive={isPublishActive || isUnpublishActive ? true : false}
+                                        classificationStatus={classificationStatus}
+                                        demoVersion={demoVersion}
+                                        allowPublishButton={allowPublishButton}
+                                        showPublishLinkAlert={showPublishLinkAlert}
+                                        clearPublishLinkAlert={this.clearPublishLinkAlert} />
                                 </div>
                             </div>
                             : null}
