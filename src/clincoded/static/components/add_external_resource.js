@@ -648,7 +648,6 @@ function clinvarSubmitResource(func) {
     this.setState({submitResourceBusy: true});
     if (this.state.tempResource.clinvarVariantId) {
         this.getRestData('/search/?type=variant&clinvarVariantId=' + this.state.tempResource.clinvarVariantId).then(check => {
-            console.log(this.state.tempResource)
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
