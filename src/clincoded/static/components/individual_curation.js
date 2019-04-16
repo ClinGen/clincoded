@@ -1243,9 +1243,23 @@ function IndividualCommonDiseases() {
                     clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Individual', 'nothpo', 'Group') 
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'nothpo', 'Family') : curator.renderPhenotype(null, 'Individual', 'nothpo')
+                ) 
+            }  
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'notft', 'Family') : curator.renderPhenotype(null, 'Individual', 'notft')
+                )
+            }       
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2"
                 value={individual && individual.termsInElimination ? individual.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
