@@ -265,6 +265,43 @@ var FamilyCuration = createReactClass({
         }
     },
 
+    handleCopyGroupNotPhenotypes(e) {
+        e.preventDefault(); e.stopPropagation();
+        var associatedGroups;
+        var hpoInElim = '';
+        var hpoElimFreeText = '';
+        if (this.state.group) {
+            // We have a group, so get the disease array from it.
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            // We have a family with associated groups. Combine the diseases from all groups.
+            associatedGroups = this.state.family.associatedGroups;
+        }
+        if (associatedGroups && associatedGroups.length > 0) {
+            hpoInElim = associatedGroups.map(function(associatedGroup, i) {
+                if (associatedGroup.hpoIdInElimination && associatedGroup.hpoIdInElimination.length) {
+                    return (
+                        associatedGroup.hpoIdInElimination.map(function(elimHpoId, i) {
+                            return (elimHpoId);
+                        }).join(', ')
+                    );
+                }
+            });
+            if (hpoInElim.length) {
+                this.refs['nothpoid'].setValue(hpoInElim.join(', '));
+            }
+            hpoElimFreeText = associatedGroups.map(function(associatedGroup, i) {
+                if (associatedGroup.termsInElimination) {
+                    return associatedGroup.termsInElimination;
+                }
+            });
+            if (hpoElimFreeText !== '') {
+                this.refs['notphenoterms'].setValue(hpoElimFreeText.join(', '));
+            }
+        }
+
+    },
+
     // Handle a click on a copy demographics button
     handleCopyGroupDemographics(e) {
         e.preventDefault(); e.stopPropagation();
@@ -1558,6 +1595,10 @@ function FamilyCommonDiseases() {
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                <Input type="button" ref={(button) => { this.notphenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm"
+                    title="Copy all NOT Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupNotPhenotypes} />
+                : null}
         </div>
     );
 }
