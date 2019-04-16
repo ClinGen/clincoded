@@ -33,7 +33,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         affiliation: PropTypes.object, // user's affiliation data object
-        criteriaList: PropTypes.array // criteria code(s) pertinent to the category/subcategory
+        criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
+        canCurrUserModifyEvidence: PropTypes.func // funcition to check if current logged in user can modify given evidence
     },
 
     contextTypes: {
@@ -417,15 +418,15 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     /**
      * 
      * @param {bool} finished      If we have finished with data collection
-     * @param {object} evidence    The evidence itself
-     * @param {bool} isNew         True -> this is a new piece of evidence.  False -> we are editing evidence
+     * @param {object} evidence    The evidence source data
+     * @param {string} id          The evidence id if editing evidence. Null if new evidence.
      */
-    evidenceCollectionDone(finished, evidence, isNew) {
+    evidenceCollectionDone(finished, evidence, id=null) {
         if (!finished) {
             return;
         } else {
             this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
-            if (isNew) {
+            if (id === null) {
                 evidence['_submitted_by'] = `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}`;
                 evidence['relevant_criteria'] = this.state.criteriaList;
             }
@@ -448,7 +449,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                     evidenceCriteria: this.state.editCriteriaInput,
                     // evidenceDescription: this.refs['edit-description'].getValue(),
                     evidenceDescription: '',
-                    source: isNew ? evidence : evidence.source
+                    source: evidence
                 };
     
                 // Add affiliation if the user is associated with an affiliation
@@ -458,7 +459,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         extra_evidence.affiliation = this.props.affiliation.affiliation_id;
                     }
                 }
-                if (isNew) {
+                if (id === null) {
+                    // create new extra evidence
                     return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
                         // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
                         if (!flatInterpretation.extra_evidence_list) {
@@ -478,7 +480,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         
                     });
                 } else {
-                    return this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
+                    return this.putRestData(id + '?render=false', extra_evidence).then(result => {
                         // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
                         if (!flatInterpretation.extra_evidence_list) {
                             flatInterpretation.extra_evidence_list = [];
@@ -596,6 +598,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                             isNew = {true}
                                                             affiliation = {this.props.affiliation}
                                                             session = {this.props.session}
+                                                            canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
                                                         >
                                                         </EvidenceModalManager>
                                                         {this.addEvidenceText()}
@@ -618,6 +621,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         session = {this.props.session}
                         affiliation = {this.props.affiliation}
                         viewOnly = {this.props.viewOnly}
+                        canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
                     >
                     </EvidenceTable>
                 </div>

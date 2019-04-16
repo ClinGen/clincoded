@@ -34,52 +34,51 @@ let EvidenceModalManager = createReactClass({
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
         disableActuator: PropTypes.bool,
         affiliation: PropTypes.object,              // The user's affiliation
-        session: PropTypes.object                   // The session object
+        session: PropTypes.object,                  // The session object
+        canCurrUserModifyEvidence: PropTypes.func   // funcition to check if current logged in user can modify the given evidence
     },
 
     getInitData: function(){
         let data = {};
         let metadata = {};
+        let sheetData = {};
+        // if current evidence has the source data, set as default
         if (this.props.data) {
             data = this.props.data;
-            if ('source' in data) {
-                if ('metadata' in data['source']) {
-                    metadata = data['source']['metadata'];
-                }
+            if (data.source && data.source.metadata) {
+                metadata = data.source.metadata;
+            }
+            if (data.source && data.source.data) {
+                sheetData = data.source.data;
             }
         }
+
         return {
             'metadata': metadata,
-            'data': data
+            'data': sheetData
         };
     },
 
     getInitialState: function() {
         let data = this.getInitData();
-        if (this.props.data) {
-            data = this.props.data;
-        }
         return {
             nextModal: false,
-            data: data,
+            sourceData: data,        // source data being added/edited
             isNew: this.props.isNew  // This may change from T -> F if a matching identifier is found.  See metadataDone() for details.
         };
     },
 
     componentDidMount: function(){
         let data = this.getInitData();
-        if (this.props.data) {
-            data = this.props.data;
-        }
         this.setState({
-            data: data
+            sourceData: data
         });
     },
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.data != null && nextProps.data !== this.state.data) {
+        if(nextProps.data != null && nextProps.data.source != null && nextProps.data.source !== this.state.sourceData) {
             this.setState({
-                data: nextProps.data
+                sourceData: nextProps.data.source
             });
         }
         if (nextProps.isNew != null && nextProps.isNew !== this.state.isNew) {
@@ -89,24 +88,32 @@ let EvidenceModalManager = createReactClass({
         }
     },
 
-    getExistingEvidence(metadata){
+    // if editing evidence, return its id.  If adding, return null.
+    getCurrentEvidenceId() {
+        if (this.props.data) {
+            return (this.props.data['@id']);
+        }
+        return null;
+    },
+
+    getExistingEvidence(metadata) {
         let identifierCol = extraEvidence.typeMapping[this.props.evidenceType].fields
             .filter(o => o.identifier === true)
             .map(o => o.name);
 
-        // Determine if this is meant to be linked to an existing piece of evidence
-        let candidate = this.props.allData
+        // Determine if this is meant to be linked to an existing piece of evidence that current user can modify
+        let candidates = this.props.allData
             .filter(o => identifierCol in o.source.metadata
                 && o.source.metadata[identifierCol] === metadata[identifierCol]);
-        if (candidate.length > 0) {
-            if (candidate[0].affiliation && candidate[0].affiliation === this.props.affiliation.affiliation_id) {
-                // Hopefully only one item, otherwise we have run into consistency issues
-                return candidate[0];
-            } else if (candidate[0].submitted_by['@id'] === this.props.session.user_properties['@id']) {
-                return candidate[0];
-            }
+        let result = false;
+        if (candidates.length > 0) {
+            candidates.forEach(candidate => {
+                if (this.props.canCurrUserModifyEvidence(candidate)) {
+                    result = candidate;
+                }
+            });
         }
-        return false;
+        return result;
     },
 
     /**
@@ -120,12 +127,12 @@ let EvidenceModalManager = createReactClass({
     metadataDone(next, metadata) {
         if (next) {
             let candidate = this.getExistingEvidence(metadata);
-            let newData = Object.assign({}, this.state.data);
+            let newData = Object.assign({}, this.state.sourceData);
             if (this.props.isNew) {
                 if (candidate) {
                     // Editing a piece of evidence initially input in a different panel
                     Object.assign(candidate.source.metadata, metadata);
-                    Object.assign(newData, candidate);
+                    Object.assign(newData, candidate.source);
                     this.setState({
                         isNew: false
                     });
@@ -138,11 +145,11 @@ let EvidenceModalManager = createReactClass({
                 }
             } else {
                 // Editing
-                Object.assign(newData.source.metadata, metadata);
+                Object.assign(newData.metadata, metadata);
             }
 
             this.setState({
-                data: newData,
+                sourceData: newData,
                 nextModal: true
             });
         } else {
@@ -157,51 +164,29 @@ let EvidenceModalManager = createReactClass({
     reset() {
         this.setState({
             nextModal: false,
-            isNew: true,
+            isNew: false,
             data: this.getInitData()
         });
     },
 
     sheetDone(data) {
         if (data === null) {
-            this.props.evidenceCollectionDone(false, this.state.data, this.state.isNew);
-            this.setState({
-                nextModal: false,
-                isNew: null
-            });
+            this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId());
         }
         else {
-            let metadata = null;
-            if ('source' in this.state.data) {
-                metadata = this.state.data.source.metadata;
-            } else {
-                metadata = this.state.data.metadata;
-            }
-            let candidate = this.getExistingEvidence(metadata);
-            let newData = Object.assign({}, this.state.data);
-            if (candidate) {
-                Object.assign(newData.source.data, data);
-            } else {
-                Object.assign(newData.data, data);
-            }
-            newData['affiliation'] = this.props.affiliation;
-            this.props.evidenceCollectionDone(true, newData, this.state.isNew);
-            this.reset();
+            let newData = Object.assign({}, this.state.sourceData);
+            Object.assign(newData.data, data);
+            this.props.evidenceCollectionDone(true, newData, this.getCurrentEvidenceId());
         }
+        this.reset();
     },
 
     getSheetData() {
-        if ('source' in this.state.data) {
-            return this.state.data.source.data;
-        }
-        return this.state.data.data;
+        return this.state.sourceData.data;
     },
 
     getMetadata() {
-        if ('source' in this.state.data) {
-            return this.state.data.source.metadata;
-        }
-        return this.state.data.metadata;
+        return this.state.sourceData.metadata;
     },
 
     evidenceSheet() {

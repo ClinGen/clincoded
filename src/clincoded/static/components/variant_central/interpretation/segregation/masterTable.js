@@ -11,7 +11,9 @@ import { external_url_map } from 'components/globals';
 
 let MasterEvidenceTable = createReactClass({
     propTypes: {
-        evidence_arr: PropTypes.array    // All pieces of evidence added to this variant
+        evidence_arr: PropTypes.array,    // All pieces of evidence added to this variant
+        affiliation: PropTypes.object,   // User's affiliation
+        session: PropTypes.object       // Session object
     },
 
     getInitialState() {

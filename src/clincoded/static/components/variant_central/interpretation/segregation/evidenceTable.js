@@ -26,7 +26,8 @@ let EvidenceTable = createReactClass({
         criteriaList: PropTypes.array,              // ACMG criteria
         session: PropTypes.object,                  // Session object
         affiliation: PropTypes.object,              // User's affiliation
-        viewOnly: PropTypes.bool                    // If the page is in read-only mode
+        viewOnly: PropTypes.bool,                   // If the page is in read-only mode
+        canCurrUserModifyEvidence: PropTypes.func   // funcition to check if current logged in user can modify the given evidence
     },
 
     getInitialState: function() {
@@ -55,22 +56,7 @@ let EvidenceTable = createReactClass({
         if (this.props.viewOnly === true) {
             return false;
         }
-
-        // First check for affiliation, then check user ID
-        let created_affiliation = row.affiliation;
-        if (created_affiliation !== null) {
-            if (this.props.affiliation == created_affiliation) {
-                return true;
-            }
-        }
-
-        // User ID check
-        let curr_user = this.props.session.user_properties['@id'];
-        let created_user = row.submitted_by['@id'];
-        if (curr_user === created_user) {
-            return true;
-        }
-        return false;
+        return this.props.canCurrUserModifyEvidence(row);;
     },
 
     getEditButton: function(key, row) {
@@ -87,6 +73,7 @@ let EvidenceTable = createReactClass({
                 disableActuator = {disableActuator}
                 affiliation = {this.props.affiliation}
                 session = {this.props.session}
+                canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
             >
             </EvidenceModalManager>
         </td>
@@ -163,7 +150,7 @@ let EvidenceTable = createReactClass({
                         {content} <ContextualHelp content={help}></ContextualHelp>
                     </span>;
                 }
-                inner.push(<td key={`cell_${i++}`}>{nodeContent}</td>)
+                inner.push(<td key={`cell_${i++}`}>{nodeContent}</td>);
 
                 colNames.forEach(col => {
                     nodeContent = null;
@@ -176,16 +163,20 @@ let EvidenceTable = createReactClass({
                     inner.push(node);
                 });
 
-                let editButton = this.getEditButton(`edit_${i++}`, row)
+                if (this.canModify(row)) {
+                    let editButton = this.getEditButton(`edit_${i++}`, row);
+                    inner.push(editButton);
 
-                inner.push(editButton);
-
-                let deleteKey = `delete+${i++}`;
-                let deleteButton = this.getDeleteButton(deleteKey, row);
-                inner.push(deleteButton);
+                    let deleteButton = this.getDeleteButton(`delete+${i++}`, row);
+                    inner.push(deleteButton);
+                } else {
+                    let emptyColumn = <td></td>
+                    inner.push(emptyColumn);
+                    inner.push(emptyColumn);
+                }
 
                 let outer = <tr key={`row_${i++}`}>{inner}</tr>
-                rows.push(outer)
+                rows.push(outer);
             }
         });
         return rows;

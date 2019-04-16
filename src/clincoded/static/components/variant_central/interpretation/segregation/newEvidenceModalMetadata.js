@@ -37,7 +37,11 @@ let NewEvidenceModalMetadata = createReactClass({
 
     title(evidenceType) {
         if (evidenceType && evidenceType in extraEvidence.typeMapping) {
-            return `Add ${extraEvidence.typeMapping[evidenceType]['name']} Evidence`;
+            if (this.props.isNew) {
+                return `Add ${extraEvidence.typeMapping[evidenceType]['name']} Evidence`;
+            } else {
+                return `Edit ${extraEvidence.typeMapping[evidenceType]['name']} Evidence`;
+            }
         }
         return null;
     },
@@ -70,12 +74,12 @@ let NewEvidenceModalMetadata = createReactClass({
         if (key && key in extraEvidence.typeMapping) {
             let nodes = [];
             extraEvidence.typeMapping[key]['fields'].forEach(obj => {
-            let lbl = [<span key={`span_${obj['name']}`}>{obj['description']}</span>];
+                let lbl = [<span key={`span_${obj['name']}`}>{obj['description']}</span>];
                 if (obj.identifier) {
                     let help = <span key={`span_help_${obj['name']}`}> <ContextualHelp content="This field will be used as an identifier for this piece of evidence."></ContextualHelp></span>;
                     lbl.push(help);
                 }
-
+                let disableInput = !this.props.isNew && obj['required'] ? true : false;
                 let node = [<div key={obj['name']}>
                         <Input
                             type="text"
@@ -86,6 +90,9 @@ let NewEvidenceModalMetadata = createReactClass({
                             ref={obj['name']}
                             required={obj['required']}
                             handleChange={ this.handleChange }
+                            error={this.getFormError('resourceId')}
+                            clearError={this.clrFormErrors.bind(null, 'resourceId')}
+                            inputDisabled = {disableInput}
                         />
                     </div>];
                 if (key === 'PMID') {
@@ -95,6 +102,7 @@ let NewEvidenceModalMetadata = createReactClass({
                             clickHandler = {this.searchPMID}
                             title = "Preview PubMed Article"
                             submitBusy = {this.state.pmidLookupBusy}
+                            inputDisabled = {this.state.isNextDisabled}
                             required
                         />);
                 }
@@ -107,54 +115,60 @@ let NewEvidenceModalMetadata = createReactClass({
     },
 
     getInputValue(name) {
-        if (this.props.isNew) {
-            return '';
+        if (!this.props.isNew && this.props.data) {
+            return this.props.data[name];
         }
-        return this.props.data[name];
+        return '';
     },
 
     searchPMID(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({
-            pmidLookupBusy: true
-        }, () => {
-            this.saveAllFormValues();
-            let formValues = this.getAllFormValues();
-            let pmid = formValues['pmid'];
-
-            const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
-            this.getRestData('/articles/' + id).then(article => {
-                // article already exists in db
-                this.setState({
-                    pmidResult: article
-                });
+        this.saveAllFormValues();
+        let formValues = this.getAllFormValues();
+        let pmid = formValues['pmid'];
+        if (pmid) {
+            this.setState({
+                pmidLookupBusy: true
             }, () => {
-                // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-                this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
-                    var data = parsePubmed(xml);
-                    if (data.pmid) {
-                        // found the result we want
-                        this.setState({
-                            pmidResult: data
-                        });
-                    } else {
-                        // no result from ClinVar
-                        this.setState({
-                            pmidResult: 'error'
-                        });
-                    }
+                const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+                this.getRestData('/articles/' + id).then(article => {
+                    // article already exists in db
+                    this.setState({
+                        pmidResult: article
+                    });
+                }, () => {
+                    // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                    this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                        var data = parsePubmed(xml);
+                        if (data.pmid) {
+                            // found the result we want
+                            this.setState({
+                                pmidResult: data
+                            });
+                        } else {
+                            // no result from ClinVar
+                            this.setState({
+                                pmidResult: {}
+                            });
+                            this.setFormErrors('resourceId', 'PMID not found');
+                        }
+                    });
+                })
+                .then(() => {
+                    this.setState({
+                        pmidLookupBusy: false
+                    });
+                })
+                .catch(e => {
+                    // error handling for PubMed query
+                    console.error(e);
+                    this.setFormErrors('resourceId', 'Error in looking up PMID');
                 });
-            })
-            .then(() => {
-                this.setState({
-                    pmidLookupBusy: false
-                });
-            })
-            .catch(e => {
-                // error handling for PubMed query
-                console.error(e);
             });
-        });
+        }
+        else {
+            this.setFormErrors('resourceId', 'Please enter a PMID');
+        }
     },
 
     submitAdditionalEvidenceHandler(e) {
@@ -180,21 +194,28 @@ let NewEvidenceModalMetadata = createReactClass({
         if (!this.state.pmidResult) {
             return null;
         } 
-        return <div>
-                    <span className="col-sm-10 col-sm-offset-1">
-                        <PmidSummary
-                            article={this.state.pmidResult}
-                            displayJournal
-                            pmidLinkout
-                        />
-                    </span>
-                </div>
+        return (
+            <div>
+                <span className="col-sm-10 col-sm-offset-1">
+                    <PmidSummary
+                        article={this.state.pmidResult}
+                        displayJournal
+                        pmidLinkout
+                    />
+                </span>
+            </div>
+        )
     },
 
     cancel() {
         this.props.metadataDone(false, null);
         this.handleModalClose();
+        let errors = this.state.formErrors;
+        errors['resourceId'] = '';
         this.setState({
+            pmidResult: null,
+            pmidLookupBusy: false,
+            formErrors: errors,
             data: this.props.data,
             isNextDisabled: this.props.isNew ? true : false
         });

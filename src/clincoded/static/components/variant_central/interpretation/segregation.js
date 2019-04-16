@@ -70,8 +70,23 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     renderMasterTable() {
         return <MasterEvidenceTable
                     evidence_arr = {this.getAllInterpretations()}
+                    affiliation = {this.props.affiliation}
+                    session = {this.props.session}
                 >
                 </MasterEvidenceTable>
+    },
+
+    canCurrUserModifyEvidence(evidence) {
+        let created_affiliation = evidence.affiliation;
+        let curr_affiliation = this.props.affiliation;
+        let created_user = evidence.submitted_by['@id'];
+        let curr_user = this.props.session.user_properties['@id'];
+
+        if ((created_affiliation && curr_affiliation && created_affiliation === curr_affiliation.affiliation_id) || 
+            (!created_affiliation && !curr_affiliation && created_user === curr_user)) {
+                return true;
+        }
+        return false;
     },
 
     getAllInterpretations() {
@@ -246,6 +261,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 updateInterpretationObj={this.props.updateInterpretationObj}
                 viewOnly={this.state.data && !this.state.interpretation}
                 affiliation={this.props.affiliation}
+                canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
             />
             return <PanelGroup accordion key={panel.key}>
                 <Panel
