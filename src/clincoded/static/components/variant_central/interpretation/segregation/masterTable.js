@@ -42,53 +42,77 @@ let MasterEvidenceTable = createReactClass({
         return evidence_types;
     },
 
+    getTableEvidenceSourceOrder() {
+        return ['PMID', 'clinical_lab', 'clinic', 'research_lab', 'public_database', 'other'];
+    },
+
     getHeader(evidence_types) {
         let header = [];
-        let first_row = [];
-        let second_row = [];
+        let first_row = []; // Evidence source Type row
+        let second_row = []; // Evidence row
+        let third_row = []; // Submitted by row
+        let tableOrder = this.getTableEvidenceSourceOrder();
 
         first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="2"></td>)
-        Object.keys(evidence_types).forEach(evidence_type => {
-            let num_items = evidence_types[evidence_type].length;
-            first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
-                {extraEvidence.typeMapping[evidence_type].name}
-            </th>)
+        tableOrder.forEach(evidence_type => {
+            // if there is evidence in this source type, display
+            if (evidence_types[evidence_type]) {
+                let num_items = evidence_types[evidence_type].length;
+                first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
+                    {extraEvidence.typeMapping[evidence_type].name}
+                </th>)
+            }
         });
 
         second_row.push(<th key="header.number" style={{border: 'none'}}>Evidence Type</th>);
-        second_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}>
+        second_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}></th>);
+        third_row.push(<th key="header.user" style={{border: 'none'}}>Submitted by</th>);
+        third_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}>
             <div><span>Sum</span></div>
         </th>);
-        Object.keys(evidence_types).forEach(evidence_type => {
-            let rows = evidence_types[evidence_type];
-            rows.forEach(row => {
-                if (row.source.metadata['_kind_key'] === 'PMID') {
-                    let pmid = row.source.metadata.pmid;
-                    let element = <a
-                        href = {external_url_map['PubMed'] + pmid}
-                        target = '_blank'
-                        title = {`PubMed Article ID: ${pmid}`}
-                    >
-                        PMID {pmid}
-                    </a>
-                    second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
-                        <div style={{textAlign: 'center'}}>
-                            <span>{element}</span>
-                        </div>
-                    </th>)
-                } else {
-                    let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
-                    let evidence_detail = `${row.source.metadata[identifier.name]}`;
-                    second_row.push(<th key={`header.${evidence_detail}`}>
-                        <div style={{textAlign: 'center'}}>
-                            <span>{evidence_detail}</span>
-                        </div>
-                    </th>);
-                }
-            });
+        tableOrder.forEach(evidence_type => {
+            if (evidence_types[evidence_type]) {
+                let rows = evidence_types[evidence_type];
+                let rowNum = 0;
+                rows.forEach(row => {
+                    if (row.source.metadata['_kind_key'] === 'PMID') {
+                        let pmid = row.source.metadata.pmid;
+                        let element = <a
+                            href = {external_url_map['PubMed'] + pmid}
+                            target = '_blank'
+                            title = {`PubMed Article ID: ${pmid}`}
+                        >
+                            PMID {pmid}
+                        </a>
+                        second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
+                            <div style={{textAlign: 'center'}}>
+                                <span>{element}</span>
+                            </div>
+                        </th>)
+                    } else {
+                        let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
+                        let evidence_detail = `${row.source.metadata[identifier.name]}`;
+                        second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
+                            <div style={{textAlign: 'center'}}>
+                                <span>{evidence_detail}</span>
+                            </div>
+                        </th>);
+                    }
+                    if (row.source['_submitted_by']) {
+                        let submittedBy = row.source['_submitted_by'];
+                        third_row.push(<th key={`header_${evidence_type}_${rowNum}.${row.uuid}`}>
+                            <div style={{textAlign: 'center'}}>
+                                <span>{submittedBy}</span>
+                            </div>
+                        </th>);
+                    }
+                    rowNum++;
+                });
+            }
         });
         header.push(<tr key="header_row_1">{first_row}</tr>)
         header.push(<tr key="header_row_2">{second_row}</tr>);
+        header.push(<tr key="header_row_3">{third_row}</tr>);
         return header;
     },
 
@@ -96,6 +120,7 @@ let MasterEvidenceTable = createReactClass({
         let tds = [];
         let cell_num = 0;  // Used to set a key
         let sums = this.getSums();
+        let tableOrder = this.getTableEvidenceSourceOrder();
 
         // Initialize the left-hand columns
         masterTable().forEach(row => {
@@ -124,7 +149,8 @@ let MasterEvidenceTable = createReactClass({
 
         // Middle columns
         // This needs to be the outer loop to ensure it lines up with our header
-            Object.keys(evidence_types).forEach(evidence_type => {
+        tableOrder.forEach(evidence_type => {
+            if (evidence_types[evidence_type]) {
                 let rows = evidence_types[evidence_type];
                 rows.forEach(row => {
                     let rowNum = 0;
@@ -133,11 +159,18 @@ let MasterEvidenceTable = createReactClass({
                         let entry = <td key={`cell_${cell_num++}`}>
                             <div>{val}</div>
                         </td>
+                        // if comment column, limit to column width and show full text when mouseover. 
+                        if (masterRow.key.endsWith('_comment') || masterRow.key === 'comments') {
+                            entry = <td key={`cell_${cell_num++}`}>
+                                <div className='title-ellipsis title-ellipsis-shorter' title={val}>{val}</div>
+                            </td>
+                        }
                         tds[rowNum].push(entry);
                         rowNum++;
                     });
                 });
-            });
+            }
+        });
 
         let result = [];
         let row_num = 0;

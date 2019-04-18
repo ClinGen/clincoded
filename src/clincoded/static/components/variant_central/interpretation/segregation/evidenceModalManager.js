@@ -40,23 +40,15 @@ let EvidenceModalManager = createReactClass({
 
     getInitData: function(){
         let data = {};
-        let metadata = {};
-        let sheetData = {};
-        // if current evidence has the source data, set as default
-        if (this.props.data) {
-            data = this.props.data;
-            if (data.source && data.source.metadata) {
-                metadata = data.source.metadata;
-            }
-            if (data.source && data.source.data) {
-                sheetData = data.source.data;
-            }
+        // if current evidence has source data, set as default
+        if (this.props.data && this.props.data.source) {
+            data = this.props.data.source;
+        }
+        else {
+            data = {'metadata': {}, 'data': {}}
         }
 
-        return {
-            'metadata': metadata,
-            'data': sheetData
-        };
+        return data;
     },
 
     getInitialState: function() {
@@ -156,7 +148,7 @@ let EvidenceModalManager = createReactClass({
             // cancelled
             this.setState({
                 nextModal: false,
-                data: this.getInitData()
+                sourceData: this.getInitData()
             });
         }
     },
@@ -165,7 +157,7 @@ let EvidenceModalManager = createReactClass({
         this.setState({
             nextModal: false,
             isNew: false,
-            data: this.getInitData()
+            sourceData: this.getInitData()
         });
     },
 
