@@ -596,6 +596,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                             isNew = {true}
                                                             affiliation = {this.props.affiliation}
                                                             session = {this.props.session}
+                                                            variant = {this.props.variant}
                                                         >
                                                         </EvidenceModalManager>
                                                         {this.addEvidenceText()}
@@ -618,6 +619,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         session = {this.props.session}
                         affiliation = {this.props.affiliation}
                         viewOnly = {this.props.viewOnly}
+                        variant = {this.props.variant}
                     >
                     </EvidenceTable>
                 </div>

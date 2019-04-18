@@ -26,7 +26,8 @@ let EvidenceTable = createReactClass({
         criteriaList: PropTypes.array,              // ACMG criteria
         session: PropTypes.object,                  // Session object
         affiliation: PropTypes.object,              // User's affiliation
-        viewOnly: PropTypes.bool                    // If the page is in read-only mode
+        viewOnly: PropTypes.bool,                   // If the page is in read-only mode
+        variant: PropTypes.object                   // The variant we are curating
     },
 
     getInitialState: function() {
@@ -87,6 +88,7 @@ let EvidenceTable = createReactClass({
                 disableActuator = {disableActuator}
                 affiliation = {this.props.affiliation}
                 session = {this.props.session}
+                variant = {this.props.variant}
             >
             </EvidenceModalManager>
         </td>

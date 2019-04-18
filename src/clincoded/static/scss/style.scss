@@ -54,22 +54,23 @@
 // Clincoded styles
 @import "clincoded/variables";
 @import "clincoded/base";
-@import "clincoded/modules/navbar";
-@import "clincoded/modules/modal";
-@import "clincoded/modules/panel";
-@import "clincoded/modules/form";
-@import "clincoded/modules/curator";
-@import "clincoded/modules/table";
 @import "clincoded/modules/activity_indicator";
-@import "clincoded/modules/tooltip";
-@import "clincoded/modules/popover";
-@import "clincoded/modules/modal_disease";
-@import "clincoded/modules/gene_disease_summary";
-@import "clincoded/modules/affiliation";
-@import "clincoded/modules/dashboard";
-@import "clincoded/modules/approval";
-@import "clincoded/modules/variant_interpretation_summary";
 @import "clincoded/modules/admin";
+@import "clincoded/modules/affiliation";
+@import "clincoded/modules/approval";
+@import "clincoded/modules/case_segregation";
+@import "clincoded/modules/curator";
+@import "clincoded/modules/dashboard";
+@import "clincoded/modules/form";
+@import "clincoded/modules/gene_disease_summary";
+@import "clincoded/modules/modal_disease";
+@import "clincoded/modules/modal";
+@import "clincoded/modules/navbar";
+@import "clincoded/modules/panel";
+@import "clincoded/modules/popover";
+@import "clincoded/modules/table";
+@import "clincoded/modules/tooltip";
+@import "clincoded/modules/variant_interpretation_summary";
 
 // Utility classes - Bootstrap 3, keep last
 @import "bootstrap/utilities";

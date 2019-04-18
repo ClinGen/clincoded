@@ -34,7 +34,8 @@ let EvidenceModalManager = createReactClass({
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
         disableActuator: PropTypes.bool,
         affiliation: PropTypes.object,              // The user's affiliation
-        session: PropTypes.object                   // The session object
+        session: PropTypes.object,                  // The session object
+        variant: PropTypes.object                   // The variant we are curating
     },
 
     getInitData: function(){
@@ -215,6 +216,7 @@ let EvidenceModalManager = createReactClass({
                         allData = {this.props.data}
                         isNew = {this.state.isNew}
                         subcategory = {this.props.subcategory}
+                        variant = {this.props.variant}
                     >
                     </EvidenceSheet>
         }

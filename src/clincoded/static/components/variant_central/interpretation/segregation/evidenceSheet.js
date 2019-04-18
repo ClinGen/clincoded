@@ -32,11 +32,40 @@ let EvidenceSheet = createReactClass({
         if (this.props.data) {
             data = this.props.data;
         }
+        let case_db_data = {
+            variants: []
+        };
         return {
             data: data,
             hpo: null,
-            backgroundGreen: '#00FF0030'
+            backgroundGreen: '#00FF0030',
+            case_db_data: case_db_data
         };
+    },
+
+    componentDidMount() {
+        let uri = external_url_map['CASEDB'];
+        uri = `${uri}/variants/${this.props.variant.clinvarVariantId}`;
+        let newState = {
+            case_db_data: {
+                variants: []
+            }
+        };
+        this.getRestData(uri).then(res => {
+            let returnObj = {
+                changes: false
+            };
+            if (res.length > 0) {
+                newState.case_db_data.variants = res;
+                returnObj.changes = true;
+                returnObj.newState = newState;
+            }
+            return returnObj;
+        }).then(obj => {
+            if (obj.changes === true) {
+                this.setState(obj.newState);
+            }
+        });
     },
 
     handleModalClose() {
@@ -120,19 +149,6 @@ let EvidenceSheet = createReactClass({
                         fieldStyle = { fields.indexOf(col.name) == -1 ? null : {backgroundColor: this.state.backgroundGreen} }
                     />
                 </div>]
-                // if ('lookup' in col) {
-                //     node.push(<div className="col-md-1">
-                //         <Input 
-                //             type = "button"
-                //             inputClassName="btn-default btn-inline-spacer"
-                //             title="Lookup"
-                //             clickHandler={() => this.lookupTerm(col.lookup, col.name)}
-                //             style={{'alignSelf': 'center'}}
-                //         >
-                //         </Input>
-                //         {this.renderLookupResult()}
-                //     </div>);
-                // }
                 inner.push(node);
             });
             let outer = <div className="row" style={outerStyle} key={i++}>
@@ -163,19 +179,41 @@ let EvidenceSheet = createReactClass({
         return node;
     },
 
-    lookupTerm(termType, fieldName) {
-        let uri = external_url_map[termType];
-        this.saveAllFormValues();
-        const formValues = this.getAllFormValues();
-        if (termType === 'HPOApi') {
-            uri += formValues[fieldName].replace(':', '_');
-            this.getRestData(uri).then(result => {
-                let term = result['_embedded']['terms'][0];
-                this.setState({
-                    hpo: term
-                });
-            });
+    case_data() {
+        if (this.state.case_db_data.variants.length === 0) {
+            return null;
         }
+        const header_titles = Object.keys(this.state.case_db_data.variants[0].data);    // e.g. ['is_snp', 'rsid', ...]
+        const headers = header_titles.map(t => <th key={`case_db_header_${t}`}>{t}</th>)
+
+        let rows = [];
+        this.state.case_db_data.variants.forEach(v => {
+            let this_row = [];
+            let row_num = 0;
+            header_titles.forEach(t => {
+                this_row.push(<td key={`case_db_cell_${row_num}_${t}`}>{v.data[t]}</td>)
+            });
+            rows.push(<tr key={`case_db_row_${row_num}`}>{this_row}</tr>);
+            row_num += 1;
+        });
+
+        return (
+            <div>
+                <div className="cdb-logo">
+                    <span className="cdb-logo-text">Cases seen with this variant inside</span>
+                </div>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            {headers}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows}
+                    </tbody>
+                </table>
+            </div>
+        );
     },
 
     render() {
@@ -196,6 +234,7 @@ let EvidenceSheet = createReactClass({
                 <Form submitHandler={this.submitNewEvidence} formClassName="form-horizontal form-std">
                 {this.inputs()}
                 <div className="row">&nbsp;<br />&nbsp;</div>
+                {this.case_data()}
                 <div className='modal-footer'>
                     <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Submit" id="submit" />
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
