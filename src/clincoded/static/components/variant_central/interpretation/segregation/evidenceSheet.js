@@ -33,7 +33,7 @@ let EvidenceSheet = createReactClass({
             data = this.props.data;
         }
         let case_db_data = {
-            variants: []
+            cases: []
         };
         return {
             data: data,
@@ -45,10 +45,10 @@ let EvidenceSheet = createReactClass({
 
     componentDidMount() {
         let uri = external_url_map['CASEDB'];
-        uri = `${uri}/variants/${this.props.variant.clinvarVariantId}`;
+        uri = `${uri}/queries/variants/${this.props.variant.clinvarVariantId}`;
         let newState = {
             case_db_data: {
-                variants: []
+                cases: []
             }
         };
         this.getRestData(uri).then(res => {
@@ -56,7 +56,7 @@ let EvidenceSheet = createReactClass({
                 changes: false
             };
             if (res.length > 0) {
-                newState.case_db_data.variants = res;
+                newState.case_db_data.cases = res;
                 returnObj.changes = true;
                 returnObj.newState = newState;
             }
@@ -180,16 +180,16 @@ let EvidenceSheet = createReactClass({
     },
 
     case_data() {
-        if (this.state.case_db_data.variants.length === 0) {
+        if (this.state.case_db_data.cases.length === 0) {
             return null;
         }
-        const header_titles = Object.keys(this.state.case_db_data.variants[0].data);    // e.g. ['is_snp', 'rsid', ...]
+        const header_titles = Object.keys(this.state.case_db_data.cases[0].data);    // e.g. ['diseases', 'symptoms', ...]
         const headers = header_titles.map(t => <th key={`case_db_header_${t}`}>{t}</th>)
 
         let rows = [];
-        this.state.case_db_data.variants.forEach(v => {
+        let row_num = 0;
+        this.state.case_db_data.cases.forEach(v => {
             let this_row = [];
-            let row_num = 0;
             header_titles.forEach(t => {
                 this_row.push(<td key={`case_db_cell_${row_num}_${t}`}>{v.data[t]}</td>)
             });
