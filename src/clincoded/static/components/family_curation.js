@@ -2396,7 +2396,7 @@ const FamilySegregationViewer = (segregation, assessments, open) => {
                 </div>
 
                 <div>
-                    <dt>Number of UNAFFECTED individuals without the bialletic genotype</dt>
+                    <dt>Number of UNAFFECTED individuals without the biallelic genotype</dt>
                     <dd>{segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype}</dd>
                 </div>
 
