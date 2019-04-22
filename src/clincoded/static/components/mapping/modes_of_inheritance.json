@@ -23,8 +23,7 @@
         "Y-linked inheritance (HP:0001450)",
         "Somatic mutation (HP:0001428)",
         "Multifactorial inheritance (HP:0001426)",
-        "Codominant inheritance",
-        "Semidominant inheritance"
+        "Codominant inheritance"
     ],
     "Undetermined mode of inheritance (HP:0000005)": []
 }
