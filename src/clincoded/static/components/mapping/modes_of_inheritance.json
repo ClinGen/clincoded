@@ -14,6 +14,7 @@
         "primarily or exclusively homoplasmic",
         "primarily or exclusively heteroplasmic"
     ],
+    "Semidominant inheritance (HP:0032113)": [],
     "X-linked inheritance (HP:0001417)": [
         "dominant (HP:0001423)",
         "recessive (HP:0001419)",
