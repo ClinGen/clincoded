@@ -1400,6 +1400,9 @@ function IndividualVariantInfo() {
     let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
+    if (gdm) {
+        var semiDom = gdm.modeInheritance.includes('Semidominant');
+    }
 
     return (
         <div className="row form-row-helper">
@@ -1480,16 +1483,29 @@ function IndividualVariantInfo() {
                 </div>
                 :
                 <div>
-                    <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
-                        error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
-                        handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    </Input>
-                    <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
-                        error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
-                        handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    </Input>
+                    { semiDom ?  
+                        <Input type="select" label="The proband is:" 
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                            <option value="none">No Selection</option>
+                            <option disabled="disabled"></option>
+                            <option value="Monoallelic heterozygous (e.g. autosomal)">Monoallelic heterozygous (e.g. autosomal)</option>
+                            <option value="Hemizygous (e.g. X-linked)">Hemizygous (e.g. X-linked)</option>
+                            <option value="Biallelic homozygous">Biallelic homozygous</option>
+                            <option value="Biallelic compound heterozygous">Biallelic compound heterozygous</option>
+                        </Input>    
+                    : 
+                    <div>
+                        <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
+                            error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
+                            handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        </Input>
+                        <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
+                            error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
+                            handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        </Input>
+                    </div>}
                     {_.range(MAX_VARIANTS).map(i => {
                         var variant;
 
