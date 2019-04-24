@@ -38,9 +38,9 @@ let EvidenceModalManager = createReactClass({
         canCurrUserModifyEvidence: PropTypes.func   // funcition to check if current logged in user can modify the given evidence
     },
 
-    getInitData: function(){
+    getInitData(){
         let data = {};
-        // if current evidence has source data, set as default
+        // If current evidence has source data, set as default
         if (this.props.data && this.props.data.source) {
             data = this.props.data.source;
         }
@@ -51,16 +51,16 @@ let EvidenceModalManager = createReactClass({
         return data;
     },
 
-    getInitialState: function() {
+    getInitialState() {
         let data = this.getInitData();
         return {
             nextModal: false,
-            sourceData: data,        // source data being added/edited
+            sourceData: data,        // Source data being added/edited
             isNew: this.props.isNew  // This may change from T -> F if a matching identifier is found.  See metadataDone() for details.
         };
     },
 
-    componentDidMount: function(){
+    componentDidMount(){
         let data = this.getInitData();
         this.setState({
             sourceData: data
@@ -80,14 +80,32 @@ let EvidenceModalManager = createReactClass({
         }
     },
 
-    // if editing evidence, return its id.  If adding, return null.
+    /**
+     * If editing current evidence, return its id.
+     * If adding new one, return null.
+     */
     getCurrentEvidenceId() {
+        // If editing existing evidence, return its id.
         if (this.props.data) {
             return (this.props.data['@id']);
         }
+        else {
+            // If adding evidence but same evidence exits, return existing evidence id.
+            let foundEvidence = this.getExistingEvidence(this.state.sourceData.metadata);
+            if (foundEvidence) {
+                return (foundEvidence['@id']);
+            }
+        }
+        // If adding new evidence, return null;
         return null;
     },
 
+    /**
+     * Check if an existing evidence has same data as given metadata.
+     * If yes, return that evidence; else null.
+     * 
+     * @param {object} metadata  The metadata object
+     */
     getExistingEvidence(metadata) {
         let identifierCol = extraEvidence.typeMapping[this.props.evidenceType].fields
             .filter(o => o.identifier === true)
@@ -97,7 +115,7 @@ let EvidenceModalManager = createReactClass({
         let candidates = this.props.allData
             .filter(o => identifierCol in o.source.metadata
                 && o.source.metadata[identifierCol] === metadata[identifierCol]);
-        let result = false;
+        let result = null;
         if (candidates.length > 0) {
             candidates.forEach(candidate => {
                 if (this.props.canCurrUserModifyEvidence(candidate)) {
@@ -145,7 +163,7 @@ let EvidenceModalManager = createReactClass({
                 nextModal: true
             });
         } else {
-            // cancelled
+            // Cancelled
             this.setState({
                 nextModal: false,
                 sourceData: this.getInitData()
@@ -161,6 +179,11 @@ let EvidenceModalManager = createReactClass({
         });
     },
 
+    /**
+     * Save the evidence and reset form data.
+     * 
+     * @param {object} data  THe evidence data object returned from modal form
+     */
     sheetDone(data) {
         if (data === null) {
             this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId());
@@ -173,14 +196,19 @@ let EvidenceModalManager = createReactClass({
         this.reset();
     },
 
+    // Return the evidence data object
     getSheetData() {
         return this.state.sourceData.data;
     },
 
+    // Return the evidence metadata object
     getMetadata() {
         return this.state.sourceData.metadata;
     },
 
+    /**
+     * Bring up the second modal form for evidence data
+     */
     evidenceSheet() {
         if (!this.state.nextModal) {
             return null;
@@ -197,7 +225,7 @@ let EvidenceModalManager = createReactClass({
         }
     },
 
-    render: function() {
+    render() {
         let jsx = <div>
             <NewEvidenceModalMetadata
                 evidenceType = {this.props.evidenceType}
