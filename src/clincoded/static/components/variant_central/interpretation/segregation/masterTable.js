@@ -159,8 +159,8 @@ let MasterEvidenceTable = createReactClass({
                         let entry = <td key={`cell_${cell_num++}`}>
                             <div>{val}</div>
                         </td>
-                        // if comment column, limit to column width and show full text when mouseover. 
-                        if (masterRow.key.endsWith('_comment') || masterRow.key === 'comments') {
+                        // if text column, limit to column width and show full text when mouseover. 
+                        if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
                             entry = <td key={`cell_${cell_num++}`}>
                                 <div className='title-ellipsis title-ellipsis-shorter' title={val}>{val}</div>
                             </td>
