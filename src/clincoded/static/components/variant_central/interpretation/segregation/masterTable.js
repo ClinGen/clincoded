@@ -42,10 +42,19 @@ let MasterEvidenceTable = createReactClass({
         return evidence_types;
     },
 
+    // Return the order to display the source types in the table
     getTableEvidenceSourceOrder() {
         return ['PMID', 'clinical_lab', 'clinic', 'research_lab', 'public_database', 'other'];
     },
 
+    /**
+     * Return the three table header rows
+     * First row - Evidence source type row
+     * Second row - Evidence row
+     * Third row - Submitted by row
+     * 
+     * @param {array} evidence_types  All evidence source types
+     */
     getHeader(evidence_types) {
         let header = [];
         let first_row = []; // Evidence source Type row
@@ -55,7 +64,6 @@ let MasterEvidenceTable = createReactClass({
 
         first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="2"></td>)
         tableOrder.forEach(evidence_type => {
-            // if there is evidence in this source type, display
             if (evidence_types[evidence_type]) {
                 let num_items = evidence_types[evidence_type].length;
                 first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
@@ -116,6 +124,11 @@ let MasterEvidenceTable = createReactClass({
         return header;
     },
 
+    /**
+     * Return the evidence rows to be displayed in the table
+     * 
+     * @param {array} evidence_types All evidence source types
+     */
     getRows(evidence_types) {
         let tds = [];
         let cell_num = 0;  // Used to set a key
@@ -159,7 +172,8 @@ let MasterEvidenceTable = createReactClass({
                         let entry = <td key={`cell_${cell_num++}`}>
                             <div>{val}</div>
                         </td>
-                        // if text column, limit to column width and show full text when mouseover. 
+                        // For text column, limit to column width and show full text when mouseover. 
+                        let key = masterRow.key;
                         if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
                             entry = <td key={`cell_${cell_num++}`}>
                                 <div className='title-ellipsis title-ellipsis-shorter' title={val}>{val}</div>
@@ -180,6 +194,7 @@ let MasterEvidenceTable = createReactClass({
         return result;
     },
 
+    // Return the sum of all evidence for each criteria
     getSums() {
         let sums = {};
         this.props.evidence_arr.forEach(row => {

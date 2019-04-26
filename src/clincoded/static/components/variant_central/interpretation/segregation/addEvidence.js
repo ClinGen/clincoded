@@ -323,7 +323,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     /**
      * Method to handle criteria selection change
      */
-    handleCriteriaChange(ref, e) {
+    handleCriteriaChange: function(ref, e) {
         if (ref === 'criteria-selection') {
             this.setState({criteriaInput: this.refs[ref].getValue()});
         } else if (ref === 'edit-criteria-selection') {
@@ -340,7 +340,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         }
     },
 
-    shouldDisableSaveButton(action) {
+    shouldDisableSaveButton: function(action) {
         let disabled = true;
         if (action === 'add') {
             if ((this.state.descriptionInput && this.state.descriptionInput.length) || this.state.criteriaInput !== 'none') {
@@ -421,7 +421,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
      * @param {object} evidence    The new/modified evidence source data
      * @param {object} id          The evidence id if editing evidence. null if new evidence.
      */
-    evidenceCollectionDone(finished, evidence, id) {
+    evidenceCollectionDone: function(finished, evidence, id) {
         if (!finished) {
             return;
         } else {
@@ -510,7 +510,11 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             this.state.variant.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.forEach(extra_evidence => {
-                        relevantEvidenceListRaw.push(extra_evidence);
+                        // temporary codes
+                        //relevantEvidenceListRaw.push(extra_evidence);
+                        if (extra_evidence.source) {
+                            relevantEvidenceListRaw.push(extra_evidence);
+                        }
                     });
                     // interpretation.extra_evidence_list.map(extra_evidence => {
                     //     if (extra_evidence.subcategory === this.props.subcategory) {
@@ -531,7 +535,16 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         const criteriaInput = this.state.criteriaInput;
         let extraEvidenceData = [];
         if (this.state.interpretation != null && 'extra_evidence_list' in this.state.interpretation) {
-            extraEvidenceData = this.state.interpretation.extra_evidence_list
+            // temporary codes
+            //extraEvidenceData = this.state.interpretation.extra_evidence_list
+            let extraEvidenceData = [];
+            if (this.state.interpretation.extra_evidence_list) {
+                this.state.interpretation.extra_evidence_list.forEach(extra_evidence => {
+                    if (extra_evidence.source) {
+                        extraEvidenceData.push(extra_evidence);
+                    }
+                });
+            }
         }
         return (
             <div className="panel panel-info">

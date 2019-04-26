@@ -95,7 +95,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             this.props.data.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.forEach(extra_evidence => {
-                        relevantEvidenceListRaw.push(extra_evidence);
+                        // temporary codes
+                        if (extra_evidence.source) {
+                            relevantEvidenceListRaw.push(extra_evidence);
+                        }
                     });
                 }
             });
