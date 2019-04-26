@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "label": {
             "title": "Label",
@@ -464,6 +464,11 @@
                 "phenotypeHPOObserved": {
                     "title": "Phenotype (HPO) Observed in Model System",
                     "description": "HPO term",
+                    "type": "string"
+                },
+                "phenotypeMPIDObserved": {
+                    "title": "Mammalian Phenotype Ontology (MP) IDs Observed in Model System",
+                    "description": "MPID",
                     "type": "string"
                 },
                 "phenotypeFreetextObserved": {
