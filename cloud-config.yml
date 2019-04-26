@@ -3,7 +3,7 @@
 # Instance
 
 apt_sources:
-- source: "ppa:webupd8team/java"
+- source: "ppa:openjdk-r/ppa"
 - source: "deb http://packages.elasticsearch.org/elasticsearch/1.7/debian stable main"
   key: |
     -----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -39,7 +39,6 @@ apt_sources:
     -----END PGP PUBLIC KEY BLOCK-----
 bootcmd:
 - cloud-init-per once ssh-users-ca echo "TrustedUserCAKeys /etc/ssh/users_ca.pub" >> /etc/ssh/sshd_config
-- cloud-init-per once accepted-oracle-license-v1-1 echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections
 - cloud-init-per once fallocate-swapfile fallocate -l 4G /swapfile
 - cloud-init-per once chmod-swapfile chmod 600 /swapfile
 - cloud-init-per once mkswap-swapfile mkswap /swapfile
@@ -68,8 +67,7 @@ packages:
 - libxslt1-dev
 - lzop
 - ntp
-- oracle-java8-installer
-- oracle-java8-set-default
+- openjdk-8-jdk
 - pv
 - python2.7-dev
 - python3.4-dev
