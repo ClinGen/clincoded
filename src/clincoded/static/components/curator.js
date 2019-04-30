@@ -1745,9 +1745,14 @@ module.exports.capture = {
         return captureBase(s, /^\s*([1-9]{1}\d*)\s*$/);
     },
 
-    // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
-    hpoids: function(s) {
+     // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
+     hpoids: function(s) {
         return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated HPO/MP ID occurrences. Return all valid HPO/MP ID in an array.
+    hpoMpids: function(s) {
+        return captureBase(s, /^\s*((HP:|MP:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated GO_Slim ID occurrences. Return all valid GO_Slim ID in an array.

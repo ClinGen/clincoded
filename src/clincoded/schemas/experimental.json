@@ -462,13 +462,8 @@
                     "type": "string"
                 },
                 "phenotypeHPOObserved": {
-                    "title": "Phenotype (HPO) Observed in Model System",
-                    "description": "HPO term",
-                    "type": "string"
-                },
-                "phenotypeMPIDObserved": {
-                    "title": "Mammalian Phenotype Ontology (MP) IDs Observed in Model System",
-                    "description": "MPID",
+                    "title": "Phenotype (HPO or MP) Observed in Model System",
+                    "description": "HPO/MP (Mammalian Phenotype) term",
                     "type": "string"
                 },
                 "phenotypeFreetextObserved": {
