@@ -29,12 +29,15 @@ let EvidenceSheet = createReactClass({
 
     getInitialState: function() {
         let data =  {};
+        let hpoUnaffected = false;
         if (this.props.data) {
             data = this.props.data;
+            hpoUnaffected = this.props.data.is_disease_associated_with_probands;
         }
         return {
             data: data,
             hpo: null,
+            hpoUnaffected: hpoUnaffected,  // Flag for "Disease associated with proband(s) (HPO)" checkbox
             backgroundGreen: '#00FF0030'
         };
     },
@@ -53,7 +56,9 @@ let EvidenceSheet = createReactClass({
         e.stopPropagation();
 
         this.saveAllFormValues();
-        const formValues = this.getAllFormValues();
+        let formValues = this.getAllFormValues();
+        // reset value for "Disease associated with proband(s) (HPO)"
+        formValues.is_disease_associated_with_probands = this.state.hpoUnaffected;
         let allData = null;
         if (this.props.isNew) {
             allData = Object.assign(this.props.data, formValues);
@@ -64,7 +69,8 @@ let EvidenceSheet = createReactClass({
         this.handleModalClose();
         this.resetAllFormValues();
         this.setState({
-            data: {}
+            data: {},
+            hpoUnaffected: false
         });
         this.props.sheetDone(allData);
     },
@@ -80,6 +86,12 @@ let EvidenceSheet = createReactClass({
             fields.splice(fields.indexOf('comments'), 1);
         }
         return fields;
+    },
+
+    handleCheckboxChange(ref, e) {
+        if (ref === 'is_disease_associated_with_probands') {
+            this.setState({hpoUnaffected: this.refs[ref].toggleValue()});
+        }
     },
 
     inputs() {
@@ -98,7 +110,7 @@ let EvidenceSheet = createReactClass({
             row.cols.forEach(col => {
                 let value = '';
                 if (this.state.data != null && Object.keys(this.state.data).length > 0) {
-                    value = this.state.data[col.name]
+                    value = this.state.data[col.name];
                 }
 
                 // Set up the label for the input
@@ -116,7 +128,9 @@ let EvidenceSheet = createReactClass({
                         label = {label}
                         name = {col.name}
                         ref = {col.name}
-                        value = {value}
+                        value = { col.kind != 'checkbox' ? value : null}
+                        checked = { col.name === 'is_disease_associated_with_probands' && this.state.hpoUnaffected != undefined ? this.state.hpoUnaffected : false }
+                        handleChange = { col.kind === 'checkbox' ? this.handleCheckboxChange : null }         
                         fieldStyle = { fields.indexOf(col.name) == -1 ? null : {backgroundColor: this.state.backgroundGreen} }
                     />
                 </div>]

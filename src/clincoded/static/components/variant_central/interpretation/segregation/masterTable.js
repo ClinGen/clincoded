@@ -169,14 +169,23 @@ let MasterEvidenceTable = createReactClass({
                     let rowNum = 0;
                     masterTable().forEach(masterRow => {
                         let val = row.source.data[masterRow.key];
-                        let entry = <td key={`cell_${cell_num++}`}>
-                            <div>{val}</div>
-                        </td>
+                        let entry = '';
                         // For text column, limit to column width and show full text when mouseover. 
                         let key = masterRow.key;
+                        // For text column, limit to column width and show full text when mouseover. 
                         if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
                             entry = <td key={`cell_${cell_num++}`}>
-                                <div className='title-ellipsis title-ellipsis-shorter' title={val}>{val}</div>
+                                <div className='title-ellipsis' title={val}>{val}</div>
+                            </td>
+                        } else if (key === 'is_disease_associated_with_probands') {
+                            // Set checkmark for  "Disease associated with proband(s) (HPO) (Check here if unaffected)" if checked
+                            let iconClass = val === true ? 'icon icon-check' : '';
+                            entry = <td key={`cell_${cell_num++}`}>
+                                <div className={iconClass}></div>
+                            </td>
+                        } else {
+                            entry = <td key={`cell_${cell_num++}`}>
+                                <div>{val}</div>
                             </td>
                         }
                         tds[rowNum].push(entry);
