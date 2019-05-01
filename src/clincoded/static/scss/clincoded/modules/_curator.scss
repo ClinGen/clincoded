@@ -1315,6 +1315,13 @@
     word-wrap: break-word;
 }
 
+.word-break-all {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-word;
+}
+
 .p-break {
     display: block;
     width: 95%;
