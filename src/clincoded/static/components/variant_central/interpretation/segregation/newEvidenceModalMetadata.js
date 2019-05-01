@@ -31,6 +31,7 @@ let NewEvidenceModalMetadata = createReactClass({
             data: this.props.data,
             pmidResult: null,
             pmidLookupBusy: false,
+            pmidPreviewDisabled: true,
             isNextDisabled: this.props.isNew ? true : false
         };
     },
@@ -51,6 +52,7 @@ let NewEvidenceModalMetadata = createReactClass({
         let data = this.state.data;
         data[ref] = e.target.value;
         let disabled = false;
+        let pmidDisabled = true;
 
         extraEvidence.typeMapping[this.props.evidenceType].fields.forEach(pair => {
             if (pair.required) {
@@ -63,7 +65,12 @@ let NewEvidenceModalMetadata = createReactClass({
             }
         });
 
+        if (ref === 'pmid') {
+            pmidDisabled = false;
+            disabled = true;
+        }
         this.setState({
+            pmidPreviewDisabled: pmidDisabled,
             isNextDisabled: disabled,
             data: data
         });
@@ -102,7 +109,7 @@ let NewEvidenceModalMetadata = createReactClass({
                             clickHandler = {this.searchPMID}
                             title = "Preview PubMed Article"
                             submitBusy = {this.state.pmidLookupBusy}
-                            inputDisabled = {this.state.isNextDisabled}
+                            inputDisabled = {this.state.pmidPreviewDisabled}
                             required
                         />);
                 }
@@ -121,6 +128,51 @@ let NewEvidenceModalMetadata = createReactClass({
         return '';
     },
 
+    /**
+     * Check if the given PMID is valid.  Return true if valid, otherwise, set form error.
+     *
+     * @param {string} id    PMID to be validated
+     */
+    validatePMID(id) {
+        let valid = true;
+        let pmid = id;
+        // Valid if input has a prefix like "PMID:" (which is removed before validation continues)
+        if (pmid.match(/:/)) {
+            if (pmid.match(/^PMID\s*:/i)) {
+                pmid = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+
+                if (!pmid) {
+                    valid = false;
+                    this.setFormErrors('resourceId', 'Please include a PMID');
+                    this.setState({pmidLookupBusy: false});
+                }
+            } else {
+                valid = false;
+                this.setFormErrors('resourceId', 'Invalid PMID');
+                this.setState({pmidLookupBusy: false});
+            }
+        }
+        // valid if input isn't zero-filled
+        if (valid && pmid.match(/^0+$/)) {
+            valid = false;
+            this.setFormErrors('resourceId', 'This PMID does not exist');
+            this.setState({pmidLookupBusy: false});
+        }
+        // valid if input isn't zero-leading
+        if (valid && pmid.match(/^0+/)) {
+            valid = false;
+            this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
+            this.setState({pmidLookupBusy: false});
+        }
+        // valid if the input only has numbers
+        if (valid && !pmid.match(/^[0-9]*$/)) {
+            valid = false;
+            this.setFormErrors('resourceId', 'PMID should contain only numbers');
+            this.setState({pmidLookupBusy: false});
+        }
+        return valid;
+    },
+
     searchPMID(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.saveAllFormValues();
@@ -130,40 +182,44 @@ let NewEvidenceModalMetadata = createReactClass({
             this.setState({
                 pmidLookupBusy: true
             }, () => {
-                const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
-                this.getRestData('/articles/' + id).then(article => {
-                    // article already exists in db
-                    this.setState({
-                        pmidResult: article
+                if (this.validatePMID(pmid)) {
+                    const id = pmid.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+                    this.getRestData('/articles/' + id).then(article => {
+                        // article already exists in db
+                        this.setState({
+                            pmidResult: article,
+                            isNextDisabled: false
+                        });
+                    }, () => {
+                        // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                        this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                            var data = parsePubmed(xml);
+                            if (data.pmid) {
+                                // found the result we want
+                                this.setState({
+                                    pmidResult: data,
+                                    isNextDisabled: false
+                                });
+                            } else {
+                                // no result from ClinVar
+                                this.setState({
+                                    pmidResult: {}
+                                });
+                                this.setFormErrors('resourceId', 'PMID not found');
+                            }
+                        });
+                    })
+                    .then(() => {
+                        this.setState({
+                            pmidLookupBusy: false
+                        });
+                    })
+                    .catch(e => {
+                        // error handling for PubMed query
+                        console.error(e);
+                        this.setFormErrors('resourceId', 'Error in looking up PMID');
                     });
-                }, () => {
-                    // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-                    this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
-                        var data = parsePubmed(xml);
-                        if (data.pmid) {
-                            // found the result we want
-                            this.setState({
-                                pmidResult: data
-                            });
-                        } else {
-                            // no result from ClinVar
-                            this.setState({
-                                pmidResult: {}
-                            });
-                            this.setFormErrors('resourceId', 'PMID not found');
-                        }
-                    });
-                })
-                .then(() => {
-                    this.setState({
-                        pmidLookupBusy: false
-                    });
-                })
-                .catch(e => {
-                    // error handling for PubMed query
-                    console.error(e);
-                    this.setFormErrors('resourceId', 'Error in looking up PMID');
-                });
+                }
             });
         }
         else {
