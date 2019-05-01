@@ -90,7 +90,7 @@ let EvidenceTable = createReactClass({
             let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
             let cols = relevantData.cols.map(o => o.key);
             cols.forEach(col => {
-                if (obj[col] != '') {
+                if (obj[col] && obj[col] != '') {
                     count++;
                 }
             });
@@ -154,12 +154,10 @@ let EvidenceTable = createReactClass({
     /**
      * Return the edit evidence button
      * 
-     * @param {string} key       Column unique key
      * @param {object} row       Evidence in this row
-     * @param {number} rowspan   Number of rows to span in this button column
      */
-    getEditButton(key, row, rowspan=1) {
-        return <td key={key} rowSpan={rowspan}>
+    getEditButton(row) {
+        return (
             <EvidenceModalManager
                 data = {row}
                 allData = {this.props.allData}
@@ -174,18 +172,16 @@ let EvidenceTable = createReactClass({
                 canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
             >
             </EvidenceModalManager>
-        </td>
+        );
     },
 
     /**
      * Return the delete evidence button
      * 
-     * @param {string} key       Table column unique key
      * @param {object} row       Evidence in this row
-     * @param {number} rowspan   Number of rows to span in this button column
      */
-    getDeleteButton(key, row, rowspan=1) {
-        return <td key={key} rowSpan={rowspan}>
+    getDeleteButton(row) {
+        return (
             <Input 
                 type="button-button"
                 inputClassName="btn btn-danger"
@@ -194,7 +190,7 @@ let EvidenceTable = createReactClass({
                 clickHandler={() => this.clickDelete(row)}
                 inputDisabled = {false}
             />
-        </td>;
+        );
     },
 
     /**
@@ -202,18 +198,19 @@ let EvidenceTable = createReactClass({
      * 
      * @param {string} key       Table Column unique key
      * @param {object} row       Evidence in this row
+     * @param {array}  inner     The table row columns content
      * @param {number} rowspan   Number of rows to span in this button column
      */
     addButtons(id, row, inner, rowspan=1) {
         if (this.canModify(row)) {
-            let editButton = this.getEditButton(`edit_${id}`, row, rowspan);
-            inner.push(editButton);
-
-            let deleteButton = this.getDeleteButton(`delete_${id}`, row, rowspan);
-            inner.push(deleteButton);
+            let editButton = this.getEditButton(row);
+            let deleteButton = this.getDeleteButton(row);
+            let buttons = <td key={`editDelete_${id}`} rowSpan={rowspan}>
+                {editButton} {deleteButton}
+            </td>
+            inner.push(buttons);
         } else {
             let emptyColumn = <td></td>
-            inner.push(emptyColumn);
             inner.push(emptyColumn);
         }
     },
@@ -258,7 +255,7 @@ let EvidenceTable = createReactClass({
                 if (commentCol in obj) {
                     nodeContent = obj[commentCol];
                 }
-                node = <td key={`cell_${key++}`} style={{borderTop: 'none'}}>
+                node = <td className='word-break-all' key={`cell_${key++}`} style={{borderTop: 'none'}}>
                     {nodeContent}
                 </td>
             }
@@ -340,7 +337,7 @@ let EvidenceTable = createReactClass({
                         if (commentCol in obj) {
                             nodeContent = obj[commentCol];
                         }
-                        node = <td key={`cell_${i++}`}>
+                        node = <td className='word-break-all' key={`cell_${i++}`}>
                             {nodeContent}
                         </td>
                     } else {
@@ -375,10 +372,9 @@ let EvidenceTable = createReactClass({
                 criteriaCodes = criteriaCodes[0].codes;
                 return <th key={col.key}>{`${col.title} [${criteriaCodes.join(',')}]`}</th>
             }
-            return <th key={col.key}>{ col.title }</th>;
+            return <th key={col.key}>{col.title}</th>;
         });
-        cols.push(<th key="edit">Edit</th>)
-        cols.push(<th key="delete">Delete</th>)
+        cols.push(<th key="editDelete"></th>)
         return cols;
     },
 
@@ -395,7 +391,7 @@ let EvidenceTable = createReactClass({
                 return;
             }
             cols.forEach(col => {
-                if (obj[col] != '') {
+                if (obj[col] && obj[col] != '') {
                     foundData = true;
                     return;
                 }
@@ -416,7 +412,7 @@ let EvidenceTable = createReactClass({
         let cols = relevantData.cols.map(o => o.key);
         let show = false;
         cols.forEach(col => {
-            if (row.source.data[col] != '') {
+            if (row.source.data[col] && row.source.data[col] != '') {
                 show = true;
                 return;
             }

@@ -57,8 +57,6 @@ let EvidenceSheet = createReactClass({
 
         this.saveAllFormValues();
         let formValues = this.getAllFormValues();
-        // reset value for "Disease associated with proband(s) (HPO)"
-        formValues.is_disease_associated_with_probands = this.state.hpoUnaffected;
         let allData = null;
         if (this.props.isNew) {
             allData = Object.assign(this.props.data, formValues);

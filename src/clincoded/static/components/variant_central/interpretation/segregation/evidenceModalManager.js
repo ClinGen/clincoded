@@ -189,8 +189,17 @@ let EvidenceModalManager = createReactClass({
             this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId());
         }
         else {
+            // remove empty fields from data
+            let hasData = Object.keys(data).reduce((object, key) => { 
+                if (data[key] !== '') {
+                    object[key] = data[key]
+                }
+                return object
+            }, {})
+
             let newData = Object.assign({}, this.state.sourceData);
-            Object.assign(newData.data, data);
+            newData.data = {};
+            Object.assign(newData.data, hasData);
             this.props.evidenceCollectionDone(true, newData, this.getCurrentEvidenceId());
         }
         this.reset();
