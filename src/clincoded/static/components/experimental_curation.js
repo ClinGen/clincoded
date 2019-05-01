@@ -2225,7 +2225,7 @@ function TypeModelSystems() {
 
 const LabelPhenotypeObserved = () => {
     return (
-        <span>Phenotype(s) observed in model system <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+        <span>Phenotype(s) observed in model system <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> or MP ID)</span>:</span>
     );
 };
 
@@ -3068,9 +3068,13 @@ const ExperimentalViewer = createReactClass({
                                     </div>
 
                                     <div>
-                                        <dt>Phenotype(s) observed in model system (HPO)</dt>
+                                        <dt>Phenotype(s) observed in model system (HPO or MP)</dt>
                                         <dd>{modelSystems_phenotypeHPOObserved && modelSystems_phenotypeHPOObserved.map((hpo, i) => {
-                                            return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                            if (hpo.includes('HP')) {
+                                                return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                            } else {
+                                                return <span key={hpo}>{hpo}</span>
+                                            }
                                         })}</dd>
                                     </div>
 
