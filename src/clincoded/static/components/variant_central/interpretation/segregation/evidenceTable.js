@@ -3,12 +3,13 @@
 // stdlib
 import React from 'react';
 import createReactClass from 'create-react-class';
-import PropTypes from 'prop-types';;
+import PropTypes from 'prop-types';
 
 // third party lib
 import _ from 'underscore';
 import { Form, FormMixin, Input } from 'libs/bootstrap/form';
 import { ContextualHelp } from 'libs/bootstrap/contextual_help';
+import ModalComponent from 'libs/bootstrap/modal';
 import moment from 'moment';
 
 // Internal lib
@@ -41,11 +42,11 @@ let EvidenceTable = createReactClass({
     },
 
     /**
-     * Delete given evidence row
+     * Delete given evidence in this table row
      * 
      * @param {object} row   The evidence row
      */
-    clickDelete(row) {
+    deleteEvidence(row) {
         this.setState({
             deleteBusy: true
         });
@@ -152,7 +153,7 @@ let EvidenceTable = createReactClass({
     },
 
     /**
-     * Return the edit evidence button
+     * Return the edit evidence button for this row
      * 
      * @param {object} row       Evidence in this row
      */
@@ -176,25 +177,23 @@ let EvidenceTable = createReactClass({
     },
 
     /**
-     * Return the delete evidence button
+     * Return the delete evidence button for this row
      * 
      * @param {object} row       Evidence in this row
      */
     getDeleteButton(row) {
         return (
-            <Input 
-                type="button-button"
-                inputClassName="btn btn-danger"
-                title="Delete"
-                submitBusy={this.state.deleteBusy}
-                clickHandler={() => this.clickDelete(row)}
-                inputDisabled = {false}
-            />
+            <DeleteModal
+                row = {row}
+                deleteEvidence = {this.deleteEvidence}
+                >
+            </DeleteModal>
         );
     },
 
     /**
-     * check if add/edit buttons should be added for given row
+     * Return the add/edit buttons for given row if current user can modify this evidencew.
+     * If not, return empty column.
      * 
      * @param {string} key       Table Column unique key
      * @param {object} row       Evidence in this row
@@ -216,7 +215,7 @@ let EvidenceTable = createReactClass({
     },
 
     /**
-     * Add the given criteria row
+     * Add the given criteria row data to table
      *
      * @param {string} criteria  The criteria name to be added
      * @param {object} colNames  The table columns 
@@ -269,7 +268,9 @@ let EvidenceTable = createReactClass({
         return outer;
     },
 
-    // Display the evidences in the table
+    /**
+     * Display the evidences in the table for this panel
+     */
     additionalEvidenceRows() {
         let i = 0;  // Hack for unique key
         let rows = [];
@@ -348,11 +349,12 @@ let EvidenceTable = createReactClass({
                     }
                     inner.push(node);
                 });
+                // Add the edit/delete buttons if user can modify this evidence
                 this.addButtons(i++, row, inner, subRows);
                 let outer = <tr key={`row_${i++}`}>{inner}</tr>
                 rows.push(outer);
 
-                // Add the other criteria rows if available
+                // Add other criteria rows if more is available for this evidence row.
                 otherCriteria.forEach(criteria => {
                     outer = this.addAnotherCriteriaRow(criteria, colNames, obj, i);
                     rows.push(outer);
@@ -364,7 +366,9 @@ let EvidenceTable = createReactClass({
         return rows;
     },
 
-    // Set the evidence table headers
+    /**
+     * Set the evidence table headers
+     */
     tableHeader() {
         let cols = this.state.tableFormat.cols.map(col => {
             let criteriaCodes = this.getCriteriaCodes(col.key);
@@ -378,7 +382,9 @@ let EvidenceTable = createReactClass({
         return cols;
     },
 
-    // Check if there is evidence to be displayed in the table
+    /**
+     * Check if there is evidence to be displayed for this panel.
+     */
     hasTableData() {
         // relevant columns non empty -> return true
         // relevant columns empty -> return False
@@ -436,6 +442,70 @@ let EvidenceTable = createReactClass({
             </tbody>
         </table>
         )
+    }
+});
+
+/**
+ * Modal to confirm before deleting an evidence.
+ */
+let DeleteModal = createReactClass({
+    propTypes: {
+        row: PropTypes.object,          // Selected evidence row to be deleted
+        deleteEvidence: PropTypes.func  // Function to call to delete the evidence row
+    },
+
+    getInitialState() {
+        return {
+            row: this.props.row,
+        }
+    },
+    
+    handleModalClose() {
+        this.child.closeModal();
+    },
+
+    cancel() {
+        this.handleModalClose();
+        this.setState({
+            row: this.props.row
+        });
+    },
+
+    /**
+     * Delete given evidence row
+     */
+    clickConfirm() {
+        this.props.deleteEvidence(this.state.row);
+        this.handleModalClose();
+        this.setState({
+            row: null
+        });
+    },
+    
+    render() {
+        return (
+            <ModalComponent
+                    modalTitle="Confirm evidence deletion"
+                    modalClass="modal-default"
+                    modalWrapperClass="confirm-interpretation-delete-segregation-evidence pull-right"
+                    bootstrapBtnClass="btn btn-danger "
+                    actuatorClass="interpretation-delete-segregation-evidence-btn"
+                    actuatorTitle={"Delete"}
+                    onRef={ref => (this.child = ref)}
+                >
+                <div>
+                    <div className="modal-body">
+                        <p>
+                            Are you sure you want to delete this evidence?
+                        </p>
+                    </div>
+                    <div className='modal-footer'>
+                        <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.clickConfirm} title="Confirm" />
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
+                    </div>
+                </div>
+            </ModalComponent>
+        );
     }
 });
 
