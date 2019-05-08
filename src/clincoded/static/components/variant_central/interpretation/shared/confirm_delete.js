@@ -19,29 +19,17 @@ let ConfirmDelete = createReactClass({
         deleteEvidence: PropTypes.func  // Function to call to delete the evidence row
     },
 
-    getInitialState() {
-        return {
-            evidence: this.props.evidence,
-        }
-    },
-    
     handleModalClose() {
         this.confirm.closeModal();
     },
 
     cancel() {
         this.handleModalClose();
-        this.setState({
-            evidence: this.props.evidence
-        });
     },
 
     clickConfirm() {
-        this.props.deleteEvidence(this.state.evidence);
+        this.props.deleteEvidence(this.props.evidence);
         this.handleModalClose();
-        this.setState({
-            evidence: null
-        });
     },
     
     render() {
