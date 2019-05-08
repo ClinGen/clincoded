@@ -515,7 +515,7 @@ const IndividualCuration = createReactClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(response => {
-                    /*************************************************************/
+                    /************************************************************/
                     /* Either update or create the score status object in the DB */
                     /*************************************************************/
                     if (Object.keys(newUserScoreObj).length && newUserScoreObj.scoreStatus) {
@@ -727,6 +727,10 @@ const IndividualCuration = createReactClass({
         value = this.getFormValue('ageunit');
         newIndividual.ageUnit = value !== 'none' ? value : '';
 
+        // Fill in the individual fields from the Associated Variants panel
+        value = this.getFormValue('probandIs');
+        newIndividual.probandIs = value !== 'none' ? value : '';
+        
         // Fill in the individual fields from the Additional panel
         value = this.getFormValue('additionalinfoindividual');
         if (value) { newIndividual.additionalInformation = value; }
@@ -1484,14 +1488,16 @@ function IndividualVariantInfo() {
                 :
                 <div>
                     { semiDom ?  
-                        <Input type="select" label="The proband is:" 
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        <Input type="select" label="The proband is:" ref="probandIs"
+                            defaultValue="none" value={individual && individual.probandIs ? individual.probandIs : 'none'}
+                            error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                             <option value="none">No Selection</option>
                             <option disabled="disabled"></option>
-                            <option value="Monoallelic heterozygous (e.g. autosomal)">Monoallelic heterozygous (e.g. autosomal)</option>
-                            <option value="Hemizygous (e.g. X-linked)">Hemizygous (e.g. X-linked)</option>
-                            <option value="Biallelic homozygous">Biallelic homozygous</option>
-                            <option value="Biallelic compound heterozygous">Biallelic compound heterozygous</option>
+                            <option value="Monoallelic heterozygous">Monoallelic heterozygous (e.g. autosomal)</option>
+                            <option value="Hemizygous">Hemizygous (e.g. X-linked)</option>
+                            <option value="Biallelic homozygous">Biallelic homozygous (e.g. the same variant is present on both alleles, autosomal or X-linked)</option>
+                            <option value="Biallelic compound heterozygous">Biallelic compound heterozygous (e.g. two different variants are present on the alleles, autosomal or X-linked)</option>
                         </Input>    
                     : 
                     <div>
