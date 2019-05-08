@@ -19,12 +19,12 @@ let EvidenceSheet = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     propTypes: {
-        evidenceCollectionDone: PropTypes.func,
-        ready: PropTypes.bool,
-        data: PropTypes.object,         // Data relevant to this particular piece of evidence
-        allData: PropTypes.object,      // All extra evidence across all entries for this variant
-        isNew: PropTypes.bool,
-        subcategory: PropTypes.string
+        evidenceCollectionDone: PropTypes.func,     // Function to call to add or edit an evidence
+        ready: PropTypes.bool,                      // Flag if ready for second modal
+        data: PropTypes.object,                     // Data relevant to this particular piece of evidence
+        allData: PropTypes.object,                  // All extra evidence across all entries for this variant
+        isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
+        subcategory: PropTypes.string               // Subcategory (usually the panel) the evidence is part of
     },
 
     getInitialState: function() {
@@ -51,6 +51,12 @@ let EvidenceSheet = createReactClass({
         this.handleModalClose();
     },
 
+    /**
+     * Submit button is clicked.  Save all form data and call function to save in db.
+     * Close the modal.
+     * 
+     * @param {object} e    // event
+     */
     submitNewEvidence(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -86,12 +92,22 @@ let EvidenceSheet = createReactClass({
         return fields;
     },
 
+    /**
+     * If the "Disease associated with proband(s) (HPO) (Check here if unaffected)"
+     * checkbox is toggled, save its current state.
+     * 
+     * @param {sting} ref 
+     * @param {event} e 
+     */
     handleCheckboxChange(ref, e) {
         if (ref === 'is_disease_associated_with_probands') {
             this.setState({hpoUnaffected: this.refs[ref].toggleValue()});
         }
     },
 
+    /**
+     * Display the input fields with available values
+     */
     inputs() {
         let jsx = [];
         let i = 0;
@@ -120,7 +136,7 @@ let EvidenceSheet = createReactClass({
                     label += ` (${codes.join(', ')})`;
                 }
 
-                let node = [<div className={`col-md-${col.width}`} key={i++}>
+                let node = [<div className={`col-md-${col.width}`}  style={{textAlign: 'left'}} key={i++}>
                     <Input 
                         type = {col.kind}
                         label = {label}
@@ -201,7 +217,7 @@ let EvidenceSheet = createReactClass({
             modalWidthPct={90}
         >
         <div className="form-std">
-            <div className="modal-body">
+            <div className="modal-body" style={{textAlign: 'left'}}>
                 <h4>
                     Fields marked in a <span style={{backgroundColor: this.state.backgroundGreen}}>green background</span> are specifically relevant to this Criteria Code.
                 </h4>

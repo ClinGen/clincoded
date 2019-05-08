@@ -19,11 +19,12 @@ import { ContextualHelp } from 'libs/bootstrap/contextual_help';
 let NewEvidenceModalMetadata = createReactClass({
     mixins: [FormMixin, RestMixin],
     propTypes: {
-        data: PropTypes.object,
-        evidenceType: PropTypes.string,
-        metadataDone: PropTypes.func,
-        isNew: PropTypes.bool,
-        disableActuator: PropTypes.bool
+        data: PropTypes.object,              // Metadata - If null, adding.  Otherwise, editing.
+        evidenceType: PropTypes.string,      // Evidence source type
+        metadataDone: PropTypes.func,        // Function to call when input metadata modal is done; either Next or Cancel.
+        isNew: PropTypes.bool,               // If we are adding a new piece of evidence or editing an existing piece
+        useIcon: PropTypes.bool,             // Use an icon instead of text as link text
+        disableActuator: PropTypes.bool      // Disable the actuator or not
     },
     getInitialState() {
         return {
@@ -36,6 +37,11 @@ let NewEvidenceModalMetadata = createReactClass({
         };
     },
 
+    /**
+     * Return the modal title for the given evidence type
+     *
+     * @param {string} evidenceType   // evidence source type
+     */
     title(evidenceType) {
         if (evidenceType && evidenceType in extraEvidence.typeMapping) {
             if (this.props.isNew) {
@@ -47,6 +53,12 @@ let NewEvidenceModalMetadata = createReactClass({
         return null;
     },
 
+    /**
+     * Enable/Disable buttons depending on user changes
+     *
+     * @param {string} ref  // data field name
+     * @param {object} e    // event
+     */
     handleChange(ref, e) {
         // ref is the name, since that's how we defined it
         let data = this.state.data;
@@ -54,6 +66,8 @@ let NewEvidenceModalMetadata = createReactClass({
         let disabled = false;
         let pmidDisabled = true;
 
+        // Check if requried fields have value, then enable Next button.
+        // If not, disable it.
         extraEvidence.typeMapping[this.props.evidenceType].fields.forEach(pair => {
             if (pair.required) {
                 let name = pair.name;
@@ -65,10 +79,13 @@ let NewEvidenceModalMetadata = createReactClass({
             }
         });
 
-        if (ref === 'pmid') {
+        // If PMID field has value, enable Preview Pubmed Article button
+        // but disable Next button.
+        if (ref === 'pmid' && data[ref] && data[ref] !== '') {
             pmidDisabled = false;
             disabled = true;
         }
+
         this.setState({
             pmidPreviewDisabled: pmidDisabled,
             isNextDisabled: disabled,
@@ -76,6 +93,9 @@ let NewEvidenceModalMetadata = createReactClass({
         });
     },
 
+    /**
+     * Display input fields for the selected evidence type
+     */
     additionalEvidenceInputFields() {
         let key = this.props.evidenceType;
         if (key && key in extraEvidence.typeMapping) {
@@ -87,7 +107,7 @@ let NewEvidenceModalMetadata = createReactClass({
                     lbl.push(help);
                 }
                 let disableInput = !this.props.isNew && obj['required'] ? true : false;
-                let node = [<div key={obj['name']}>
+                let node = [<div key={obj['name']} style={{textAlign: 'left'}}>
                         <Input
                             type="text"
                             label={lbl}
@@ -121,6 +141,11 @@ let NewEvidenceModalMetadata = createReactClass({
         }
     },
 
+    /**
+     * Return the value of the given field if available
+     *
+     * @param {string} name     // field name
+     */
     getInputValue(name) {
         if (!this.props.isNew && this.props.data) {
             return this.props.data[name];
@@ -173,6 +198,12 @@ let NewEvidenceModalMetadata = createReactClass({
         return valid;
     },
 
+    /**
+     * Retrieve Pubmed article if provided PMID is valid.
+     * Otherwise, display error.
+     *
+     * @param {object}  e   // event
+     */
     searchPMID(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
         this.saveAllFormValues();
@@ -227,6 +258,11 @@ let NewEvidenceModalMetadata = createReactClass({
         }
     },
 
+    /**
+     * Next button is clicked, call function to save provided metadata.
+     * 
+     * @param {object} e    // event
+     */
     submitAdditionalEvidenceHandler(e) {
         // Don't run through HTML submit handler
         e.preventDefault();
@@ -246,6 +282,9 @@ let NewEvidenceModalMetadata = createReactClass({
         this.props.metadataDone(true, formValues);
     },
 
+    /**
+     * Display the Pubmed article
+     */
     renderPMIDResult() {
         if (!this.state.pmidResult) {
             return null;
@@ -263,6 +302,9 @@ let NewEvidenceModalMetadata = createReactClass({
         )
     },
 
+    /**
+     * Cancel button is clicked.  Close modal and reset form data.
+     */
     cancel() {
         this.props.metadataDone(false, null);
         this.handleModalClose();
@@ -281,13 +323,25 @@ let NewEvidenceModalMetadata = createReactClass({
         this.child.closeModal();
     },
 
+    /**
+     * Return the actuator title, which can be an icon,  to be used.
+     */
     actuatorTitle() {
         if (this.props.isNew) {
             return 'Add Evidence';
         }
-        return 'Edit';
+        // If for editing, check if using icon or text.
+        if (this.props.useIcon) {
+            return <i className="icon icon-pencil"></i>;
+        } else {
+            return 'Edit';
+        }
+
     },
 
+    /**
+     * Check if the actuator should be disabled
+     */
     isActuatorDisabled() {
         if (!this.props.evidenceType) {
             return true;
@@ -301,32 +355,34 @@ let NewEvidenceModalMetadata = createReactClass({
 
     render() {
         const additionalEvidenceFields = this.additionalEvidenceInputFields();
+        const modalWrapperClass = this.props.useIcon ? "input-inline" : "input-inline";
+        const bootstrapBtnClass = this.props.useIcon ? "btn " : "";
+        const actuatorClass = this.props.useIcon ? "" : "btn btn-default btn-primary";
         return (
-            <div>
-                <ModalComponent 
-                        modalTitle={this.title(this.props.evidenceType)}
-                        modalClass="modal-default"
-                        modalWrapperClass="input-inline add-resource-id-modal"
-                        onRef={ref => (this.child = ref)}
-                        actuatorDisabled={this.isActuatorDisabled()}
-                        actuatorTitle={this.actuatorTitle()}
-                        actuatorClass="btn btn-default btn-primary"
-                    >
-                    <div className="form-std">
-                        <div className="modal-body">
-                            <Form submitHandler={this.submitAdditionalEvidenceHandler} formClassName="form-horizontal form-std">
-                                {additionalEvidenceFields}
-                                {this.renderPMIDResult()}
-                                <div className="row">&nbsp;<br />&nbsp;</div>
-                                <div className='modal-footer'>
-                                    <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Next" id="submit" inputDisabled={this.state.isNextDisabled}/>
-                                    <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
-                                </div>
-                            </Form>
-                        </div>
+            <ModalComponent 
+                    modalTitle={this.title(this.props.evidenceType)}
+                    modalClass="modal-default"
+                    modalWrapperClass={modalWrapperClass}
+                    bootstrapBtnClass={bootstrapBtnClass}
+                    onRef={ref => (this.child = ref)}
+                    actuatorDisabled={this.isActuatorDisabled()}
+                    actuatorTitle={this.actuatorTitle()}
+                    actuatorClass={actuatorClass}
+                >
+                <div className="form-std">
+                    <div className="modal-body">
+                        <Form submitHandler={this.submitAdditionalEvidenceHandler} formClassName="form-horizontal form-std">
+                            {additionalEvidenceFields}
+                            {this.renderPMIDResult()}
+                            <div className="row">&nbsp;<br />&nbsp;</div>
+                            <div className='modal-footer'>
+                                <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Next" id="submit" inputDisabled={this.state.isNextDisabled}/>
+                                <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
+                            </div>
+                        </Form>
                     </div>
-                </ModalComponent>
-            </div>
+                </div>
+            </ModalComponent>
         )
     }
 });

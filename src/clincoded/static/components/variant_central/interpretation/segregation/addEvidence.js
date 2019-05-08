@@ -9,7 +9,6 @@ import { Form, FormMixin, Input } from 'libs/bootstrap/form';
 
 // Internal libs
 import { RestMixin } from 'components/rest';
-import { AddResourceId } from 'components/add_external_resource';
 var curator = require('components/curator');
 var PmidSummary = curator.PmidSummary;
 var CuratorHistory = require('components/curator_history');
@@ -34,6 +33,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         affiliation: PropTypes.object, // user's affiliation data object
         criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
+        deleteEvidenceFunc: PropTypes.func, // Function to call to delete an evidence
+        evidenceCollectionDone: PropTypes.func,  // Fucntion to call to add or edit an existing one
         canCurrUserModifyEvidence: PropTypes.func // funcition to check if current logged in user can modify given evidence
     },
 
@@ -244,55 +245,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         });
     },
 
-    deleteEvidenceFunc: function(evidence) {
-        //TODO: Update evidence object or re-create it so that it passes the update validation.  See the open screenshot for details.
-
-        this.setState({deleteBusy: true});
-
-        let deleteTargetId = evidence['@id'];
-        let flatInterpretation = null;
-        let freshInterpretation = null;
-
-        let extra_evidence = {
-            variant: evidence.variant,
-            category: this.props.category,
-            subcategory: this.props.subcategory,
-            // articles: [evidence.articles[0]['@id']],
-            articles: [],
-            evidenceCriteria: evidence.evidenceCriteria,
-            evidenceDescription: evidence.evidenceDescription,
-            status: 'deleted'
-        };
-
-        return this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
-            return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
-                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
-                    // get updated interpretation object, then flatten it
-                    freshInterpretation = interpretation;
-                    flatInterpretation = curator.flatten(freshInterpretation);
-
-                    // remove removed evidence from evidence list
-                    flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
-
-                    // update the interpretation object
-                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
-                            return Promise.resolve(data['@graph'][0]);
-                        });
-                    });
-                });
-            }).then(interpretation => {
-                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-                this.setState({deleteBusy: false});
-                this.props.updateInterpretationObj();
-            });
-        }).catch(error => {
-            this.setState({deleteBusy: false});
-            console.error(error);
-        });
-
-    },
-
     renderInterpretationExtraEvidence: function(extra_evidence) {
         let affiliation = this.props.affiliation, session = this.props.session;
         let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
@@ -415,95 +367,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         )
     },
 
-    /**
-     * 
-     * @param {bool} finished      If we have finished with data collection
-     * @param {object} evidence    The new/modified evidence source data
-     * @param {object} id          The evidence id if editing evidence. null if new evidence.
-     */
-    evidenceCollectionDone: function(finished, evidence, id) {
-        if (!finished) {
-            return;
-        } else {
-            this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
-            if (id === null) {
-                // set the submitter data as 'affiliation full name (user name)' or 'user name' if no affiliation
-                let affiliationName = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
-                let userName = `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}`;
-                evidence['_submitted_by'] = affiliationName ? `${affiliationName} (${userName})` : `${userName}`;
-                evidence['relevant_criteria'] = this.state.criteriaList;
-            }
-
-            let flatInterpretation = null;
-            let freshInterpretation = null;
-
-            this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
-                // get updated interpretation object, then flatten it
-                freshInterpretation = interpretation;
-                flatInterpretation = curator.flatten(freshInterpretation);
-
-                // create extra_evidence object to be inserted
-                let extra_evidence = {
-                    variant: this.state.interpretation.variant['@id'],
-                    category: this.props.category,
-                    subcategory: this.props.subcategory,
-                    // articles: [this.refs['edit-pmid'].getValue()],
-                    articles: [],
-                    evidenceCriteria: this.state.editCriteriaInput,
-                    // evidenceDescription: this.refs['edit-description'].getValue(),
-                    evidenceDescription: '',
-                    source: evidence
-                };
-    
-                // Add affiliation if the user is associated with an affiliation
-                // and if the data object has no affiliation
-                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
-                    if (!extra_evidence.affiliation) {
-                        extra_evidence.affiliation = this.props.affiliation.affiliation_id;
-                    }
-                }
-                if (id === null) {
-                    // create new extra evidence
-                    return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
-                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
-                        if (!flatInterpretation.extra_evidence_list) {
-                            flatInterpretation.extra_evidence_list = [];
-                        }
-                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
-        
-                        // update interpretation object
-                        return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
-                            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                                return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
-                                    return Promise.resolve(data['@graph'][0]);
-                                });
-        
-                            });
-                        });
-        
-                    });
-                } else {
-                    return this.putRestData(id + '?render=false', extra_evidence).then(result => {
-                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
-                        if (!flatInterpretation.extra_evidence_list) {
-                            flatInterpretation.extra_evidence_list = [];
-                        }
-                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
-                        // update interpretation object
-                        return this.recordHistory('modify-hide', result['@graph'][0])
-                    });
-                }
-            }).then(interpretation => {
-                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-                this.setState({submitBusy: false, tempEvidence: null, editCriteriaSelection: 'none', descriptionInput: null});
-                this.props.updateInterpretationObj();
-            }).catch(error => {
-                this.setState({submitBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
-                console.error(error);
-            });
-        }
-    },
-
     render: function() {
         let relevantEvidenceListRaw = [];
         if (this.state.variant && this.state.variant.associatedInterpretations) {
@@ -555,84 +418,49 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                             {!this.props.viewOnly ?
                                 <tr>
                                     <td colSpan="6">
-                                        {this.state.tempEvidence ?
-                                            <span>
-                                                <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
-                                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                    <div className="pmid-evidence-form clearfix">
-                                                        <div className="col-xs-6 col-md-4 pmid-evidence-form-item criteria-selection">
-                                                            <Input type="select" ref="criteria-selection" defaultValue={criteriaInput} label="Criteria:" handleChange={this.handleCriteriaChange}
-                                                                error={this.getFormError("criteria-selection")} clearError={this.clrFormErrors.bind(null, "criteria-selection")}
-                                                                labelClassName="col-xs-6 col-md-3 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-9" groupClassName="form-group">
-                                                                <option value="none">Select criteria code</option>
-                                                                <option disabled="disabled"></option>
-                                                                {criteriaList.map((item, i) => {
-                                                                    return <option key={i} value={item}>{item}</option>;
-                                                                })}
-                                                            </Input>
-                                                        </div>
-                                                        <div className="col-xs-12 col-sm-6 col-md-8 pmid-evidence-form-item evidence-input">
-                                                            <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
-                                                                labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
-                                                        </div>
-                                                    </div>
-                                                    <div className="clearfix">
-                                                        <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
-                                                            buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-                                                        <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
-                                                        <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                            submitBusy={this.state.submitBusy} inputDisabled={this.shouldDisableSaveButton('add')} />
-                                                        {this.state.updateMsg ?
-                                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                            : null}
-                                                    </div>
-                                                </Form>
-                                            </span>
-                                            :
-                                            <span>
-                                                <div className="row">
-                                                    <div className="col-md-12">
-                                                        <Input type="select" defaultValue="select-source" handleChange={this.setEvidenceType}>
-                                                            <option value="select-source">Select Source</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="PMID">PMID</option>
-                                                            <option value="clinical_lab">Clinical Lab</option>
-                                                            <option value="clinic">Clinic</option>
-                                                            <option value="research_lab">Research Lab</option>
-                                                            <option value="public_database">Public Database</option>
-                                                            <option value="other">Other</option>
-                                                        </Input>
-                                                    </div>
-                                                    <div className="col-md-12">
-                                                        <EvidenceModalManager
-                                                            data = {null}
-                                                            allData = {relevantEvidenceList}
-                                                            criteriaList = {this.props.criteriaList}
-                                                            evidenceType = {this.state.evidenceType}
-                                                            subcategory = {this.props.subcategory}
-                                                            evidenceCollectionDone = {this.evidenceCollectionDone}
-                                                            isNew = {true}
-                                                            affiliation = {this.props.affiliation}
-                                                            session = {this.props.session}
-                                                            canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
-                                                        >
-                                                        </EvidenceModalManager>
-                                                        {this.addEvidenceText()}
-                                                    </div>
+                                        <span>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <Input type="select" defaultValue="select-source" handleChange={this.setEvidenceType}>
+                                                        <option value="select-source">Select Source</option>
+                                                        <option disabled="disabled"></option>
+                                                        <option value="PMID">PMID</option>
+                                                        <option value="clinical_lab">Clinical Lab</option>
+                                                        <option value="clinic">Clinic</option>
+                                                        <option value="research_lab">Research Lab</option>
+                                                        <option value="public_database">Public Database</option>
+                                                        <option value="other">Other</option>
+                                                    </Input>
                                                 </div>
-                                            </span>
-                                        }
+                                                <div className="col-md-12">
+                                                    <EvidenceModalManager
+                                                        data = {null}
+                                                        allData = {relevantEvidenceList}
+                                                        criteriaList = {this.props.criteriaList}
+                                                        evidenceType = {this.state.evidenceType}
+                                                        subcategory = {this.props.subcategory}
+                                                        evidenceCollectionDone = {this.props.evidenceCollectionDone}
+                                                        isNew = {true}
+                                                        affiliation = {this.props.affiliation}
+                                                        session = {this.props.session}
+                                                        canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
+                                                    >
+                                                    </EvidenceModalManager>
+                                                    {this.addEvidenceText()}
+                                                </div>
+                                            </div>
+                                        </span>
                                     </td>
                                 </tr>
-                                : null}
+                            : null}
                         </tbody>
                     </table>
                     <EvidenceTable
                         allData = {extraEvidenceData}
                         tableData = {relevantEvidenceList}
                         subcategory = {this.props.subcategory}
-                        deleteEvidenceFunc = {this.deleteEvidenceFunc}
-                        evidenceCollectionDone = {this.evidenceCollectionDone}
+                        deleteEvidenceFunc = {this.props.deleteEvidenceFunc}
+                        evidenceCollectionDone = {this.props.evidenceCollectionDone}
                         criteriaList = {this.props.criteriaList}
                         session = {this.props.session}
                         affiliation = {this.props.affiliation}

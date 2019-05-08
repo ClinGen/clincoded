@@ -27,15 +27,16 @@ let EvidenceModalManager = createReactClass({
     propTypes: {
         data: PropTypes.object,                     // If null, we are adding.  Otherwise, we are editing.
         allData: PropTypes.array,                   // All extra evidence we've collected
-        criteriaList: PropTypes.array,              // criteria code(s) pertinent to the category/subcategory
-        evidenceType: PropTypes.string,
-        subcategory: PropTypes.string,              // subcategory (usually the panel) the evidence is part of
+        criteriaList: PropTypes.array,              // Criteria code(s) pertinent to the category/subcategory
+        evidenceType: PropTypes.string,             // Evidence source type
+        subcategory: PropTypes.string,              // Subcategory (usually the panel) the evidence is part of
         evidenceCollectionDone: PropTypes.func,     // Function to call when we finish with modal 2
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
-        disableActuator: PropTypes.bool,
+        useIcon: PropTypes.bool,                    // Use an icon instead of text as link text  
+        disableActuator: PropTypes.bool,            // Disable the actuator or not
         affiliation: PropTypes.object,              // The user's affiliation
         session: PropTypes.object,                  // The session object
-        canCurrUserModifyEvidence: PropTypes.func   // funcition to check if current logged in user can modify the given evidence
+        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
     },
 
     getInitData(){
@@ -54,7 +55,7 @@ let EvidenceModalManager = createReactClass({
     getInitialState() {
         let data = this.getInitData();
         return {
-            nextModal: false,
+            nextModal: false,        // Flag if able to go to next data form  
             sourceData: data,        // Source data being added/edited
             isNew: this.props.isNew  // This may change from T -> F if a matching identifier is found.  See metadataDone() for details.
         };
@@ -154,7 +155,7 @@ let EvidenceModalManager = createReactClass({
                     });
                 }
             } else {
-                // Editing
+                // Editing existing evidence
                 Object.assign(newData.metadata, metadata);
             }
 
@@ -186,10 +187,11 @@ let EvidenceModalManager = createReactClass({
      */
     sheetDone(data) {
         if (data === null) {
-            this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId());
+            // No change is needed
+            this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory);
         }
         else {
-            // remove empty fields from data
+            // Remove empty fields from data
             let hasData = Object.keys(data).reduce((object, key) => { 
                 if (data[key] !== '') {
                     object[key] = data[key]
@@ -197,20 +199,27 @@ let EvidenceModalManager = createReactClass({
                 return object
             }, {})
 
+            // Combine the changes with existing data
             let newData = Object.assign({}, this.state.sourceData);
             newData.data = {};
             Object.assign(newData.data, hasData);
-            this.props.evidenceCollectionDone(true, newData, this.getCurrentEvidenceId());
+            newData['relevant_criteria'] = this.props.criteriaList;
+            // Save the evidence data
+            this.props.evidenceCollectionDone(true, newData, this.getCurrentEvidenceId(), this.props.subcategory);
         }
         this.reset();
     },
 
-    // Return the evidence data object
+    /**
+     * Return the evidence data object
+     */
     getSheetData() {
         return this.state.sourceData.data;
     },
 
-    // Return the evidence metadata object
+    /**
+     * Return the evidence metadata object
+     */
     getMetadata() {
         return this.state.sourceData.metadata;
     },
@@ -241,6 +250,7 @@ let EvidenceModalManager = createReactClass({
                 metadataDone = {this.metadataDone}
                 data = {this.getMetadata()}
                 isNew = {this.props.isNew}
+                useIcon = {this.props.useIcon}
                 disableActuator = {this.props.disableActuator}
             />
             {this.evidenceSheet()}

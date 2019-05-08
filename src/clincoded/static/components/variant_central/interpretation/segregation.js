@@ -4,8 +4,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
-import moment from 'moment';
-// import { Form, FormMixin, Input } from 'libs/bootstrap/form';
 import { PanelGroup, Panel } from 'libs/bootstrap/panel';
 
 // Internal libs
@@ -16,12 +14,14 @@ import { scrollElementIntoView } from 'libs/helpers/scroll_into_view';
 const vciFormHelper = require('components/variant_central/interpretation/shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const evaluation_section_mapping = require('components/variant_central/interpretation/mapping/evaluation_section.json');
+var curator = require('components/curator');
+var CuratorHistory = require('components/curator_history');
 import { ExtraEvidenceTable } from 'components/variant_central/interpretation/segregation/addEvidence';
 import { MasterEvidenceTable } from 'components/variant_central/interpretation/segregation/masterTable';
 
 // Display the curator data of the curation data
 var CurationInterpretationSegregation = module.exports.CurationInterpretationSegregation = createReactClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, CuratorHistory],
 
     propTypes: {
         data: PropTypes.object, // ClinVar data payload
@@ -38,7 +38,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             data: this.props.data,
             clinvar_id: null,
             interpretation: this.props.interpretation,
-            selectedCriteria: this.props.selectedCriteria
+            selectedCriteria: this.props.selectedCriteria,
+            deleteBusy: false,
+            editBusy: false,
+            updateMsg: null
         };
     },
 
@@ -57,6 +60,164 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         }
     },
 
+    /**
+     * Delete the given evidence from its interpretation.
+     * 
+     * @param {object} evidence     // Evidence to be deleted
+     * @param {string} subcategory  // Subcategory this evidence belongs to
+     */
+    deleteEvidenceFunc: function(evidence) {
+        //TODO: Update evidence object or re-create it so that it passes the update validation.  See the open screenshot for details.
+
+        this.setState({deleteBusy: true});
+
+        let deleteTargetId = evidence['@id'];
+        let flatInterpretation = null;
+        let freshInterpretation = null;
+
+        let extra_evidence = {
+            variant: evidence.variant,
+            category: evidence.category,
+            subcategory: evidence.subcategory,
+            articles: [],
+            evidenceCriteria: evidence.evidenceCriteria,
+            evidenceDescription: evidence.evidenceDescription,
+            status: 'deleted'
+        };
+
+        return this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
+            return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
+                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                    // get updated interpretation object, then flatten it
+                    freshInterpretation = interpretation;
+                    flatInterpretation = curator.flatten(freshInterpretation);
+
+                    // remove removed evidence from evidence list
+                    flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
+
+                    // update the interpretation object
+                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    });
+                });
+            }).then(interpretation => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({deleteBusy: false});
+                this.props.updateInterpretationObj();
+            });
+        }).catch(error => {
+            this.setState({deleteBusy: false});
+            console.error(error);
+        });
+    },
+
+    /**
+     * 
+     * @param {bool} finished      If we have finished with data collection
+     * @param {object} evidence    The new/modified evidence source data
+     * @param {object} id          The evidence id if editing evidence. null if new evidence.
+     */
+    evidenceCollectionDone: function(finished, evidence, id, subcategory) {
+        if (!finished) {
+            return;
+        } else {
+            this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
+            if (id === null) {
+                // set the submitter data as 'affiliation full name (user name)' or 'user name' if no affiliation
+                let affiliationName = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
+                let userName = `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}`;
+                evidence['_submitted_by'] = affiliationName ? `${affiliationName} (${userName})` : `${userName}`;
+            }
+
+            let flatInterpretation = null;
+            let freshInterpretation = null;
+            // ??? need to find criteria that has value from source.data
+            let evidenceCriteria = 'none';
+
+            this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                // get updated interpretation object, then flatten it
+                freshInterpretation = interpretation;
+                flatInterpretation = curator.flatten(freshInterpretation);
+
+                // create extra_evidence object to be inserted
+                let extra_evidence = {
+                    variant: this.state.interpretation.variant['@id'],
+                    category: 'case-segregation',
+                    subcategory: subcategory,
+                    // articles: [this.refs['edit-pmid'].getValue()],
+                    articles: [],
+                    evidenceCriteria: evidenceCriteria,  // criteria has value which is not used for case gegregation
+                    // evidenceDescription: this.refs['edit-description'].getValue(),
+                    evidenceDescription: '',
+                    source: evidence
+                };
+
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!extra_evidence.affiliation) {
+                        extra_evidence.affiliation = this.props.affiliation.affiliation_id;
+                    }
+                }
+                if (id === null) {
+                    // create new extra evidence
+                    return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
+                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
+                        if (!flatInterpretation.extra_evidence_list) {
+                            flatInterpretation.extra_evidence_list = [];
+                        }
+                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+                        // update interpretation object
+                        return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
+                            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                                return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                                    return Promise.resolve(data['@graph'][0]);
+                                });
+                            });
+                        });
+                    });
+                } else {
+                    return this.putRestData(id + '?render=false', extra_evidence).then(result => {
+                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
+                        if (!flatInterpretation.extra_evidence_list) {
+                            flatInterpretation.extra_evidence_list = [];
+                        }
+                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+                        // update interpretation object
+                        return this.recordHistory('modify-hide', result['@graph'][0])
+                    });
+                }
+            }).then(interpretation => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({editBusy: false, tempEvidence: null, editCriteriaSelection: 'none', descriptionInput: null});
+                this.props.updateInterpretationObj();
+            }).catch(error => {
+                this.setState({editBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
+                console.error(error);
+            });
+        }
+    },
+
+    /**
+     * Check if the current login user can modify the given evidence.
+     *
+     * @param {object} evidence  // Evidence to be checked for
+     */
+    canCurrUserModifyEvidence(evidence) {
+        let created_affiliation = evidence.affiliation;
+        let curr_affiliation = this.props.affiliation;
+        let created_user = evidence.submitted_by['@id'];
+        let curr_user = this.props.session.user_properties['@id'];
+
+        if ((created_affiliation && curr_affiliation && created_affiliation === curr_affiliation.affiliation_id) ||
+            (!created_affiliation && !curr_affiliation && created_user === curr_user)) {
+                return true;
+        }
+        return false;
+    },
+
     renderCriteriaEvalLink() {
         return (
             <span>
@@ -72,21 +233,12 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     evidence_arr = {this.getAllInterpretations()}
                     affiliation = {this.props.affiliation}
                     session = {this.props.session}
+                    viewOnly = {this.state.data && !this.state.interpretation}
+                    deleteEvidenceFunc = {this.deleteEvidenceFunc}
+                    evidenceCollectionDone = {this.evidenceCollectionDone}
+                    canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
                 >
                 </MasterEvidenceTable>
-    },
-
-    canCurrUserModifyEvidence(evidence) {
-        let created_affiliation = evidence.affiliation;
-        let curr_affiliation = this.props.affiliation;
-        let created_user = evidence.submitted_by['@id'];
-        let curr_user = this.props.session.user_properties['@id'];
-
-        if ((created_affiliation && curr_affiliation && created_affiliation === curr_affiliation.affiliation_id) || 
-            (!created_affiliation && !curr_affiliation && created_user === curr_user)) {
-                return true;
-        }
-        return false;
     },
 
     getAllInterpretations() {
@@ -264,6 +416,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 updateInterpretationObj={this.props.updateInterpretationObj}
                 viewOnly={this.state.data && !this.state.interpretation}
                 affiliation={this.props.affiliation}
+                deleteEvidenceFunc={this.deleteEvidenceFunc}
+                evidenceCollectionDone = {this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
             />
             return <PanelGroup accordion key={panel.key}>

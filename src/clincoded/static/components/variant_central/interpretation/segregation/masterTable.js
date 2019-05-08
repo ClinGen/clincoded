@@ -8,12 +8,18 @@ import createReactClass from 'create-react-class';
 // Internal
 import { masterTable, extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
 import { external_url_map } from 'components/globals';
+import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
+import { DeleteEvidenceModal} from 'components/variant_central/interpretation/segregation/deleteEvidenceModal';
 
 let MasterEvidenceTable = createReactClass({
     propTypes: {
-        evidence_arr: PropTypes.array,    // All pieces of evidence added to this variant
-        affiliation: PropTypes.object,   // User's affiliation
-        session: PropTypes.object       // Session object
+        evidence_arr: PropTypes.array,              // All pieces of evidence added to this variant
+        affiliation: PropTypes.object,              // User's affiliation
+        session: PropTypes.object,                  // Session object
+        viewOnly: PropTypes.bool,                   // If the page is in read-only mode
+        deleteEvidenceFunc: PropTypes.func,         // Function to call to delete an evidence
+        evidenceCollectionDone: PropTypes.func,     // Fucntion to call to add or edit an existing one
+        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
     },
 
     getInitialState() {
@@ -42,15 +48,70 @@ let MasterEvidenceTable = createReactClass({
         return evidence_types;
     },
 
-    // Return the order to display the source types in the table
-    getTableEvidenceSourceOrder() {
+    /**
+     * Check if current user can edit/delete the given evidence
+     *
+     * @param {object} row   The evidence row
+     */
+    canModify(row) {
+        if (this.props.viewOnly === true) {
+            return false;
+        }
+        return this.props.canCurrUserModifyEvidence(row);;
+    },
+
+    /**
+     * Return the edit evidence button
+     * 
+     * @param {object} row       Evidence in this row
+     */
+    getEditButton(row) {
+        return (
+            <EvidenceModalManager
+                data = {row}
+                allData = {this.props.evidence_arr}
+                criteriaList = {row.source['relevant_criteria']}
+                evidenceType = {row.source.metadata['_kind_key']}
+                subcategory = {row.subcategory}
+                evidenceCollectionDone = {this.props.evidenceCollectionDone}
+                isNew = {false}
+                useIcon = {true}
+                disableActuator = {false}
+                affiliation = {this.props.affiliation}
+                session = {this.props.session}
+                canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
+            >
+            </EvidenceModalManager>
+        );
+    },
+
+    /**
+     * Return the delete evidence button
+     *
+     * @param {object} row       Evidence in this row
+     */
+    getDeleteButton(row) {
+        return (
+            <DeleteEvidenceModal
+                row = {row}
+                useIcon = {true}
+                deleteEvidence = {this.props.deleteEvidenceFunc}
+                >
+            </DeleteEvidenceModal>
+        );
+    },
+
+    /**
+     * Return the order to display the source types in the main table
+     */
+     getTableEvidenceSourceOrder() {
         return ['PMID', 'clinical_lab', 'clinic', 'research_lab', 'public_database', 'other'];
     },
 
     /**
      * Return the three table header rows
      * First row - Evidence source type row
-     * Second row - Evidence row
+     * Second row - Evidence row with edit and delete buttons if user can modify the evidence
      * Third row - Submitted by row
      * 
      * @param {array} evidence_types  All evidence source types
@@ -62,13 +123,13 @@ let MasterEvidenceTable = createReactClass({
         let third_row = []; // Submitted by row
         let tableOrder = this.getTableEvidenceSourceOrder();
 
-        first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="2"></td>)
+        first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="2"></td>);
         tableOrder.forEach(evidence_type => {
             if (evidence_types[evidence_type]) {
                 let num_items = evidence_types[evidence_type].length;
                 first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
                     {extraEvidence.typeMapping[evidence_type].name}
-                </th>)
+                </th>);
             }
         });
 
@@ -83,6 +144,12 @@ let MasterEvidenceTable = createReactClass({
                 let rows = evidence_types[evidence_type];
                 let rowNum = 0;
                 rows.forEach(row => {
+                    let editButton = null;
+                    let deleteButton = null;
+                    if (this.canModify(row)) {
+                        editButton = this.getEditButton(row);
+                        deleteButton = this.getDeleteButton(row);
+                    }
                     if (row.source.metadata['_kind_key'] === 'PMID') {
                         let pmid = row.source.metadata.pmid;
                         let element = <a
@@ -93,16 +160,16 @@ let MasterEvidenceTable = createReactClass({
                             PMID {pmid}
                         </a>
                         second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
-                            <div style={{textAlign: 'center'}}>
-                                <span>{element}</span>
-                            </div>
+                                <div style={{textAlign: 'center'}}>
+                                    <span>{element}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
+                                </div>
                         </th>)
                     } else {
                         let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
                         let evidence_detail = `${row.source.metadata[identifier.name]}`;
                         second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
                             <div style={{textAlign: 'center'}}>
-                                <span>{evidence_detail}</span>
+                                <span>{evidence_detail}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
                             </div>
                         </th>);
                     }
@@ -170,7 +237,6 @@ let MasterEvidenceTable = createReactClass({
                     masterTable().forEach(masterRow => {
                         let val = row.source.data[masterRow.key];
                         let entry = '';
-                        // For text column, limit to column width and show full text when mouseover. 
                         let key = masterRow.key;
                         // For text column, limit to column width and show full text when mouseover. 
                         if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {

@@ -7,13 +7,12 @@ import PropTypes from 'prop-types';
 
 // third party lib
 import _ from 'underscore';
-import { Form, FormMixin, Input } from 'libs/bootstrap/form';
 import { ContextualHelp } from 'libs/bootstrap/contextual_help';
-import ModalComponent from 'libs/bootstrap/modal';
 import moment from 'moment';
 
 // Internal lib
 import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
+import { DeleteEvidenceModal} from 'components/variant_central/interpretation/segregation/deleteEvidenceModal';
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
 import { external_url_map } from 'components/globals';
 
@@ -23,12 +22,12 @@ let EvidenceTable = createReactClass({
         allData: PropTypes.array,                   // All extra evidence we've collected
         subcategory: PropTypes.string,              // subcategory (usually the panel) the evidence is part of
         deleteEvidenceFunc: PropTypes.func,         // Function to call to delete an evidence
-        evidenceCollectionDone: PropTypes.func,     // Function to call to add/edit an evidence
+        evidenceCollectionDone: PropTypes.func,     // Function to call to add or edit an evidence
         criteriaList: PropTypes.array,              // ACMG criteria
         session: PropTypes.object,                  // Session object
         affiliation: PropTypes.object,              // User's affiliation
         viewOnly: PropTypes.bool,                   // If the page is in read-only mode
-        canCurrUserModifyEvidence: PropTypes.func   // funcition to check if current logged in user can modify the given evidence
+        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
     },
 
     getInitialState() {
@@ -37,25 +36,7 @@ let EvidenceTable = createReactClass({
         return {
             tableFormat: tableFormat,
             rows: this.props.tableData,
-            deleteBusy: false
         };
-    },
-
-    /**
-     * Delete given evidence in this table row
-     * 
-     * @param {object} row   The evidence row
-     */
-    deleteEvidence(row) {
-        this.setState({
-            deleteBusy: true
-        });
-        this.props.deleteEvidenceFunc(row)
-        .then(() => {
-            this.setState({
-                deleteBusy: false
-            });
-        });
     },
 
     /**
@@ -167,6 +148,7 @@ let EvidenceTable = createReactClass({
                 subcategory = {this.props.subcategory}
                 evidenceCollectionDone = {this.props.evidenceCollectionDone}
                 isNew = {false}
+                useIcon = {false}
                 disableActuator = {false}
                 affiliation = {this.props.affiliation}
                 session = {this.props.session}
@@ -183,11 +165,12 @@ let EvidenceTable = createReactClass({
      */
     getDeleteButton(row) {
         return (
-            <DeleteModal
+            <DeleteEvidenceModal
                 row = {row}
-                deleteEvidence = {this.deleteEvidence}
+                useIcon = {false}
+                deleteEvidence = {this.props.deleteEvidenceFunc}
                 >
-            </DeleteModal>
+            </DeleteEvidenceModal>
         );
     },
 
@@ -442,70 +425,6 @@ let EvidenceTable = createReactClass({
             </tbody>
         </table>
         )
-    }
-});
-
-/**
- * Modal to confirm before deleting an evidence.
- */
-let DeleteModal = createReactClass({
-    propTypes: {
-        row: PropTypes.object,          // Selected evidence row to be deleted
-        deleteEvidence: PropTypes.func  // Function to call to delete the evidence row
-    },
-
-    getInitialState() {
-        return {
-            row: this.props.row,
-        }
-    },
-    
-    handleModalClose() {
-        this.child.closeModal();
-    },
-
-    cancel() {
-        this.handleModalClose();
-        this.setState({
-            row: this.props.row
-        });
-    },
-
-    /**
-     * Delete given evidence row
-     */
-    clickConfirm() {
-        this.props.deleteEvidence(this.state.row);
-        this.handleModalClose();
-        this.setState({
-            row: null
-        });
-    },
-    
-    render() {
-        return (
-            <ModalComponent
-                    modalTitle="Confirm evidence deletion"
-                    modalClass="modal-default"
-                    modalWrapperClass="confirm-interpretation-delete-segregation-evidence pull-right"
-                    bootstrapBtnClass="btn btn-danger "
-                    actuatorClass="interpretation-delete-segregation-evidence-btn"
-                    actuatorTitle={"Delete"}
-                    onRef={ref => (this.child = ref)}
-                >
-                <div>
-                    <div className="modal-body">
-                        <p>
-                            Are you sure you want to delete this evidence?
-                        </p>
-                    </div>
-                    <div className='modal-footer'>
-                        <Input type="button" inputClassName="btn-primary btn-inline-spacer" clickHandler={this.clickConfirm} title="Confirm" />
-                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
-                    </div>
-                </div>
-            </ModalComponent>
-        );
     }
 });
 
