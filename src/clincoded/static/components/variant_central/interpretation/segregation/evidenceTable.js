@@ -102,15 +102,17 @@ let EvidenceTable = createReactClass({
             switch (metadata['_kind_key']) {
                 case 'clinical_lab':
                     content = metadata.lab_name;
-                    help = `Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}, Contact: ${metadata.contact}`;
+                    help = `Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}` + (metadata.contact ? `, Contact: ${metadata.contact}` : '');
                     break;
                 case 'clinic':
                     content = metadata.healthcare_provider;
-                    help = `Institutional Affiliation: ${metadata.institutional_affiliation}, Department: ${metadata.department_affiliation}, ORCID ID: ${metadata.orcid_id}`;
+                    help = `Institutional Affiliation: ${metadata.institutional_affiliation}` + 
+                           (metadata.department_affiliation ? `, Department: ${metadata.department_affiliation}` : '') + 
+                           (metadata.orcid_id ? `, ORCID ID: ${metadata.orcid_id}` : '');
                     break;
                 case 'research_lab':
                     content = metadata.pi_lab_director;
-                    help = `Institution: ${metadata.institution}, ORCID ID: ${metadata.orcid_id}`;
+                    help = `Institution: ${metadata.institution}` + (metadata.orcid_id ? `, ORCID ID: ${metadata.orcid_id}` : '')
                     break;
                 case 'public_database':
                     content = metadata.name;

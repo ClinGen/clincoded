@@ -19,12 +19,6 @@ let DeleteEvidenceModal = createReactClass({
         useIcon: PropTypes.bool,        // Use icon as button title
         deleteEvidence: PropTypes.func  // Function to call to delete the evidence row
     },
-
-    getInitialState() {
-        return {
-            row: this.props.row,
-        }
-    },
     
     handleModalClose() {
         this.child.closeModal();
@@ -32,20 +26,14 @@ let DeleteEvidenceModal = createReactClass({
 
     cancel() {
         this.handleModalClose();
-        this.setState({
-            row: this.props.row
-        });
     },
 
     /**
      * Confirm button is clicked.  Delete given evidence row
      */
     clickConfirm() {
-        this.props.deleteEvidence(this.state.row);
+        this.props.deleteEvidence(this.props.row);
         this.handleModalClose();
-        this.setState({
-            row: null
-        });
     },
     
     render() {

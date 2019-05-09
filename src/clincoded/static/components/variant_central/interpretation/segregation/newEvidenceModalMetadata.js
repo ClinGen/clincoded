@@ -125,7 +125,7 @@ let NewEvidenceModalMetadata = createReactClass({
                 if (key === 'PMID') {
                     node.push(<Input
                             type = "button-button"
-                            inputClassName = "btn-default btn-inline-spacer pull-right"
+                            inputClassName = {(this.state.pmidPreviewDisabled ? "btn-default" : "btn-primary") + " btn-inline-spacer pull-right"}
                             clickHandler = {this.searchPMID}
                             title = "Preview PubMed Article"
                             submitBusy = {this.state.pmidLookupBusy}
@@ -169,31 +169,46 @@ let NewEvidenceModalMetadata = createReactClass({
                 if (!pmid) {
                     valid = false;
                     this.setFormErrors('resourceId', 'Please include a PMID');
-                    this.setState({pmidLookupBusy: false});
+                    this.setState({
+                        pmidLookupBusy: false,
+                        pmidResult: null
+                    });
                 }
             } else {
                 valid = false;
                 this.setFormErrors('resourceId', 'Invalid PMID');
-                this.setState({pmidLookupBusy: false});
+                this.setState({
+                    pmidLookupBusy: false,
+                    pmidResult: null
+                });
             }
         }
         // valid if input isn't zero-filled
         if (valid && pmid.match(/^0+$/)) {
             valid = false;
             this.setFormErrors('resourceId', 'This PMID does not exist');
-            this.setState({pmidLookupBusy: false});
+            this.setState({
+                pmidLookupBusy: false,
+                pmidResult: null
+            });
         }
         // valid if input isn't zero-leading
         if (valid && pmid.match(/^0+/)) {
             valid = false;
             this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
-            this.setState({pmidLookupBusy: false});
+            this.setState({
+                pmidLookupBusy: false,
+                pmidResult: null
+            });
         }
         // valid if the input only has numbers
         if (valid && !pmid.match(/^[0-9]*$/)) {
             valid = false;
             this.setFormErrors('resourceId', 'PMID should contain only numbers');
-            this.setState({pmidLookupBusy: false});
+            this.setState({
+                pmidLookupBusy: false,
+                pmidResult: null
+            });
         }
         return valid;
     },
@@ -355,9 +370,9 @@ let NewEvidenceModalMetadata = createReactClass({
 
     render() {
         const additionalEvidenceFields = this.additionalEvidenceInputFields();
-        const modalWrapperClass = this.props.useIcon ? "input-inline" : "input-inline";
-        const bootstrapBtnClass = this.props.useIcon ? "btn " : "";
-        const actuatorClass = this.props.useIcon ? "" : "btn btn-default btn-primary";
+        const modalWrapperClass = "input-inline";
+        const bootstrapBtnClass = this.props.useIcon ? "btn " : "btn btn-default ";
+        const actuatorClass = this.props.useIcon ? "" : "btn-primary";
         return (
             <ModalComponent 
                     modalTitle={this.title(this.props.evidenceType)}
@@ -376,7 +391,7 @@ let NewEvidenceModalMetadata = createReactClass({
                             {this.renderPMIDResult()}
                             <div className="row">&nbsp;<br />&nbsp;</div>
                             <div className='modal-footer'>
-                                <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Next" id="submit" inputDisabled={this.state.isNextDisabled}/>
+                                <Input type="submit" inputClassName="btn-default btn-inline-spacer btn-primary" title="Next" id="submit" inputDisabled={this.state.isNextDisabled}/>
                                 <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
                             </div>
                         </Form>

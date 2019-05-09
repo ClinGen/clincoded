@@ -1,16 +1,13 @@
 'use strict';
 // Third-party libs
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
-import moment from 'moment';
-import { Form, FormMixin, Input } from 'libs/bootstrap/form';
+import { FormMixin, Input } from 'libs/bootstrap/form';
 
 // Internal libs
 import { RestMixin } from 'components/rest';
-var curator = require('components/curator');
-var PmidSummary = curator.PmidSummary;
 var CuratorHistory = require('components/curator_history');
 
 import { EvidenceTable } from 'components/variant_central/interpretation/segregation/evidenceTable';
@@ -26,7 +23,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         tableName: PropTypes.object, // table name as HTML object
         category: PropTypes.string, // category (usually the tab) the evidence is part of
         subcategory: PropTypes.string, // subcategory (usually the panel) the evidence is part of
-        href_url: PropTypes.object, // href_url object
         session: PropTypes.object, // session object
         variant: PropTypes.object, // parent variant object
         interpretation: PropTypes.object, // parent interpretation object
@@ -47,7 +43,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             submitBusy: false, // spinner for Save button
             editBusy: false, // spinner for Edit button
             deleteBusy: false, // spinner for Delete button
-            updateMsg: null,
+            updateMsg: null,   // error message
             tempEvidence: null, // evidence object brought in my AddResourceId modal
             editEvidenceId: null, // the ID of the evidence to be edited from the table
             descriptionInput: null, // state to store the description input content
@@ -76,279 +72,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         }
     },
 
-    updateTempEvidence: function(article) {
-        // Called by AddResourceId modal upon closing modal. Updates the tempEvidence state and clears description input
-        this.setState({tempEvidence: article, editCriteriaSelection: 'none', descriptionInput: null});
-    },
-
-    submitForm: function(e) {
-        // Called when Add PMID form is submitted
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({submitBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
-
-        // Save all form values from the DOM.
-        this.saveAllFormValues();
-
-        let flatInterpretation = null;
-        let freshInterpretation = null;
-
-        this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
-            // get updated interpretation object, then flatten it
-            freshInterpretation = interpretation;
-            flatInterpretation = curator.flatten(freshInterpretation);
-
-            // create extra_evidence object to be inserted
-            let extra_evidence = {
-                variant: this.state.interpretation.variant['@id'],
-                category: this.props.category,
-                subcategory: this.props.subcategory,
-                articles: [this.state.tempEvidence.pmid],
-                evidenceCriteria: this.state.criteriaInput,
-                evidenceDescription: this.refs['description'].getValue()
-            };
-
-            // Add affiliation if the user is associated with an affiliation
-            // and if the data object has no affiliation
-            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
-                if (!extra_evidence.affiliation) {
-                    extra_evidence.affiliation = this.props.affiliation.affiliation_id;
-                }
-            }
-
-            return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
-                // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
-                if (!flatInterpretation.extra_evidence_list) {
-                    flatInterpretation.extra_evidence_list = [];
-                }
-                flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
-
-                // update interpretation object
-                return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
-                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
-                            return Promise.resolve(data['@graph'][0]);
-                        });
-
-                    });
-                });
-
-            });
-        }).then(interpretation => {
-            // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-            this.setState({submitBusy: false, tempEvidence: null, editCriteriaSelection: 'none', descriptionInput: null});
-            this.props.updateInterpretationObj();
-        }).catch(error => {
-            this.setState({submitBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
-            console.log(error);
-        });
-    },
-
-    cancelAddEvidenceButton: function(e) {
-        // called when the Cancel button is pressed during Add PMID
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({tempEvidence: null, editCriteriaSelection: 'none', descriptionInput: null});
-    },
-
-    editEvidenceButton: function(id) {
-        // called when the Edit button is pressed for an existing evidence
-        this.setState({editEvidenceId: id, editCriteriaSelection: 'none', editDescriptionInput: null});
-    },
-
-    cancelEditEvidenceButton: function(e) {
-        // called when the Cancel button is pressed while editing an existing evidence
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({editEvidenceId: null, editCriteriaSelection: 'none', editDescriptionInput: null});
-    },
-
-    submitEditForm: function(e) {
-        // called when Edit PMID form is submitted
-        e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
-        this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
-
-        // Save all form values from the DOM.
-        this.saveAllFormValues();
-
-        // since the extra_evidence object is really simple, and the description is the only thing changing,
-        // make a new one instead of getting an updated and flattened one
-        let extra_evidence = {
-            variant: this.state.interpretation.variant['@id'],
-            category: this.props.category,
-            subcategory: this.props.subcategory,
-            articles: [this.refs['edit-pmid'].getValue()],
-            evidenceCriteria: this.state.editCriteriaInput,
-            evidenceDescription: this.refs['edit-description'].getValue()
-        };
-
-        // Add affiliation if the user is associated with an affiliation
-        // and if the data object has no affiliation
-        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
-            if (!extra_evidence.affiliation) {
-                extra_evidence.affiliation = this.props.affiliation.affiliation_id;
-            }
-        }
-
-        this.putRestData(this.refs['edit-target'].getValue(), extra_evidence).then(result => {
-            this.recordHistory('modify-hide', result['@graph'][0]).then(addHistory => {
-                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-                this.setState({editBusy: false, editEvidenceId: null, editCriteriaSelection: 'none', editDescriptionInput: null});
-                this.props.updateInterpretationObj();
-            });
-        }).catch(error => {
-            this.setState({editBusy: false, editEvidenceId: null, editCriteriaSelection: 'none', editDescriptionInput: null});
-            console.log(error);
-        });
-    },
-
-    deleteEvidence: function(evidence) {
-        // called when the Delete button for an existing evidence is pressed
-        this.setState({deleteBusy: true});
-
-        let deleteTargetId = evidence['@id'];
-        let flatInterpretation = null;
-        let freshInterpretation = null;
-        // since the extra_evidence object is really simple, and the description is the only thing changing,
-        // make a new one instead of getting an updated and flattened one
-        let extra_evidence = {
-            variant: evidence.variant,
-            category: this.props.category,
-            subcategory: this.props.subcategory,
-            articles: [evidence.articles[0]['@id']],
-            evidenceCriteria: evidence.evidenceCriteria,
-            evidenceDescription: evidence.evidenceDescription,
-            status: 'deleted'
-        };
-        this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
-            return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
-                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
-                    // get updated interpretation object, then flatten it
-                    freshInterpretation = interpretation;
-                    flatInterpretation = curator.flatten(freshInterpretation);
-
-                    // remove removed evidence from evidence list
-                    flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
-
-                    // update the interpretation object
-                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
-                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
-                            return Promise.resolve(data['@graph'][0]);
-                        });
-                    });
-                });
-            }).then(interpretation => {
-                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-                this.setState({deleteBusy: false});
-                this.props.updateInterpretationObj();
-            });
-        }).catch(error => {
-            this.setState({deleteBusy: false});
-            console.log(error);
-        });
-    },
-
-    renderInterpretationExtraEvidence: function(extra_evidence) {
-        let affiliation = this.props.affiliation, session = this.props.session;
-        let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
-        // for rendering the evidence in tabular format
-        return (
-            <tr key={extra_evidence.uuid}>
-                <td className="col-md-4"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
-                <td className="col-md-1"><p>{criteriaInput}</p></td>
-                <td className="col-md-3"><p className="word-break">{extra_evidence.evidenceDescription}</p></td>
-                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{extra_evidence.submitted_by.title}</td>
-                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
-                {!this.props.viewOnly ?
-                    <td className="col-md-2">
-                        {!this.props.viewOnly && ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
-                            (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
-                            <div>
-                                <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
-                                <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
-                                    clickHandler={() => this.deleteEvidence(extra_evidence)} />
-                            </div>
-                            : null}
-                    </td>
-                    : null}
-            </tr>
-        );
-    },
-
-    /**
-     * Method to handle criteria selection change
-     */
-    handleCriteriaChange: function(ref, e) {
-        if (ref === 'criteria-selection') {
-            this.setState({criteriaInput: this.refs[ref].getValue()});
-        } else if (ref === 'edit-criteria-selection') {
-            this.setState({editCriteriaInput: this.refs[ref].getValue()});
-        }
-    },
-
-    handleDescriptionChange: function(ref, e) {
-        // handles updating the state on textbox input change
-        if (ref === 'description') {
-            this.setState({descriptionInput: this.refs[ref].getValue()});
-        } else if (ref === 'edit-description') {
-            this.setState({editDescriptionInput: this.refs[ref].getValue()});
-        }
-    },
-
-    shouldDisableSaveButton: function(action) {
-        let disabled = true;
-        if (action === 'add') {
-            if ((this.state.descriptionInput && this.state.descriptionInput.length) || this.state.criteriaInput !== 'none') {
-                disabled = false;
-            }
-        } else if (action === 'edit') {
-            if ((this.state.editDescriptionInput && this.state.editDescriptionInput.length) || this.state.editCriteriaInput !== 'none') {
-                disabled = false;
-            }
-        }
-        return disabled;
-    },
-
-    renderInterpretationExtraEvidenceEdit: function(extra_evidence) {
-        const criteriaList = this.state.criteriaList;
-        let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria.length ? extra_evidence.evidenceCriteria : this.state.criteriaInput;
-
-        return (
-            <tr key={extra_evidence.uuid}>
-                <td colSpan="6">
-                    <PmidSummary article={extra_evidence.articles[0]} className="alert alert-info" pmidLinkout />
-                    <Form submitHandler={this.submitEditForm} formClassName="form-horizontal form-std">
-                        <Input type="text" ref="edit-target" value={extra_evidence['@id']} inputDisabled={true} groupClassName="hidden" />
-                        <Input type="text" ref="edit-pmid" value={extra_evidence.articles[0].pmid} inputDisabled={true} groupClassName="hidden" />
-                        <div className="pmid-evidence-form clearfix">
-                            <div className="col-xs-6 col-md-4 pmid-evidence-form-item criteria-selection">
-                                <Input type="select" ref="edit-criteria-selection" label="Criteria:"
-                                    defaultValue={criteriaInput} value={criteriaInput} handleChange={this.handleCriteriaChange}
-                                    error={this.getFormError("edit-criteria-selection")} clearError={this.clrFormErrors.bind(null, "edit-criteria-selection")}
-                                    labelClassName="col-xs-6 col-md-4 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-8" groupClassName="form-group">
-                                    <option value="none">Select criteria code</option>
-                                    <option disabled="disabled"></option>
-                                    {criteriaList.map((item, i) => {
-                                        return <option key={i} value={item}>{item}</option>;
-                                    })}
-                                </Input>
-                            </div>
-                            <div className="col-xs-12 col-sm-6 col-md-8 pmid-evidence-form-item evidence-input">
-                                <Input type="textarea" ref="edit-description" rows="2" label="Evidence:" value={extra_evidence.evidenceDescription} defaultValue={extra_evidence.evidenceDescription}
-                                    labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" handleChange={this.handleDescriptionChange} />
-                            </div>
-                        </div>
-                        <div className="clearfix">
-                            <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelEditEvidenceButton}>Cancel Edit</button>
-                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                submitBusy={this.state.editBusy} inputDisabled={this.shouldDisableSaveButton('edit')} />
-                            {this.state.updateMsg ?
-                                <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                : null}
-                        </div>
-                    </Form>
-                </td>
-            </tr>
-        );
-    },
-
     setEvidenceType: function(ref, event) {
         if (event.target.value === 'select-source') {
             this.setState({evidenceType: null});
@@ -375,7 +98,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                     interpretation.extra_evidence_list.forEach(extra_evidence => {
                         // temporary codes
                         //relevantEvidenceListRaw.push(extra_evidence);
-                        if (extra_evidence.source) {
+                        if (extra_evidence.category === 'case-segregation') {
                             relevantEvidenceListRaw.push(extra_evidence);
                         }
                     });
@@ -390,12 +113,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
             return evidence.date_created;
         }).reverse();
-        let parentObj = {/* // BEHAVIOR TBD
-            '@type': ['evidenceList'],
-            'evidenceList': relevantEvidenceList
-        */};
-        const criteriaList = this.state.criteriaList;
-        const criteriaInput = this.state.criteriaInput;
         let extraEvidenceData = [];
         if (this.state.interpretation != null && 'extra_evidence_list' in this.state.interpretation) {
             // temporary codes
@@ -403,7 +120,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             let extraEvidenceData = [];
             if (this.state.interpretation.extra_evidence_list) {
                 this.state.interpretation.extra_evidence_list.forEach(extra_evidence => {
-                    if (extra_evidence.source) {
+                    if (extra_evidence.category === 'case-segregation') {
                         extraEvidenceData.push(extra_evidence);
                     }
                 });

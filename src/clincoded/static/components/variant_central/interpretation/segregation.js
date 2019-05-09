@@ -133,7 +133,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
             let flatInterpretation = null;
             let freshInterpretation = null;
-            // ??? need to find criteria that has value from source.data
+            // TODO - not sure if need to find criteria that has value from source.data
             let evidenceCriteria = 'none';
 
             this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
@@ -248,7 +248,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.forEach(extra_evidence => {
                         // temporary codes
-                        if (extra_evidence.source) {
+                        if (extra_evidence.category === 'case-segregation') {
                             relevantEvidenceListRaw.push(extra_evidence);
                         }
                     });

@@ -225,7 +225,7 @@ let EvidenceSheet = createReactClass({
                 {this.inputs()}
                 <div className="row">&nbsp;<br />&nbsp;</div>
                 <div className='modal-footer'>
-                    <Input type="submit" inputClassName="btn-default btn-inline-spacer" title="Submit" id="submit" />
+                    <Input type="submit" inputClassName="btn-default btn-inline-spacer btn-primary" title="Submit" id="submit" />
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
                 </div>
                 </Form>
