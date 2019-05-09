@@ -60,7 +60,7 @@ const IndividualCuration = createReactClass({
             individualName: '', // Currently entered individual name
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
-            compoundHetOrHom: null, // Conditional rendering of denovo questions depending on proband answer for semidom
+            biallelicHetOrHom: null, // Conditional rendering of denovo questions depending on proband answer for semidom
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             userScoreObj: {}, // Logged-in user's score object
@@ -109,9 +109,9 @@ const IndividualCuration = createReactClass({
         } else if (ref === 'proband') {
             this.setState({proband_selected: false});
         } else if (ref === 'probandIs' && this.refs[ref].getValue() === 'Biallelic homozygous' || this.refs[ref].getValue() === 'Biallelic compound heterozygous') {
-            this.setState({compoundHetOrHom: true});
+            this.setState({biallelicHetOrHom: true});
         } else if (ref === 'probandIs') {
-            this.setState({compoundHetOrHom: false});
+            this.setState({biallelicHetOrHom: false});
         }
     },
 
@@ -218,7 +218,7 @@ const IndividualCuration = createReactClass({
                 }
 
                 if (stateObj.individual.probandIs === 'Biallelic homozygous' || stateObj.individual.probandIs === 'Biallelic compound heterozygous') {
-                    this.setState({compoundHetOrHom: true});
+                    this.setState({biallelicHetOrHom: true});
                 }
             }
 
@@ -1579,7 +1579,7 @@ function IndividualVariantInfo() {
                             </div>
                         );
                     })}
-                    {this.state.compoundHetOrHom || (Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected) ?
+                    {this.state.biallelicHetOrHom || (Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected) ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
