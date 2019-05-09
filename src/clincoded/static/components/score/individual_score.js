@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, X_LINKED } from './constants/evidence_types';
+import { AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, X_LINKED, SEMIDOMINANT } from './constants/evidence_types';
 import CASE_INFO_TYPES from './constants/case_info_types';
 import { defaultScore } from './helpers/default_score';
 import { scoreRange } from './helpers/score_range';
@@ -418,6 +418,8 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
                 modeInheritanceType = AUTOSOMAL_RECESSIVE;
             } else if (modeInheritance.indexOf('X-linked') > -1) {
                 modeInheritanceType = X_LINKED;
+            } else if (modeInheritance.indexOf('Semidominant inheritance') > -1) {
+                modeInheritanceType = SEMIDOMINANT;
             } else {
                 // Mode of Inheritance is not either AD, AR, or X-Linked
                 modeInheritanceType = '';
