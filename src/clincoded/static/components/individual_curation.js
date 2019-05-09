@@ -60,6 +60,7 @@ const IndividualCuration = createReactClass({
             individualName: '', // Currently entered individual name
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
+            compoundHetOrHom: null, // Conditional rendering of denovo questions depending on proband answer for semidom
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             userScoreObj: {}, // Logged-in user's score object
@@ -107,6 +108,10 @@ const IndividualCuration = createReactClass({
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
             this.setState({proband_selected: false});
+        } else if (ref === 'probandIs' && this.refs[ref].getValue() === 'Biallelic homozygous' || this.refs[ref].getValue() === 'Biallelic compound heterozygous') {
+            this.setState({compoundHetOrHom: true});
+        } else if (ref === 'probandIs') {
+            this.setState({compoundHetOrHom: false});
         }
     },
 
@@ -210,6 +215,10 @@ const IndividualCuration = createReactClass({
                 }
                 else {
                     this.setState({proband_selected: false});
+                }
+
+                if (stateObj.individual.probandIs === 'Biallelic homozygous' || stateObj.individual.probandIs === 'Biallelic compound heterozygous') {
+                    this.setState({compoundHetOrHom: true});
                 }
             }
 
@@ -1488,7 +1497,7 @@ function IndividualVariantInfo() {
                 :
                 <div>
                     { semiDom ?  
-                        <Input type="select" label="The proband is:" ref="probandIs"
+                        <Input type="select" label="The proband is:" ref="probandIs" handleChange={this.handleChange}
                             defaultValue="none" value={individual && individual.probandIs ? individual.probandIs : 'none'}
                             error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
@@ -1570,7 +1579,7 @@ function IndividualVariantInfo() {
                             </div>
                         );
                     })}
-                    {Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected ?
+                    {this.state.compoundHetOrHom || (Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected) ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
