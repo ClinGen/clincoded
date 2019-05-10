@@ -1883,6 +1883,7 @@ const IndividualViewer = createReactClass({
         var tempPmid = tempGdmPmid[1];
         let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
         let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
+        var probandIs = this.props.context.probandIs;
 
         return (
             <div>
@@ -2025,14 +2026,22 @@ const IndividualViewer = createReactClass({
                                 </div>
                             </dl>
                         </Panel>
-
                         <Panel title={LabelPanelTitleView(individual, '', true)} panelClassName="panel-data">
-                            <div>
-                                <dl className="dl-horizontal">
-                                    <dt>Zygosity</dt>
-                                    <dd>{individual && individual.recessiveZygosity ? individual.recessiveZygosity : "None selected"}</dd>
-                                </dl>
-                            </div>
+                            {probandIs 
+                                ? <div>
+                                    <dl className="dl-horizontal">
+                                        <dt>The proband is</dt>
+                                        <dd>{individual && individual.probandIs ? individual.probandIs : "None selected"}</dd>
+                                    </dl>
+                                </div>
+                                :
+                                <div>
+                                    <dl className="dl-horizontal">
+                                        <dt>Zygosity</dt>
+                                        <dd>{individual && individual.recessiveZygosity ? individual.recessiveZygosity : "None selected"}</dd>
+                                    </dl>
+                                </div>
+                            }   
                             {variants.map(function(variant, i) {
                                 return (
                                     <div key={i} className="variant-view-panel">
