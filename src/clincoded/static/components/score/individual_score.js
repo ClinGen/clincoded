@@ -421,7 +421,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
             } else if (modeInheritance.indexOf('Semidominant inheritance') > -1) {
                 modeInheritanceType = SEMIDOMINANT;
             } else {
-                // Mode of Inheritance is not either AD, AR, or X-Linked
+                // Mode of Inheritance is not either AD, AR, SD, or X-Linked
                 modeInheritanceType = '';
             }
         }
@@ -564,7 +564,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
         let scoreError = this.state.scoreError;
         let variants = this.state.variantInfo && Object.keys(this.state.variantInfo).length > 0 ? Object.values(this.state.variantInfo) : (this.state.variantInfo.length ? this.state.variantInfo : []);
 
-        // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, or X_LINKED
+        // TRUE if Mode of Inheritance is either AUTOSOMAL_DOMINANT, AUTOSOMAL_RECESSIVE, SEMIDOMINANT, or X_LINKED
         let shouldCalcScore = modeInheritanceType && modeInheritanceType.length ? true : false;
 
         return (
