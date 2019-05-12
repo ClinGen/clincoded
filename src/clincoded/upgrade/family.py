@@ -108,3 +108,8 @@ def family_5_6(value, system):
             if value['segregation']['includeLodScoreInAggregateCalculation'] is True:
                 value['segregation']['sequencingMethod'] = 'Candidate gene sequencing'
 
+@upgrade_step('family', '6', '7')
+def family_6_7(value, system):
+		# https://github.com/ClinGen/clincoded/issues/1848
+		# Add new property moiDisplayedForFamily and upgrade schema version
+		return
