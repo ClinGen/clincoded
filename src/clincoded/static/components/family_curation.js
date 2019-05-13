@@ -40,6 +40,7 @@ var formMapSegregation = {
     'SEGnumberOfSegregationsForThisFamily': 'numberOfSegregationsForThisFamily',
     'SEGinconsistentSegregationAmongstTestedIndividuals': 'inconsistentSegregationAmongstTestedIndividuals',
     'SEGexplanationForInconsistent': 'explanationForInconsistent',
+    'SEGmoiDisplayedForFamily': 'moiDisplayedForFamily',
     'SEGfamilyConsanguineous': 'familyConsanguineous',
     'SEGpedigreeLocation': 'pedigreeLocation',
     'SEGlodPublished': 'lodPublished',
@@ -170,6 +171,15 @@ var FamilyCuration = createReactClass({
             } else {
                 this.setState({recessiveZygosity: null});
             }
+        } else if (ref === 'SEGmoiDisplayedForFamily') {
+            let familyMoiDisplayed =  this.refs[ref].getValue();
+            if (familyMoiDisplayed === 'Autosomal dominant/X-linked') {
+                this.setState({lodLocked: true, lodCalcMode: 'ADX'})
+            } else if (familyMoiDisplayed === 'Autosomal recessive') {
+                this.setState({lodLocked: true, lodCalcMode: 'AR'})
+            } else {
+                this.setState({lodLocked: false, lodCalcMode: null})
+            }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
             var value = this.refs[ref].getValue();
@@ -222,7 +232,7 @@ var FamilyCuration = createReactClass({
                 this.cv.assessmentTracker.currentVal = 'Not Assessed';
                 this.updateAssessmentValue(this.cv.assessmentTracker, 'Not Assessed');
             }
-        }
+        }        
     },
 
     /**
@@ -1006,6 +1016,10 @@ var FamilyCuration = createReactClass({
             if (value1) {
                 newSegregation[formMapSegregation['SEGexplanationForInconsistent']] = value1;
             }
+            value1 = this.getFormValue('SEGmoiDisplayedForFamily');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGmoiDisplayedForFamily']] = value1;
+            }
             value1 = this.getFormValue('SEGfamilyConsanguineous');
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGfamilyConsanguineous']] = value1;
@@ -1657,7 +1671,11 @@ function FamilyDemographics() {
  */
 function FamilySegregation() {
     let family = this.state.family;
+    let gdm = this.state.gdm;
     let segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
+    if (gdm) {
+        var semiDom = gdm.modeInheritance.includes('Semidominant');
+    }
 
     return (
         <div className="row section section-family-segregation">
@@ -1688,6 +1706,17 @@ function FamilySegregation() {
             <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5"
                 value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {semiDom ?    
+            <Input type="select" ref="SEGmoiDisplayedForFamily" label="Which mode of inheritance does this family display?:"
+                value={segregation && segregation.moiDisplayedForFamily ? segregation.moiDisplayedForFamily : ''} 
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option value="Autosomal dominant/X-linked">Autosomal dominant/X-linked</option>
+                <option value="Autosomal recessive">Autosomal recessive</option>
+                <option value="Semidominant">Semidominant</option>
+            </Input>
+            : null}
             <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none"
                 value={segregation && segregation.familyConsanguineous ? segregation.familyConsanguineous : 'none'}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1928,6 +1957,7 @@ function segregationExists(segregation) {
         exists = (segregation.pedigreeDescription && segregation.pedigreeDescription.length > 0) ||
                   segregation.pedigreeSize ||
                   segregation.numberOfGenerationInPedigree ||
+                  segregation.moiDisplayedForFamily ||
                   segregation.consanguineousFamily ||
                   segregation.numberOfCases ||
                  (segregation.deNovoType && segregation.deNovoType.length > 0) ||
@@ -2366,6 +2396,11 @@ const FamilySegregationViewer = (segregation, assessments, open) => {
                 <div>
                     <dt>Explanation for the inconsistent segregations</dt>
                     <dd>{segregation && segregation.explanationForInconsistent}</dd>
+                </div>
+
+                <div>
+                    <dt>Which mode of inheritance does this family display?</dt>
+                    <dd>{segregation && segregation.moiDisplayedForFamily}</dd>
                 </div>
 
                 <div>
