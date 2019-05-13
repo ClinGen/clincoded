@@ -91,6 +91,7 @@ var FamilyCuration = createReactClass({
             variantInfo: {}, // Extra holding info for variant display
             probandIndividual: null, //Proband individual if the family being edited has one
             familyName: '', // Currently entered family name
+            familyMoiDisplayed: null,
             individualRequired: false, // Boolean for set up requirement of proband
             individualName: '', // Proband individual name
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
@@ -402,6 +403,19 @@ var FamilyCuration = createReactClass({
                     stateObj.lodCalcMode = 'AR';
                 } else {
                     stateObj.lodLocked = false;
+                }
+            }
+
+            // Update LOD locked and calculation modes based on family moi question for semidom
+            if (stateObj.family.segregation && stateObj.family.segregation.moiDisplayedForFamily) {
+                if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal dominant/X-linked') > -1) {
+                    stateObj.lodLocked = true;
+                    stateObj.lodCalcMode = 'ADX';
+                } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal recessive') > -1) {
+                    stateObj.lodLocked = true;
+                    stateObj.lodCalcMode = 'AR';
+                } else {
+                    lodLocked = false;
                 }
             }
 
