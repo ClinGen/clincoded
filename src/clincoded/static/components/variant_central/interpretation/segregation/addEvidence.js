@@ -53,7 +53,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             variant: this.props.variant, // parent variant object
             interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
             criteriaList: this.props.criteriaList ? this.props.criteriaList : [],
-            evidenceType: null  // One of PMID, clinical_lab, clinic, research_lab, public_database, registered_curator, other
+            evidenceType: 'PMID'  // One of PMID, clinical_lab, clinic, research_lab, public_database, registered_curator, other
         };
     },
 
@@ -126,6 +126,18 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 });
             }
         }
+        /* removed source options for now
+                                                    <Input type="select" defaultValue="select-source" handleChange={this.setEvidenceType}>
+                                                        <option value="select-source">Select Source</option>
+                                                        <option disabled="disabled"></option>
+                                                        <option value="PMID">PMID</option>
+                                                        <option value="clinical_lab">Clinical Lab</option>
+                                                        <option value="clinic">Clinic</option>
+                                                        <option value="research_lab">Research Lab</option>
+                                                        <option value="public_database">Public Database</option>
+                                                        <option value="other">Other</option>
+                                                    </Input>
+        */
         return (
             <div className="panel panel-info">
                 <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
@@ -138,15 +150,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                         <span>
                                             <div className="row">
                                                 <div className="col-md-12">
-                                                    <Input type="select" defaultValue="select-source" handleChange={this.setEvidenceType}>
-                                                        <option value="select-source">Select Source</option>
-                                                        <option disabled="disabled"></option>
+                                                    <Input type="select" defaultValue="PMID" handleChange={this.setEvidenceType}>
                                                         <option value="PMID">PMID</option>
-                                                        <option value="clinical_lab">Clinical Lab</option>
-                                                        <option value="clinic">Clinic</option>
-                                                        <option value="research_lab">Research Lab</option>
-                                                        <option value="public_database">Public Database</option>
-                                                        <option value="other">Other</option>
                                                     </Input>
                                                 </div>
                                                 <div className="col-md-12">
