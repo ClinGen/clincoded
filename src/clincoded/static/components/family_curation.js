@@ -1846,6 +1846,12 @@ function FamilyVariant() {
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
     let individualName = this.state.individualName;
+    if (gdm) {
+        var semiDom = gdm.modeInheritance.includes('Semidominant');
+        if (semiDom) {
+            var MAX_VARIANTS = 3;
+        }
+    }
 
     return (
         <div className="row form-row-helper">
