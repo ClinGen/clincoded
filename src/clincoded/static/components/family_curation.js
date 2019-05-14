@@ -94,6 +94,7 @@ var FamilyCuration = createReactClass({
             familyMoiDisplayed: null,
             individualRequired: false, // Boolean for set up requirement of proband
             individualName: '', // Proband individual name
+            isSemidominant: null, // True if Family MOI question returns Semidominant
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             segregationFilled: false, // True if at least one segregation field has a value
             submitBusy: false, // True while form is submitting
@@ -175,11 +176,21 @@ var FamilyCuration = createReactClass({
         } else if (ref === 'SEGmoiDisplayedForFamily') {
             let familyMoiDisplayed =  this.refs[ref].getValue();
             if (familyMoiDisplayed === 'Autosomal dominant/X-linked') {
-                this.setState({lodLocked: true, lodCalcMode: 'ADX'})
+                this.setState({lodLocked: true, lodCalcMode: 'ADX', familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
             } else if (familyMoiDisplayed === 'Autosomal recessive') {
-                this.setState({lodLocked: true, lodCalcMode: 'AR'})
+                this.setState({lodLocked: true, lodCalcMode: 'AR', familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
+            } else if (familyMoiDisplayed === 'Semidominant') {
+                this.setState({lodLocked: false, lodCalcMode: null, familyMoiDisplayed: familyMoiDisplayed, isSemidominant: true});
             } else {
-                this.setState({lodLocked: false, lodCalcMode: null})
+                this.setState({lodLocked: false, lodCalcMode: null, familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
+            }
+        } else if (ref === 'SEGlodRequirements') {
+            // Handle LOD score based on family requirements question if semidominant
+            let lodRequirements = this.refs[ref].getValue();
+            if (lodRequirements === 'Yes - autosomal dominant/X-linked') {
+                this.setState({lodLocked: true, lodCalcMode: 'ADX'});
+            } else if (lodRequirements === 'Yes - autosomal recessive') {
+                this.setState({lodLocked: true, lodCalcMode: 'AR'});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
@@ -411,11 +422,18 @@ var FamilyCuration = createReactClass({
                 if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal dominant/X-linked') > -1) {
                     stateObj.lodLocked = true;
                     stateObj.lodCalcMode = 'ADX';
+                    stateObj.isSemidominant = false;
                 } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal recessive') > -1) {
                     stateObj.lodLocked = true;
                     stateObj.lodCalcMode = 'AR';
+                    stateObj.isSemidominant = false;
+                } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Semidominant') > -1) {
+                    stateObj.lodlocked = false;
+                    stateObj.isSemidominant = true;
+                    this.setState({isSemidominant: true})
                 } else {
-                    lodLocked = false;
+                    stateObj.lodLocked = false;
+                    stateObj.isSemidominant = false;
                 }
             }
 
@@ -534,7 +552,7 @@ var FamilyCuration = createReactClass({
             // No annotation; just resolve with an empty promise.
             return Promise.resolve();
         }).catch(function(e) {
-            console.log('OBJECT LOAD ERROR: %s — %s', e.statusText, e.url);
+            console.log('OBJECT LOAD ERROR: %s — %s', e, e.statusText, e.url);
         });
     },
 
@@ -1752,6 +1770,17 @@ function FamilySegregation() {
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </Input>
+            {this.state.isSemidominant == true && this.state.lodPublished === 'No' ? 
+            <Input type="select" ref="SEGlodRequirements" label="Does the family meet requirements for estimating LOD score for EITHER autosomal dominant/X-linked or autosomal recessive?:"
+                value={segregation && segregation.lodRequirements ? segregation.lodRequirements : ''}
+                handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                <option value="none">No Selection</option>
+                <option disabled="disabled"></option>
+                <option value="Yes - autosomal dominant/X-linked">Yes - autosomal dominant/X-linked</option>
+                <option value="Yes - autosomal recessive">Yes - autosomal recessive</option>
+                <option value="No">No</option>
+            </Input>
+            : null}
             {this.state.lodPublished === 'Yes' ?
                 <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:"
                     value={segregation && segregation.publishedLodScore ? segregation.publishedLodScore : ''}
@@ -1792,10 +1821,10 @@ function FamilySegregation() {
                 </Input>
                 : null}
             <Input type="textarea" ref="SEGreasonExplanation" label="Explain reasoning:" rows="5"
-                value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''}
+                value={segregation && segregation.reasonExplanation ? segregation.reasonExplanation : ''} inputDisabled={(this.state.isSemidominant == true && this.state.lodPublished === "Yes")}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="textarea" ref="SEGaddedsegregationinfo" label="Additional Segregation Information:" rows="5"
-                value={segregation && segregation.additionalInformation ? segregation.additionalInformation : ''}
+                value={segregation && segregation.additionalInformation ? segregation.additionalInformation : ''} inputDisabled={(this.state.isSemidominant == true && this.state.lodPublished === "Yes")}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
