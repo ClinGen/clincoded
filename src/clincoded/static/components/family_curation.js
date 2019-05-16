@@ -417,7 +417,7 @@ var FamilyCuration = createReactClass({
                 }
             }
 
-            // // Update LOD locked and calculation modes based on family moi question for semidom
+            // Update LOD locked and calculation modes based on family moi question for semidom
             if (stateObj.family) {
                 if (stateObj.family.segregation && stateObj.family.segregation.moiDisplayedForFamily) {
                     if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal dominant/X-linked') > -1) {
