@@ -248,6 +248,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 }
                             }
                             let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
+                            let gdm = this.state.gdm;
                             let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
                             // Define object key/value pairs
                             caseLevelEvidence['variantType'] = score.caseInfoType && score.caseInfoType.length ? this.mapVariantType(score.caseInfoType) : '';
@@ -260,6 +261,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                             caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
                             caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
                             caseLevelEvidence['ageUnit'] = proband.ageUnit && proband.ageUnit.length ? proband.ageUnit : '';
+                            caseLevelEvidence['modeInheritance'] = gdm.modeInheritance ? gdm.modeInheritance : '';
                             caseLevelEvidence['ethnicity'] = proband.ethnicity && proband.ethnicity.length ? proband.ethnicity : '';
                             caseLevelEvidence['hpoIdInDiagnosis'] = proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length ? proband.hpoIdInDiagnosis : [];
                             caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';

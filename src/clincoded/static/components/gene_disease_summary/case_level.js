@@ -76,6 +76,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 <td className="evidence-reference">
                     <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
                 </td>
+                <td className="evidence-modeInheritance">
+                    {evidence.modeInheritance}
+                </td>
                 <td className="evidence-sex">
                     {evidence.sex}
                 </td>
@@ -216,6 +219,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'variantType')}>Variant type<span className={sortIconClass.variantType}></span></th>
                                     <th rowSpan="2">Variant</th>
                                     <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
+                                    <th rowSpan="2">Mode of Inheritance</th>
                                     <th rowSpan="2">Proband sex</th>
                                     <th rowSpan="2">Proband age</th>
                                     <th rowSpan="2">Proband ethnicity</th>
