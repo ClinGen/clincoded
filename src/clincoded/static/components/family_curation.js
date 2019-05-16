@@ -417,26 +417,28 @@ var FamilyCuration = createReactClass({
                 }
             }
 
-            // Update LOD locked and calculation modes based on family moi question for semidom
-            if (stateObj.family.segregation && stateObj.family.segregation.moiDisplayedForFamily) {
-                if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal dominant/X-linked') > -1) {
-                    stateObj.lodLocked = true;
-                    stateObj.lodCalcMode = 'ADX';
-                    stateObj.isSemidominant = false;
-                } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal recessive') > -1) {
-                    stateObj.lodLocked = true;
-                    stateObj.lodCalcMode = 'AR';
-                    stateObj.isSemidominant = false;
-                } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Semidominant') > -1) {
-                    stateObj.lodlocked = false;
-                    stateObj.isSemidominant = true;
-                    this.setState({isSemidominant: true})
-                } else {
-                    stateObj.lodLocked = false;
-                    stateObj.isSemidominant = false;
+            // // Update LOD locked and calculation modes based on family moi question for semidom
+            if (stateObj.family) {
+                if (stateObj.family.segregation && stateObj.family.segregation.moiDisplayedForFamily) {
+                    if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal dominant/X-linked') > -1) {
+                        stateObj.lodLocked = true;
+                        stateObj.lodCalcMode = 'ADX';
+                        stateObj.isSemidominant = false;
+                    } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal recessive') > -1) {
+                        stateObj.lodLocked = true;
+                        stateObj.lodCalcMode = 'AR';
+                        stateObj.isSemidominant = false;
+                    } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Semidominant') > -1) {
+                        stateObj.lodlocked = false;
+                        stateObj.isSemidominant = true;
+                        this.setState({isSemidominant: true})
+                    } else {
+                        stateObj.lodLocked = false;
+                        stateObj.isSemidominant = false;
+                    }
                 }
             }
-
+            
             // Update the family name
             if (stateObj.family) {
                 this.setState({familyName: stateObj.family.label});
