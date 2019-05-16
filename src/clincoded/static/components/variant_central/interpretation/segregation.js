@@ -191,10 +191,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 }
             }).then(interpretation => {
                 // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-                this.setState({editBusy: false, tempEvidence: null, editCriteriaSelection: 'none', descriptionInput: null});
+                this.setState({editBusy: false, descriptionInput: null});
                 this.props.updateInterpretationObj();
             }).catch(error => {
-                this.setState({editBusy: false, tempEvidence: null, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
+                this.setState({editBusy: false, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
                 console.error(error);
             });
         }
