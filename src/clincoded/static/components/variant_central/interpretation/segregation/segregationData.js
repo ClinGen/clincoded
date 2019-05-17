@@ -566,8 +566,7 @@ function tableCols() {
         let cols = [{
             key: '_kind_title',
             title: 'Source'
-        }
-    ];
+        }];
 
         // construct obj middle cols
         let mapping = _.find(sheetToTableMapping, o => o.subcategory === cat);
@@ -578,10 +577,14 @@ function tableCols() {
         cols = cols.concat(innerCols);
 
         // end of obj
-        cols = cols.concat([{
+        // if subcategory is specificity-of-phenotype, no comments column
+        if (cat !== 'specificity-of-phenotype') {
+            cols = cols.concat({
                 key: 'comments',
                 title: 'Comments'
-            },
+            });
+        }
+        cols = cols.concat([
             {
                 key: '_submitted_by',
                 title: 'Submitted By'
