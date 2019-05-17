@@ -68,14 +68,20 @@ let EvidenceTable = createReactClass({
      */
     getSubRowCount(obj) {
         let count = 0;
-        if (obj['relevant_criteria']) {
-            let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
-            let cols = relevantData.cols.map(o => o.key);
-            cols.forEach(col => {
-                if (obj[col] && obj[col] != '') {
-                    count++;
-                }
-            });
+        // The criteria under Specificity of phenotype panel has no corresponding comment so display them on same row.
+        // SubRowCount is 1.
+        if (this.props.subcategory === 'specificity-of-phenotype') {
+            count = 1;
+        } else {
+            if (obj['relevant_criteria']) {
+                let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
+                let cols = relevantData.cols.map(o => o.key);
+                cols.forEach(col => {
+                    if (obj[col] && obj[col] != '') {
+                        count++;
+                    }
+                });
+            }
         }
         return count;
     },
@@ -285,55 +291,74 @@ let EvidenceTable = createReactClass({
                 // Add source column for this evidence
                 inner.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(metadata)}</td>);
 
-                // Add first available criteria in this evidence to the first row
-                colNames.forEach(col => {
-                    let node = null;
-                    let nodeContent = null;
-                    if (col in obj) {
-                        nodeContent = obj[col];
-                    }
-                    let criteriaCodes = this.getCriteriaCodes(col);
-                    // If this is a criteria column, display the first criteria only
-                    if (criteriaCodes.length > 0) {
-                        if (nodeContent) {
-                            // If this is the first criteria column that has value, display in first row
-                            if (criteriaName === '') {
-                                node = <td key={`cell_${i++}`}>
-                                    {nodeContent}
-                                </td>
-                                // Set the criteria name which is used to get its comment later
-                                criteriaName = col;
+                // The criteria under Specificity of phenotype panel has no corresponding comment so display them on same row.
+                if (this.props.subcategory === 'specificity-of-phenotype') {
+                    colNames.forEach(col => {
+                        let node = null;
+                        let nodeContent = null;
+                        if (col in obj) {
+                            nodeContent = obj[col];
+                            node = <td key={`cell_${i++}`}>
+                                {nodeContent}
+                            </td>
+                        }
+                        inner.push(node);
+                    });
+                } else {
+                    // For other panels, put each criteria on separate row.
+                    // Add first available criteria in this evidence to the first row
+                    colNames.forEach(col => {
+                        let node = null;
+                        let nodeContent = null;
+                        if (col in obj) {
+                            nodeContent = obj[col];
+                            node = <td key={`cell_${i++}`}>
+                                {nodeContent}
+                            </td>
+                        }
+                        let criteriaCodes = this.getCriteriaCodes(col);
+                        // If this is a criteria column, display the first criteria only
+                        if (criteriaCodes.length > 0) {
+                            if (nodeContent) {
+                                // If this is the first criteria column that has value, display in first row
+                                if (criteriaName === '') {
+                                    node = <td key={`cell_${i++}`}>
+                                        {nodeContent}
+                                    </td>
+                                    // Set the criteria name which is used to get its comment later
+                                    criteriaName = col;
+                                }
+                                else {
+                                    // If first row criteria has been set, display empty column
+                                    // And add this criteria to the list that will be added later
+                                    node = emptyColumn;
+                                    otherCriteria.push(col);
+                                }
                             }
                             else {
-                                // If first row criteria has been set, display empty column
-                                // And add this criteria to the list that will be added later
+                                // If criteria has no value, display empty column
                                 node = emptyColumn;
-                                otherCriteria.push(col);
                             }
                         }
-                        else {
-                            // If criteria has no value, display empty column
-                            node = emptyColumn;
+                        else if (col === 'comments') {
+                            // Display the comment for current criteria in this column
+                            let commentCol = criteriaName + '_comment';
+                            nodeContent = null;
+                            if (commentCol in obj) {
+                                nodeContent = obj[commentCol];
+                            }
+                            node = <td className='word-break-all' key={`cell_${i++}`}>
+                                {nodeContent}
+                            </td>
+                        } else {
+                            // Display value for other columns
+                            node = <td key={`cell_${i++}`} rowSpan={subRows}>
+                                {nodeContent}
+                            </td>
                         }
-                    }
-                    else if (col === 'comments') {
-                        // Display the comment for current criteria in this column
-                        let commentCol = criteriaName + '_comment';
-                        nodeContent = null;
-                        if (commentCol in obj) {
-                            nodeContent = obj[commentCol];
-                        }
-                        node = <td className='word-break-all' key={`cell_${i++}`}>
-                            {nodeContent}
-                        </td>
-                    } else {
-                        // Display value for other columns
-                        node = <td key={`cell_${i++}`} rowSpan={subRows}>
-                            {nodeContent}
-                        </td>
-                    }
-                    inner.push(node);
-                });
+                        inner.push(node);
+                    });
+                }
                 // Add the edit/delete buttons if user can modify this evidence
                 this.addButtons(i++, row, inner, subRows);
                 let outer = <tr key={`row_${i++}`}>{inner}</tr>
