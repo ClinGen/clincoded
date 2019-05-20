@@ -26,8 +26,8 @@ export function parseClinvar(xml, extended) {
                 // Parse <Name> node under <OtherNameList>
                 let $OtherNameListNode = $Allele.getElementsByTagName('OtherNameList')[0];
                 let $OtherNameNodes = [];
-                variant.otherNameList = [];
                 if ($OtherNameListNode) {
+                    variant.otherNameList = [];
                     $OtherNameNodes = $OtherNameListNode.getElementsByTagName('Name');
                     for (var k = 0; k < $OtherNameNodes.length; k++) {
                         variant.otherNameList.push($OtherNameNodes[k].textContent)

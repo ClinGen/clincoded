@@ -16,13 +16,12 @@ class CurationRecordVariant extends Component {
             if (dbSNPId && dbSNPId.indexOf('rs') < 0) {
                 dbSNPId = 'rs' + dbSNPId;
             }
-            nameList = data.otherNameList.map((name, i) => {
-                return (
-                    <li key={i}>{name}</li>
-                )
-            })
-            if (data.otherNameList == undefined || data.otherNameList.length == 0) {
-                nameList = null;
+            if (data.otherNameList) {
+                nameList = data.otherNameList.map((name, i) => {
+                    return (
+                        <li key={i}>{name}</li>
+                    )
+                })
             }
         }
 
