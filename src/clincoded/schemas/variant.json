@@ -71,7 +71,6 @@
             "title": "Other Name List",
             "description": "List of legacy names associated with the variant",
             "type": "array",
-            "default": [],
             "items": {
                 "type": "string"
             }
