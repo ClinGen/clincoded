@@ -261,6 +261,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                             caseLevelEvidence['ageType'] = proband.ageType ? proband.ageType : '';
                             caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
                             caseLevelEvidence['ageUnit'] = proband.ageUnit && proband.ageUnit.length ? proband.ageUnit : '';
+                            caseLevelEvidence['probandIs'] = proband.probandIs ? proband.probandIs : '';
                             caseLevelEvidence['modeInheritance'] = gdm.modeInheritance ? gdm.modeInheritance : '';
                             caseLevelEvidence['ethnicity'] = proband.ethnicity && proband.ethnicity.length ? proband.ethnicity : '';
                             caseLevelEvidence['hpoIdInDiagnosis'] = proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length ? proband.hpoIdInDiagnosis : [];

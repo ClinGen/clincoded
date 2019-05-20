@@ -72,6 +72,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                             </div>
                         );
                     })}
+                    <span><strong>{evidence.probandIs}</strong></span>
                 </td>
                 <td className="evidence-reference">
                     <span>{authors}, <strong>{evidence.pubYear}</strong>, <a href={external_url_map['PubMed'] + evidence.pmid} target="_blank">PMID: {evidence.pmid}</a></span>
