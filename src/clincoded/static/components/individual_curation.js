@@ -1247,7 +1247,7 @@ function IndividualCommonDiseases() {
                 curator.renderPhenotype(associatedGroups, 'Individual', 'nothpo', 'Group') 
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'nothpo', 'Family') : curator.renderPhenotype(null, 'Individual', 'nothpo')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'nothpo', 'Family') : null
                 ) 
             }  
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
@@ -1257,7 +1257,7 @@ function IndividualCommonDiseases() {
                 curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
                 :
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
-                    curator.renderPhenotype(associatedFamilies, 'Individual', 'notft', 'Family') : curator.renderPhenotype(null, 'Individual', 'notft')
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'notft', 'Family') : null
                 )
             }       
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2"
