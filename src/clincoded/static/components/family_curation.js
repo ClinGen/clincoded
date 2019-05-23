@@ -2020,7 +2020,7 @@ const FamilyViewer = createReactClass({
             this.setState({submitBusy: true});
             var family = data;
 
-            // Write the assessment to the DB, if there was one.
+            // Write the assessment to the DB, if there was one
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // If we're assessing a family segregation, write that to history
                 this.saveAssessmentHistory(assessmentInfo.assessment, null, family, assessmentInfo.update);
