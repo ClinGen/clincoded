@@ -407,11 +407,11 @@ const fieldToCriteriaCodeMapping = [
         codes: ['BS4']
     },
     {
-        key: 'num_de_novo_unconfirmed',
+        key: 'num_de_novo_confirmed',
         codes: ['PS2']
     },
     {
-        key: 'num_de_novo_confirmed',
+        key: 'num_de_novo_unconfirmed',
         codes: ['PM6']
     },
     {
