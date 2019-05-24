@@ -180,6 +180,7 @@ var FamilyCuration = createReactClass({
             } else if (familyMoiDisplayed === 'Autosomal recessive') {
                 this.setState({lodLocked: true, lodCalcMode: 'AR', familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
             } else if (familyMoiDisplayed === 'Semidominant') {
+                this.refs['SEGnumberOfAffectedWithGenotype'].setValue('');
                 this.setState({lodLocked: false, lodCalcMode: null, familyMoiDisplayed: familyMoiDisplayed, isSemidominant: true});
             } else {
                 this.setState({lodLocked: false, lodCalcMode: null, familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
@@ -188,9 +189,11 @@ var FamilyCuration = createReactClass({
             // Handle LOD score based on family requirements question if semidominant
             let lodRequirements = this.refs[ref].getValue();
             if (lodRequirements === 'Yes - autosomal dominant/X-linked') {
-                this.setState({lodLocked: true, lodCalcMode: 'ADX'});
+                this.setState({lodLocked: false, lodCalcMode: 'ADX'});
             } else if (lodRequirements === 'Yes - autosomal recessive') {
-                this.setState({lodLocked: true, lodCalcMode: 'AR'});
+                this.setState({lodLocked: false, lodCalcMode: 'AR'});
+            } else if (lodRequirements === 'No') {
+                this.setState({lodLocked: true, lodCalcMode: null});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
@@ -1709,6 +1712,12 @@ function FamilySegregation() {
     let segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
     if (gdm) {
         var semiDom = gdm.modeInheritance.includes('Semidominant');
+        var moi = this.state.family.segregation.moiDisplayedForFamily
+        if (moi === 'Autosomal dominant/X-linked' || this.state.familyMoiDisplayed === 'Autosomal dominant/X-linked') {
+            var isAdx = true;
+        } else if (moi === 'Autosomal recessive' || this.state.familyMoiDisplayed === 'Autosomal recessive') {
+            var isRecessive = true;
+        }
     }
 
     return (
@@ -1728,18 +1737,18 @@ function FamilySegregation() {
             <Input type="number" inputClassName="integer-only" ref="SEGnumberOfAffectedWithGenotype" label={<span>For Dominant AND Recessive inheritance:<br/>Number of AFFECTED individuals <i>WITH</i> genotype?</span>}
                 value={segregation && segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : ''}
                 handleChange={this.handleChange} error={this.getFormError('SEGnumberOfAffectedWithGenotype')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfAffectedWithGenotype')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" inputDisabled={this.state.familyMoiDisplayed === 'Semidominant'} required={this.state.familyMoiDisplayed !== 'Semidominant'} />
-            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" inputDisabled={this.state.familyMoiDisplayed === 'Autosomal dominant/X-linked' || this.state.familyMoiDisplayed === 'Semidominant'}
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" inputDisabled={this.state.isSemidominant} required={!this.state.isSemidominant} />
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfUnaffectedWithoutBiallelicGenotype" inputDisabled={isAdx || this.state.isSemidominant}
                 label={<span>For Recessive inheritance only:<br/>Number of UNAFFECTED individuals <i>WITHOUT</i> the biallelic genotype? (required for Recessive inheritance)</span>}
                 value={segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype ? segregation.numberOfUnaffectedWithoutBiallelicGenotype : ''}
                 handleChange={this.handleChange} error={this.getFormError('SEGnumberOfUnaffectedWithoutBiallelicGenotype')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfUnaffectedWithoutBiallelicGenotype')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfSegregationsForThisFamily" inputDisabled={this.state.familyMoiDisplayed === 'Autosomal recessive' || this.state.familyMoiDisplayed === 'Semidominant'}
+            <Input type="number" inputClassName="integer-only" ref="SEGnumberOfSegregationsForThisFamily" inputDisabled={isRecessive || this.state.isSemidominant}
                 label={<span>Number of segregations reported for this Family:<br/>(required for calculating an estimated LOD score for Dominant or X-linked inheritance)</span>}
                 value={segregation && segregation.numberOfSegregationsForThisFamily ? segregation.numberOfSegregationsForThisFamily : ''}
                 handleChange={this.handleChange} error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals"
+            <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals" inputDisabled={this.state.isSemidominant}
                 label={<span>Were there any inconsistent segregations amongst TESTED individuals? <i>(i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)</i></span>}
                 defaultValue="none" value={segregation && segregation.inconsistentSegregationAmongstTestedIndividuals ? segregation.inconsistentSegregationAmongstTestedIndividuals : 'none'}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1749,7 +1758,7 @@ function FamilySegregation() {
                 <option value="No">No</option>
             </Input>
             <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5"
-                value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''}
+                value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''} inputDisabled={this.state.isSemidominant}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none"
                 value={segregation && segregation.familyConsanguineous ? segregation.familyConsanguineous : 'none'}
@@ -1774,7 +1783,7 @@ function FamilySegregation() {
             </Input>
             {this.state.isSemidominant == true && this.state.lodPublished === 'No' ? 
             <Input type="select" ref="SEGlodRequirements" label="Does the family meet requirements for estimating LOD score for EITHER autosomal dominant/X-linked or autosomal recessive?:"
-                value={segregation && segregation.lodRequirements ? segregation.lodRequirements : ''}
+                value={segregation && segregation.lodRequirements ? segregation.lodRequirements : 'none'}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                 <option value="none">No Selection</option>
                 <option disabled="disabled"></option>
