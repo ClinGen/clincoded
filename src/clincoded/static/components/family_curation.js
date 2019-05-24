@@ -192,7 +192,7 @@ var FamilyCuration = createReactClass({
                 this.setState({lodLocked: false, lodCalcMode: 'ADX'});
             } else if (lodRequirements === 'Yes - autosomal recessive') {
                 this.setState({lodLocked: false, lodCalcMode: 'AR'});
-            } else if (lodRequirements === 'No') {
+            } else if (lodRequirements === 'No' || lodRequirements === 'none') {
                 this.setState({lodLocked: true, lodCalcMode: null});
             }
         } else if (ref.substring(0,3) === 'SEG') {
