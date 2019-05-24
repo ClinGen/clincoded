@@ -144,6 +144,14 @@ const evidenceInputs = [{
     },
     {
         cols: [{
+            label: 'Comment',
+            name: 'proband_hpo_comment',
+            kind: 'text',
+            width: 12
+        }]
+    },
+    {
+        cols: [{
             label: 'Number of probands with relevant phenotype',
             name: 'num_probands_relevant_phenotype',
             kind: 'number',
@@ -577,14 +585,11 @@ function tableCols() {
         cols = cols.concat(innerCols);
 
         // end of obj
-        // if subcategory is specificity-of-phenotype, no comments column
-        if (cat !== 'specificity-of-phenotype') {
-            cols = cols.concat({
+        cols = cols.concat([
+            {
                 key: 'comments',
                 title: 'Comments'
-            });
-        }
-        cols = cols.concat([
+            },
             {
                 key: '_submitted_by',
                 title: 'Submitted By'

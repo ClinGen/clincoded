@@ -68,7 +68,7 @@ let EvidenceTable = createReactClass({
      */
     getSubRowCount(obj) {
         let count = 0;
-        // The criteria under Specificity of phenotype panel has no corresponding comment so display them on same row.
+        // The criteria under Specificity of phenotype panel has only one corresponding comment so display them on same row.
         // SubRowCount is 1.
         if (this.props.subcategory === 'specificity-of-phenotype') {
             count = 1;
@@ -291,14 +291,22 @@ let EvidenceTable = createReactClass({
                 // Add source column for this evidence
                 inner.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(metadata)}</td>);
 
-                // The criteria under Specificity of phenotype panel has no corresponding comment so display them on same row.
+                // The criteria under Specificity of phenotype panel has only one corresponding comment so display them on same row.
                 if (this.props.subcategory === 'specificity-of-phenotype') {
                     colNames.forEach(col => {
-                        let node = null;
-                        let nodeContent = null;
+                        let node = emptyColumn;
                         if (col in obj) {
-                            nodeContent = obj[col];
                             node = <td key={`cell_${i++}`}>
+                                {obj[col]}
+                            </td>
+                        }
+                        if (col === 'comments') {
+                            // Display the HPO comment
+                            let nodeContent = null;
+                            if ('proband_hpo_comment' in obj) {
+                                nodeContent = obj['proband_hpo_comment'];
+                            }
+                            node = <td className='word-break-all' key={`cell_${i++}`}>
                                 {nodeContent}
                             </td>
                         }

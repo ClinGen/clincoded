@@ -14,6 +14,7 @@ import _ from 'underscore';
 import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
 import { external_url_map } from 'components/globals';
 import { RestMixin } from 'components/rest';
+import * as curator from 'components/curator';
 
 let EvidenceSheet = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -63,20 +64,32 @@ let EvidenceSheet = createReactClass({
 
         this.saveAllFormValues();
         let formValues = this.getAllFormValues();
-        let allData = null;
-        if (this.props.isNew) {
-            allData = Object.assign(this.props.data, formValues);
-        } else {
-            allData = Object.assign({}, this.props.data);
-            Object.assign(allData, formValues);
+
+        var formError = false;
+        // Check HPO ID format
+        var hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
+        if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+            // HPOID list is bad
+            formError = true;
+            this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
         }
-        this.handleModalClose();
-        this.resetAllFormValues();
-        this.setState({
-            data: {},
-            hpoUnaffected: false
-        });
-        this.props.sheetDone(allData);
+
+        if (!formError) {
+            let allData = null;
+            if (this.props.isNew) {
+                allData = Object.assign(this.props.data, formValues);
+            } else {
+                allData = Object.assign({}, this.props.data);
+                Object.assign(allData, formValues);
+            }
+            this.handleModalClose();
+            this.resetAllFormValues();
+            this.setState({
+                data: {},
+                hpoUnaffected: false
+            });
+            this.props.sheetDone(allData);
+        }
     },
 
     /**
@@ -144,7 +157,8 @@ let EvidenceSheet = createReactClass({
                         ref = {col.name}
                         value = { col.kind != 'checkbox' ? value : null}
                         checked = { col.name === 'is_disease_associated_with_probands' && this.state.hpoUnaffected != undefined ? this.state.hpoUnaffected : false }
-                        handleChange = { col.kind === 'checkbox' ? this.handleCheckboxChange : null }         
+                        handleChange = { col.kind === 'checkbox' ? this.handleCheckboxChange : null }
+                        error = { col.name === 'proband_hpo_ids' ? this.getFormError('proband_hpo_ids') : null }
                         fieldStyle = { fields.indexOf(col.name) == -1 ? null : {backgroundColor: this.state.backgroundGreen} }
                     />
                 </div>]
@@ -207,6 +221,8 @@ let EvidenceSheet = createReactClass({
     },
 
     render() {
+        var submitErrClass = 'submit-err ' + (this.anyFormErrors() ? '' : ' hidden');
+
         return  <ModalComponent
             modalTitle="Add Evidence Details"
             modalClass="modal-default"
@@ -225,6 +241,7 @@ let EvidenceSheet = createReactClass({
                 {this.inputs()}
                 <div className="row">&nbsp;<br />&nbsp;</div>
                 <div className='modal-footer'>
+                <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
                     <Input type="submit" inputClassName="btn-default btn-inline-spacer btn-primary" title="Submit" id="submit" />
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
                 </div>
