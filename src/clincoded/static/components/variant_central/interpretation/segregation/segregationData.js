@@ -205,7 +205,7 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: 'Number of segregations (genotype +, phenotype +)',
+                label: 'Number of segregations',
                 name: 'num_segregations',
                 kind: 'number',
                 width: 4
@@ -221,7 +221,7 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: 'Number of non-segregations (phenotype +, genotype -)',
+                label: 'Number of non-segregations',
                 name: 'num_non_segregations',
                 kind: 'number',
                 width: 4
@@ -471,11 +471,11 @@ const sheetToTableMapping = [
         'subcategory': 'segregation-data',
         'cols': [{
             key: 'num_segregations',
-            title: 'Number of segregations (genotype +; phenotype +)'
+            title: 'Number of segregations'
         },
         {
             key: 'num_non_segregations',
-            title: 'Number of non-segregations (phenotype +; genotype -)'
+            title: 'Number of non-segregations'
         }]
     },
     {
