@@ -248,7 +248,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                 }
                             }
                             let pubDate = (/^([\d]{4})(.*?)$/).exec(annotation.article.date);
-                            let gdm = this.state.gdm;
                             let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
                             // Define object key/value pairs
                             caseLevelEvidence['variantType'] = score.caseInfoType && score.caseInfoType.length ? this.mapVariantType(score.caseInfoType) : '';
@@ -262,7 +261,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                             caseLevelEvidence['ageValue'] = proband.ageValue ? proband.ageValue : null;
                             caseLevelEvidence['ageUnit'] = proband.ageUnit && proband.ageUnit.length ? proband.ageUnit : '';
                             caseLevelEvidence['probandIs'] = proband.probandIs ? proband.probandIs : '';
-                            caseLevelEvidence['modeInheritance'] = gdm.modeInheritance ? gdm.modeInheritance : '';
                             caseLevelEvidence['ethnicity'] = proband.ethnicity && proband.ethnicity.length ? proband.ethnicity : '';
                             caseLevelEvidence['hpoIdInDiagnosis'] = proband.hpoIdInDiagnosis && proband.hpoIdInDiagnosis.length ? proband.hpoIdInDiagnosis : [];
                             caseLevelEvidence['termsInDiagnosis'] = proband.termsInDiagnosis && proband.termsInDiagnosis.length ? proband.termsInDiagnosis : '';
@@ -375,6 +373,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     segregationEvidence['pubYear'] = pubDate[1];
                     segregationEvidence['label'] = family.label ? family.label : '';
                     segregationEvidence['ethnicity'] = family.ethnicity ? family.ethnicity : '';
+                    segregationEvidence['moiDisplayedForFamily'] = segregation.moiDisplayedForFamily ? segregation.moiDisplayedForFamily : '';
                     segregationEvidence['hpoIdInDiagnosis'] = family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length ? family.hpoIdInDiagnosis : [];
                     segregationEvidence['termsInDiagnosis'] = family.termsInDiagnosis && family.termsInDiagnosis.length ? family.termsInDiagnosis : '';
                     segregationEvidence['segregationNumAffected'] = segregation.numberOfAffectedWithGenotype ? segregation.numberOfAffectedWithGenotype : null;

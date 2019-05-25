@@ -1712,7 +1712,9 @@ function FamilySegregation() {
     let segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
     if (gdm) {
         var semiDom = gdm.modeInheritance.includes('Semidominant');
-        var moi = this.state.family.segregation.moiDisplayedForFamily
+    }
+    if (segregation) {
+        var moi = segregation.moiDisplayedForFamily
         if (moi === 'Autosomal dominant/X-linked' || this.state.familyMoiDisplayed === 'Autosomal dominant/X-linked') {
             var isAdx = true;
         } else if (moi === 'Autosomal recessive' || this.state.familyMoiDisplayed === 'Autosomal recessive') {
