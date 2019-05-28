@@ -2449,10 +2449,14 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Phenotype(s) Associated with {parentObjName ? parentObjName : title}
-                                    {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
-                                    {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
-                                    :</strong>
+                                    { (type === 'hpo' || type === 'ft') ? <strong className="pull-right">Phenotype(s) Associated with {parentObjName ? parentObjName : title}
+                                        {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
+                                        {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
+                                    :</strong> : null}
+                                    { (type === 'nothpo' || type === 'notft') ? <strong className="pull-right">NOT Phenotype(s) Associated with {parentObjName ? parentObjName : title}
+                                        {type === 'nothpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
+                                        {type === 'notft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
+                                    :</strong> : null}
                                 </div>
                                 <div className="col-sm-7">
                                     { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
@@ -2467,8 +2471,25 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                                         })
                                         : null
                                     }
+                                    { (type === 'nothpo' || type === '') && (obj.hpoIdInElimination && obj.hpoIdInElimination.length > 0) ?
+                                        obj.hpoIdInElimination.map(function(nothpoid, i) {
+                                            return (
+                                                <span key={nothpoid}>
+                                                    {nothpoid}
+                                                    {i < obj.hpoIdInElimination.length-1 ? ', ' : ''}
+                                                    {i === obj.hpoIdInElimination.length-1 && obj.termsInElimination && type === '' ? '; ' : null}
+                                                </span>
+                                            );
+                                        })
+                                        : null
+                                    }
                                     { type === 'ft' && obj.termsInDiagnosis ?
                                         <span>{obj.termsInDiagnosis}</span>
+                                        :
+                                        null
+                                    }
+                                    { type === 'notft' && obj.termsInElimination ?
+                                        <span>{obj.termsInElimination}</span>
                                         :
                                         null
                                     }
