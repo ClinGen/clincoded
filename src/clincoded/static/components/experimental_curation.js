@@ -753,7 +753,7 @@ var ExperimentalCuration = createReactClass({
             },
             'hpoMpIDs': {
                 'invalid1': "Use HPO ID (e.g. HP:0000001) or MP ID (e.g. MP:0000001)",
-                'invalid': "Use HPO IDs (e.g. HP:0000001) or MP ID (e.g. MP:0000001) separated by commas",
+                'invalid': "Use HPO IDs (e.g. HP:0000001) or MP IDs (e.g. MP:0000001) separated by commas",
                 'limit1': "Enter only one HPO ID or MP ID",
                 'limit': "Enter only " + limit + " HPO or MP IDs"
             },
@@ -815,7 +815,7 @@ var ExperimentalCuration = createReactClass({
                 // check geneSymbols
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'geneWithSameFunctionSameDisease.genes');
-                // check hpoMpIDs
+                // check hpoIDs
                 hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
                 formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
@@ -879,7 +879,7 @@ var ExperimentalCuration = createReactClass({
                 }
                 // check hpoIDs
                 if (this.getFormValue('rescue.phenotypeHPO') !== '') {
-                    hpoIDs = curator.capture.hpoMpids(this.getFormValue('rescue.phenotypeHPO'));
+                    hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
                     formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO');
                 }
             }
@@ -3070,7 +3070,7 @@ const ExperimentalViewer = createReactClass({
                                     <div>
                                         <dt>Phenotype(s) observed in model system (HPO or MP)</dt>
                                         <dd>{modelSystems_phenotypeHPOObserved && modelSystems_phenotypeHPOObserved.map((hpo, i) => {
-                                            if (hpo.includes('HP')) {
+                                            if (hpo.indexOf('HP') > -1) {
                                                 return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                             } else {
                                                 return <span key={hpo}>{hpo}</span>
