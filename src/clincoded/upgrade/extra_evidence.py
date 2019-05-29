@@ -13,3 +13,11 @@ def extra_evidence_2_3(value, system):
     # https://github.com/ClinGen/clincoded/issues/1822
     # Add evidenceCriteria and affiliation properties
     return
+
+
+@upgrade_step('extra_evidence', '3', '4')
+def extra_evidence_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1755
+    # Add source property
+    return
+
