@@ -3073,7 +3073,7 @@ const ExperimentalViewer = createReactClass({
                                             if (hpo.indexOf('HP') > -1) {
                                                 return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                             } else {
-                                                return <span key={hpo}>{hpo}</span>
+                                                return <span key={hpo}>{i > 0 ? ', ' : ''}{hpo}</span>
                                             }
                                         })}</dd>
                                     </div>
