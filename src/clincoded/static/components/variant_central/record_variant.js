@@ -7,7 +7,7 @@ import { external_url_map } from '../globals';
 class CurationRecordVariant extends Component {
     render() {
         const { data } = this.props;
-        let clinVarId, carId, dbSNPId;
+        let clinVarId, carId, dbSNPId, nameList;
 
         if (data) {
             clinVarId = (data.clinvarVariantId) ? data.clinvarVariantId : null;
@@ -15,6 +15,13 @@ class CurationRecordVariant extends Component {
             dbSNPId = (data.dbSNPIds.length) ? data.dbSNPIds[0] : null;
             if (dbSNPId && dbSNPId.indexOf('rs') < 0) {
                 dbSNPId = 'rs' + dbSNPId;
+            }
+            if (data.otherNameList) {
+                nameList = data.otherNameList.map((name, i) => {
+                    return (
+                        <li key={i}>{name}</li>
+                    )
+                })
             }
         }
 
@@ -33,6 +40,9 @@ class CurationRecordVariant extends Component {
                             {dbSNPId ?
                                 <dd>dbSNP ID:&nbsp;<a href={'https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=' + dbSNPId.replace('rs', '')} target="_blank" title={'dbSNP page for ' + dbSNPId + ' in a new window'}>{dbSNPId}</a></dd>
                                 : null}
+                            {nameList ?
+                                <dd>Other Names: <ul>{nameList}</ul></dd>
+                                : null} 
                         </dl>
                         : null}
                 </div>
