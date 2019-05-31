@@ -55,7 +55,6 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
      */
     renderCaseLevelEvidence(evidence, key) {
         let authors = this.getEvidenceAuthors(evidence);
-
         return (
             <tr key={key} className="scored-case-level-evidence">
                 <td className="evidence-label">
