@@ -41,6 +41,7 @@ var formMapSegregation = {
     'SEGinconsistentSegregationAmongstTestedIndividuals': 'inconsistentSegregationAmongstTestedIndividuals',
     'SEGexplanationForInconsistent': 'explanationForInconsistent',
     'SEGmoiDisplayedForFamily': 'moiDisplayedForFamily',
+    'SEGprobandIs': 'probandIs',
     'SEGfamilyConsanguineous': 'familyConsanguineous',
     'SEGpedigreeLocation': 'pedigreeLocation',
     'SEGlodPublished': 'lodPublished',
@@ -508,7 +509,6 @@ var FamilyCuration = createReactClass({
                     if (segregation.includeLodScoreInAggregateCalculation) {
                         this.setState({includeLodScore: true});
                     }
-
                     // Find the current user's segregation assessment from the segregation's assessment list
                     if (segregation.assessments && segregation.assessments.length) {
                         // Find the assessment belonging to the logged-in curator, if any.
@@ -1057,6 +1057,10 @@ var FamilyCuration = createReactClass({
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGmoiDisplayedForFamily']] = value1;
             }
+            value1 = this.getFormValue('SEGprobandIs');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGprobandIs']] = value1;
+            }
             value1 = this.getFormValue('SEGfamilyConsanguineous');
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGfamilyConsanguineous']] = value1;
@@ -1184,6 +1188,9 @@ var FamilyCuration = createReactClass({
 
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
+
+        value = this.getFormValue('probandIs');
+        newFamily.segregation.probandIs = value !== 'none' ? value : '';
 
         // Add affiliation if the user is associated with an affiliation
         // and if the data object has no affiliation
@@ -1903,16 +1910,32 @@ function FamilyVariant() {
                 :
                 <p>The proband associated with this Family can be edited here: <a href={"/individual-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&individual=" + probandIndividual.uuid}>Edit {probandIndividual.label}</a></p>
             }
-            <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
-                error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
-                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-            </Input>
-            <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
-                error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
-                handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-            </Input>
+            {semiDom ?
+                <Input type="select" label="The proband is:" ref="SEGprobandIs" handleChange={this.handleChange}
+                    defaultValue="none" value={family.segregation && family.segregation.probandIs ? family.segregation.probandIs : 'none'}
+                    error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                    <option value="none">No Selection</option>
+                    <option disabled="disabled"></option>
+                    <option value="Monoallelic heterozygous">Monoallelic heterozygous (e.g. autosomal)</option>
+                    <option value="Hemizygous">Hemizygous (e.g. X-linked)</option>
+                    <option value="Biallelic homozygous">Biallelic homozygous (e.g. the same variant is present on both alleles, autosomal or X-linked)</option>
+                    <option value="Biallelic compound heterozygous">Biallelic compound heterozygous (e.g. two different variants are present on the alleles, autosomal or X-linked)</option>
+                </Input>
+            :
+                <div>
+                    <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
+                        error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
+                        handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                    </Input>
+                    <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
+                        error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
+                        handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
+                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                    </Input>
+                </div>
+            }
             {_.range(MAX_VARIANTS).map(i => {
                 var variant;
 
@@ -2167,6 +2190,7 @@ const FamilyViewer = createReactClass({
         var method = family.method;
         var groups = family.associatedGroups;
         var segregation = family.segregation;
+        var probandIs = segregation.probandIs;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
         var validAssessments = [];
         _.map(assessments, assessment => {
@@ -2365,6 +2389,14 @@ const FamilyViewer = createReactClass({
                                     })}
                                 </div>
                                 : null }
+                            {probandIs ? 
+                                <div>
+                                    <dl className="dl-horizontal">
+                                        <dt>Proband is</dt>
+                                        <dd>{probandIs}</dd>
+                                    </dl>
+                                </div>
+                            : null}    
                             {variants.map(function(variant, i) {
                                 return (
                                     <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
