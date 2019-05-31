@@ -1189,9 +1189,6 @@ var FamilyCuration = createReactClass({
         value = this.getFormValue('additionalinfofamily');
         if (value) { newFamily.additionalInformation = value; }
 
-        value = this.getFormValue('probandIs');
-        newFamily.segregation.probandIs = value !== 'none' ? value : '';
-
         // Add affiliation if the user is associated with an affiliation
         // and if the data object has no affiliation
         if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
@@ -1912,7 +1909,7 @@ function FamilyVariant() {
             }
             {semiDom ?
                 <Input type="select" label="The proband is:" ref="SEGprobandIs" handleChange={this.handleChange}
-                    defaultValue="none" value={family.segregation && family.segregation.probandIs ? family.segregation.probandIs : 'none'}
+                    defaultValue="none" value={family && family.segregation.probandIs ? family.segregation.probandIs : 'none'}
                     error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                     <option value="none">No Selection</option>
