@@ -110,6 +110,6 @@ def family_5_6(value, system):
 
 @upgrade_step('family', '6', '7')
 def family_6_7(value, system):
-		# https://github.com/ClinGen/clincoded/issues/1848
-		# Add new property moiDisplayedForFamily and upgrade schema version
-		return
+    # https://github.com/ClinGen/clincoded/issues/1848
+    # Add new properties moiDisplayedForFamily/probandIs and upgrade schema version
+    return

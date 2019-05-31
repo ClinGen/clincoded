@@ -364,6 +364,10 @@
                     "title": "What mode of inheritance does this family display",
                     "type": "string"
                 },
+                "probandIs": {
+                    "title": "Proband is:",
+                    "type": "string"
+                },
                 "pedigreeLocation": {
                     "title": "Location of Pedigree in Publication",
                     "description": "If pedigree provided in publication, indicate location",
