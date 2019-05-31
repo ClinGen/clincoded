@@ -751,6 +751,12 @@ var ExperimentalCuration = createReactClass({
                 'limit1': "Enter only one HPO ID",
                 'limit': "Enter only " + limit + " HPO IDs"
             },
+            'hpoMpIDs': {
+                'invalid1': "Use HPO ID (e.g. HP:0000001) or MP ID (e.g. MP:0000001)",
+                'invalid': "Use HPO IDs (e.g. HP:0000001) or MP IDs (e.g. MP:0000001) separated by commas",
+                'limit1': "Enter only one HPO ID or MP ID",
+                'limit': "Enter only " + limit + " HPO or MP IDs"
+            },
             'uberonIDs': {
                 'invalid1': "Use Uberon ID (e.g. UBERON:0015228)",
                 'invalid': "Use Uberon IDs (e.g. UBERON:0015228) separated by commas",
@@ -797,7 +803,7 @@ var ExperimentalCuration = createReactClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var groupGenes;
-            var goSlimIDs, geneSymbols, hpoIDs, uberonIDs, clIDs, efoClIDs;
+            var goSlimIDs, geneSymbols, hpoIDs, hpoMpIDs, uberonIDs, clIDs, efoClIDs;
             var formError = false;
 
             if (this.state.experimentalType == 'Biochemical Function') {
@@ -855,10 +861,10 @@ var ExperimentalCuration = createReactClass({
                     hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
                     formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO');
                 }
-                // check hpoIDs part 2
+                // check hpoMpIDs part 2
                 if (this.getFormValue('model.phenotypeHPOObserved') !== '') {
-                    hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPOObserved'));
-                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPOObserved');
+                    hpoMpIDs = curator.capture.hpoMpids(this.getFormValue('model.phenotypeHPOObserved'));
+                    formError = this.validateFormTerms(formError, 'hpoMpIDs', hpoMpIDs, 'model.phenotypeHPOObserved');
                 }
             }
             else if (this.state.experimentalType == 'Rescue') {
@@ -2219,7 +2225,7 @@ function TypeModelSystems() {
 
 const LabelPhenotypeObserved = () => {
     return (
-        <span>Phenotype(s) observed in model system <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
+        <span>Phenotype(s) observed in model system <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> or MP ID)</span>:</span>
     );
 };
 
@@ -3062,9 +3068,13 @@ const ExperimentalViewer = createReactClass({
                                     </div>
 
                                     <div>
-                                        <dt>Phenotype(s) observed in model system (HPO)</dt>
+                                        <dt>Phenotype(s) observed in model system (HPO or MP)</dt>
                                         <dd>{modelSystems_phenotypeHPOObserved && modelSystems_phenotypeHPOObserved.map((hpo, i) => {
-                                            return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                            if (hpo.indexOf('HP') > -1) {
+                                                return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPO Browser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                            } else {
+                                                return <span key={hpo}>{i > 0 ? ', ' : ''}{hpo}</span>
+                                            }
                                         })}</dd>
                                     </div>
 
