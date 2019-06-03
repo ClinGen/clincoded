@@ -26,7 +26,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
         session: PropTypes.object,
-        selectedCriteria: PropTypes.string
+        selectedCriteria: PropTypes.string,
+        unusedCriteria: PropTypes.array
     },
 
     getInitialState() {
@@ -82,7 +83,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -101,7 +102,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -120,7 +121,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup3Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -139,7 +140,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
                             </div>
                         </div>
                         : null}
@@ -158,7 +159,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup5Update} variantUuid={this.props.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -177,7 +178,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup6Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -196,7 +197,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup7Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -216,7 +217,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
                                     formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    disableEvalForm={true} affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -232,11 +233,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup1 = function() {
+var criteriaGroup1 = function(unusedCriteria) {
     let criteriaList1 = ['BS2']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };
@@ -248,11 +249,11 @@ var criteriaGroup1Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup2 = function() {
+var criteriaGroup2 = function(unusedCriteria) {
     let criteriaList1 = ['PS4']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };
@@ -264,14 +265,14 @@ var criteriaGroup2Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup3 = function() {
+var criteriaGroup3 = function(unusedCriteria) {
     let criteriaList1 = ['BS4'], // array of criteria code handled subgroup of this section
         criteriaList2 = ['PP1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
             <div className="clear criteria-evaluation-divider"></div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, unusedCriteria)}
         </div>
     );
 };
@@ -283,14 +284,14 @@ var criteriaGroup3Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup4 = function() {
+var criteriaGroup4 = function(unusedCriteria) {
     let criteriaList1 = ['PM6'], // array of criteria code handled subgroup of this section
         criteriaList2 = ['PS2']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
             <div className="clear criteria-evaluation-divider"></div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, unusedCriteria)}
         </div>
     );
 };
@@ -302,14 +303,14 @@ var criteriaGroup4Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup5 = function() {
+var criteriaGroup5 = function(unusedCriteria) {
     let criteriaList1 = ['BP2'], // array of criteria code handled subgroup of this section
         criteriaList2 = ['PM3']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
             <div className="clear criteria-evaluation-divider"></div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, unusedCriteria)}
         </div>
     );
 };
@@ -321,11 +322,11 @@ var criteriaGroup5Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup6 = function() {
+var criteriaGroup6 = function(unusedCriteria) {
     let criteriaList1 = ['BP5']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };
@@ -337,11 +338,11 @@ var criteriaGroup6Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup7 = function() {
+var criteriaGroup7 = function(unusedCriteria) {
     let criteriaList1 = ['PP4']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };
@@ -357,11 +358,11 @@ var criteriaGroup7Update = function(nextProps) {
  * Disabling form currently only applies to 'BP6' and 'PP5' if the gene is NEITHER BRCA1 or BRCA2
  * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
  */
-var criteriaGroup8 = function(disableEvalForm) {
+var criteriaGroup8 = function(unusedCriteria) {
     let criteriaList1 = ['BP6', 'PP5']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, true)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };

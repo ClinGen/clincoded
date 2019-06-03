@@ -35,7 +35,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         criteriaCrossCheck: PropTypes.array, // an array of arrays of criteria codes that are to be checked upon submitForm to make sure there are no more than one 'Met'
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
-        disableEvalForm: PropTypes.bool, // TRUE to disable form elements of Segregation's 'Reputable source' section if the gene is NEITHER BRCA1 or BRCA2
+        unusedCriteria: PropTypes.array, // used to determine whether or not to disable the field
         affiliation: PropTypes.object,
         session: PropTypes.object,
         criteriaEvalNote: PropTypes.func
@@ -158,12 +158,14 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         // cross check criteria values here (no more than one met per cross-check group); for cross checking within the same form group
         var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'stand-alone', 'very-strong'];
         if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
+            // filter out disabled criteria
+            var criteriaCrossCheck = this.props.criteriaCrossCheck.filter(criterion => this.props.unusedCriteria.indexOf(criterion) === -1);
             var criteriaMetNum = 0,
                 criteriaConflicting = [],
                 errorMsgCriteria = '',
                 crossCheckGroup;
-            for (var i = 0; i < this.props.criteriaCrossCheck.length; i++) {
-                crossCheckGroup = this.props.criteriaCrossCheck[i];
+            for (var i = 0; i < criteriaCrossCheck.length; i++) {
+                crossCheckGroup = criteriaCrossCheck[i];
                 // reset criteria conflicting array and message when moving to next cross check group
                 criteriaMetNum = 0;
                 criteriaConflicting = [];
@@ -231,7 +233,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
                 }
                 */
                 // UNCOMMENT ABOVE + COMMENT LINE BELOW FOR DISEASE DEPENDENCY RESTRICTION
-                submittedCriteria.push(criterion);
+                if (this.props.unusedCriteria.indexOf(criterion) === -1) {
+                    submittedCriteria.push(criterion);
+                }
             });
             // do hard-coded check for PM2 vs PS4
             // UNCOMMENT BELOW TO RE-ENABLE PM2 vs PS4 CHECK - SEE #1195
@@ -405,10 +409,11 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
     },
 
     render: function() {
+        const disableSubmit = this.props.criteria.every(criterion => this.props.unusedCriteria.indexOf(criterion) !== -1);
         return (
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
-                    {this.props.renderedFormContent.call(this, this.props.disableEvalForm)}
+                    {this.props.renderedFormContent.call(this, this.props.unusedCriteria)}
                 </div>
                 <div className="curation-submit clearfix">
                     {typeof this.props.criteriaEvalNote === 'function' ?
@@ -416,7 +421,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
                         : null}
                     <Input type="submit" inputClassName={(this.state.evaluationExists ? "btn-info" : "btn-primary") + " pull-right btn-inline-spacer"}
                         id="submit" title={this.state.evaluationExists ? "Update" : "Save"} submitBusy={this.state.submitBusy}
-                        inputDisabled={(this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated) || this.props.disableEvalForm} />
+                        inputDisabled={(this.state.diseaseCriteria && this.state.diseaseCriteria.length == this.props.criteria.length && !this.state.diseaseAssociated) || disableSubmit} />
                     {this.state.updateMsg ?
                         <div className="submit-info pull-right">{this.state.updateMsg}</div>
                         : null}
@@ -456,6 +461,7 @@ export function renderEvalFormSection(criteriaList, disableEvalForm) {
     return (
         <div className="evaluation-form-section-wrapper">
             {criteriaList.map((criteria, i) => {
+                const disableEvalForm = (this.props.unusedCriteria.indexOf(criteria) > -1);
                 return (
                     <div key={i}>
                         <div className="panel panel-info evalation-form-item">
@@ -531,7 +537,9 @@ function evalFormValueDropdown(criteria, disableEvalForm) {
             error={this.getFormError(criteria + "-status")} clearError={this.clrFormErrors.bind(null, criteria + "-status")}
             labelClassName="control-label" wrapperClassName="col-xs-12 eval-form-criteria-dropdown" groupClassName="form-group"
             inputDisabled={disableEvalForm}>
-            <option value="not-evaluated">Not Evaluated</option>
+            <option value="not-evaluated">
+                {disableEvalForm ? 'Not Applicable' : 'Not Evaluated'}
+            </option>
             <option disabled="disabled"></option>
             <option value="met">Met</option>
             <option value="not-met">Not Met</option>

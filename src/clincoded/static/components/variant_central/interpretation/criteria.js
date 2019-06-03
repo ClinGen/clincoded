@@ -33,7 +33,8 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
     propTypes: {
         interpretation: PropTypes.object,
         selectedTab: PropTypes.string,
-        updateSelectedCriteria: PropTypes.func
+        updateSelectedCriteria: PropTypes.func,
+        unusedCriteria: PropTypes.array
     },
 
     getInitialState() {
@@ -101,13 +102,20 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
                 });
             }
         }
+        const unused = (this.props.unusedCriteria.indexOf(key) > -1)
         return (
             <button className={'btn btn-default ' + evidence[key].class + ' ' + evidence[key].category + this.getCurrentTab(evidence[key].category)}
                 type="button" key={key} data-status={status}
                 data-toggle="tooltip" data-placement="top"
                 data-tooltip={evidence[key].definition}
                 onClick={this.handleClick.bind(this, key, evidence[key].category)}>
-                <span>{key}</span>
+                {unused &&
+                    <div className="criteria-cross">
+                        <div className="criteria-neg-slope-line" />
+                        <div className="criteria-pos-slope-line" />
+                    </div>
+                }
+                <span className="criteria-key">{key}</span>
             </button>
         );
     },

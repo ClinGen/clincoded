@@ -58,7 +58,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         selectedTab: PropTypes.string,
         selectedSubtab: PropTypes.string,
         selectedCriteria: PropTypes.string,
-        affiliation: PropTypes.object
+        affiliation: PropTypes.object,
+        unusedCriteria: PropTypes.array
     },
 
     getInitialState: function() {
@@ -221,7 +222,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
                             affiliation={this.props.affiliation}
-                            selectedCriteria={this.state.selectedCriteria} />
+                            selectedCriteria={this.state.selectedCriteria} unusedCriteria={this.props.unusedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'variant-type' ?
@@ -237,6 +238,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             affiliation={this.props.affiliation}
                             selectedSubtab={this.state.selectedSubtab}
                             selectedCriteria={this.state.selectedCriteria}
+                            unusedCriteria={this.props.unusedCriteria}
                             getSelectedSubTab={this.props.getSelectedSubTab} />
                     </div>
                     : null}
@@ -244,14 +246,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
-                            selectedCriteria={this.state.selectedCriteria} />
+                            selectedCriteria={this.state.selectedCriteria} unusedCriteria={this.props.unusedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'segregation-case' ?
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationSegregation data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
-                            selectedCriteria={this.state.selectedCriteria} />
+                            selectedCriteria={this.state.selectedCriteria} unusedCriteria={this.props.unusedCriteria} />
                     </div>
                     : null}
                     {this.state.selectedTab == 'gene-centric' ?

@@ -2162,6 +2162,35 @@
     }
 }
 
+.criteria-key {
+    z-index: 2;
+    position: relative;
+}
+
+.criteria-cross {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    z-index: 1;
+}
+
+.criteria-neg-slope-line {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to top right, #fff calc(50% - 2px), #aaa, #aaa, #fff calc(50% + 2px))
+}
+
+.criteria-pos-slope-line {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to bottom right, transparent calc(50% - 2px), #aaa, #aaa, transparent calc(50% + 2px))
+}
+
 .criteria-group.btn-group-sm {
     padding-top: 10px;
     padding-bottom: 10px;

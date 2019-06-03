@@ -26,7 +26,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
         session: PropTypes.object,
-        selectedCriteria: PropTypes.string
+        selectedCriteria: PropTypes.string,
+        unusedCriteria: PropTypes.array
     },
 
     getInitialState() {
@@ -69,7 +70,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                     evidenceData={null} evidenceDataUpdated={true}
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -87,7 +88,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BS3', 'PS3']]}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -107,11 +108,11 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup1 = function() {
+var criteriaGroup1 = function(unusedCriteria) {
     let criteriaList1 = ['PM1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };
@@ -123,11 +124,11 @@ var criteriaGroup1Update = function(nextProps) {
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup2 = function() {
+var criteriaGroup2 = function(unusedCriteria) {
     let criteriaList1 = ['BS3', 'PS3']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 };
