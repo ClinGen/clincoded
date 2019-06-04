@@ -243,7 +243,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         let affiliation = this.props.affiliation, session = this.props.session;
         let creatorAffiliation = extra_evidence.affiliation ? getAffiliationName(extra_evidence.affiliation) : null;
         let title = extra_evidence.submitted_by && extra_evidence.submitted_by.title ? extra_evidence.submitted_by.title : '';
-        let creator = creatorAffiliation ? creatorAffiliation + '(' + title + ')' : title;
+        let creator = creatorAffiliation ? creatorAffiliation + ' (' + title + ')' : title;
 
         let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
         // for rendering the evidence in tabular format
