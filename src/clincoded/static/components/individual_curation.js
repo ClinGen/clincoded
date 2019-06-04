@@ -1421,6 +1421,7 @@ function IndividualVariantInfo() {
         <div className="row form-row-helper">
             {individual && individual.proband && family ?
                 <div>
+                    {family.segregation.probandIs ? <span><strong>Proband is: </strong>{family.segregation.probandIs}</span> : null}
                     <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                     {variants.map(function(variant, i) {
                         return (
