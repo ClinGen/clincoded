@@ -1414,7 +1414,7 @@ function IndividualVariantInfo() {
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
     if (gdm) {
-        var semiDom = gdm.modeInheritance.includes('Semidominant');
+        var semiDom = gdm.modeInheritance.indexOf('Semidominant') > -1;
     }
 
     return (
