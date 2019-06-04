@@ -125,6 +125,8 @@ def experimental_4_5(value, system):
                 value['modelSystems']['nonHumanModel'] = 'Rabbit (Oryctolagus cuniculus) 9986'
             if value['modelSystems']['nonHumanModel'] == 'Round worm (Carnorhabditis elegans) 6239':
                 value['modelSystems']['nonHumanModel'] = 'Round worm (Caenorhabditis elegans) 6239'
+            if value['rescue']['nonHumanModel'] == 'Zebra finch (Taeniopygia guttata) 59729':
+                value['rescue']['nonHumanModel'] = 'Zebra finch (Taeniopygia guttata) 59729'
             if value['modelSystems']['nonHumanModel'] == 'Zebrafish (Daanio rerio) 7955':
                 value['modelSystems']['nonHumanModel'] = 'Zebrafish (Danio rerio) 7955'
 
@@ -138,6 +140,8 @@ def experimental_4_5(value, system):
                 value['rescue']['nonHumanModel'] = 'Rabbit (Oryctolagus cuniculus) 9986'
             if value['rescue']['nonHumanModel'] == 'Round worm (Carnorhabditis elegans) 6239':
                 value['rescue']['nonHumanModel'] = 'Round worm (Caenorhabditis elegans) 6239'
+            if value['rescue']['nonHumanModel'] == 'Zebra finch (Taeniopygia guttata) 59729':
+                value['rescue']['nonHumanModel'] = 'Zebra finch (Taeniopygia guttata) 59729'
             if value['rescue']['nonHumanModel'] == 'Zebrafish (Daanio rerio) 7955':
                 value['rescue']['nonHumanModel'] = 'Zebrafish (Danio rerio) 7955'
 

@@ -2155,6 +2155,7 @@ function TypeModelSystems() {
                         <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
                         <option value="Round worm (Caenorhabditis elegans) 6239">Round worm (Caenorhabditis elegans) 6239</option>
                         <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
+                        <option value="Zebra finch (Taeniopygia guttata) 59729">Zebra finch (Taeniopygia guttata) 59729</option>
                         <option value="Zebrafish (Danio rerio) 7955">Zebrafish (Danio rerio) 7955</option>
                     </Input>
                 </div>
@@ -2310,6 +2311,7 @@ function TypeRescue() {
                         <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
                         <option value="Round worm (Caenorhabditis elegans) 6239">Round worm (Caenorhabditis elegans) 6239</option>
                         <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
+                        <option value="Zebra finch (Taeniopygia guttata) 59729">Zebra finch (Taeniopygia guttata) 59729</option>
                         <option value="Zebrafish (Danio rerio) 7955">Zebrafish (Danio rerio) 7955</option>
                     </Input>
                 </div>
