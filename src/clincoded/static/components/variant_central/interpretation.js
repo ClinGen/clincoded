@@ -6,7 +6,7 @@ import _ from 'underscore';
 import moment from 'moment';
 
 import { content_views, history_views, truncateString, queryKeyValue, editQueryValue } from '../globals';
-import { renderVariantTitle } from 'libs/render_variant_title';
+import { renderVariantTitle } from '../../libs/render_variant_title';
 
 // Import individual tab components
 import { CurationInterpretationCriteria } from './interpretation/criteria';

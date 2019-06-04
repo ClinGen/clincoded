@@ -6,15 +6,15 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 
 // third-party lib
-import ModalComponent from 'libs/bootstrap/modal';
-import { Form, FormMixin, Input } from 'libs/bootstrap/form';
+import ModalComponent from '../../../../libs/bootstrap/modal';
+import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
 import _ from 'underscore';
 
 // Internal lib
-import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
-import { external_url_map } from 'components/globals';
-import { RestMixin } from 'components/rest';
-import * as curator from 'components/curator';
+import { extraEvidence } from './segregationData';
+import { external_url_map } from '../../../globals';
+import { RestMixin } from '../../../rest';
+import * as curator from '../../../curator';
 
 let EvidenceSheet = createReactClass({
     mixins: [FormMixin, RestMixin],

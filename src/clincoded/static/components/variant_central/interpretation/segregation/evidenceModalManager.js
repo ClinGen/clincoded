@@ -14,12 +14,12 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class'
 
 // Third-party lib
-import { FormMixin } from 'libs/bootstrap/form';
+import { FormMixin } from '../../../../libs/bootstrap/form';
 
 // Internal lib
-import { EvidenceSheet } from 'components/variant_central/interpretation/segregation/evidenceSheet';
-import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
-import { NewEvidenceModalMetadata } from 'components/variant_central/interpretation/segregation/newEvidenceModalMetadata';
+import { EvidenceSheet } from './evidenceSheet';
+import { extraEvidence } from './segregationData';
+import { NewEvidenceModalMetadata } from './newEvidenceModalMetadata';
 
 let EvidenceModalManager = createReactClass({
     mixins: [FormMixin],

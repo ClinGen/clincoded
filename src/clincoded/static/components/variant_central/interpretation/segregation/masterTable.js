@@ -6,10 +6,10 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 
 // Internal
-import { masterTable, extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
-import { external_url_map } from 'components/globals';
-import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
-import { DeleteEvidenceModal} from 'components/variant_central/interpretation/segregation/deleteEvidenceModal';
+import { masterTable, extraEvidence } from './segregationData';
+import { external_url_map } from '../../../globals';
+import { EvidenceModalManager } from './evidenceModalManager';
+import { DeleteEvidenceModal} from './deleteEvidenceModal';
 
 let MasterEvidenceTable = createReactClass({
     propTypes: {

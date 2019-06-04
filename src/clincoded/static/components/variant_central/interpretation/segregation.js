@@ -4,20 +4,20 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
-import { PanelGroup, Panel } from 'libs/bootstrap/panel';
+import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 
 // Internal libs
-import { RestMixin } from 'components/rest';
-import { CompleteSection } from 'components/variant_central/interpretation/shared/complete_section';
-import { scrollElementIntoView } from 'libs/helpers/scroll_into_view';
+import { RestMixin } from '../../rest';
+import { CompleteSection } from './shared/complete_section';
+import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 
-const vciFormHelper = require('components/variant_central/interpretation/shared/form');
+const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
-const evaluation_section_mapping = require('components/variant_central/interpretation/mapping/evaluation_section.json');
-var curator = require('components/curator');
-var CuratorHistory = require('components/curator_history');
-import { ExtraEvidenceTable } from 'components/variant_central/interpretation/segregation/addEvidence';
-import { MasterEvidenceTable } from 'components/variant_central/interpretation/segregation/masterTable';
+const evaluation_section_mapping = require('./mapping/evaluation_section.json');
+var curator = require('../../curator');
+var CuratorHistory = require('../../curator_history');
+import { ExtraEvidenceTable } from './segregation/addEvidence';
+import { MasterEvidenceTable } from './segregation/masterTable';
 
 // Display the curator data of the curation data
 var CurationInterpretationSegregation = module.exports.CurationInterpretationSegregation = createReactClass({

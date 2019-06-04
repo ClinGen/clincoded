@@ -4,17 +4,17 @@ import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 
 // shared lib
-import { Form, FormMixin, Input } from 'libs/bootstrap/form';
-import ModalComponent from 'libs/bootstrap/modal';
-import { parsePubmed } from 'libs/parse-pubmed';
+import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
+import ModalComponent from '../../../../libs/bootstrap/modal';
+import { parsePubmed } from '../../../../libs/parse-pubmed';
 
 // Internal lib
-import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
+import { extraEvidence } from './segregationData';
 
-import { RestMixin } from 'components/rest';
-import { external_url_map } from 'components/globals';
-import { PmidSummary } from 'components/curator';
-import { ContextualHelp } from 'libs/bootstrap/contextual_help';
+import { RestMixin } from '../../../rest';
+import { external_url_map } from '../../../globals';
+import { PmidSummary } from '../../../curator';
+import { ContextualHelp } from '../../../../libs/bootstrap/contextual_help';
 
 let NewEvidenceModalMetadata = createReactClass({
     mixins: [FormMixin, RestMixin],

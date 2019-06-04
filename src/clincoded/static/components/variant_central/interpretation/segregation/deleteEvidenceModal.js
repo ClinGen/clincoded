@@ -6,8 +6,8 @@ import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 
 // third party lib
-import { Input } from 'libs/bootstrap/form';
-import ModalComponent from 'libs/bootstrap/modal';
+import { Input } from '../../../../libs/bootstrap/form';
+import ModalComponent from '../../../../libs/bootstrap/modal';
 
 /**
  * Modal to confirm before deleting an evidence.

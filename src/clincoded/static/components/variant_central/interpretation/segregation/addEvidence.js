@@ -4,14 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
-import { FormMixin, Input } from 'libs/bootstrap/form';
+import { FormMixin, Input } from '../../../../libs/bootstrap/form';
 
 // Internal libs
-import { RestMixin } from 'components/rest';
-var CuratorHistory = require('components/curator_history');
+import { RestMixin } from '../../../rest';
+var CuratorHistory = require('../../../curator_history');
 
-import { EvidenceTable } from 'components/variant_central/interpretation/segregation/evidenceTable';
-import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
+import { EvidenceTable } from './evidenceTable';
+import { EvidenceModalManager } from './evidenceModalManager';
 
 // Class to render the extra evidence table in VCI, and handle any interactions with it
 // export default ExtraEvidenceTable = createReactClass({

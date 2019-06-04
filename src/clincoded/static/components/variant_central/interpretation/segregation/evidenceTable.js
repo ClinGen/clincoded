@@ -7,14 +7,14 @@ import PropTypes from 'prop-types';
 
 // third party lib
 import _ from 'underscore';
-import { ContextualHelp } from 'libs/bootstrap/contextual_help';
+import { ContextualHelp } from '../../../../libs/bootstrap/contextual_help';
 import moment from 'moment';
 
 // Internal lib
-import { EvidenceModalManager } from 'components/variant_central/interpretation/segregation/evidenceModalManager';
-import { DeleteEvidenceModal} from 'components/variant_central/interpretation/segregation/deleteEvidenceModal';
-import { extraEvidence } from 'components/variant_central/interpretation/segregation/segregationData';
-import { external_url_map } from 'components/globals';
+import { EvidenceModalManager } from './evidenceModalManager';
+import { DeleteEvidenceModal} from './deleteEvidenceModal';
+import { extraEvidence } from './segregationData';
+import { external_url_map } from '../../../globals';
 
 let EvidenceTable = createReactClass({
     propTypes: {
