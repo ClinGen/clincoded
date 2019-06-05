@@ -192,9 +192,9 @@ var FamilyCuration = createReactClass({
             // Handle LOD score based on semidominant family requirements question
             let lodRequirements = this.refs[ref].getValue();
             if (lodRequirements === 'Yes - autosomal dominant/X-linked') {
-                this.setState({lodLocked: false, lodRequirements: lodRequirements, lodCalcMode: 'ADX'});
+                this.setState({lodLocked: true, lodRequirements: lodRequirements, lodCalcMode: 'ADX'});
             } else if (lodRequirements === 'Yes - autosomal recessive') {
-                this.setState({lodLocked: false, lodRequirements: lodRequirements, lodCalcMode: 'AR'});
+                this.setState({lodLocked: true, lodRequirements: lodRequirements, lodCalcMode: 'AR'});
             } else if (lodRequirements === 'No' || lodRequirements === 'none') {
                 this.setState({lodLocked: true, lodRequirements: null, lodCalcMode: null});
             }
@@ -1794,7 +1794,7 @@ function FamilySegregation() {
                 value={segregation && segregation.numberOfSegregationsForThisFamily ? segregation.numberOfSegregationsForThisFamily : ''}
                 handleChange={this.handleChange} error={this.getFormError('SEGnumberOfSegregationsForThisFamily')} clearError={this.clrFormErrors.bind(null, 'SEGnumberOfSegregationsForThisFamily')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="Number only" />
-            <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals" inputDisabled={lodPublished || isSemidominant}
+            <Input type="select" ref="SEGinconsistentSegregationAmongstTestedIndividuals"
                 label={<span>Were there any inconsistent segregations amongst TESTED individuals? <i>(i.e. affected individuals WITHOUT the genotype or unaffected individuals WITH the genotype?)</i></span>}
                 defaultValue="none" value={segregation && segregation.inconsistentSegregationAmongstTestedIndividuals ? segregation.inconsistentSegregationAmongstTestedIndividuals : 'none'}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1804,7 +1804,7 @@ function FamilySegregation() {
                 <option value="No">No</option>
             </Input>
             <Input type="textarea" ref="SEGexplanationForInconsistent" label={<span>please provide explanation:<br/><i>(optional)</i></span>} rows="5"
-                value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''} inputDisabled={lodPublished || isSemidominant}
+                value={segregation && segregation.explanationForInconsistent ? segregation.explanationForInconsistent : ''}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <Input type="select" ref="SEGfamilyConsanguineous" label="Is this family consanguineous?:" defaultValue="none"
                 value={segregation && segregation.familyConsanguineous ? segregation.familyConsanguineous : 'none'}
