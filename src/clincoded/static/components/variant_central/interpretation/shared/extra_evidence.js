@@ -7,6 +7,7 @@ import moment from 'moment';
 import { RestMixin } from '../../../rest';
 import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
 import { AddResourceId } from '../../../add_external_resource';
+import { getAffiliationName } from '../../../../libs/get_affiliation_name';
 
 var curator = require('../../../curator');
 var PmidSummary = curator.PmidSummary;
@@ -240,6 +241,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
 
     renderInterpretationExtraEvidence: function(extra_evidence) {
         let affiliation = this.props.affiliation, session = this.props.session;
+        let creatorAffiliation = extra_evidence.affiliation ? getAffiliationName(extra_evidence.affiliation) : null;
+        let title = extra_evidence.submitted_by && extra_evidence.submitted_by.title ? extra_evidence.submitted_by.title : '';
+        let creator = creatorAffiliation ? creatorAffiliation + ' (' + title + ')' : title;
+
         let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
         // for rendering the evidence in tabular format
         return (
@@ -247,7 +252,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 <td className="col-md-4"><PmidSummary article={extra_evidence.articles[0]} pmidLinkout /></td>
                 <td className="col-md-1"><p>{criteriaInput}</p></td>
                 <td className="col-md-3"><p className="word-break">{extra_evidence.evidenceDescription}</p></td>
-                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{extra_evidence.submitted_by.title}</td>
+                <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{creator}</td>
                 <td className={!this.props.viewOnly ? "col-md-1" : "col-md-2"}>{moment(extra_evidence.date_created).format("YYYY MMM DD, h:mm a")}</td>
                 {!this.props.viewOnly ?
                     <td className="col-md-2">
