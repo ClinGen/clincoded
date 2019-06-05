@@ -70,11 +70,6 @@ var Title = module.exports.Title = createReactClass({
         return title;
     },
 
-    /**
-     * Method to handle user's response (Agree/Disagree) to PHI Disclaimer modal (presented when user attempts to start a new interpretation)
-     * @param {object} e - The submitted event object
-     * @param {string} buttonSelected - String value of the button/response selected by the user
-     */
     handleViewSummaryResponse: function(e, buttonSelected) {
         this.child.closeModal();
 
