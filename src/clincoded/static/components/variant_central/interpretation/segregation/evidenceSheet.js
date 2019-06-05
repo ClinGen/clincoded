@@ -66,29 +66,31 @@ let EvidenceSheet = createReactClass({
         let formValues = this.getAllFormValues();
 
         var formError = false;
-        // Check HPO ID format
-        var hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
-        if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-            // HPOID list is bad
-            formError = true;
-            this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-        }
+        if (this.validateDefault()) {
+            // Check HPO ID format
+            var hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
+            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+                // HPOID list is bad
+                formError = true;
+                this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+              }
 
-        if (!formError) {
-            let allData = null;
-            if (this.props.isNew) {
-                allData = Object.assign(this.props.data, formValues);
-            } else {
-                allData = Object.assign({}, this.props.data);
-                Object.assign(allData, formValues);
+            if (!formError) {
+                let allData = null;
+                if (this.props.isNew) {
+                    allData = Object.assign(this.props.data, formValues);
+                } else {
+                    allData = Object.assign({}, this.props.data);
+                    Object.assign(allData, formValues);
+                }
+                this.handleModalClose();
+                this.resetAllFormValues();
+                this.setState({
+                    data: {},
+                    hpoUnaffected: false
+                });
+                this.props.sheetDone(allData);
             }
-            this.handleModalClose();
-            this.resetAllFormValues();
-            this.setState({
-                data: {},
-                hpoUnaffected: false
-            });
-            this.props.sheetDone(allData);
         }
     },
 
