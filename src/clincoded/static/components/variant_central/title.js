@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
+import ModalComponent from '../../libs/bootstrap/modal';
 import { FormMixin, Form, Input } from '../../libs/bootstrap/form';
 import { queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 import { renderVariantTitle } from '../../libs/render_variant_title';
@@ -69,6 +70,21 @@ var Title = module.exports.Title = createReactClass({
         return title;
     },
 
+    /**
+     * Method to handle user's response (Agree/Disagree) to PHI Disclaimer modal (presented when user attempts to start a new interpretation)
+     * @param {object} e - The submitted event object
+     * @param {string} buttonSelected - String value of the button/response selected by the user
+     */
+    handleViewSummaryResponse: function(e, buttonSelected) {
+        this.child.closeModal();
+
+        if (buttonSelected === 'Continue') {
+            this.handleSummaryButtonEvent(e);
+        } else {
+            e.preventDefault(); e.stopPropagation();
+        }
+    },
+
     // handler for 'View Summary' & 'Return to Interpretation' button click events
     handleSummaryButtonEvent: function(e) {
         e.preventDefault(); e.stopPropagation();
@@ -95,9 +111,9 @@ var Title = module.exports.Title = createReactClass({
     render() {
         const variant = this.props.data;
         const interpretation = this.state.interpretation;
+        const evaluations = interpretation ? interpretation.evaluations : null;
         let calculatePatho_button = this.props.interpretationUuid ? true : false;
         let summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
-
         return (
             <div className="variant-interpretation-header">
                 <div className="variant-interpretation-header-item title">
@@ -109,8 +125,22 @@ var Title = module.exports.Title = createReactClass({
                         <div className="btn-vertical-space">
                             <div className="interpretation-record clearfix">
                                 <div className="pull-right">
-                                    <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
-                                        title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
+                                    {this.state.summaryVisible || (evaluations && evaluations.length) ? 
+                                        <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
+                                            title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
+                                    :
+                                        <ModalComponent modalClass="modal-default" modalWrapperClass="confirm-evaluation-summary"
+                                            bootstrapBtnClass="btn btn-primary pull-right view-summary" actuatorTitle={<span>{summaryButtonTitle}</span>}
+                                            onRef={ref => (this.child = ref)}>
+                                            <div className="modal-body">
+                                                You have not applied any criteria, are you sure you want to finish this interpretation?
+                                            </div>
+                                            <div className="modal-footer">
+                                                <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={(e) => this.handleViewSummaryResponse(e, 'Cancel')} title="Cancel" />
+                                                <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={(e) => this.handleViewSummaryResponse(e, 'Continue')} title="Continue" />
+                                            </div>
+                                        </ModalComponent>
+                                    }
                                 </div>
                             </div>
                         </div>
