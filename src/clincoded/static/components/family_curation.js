@@ -293,6 +293,43 @@ var FamilyCuration = createReactClass({
         }
     },
 
+    handleCopyGroupNotPhenotypes(e) {
+        e.preventDefault(); e.stopPropagation();
+        var associatedGroups;
+        var hpoInElim = '';
+        var hpoElimFreeText = '';
+        if (this.state.group) {
+            // We have a group, so get the disease array from it.
+            associatedGroups = [this.state.group];
+        } else if (this.state.family && this.state.family.associatedGroups && this.state.family.associatedGroups.length) {
+            // We have a family with associated groups. Combine the diseases from all groups.
+            associatedGroups = this.state.family.associatedGroups;
+        }
+        if (associatedGroups && associatedGroups.length > 0) {
+            hpoInElim = associatedGroups.map(function(associatedGroup, i) {
+                if (associatedGroup.hpoIdInElimination && associatedGroup.hpoIdInElimination.length) {
+                    return (
+                        associatedGroup.hpoIdInElimination.map(function(elimHpoId, i) {
+                            return (elimHpoId);
+                        }).join(', ')
+                    );
+                }
+            });
+            if (hpoInElim.length) {
+                this.refs['nothpoid'].setValue(hpoInElim.join(', '));
+            }
+            hpoElimFreeText = associatedGroups.map(function(associatedGroup, i) {
+                if (associatedGroup.termsInElimination) {
+                    return associatedGroup.termsInElimination;
+                }
+            });
+            if (hpoElimFreeText !== '') {
+                this.refs['notphenoterms'].setValue(hpoElimFreeText.join(', '));
+            }
+        }
+
+    },
+
     // Handle a click on a copy demographics button
     handleCopyGroupDemographics(e) {
         e.preventDefault(); e.stopPropagation();
@@ -1610,11 +1647,19 @@ function FamilyCommonDiseases() {
                     title="Copy all Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupPhenotypes} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Family', 'nothpo', 'Group') : null}
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Family', 'notft', 'Group') : null}    
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                <Input type="button" ref={(button) => { this.notphenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm"
+                    title="Copy all NOT Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupNotPhenotypes} />
+                : null}
         </div>
     );
 }
@@ -2117,7 +2162,7 @@ const FamilyViewer = createReactClass({
             this.setState({submitBusy: true});
             var family = data;
 
-            // Write the assessment to the DB, if there was one.
+            // Write the assessment to the DB, if there was one
             return this.saveAssessment(this.cv.assessmentTracker, this.cv.gdmUuid, this.props.context.uuid).then(assessmentInfo => {
                 // If we're assessing a family segregation, write that to history
                 this.saveAssessmentHistory(assessmentInfo.assessment, null, family, assessmentInfo.update);
@@ -2502,7 +2547,7 @@ const FamilySegregationViewer = (segregation, assessments, open) => {
                 </div>
 
                 <div>
-                    <dt>Number of UNAFFECTED individuals without the bialletic genotype</dt>
+                    <dt>Number of UNAFFECTED individuals without the biallelic genotype</dt>
                     <dd>{segregation && segregation.numberOfUnaffectedWithoutBiallelicGenotype}</dd>
                 </div>
 

@@ -119,6 +119,7 @@ const IndividualCuration = createReactClass({
     handleClick: function(obj, item, e) {
         e.preventDefault(); e.stopPropagation();
         var hpoIds = '';
+        var hpoElimIds = '';
 
         if (item === 'phenotype') {
             if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
@@ -141,6 +142,16 @@ const IndividualCuration = createReactClass({
 
             if (obj.race) {
                 this.refs['race'].setValue(obj.race);
+            }
+        } else if (item === 'notphenotype') {
+            if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
+                hpoElimIds = obj.hpoIdInElimination.map(function(elimhpo, i) {
+                    return (elimhpo);
+                }).join(', ');
+                this.refs['nothpoid'].setValue(hpoElimIds);
+            }
+            if (obj.termsInElimination) {
+                this.refs['notphenoterms'].setValue(obj.termsInElimination);
             }
         }
     },
@@ -1245,12 +1256,34 @@ function IndividualCommonDiseases() {
                     clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Individual', 'nothpo', 'Group') 
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'nothpo', 'Family') : null
+                ) 
+            }  
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'notft', 'Family') : null
+                )
+            }       
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2"
                 value={individual && individual.termsInElimination ? individual.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                <Input type="button" ref="notphenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy NOT Phenotype from Associated Group"
+                    clickHandler={this.handleClick.bind(this, associatedGroups[0], 'notphenotype')} />
+                : null}
+            {associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                <Input type="button" ref="notphenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy NOT Phenotype from Associated Family"
+                    clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'notphenotype')} />
+                : null}    
         </div>
     );
 }
