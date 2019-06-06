@@ -20,8 +20,8 @@ let EvidenceSheet = createReactClass({
     mixins: [FormMixin, RestMixin],
 
     propTypes: {
-        evidenceCollectionDone: PropTypes.func,     // Function to call to add or edit an evidence
         ready: PropTypes.bool,                      // Flag if ready for second modal
+        sheetDone: PropTypes.func,                  // Function to call to add or edit an evidence
         data: PropTypes.object,                     // Data relevant to this particular piece of evidence
         allData: PropTypes.object,                  // All extra evidence across all entries for this variant
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
