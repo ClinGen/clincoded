@@ -106,6 +106,7 @@ var Title = module.exports.Title = createReactClass({
     render() {
         const variant = this.props.data;
         const interpretation = this.state.interpretation;
+        const provisionalCount = interpretation ? interpretation.provisional_count : 0;
         const evaluations = interpretation ? interpretation.evaluations : null;
         let calculatePatho_button = this.props.interpretationUuid ? true : false;
         let summaryButtonTitle = this.state.summaryVisible ? 'Return to Interpretation' : 'View Summary';
@@ -120,7 +121,7 @@ var Title = module.exports.Title = createReactClass({
                         <div className="btn-vertical-space">
                             <div className="interpretation-record clearfix">
                                 <div className="pull-right">
-                                    {this.state.summaryVisible || (evaluations && evaluations.length) ? 
+                                    {this.state.summaryVisible || (evaluations && evaluations.length) || provisionalCount > 0 ? 
                                         <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
                                             title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
                                     :

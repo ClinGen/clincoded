@@ -44,7 +44,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     getInitialState() {
         return {
             interpretation: this.props.interpretation,
-            calculatedAssertion: this.props.calculatedAssertion,
+            calculatedAssertion: this.props.calculatedAssertion || 'Uncertain significance',
             autoClassification: null,
             modifiedPathogenicity: null,
             provisionalPathogenicity: this.props.provisionalPathogenicity,
@@ -583,7 +583,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
 
     render() {
         let interpretation = this.state.interpretation;
-        let evaluations = interpretation ? interpretation.evaluations : null;
+        let evaluations = interpretation ? interpretation.evaluations : undefined;
         let sortedEvaluations = sortByStrength(evaluations);
         let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
         let provisionalVariant = null;
@@ -647,7 +647,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
                                     <div className="col-xs-12 col-sm-6">
                                         <dl className="inline-dl clearfix">
                                             <dt>Disease:</dt>
-                                            <dd>{interpretation.disease && interpretation.disease.term ? interpretation.disease.term : 'None'}</dd>
+                                            <dd>{interpretation && interpretation.disease && interpretation.disease.term ? interpretation.disease.term : 'None'}</dd>
                                         </dl>
                                         <dl className="inline-dl clearfix">
                                             <dt>Mode of Inheritance:</dt>
