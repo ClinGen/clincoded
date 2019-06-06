@@ -124,7 +124,7 @@ var Title = module.exports.Title = createReactClass({
                                     {this.state.summaryVisible || (evaluations && evaluations.length) || provisionalCount > 0 ? 
                                         <Input type="button-button" inputClassName="btn btn-primary pull-right view-summary"
                                             title={summaryButtonTitle} clickHandler={this.handleSummaryButtonEvent} />
-                                    :
+                                        :
                                         <ModalComponent modalClass="modal-default" modalWrapperClass="confirm-evaluation-summary"
                                             bootstrapBtnClass="btn btn-primary pull-right view-summary" actuatorTitle={<span>{summaryButtonTitle}</span>}
                                             onRef={ref => (this.child = ref)}>
