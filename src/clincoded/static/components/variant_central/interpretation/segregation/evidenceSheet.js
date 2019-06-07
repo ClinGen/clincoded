@@ -25,7 +25,8 @@ let EvidenceSheet = createReactClass({
         data: PropTypes.object,                     // Data relevant to this particular piece of evidence
         allData: PropTypes.object,                  // All extra evidence across all entries for this variant
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
-        subcategory: PropTypes.string               // Subcategory (usually the panel) the evidence is part of
+        subcategory: PropTypes.string,              // Subcategory (usually the panel) the evidence is part of
+        evidenceType: PropTypes.string              // Evidence source type
     },
 
     getInitialState: function() {
@@ -226,7 +227,7 @@ let EvidenceSheet = createReactClass({
         var submitErrClass = 'submit-err ' + (this.anyFormErrors() ? '' : ' hidden');
 
         return  <ModalComponent
-            modalTitle="Add Evidence Details"
+            modalTitle={this.props.isNew ? "Add Evidence Details" : "Edit Evidence Details"}
             modalClass="modal-default"
             modalWrapperClass="input-inline add-resource-id-modal"
             onRef={ref => (this.child = ref)}
@@ -236,6 +237,9 @@ let EvidenceSheet = createReactClass({
         >
         <div className="form-std">
             <div className="modal-body" style={{textAlign: 'left'}}>
+                <h4>
+                    For {extraEvidence.typeMapping[this.props.evidenceType].name} evidence details
+                </h4>
                 <h4>
                     Fields marked in a <span style={{backgroundColor: this.state.backgroundGreen}}>green background</span> are specifically relevant to this Criteria Code.
                 </h4>

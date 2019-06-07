@@ -261,6 +261,7 @@ let EvidenceModalManager = createReactClass({
                         allData = {this.props.data}
                         isNew = {this.state.isNew}
                         subcategory = {this.props.subcategory}
+                        evidenceType = {this.props.evidenceType}
                     >
                     </EvidenceSheet>
         }
