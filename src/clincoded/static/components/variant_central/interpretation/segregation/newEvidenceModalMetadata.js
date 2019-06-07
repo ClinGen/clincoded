@@ -19,9 +19,9 @@ import { ContextualHelp } from '../../../../libs/bootstrap/contextual_help';
 let NewEvidenceModalMetadata = createReactClass({
     mixins: [FormMixin, RestMixin],
     propTypes: {
-        data: PropTypes.object,              // Metadata - If null, adding.  Otherwise, editing.
         evidenceType: PropTypes.string,      // Evidence source type
         metadataDone: PropTypes.func,        // Function to call when input metadata modal is done; either Next or Cancel.
+        data: PropTypes.object,              // Metadata - If null, adding.  Otherwise, editing.
         isNew: PropTypes.bool,               // If we are adding a new piece of evidence or editing an existing piece
         useIcon: PropTypes.bool,             // Use an icon instead of text as link text
         disableActuator: PropTypes.bool      // Disable the actuator or not
@@ -249,7 +249,7 @@ let NewEvidenceModalMetadata = createReactClass({
                             } else {
                                 // no result from ClinVar
                                 this.setState({
-                                    pmidResult: {}
+                                    pmidResult: null
                                 });
                                 this.setFormErrors('resourceId', 'PMID not found');
                             }
