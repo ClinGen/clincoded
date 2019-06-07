@@ -269,7 +269,7 @@ var PmidSelectionList = createReactClass({
             <div className="pmid-selection-wrapper">
                 <div className="pmid-selection-add">
                     <AddResourceId resourceType="pubmed" wrapperClass="inline-button-wrapper-fullwidth" buttonWrapperClass="inline-button-wrapper-fullwidth" buttonClass="btn btn-primary pmid-selection-add-btn"
-                        protocol={this.props.protocol} parentObj={this.props.currGdm} buttonText="Add New PMID" modalButtonText="Add Article" updateParentForm={this.props.updateGdmArticles} buttonOnly={true} />
+                        protocol={this.props.protocol} parentObj={this.props.currGdm} buttonText="Add New Article" modalButtonText="Add Article" updateParentForm={this.props.updateGdmArticles} buttonOnly={true} />
                 </div>
                 {annotations ?
                     <div className="pmid-selection-list" id="user-pmid-list">
@@ -283,6 +283,7 @@ var PmidSelectionList = createReactClass({
                                         <PmidSummary article={annotation.article} />
                                     </div>
                                     <div className="pmid-selection-list-pmid"><a href={external_url_map['PubMed'] + annotation.article.pmid} target="_blank">PMID: {annotation.article.pmid}</a></div>
+                                    <div className="pmid-selection-list-pmid"><span>DOI: {annotation.article.doi}</span></div>
                                 </div>
                             );
                         })}
@@ -290,7 +291,7 @@ var PmidSelectionList = createReactClass({
                 : null}
                 {annotations.length === 0 ?
                     <div className="pmid-selection-help">
-                        <i>Add papers to this Gene-Disease Record using the <strong>Add New PMID(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
+                        <i>Add papers to this Gene-Disease Record using the <strong>Add New Article(s)</strong> button; click on any added paper to view its abstract and begin curating evidence from that paper.</i>
                     </div>
                 :null }
             </div>

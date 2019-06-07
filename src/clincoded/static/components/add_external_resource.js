@@ -373,7 +373,7 @@ function pubmedTxt(field, extra) {
             txt = 'Add new PubMed Article';
             break;
         case 'inputLabel':
-            txt = 'Enter a PMID';
+            txt = 'Enter a PMID or DOI';
             break;
         case 'editLabel':
             txt = 'Edit PMID';
