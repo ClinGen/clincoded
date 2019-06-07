@@ -31,7 +31,7 @@ let ConfirmDelete = createReactClass({
         this.props.deleteEvidence(this.props.evidence);
         this.handleModalClose();
     },
-    
+
     render() {
         return (
             <ModalComponent
@@ -40,7 +40,7 @@ let ConfirmDelete = createReactClass({
                     modalWrapperClass="confirm-interpretation-delete-evidence pull-right"
                     bootstrapBtnClass="btn btn-danger "
                     actuatorClass="interpretation-delete-evidence-btn"
-                    actuatorTitle={"Delete"}
+                    actuatorTitle="Delete"
                     onRef={ref => (this.confirm = ref)}
                 >
                 <div>
