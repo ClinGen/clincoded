@@ -1987,7 +1987,7 @@ function FamilyVariant() {
             {semiDom ?
                 <Input type="select" label="The proband is:" ref="SEGprobandIs" handleChange={this.handleChange}
                     defaultValue="none" value={family && family.segregation.probandIs ? family.segregation.probandIs : 'none'}
-                    error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
+                    error={this.getFormError('SEGprobandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
