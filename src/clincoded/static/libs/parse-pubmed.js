@@ -13,14 +13,27 @@ function parsePubmed(xml){
     var article = {};
     var doc = new DOMParser().parseFromString(xml, 'text/xml');
 
+    // Get PMID from DOI XML
+    var $DOIResult = doc.getElementsByTagName('eSearchResult')[0];
+    if($DOIResult) {
+        var $PMID = $DOIResult.getElementsByTagName('Id')[0];
+        if($PMID) {
+            article.pmid = $PMID.textContent;
+        }
+    }
+
     var $PubmedArticle = doc.getElementsByTagName('PubmedArticle')[0];
     if($PubmedArticle){
         var publicationData = '';
 
-        // Get the PMID
+        // Get the PMID and DOI
         var $PMID = $PubmedArticle.getElementsByTagName('PMID')[0];
+        var $DOI = $PubmedArticle.querySelector('[IdType="doi"]')
         if($PMID) {
             article.pmid = $PMID.textContent;
+        }
+        if($DOI) {
+            article.doi = $DOI.textContent;
         }
 
         // Get the journal name

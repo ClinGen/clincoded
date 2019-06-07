@@ -421,16 +421,25 @@ function pubmedValidateForm() {
         this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
         this.setState({submitBusy: false});
     }
-    // valid if the input only has numbers
-    if (valid && !formInput.match(/^[0-9]*$/)) {
+    // Check if form input is a DOI/PMID, then validate
+    if (valid && formInput.match(/^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi)) {
+        var doiPresent = true;    
+    } else if (valid && formInput.match(/^[0-9]*$/)) {
+        var pmidPresent = true;
+    } else if (valid && !doiPresent && !formInput.match(/^[0-9]*$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'PMID should contain only numbers');
         this.setState({submitBusy: false});
-    }
+    } else if (valid && !pmidPresent && !formInput.match(/^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Invalid DOI');
+        this.setState({submitBusy: false});
+    } 
+    
     // valid if parent object is GDM and input isn't already associated with it
     if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'gdm') {
         for (var i = 0; i < this.props.parentObj.annotations.length; i++) {
-            if (this.props.parentObj.annotations[i].article.pmid == formInput) {
+            if (this.props.parentObj.annotations[i].article.pmid == formInput || this.props.parentObj.annotations[i].article.doi == formInput) {
                 valid = false;
                 this.setFormErrors('resourceId', 'This article has already been associated with this Gene-Disease Record');
                 this.setState({submitBusy: false});
@@ -439,20 +448,19 @@ function pubmedValidateForm() {
         }
     }
     // valid if parent object is evidence list (VCI) and input isn't already associated with it - final behavior TBD
-    /*
     if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'evidenceList') {
         for (var j = 0; j < this.props.parentObj.evidenceList.length; j++) {
-            if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput) {
+            if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput || this.props.parentObj.evidenceList[j].articles[0].doi == formInput) {
                 valid = false;
                 this.setFormErrors('resourceId', 'This article has already been associated with this evidence group');
                 this.setState({submitBusy: false});
                 break;
             }
         }
-    }*/
+    }
     return valid;
 }
-function pubmedQueryResource() {
+async function pubmedQueryResource() {
     // for pinging and parsing data from PubMed
     this.saveFormValue('resourceId', this.state.inputValue);
     if (pubmedValidateForm.call(this)) {
@@ -461,6 +469,18 @@ function pubmedQueryResource() {
 
         // Remove possible prefix like "PMID:" before sending queries
         var id = this.state.inputValue.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+        // Handle search via DOI
+        var doiRegex = /^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi;
+        var validDoi = id.match(doiRegex);
+        if(validDoi) {
+            var doiUrl = external_url_map['DoiToPubMed'] + validDoi[0];
+           await this.getRestDataXml(doiUrl).then(response => {
+                var doiData = parsePubmed(response);
+                if (doiData) {
+                    id = doiData.pmid;
+                }
+            });
+        }
         this.getRestData('/articles/' + id).then(article => {
             // article already exists in db
             this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});

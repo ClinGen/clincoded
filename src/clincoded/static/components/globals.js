@@ -164,6 +164,7 @@ module.exports.dbxref_prefix_map = {
 
 module.exports.external_url_map = {
     'PubMedSearch': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?api_key=986bd80f43a3ba6ec1bc7a50e7bda60c1b09&db=PubMed&retmode=xml&id=',
+    'DoiToPubMed': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=',
     'PubMed': 'https://www.ncbi.nlm.nih.gov/pubmed/',
     'OrphaNet': 'http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert=',
     'OrphanetHome': 'http://www.orpha.net/',
