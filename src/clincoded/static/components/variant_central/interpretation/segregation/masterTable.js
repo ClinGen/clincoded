@@ -40,7 +40,7 @@ let MasterEvidenceTable = createReactClass({
     getEvidenceTypes() {
         let evidence_types = {};
         for(let row of this.props.evidence_arr) {
-            let evidence_type = row.source.metadata['_kind_key'];
+            let evidence_type = row.source && row.source.metadata ? row.source.metadata['_kind_key'] : '';
             if (!(evidence_type in evidence_types)) {
                 evidence_types[evidence_type] = this.props.evidence_arr.filter(row => row.source.metadata['_kind_key'] === evidence_type);
             }
@@ -144,44 +144,55 @@ let MasterEvidenceTable = createReactClass({
                 let rows = evidence_types[evidence_type];
                 let rowNum = 0;
                 rows.forEach(row => {
-                    let editButton = null;
-                    let deleteButton = null;
-                    if (this.canModify(row)) {
-                        editButton = this.getEditButton(row);
-                        deleteButton = this.getDeleteButton(row);
-                    }
-                    if (row.source.metadata['_kind_key'] === 'PMID') {
-                        let pmid = row.source.metadata.pmid;
-                        let element = <a
-                            href = {external_url_map['PubMed'] + pmid}
-                            target = '_blank'
-                            title = {`PubMed Article ID: ${pmid}`}
-                        >
-                            PMID {pmid}
-                        </a>
-                        second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
+                    if (row.source && row.source.metadata && row.source.data) {
+                        let editButton = null;
+                        let deleteButton = null;
+                        if (this.canModify(row)) {
+                            editButton = this.getEditButton(row);
+                            deleteButton = this.getDeleteButton(row);
+                        }
+                        if (row.source.metadata['_kind_key'] === 'PMID') {
+                            let pmid = row.source.metadata.pmid;
+                            let authorYear = '';
+                            if (row.articles) {
+                                let article = row.articles[0];
+                                let date = article && article.date ? (/^([\d]{4})/).exec(article.date) : [];
+                                authorYear = date ? date[0] + '.' : '';
+                                if (article && article.authors && article.authors.length) {
+                                    authorYear = article.authors[0] + ', ' + authorYear;
+                                }
+                            }
+                            let element = <a
+                                href = {external_url_map['PubMed'] + pmid}
+                                target = '_blank'
+                                title = {`PubMed Article ID: ${pmid}`}
+                            >
+                                PMID {pmid}
+                            </a>
+                            second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
+                                    <div style={{textAlign: 'center'}}>
+                                        <span>{authorYear} {element}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
+                                    </div>
+                            </th>)
+                        } else {
+                            let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
+                            let evidence_detail = `${row.source.metadata[identifier.name]}`;
+                            second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
                                 <div style={{textAlign: 'center'}}>
-                                    <span>{element}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
+                                    <span>{evidence_detail}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
                                 </div>
-                        </th>)
-                    } else {
-                        let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
-                        let evidence_detail = `${row.source.metadata[identifier.name]}`;
-                        second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
-                            <div style={{textAlign: 'center'}}>
-                                <span>{evidence_detail}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
-                            </div>
-                        </th>);
+                            </th>);
+                        }
+                        if (row.source['_submitted_by']) {
+                            let submittedBy = row.source['_submitted_by'];
+                            third_row.push(<th key={`header_${evidence_type}_${rowNum}.${row.uuid}`}>
+                                <div style={{textAlign: 'center'}}>
+                                    <span>{submittedBy}</span>
+                                </div>
+                            </th>);
+                        }
+                        rowNum++;
                     }
-                    if (row.source['_submitted_by']) {
-                        let submittedBy = row.source['_submitted_by'];
-                        third_row.push(<th key={`header_${evidence_type}_${rowNum}.${row.uuid}`}>
-                            <div style={{textAlign: 'center'}}>
-                                <span>{submittedBy}</span>
-                            </div>
-                        </th>);
-                    }
-                    rowNum++;
                 });
             }
         });
@@ -233,30 +244,32 @@ let MasterEvidenceTable = createReactClass({
             if (evidence_types[evidence_type]) {
                 let rows = evidence_types[evidence_type];
                 rows.forEach(row => {
-                    let rowNum = 0;
-                    masterTable().forEach(masterRow => {
-                        let val = row.source.data[masterRow.key];
-                        let entry = '';
-                        let key = masterRow.key;
-                        // For text column, limit to column width and show full text when mouseover. 
-                        if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
-                            entry = <td key={`cell_${cell_num++}`}>
-                                <div className='title-ellipsis' title={val}>{val}</div>
-                            </td>
-                        } else if (key === 'is_disease_associated_with_probands') {
-                            // Set checkmark for  "Disease associated with proband(s) (HPO) (Check here if unaffected)" if checked
-                            let iconClass = val === true ? 'icon icon-check' : '';
-                            entry = <td key={`cell_${cell_num++}`}>
-                                <div className={iconClass}></div>
-                            </td>
-                        } else {
-                            entry = <td key={`cell_${cell_num++}`}>
-                                <div>{val}</div>
-                            </td>
-                        }
-                        tds[rowNum].push(entry);
-                        rowNum++;
-                    });
+                    if (row.source && row.source.data) {
+                        let rowNum = 0;
+                        masterTable().forEach(masterRow => {
+                            let val = row.source.data[masterRow.key];
+                            let entry = '';
+                            let key = masterRow.key;
+                            // For text column, limit to column width and show full text when mouseover. 
+                            if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
+                                entry = <td key={`cell_${cell_num++}`}>
+                                    <div className='title-ellipsis' title={val}>{val}</div>
+                                </td>
+                            } else if (key === 'is_disease_associated_with_probands') {
+                                // Set checkmark for  "Disease associated with proband(s) (HPO) (Check here if unaffected)" if checked
+                                let iconClass = val === true ? 'icon icon-check' : '';
+                                entry = <td key={`cell_${cell_num++}`}>
+                                    <div className={iconClass}></div>
+                                </td>
+                            } else {
+                                entry = <td key={`cell_${cell_num++}`}>
+                                    <div>{val}</div>
+                                </td>
+                            }
+                            tds[rowNum].push(entry);
+                            rowNum++;
+                        });
+                    }
                 });
             }
         });
@@ -273,23 +286,25 @@ let MasterEvidenceTable = createReactClass({
     getSums() {
         let sums = {};
         this.props.evidence_arr.forEach(row => {
-            let data = row.source.data;
-            Object.keys(data).forEach(name => {
-                if (name.startsWith('num_') && !name.endsWith('_comment')) {
-                    let val = parseInt(data[name]);
-                    if (Object.keys(sums).indexOf(name) === -1) {
-                        if (isNaN(val)) {
-                            sums[name] = 0;
+            if (row.source && row.source.data) {
+                let data = row.source.data;
+                Object.keys(data).forEach(name => {
+                    if (name.startsWith('num_') && !name.endsWith('_comment')) {
+                        let val = parseInt(data[name]);
+                        if (Object.keys(sums).indexOf(name) === -1) {
+                            if (isNaN(val)) {
+                                sums[name] = 0;
+                            } else {
+                                sums[name] = val;
+                            }
                         } else {
-                            sums[name] = val;
-                        }
-                    } else {
-                        if (!isNaN(val)) {
-                            sums[name] += val;
+                            if (!isNaN(val)) {
+                                sums[name] += val;
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
         });
         return sums;
     },

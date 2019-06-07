@@ -15,6 +15,7 @@ import { EvidenceModalManager } from './evidenceModalManager';
 import { DeleteEvidenceModal} from './deleteEvidenceModal';
 import { extraEvidence } from './segregationData';
 import { external_url_map } from '../../../globals';
+import { PmidSummary } from '../../../curator';
 
 let EvidenceTable = createReactClass({
     propTypes: {
@@ -89,19 +90,16 @@ let EvidenceTable = createReactClass({
     /**
      * Return the formatted source title for given evidence
      * 
-     * @param {object} metadata  The evidence source metadata
+     * @param {object} row  The evidence row data 
      */
-    getSourceColumnContent(metadata) {
+    getSourceColumnContent(row) {
         let nodeContent = null;
+        let metadata = row.source.metadata;
         if (metadata['_kind_key'] === 'PMID') {
-            let pmid = metadata.pmid;
-            nodeContent = <a
-                href = {external_url_map['PubMed'] + pmid}
-                target = "_blank"
-                title = {`PubMed Article ID: ${pmid}`}
-            >
-                PMID {pmid}
-            </a>
+            nodeContent = <PmidSummary
+                article = {row.articles[0]}
+                pmidLinkout
+            />
         } else {
             let content = null;
             let help = null;
@@ -289,7 +287,7 @@ let EvidenceTable = createReactClass({
                 const emptyColumn = <td></td>
 
                 // Add source column for this evidence
-                inner.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(metadata)}</td>);
+                inner.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(row)}</td>);
 
                 // The criteria under Specificity of phenotype panel has only one corresponding comment so display them on same row.
                 if (this.props.subcategory === 'specificity-of-phenotype') {
@@ -410,16 +408,18 @@ let EvidenceTable = createReactClass({
         let cols = relevantData.cols.map(o => o.key);
         let foundData = false;
         this.props.tableData.forEach(row => {
-            let obj = row.source.data;
-            if (foundData) {
-                return;
-            }
-            cols.forEach(col => {
-                if (obj[col] && obj[col] != '') {
-                    foundData = true;
+            if (row.source && row.source.data) {
+                let obj = row.source.data;
+                if (foundData) {
                     return;
                 }
-            });
+                cols.forEach(col => {
+                    if (obj[col] && obj[col] != '') {
+                        foundData = true;
+                        return;
+                    }
+                });
+            }
         });
         return foundData;
     },
@@ -436,7 +436,7 @@ let EvidenceTable = createReactClass({
         let cols = relevantData.cols.map(o => o.key);
         let show = false;
         cols.forEach(col => {
-            if (row.source.data[col] && row.source.data[col] != '') {
+            if (row.source && row.source.data && row.source.data[col] && row.source.data[col] != '') {
                 show = true;
                 return;
             }

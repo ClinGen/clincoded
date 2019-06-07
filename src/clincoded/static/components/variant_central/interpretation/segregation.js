@@ -124,6 +124,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             return;
         } else {
             this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
+
             if (id === null) {
                 // set the submitter data as 'affiliation full name (user name)' or 'user name' if no affiliation
                 let affiliationName = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
@@ -146,10 +147,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     variant: this.state.interpretation.variant['@id'],
                     category: 'case-segregation',
                     subcategory: subcategory,
-                    // articles: [this.refs['edit-pmid'].getValue()],
-                    articles: [],
+                    articles: evidence.metadata._kind_key === 'PMID' ? [evidence.metadata.pmid] : [],
                     evidenceCriteria: evidenceCriteria,  // criteria has value which is not used for case gegregation
-                    // evidenceDescription: this.refs['edit-description'].getValue(),
                     evidenceDescription: '',
                     source: evidence
                 };
@@ -161,6 +160,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         extra_evidence.affiliation = this.props.affiliation.affiliation_id;
                     }
                 }
+
                 if (id === null) {
                     // create new extra evidence
                     return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
@@ -179,7 +179,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         });
                     });
                 } else {
-                    return this.putRestData(id + '?render=false', extra_evidence).then(result => {
+                    return this.putRestData(id, extra_evidence).then(result => {
                         // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
                         if (!flatInterpretation.extra_evidence_list) {
                             flatInterpretation.extra_evidence_list = [];

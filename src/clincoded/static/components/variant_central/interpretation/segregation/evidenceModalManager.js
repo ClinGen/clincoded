@@ -15,14 +15,17 @@ import createReactClass from 'create-react-class'
 
 // Third-party lib
 import { FormMixin } from '../../../../libs/bootstrap/form';
+import { parsePubmed } from '../../../../libs/parse-pubmed';
 
 // Internal lib
+import { RestMixin } from '../../../rest';
+import { external_url_map } from '../../../globals';
 import { EvidenceSheet } from './evidenceSheet';
 import { extraEvidence } from './segregationData';
 import { NewEvidenceModalMetadata } from './newEvidenceModalMetadata';
 
 let EvidenceModalManager = createReactClass({
-    mixins: [FormMixin],
+    mixins: [FormMixin, RestMixin],
 
     propTypes: {
         data: PropTypes.object,                     // If null, we are adding.  Otherwise, we are editing.
@@ -157,6 +160,26 @@ let EvidenceModalManager = createReactClass({
             } else {
                 // Editing existing evidence
                 Object.assign(newData.metadata, metadata);
+            }
+
+            // If source is PMID, check if Pubmed article needs to be added.
+            if (metadata._kind_key === 'PMID' && metadata.pmid) {
+                this.getRestData('/search/?type=article&pmid=' + metadata.pmid).then(check => {
+                    // Article is new to our DB
+                    if (check.total < 1) {
+                        // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                        let data = {};
+                        this.getRestDataXml(external_url_map['PubMedSearch'] + metadata.pmid).then(xml => {
+                            data = parsePubmed(xml);
+                            if (data.pmid) { 
+                                // Found the article and add it to DB
+                                this.postRestData('/article/', data);
+                            } else {
+                                console.error('PMID is invalid ' + metadata.pmid);
+                            }
+                        });
+                    }
+                });
             }
 
             this.setState({
