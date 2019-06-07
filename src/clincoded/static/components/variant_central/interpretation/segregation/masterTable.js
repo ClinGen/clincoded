@@ -154,7 +154,7 @@ let MasterEvidenceTable = createReactClass({
                         if (row.source.metadata['_kind_key'] === 'PMID') {
                             let pmid = row.source.metadata.pmid;
                             let authorYear = '';
-                            if (row.articles) {
+                            if (row.articles.length > 0) {
                                 let article = row.articles[0];
                                 let date = article && article.date ? (/^([\d]{4})/).exec(article.date) : [];
                                 authorYear = date ? date[0] + '.' : '';

@@ -96,10 +96,20 @@ let EvidenceTable = createReactClass({
         let nodeContent = null;
         let metadata = row.source.metadata;
         if (metadata['_kind_key'] === 'PMID') {
-            nodeContent = <PmidSummary
-                article = {row.articles[0]}
-                pmidLinkout
-            />
+            if (row.articles.length > 0) {
+                nodeContent = <PmidSummary
+                    article = {row.articles[0]}
+                    pmidLinkout
+                />
+            } else {
+                nodeContent = <a
+                    href = {external_url_map['PubMed'] + metadata.pmid}
+                    target = "_blank"
+                    title = {`PubMed Article ID: ${metadata.pmid}`}
+                >
+                    PMID {metadata.pmid}
+                </a>
+            }
         } else {
             let content = null;
             let help = null;
