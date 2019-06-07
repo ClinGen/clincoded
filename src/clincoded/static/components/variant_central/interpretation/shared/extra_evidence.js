@@ -11,6 +11,8 @@ import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
 import { RestMixin } from '../../../rest';
 import { AddResourceId } from '../../../add_external_resource';
 import { getAffiliationName } from '../../../../libs/get_affiliation_name';
+import { ConfirmDelete } from './confirm_delete';
+
 var curator = require('../../../curator');
 var PmidSummary = curator.PmidSummary;
 var CuratorHistory = require('../../../curator_history');
@@ -262,8 +264,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                             (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
                             <div>
                                 <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
-                                <Input type="button-button" inputClassName="btn btn-danger btn-inline-spacer" title="Delete" submitBusy={this.state.deleteBusy}
-                                    clickHandler={() => this.deleteEvidence(extra_evidence)} />
+                                <ConfirmDelete evidence={extra_evidence} deleteEvidence={this.deleteEvidence}></ConfirmDelete>
                             </div>
                             : null}
                     </td>
