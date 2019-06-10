@@ -370,19 +370,19 @@ function pubmedTxt(field, extra) {
     }
     switch(field) {
         case 'modalTitle':
-            txt = 'Add new PubMed Article';
+            txt = 'Add new Article';
             break;
         case 'inputLabel':
             txt = 'Enter a PMID or DOI';
             break;
         case 'editLabel':
-            txt = 'Edit PMID';
+            txt = 'Edit PMID/DOI';
             break;
         case 'inputButton':
-            txt = 'Retrieve PubMed Article';
+            txt = 'Retrieve Article';
             break;
         case 'resourceResponse':
-            txt = "Select \"" + extra + "\" (below) if the following citation is correct; otherwise, edit the PMID (above) to retrieve a different article.";
+            txt = "Select \"" + extra + "\" (below) if the following citation is correct; otherwise, edit the PMID/DOI (above) to retrieve a different article.";
             break;
     }
     return txt;

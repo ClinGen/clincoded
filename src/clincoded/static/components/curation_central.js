@@ -283,7 +283,7 @@ var PmidSelectionList = createReactClass({
                                         <PmidSummary article={annotation.article} />
                                     </div>
                                     <div className="pmid-selection-list-pmid"><a href={external_url_map['PubMed'] + annotation.article.pmid} target="_blank">PMID: {annotation.article.pmid}</a></div>
-                                    <div className="pmid-selection-list-pmid"><span>DOI: {annotation.article.doi}</span></div>
+                                    { annotation.article.doi ? <div className="pmid-selection-list-pmid"><a href={external_url_map['PubMed'] + annotation.article.pmid} target="_blank">DOI: {annotation.article.doi}</a></div> : null}
                                 </div>
                             );
                         })}
