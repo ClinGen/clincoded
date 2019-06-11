@@ -41,7 +41,8 @@ let EvidenceSheet = createReactClass({
             hpo: null,
             hpoUnaffected: hpoUnaffected,  // Flag for "Disease associated with proband(s) (HPO)" checkbox
             backgroundGreen: '#00FF0030',
-            errorMsg: ''
+            errorMsg: '',
+            enableSubmit: true               // Flag to enable Submit button
         };
     },
 
@@ -65,6 +66,12 @@ let EvidenceSheet = createReactClass({
     showError(msg) {
         this.setState({
             errorMsg: msg
+        });
+    },
+
+    enableSubmitButton(flag) {
+        this.setState({
+            enableSubmit: flag
         });
     },
 
@@ -241,7 +248,7 @@ let EvidenceSheet = createReactClass({
     render() {
         var submitErrClass = 'submit-err ' + (this.anyFormErrors() ? '' : ' hidden');
         var errMsgClass = this.state.errorMsg === '' ? 'hidden' : '';
-        var submitClass = "btn-default btn-inline-spacer btn-primary" + (this.state.errorMsg === '' ? '' : ' disabled');
+        var submitClass = "btn-default btn-inline-spacer btn-primary" + (this.state.errorMsg === '' && this.state.enableSubmit === true ? '' : ' disabled');
 
         return  <ModalComponent
             modalTitle={this.props.isNew ? "Add Evidence Details" : "Edit Evidence Details"}

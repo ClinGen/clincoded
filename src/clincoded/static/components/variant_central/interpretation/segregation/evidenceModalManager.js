@@ -162,18 +162,23 @@ let EvidenceModalManager = createReactClass({
                 Object.assign(newData.metadata, metadata);
             }
 
-            // If source is PMID, check if Pubmed article needs to be added.
-            if (metadata._kind_key === 'PMID' && metadata.pmid) {
+            // If source is PMID and new evidence, check if Pubmed article needs to be added.
+            if (metadata._kind_key === 'PMID' && metadata.pmid && this.state.isNew) {
                 this.getRestData('/search/?type=article&pmid=' + metadata.pmid).then(check => {
                     // Article is new to our DB
                     if (check.total < 1) {
                         // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                        // Disable the evidence details modal submit button until the article is added to database.
+                        // If add fails, the submit will still be disabled and an error message is updated on the modal.
+                        this.sheetModal.enableSubmitButton(false);
                         let data = {};
                         this.getRestDataXml(external_url_map['PubMedSearch'] + metadata.pmid).then(xml => {
                             data = parsePubmed(xml);
                             if (data.pmid) { 
                                 // Found the article and add it to DB
                                 this.postRestData('/article/', data).then(result => {
+                                    // Article is added so enable the submit button.
+                                    this.sheetModal.enableSubmitButton(true);
                                     Promise.resolve(result['@graph'][0]);
                                 }).catch(error => {
                                     this.sheetModal.showError('Error in saving Pubmed article to database.  Please try again later.');
