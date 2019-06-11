@@ -40,8 +40,17 @@ let EvidenceSheet = createReactClass({
             data: data,
             hpo: null,
             hpoUnaffected: hpoUnaffected,  // Flag for "Disease associated with proband(s) (HPO)" checkbox
-            backgroundGreen: '#00FF0030'
+            backgroundGreen: '#00FF0030',
+            errorMsg: ''
         };
+    },
+
+    componentDidMount() {
+        this.props.onRef(this);
+    },
+
+    componentWillUnmount() {
+        this.props.onRef(null);
     },
 
     handleModalClose() {
@@ -51,6 +60,12 @@ let EvidenceSheet = createReactClass({
     cancel() {
         this.props.sheetDone(null);
         this.handleModalClose();
+    },
+
+    showError(msg) {
+        this.setState({
+            errorMsg: msg
+        });
     },
 
     /**
@@ -225,6 +240,8 @@ let EvidenceSheet = createReactClass({
 
     render() {
         var submitErrClass = 'submit-err ' + (this.anyFormErrors() ? '' : ' hidden');
+        var errMsgClass = this.state.errorMsg === '' ? 'hidden' : '';
+        var submitClass = "btn-default btn-inline-spacer btn-primary" + (this.state.errorMsg === '' ? '' : ' disabled');
 
         return  <ModalComponent
             modalTitle={this.props.isNew ? "Add Evidence Details" : "Edit Evidence Details"}
@@ -237,6 +254,7 @@ let EvidenceSheet = createReactClass({
         >
         <div className="form-std">
             <div className="modal-body" style={{textAlign: 'left'}}>
+                <h4 className={errMsgClass} style={{color: 'red'}}>{this.state.errorMsg}</h4>
                 <h4>
                     For {extraEvidence.typeMapping[this.props.evidenceType].name} evidence details
                 </h4>
@@ -247,8 +265,9 @@ let EvidenceSheet = createReactClass({
                 {this.inputs()}
                 <div className="row">&nbsp;<br />&nbsp;</div>
                 <div className='modal-footer'>
+                <h4 className={errMsgClass} style={{color: 'red'}}>{this.state.errorMsg}</h4>
                 <div className={submitErrClass}>Please fix errors on the form and resubmit.</div>
-                    <Input type="submit" inputClassName="btn-default btn-inline-spacer btn-primary" title="Submit" id="submit" />
+                    <Input type="submit" inputClassName={submitClass} title="Submit" id="submit" />
                     <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.cancel} title="Cancel" />
                 </div>
                 </Form>

@@ -173,10 +173,19 @@ let EvidenceModalManager = createReactClass({
                             data = parsePubmed(xml);
                             if (data.pmid) { 
                                 // Found the article and add it to DB
-                                this.postRestData('/article/', data);
+                                this.postRestData('/article/', data).then(result => {
+                                    Promise.resolve(result['@graph'][0]);
+                                }).catch(error => {
+                                    this.sheetModal.showError('Error in saving Pubmed article to database.  Please try again later.');
+                                    console.error('Error in saving Pubmed article to database.');
+                                });
                             } else {
-                                console.error('PMID is invalid ' + metadata.pmid);
+                                this.sheetModal.showError('PMID is invalid - ' + metadata.pmid);
+                                console.error('PMID is invalid - ' + metadata.pmid);
                             }
+                        }).catch(error => {
+                            this.sheetModal.showError('PMID is invalid - ' + metadata.pmid);
+                            console.error('PMID is invalid - ' + metadata.pmid);
                         });
                     }
                 });
@@ -262,6 +271,7 @@ let EvidenceModalManager = createReactClass({
                         isNew = {this.state.isNew}
                         subcategory = {this.props.subcategory}
                         evidenceType = {this.props.evidenceType}
+                        onRef={ref => (this.sheetModal = ref)}
                     >
                     </EvidenceSheet>
         }
