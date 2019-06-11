@@ -74,7 +74,6 @@ export function parseClinvar(xml, extended) {
                     if ($XRef[j].getAttribute('DB') === 'ClinGen') {
                         variant.carId = $XRef[j].getAttribute('ID');
                     }
-                    
                 }
                 // Call to extract more ClinVar data from XML response
                 if (extended) {
