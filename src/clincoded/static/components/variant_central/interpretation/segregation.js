@@ -355,8 +355,8 @@ var criteriaGroup7Update = function(nextProps) {
 
 /**
  * Callback for rendering of this group of interpretation forms
- * Disabling form currently only applies to 'BP6' and 'PP5' if the gene is NEITHER BRCA1 or BRCA2
- * @param {boolean} disableEvalForm - The flag to disable criteria evaluation form
+ * Disabling form currently only applies to 'BP6' and 'PP5'
+ * @param {boolean} unusedCriteria - An array of criteria that are not active
  */
 var criteriaGroup8 = function(unusedCriteria) {
     let criteriaList1 = ['BP6', 'PP5']; // array of criteria code handled subgroup of this section

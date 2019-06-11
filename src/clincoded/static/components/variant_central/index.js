@@ -31,6 +31,7 @@ var VariantCurationHub = createReactClass({
     },
 
     getInitialState: function() {
+        const unusedCriteria = ['BP6', 'PP5'];
         return {
             variantUuid: queryKeyValue('variant', this.props.href),
             interpretationUuid: queryKeyValue('interpretation', this.props.href),
@@ -75,7 +76,8 @@ var VariantCurationHub = createReactClass({
             classificationStatus: 'In progress',
             classificationSnapshots: [],
             publishProvisionalReady: false,
-            publishSnapshotListReady: false
+            publishSnapshotListReady: false,
+            unusedCriteria: unusedCriteria
         };
     },
 
@@ -557,7 +559,6 @@ var VariantCurationHub = createReactClass({
     },
 
     render() {
-        const unusedCriteria = ['BP6', 'PP5'];
         const variantData = this.state.variantObj;
         const editKey = this.state.editKey;
         const selectedTab = this.state.selectedTab;
@@ -583,7 +584,7 @@ var VariantCurationHub = createReactClass({
                 {!this.state.summaryVisible ?
                     <div>
                         <CurationInterpretationCriteria interpretation={interpretation} selectedTab={selectedTab}
-                            updateSelectedCriteria={this.updateSelectedCriteria} unusedCriteria={unusedCriteria} />
+                            updateSelectedCriteria={this.updateSelectedCriteria} unusedCriteria={this.state.unusedCriteria} />
                         <VariantCurationActions variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href} updateInterpretationObj={this.updateInterpretationObj}
                             calculatedAssertion={calculated_pathogenicity} provisionalPathogenicity={this.state.provisionalPathogenicity}
@@ -591,7 +592,7 @@ var VariantCurationHub = createReactClass({
                         <VariantCurationInterpretation variantData={variantData} interpretation={interpretation} editKey={editKey} session={session}
                             href_url={this.props.href_url} updateInterpretationObj={this.updateInterpretationObj} getSelectedTab={this.getSelectedTab}
                             getSelectedSubTab={this.getSelectedSubTab}
-                            unusedCriteria={unusedCriteria}
+                            unusedCriteria={this.state.unusedCriteria}
                             ext_myGeneInfo={my_gene_info}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}

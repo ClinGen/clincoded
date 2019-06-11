@@ -159,7 +159,9 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
         var criteriaEvalConflictValues = ['met', 'supporting', 'moderate', 'strong', 'stand-alone', 'very-strong'];
         if (this.props.criteriaCrossCheck && this.props.criteriaCrossCheck.length > 0) {
             // filter out disabled criteria
-            var criteriaCrossCheck = this.props.criteriaCrossCheck.filter(criterion => this.props.unusedCriteria.indexOf(criterion) === -1);
+            var criteriaCrossCheck = Array.isArray(this.props.unusedCriteria)
+                ? this.props.criteriaCrossCheck.filter(criterion => this.props.unusedCriteria.indexOf(criterion) === -1)
+                : this.props.criteriaCrossCheck;
             var criteriaMetNum = 0,
                 criteriaConflicting = [],
                 errorMsgCriteria = '',
@@ -233,7 +235,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
                 }
                 */
                 // UNCOMMENT ABOVE + COMMENT LINE BELOW FOR DISEASE DEPENDENCY RESTRICTION
-                if (this.props.unusedCriteria.indexOf(criterion) === -1) {
+                if (Array.isArray(this.props.unusedCriteria) && this.props.unusedCriteria.indexOf(criterion) === -1) {
                     submittedCriteria.push(criterion);
                 }
             });
@@ -409,7 +411,7 @@ var CurationInterpretationForm = module.exports.CurationInterpretationForm = cre
     },
 
     render: function() {
-        const disableSubmit = this.props.criteria.every(criterion => this.props.unusedCriteria.indexOf(criterion) !== -1);
+        const disableSubmit = Array.isArray(this.props.unusedCriteria) && Array.isArray(this.props.criteria) && this.props.criteria.every(criterion => this.props.unusedCriteria.indexOf(criterion) !== -1);
         return (
             <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                 <div className="evaluation">
@@ -457,11 +459,11 @@ export function evalFormSectionWrapper(noteContent, dropdownContent, explanation
     );
 }
 
-export function renderEvalFormSection(criteriaList, disableEvalForm) {
+export function renderEvalFormSection(criteriaList, unusedCriteria) {
     return (
         <div className="evaluation-form-section-wrapper">
             {criteriaList.map((criteria, i) => {
-                const disableEvalForm = (this.props.unusedCriteria.indexOf(criteria) > -1);
+                const disableEvalForm = Array.isArray(unusedCriteria) && (unusedCriteria.indexOf(criteria) > -1);
                 return (
                     <div key={i}>
                         <div className="panel panel-info evalation-form-item">

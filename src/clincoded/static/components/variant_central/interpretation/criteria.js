@@ -102,7 +102,7 @@ var CurationInterpretationCriteria = module.exports.CurationInterpretationCriter
                 });
             }
         }
-        const unused = (this.props.unusedCriteria.indexOf(key) > -1)
+        const unused = Array.isArray(this.props.unusedCriteria) && (this.props.unusedCriteria.indexOf(key) > -1);
         return (
             <button className={'btn btn-default ' + evidence[key].class + ' ' + evidence[key].category + this.getCurrentTab(evidence[key].category)}
                 type="button" key={key} data-status={status}
