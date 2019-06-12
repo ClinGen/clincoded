@@ -128,7 +128,8 @@ let MasterEvidenceTable = createReactClass({
             if (evidence_types[evidence_type]) {
                 let num_items = evidence_types[evidence_type].length;
                 first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
-                    {extraEvidence.typeMapping[evidence_type].name}
+                    {`${extraEvidence.typeMapping[evidence_type].name} (${num_items})`}
+
                 </th>);
             }
         });
