@@ -2,7 +2,7 @@ import _ from 'underscore';
 
 const typeMapping = {
     PMID: {
-        name: 'Pubmed',
+        name: 'PubMed',
         fields: [{
             name: 'pmid',
             description: 'PMID',
