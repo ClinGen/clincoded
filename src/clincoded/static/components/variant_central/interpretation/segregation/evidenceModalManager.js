@@ -225,7 +225,7 @@ let EvidenceModalManager = createReactClass({
     sheetDone(data) {
         if (data === null) {
             // No change is needed
-            this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory);
+            this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory, null);
         }
         else {
             // Remove empty fields from data
@@ -241,8 +241,10 @@ let EvidenceModalManager = createReactClass({
             newData.data = {};
             Object.assign(newData.data, hasData);
             newData['relevant_criteria'] = this.props.criteriaList;
+            // if editing existing evidence, get its created date.
+            let dateCreated = this.props.data ? this.props.data.date_created : null;
             // Save the evidence data
-            this.props.evidenceCollectionDone(true, newData, this.getCurrentEvidenceId(), this.props.subcategory);
+            this.props.evidenceCollectionDone(true, newData, this.getCurrentEvidenceId(), this.props.subcategory, dateCreated);
         }
         this.reset();
     },

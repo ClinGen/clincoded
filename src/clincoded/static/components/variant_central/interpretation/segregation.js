@@ -119,7 +119,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
      * @param {object} evidence    The new/modified evidence source data
      * @param {object} id          The evidence id if editing evidence. null if new evidence.
      */
-    evidenceCollectionDone: function(finished, evidence, id, subcategory) {
+    evidenceCollectionDone: function(finished, evidence, id, subcategory, dateCreated) {
         if (!finished) {
             return;
         } else {
@@ -152,6 +152,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     evidenceDescription: '',
                     source: evidence
                 };
+
+                // Set the evidence created date to its original date if editing evidence
+                if (id !== null && dateCreated !== null) {
+                    extra_evidence.date_created = dateCreated;
+                }
 
                 // Add affiliation if the user is associated with an affiliation
                 // and if the data object has no affiliation
