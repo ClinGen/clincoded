@@ -156,7 +156,7 @@ var AddResourceIdModal = createReactClass({
             queryResourceBusy: false, // Flag to indicate the input button's 'busy' state
             resourceFetched: false, // Flag to indicate that a response from the resource has been obtained
             tempResource: {}, // Temporary object to hold the resource response
-            submitResourceBusy: false // Flag to indicate that the modal's submit button is in a 'busy' state (creating local db entry)
+            submitResourceBusy: false, // Flag to indicate that the modal's submit button is in a 'busy' state (creating local db entry)
         };
     },
 
@@ -460,7 +460,7 @@ function pubmedValidateForm() {
     }
     return valid;
 }
-async function pubmedQueryResource() {
+function pubmedQueryResource() {
     // for pinging and parsing data from PubMed
     this.saveFormValue('resourceId', this.state.inputValue);
     if (pubmedValidateForm.call(this)) {
@@ -469,40 +469,71 @@ async function pubmedQueryResource() {
 
         // Remove possible prefix like "PMID:" before sending queries
         var id = this.state.inputValue.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
+        // Check whether input is a valid DOI
+        const doiRegex = /^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi;
+        const validDoi = id.match(doiRegex);
         // Handle search via DOI
-        var doiRegex = /^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi;
-        var validDoi = id.match(doiRegex);
-        if(validDoi) {
-            var doiUrl = external_url_map['DoiToPubMed'] + validDoi[0];
-           await this.getRestDataXml(doiUrl).then(response => {
-                var doiData = parsePubmed(response);
-                if (doiData) {
-                    id = doiData.pmid;
-                }
+        if (validDoi) {
+            const doiUrl = external_url_map['DoiToPubMed'] + validDoi[0];
+            const doiData = this.getRestDataXml(doiUrl).then(xml => {
+                let data = parsePubmed(xml);
+                return data;
+            })
+            Promise.resolve(doiData).then(res => {
+                id = res.pmid;
+                return id;
+            })
+            // Take the resolved PMID and then query PubMed
+            .then(id => {this.getRestData('/articles/' + id)
+            .then(article => {
+                    // article already exists in db
+                    this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
+                }, () => {
+                    var url = external_url_map['PubMedSearch'];
+                    // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                    this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                        var data = parsePubmed(xml);
+                        if (data.pmid) {
+                            // found the result we want
+                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        } else {
+                            // no result from ClinVar
+                            this.setFormErrors('resourceId', 'PMID not found');
+                            this.setState({queryResourceBusy: false, resourceFetched: false});
+                        }
+                    });
+                }).catch(e => {
+                    // error handling for PubMed query
+                    this.setFormErrors('resourceId', 'Error querying PubMed. Please check your input and try again.');
+                    this.setState({queryResourceBusy: false, resourceFetched: false});
+                });
+            });
+        // If not a DOI, query PubMed using PMID
+        } else {
+            this.getRestData('/articles/' + id)
+            .then(article => {
+                // article already exists in db
+                this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
+            }, () => {
+                var url = external_url_map['PubMedSearch'];
+                // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+                this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+                    var data = parsePubmed(xml);
+                    if (data.pmid) {
+                        // found the result we want
+                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                    } else {
+                        // no result from ClinVar
+                        this.setFormErrors('resourceId', 'PMID not found');
+                        this.setState({queryResourceBusy: false, resourceFetched: false});
+                    }
+                });
+            }).catch(e => {
+                // error handling for PubMed query
+                this.setFormErrors('resourceId', 'Error querying PubMed. Please check your input and try again.');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
             });
         }
-        this.getRestData('/articles/' + id).then(article => {
-            // article already exists in db
-            this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
-        }, () => {
-            var url = external_url_map['PubMedSearch'];
-            // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-            this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
-                var data = parsePubmed(xml);
-                if (data.pmid) {
-                    // found the result we want
-                    this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
-                } else {
-                    // no result from ClinVar
-                    this.setFormErrors('resourceId', 'PMID not found');
-                    this.setState({queryResourceBusy: false, resourceFetched: false});
-                }
-            });
-        }).catch(e => {
-            // error handling for PubMed query
-            this.setFormErrors('resourceId', 'Error querying PubMed. Please check your input and try again.');
-            this.setState({queryResourceBusy: false, resourceFetched: false});
-        });
     } else {
         this.setState({queryResourceBusy: false});
     }
