@@ -276,6 +276,7 @@ let EvidenceModalManager = createReactClass({
                         data = {this.getSheetData()}
                         allData = {this.props.data}
                         isNew = {this.state.isNew}
+                        isFromMaster = {this.props.useIcon}
                         subcategory = {this.props.subcategory}
                         evidenceType = {this.props.evidenceType}
                         onRef={ref => (this.sheetModal = ref)}

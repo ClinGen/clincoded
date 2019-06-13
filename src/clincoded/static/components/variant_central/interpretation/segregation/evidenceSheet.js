@@ -25,6 +25,7 @@ let EvidenceSheet = createReactClass({
         data: PropTypes.object,                     // Data relevant to this particular piece of evidence
         allData: PropTypes.object,                  // All extra evidence across all entries for this variant
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
+        isFromMaster: PropTypes.bool,               // If editing an existing evidence by clicking edit button in master/tally table
         subcategory: PropTypes.string,              // Subcategory (usually the panel) the evidence is part of
         evidenceType: PropTypes.string              // Evidence source type
     },
@@ -184,7 +185,7 @@ let EvidenceSheet = createReactClass({
                         checked = { col.name === 'is_disease_associated_with_probands' && this.state.hpoUnaffected != undefined ? this.state.hpoUnaffected : false }
                         handleChange = { col.kind === 'checkbox' ? this.handleCheckboxChange : null }
                         error = { col.name === 'proband_hpo_ids' ? this.getFormError('proband_hpo_ids') : null }
-                        fieldStyle = { fields.indexOf(col.name) == -1 ? null : {backgroundColor: this.state.backgroundGreen} }
+                        fieldStyle = { fields.indexOf(col.name) == -1 || this.props.isFromMaster ? null : {backgroundColor: this.state.backgroundGreen} }
                     />
                 </div>]
                 // if ('lookup' in col) {
@@ -249,6 +250,7 @@ let EvidenceSheet = createReactClass({
         var submitErrClass = 'submit-err ' + (this.anyFormErrors() ? '' : ' hidden');
         var errMsgClass = this.state.errorMsg === '' ? 'hidden' : '';
         var submitClass = "btn-default btn-inline-spacer btn-primary" + (this.state.errorMsg === '' && this.state.enableSubmit === true ? '' : ' disabled');
+        var showMsgClass = this.props.isFromMaster ? 'hidden' : '';
 
         return  <ModalComponent
             modalTitle={this.props.isNew ? "Add Evidence Details" : "Edit Evidence Details"}
@@ -261,11 +263,13 @@ let EvidenceSheet = createReactClass({
         >
         <div className="form-std">
             <div className="modal-body" style={{textAlign: 'left'}}>
-                <h4 className={errMsgClass} style={{color: 'red'}}>{this.state.errorMsg}</h4>
+                <h4 className={errMsgClass} style={{color: 'red'}}>
+                    {this.state.errorMsg}
+                </h4>
                 <h4>
                     For {extraEvidence.typeMapping[this.props.evidenceType].name} evidence details
                 </h4>
-                <h4>
+                <h4 className={showMsgClass}>
                     Fields marked in a <span style={{backgroundColor: this.state.backgroundGreen}}>green background</span> are specifically relevant to this Criteria Code.
                 </h4>
                 <Form submitHandler={this.submitNewEvidence} formClassName="form-horizontal form-std">
