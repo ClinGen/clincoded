@@ -241,6 +241,7 @@ $status-types:
     font-size: 0.9rem;
 }
 
+// For variant interpretation Case/Segregation tab master/tally table
 .masterTable {
     width: 100%;
     display: block;
@@ -254,8 +255,17 @@ $status-types:
     min-height:37px;
     max-height:77px;
 }
-.masterTable tbody tr td:nth-child(n+2), .masterTable thead tr th:nth-child(n+2){
+.masterTable thead tr th:nth-child(n+2),
+.masterTable tbody tr td:nth-child(n+2) {
     max-width: 250px;
+}
+.masterTable thead tr:nth-child(n+1) th:nth-child(n+2),
+.masterTable tbody tr td:nth-child(n+2) {
+    background-color: $table-row-odd-bg;
+}
+.masterTable thead tr:nth-child(n+1) th:nth-child(2n+2),
+.masterTable tbody tr td:nth-child(2n+2) {
+    background-color: $table-row-even-bg;
 }
 .masterTable thead tr th.rotate {
     height: 400px;
