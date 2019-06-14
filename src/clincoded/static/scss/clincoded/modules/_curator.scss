@@ -271,12 +271,13 @@
 
     &:hover div,
     &.curr-pmid div {
+        overflow: hidden;
         opacity: 1;
     }
 }
 
 .pmid-selection-list-pmid {
-    font-weight: bold;
+    font-weight: bold;        
 }
 
 .pmid-selection-help {
