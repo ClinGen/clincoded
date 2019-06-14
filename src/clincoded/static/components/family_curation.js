@@ -1761,15 +1761,9 @@ function FamilySegregation() {
     let family = this.state.family;
     let gdm = this.state.gdm;
     let segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
-    if (gdm) {
-        var semiDom = gdm.modeInheritance.indexOf('Semidominant') > -1;
-    }
+    const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
     // Creates boolean values for conditional disabling of inputs
-    if (this.state.lodPublished === 'Yes') {
-        var lodPublished = true;
-    } else {
-        var lodPublished = false;
-    }
+    const lodPublished = this.state.lodPublished === 'Yes';
     if (segregation) {
         var moi = segregation.moiDisplayedForFamily;
         if (moi === 'Autosomal dominant/X-linked' || this.state.familyMoiDisplayed === 'Autosomal dominant/X-linked') {
@@ -1864,8 +1858,7 @@ function FamilySegregation() {
                 value={segregation && segregation.pedigreeLocation ? segregation.pedigreeLocation : ''}
                 handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" placeholder="e.g. Figure 3A" />
             <h3><i className="icon icon-chevron-right"></i> LOD Score (select one to include as score):</h3>
-            {semiDom ? null 
-                :
+            {!semiDom ? 
                 <Input type="select" ref="SEGlodPublished" label="Published LOD score?:" defaultValue="none"
                     value={curator.booleanToDropdown(segregation.lodPublished)}
                     handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
@@ -1874,7 +1867,7 @@ function FamilySegregation() {
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
                 </Input>
-            }
+            : null}
             {this.state.lodPublished === 'Yes' ?
                 <Input type="number" ref="SEGpublishedLodScore" label="Published Calculated LOD score:"
                     value={segregation && segregation.publishedLodScore ? segregation.publishedLodScore : ''}
@@ -1940,12 +1933,9 @@ function FamilyVariant() {
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
     let individualName = this.state.individualName;
-    if (gdm) {
-        var semiDom = gdm.modeInheritance.indexOf('Semidominant') > -1;
-        if (semiDom) {
-            var MAX_VARIANTS = 3;
-        }
-    }
+    
+    const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+    const maxVariants = semiDom ? 3 : MAX_VARIANTS;
 
     return (
         <div className="row form-row-helper">
@@ -1986,8 +1976,8 @@ function FamilyVariant() {
             }
             {semiDom ?
                 <Input type="select" label="The proband is:" ref="SEGprobandIs" handleChange={this.handleChange}
-                    defaultValue="none" value={family && family.segregation.probandIs ? family.segregation.probandIs : 'none'}
-                    error={this.getFormError('SEGprobandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
+                    defaultValue="none" value={segregation && segregation.probandIs ? segregation.probandIs : 'none'}
+                    error={this.getFormError('SEGprobandIs')} clearError={this.clrFormErrors.bind(null, 'SEGprobandIs')}
                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
@@ -2010,7 +2000,7 @@ function FamilyVariant() {
                     </Input>
                 </div>
             }
-            {_.range(MAX_VARIANTS).map(i => {
+            {_.range(maxVariants).map(i => {
                 var variant;
 
                 if (variants && variants.length) {

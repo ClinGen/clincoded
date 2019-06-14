@@ -108,8 +108,10 @@ const IndividualCuration = createReactClass({
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
             this.setState({proband_selected: false});
-        } else if (ref === 'probandIs' && this.refs[ref].getValue() === 'Biallelic homozygous' || this.refs[ref].getValue() === 'Biallelic compound heterozygous') {
-            this.setState({biallelicHetOrHom: true});
+        } else if (ref === 'probandIs') {
+            if (this.refs[ref].getValue() === 'Biallelic homozygous' || this.refs[ref].getValue() === 'Biallelic compound heterozygous') {
+                this.setState({biallelicHetOrHom: true});
+            }
         } else if (ref === 'probandIs') {
             this.setState({biallelicHetOrHom: false});
         }
@@ -1442,19 +1444,18 @@ function IndividualVariantInfo() {
     let family = this.state.family;
     let gdm = this.state.gdm;
     let annotation = this.state.annotation;
+    let segregation = family && family.segregation;
     let variants = individual && individual.variants;
     let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
-    if (gdm) {
-        var semiDom = gdm.modeInheritance.indexOf('Semidominant') > -1;
-    }
+    const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
 
     return (
         <div className="row form-row-helper">
             {individual && individual.proband && family ?
                 <div>
-                    {family.segregation.probandIs ? <span><strong>Proband is: </strong>{family.segregation.probandIs}</span> : null}
+                    {segregation.probandIs ? <span><strong>Proband is: </strong>{segregation.probandIs}</span> : null}
                     <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                     {variants.map(function(variant, i) {
                         return (
@@ -1917,7 +1918,7 @@ const IndividualViewer = createReactClass({
         var tempPmid = tempGdmPmid[1];
         let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
         let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
-        var probandIs = this.props.context.probandIs;
+        var probandIs = individual.probandIs;
 
         return (
             <div>
@@ -2065,7 +2066,7 @@ const IndividualViewer = createReactClass({
                                 ? <div>
                                     <dl className="dl-horizontal">
                                         <dt>The proband is</dt>
-                                        <dd>{individual && individual.probandIs ? individual.probandIs : "None selected"}</dd>
+                                        <dd>{probandIs}</dd>
                                     </dl>
                                 </div>
                                 :
