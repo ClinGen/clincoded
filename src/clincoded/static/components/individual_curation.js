@@ -111,9 +111,9 @@ const IndividualCuration = createReactClass({
         } else if (ref === 'probandIs') {
             if (this.refs[ref].getValue() === 'Biallelic homozygous' || this.refs[ref].getValue() === 'Biallelic compound heterozygous') {
                 this.setState({biallelicHetOrHom: true});
+            } else {
+                this.setState({biallelicHetOrHom: false});
             }
-        } else if (ref === 'probandIs') {
-            this.setState({biallelicHetOrHom: false});
         }
     },
 
@@ -1459,7 +1459,7 @@ function IndividualVariantInfo() {
         <div className="row form-row-helper">
             {individual && individual.proband && family ?
                 <div>
-                    {segregation.probandIs ? <span><strong>Proband is: </strong>{segregation.probandIs}</span> : null}
+                    {segregation && segregation.probandIs ? <span><strong>Proband is: </strong>{segregation.probandIs}</span> : null}
                     <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
                     {variants.map(function(variant, i) {
                         return (
@@ -1922,7 +1922,7 @@ const IndividualViewer = createReactClass({
         var tempPmid = tempGdmPmid[1];
         let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
         let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
-        var probandIs = individual.probandIs;
+        var probandIs = individual && individual.probandIs;
 
         return (
             <div>
