@@ -355,11 +355,14 @@ const IndividualCuration = createReactClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var family = this.state.family;
+            let gdm = this.state.gdm;
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = [], individualArticles, individualVariants = [];
             var evidenceScores = []; // Holds new array of scores
             let individualScores = currIndividual && currIndividual.scores ? currIndividual.scores : [];
+            const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+            const maxVariants = semiDom ? 3 : MAX_VARIANTS;
             // Find any pre-existing score(s) and put their '@id' values into an array
             if (individualScores.length) {
                 individualScores.forEach(score => {
@@ -405,7 +408,7 @@ const IndividualCuration = createReactClass({
             }
 
             // Get variant uuid's if they were added via the modals
-            for (var i = 0; i < MAX_VARIANTS; i++) {
+            for (var i = 0; i < maxVariants; i++) {
                 // Grab the values from the variant form panel
                 var variantId = this.getFormValue('variantUuid' + i);
 
@@ -1450,6 +1453,7 @@ function IndividualVariantInfo() {
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
     const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+    const maxVariants = semiDom ? 3 : MAX_VARIANTS;
 
     return (
         <div className="row form-row-helper">
@@ -1556,7 +1560,7 @@ function IndividualVariantInfo() {
                             labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                         </Input>
                     </div>}
-                    {_.range(MAX_VARIANTS).map(i => {
+                    {_.range(maxVariants).map(i => {
                         var variant;
 
                         if (variants && variants.length) {

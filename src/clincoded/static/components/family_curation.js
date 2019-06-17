@@ -659,6 +659,9 @@ var FamilyCuration = createReactClass({
             var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
+            let gdm = this.state.gdm;
+            const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+            const maxVariants = semiDom ? 3 : MAX_VARIANTS;
 
             /**
              * Proband disease is required if Proband name is not nil
@@ -690,9 +693,8 @@ var FamilyCuration = createReactClass({
                 formError = true;
                 this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
-
             // Get variant uuid's if they were added via the modals
-            for (var i = 0; i < MAX_VARIANTS; i++) {
+            for (var i = 0; i < maxVariants; i++) {
                 // Grab the values from the variant form panel
                 var variantId = this.getFormValue('variantUuid' + i);
 
