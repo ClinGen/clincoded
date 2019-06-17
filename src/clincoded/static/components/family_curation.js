@@ -195,8 +195,10 @@ var FamilyCuration = createReactClass({
                 this.setState({lodLocked: true, lodRequirements: lodRequirements, lodCalcMode: 'ADX'});
             } else if (lodRequirements === 'Yes - autosomal recessive') {
                 this.setState({lodLocked: true, lodRequirements: lodRequirements, lodCalcMode: 'AR'});
-            } else if (lodRequirements === 'No' || lodRequirements === 'none') {
+            } else if (lodRequirements === 'No') {
                 this.setState({lodLocked: true, lodRequirements: null, lodCalcMode: null});
+            } else if (lodRequirements === 'none') {
+                this.setState({lodLocked: false, lodRequirements: null, lodCalcMode: null});
             }
         } else if (ref.substring(0,3) === 'SEG') {
             // Handle segregation fields to see if we should enable or disable the assessment dropdown
