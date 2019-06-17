@@ -144,6 +144,9 @@ var FamilyCuration = createReactClass({
                 publishedLodScore = this.state.family.segregation.publishedLodScore;
             }
             if (lodPublished === 'Yes') {
+                this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
+                this.refs['SEGnumberOfAffectedWithGenotype'].setValue('');
+                this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
                 this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null, includeLodScore: false}, () => {
                     if (!this.state.publishedLodScore) {
                         this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
@@ -179,19 +182,25 @@ var FamilyCuration = createReactClass({
         } else if (ref === 'SEGmoiDisplayedForFamily') {
             let familyMoiDisplayed =  this.refs[ref].getValue();
             if (familyMoiDisplayed === 'Autosomal dominant/X-linked') {
+                if (this.state.lodPublished === 'No') {
+                    this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
+                    this.refs['SEGestimatedLodScore'].setValue('');
+                }
                 this.setState({lodLocked: true, lodCalcMode: 'ADX', familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
-                this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
-                this.refs['SEGestimatedLodScore'].setValue('');
             } else if (familyMoiDisplayed === 'Autosomal recessive') {
+                if (this.state.lodPublished === 'No') {
+                    this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
+                    this.refs['SEGestimatedLodScore'].setValue('');
+                }
                 this.setState({lodLocked: true, lodCalcMode: 'AR', familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
-                this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
-                this.refs['SEGestimatedLodScore'].setValue('');
             } else if (familyMoiDisplayed === 'Semidominant') {
+                if (this.state.lodPublished === 'No') {
+                    this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
+                    this.refs['SEGnumberOfAffectedWithGenotype'].setValue('');
+                    this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
+                    this.refs['SEGestimatedLodScore'].setValue('');
+                }
                 this.setState({lodLocked: false, lodCalcMode: null, familyMoiDisplayed: familyMoiDisplayed, isSemidominant: true});
-                this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
-                this.refs['SEGnumberOfAffectedWithGenotype'].setValue('');
-                this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
-                this.refs['SEGestimatedLodScore'].setValue('');
             } else {
                 this.setState({lodLocked: false, lodCalcMode: null, familyMoiDisplayed: familyMoiDisplayed, isSemidominant: false})
             }
