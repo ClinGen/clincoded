@@ -1950,6 +1950,7 @@ function FamilyVariant() {
     let pmidUuid = this.state.annotation && this.state.annotation.article.pmid ? this.state.annotation.article.pmid : null;
     let userUuid = this.state.gdm && this.state.gdm.submitted_by.uuid ? this.state.gdm.submitted_by.uuid : null;
     let individualName = this.state.individualName;
+    let isProband = probandIndividual && probandIndividual.proband ? probandIndividual.proband : false;
     
     const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
     const maxVariants = semiDom ? 3 : MAX_VARIANTS;
@@ -1995,7 +1996,7 @@ function FamilyVariant() {
                 <Input type="select" label="The proband is:" ref="SEGprobandIs" handleChange={this.handleChange}
                     defaultValue="none" value={segregation && segregation.probandIs ? segregation.probandIs : 'none'}
                     error={this.getFormError('SEGprobandIs')} clearError={this.clrFormErrors.bind(null, 'SEGprobandIs')}
-                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={isProband || this.state.individualRequired}>
                     <option value="none">No Selection</option>
                     <option disabled="disabled"></option>
                     <option value="Monoallelic heterozygous">Monoallelic heterozygous (e.g. autosomal)</option>

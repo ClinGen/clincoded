@@ -1539,7 +1539,7 @@ function IndividualVariantInfo() {
                         <Input type="select" label="The proband is:" ref="probandIs" handleChange={this.handleChange}
                             defaultValue="none" value={individual && individual.probandIs ? individual.probandIs : 'none'}
                             error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
-                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required>
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.proband_selected}>
                             <option value="none">No Selection</option>
                             <option disabled="disabled"></option>
                             <option value="Monoallelic heterozygous">Monoallelic heterozygous (e.g. autosomal)</option>
