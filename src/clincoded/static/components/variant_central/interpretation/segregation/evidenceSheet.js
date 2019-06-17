@@ -160,6 +160,7 @@ let EvidenceSheet = createReactClass({
 
         extraEvidence.evidenceInputs.forEach(row => {
             let inner = [];
+            let done = false;
             row.cols.forEach(col => {
                 let value = '';
                 if (this.state.data != null && Object.keys(this.state.data).length > 0) {
@@ -202,11 +203,23 @@ let EvidenceSheet = createReactClass({
                 //     </div>);
                 // }
                 inner.push(node);
+                // if field needs to be put in its own row, add it here.
+                if (col.width === 12) {
+                    let outer = <div className="row" style={outerStyle} key={i++}>
+                        {inner}
+                    </div>
+                    jsx.push(outer);
+                    inner = [];
+                    done = true;
+                }
             });
-            let outer = <div className="row" style={outerStyle} key={i++}>
-                {inner}
-            </div>
-            jsx.push(outer);
+            // if row has not been added, add it here.
+            if (!done) {
+                let outer = <div className="row" style={outerStyle} key={i++}>
+                    {inner}
+                </div>
+                jsx.push(outer);
+            }
         });
         return jsx;
     },

@@ -247,11 +247,8 @@ $status-types:
     display: block;
     overflow-x: scroll;
 }
-.masterTable thead tr th:first-child > div,
-.masterTable tbody tr td:first-child > div {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
+.masterTable tbody tr td:nth-child(2) > div {
+    width: 230px;
     min-height:37px;
     max-height:77px;
 }
@@ -259,12 +256,12 @@ $status-types:
 .masterTable tbody tr td:nth-child(n+2) {
     max-width: 250px;
 }
-.masterTable thead tr:nth-child(n+1) th:nth-child(n+2),
-.masterTable tbody tr td:nth-child(n+2) {
+.masterTable thead tr:nth-child(n+1) th:nth-child(n+3),
+.masterTable tbody tr td:nth-child(n+3) {
     background-color: $table-row-odd-bg;
 }
-.masterTable thead tr:nth-child(n+1) th:nth-child(2n+2),
-.masterTable tbody tr td:nth-child(2n+2) {
+.masterTable thead tr:nth-child(n+1) th:nth-child(2n+3),
+.masterTable tbody tr td:nth-child(2n+3) {
     background-color: $table-row-even-bg;
 }
 .masterTable thead tr th.rotate {

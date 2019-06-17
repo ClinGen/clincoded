@@ -123,7 +123,7 @@ let MasterEvidenceTable = createReactClass({
         let third_row = []; // Submitted by row
         let tableOrder = this.getTableEvidenceSourceOrder();
 
-        first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="2"></td>);
+        first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="3"></td>);
         tableOrder.forEach(evidence_type => {
             if (evidence_types[evidence_type]) {
                 let num_items = evidence_types[evidence_type].length;
@@ -133,9 +133,10 @@ let MasterEvidenceTable = createReactClass({
                 </th>);
             }
         });
-
+        second_row.push(<th key="header.codes" style={{borderBottom: 'none', borderTop: 'none', borderRight: 'none'}}></th>);
         second_row.push(<th key="header.number" style={{border: 'none'}}>Evidence Type</th>);
         second_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}></th>);
+        third_row.push(<th key="header.codes" style={{borderBottom: 'none', borderTop: 'none', borderRight: 'none'}}></th>);
         third_row.push(<th key="header.user" style={{border: 'none'}}>Submitted by</th>);
         third_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}>
             <div><span>Sum</span></div>
@@ -217,8 +218,19 @@ let MasterEvidenceTable = createReactClass({
         // Initialize the left-hand columns
         masterTable().forEach(row => {
             let contents = `${row.label}`;
-            if ('criteria_codes' in row) {
-                contents = `[${row['criteria_codes'].join(', ')}] ${contents}`;
+            let code_td = <td></td>;
+
+            if ('criteria_codes' in row && 'row_span' in row && row['row_span'] !== 0) {
+                let codes = `${row['criteria_codes'].join(', ')}`;
+                code_td = <td key={`cell_${cell_num++}`} style={{borderBottom: 'none'}}>
+                    <div className={row['code_color']}>
+                        <strong>{codes}</strong>
+                    </div>
+                </td>
+            }
+            // No table cell border if same source type
+            if ('row_span' in row && row['row_span'] === 0) {
+                code_td = <td style={{border: 'none'}}></td>;
             }
             let label_td = <td key={`cell_${cell_num++}`}>
                 <div>
@@ -235,8 +247,7 @@ let MasterEvidenceTable = createReactClass({
                     <div></div>
                 </td>;
             }
-            
-            tds.push([label_td, sum_td]);  // Note we are pushing an array
+            tds.push([code_td, label_td, sum_td]);  // Note we are pushing an array
         });
 
         // Middle columns

@@ -38,7 +38,7 @@ const typeMapping = {
             identifier: true
         }, {
             name: 'institutional_affiliation',
-            description: 'institutional Affiliation',
+            description: 'Institutional Affiliation',
             required: true,
             identifier: false
         }, {
@@ -132,18 +132,14 @@ const evidenceInputs = [{
             kind: 'text',
             lookup: 'HPOApi',
             width: 12
-        }]
-    },
-    {
-        cols: [{
+        },
+        {
             label: 'Phenotypic feature(s) associated with proband(s) (free text)',
             name: 'proband_free_text',
             kind: 'text',
             width: 12
-        }]
-    },
-    {
-        cols: [{
+        },
+        {
             label: 'Comment',
             name: 'proband_hpo_comment',
             kind: 'text',
@@ -152,7 +148,7 @@ const evidenceInputs = [{
     },
     {
         cols: [{
-            label: 'Number of probands with relevant phenotype',
+            label: '# probands with relevant phenotype',
             name: 'num_probands_relevant_phenotype',
             kind: 'number',
             width: 4
@@ -167,7 +163,7 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: 'Number of unaffected family members with variant',
+                label: '# unaffected family members with variant',
                 name: 'num_unaffected_family_with_variant',
                 kind: 'number',
                 width: 4
@@ -183,7 +179,7 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: 'Number of control individuals with variant',
+                label: '# control individuals with variant',
                 name: 'num_control_with_variant',
                 kind: 'number',
                 width: 2
@@ -205,7 +201,7 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: 'Number of segregations',
+                label: '# segregations',
                 name: 'num_segregations',
                 kind: 'number',
                 width: 4
@@ -221,7 +217,7 @@ const evidenceInputs = [{
     {
         cols: [
             {
-                label: 'Number of non-segregations',
+                label: '# non-segregations',
                 name: 'num_non_segregations',
                 kind: 'number',
                 width: 4
@@ -343,6 +339,8 @@ const evidenceInputs = [{
 function masterTable() {
     let fields = [];
     evidenceInputs.forEach(input => {
+        let count = input.cols.length;
+        let set = false;
         input.cols.forEach(col => {
             let obj = {
                 key: col.name,
@@ -351,8 +349,14 @@ function masterTable() {
             let mapping = _.find(fieldToCriteriaCodeMapping, o => {
                 return o.key === col.name
             });
-            if (mapping != undefined) {
+            if (mapping != undefined && !set) {
                 obj['criteria_codes'] = mapping['codes'];
+                obj['row_span'] = count;
+                obj['code_color'] = mapping['code_color'];
+                set = true;
+            }
+            else {
+                obj['row_span'] = set === true ? 0 : 1;
             }
             fields.push(obj);
         });
@@ -388,39 +392,48 @@ const subcategories = [
 const fieldToCriteriaCodeMapping = [
     {
         key: 'num_unaffected_family_with_variant',
-        codes: ['BS2']
+        codes: ['BS2'],
+        code_color: 'benign-strong'
     },
     {
         key: 'num_control_with_variant',
-        codes: ['BS2']
+        codes: ['BS2'],
+        code_color: 'benign-strong'
     },
     {
         key: 'num_probands_relevant_phenotype',
-        codes: ['PS4']
+        codes: ['PS4'],
+        code_color: 'pathogenic-strong'
     },
     {
         key: 'num_segregations',
-        codes: ['PP1']
+        codes: ['PP1'],
+        code_color: 'pathogenic-supporting'
     },
     {
         key: 'num_non_segregations',
-        codes: ['BS4']
+        codes: ['BS4'],
+        code_color: 'benign-strong'
     },
     {
         key: 'num_de_novo_confirmed',
-        codes: ['PS2']
+        codes: ['PS2'],
+        code_color: 'pathogenic-strong'
     },
     {
         key: 'num_de_novo_unconfirmed',
-        codes: ['PM6']
+        codes: ['PM6'],
+        code_color: 'pathogenic-strong'
     },
     {
         key: 'num_probands_with_alt_genetic_cause',
-        codes: ['BP5']
+        codes: ['BP5'],
+        code_color: 'benign-supporting'
     },
     {
         key: 'proband_hpo_ids',
-        codes: ['PP4']
+        codes: ['PP4'],
+        code_color: 'pathogenic-supporting'
     },
     {
         key: 'proband_free_text',
@@ -428,15 +441,18 @@ const fieldToCriteriaCodeMapping = [
     },
     {
         key: 'num_proband_hom',
-        codes: ['PM3']
+        codes: ['PM3'],
+        code_color: 'pathogenic-strong'
     },
     {
         key: 'num_proband_double_het',
-        codes: ['BP2']
+        codes: ['BP2'],
+        code_color: 'benign-supporting'
     },
     {
         key: 'num_probands_compound_het',
-        codes: ['PM3']
+        codes: ['PM3'],
+        code_color: 'pathogenic-strong'
     }
 ];
 
@@ -471,11 +487,11 @@ const sheetToTableMapping = [
         'subcategory': 'segregation-data',
         'cols': [{
             key: 'num_segregations',
-            title: 'Number of segregations'
+            title: '# segregations'
         },
         {
             key: 'num_non_segregations',
-            title: 'Number of non-segregations'
+            title: '# non-segregations'
         }]
     },
     {
