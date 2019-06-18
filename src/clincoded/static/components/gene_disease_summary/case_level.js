@@ -33,28 +33,12 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     }
 
     /**
-     * Method to assemble the authors list for the given evidence
-     * @param {object} evidence - scored evidence and its associated case-control evidence
-     */
-    getEvidenceAuthors(evidence) {
-        let authors;
-        if (evidence.authors && evidence.authors.length) {
-            if (evidence.authors.length > 1) {
-                authors = evidence.authors[0] + ', et al.';
-            } else {
-                authors = evidence.authors[0];
-            }
-        }
-        return authors;
-    }
-
-    /**
      * Method to render individual table row of the logged-in user's scored evidence
      * @param {object} evidence - scored evidence and its associated case-control evidence
      * @param {number} key - unique key
      */
     renderCaseLevelEvidence(evidence, key) {
-        let authors = this.getEvidenceAuthors(evidence);
+        let authors = this.props.getEvidenceAuthors(evidence);
 
         return (
             <tr key={key} className="scored-case-level-evidence">
@@ -166,39 +150,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
         return parseFloat(totalScore).toFixed(2);
     }
 
-    /**
-     * Sort table rows given a list of evidence and column name
-     * @param {array} evidenceList - A list of evidence items
-     * @param {string} colName - sort by column name
-     */
-    sortListbyColName(evidenceList, colName) {
-        let sortedList = [];
-        let dir = this.state.reversed ? -1 : 1;
-        if (evidenceList.length) {
-            switch (colName) {
-                case 'reference':
-                    sortedList = evidenceList.sort((x,y) => { 
-                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
-                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
-                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
-                    });
-                    break;
-                case 'variantType':
-                case 'scoreStatus':
-                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
-                    break;
-                default:
-                    sortedList = evidenceList;
-                    break;
-            }
-        }
-        return sortedList;
-    }
-
     render() {
         const caseLevelEvidenceList = this.props.caseLevelEvidenceList;
-        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseLevelEvidenceList, this.state.sortCol) : caseLevelEvidenceList;
-        let self = this;
+        let sortedEvidenceList = this.state.mounted ? this.props.sortListByColName(caseLevelEvidenceList, this.state.sortCol, this.state.reversed) : caseLevelEvidenceList;
         let sortIconClass = {variantType: 'tcell-sort', reference: 'tcell-sort', scoreStatus: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
@@ -213,9 +167,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                             <thead>
                                 <tr>
                                     <th rowSpan="2">Label</th>
-                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'variantType')}>Variant type<span className={sortIconClass.variantType}></span></th>
+                                    <th rowSpan="2" onClick={(e) => this.handleClickHeader(e, 'variantType')}>Variant type<span className={sortIconClass.variantType}></span></th>
                                     <th rowSpan="2">Variant</th>
-                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
+                                    <th rowSpan="2" onClick={(e) => this.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
                                     <th rowSpan="2">Proband sex</th>
                                     <th rowSpan="2">Proband age</th>
                                     <th rowSpan="2">Proband ethnicity</th>
@@ -223,7 +177,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                     <th colSpan="5">Segregations</th>
                                     <th rowSpan="2">Proband previous testing</th>
                                     <th rowSpan="2">Proband methods of detection</th>
-                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'scoreStatus')}>Score status<span className={sortIconClass.scoreStatus}></span></th>
+                                    <th rowSpan="2" onClick={(e) => this.handleClickHeader(e, 'scoreStatus')}>Score status<span className={sortIconClass.scoreStatus}></span></th>
                                     <th rowSpan="2">Proband points (default points)</th>
                                     <th rowSpan="2">Reason for changed score</th>
                                 </tr>
@@ -237,7 +191,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                             </thead>
                             <tbody>
                                 {sortedEvidenceList.map((item, i) => {
-                                    return (self.renderCaseLevelEvidence(item, i));
+                                    return (this.renderCaseLevelEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="16" className="total-score-label">Total points:</td>
@@ -258,7 +212,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
     caseLevelEvidenceList: PropTypes.array,
-    hpoTerms: PropTypes.object
+    hpoTerms: PropTypes.object,
+    getEvidenceAuthors: PropTypes.func,
+    sortListByColName: PropTypes.func
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;

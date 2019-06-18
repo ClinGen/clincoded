@@ -32,28 +32,12 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     }
 
     /**
-     * Method to assemble the authors list for the given evidence
-     * @param {object} evidence - scored evidence and its associated case-control evidence
-     */
-    getEvidenceAuthors(evidence) {
-        let authors;
-        if (evidence.authors && evidence.authors.length) {
-            if (evidence.authors.length > 1) {
-                authors = evidence.authors[0] + ', et al.';
-            } else {
-                authors = evidence.authors[0];
-            }
-        }
-        return authors;
-    }
-
-    /**
      * Method to render individual table row of the logged-in user's scored evidence
      * @param {object} evidence - scored evidence and its associated case-control evidence
      * @param {number} key - unique key
      */
     renderCaseControlEvidence(evidence, key) {
-        let authors = this.getEvidenceAuthors(evidence);
+        let authors = this.props.getEvidenceAuthors(evidence);
 
         return (
             <tr key={key} className="scored-case-control-evidence">
@@ -142,38 +126,9 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
         return parseFloat(totalScore).toFixed(2);
     }
 
-    /**
-     * Sort table rows given a list of evidence and column name
-     * @param {array} evidenceList - A list of evidence items
-     * @param {string} colName - sort by column name
-     */
-    sortListbyColName(evidenceList, colName) {
-        let sortedList = [];
-        let dir = this.state.reversed ? -1 : 1;
-        if (evidenceList.length) {
-            switch (colName) {
-                case 'reference':
-                    sortedList = evidenceList.sort((x,y) => {
-                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
-                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
-                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
-                    });
-                    break;
-                case 'studyType':
-                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
-                    break;
-                default:
-                    sortedList = evidenceList;
-                    break;
-            }
-        }
-        return sortedList;
-    }
-
     render() {
         const caseControlEvidenceList = this.props.caseControlEvidenceList;
-        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(caseControlEvidenceList, this.state.sortCol) : caseControlEvidenceList;
-        let self = this;
+        let sortedEvidenceList = this.state.mounted ? this.props.sortListByColName(caseControlEvidenceList, this.state.sortCol, this.state.reversed) : caseControlEvidenceList;
         let sortIconClass = {reference: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
@@ -188,7 +143,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                             <thead>
                                 <tr>
                                     <th rowSpan="2">Label</th>
-                                    <th rowSpan="2" onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference (PMID)<span className={sortIconClass.reference}></span></th>
+                                    <th rowSpan="2" onClick={(e) => this.handleClickHeader(e, 'reference')}>Reference (PMID)<span className={sortIconClass.reference}></span></th>
                                     <th rowSpan="2">Disease (Case)</th>
                                     <th rowSpan="2">Study type</th>
                                     <th rowSpan="2">Detection method (Case)</th>
@@ -209,7 +164,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                             </thead>
                             <tbody>
                                 {sortedEvidenceList.map((item, i) => {
-                                    return (self.renderCaseControlEvidence(item, i));
+                                    return (this.renderCaseControlEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="13" className="total-score-label">Total points:</td>
@@ -230,7 +185,9 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
 
 GeneDiseaseEvidenceSummaryCaseControl.propTypes = {
     caseControlEvidenceList: PropTypes.array,
-    hpoTerms: PropTypes.object
+    hpoTerms: PropTypes.object,
+    getEvidenceAuthors: PropTypes.func,
+    sortListByColName: PropTypes.func
 };
 
 export default GeneDiseaseEvidenceSummaryCaseControl;

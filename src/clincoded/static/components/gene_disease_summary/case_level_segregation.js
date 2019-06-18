@@ -32,28 +32,12 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
     }
 
     /**
-     * Method to assemble the authors list for the given evidence
-     * @param {object} evidence - scored evidence and its associated case-control evidence
-     */
-    getEvidenceAuthors(evidence) {
-        let authors;
-        if (evidence.authors && evidence.authors.length) {
-            if (evidence.authors.length > 1) {
-                authors = evidence.authors[0] + ', et al.';
-            } else {
-                authors = evidence.authors[0];
-            }
-        }
-        return authors;
-    }
-
-    /**
      * Method to render individual table row of the logged-in user's segregation evidence
      * @param {object} evidence - segregation evidence with LOD score but without proband
      * @param {number} key - unique key
      */
     renderSegregationEvidence(evidence, key) {
-        let authors = this.getEvidenceAuthors(evidence);
+        let authors = this.props.getEvidenceAuthors(evidence);
 
         return (
             <tr key={key} className="scored-segregation-evidence">
@@ -119,40 +103,9 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
         return parseFloat(totalScore).toFixed(2);
     }
 
-    /**
-     * Sort table rows given a list of evidence and column name
-     * @param {array} evidenceList - A list of evidence items
-     * @param {string} colName - sort by column name 
-     */
-    sortListbyColName(evidenceList, colName) {
-        let sortedList = [];
-        let dir = this.state.reversed ? -1 : 1;
-        if (evidenceList.length) {
-            switch (colName) { 
-                case 'reference':
-                    sortedList = evidenceList.sort((x,y) => {
-                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
-                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
-                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
-                    });
-                    break;
-                case 'lodScore':
-                    sortedList = evidenceList.sort((x, y) => 
-                        (x['segregationPublishedLodScore'] ? x['segregationPublishedLodScore'] : x['segregationEstimatedLodScore'] - y['segregationPublishedLodScore'] ? y['segregationPublishedLodScore'] : y['segregationEstimatedLodScore']) * dir
-                    );
-                    break;
-                default:
-                    sortedList = evidenceList;
-                    break;
-            }
-        }
-        return sortedList;
-    }
-
     render() {
         const segregationEvidenceList = this.props.segregationEvidenceList;
-        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(segregationEvidenceList, this.state.sortCol) : segregationEvidenceList;
-        let self = this;
+        let sortedEvidenceList = this.state.mounted ? this.props.sortListByColName(segregationEvidenceList, this.state.sortCol, this.state.reversed) : segregationEvidenceList;
         let sortIconClass = {reference: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
@@ -167,7 +120,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                             <thead>
                                 <tr>
                                     <th>Label</th>
-                                    <th onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
+                                    <th onClick={(e) => this.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
                                     <th>Family ethnicity</th>
                                     <th>Family phenotypes</th>
                                     <th>Number of affected individuals</th>
@@ -179,7 +132,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                             </thead>
                             <tbody>
                                 {sortedEvidenceList.map((item, i) => {
-                                    return (self.renderSegregationEvidence(item, i));
+                                    return (this.renderSegregationEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="6" className="total-score-label">Total LOD score:</td>
@@ -200,7 +153,9 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
 
 GeneDiseaseEvidenceSummarySegregation.propTypes = {
     segregationEvidenceList: PropTypes.array,
-    hpoTerms: PropTypes.object
+    hpoTerms: PropTypes.object,
+    getEvidenceAuthors: PropTypes.func,
+    sortListByColName: PropTypes.func
 };
 
 export default GeneDiseaseEvidenceSummarySegregation;

@@ -648,6 +648,59 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
+     * Method to assemble the authors list for the given evidence
+     * @param {object} evidence - scored evidence and its associated case-control evidence
+     */
+    getEvidenceAuthors(evidence) {
+        let authors;
+        if (evidence.authors && evidence.authors.length) {
+            if (evidence.authors.length > 1) {
+                authors = evidence.authors[0] + ', et al.';
+            } else {
+                authors = evidence.authors[0];
+            }
+        }
+        return authors;
+    },
+
+    /**
+     * Sort table rows given a list of evidence and column name
+     * @param {array} evidenceList - A list of evidence items
+     * @param {string} colName - sort by column name
+     * @param {bool} reversed - sort by reversed order
+     */
+    sortListByColName(evidenceList, colName, reversed) {
+        let sortedList = [];
+        let dir = reversed ? -1 : 1;
+        if (evidenceList.length) {
+            switch (colName) {
+                case 'reference':
+                    sortedList = evidenceList.sort((x,y) => {
+                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
+                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
+                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
+                    });
+                    break;
+                case 'evidenceType':
+                case 'scoreStatus':
+                case 'studyType':
+                case 'variantType':
+                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
+                    break;
+                case 'lodScore':
+                    sortedList = evidenceList.sort((x, y) =>
+                        (x['segregationPublishedLodScore'] ? x['segregationPublishedLodScore'] : x['segregationEstimatedLodScore'] - y['segregationPublishedLodScore'] ? y['segregationPublishedLodScore'] : y['segregationEstimatedLodScore']) * dir
+                    );
+                    break;
+                default:
+                    sortedList = evidenceList;
+                    break;
+            }
+        }
+        return sortedList;
+    },
+
+    /**
      * Method to close current window
      * @param {*} e - Window event
      */
@@ -682,10 +735,10 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     {!this.state.preview && provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
                         : null}
-                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTerms={hpoTermsCollection.caseLevel} />
-                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTerms={hpoTermsCollection.segregation} />
-                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTerms={hpoTermsCollection.caseControl} />
-                    <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
+                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTerms={hpoTermsCollection.caseLevel} getEvidenceAuthors={this.getEvidenceAuthors} sortListByColName={this.sortListByColName} />
+                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTerms={hpoTermsCollection.segregation} getEvidenceAuthors={this.getEvidenceAuthors} sortListByColName={this.sortListByColName} />
+                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTerms={hpoTermsCollection.caseControl} getEvidenceAuthors={this.getEvidenceAuthors} sortListByColName={this.sortListByColName} />
+                    <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} getEvidenceAuthors={this.getEvidenceAuthors} sortListByColName={this.sortListByColName} />
                 </div>
                 <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".
