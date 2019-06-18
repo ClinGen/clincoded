@@ -29,22 +29,6 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
             this.setState({sortCol: sortCol, reversed: reversed});
         }
     }
-    
-    /**
-     * Method to assemble the authors list for the given evidence
-     * @param {object} evidence - scored evidence and its associated case-control evidence
-     */
-    getEvidenceAuthors(evidence) {
-        let authors;
-        if (evidence.authors && evidence.authors.length) {
-            if (evidence.authors.length > 1) {
-                authors = evidence.authors[0] + ', et al.';
-            } else {
-                authors = evidence.authors[0];
-            }
-        }
-        return authors;
-    }
 
     /**
      * Method to render individual table row of the logged-in user's scored evidence
@@ -52,7 +36,7 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
      * @param {number} key - unique key
      */
     renderExperimentalEvidence(evidence, key) {
-        let authors = this.getEvidenceAuthors(evidence);
+        let authors = this.props.getEvidenceAuthors(evidence);
 
         return (
             <tr key={key} className="scored-experimental-evidence">
@@ -102,40 +86,10 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
         return parseFloat(totalScore).toFixed(2);
     }
 
-    /**
-     * Sort table rows given a list of evidence and column name
-     * @param {array} evidenceList - A list of evidence items
-     * @param {string} colName - sort by column name
-     */
-    sortListbyColName(evidenceList, colName) {
-        let sortedList = [];
-        let dir = this.state.reversed ? -1 : 1;
-        if (evidenceList.length) {
-            switch (colName) {
-                case 'reference':
-                    sortedList = evidenceList.sort((x,y) => {
-                        let referenceX = this.getEvidenceAuthors(x) + x.pubYear + x.pmid;
-                        let referenceY = this.getEvidenceAuthors(y) + y.pubYear + y.pmid;
-                        return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
-                    });
-                    break;
-                case 'evidenceType':
-                case 'scoreStatus':
-                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
-                    break;
-                default:
-                    sortedList = evidenceList;
-                    break;
-            }
-        }
-        return sortedList;
-    }
-
     render() {
         const experimentalEvidenceList = this.props.experimentalEvidenceList;
-        let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(experimentalEvidenceList, this.state.sortCol) : experimentalEvidenceList;
-        let self = this;
-        let sortIconClass = {evidenceType: 'tcell-sort', reference: 'tcell-sort', evidenceType: 'tcell-sort', scoreStatus: 'tcell-sort'};
+        let sortedEvidenceList = this.state.mounted ? this.props.sortListByColName(experimentalEvidenceList, this.state.sortCol, this.state.reversed) : experimentalEvidenceList;
+        let sortIconClass = {evidenceType: 'tcell-sort', reference: 'tcell-sort', scoreStatus: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         return (
@@ -149,17 +103,17 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
                             <thead>
                                 <tr>
                                     <th>Label</th>
-                                    <th onClick={(e) => self.handleClickHeader(e, 'evidenceType')}>Experimental category<span className={sortIconClass.evidenceType}></span></th>
-                                    <th onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
+                                    <th onClick={(e) => this.handleClickHeader(e, 'evidenceType')}>Experimental category<span className={sortIconClass.evidenceType}></span></th>
+                                    <th onClick={(e) => this.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
                                     <th>Explanation</th>
-                                    <th onClick={(e) => self.handleClickHeader(e, 'scoreStatus')}>Score status<span className={sortIconClass.scoreStatus}></span></th>
+                                    <th onClick={(e) => this.handleClickHeader(e, 'scoreStatus')}>Score status<span className={sortIconClass.scoreStatus}></span></th>
                                     <th>Points (default points)</th>
                                     <th>Reason for changed score</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {sortedEvidenceList.map((item, i) => {
-                                    return (self.renderExperimentalEvidence(item, i));
+                                    return (this.renderExperimentalEvidence(item, i));
                                 })}
                                 <tr>
                                     <td colSpan="5" className="total-score-label">Total points:</td>
@@ -187,7 +141,9 @@ class GeneDiseaseEvidenceSummaryExperimental extends Component {
 }
 
 GeneDiseaseEvidenceSummaryExperimental.propTypes = {
-    experimentalEvidenceList: PropTypes.array
+    experimentalEvidenceList: PropTypes.array,
+    getEvidenceAuthors: PropTypes.func,
+    sortListByColName: PropTypes.func
 };
 
 export default GeneDiseaseEvidenceSummaryExperimental;
