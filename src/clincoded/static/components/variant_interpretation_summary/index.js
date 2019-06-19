@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { curator_page, userMatch, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
+import ViewJson from '../view_json';
 import VariantInterpretationSummaryHeader from './header';
 import VariantInterpretationSummaryEvaluation from './evaluations';
 
@@ -21,7 +22,8 @@ const VariantInterpretationSummary = createReactClass({
             user: null, // Logged-in user uuid
             interpretation: null, // The parent interpretation object associated with the classification
             classification: {}, // Logged-in user's existing classification object
-            preview: queryKeyValue('preview', this.props.href)
+            preview: queryKeyValue('preview', this.props.href),
+            displayJson: false,
         };
     },
 
@@ -71,9 +73,18 @@ const VariantInterpretationSummary = createReactClass({
         window.print();
     },
 
+    /**
+     * Method to toggle JSON from interpretation state
+     * @param {*} e - Window event
+     */
+    handleViewJSON(e) {
+        this.setState({displayJson: !this.state.displayJson})
+    },
+
     render() {
         const interpretation = this.state.interpretation;
         const classification = this.state.classification;
+        const json = JSON.stringify(interpretation, null, 4);
 
         return (
             <div className="container variant-interprertation-summary-wrapper">
@@ -90,7 +101,13 @@ const VariantInterpretationSummary = createReactClass({
                 </p>
                 <div className="pdf-download-wrapper">
                     <button className="btn btn-default btn-inline-spacer" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
+                    <button className="btn btn-primary btn-inline-spacer" onClick={this.handleViewJSON}>View JSON</button>
                     <button className="btn btn-primary btn-inline-spacer pull-right" onClick={this.handlePrintPDF}>Print PDF</button>
+                </div>
+                <div>
+                    {this.state.displayJson ? 
+                        <ViewJson data={json} />
+                    : null}
                 </div>
             </div>
         );

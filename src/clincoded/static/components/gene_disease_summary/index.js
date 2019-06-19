@@ -10,6 +10,7 @@ import GeneDiseaseEvidenceSummarySegregation from './case_level_segregation';
 import GeneDiseaseEvidenceSummaryCaseControl from './case_control';
 import GeneDiseaseEvidenceSummaryExperimental from './experimental';
 import GeneDiseaseEvidenceSummaryClassificationMatrix from './classification_matrix';
+import ViewJson from '../view_json';
 import CASE_INFO_TYPES from '../score/constants/case_info_types';
 
 const GeneDiseaseEvidenceSummary = createReactClass({
@@ -36,6 +37,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             caseControlEvidenceList: [],
             experimentalEvidenceList: [],
             preview: queryKeyValue('preview', this.props.href),
+            displayJson: false,
             hpoTermsCollection: {
                 caseLevel: {},
                 segregation: {},
@@ -656,15 +658,24 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
-     * Method to genetate PDF from HTML
+     * Method to generate PDF from HTML
      * @param {*} e - Window event
      */
     handlePrintPDF(e) {
         window.print();
     },
 
+    /**
+     * Method to toggle JSON from gdm state
+     * @param {*} e
+     */
+    handleViewJSON(e) {
+        this.setState({displayJson: !this.state.displayJson})
+    },
+
     render() {
         const gdm = this.state.gdm;
+        const json = JSON.stringify(gdm, null, 4);
         const provisional = this.state.provisional;
         const snapshotPublishDate = this.state.snapshotPublishDate;
         const hpoTermsCollection = this.state.hpoTermsCollection;
@@ -692,7 +703,13 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 </p>
                 <div className="pdf-download-wrapper">
                     <button className="btn btn-default btn-inline-spacer" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
+                    <button className="btn btn-primary btn-inline-spacer" onClick={this.handleViewJSON}>View JSON</button>
                     <button className="btn btn-primary btn-inline-spacer pull-right" onClick={this.handlePrintPDF}>Print PDF</button>
+                </div>
+                <div>
+                    {this.state.displayJson ? 
+                        <ViewJson data={json} />
+                    : null}
                 </div>
             </div>
         );
