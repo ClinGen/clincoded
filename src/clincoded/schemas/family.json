@@ -373,6 +373,10 @@
                     "description": "If pedigree provided in publication, indicate location",
                     "type": "string"
                 },
+                "lodRequirements": {
+                    "title": "Does the family meet requirements for estimating LOD score for EITHER autosomal dominant/X-linked or autosomal recessive?",
+                    "type": "string"
+                },
                 "lodPublished": {
                     "title": "LOD Score Published",
                     "description": "Is there a LOD score published?",
