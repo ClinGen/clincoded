@@ -42,9 +42,9 @@ var formMapSegregation = {
     'SEGexplanationForInconsistent': 'explanationForInconsistent',
     'SEGmoiDisplayedForFamily': 'moiDisplayedForFamily',
     'SEGprobandIs': 'probandIs',
-    'SEGlodRequirements': 'lodRequirements',
     'SEGfamilyConsanguineous': 'familyConsanguineous',
     'SEGpedigreeLocation': 'pedigreeLocation',
+    'SEGlodRequirements': 'lodRequirements',
     'SEGlodPublished': 'lodPublished',
     'SEGpublishedLodScore': 'publishedLodScore',
     'SEGestimatedLodScore': 'estimatedLodScore',
@@ -1146,6 +1146,10 @@ var FamilyCuration = createReactClass({
                 newSegregation[formMapSegregation['SEGdenovo']] = value1;
             }
             */
+            value1 = this.getFormValue('SEGlodRequirements');
+            if (value1 !== 'none') {
+                newSegregation[formMapSegregation['SEGlodRequirements']] = value1;
+            }
             value1 = this.getFormValue('SEGlodPublished');
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGlodPublished']] = value1 === 'Yes';
@@ -1840,7 +1844,7 @@ function FamilySegregation() {
                     </Input>
                     {this.state.lodPublished === 'No' && this.state.isSemidominant ? 
                         <Input type="select" ref="SEGlodRequirements" label="Does the family meet requirements for estimating LOD score for EITHER autosomal dominant/X-linked or autosomal recessive?:"
-                            value={segregation && segregation.lodRequirements ? segregation.lodRequirements : 'none'}
+                            defaultValue="none" value={segregation && segregation.lodRequirements ? segregation.lodRequirements : 'none'}
                             handleChange={this.handleChange} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
                             <option value="none">No Selection</option>
                             <option disabled="disabled"></option>
