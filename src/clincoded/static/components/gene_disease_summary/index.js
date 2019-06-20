@@ -58,6 +58,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         if (affiliationUtilityBar) {
             affiliationUtilityBar.setAttribute('style', 'display:none');
         }
+        if (this.jsonView) {
+            this.jsonView.scrollIntoView({ behavior: "smooth" });
+        }
     },
 
     loadData() {
@@ -670,7 +673,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
      * @param {*} e
      */
     handleViewJSON(e) {
-        this.setState({displayJson: !this.state.displayJson})
+        this.setState({displayJson: !this.state.displayJson});
     },
 
     render() {
@@ -679,6 +682,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         const provisional = this.state.provisional;
         const snapshotPublishDate = this.state.snapshotPublishDate;
         const hpoTermsCollection = this.state.hpoTermsCollection;
+        let jsonButtonText = this.state.displayJson ? 'Hide JSON' : 'View JSON';
 
         return (
             <div className="gene-disease-evidence-summary-wrapper">
@@ -698,18 +702,18 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTerms={hpoTermsCollection.caseControl} />
                     <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                 </div>
+                {this.state.displayJson ? 
+                    <div ref={(ref) => this.jsonView = ref}>
+                        <ViewJson data={json} />
+                    </div>
+                : null}
                 <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".
                 </p>
                 <div className="pdf-download-wrapper">
                     <button className="btn btn-default btn-inline-spacer" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
-                    <button className="btn btn-primary btn-inline-spacer" onClick={this.handleViewJSON}>View JSON</button>
+                    <button className="btn btn-primary btn-inline-spacer" onClick={this.handleViewJSON}>{jsonButtonText}</button>
                     <button className="btn btn-primary btn-inline-spacer pull-right" onClick={this.handlePrintPDF}>Print PDF</button>
-                </div>
-                <div>
-                    {this.state.displayJson ? 
-                        <ViewJson data={json} />
-                    : null}
                 </div>
             </div>
         );
