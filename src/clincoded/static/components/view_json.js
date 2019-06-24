@@ -7,7 +7,6 @@ const divStyle = {
   userSelect: 'all',
   overflowY: 'scroll', 
   maxHeight: '500px',
-  marginBottom: '2rem'
 }
 
 const ViewJson = props => {

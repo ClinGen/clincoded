@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { curator_page, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
+import omit from 'lodash/omit';
 import GeneDiseaseEvidenceSummaryHeader from './header';
 import GeneDiseaseEvidenceSummaryCaseLevel from './case_level';
 import GeneDiseaseEvidenceSummarySegregation from './case_level_segregation';
@@ -678,7 +679,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
 
     render() {
         const gdm = this.state.gdm;
-        const json = JSON.stringify(gdm, null, 4);
+        const parsedJson = omit(gdm, ['@id', '@type', 'actions', 'active']);
+        const json = JSON.stringify(parsedJson, null, 4);
         const provisional = this.state.provisional;
         const snapshotPublishDate = this.state.snapshotPublishDate;
         const hpoTermsCollection = this.state.hpoTermsCollection;
