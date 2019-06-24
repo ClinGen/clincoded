@@ -152,3 +152,11 @@ def experimental_6_7(value, system):
     # https://github.com/ClinGen/clincoded/issues/1909
     # Add Zebra finch (Taeniopygia guttata) 59729 to Rescue and Model Systems
     return
+
+@upgrade_step('experimental', '7', '8')
+def experimental_7_8(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1336
+    # Changed Expression OrganOfTissue property from string to array. 
+    if 'expression' in value:
+        if 'organOfTissue' in value['expression']:
+            value['expression']['organOfTissue'] = [value['expression']['organOfTissue']]

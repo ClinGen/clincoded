@@ -828,7 +828,7 @@ var ExperimentalCuration = createReactClass({
                 // Validate Uberon ID(s) if value is not empty. Don't validate if free text is provided.
                 if (this.getFormValue('organOfTissue')) {
                     uberonIDs = curator.capture.uberonids(this.getFormValue('organOfTissue'));
-                    formError = this.validateFormTerms(formError, 'uberonIDs', uberonIDs, 'organOfTissue', 1);
+                    formError = this.validateFormTerms(formError, 'uberonIDs', uberonIDs, 'organOfTissue');
                 }
             }
             else if (this.state.experimentalType === 'Functional Alteration') {
@@ -987,9 +987,8 @@ var ExperimentalCuration = createReactClass({
                 } else if (newExperimental.evidenceType == 'Expression') {
                     // newExperimental object for type Expression
                     newExperimental.expression = {};
-                    var EorganOfTissue = this.getFormValue('organOfTissue');
-                    if (EorganOfTissue) {
-                        newExperimental.expression.organOfTissue = EorganOfTissue.indexOf('_') > -1 ? EorganOfTissue.replace('_', ':') : EorganOfTissue;
+                    if (uberonIDs) {
+                        newExperimental.expression.organOfTissue = uberonIDs;
                     }
                     var EorganOfTissueFreeText = this.getFormValue('organOfTissueFreeText');
                     if (EorganOfTissueFreeText) {
@@ -1899,7 +1898,7 @@ function TypeExpression() {
             <Input type="text" ref="organOfTissue" label={<span>Organ or tissue relevant to disease <span className="normal">(Uberon ID)</span>:</span>}
                 error={this.getFormError('organOfTissue')} clearError={this.clrFormErrors.bind(null, 'organOfTissue')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228 or UBERON_0015228" inputDisabled={this.cv.othersAssessed}
+                value={EXP_organOfTissue} placeholder="e.g. UBERON:0015228 or UBERON_0015228 or UBERON:0015228, UBERON:0012345" inputDisabled={this.cv.othersAssessed}
                 handleChange={this.handleChange} required={!this.state.expressionOT_FreeText}
                 customErrorMsg="Enter Uberon ID and/or free text" />
             <Input type="textarea" ref="organOfTissueFreeText" label={<span>Organ or tissue relevant to disease <span className="normal">(free text)</span>:</span>}
@@ -2928,7 +2927,13 @@ const ExperimentalViewer = createReactClass({
                                 <dl className="dl-horizontal">
                                     <div>
                                         <dt>Organ or tissue relevant to disease (Uberon ID)</dt>
-                                        <dd>{experimental.expression.organOfTissue ? <a href={external_url_map['UberonSearch'] + experimental.expression.organOfTissue.replace(':', '_')} title={"Uberon entry for " + experimental.expression.organOfTissue + " in new tab"} target="_blank">{experimental.expression.organOfTissue}</a> : null}</dd>
+                                        <dd>{experimental.expression.organOfTissue && experimental.expression.organOfTissue.map((uberonId, i) => {
+                                            if (uberonId.indexOf('UBERON') > -1) {
+                                                return <span key={uberonId}>{i > 0 ? ', ' : ''}<a href={external_url_map['UberonSearch'] + uberonId.replace(':', '_')} title={"Uberon entry for " + uberonId + " in new tab"} target="_blank">{uberonId}</a></span>;
+                                            } else {
+                                                return <span key={uberonId}>{i > 0 ? ', ' : ''}{uberonId}</span>
+                                            }
+                                        })}</dd>
                                     </div>
 
                                     <div>
