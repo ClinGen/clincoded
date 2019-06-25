@@ -99,7 +99,7 @@ var ScoreViewer = module.exports.ScoreViewer = createReactClass({
                                             <dd>{item.calculatedScore}</dd>
                                         </dl>
                                         : null}
-                                    {item.score ?
+                                    {item.score >= 0 ?
                                         <dl className="dl-horizontal">
                                             <dt>Changed Score</dt>
                                             <dd>{item.score}</dd>
