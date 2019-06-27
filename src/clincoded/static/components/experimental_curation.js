@@ -2551,7 +2551,8 @@ const ExperimentalViewer = createReactClass({
             userScoreObj: {}, // Logged-in user's score object
             submitBusy: false, // True while form is submitting
             experimentalEvidenceType: null,
-            formError: false
+            scoreError: false,
+            scoreErrorMsg: ''
         };
     },
 
@@ -2559,7 +2560,7 @@ const ExperimentalViewer = createReactClass({
     handleUserScoreObj: function(newUserScoreObj) {
         this.setState({userScoreObj: newUserScoreObj}, () => {
             if (!newUserScoreObj.hasOwnProperty('score') || (newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && newUserScoreObj.scoreExplanation)) {
-                this.setState({formError: false});
+                this.setState({scoreError: false, scoreErrorMsg: ''});
             }
         });
     },
@@ -2582,7 +2583,7 @@ const ExperimentalViewer = createReactClass({
 
         if (Object.keys(newUserScoreObj).length) {
             if(newUserScoreObj.hasOwnProperty('score') && newUserScoreObj.score !== false && !newUserScoreObj.scoreExplanation) {
-                this.setState({formError: true});
+                this.setState({scoreError: true, scoreErrorMsg: 'A reason is required for the changed score.'});
                 return false;
             }
             this.setState({submitBusy: true});
@@ -3268,7 +3269,7 @@ const ExperimentalViewer = createReactClass({
                             {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedExperimental) || (!isEvidenceScored && !affiliation && userExperimental) ?
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
                                     evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                    formError={this.state.formError} affiliation={affiliation} />
+                                    scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation} />
                                 : null}
                             {!isEvidenceScored && ((affiliation && !affiliatedExperimental) || (!affiliation && !userExperimental)) ?
                                 <div className="row">

@@ -23,7 +23,8 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
         handleUserScoreObj: PropTypes.func, // Function to call create/update score object
         scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         submitBusy: PropTypes.bool, // TRUE while the form submit is running
-        formError: PropTypes.bool, // TRUE if no explanation is given for a different score
+        scoreError: PropTypes.bool, // TRUE if no explanation is given for a different score or no change is made
+        scoreErrorMsg: PropTypes.string, // Text string in response to the type of score error
         scoreDisabled: PropTypes.bool, // FALSE if the matched checkbox is selected
         affiliation: PropTypes.object // Affiliation object passed from parent
     },
@@ -45,8 +46,13 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
             submitBusy: false, // TRUE while form is submitting
             disableScoreStatus: this.props.scoreDisabled, // FALSE if the matched checkbox is selected
             willNotCountScore: false, // TRUE if 'Review' is selected when Mode of Inheritance is not AD, AR, or X-Linked
-            formError: false, // TRUE if no explanation is given for a different score
-            scoreAffiliation: null // Affiliation associated with the score
+            scoreAffiliation: null, // Affiliation associated with the score
+            scoreError: this.props.scoreError, // TRUE if no explanation is given for a different score or no change is made
+            scoreErrorMsg: this.props.scoreErrorMsg, // Text string in response to the type of score error
+            scoreAffiliation: null, // Affiliation associated with the score
+            origStatus: null, // User originally selected status
+            origScore: null, // User originally selected score
+            origScoreExplanation: null // User originally entered explanation for selected score
         };
     },
 
@@ -65,9 +71,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                 this.refs.scoreStatus.resetValue();
             });
         }
-        if (nextProps.formError && nextProps.formError !== this.props.formError) {
-            this.setState({formError: true});
-        }
+        this.setState({scoreError: nextProps.scoreError, scoreErrorMsg: nextProps.scoreErrorMsg});
         this.setState({disableScoreStatus: nextProps.scoreDisabled}, () => {
             if (this.state.disableScoreStatus) {
                 this.setState({showScoreInput: false}, () => {
@@ -102,6 +106,14 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                         modifiedScore = matchedScore.hasOwnProperty('score') ? matchedScore.score.toString() : null,
                         scoreExplanation = matchedScore.scoreExplanation,
                         calcScoreRange = this.getScoreRange(experimentalEvidenceType, parseFloat(defaultScore));
+
+                    // Save original data for checking if changes has been made
+                    this.setState({
+                        origStatus: scoreStatus,
+                        origScore: modifiedScore,
+                        origScoreExplanation: scoreExplanation === undefined ? null : scoreExplanation
+                    });
+
                     /**************************************************************************************/
                     /* Curators are allowed to access the score form fields when the 'Score' is selected, */
                     /* or when 'Review' is selected given the matched Mode of Inheritance types           */
@@ -160,7 +172,8 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     modifiedScore: null,
                     scoreExplanation: null,
                     requiredScoreExplanation: false,
-                    formError: false,
+                    scoreError: false,
+                    scoreErrorMsg: '',
                     updateDefaultScore: true
                 }, () => {
                     let calcScoreRange = this.getScoreRange(experimentalEvidenceType, calcDefaultScore);
@@ -183,7 +196,8 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                     scoreRange: [],
                     scoreExplanation: null,
                     requiredScoreExplanation: false,
-                    formError: false
+                    scoreError: false,
+                    scoreErrorMsg: ''
                 }, () => {
                     if (this.refs.scoreExplanation && this.refs.scoreExplanation.getValue()) {
                         this.refs.scoreExplanation.resetValue();
@@ -209,7 +223,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                 });
             } else {
                 // Reset explanation if default score is kept
-                this.setState({scoreExplanation: null, requiredScoreExplanation: false, formError: false}, () => {
+                this.setState({scoreExplanation: null, requiredScoreExplanation: false, scoreError: false, scoreErrorMsg: ''}, () => {
                     this.refs.scoreExplanation.resetValue();
                     this.updateUserScoreObj();
                 });
@@ -221,10 +235,25 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
         if (this.refs.scoreExplanation) {
             // Parse the score explanation entered by the curator
             let scoreExplanation = this.refs.scoreExplanation.getValue();
-            this.setState({scoreExplanation: scoreExplanation, formError: false}, () => {
+            this.setState({scoreExplanation: scoreExplanation, scoreError: false, scoreErrorMsg: ''}, () => {
                 this.updateUserScoreObj();
             });
         }
+    },
+
+    // Check if changes has been made before saving the score object.
+    saveScore(e) {
+        if ((this.state.scoreStatus === this.state.origStatus ||
+             this.state.scoreStatus === 'none' && this.state.origStatus === null) &&
+            (this.state.modifiedScore === this.state.origScore ||
+             this.state.modifiedScore === 'none' && this.state.origScore === null) &&
+            (this.state.scoreExplanation === this.state.origScoreExplanation ||
+             this.state.scoreExplanation === '' && this.state.origScoreExplanation === null)) {
+                this.setState({scoreError: true, scoreErrorMsg: 'Cannot save because no field has been modified.  Please make your changes then save.'});
+            }
+            else {
+                this.props.scoreSubmit(e);
+            }
     },
 
     // Put together the score object based on the form values for
@@ -413,7 +442,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
         let requiredScoreExplanation = this.state.requiredScoreExplanation;
         let disableScoreStatus = this.state.disableScoreStatus;
         let willNotCountScore = this.state.willNotCountScore;
-        let formError = this.state.formError;
+        let scoreError = this.state.scoreError;
  
         return (
             <div>
@@ -457,17 +486,17 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
                                 value={scoreExplanation} handleChange={this.handleScoreExplanation}
                                 placeholder="Note: If you selected a score different from the default score, you must provide a reason for the change here."
                                 rows="3" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-                            {formError ?
-                                <div className="col-sm-7 col-sm-offset-5 score-alert-message">
-                                    <p className="alert alert-warning"><i className="icon icon-exclamation-triangle"></i> A reason is required for the changed score.</p>
-                                </div>
-                                : null}
                         </div>
                         : null}
+                    {scoreError ?
+                        <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                            <p className="alert alert-warning"><i className="icon icon-exclamation-triangle"></i> {this.state.scoreErrorMsg}</p>
+                        </div>
+                         : null}
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">
-                        <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit}
+                        <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.saveScore}
                             title="Save" submitBusy={this.props.submitBusy} />
                     </div>
                     : null}

@@ -18,6 +18,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         handleUserScoreObj: PropTypes.func, // Function to call create/update score object
         scoreSubmit: PropTypes.func, // Function to call when Save button is clicked; This prop's existence makes the Save button exist
         submitBusy: PropTypes.bool, // TRUE while the form submit is running
+        scoreError: PropTypes.bool, // TRUE if score selection is not changed
+        scoreErrorMsg: PropTypes.string, // Text string in response to the type of score error
         affiliation: PropTypes.object, // Affiliation object passed from parent
         isDisabled: PropTypes.bool // Boolean for the state (disabled or not) of the input field
     },
@@ -28,6 +30,9 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
             modifiedScore: null, // Score that is selected by curator
             userScoreUuid: null, // Pre-existing logged-in user's score uuuid
             submitBusy: false, // TRUE while form is submitting
+            userOrigScore: null, // User originally selected score
+            scoreError: this.props.scoreError, // TRUE if score selection is not changed
+            scoreErrorMsg: this.props.scoreErrorMsg, // Text string in response to the type of score error
             scoreAffiliation: null // Affiliation associated with the score
         };
     },
@@ -43,6 +48,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                 this.updateUserScoreObj();
             });
         }
+        this.setState({scoreError: nextProps.scoreError, scoreErrorMsg: nextProps.scoreErrorMsg});
     },
 
     loadData() {
@@ -69,6 +75,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                             this.refs.scoreRange.setValue(modifiedScore ? modifiedScore : 'none');
                             this.updateUserScoreObj();
                         });
+                        // Save original score for checking if change has been made
+                        this.setState({userOrigScore: !isNaN(parseFloat(modifiedScore)) ? modifiedScore : null});
                     }
                 }
             });
@@ -165,9 +173,20 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
         return affiliatedScore;
     },
 
+    // Check if score has been changed before saving the score object
+    saveScore(e) {
+        if (this.state.modifiedScore === this.state.userOrigScore ||
+            this.state.modifiedScore === 'none' && this.state.userOrigScore === null) {
+            this.setState({scoreError: true, scoreErrorMsg: 'Cannot save because score is not changed.  Please select a new score then save.'});
+        }
+        else {
+            this.props.scoreSubmit(e);
+        }
+    },
+
     render() {
         let modifiedScore = this.state.modifiedScore ? this.state.modifiedScore : 'none';
- 
+        let scoreError = this.state.scoreError;
         return (
             <div>
                 <div className="row">
@@ -190,6 +209,11 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                         <option value="5.5">5.5</option>
                         <option value="6">6</option>
                     </Input>
+                    {scoreError ?
+                        <div className="col-sm-7 col-sm-offset-5 score-alert-message">
+                            <p className="alert alert-warning"><i className="icon icon-exclamation-triangle"></i> {this.state.scoreErrorMsg}</p>
+                        </div>
+                        : null}
                     {this.props.isDisabled ?
                         <div className="col-sm-7 col-sm-offset-5 score-alert-message">
                             <p className="alert alert-warning"><i className="icon icon-info-circle"></i> A Study type must be selected
@@ -199,8 +223,8 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">
-                        <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit}
-                        title="Save" submitBusy={this.props.submitBusy} />
+                        <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.saveScore}
+                        title="Save" submitBusy={this.props.submitBusy} inputDisabled={this.props.isDisabled} />
                     </div>
                 : null}
             </div>
