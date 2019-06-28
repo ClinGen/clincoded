@@ -183,7 +183,7 @@ let EvidenceSheet = createReactClass({
         if (this.state.case_db_data.cases.length === 0) {
             return null;
         }
-        const header_titles = Object.keys(this.state.case_db_data.cases[0].data);    // e.g. ['diseases', 'symptoms', ...]
+        const header_titles = Object.keys(this.state.case_db_data.cases[0].case_data);    // e.g. ['diseases', 'symptoms', ...]
         const headers = header_titles.map(t => <th key={`case_db_header_${t}`}>{t}</th>)
 
         let rows = [];
@@ -191,7 +191,7 @@ let EvidenceSheet = createReactClass({
         this.state.case_db_data.cases.forEach(v => {
             let this_row = [];
             header_titles.forEach(t => {
-                this_row.push(<td key={`case_db_cell_${row_num}_${t}`}>{v.data[t]}</td>)
+                this_row.push(<td key={`case_db_cell_${row_num}_${t}`}>{v.case_data[t]}</td>)
             });
             rows.push(<tr key={`case_db_row_${row_num}`}>{this_row}</tr>);
             row_num += 1;
