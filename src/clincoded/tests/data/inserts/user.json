@@ -13078,24 +13078,6 @@
         "timezone": "US/Pacific"
     },
     {
-        "email": "kevin.colclough@nhs.net",
-        "first_name": "Kevin",
-        "last_name": "Colclough",
-        "uuid": "be59c368-a9a7-43ff-a14a-aa1cd4a4efdd",
-        "groups": [
-            "curator"
-        ],
-        "affiliation": [
-            "10016"
-        ],
-        "job_title": "ClinGen Curator",
-        "lab": "/labs/curator/",
-        "submits_for": [
-            "/labs/curator/"
-        ],
-        "timezone": "US/Pacific"
-    },
-    {
         "email": "lcaldovic@childrensnational.org",
         "first_name": "Ljubica",
         "last_name": "Caldovic",
