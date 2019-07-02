@@ -2804,6 +2804,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10040"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -3462,6 +3465,7 @@
             "10007",
             "10017",
             "10019",
+            "10020",
             "10021",
             "10026",
             "10031"
@@ -4544,7 +4548,7 @@
         "timezone": "US/Pacific"
     },
     {
-        "email": "cabarry1@geisinger.edu",
+        "email": "barryc1@email.chop.edu",
         "first_name": "Carrie-Anne",
         "last_name": "Barry",
         "uuid": "2e867aee-6719-4624-94bd-d19cd268b416",
@@ -4552,6 +4556,7 @@
             "curator"
         ],
         "affiliation": [
+            "10006",
             "10019",
             "10022",
             "10026"
@@ -5077,7 +5082,8 @@
         "affiliation": [
             "10014",
             "10023",
-            "10026"
+            "10026",
+            "10040"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -5674,7 +5680,8 @@
         "affiliation": [
             "10011",
             "10023",
-            "10028"
+            "10028",
+            "10040"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -8089,7 +8096,8 @@
         "affiliation": [
             "10006",
             "10018",
-            "10028"
+            "10028",
+            "10040"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -8348,10 +8356,12 @@
             "curator"
         ],
         "affiliation": [
+            "10005",
             "10006",
             "10007",
             "10017",
-            "10019"
+            "10019",
+            "10021"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -8531,7 +8541,8 @@
             "curator"
         ],
         "affiliation": [
-            "10028"
+            "10028",
+            "10040"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -10534,7 +10545,8 @@
             "curator"
         ],
         "affiliation": [
-            "10028"
+            "10028",
+            "10040"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -11860,6 +11872,7 @@
             "curator"
         ],
         "affiliation": [
+            "10016",
             "10018"
         ],
         "job_title": "ClinGen Curator",
@@ -12290,7 +12303,8 @@
             "curator"
         ],
         "affiliation": [
-            "10028"
+            "10028",
+            "10040"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -12721,7 +12735,7 @@
         "timezone": "US/Pacific"
     },
     {
-        "email": "lclarke@cw.bc.ca",
+        "email": "lclarke@bcchr.ca",
         "first_name": "Lorne",
         "last_name": "Clarke",
         "uuid": "b1e71c21-c66e-47bb-98f4-1c3911a7ecec",
