@@ -168,6 +168,9 @@ var FamilySubmit = module.exports.FamilySubmit = createReactClass({
                             :
                                 <div>
                                     <Panel panelClassName="submit-results-panel" panelBodyClassName="bg-info">
+                                    {probandIndividual ? 
+                                        <p>An Individual entry for the proband <strong><a href={'/individual/' + probandIndividual.uuid}>{probandIndividual.label}</a></strong> has been created.</p> 
+                                    : null}
                                         <Form formClassName="form-horizontal form-std">
                                             <Input type="select" ref="haveindividual" defaultValue={this.state.haveIndividual}
                                                 label="No segregating variant information has been associated with this Family. Would you like to add it?"
