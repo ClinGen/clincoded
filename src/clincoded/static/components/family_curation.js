@@ -120,6 +120,7 @@ var FamilyCuration = createReactClass({
     // Handle value changes in various form fields
     handleChange: function(ref, e) {
         var clinvarid, othervariant;
+        const semiDom = this.state.gdm && this.state.gdm.modeInheritance ? this.state.gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
 
         if (ref === 'genotypingmethod1' && this.refs[ref].getValue()) {
             // Disable the Genotyping Method 2 if Genotyping Method 1 has no value
@@ -144,18 +145,24 @@ var FamilyCuration = createReactClass({
                 publishedLodScore = this.state.family.segregation.publishedLodScore;
             }
             if (lodPublished === 'Yes') {
-                this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
-                this.refs['SEGnumberOfAffectedWithGenotype'].setValue('');
-                this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
+                if (semiDom) {
+                    this.refs['SEGnumberOfUnaffectedWithoutBiallelicGenotype'].setValue('');
+                    this.refs['SEGnumberOfAffectedWithGenotype'].setValue('');
+                    this.refs['SEGnumberOfSegregationsForThisFamily'].setValue('');
+                }
                 this.setState({lodPublished: 'Yes', publishedLodScore: publishedLodScore ? publishedLodScore : null, includeLodScore: false, lodRequirements: null}, () => {
                     if (!this.state.publishedLodScore) {
                         this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                     }
                 });
             } else if (lodPublished === 'No') {
-                const familyMoiDisplayed = this.refs['SEGmoiDisplayedForFamily'].getValue();
-                const lodLocked = familyMoiDisplayed === 'Autosomal dominant/X-linked' || familyMoiDisplayed === 'Autosomal recessive';
-                this.setState({lodPublished: 'No', publishedLodScore: null, includeLodScore: false, lodLocked: lodLocked});
+                if (semiDom) {
+                    const familyMoiDisplayed = this.refs['SEGmoiDisplayedForFamily'].getValue();
+                    const lodLocked = familyMoiDisplayed === 'Autosomal dominant/X-linked' || familyMoiDisplayed === 'Autosomal recessive';
+                    this.setState({lodPublished: 'No', publishedLodScore: null, includeLodScore: false, lodLocked: lodLocked});
+                } else {
+                    this.setState({lodPublished: 'No', publishedLodScore: null, includeLodScore: false});
+                }
                 if (!this.state.estimatedLodScore) {
                     this.refs['SEGincludeLodScoreInAggregateCalculation'].resetValue();
                 }
@@ -494,24 +501,42 @@ var FamilyCuration = createReactClass({
             if (stateObj.family) {
                 if (stateObj.family.segregation && stateObj.family.segregation.moiDisplayedForFamily) {
                     if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal dominant/X-linked') > -1) {
+                        stateObj.familyMoiDisplayed = stateObj.family.segregation.moiDisplayedForFamily;
                         stateObj.lodLocked = true;
                         stateObj.lodCalcMode = 'ADX';
                         stateObj.isSemidominant = false;
                     } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Autosomal recessive') > -1) {
+                        stateObj.familyMoiDisplayed = stateObj.family.segregation.moiDisplayedForFamily;
                         stateObj.lodLocked = true;
                         stateObj.lodCalcMode = 'AR';
                         stateObj.isSemidominant = false;
                     } else if (stateObj.family.segregation.moiDisplayedForFamily.indexOf('Semidominant') > -1) {
+                        stateObj.familyMoiDisplayed = stateObj.family.segregation.moiDisplayedForFamily;
                         stateObj.lodlocked = false;
                         stateObj.isSemidominant = true;
-                        this.setState({isSemidominant: true})
+                        if (stateObj.family.segregation.lodRequirements) {
+                            if (stateObj.family.segregation.lodRequirements === 'Yes - autosomal dominant/X-linked') {
+                                stateObj.lodLocked = true;
+                                stateObj.lodCalcMode = 'ADX';
+                                stateObj.lodRequirements = stateObj.family.segregation.lodRequirements;
+                            } else if (stateObj.family.segregation.lodRequirements === 'Yes - autosomal recessive') {
+                                stateObj.lodLocked = true;
+                                stateObj.lodCalcMode = 'AR';
+                                stateObj.lodRequirements = stateObj.family.segregation.lodRequirements;
+                            } else {
+                                stateObj.lodRequirements = null;
+                            }
+                        } else {
+                            stateObj.lodRequirements = null;
+                        }
                     } else {
+                        stateObj.familyMoiDisplayed = null;
                         stateObj.lodLocked = false;
                         stateObj.isSemidominant = false;
                     }
                 }
             }
-            
+
             // Update the family name
             if (stateObj.family) {
                 this.setState({familyName: stateObj.family.label});
@@ -900,6 +925,16 @@ var FamilyCuration = createReactClass({
                     /* pass into the individual object       */
                     /*****************************************/
                     let zygosity = this.state.recessiveZygosity;
+                    let probandIs = null;
+
+                    // Retrieve value of "The proband is" form field (should only be available when GDM has Semidominant MOI)
+                    if (semiDom) {
+                        let probandIsFormValue = this.getFormValue('SEGprobandIs');
+
+                        if (probandIsFormValue !== 'none') {
+                            probandIs = probandIsFormValue;
+                        }
+                    }
 
                     // If we're editing a family, see if we need to update it and its proband individual
                     if (currFamily) {
@@ -910,7 +945,7 @@ var FamilyCuration = createReactClass({
 
                         // If the family has a proband, update it to the current variant list, and then immediately on to creating a family.
                         if (this.state.probandIndividual) {
-                            return updateProbandVariants(this.state.probandIndividual, familyVariants, zygosity, this).then(data => {
+                            return updateProbandVariants(this.state.probandIndividual, familyVariants, zygosity, probandIs, this).then(data => {
                                 return Promise.resolve(null);
                             });
                         }
@@ -923,7 +958,7 @@ var FamilyCuration = createReactClass({
                         initvar = true;
                         label = this.getFormValue('individualname');
                         diseases = individualDiseases.map(disease => { return disease; });
-                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, this.props.affiliation, this);
+                        return makeStarterIndividual(label, diseases, familyVariants, zygosity, probandIs, this.props.affiliation, this);
                     }
 
                     // Family doesn't have any variants
@@ -1094,6 +1129,7 @@ var FamilyCuration = createReactClass({
     createSegregation: function(newFamily, variants, assessments) {
         var newSegregation = {};
         var value1;
+        const semiDom = this.state.gdm && this.state.gdm.modeInheritance ? this.state.gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
 
         // Unless others have assessed (in which case there's no segregation form), get the segregation
         // values from the form
@@ -1124,13 +1160,20 @@ var FamilyCuration = createReactClass({
             if (value1) {
                 newSegregation[formMapSegregation['SEGexplanationForInconsistent']] = value1;
             }
-            value1 = this.getFormValue('SEGmoiDisplayedForFamily');
-            if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGmoiDisplayedForFamily']] = value1;
-            }
-            value1 = this.getFormValue('SEGprobandIs');
-            if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGprobandIs']] = value1;
+            // Fields only available on GDMs with Semidominant MOI
+            if (semiDom) {
+                value1 = this.getFormValue('SEGmoiDisplayedForFamily');
+                if (value1 !== 'none') {
+                    newSegregation[formMapSegregation['SEGmoiDisplayedForFamily']] = value1;
+                }
+                value1 = this.getFormValue('SEGprobandIs');
+                if (value1 !== 'none') {
+                    newSegregation[formMapSegregation['SEGprobandIs']] = value1;
+                }
+                value1 = this.getFormValue('SEGlodRequirements');
+                if (value1 !== 'none') {
+                    newSegregation[formMapSegregation['SEGlodRequirements']] = value1;
+                }
             }
             value1 = this.getFormValue('SEGfamilyConsanguineous');
             if (value1 !== 'none') {
@@ -1146,10 +1189,6 @@ var FamilyCuration = createReactClass({
                 newSegregation[formMapSegregation['SEGdenovo']] = value1;
             }
             */
-            value1 = this.getFormValue('SEGlodRequirements');
-            if (value1 !== 'none') {
-                newSegregation[formMapSegregation['SEGlodRequirements']] = value1;
-            }
             value1 = this.getFormValue('SEGlodPublished');
             if (value1 !== 'none') {
                 newSegregation[formMapSegregation['SEGlodPublished']] = value1 === 'Yes';
@@ -1799,14 +1838,13 @@ function FamilySegregation() {
     let segregation = (family && family.segregation && Object.keys(family.segregation).length) ? family.segregation : {};
     const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
     // Creates boolean values for conditional disabling of inputs
-    const lodPublished = this.state.lodPublished === 'Yes';
-    if (segregation) {
-        var moi = segregation.moiDisplayedForFamily;
-        if (moi === 'Autosomal dominant/X-linked' || this.state.familyMoiDisplayed === 'Autosomal dominant/X-linked') {
-            var isADX = true;	            
-        } else if (moi === 'Autosomal recessive' || this.state.familyMoiDisplayed === 'Autosomal recessive') {
+    const lodPublished = semiDom && this.state.lodPublished === 'Yes';
+    if (semiDom) {
+        if (this.state.familyMoiDisplayed === 'Autosomal dominant/X-linked') {
+            var isADX = true;
+        } else if (this.state.familyMoiDisplayed === 'Autosomal recessive') {
             var isAR = true;
-        } else if (moi === 'Semidominant' || this.state.familyMoiDisplayed === 'Semidominant') {
+        } else if (this.state.familyMoiDisplayed === 'Semidominant') {
             var isSemidominant = true;
             var lodRequirements = this.state.lodRequirements;
             var lodReqNone, lodReqADX, lodReqAR;
@@ -1819,7 +1857,8 @@ function FamilySegregation() {
                 lodReqADX, lodReqAR = false;
             }
         }
-    }    
+    }
+
     return (
         <div className="row section section-family-segregation">
             <h3><i className="icon icon-chevron-right"></i> Tested Individuals</h3>
@@ -2291,7 +2330,6 @@ const FamilyViewer = createReactClass({
         var method = family.method;
         var groups = family.associatedGroups;
         var segregation = family.segregation;
-        var probandIs = segregation && segregation.probandIs;
         var assessments = this.state.assessments ? this.state.assessments : (segregation ? segregation.assessments : null);
         var validAssessments = [];
         _.map(assessments, assessment => {
@@ -2326,6 +2364,7 @@ const FamilyViewer = createReactClass({
         var tempGdmPmid = curator.findGdmPmidFromObj(family);
         var tempGdm = tempGdmPmid[0];
         var tempPmid = tempGdmPmid[1];
+        const semiDom = tempGdm && tempGdm.modeInheritance ? tempGdm.modeInheritance.indexOf('Semidominant') > -1 : false;
 
         return (
             <div>
@@ -2481,23 +2520,22 @@ const FamilyViewer = createReactClass({
                                     {family.individualIncluded.map(function(ind, index) {
                                         return (
                                             <div key={index}>
-                                                <dl className="dl-horizontal">
-                                                    <dt>Zygosity</dt>
-                                                    <dd>{ind.proband && ind.recessiveZygosity ? ind.recessiveZygosity : "None selected"}</dd>
-                                                </dl>
+                                                {semiDom ?
+                                                    <dl className="dl-horizontal">
+                                                        <dt>The proband is</dt>
+                                                        <dd>{ind.probandIs}</dd>
+                                                    </dl>
+                                                    :
+                                                    <dl className="dl-horizontal">
+                                                        <dt>Zygosity</dt>
+                                                        <dd>{ind.proband && ind.recessiveZygosity ? ind.recessiveZygosity : "None selected"}</dd>
+                                                    </dl>
+                                                }
                                             </div>
                                         );
                                     })}
                                 </div>
                                 : null }
-                            {probandIs ? 
-                                <div>
-                                    <dl className="dl-horizontal">
-                                        <dt>Proband is</dt>
-                                        <dd>{probandIs}</dd>
-                                    </dl>
-                                </div>
-                            : null}    
                             {variants.map(function(variant, i) {
                                 return (
                                     <div className="variant-view-panel" key={variant.uuid ? variant.uuid : i}>
@@ -2596,6 +2634,11 @@ const FamilySegregationViewer = (segregation, assessments, open) => {
                 <div>
                     <dt>Which mode of inheritance does this family display?</dt>
                     <dd>{segregation && segregation.moiDisplayedForFamily}</dd>
+                </div>
+
+                <div>
+                    <dt>Does the family meet requirements for estimating LOD score?</dt>
+                    <dd>{segregation && segregation.lodRequirements}</dd>
                 </div>
 
                 <div>

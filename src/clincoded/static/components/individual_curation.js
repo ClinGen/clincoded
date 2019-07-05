@@ -540,7 +540,7 @@ const IndividualCuration = createReactClass({
                     // No variant search strings. Go to next THEN indicating no new named variants
                     return Promise.resolve(null);
                 }).then(response => {
-                    /************************************************************/
+                    /*************************************************************/
                     /* Either update or create the score status object in the DB */
                     /*************************************************************/
                     if (Object.keys(newUserScoreObj).length && newUserScoreObj.scoreStatus) {
@@ -672,6 +672,7 @@ const IndividualCuration = createReactClass({
         var value;
         var currIndividual = this.state.individual;
         var family = this.state.family;
+        const semiDom = this.state.gdm && this.state.gdm.modeInheritance ? this.state.gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
 
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
@@ -752,10 +753,12 @@ const IndividualCuration = createReactClass({
         value = this.getFormValue('ageunit');
         newIndividual.ageUnit = value !== 'none' ? value : '';
 
-        // Fill in the individual fields from the Associated Variants panel
-        value = this.getFormValue('probandIs');
-        newIndividual.probandIs = value !== 'none' ? value : '';
-        
+        // Field only available on GDMs with Semidominant MOI (and individual is not a family-based proband)
+        if (semiDom && !(currIndividual && currIndividual.proband && family)) {
+            value = this.getFormValue('probandIs');
+            newIndividual.probandIs = value !== 'none' ? value : '';
+        }
+
         // Fill in the individual fields from the Additional panel
         value = this.getFormValue('additionalinfoindividual');
         if (value) { newIndividual.additionalInformation = value; }
@@ -1447,7 +1450,6 @@ function IndividualVariantInfo() {
     let family = this.state.family;
     let gdm = this.state.gdm;
     let annotation = this.state.annotation;
-    let segregation = family && family.segregation;
     let variants = individual && individual.variants;
     let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
@@ -1459,8 +1461,8 @@ function IndividualVariantInfo() {
         <div className="row form-row-helper">
             {individual && individual.proband && family ?
                 <div>
-                    {segregation && segregation.probandIs ? <span><strong>Proband is: </strong>{segregation.probandIs}</span> : null}
                     <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
+                    {individual.probandIs ? <p><strong>Proband is: </strong>{individual.probandIs}</p> : null}
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
@@ -1923,6 +1925,8 @@ const IndividualViewer = createReactClass({
         let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
         let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
         var probandIs = individual && individual.probandIs;
+        const semiDom = tempGdm && tempGdm.modeInheritance ? tempGdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+        const biallelicHetOrHom = semiDom && (probandIs === 'Biallelic homozygous' || probandIs === 'Biallelic compound heterozygous');
 
         return (
             <div>
@@ -2066,8 +2070,8 @@ const IndividualViewer = createReactClass({
                             </dl>
                         </Panel>
                         <Panel title={LabelPanelTitleView(individual, '', true)} panelClassName="panel-data">
-                            {probandIs 
-                                ? <div>
+                            {semiDom ?
+                                <div>
                                     <dl className="dl-horizontal">
                                         <dt>The proband is</dt>
                                         <dd>{probandIs}</dd>
@@ -2080,7 +2084,7 @@ const IndividualViewer = createReactClass({
                                         <dd>{individual && individual.recessiveZygosity ? individual.recessiveZygosity : "None selected"}</dd>
                                     </dl>
                                 </div>
-                            }   
+                            }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div key={i} className="variant-view-panel">
@@ -2113,7 +2117,7 @@ const IndividualViewer = createReactClass({
                                     </div>
                                 );
                             })}
-                            {variants && variants.length && individual.proband ?
+                            {(variants && variants.length && individual.proband) || biallelicHetOrHom ?
                                 <div className="variant-view-panel family-associated">
                                     <div>
                                         <dl className="dl-horizontal">
@@ -2212,9 +2216,10 @@ const LabelPanelTitleView = (individual, labelText, hasVariant) => {
  * @param {object} diseases 
  * @param {object} variants 
  * @param {object} zygosity 
+ * @param {string} probandIs - Value of "The proband is" form field (expected to be null for none/"No Selection")
  * @param {object} context 
  */
-export function makeStarterIndividual(label, diseases, variants, zygosity, affiliation, context) {
+export function makeStarterIndividual(label, diseases, variants, zygosity, probandIs, affiliation, context) {
     let newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
@@ -2224,6 +2229,7 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
         newIndividual.variants = variants;
     }
     if (zygosity) newIndividual.recessiveZygosity = zygosity;
+    if (probandIs) newIndividual.probandIs = probandIs;
     if (affiliation) newIndividual.affiliation = affiliation.affiliation_id;
     const newMethod = {dateTime: moment().format()};
     newIndividual.method = newMethod;
@@ -2239,10 +2245,12 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
  * @param {object} individual 
  * @param {object} variants 
  * @param {object} zygosity 
+ * @param {string} probandIs - Value of "The proband is" form field (expected to be null for none/"No Selection")
  * @param {object} context 
  */
-export function updateProbandVariants(individual, variants, zygosity, context) {
+export function updateProbandVariants(individual, variants, zygosity, probandIs, context) {
     let updateNeeded = true;
+    const probandIsExisting = individual && individual.probandIs ? individual.probandIs : null;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -2263,6 +2271,11 @@ export function updateProbandVariants(individual, variants, zygosity, context) {
     let tempZygosity = zygosity ? zygosity : null;
     let tempIndivZygosity = individual.recessiveZygosity ? individual.recessiveZygosity : null;
     if (tempZygosity !== tempIndivZygosity) {
+        updateNeeded = true;
+    }
+
+    // Check if value of "The proband is" form field changed
+    if (probandIs !== probandIsExisting) {
         updateNeeded = true;
     }
 
@@ -2291,6 +2304,13 @@ export function updateProbandVariants(individual, variants, zygosity, context) {
             writerIndividual.recessiveZygosity = zygosity;
         } else {
             delete writerIndividual['recessiveZygosity'];
+        }
+
+        // Set probandIs attribute in individual object (based on form field value)
+        if (probandIs) {
+            writerIndividual.probandIs = probandIs;
+        } else {
+            delete writerIndividual['probandIs'];
         }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {
