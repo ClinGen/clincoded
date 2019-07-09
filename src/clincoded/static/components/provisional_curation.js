@@ -17,6 +17,7 @@ import { sortListByDate } from '../libs/helpers/sort';
 import { getClassificationSavedDate } from '../libs/get_saved_date';
 import { allowPublishGlobal } from '../libs/allow_publish';
 import { isScoringForCurrentSOP } from '../libs/sop';
+import { renderAnimalOnlyTag } from '../libs/render_classification_animal_only_tag';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import * as curator from './curator';
@@ -804,12 +805,19 @@ var ProvisionalCuration = createReactClass({
         this.setState({totalScore: this.classificationMathRound(totalScore, 2), contradictingEvidence: contradictingEvidence, scoreTableValues: scoreTableValues});
 
         // set classification
-        this.calculateClassifications(totalScore, this.state.replicatedOverTime);
+        this.calculateClassifications(totalScore, scoreTableValues['geneticEvidenceTotalPoints'], contradictingEvidence, this.state.replicatedOverTime);
     },
 
-    calculateClassifications: function(totalPoints, replicatedOverTime) {
+    calculateClassifications: function(totalPoints, geneticEvidencePoints, contradictingEvidence, replicatedOverTime) {
         let autoClassification = "No Classification";
-        if (totalPoints >= 0.1 && totalPoints <= 6) {
+        // If no scored genetic evidence and no contradicting evidence, calculated classification should be "No Known Disease Relationship"
+        if (geneticEvidencePoints === 0 && 
+            !contradictingEvidence.caseControl &&
+            !contradictingEvidence.experimental &&
+            !contradictingEvidence.proband) {
+            autoClassification = "No Known Disease Relationship";
+        }
+        else if (totalPoints >= 0.1 && totalPoints <= 6) {
             autoClassification = "Limited";
         } else if (totalPoints > 6 && totalPoints <= 11) {
             autoClassification = "Moderate";
@@ -1077,21 +1085,25 @@ var ProvisionalCuration = createReactClass({
                                                                 </td>
                                                             </tr>
                                                             <tr className="header large">
-                                                                <td colSpan="3" rowSpan="4">Calculated Classification</td>
-                                                                <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>LIMITED</td>
-                                                                <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>0.1-6</td>
+                                                                <td colSpan="2" rowSpan="5">Calculated Classification</td>
+                                                                <td className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Known Disease Relationship</td>
+                                                                <td colSpan="2" className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Scored Genetic Evidence and Contradictory Evidence</td>
+                                                            </tr>
+                                                            <tr className={"header large" + (autoClassification === 'Limited' ? ' bg-emphasis' : null)}>
+                                                                <td>LIMITED</td>
+                                                                <td colSpan="2">0.1-6</td>
                                                             </tr>
                                                             <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-emphasis' : null)}>
                                                                 <td>MODERATE</td>
-                                                                <td>7-11</td>
+                                                                <td colSpan="2">7-11</td>
                                                             </tr>
                                                             <tr className={"header large" + (autoClassification === 'Strong' ? ' bg-emphasis' : null)}>
                                                                 <td>STRONG</td>
-                                                                <td>12-18</td>
+                                                                <td colSpan="2">12-18</td>
                                                             </tr>
                                                             <tr className={"header large" + (autoClassification === 'Definitive' ? ' bg-emphasis' : null)}>
                                                                 <td>DEFINITIVE</td>
-                                                                <td>12-18 & Replicated Over Time</td>
+                                                                <td colSpan="2">12-18 & Replicated Over Time</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colSpan="2" className="header large">Contradictory Evidence?</td>
@@ -1119,7 +1131,7 @@ var ProvisionalCuration = createReactClass({
                                                                                     {autoClassification === 'Limited' ? null : <option value="Limited">Limited</option>}
                                                                                     <option value="Disputed">Disputed</option>
                                                                                     <option value="Refuted">Refuted</option>
-                                                                                    <option value="No Reported Evidence">No Reported Evidence (calculated score is based on Experimental evidence only)</option>
+                                                                                    <option value="No Known Disease Relationship">No Known Disease Relationship (calculated score is based on Experimental evidence only)</option>
                                                                                 </Input>
                                                                             </div>
                                                                             <div className="altered-classification-reasons">
@@ -1153,11 +1165,11 @@ var ProvisionalCuration = createReactClass({
                                                             </tr>
                                                             <tr className="total-row header">
                                                                 <td colSpan="2">Last Saved Summary Classification</td>
-                                                                <td colSpan="4">
+                                                                <td colSpan="3">
                                                                     {currentClassification == 'None' ?
                                                                         <span>{currentClassification}</span>
                                                                         :
-                                                                        <div>{currentClassification}
+                                                                        <div>{currentClassification}<span>&nbsp;{renderAnimalOnlyTag(provisional)}</span>
                                                                             <br />
                                                                             <span className="large">({moment(lastSavedDate).format("YYYY MMM DD, h:mm a")})</span>
                                                                         </div>

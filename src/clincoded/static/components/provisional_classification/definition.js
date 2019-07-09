@@ -69,7 +69,7 @@ export function ClassificationDefinition() {
                         </tr>
                         <tr className="narrow-line"></tr>
                         <tr>
-                            <td colSpan="2" className="levelCell">NO REPORTED<br />EVIDENCE</td>
+                            <td colSpan="2" className="levelCell">NO KNOWN<br />DISEASE<br />RELATIONSHIP</td>
                             <td>
                                 No evidence reported for a causal role in disease. These genes might be &#34;candidate&#34; genes based on animal models or implication
                                 in pathways known to be involved in human diseases, but no reports have implicated the gene in human disease cases.
