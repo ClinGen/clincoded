@@ -19,6 +19,7 @@ import { sortListByDate } from '../../libs/helpers/sort';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
 import { allowPublishGlobal } from '../../libs/allow_publish';
 import { isScoringForCurrentSOP } from '../../libs/sop';
+import { renderAnimalOnlyTag } from '../../libs/render_classification_animal_only_tag';
 import * as methods from '../methods';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -426,21 +427,25 @@ const ProvisionalClassification = createReactClass({
                                                             <td>{provisional['replicatedOverTime'] ? <span>Yes</span> : <span>No</span>}</td>
                                                         </tr>
                                                         <tr className="header large">
-                                                            <td colSpan="3" rowSpan="4">Calculated Classification</td>
-                                                            <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>LIMITED</td>
-                                                            <td className={autoClassification === 'Limited' ? ' bg-emphasis' : null}>0.1-6</td>
+                                                            <td colSpan="2" rowSpan="5">Calculated Classification</td>
+                                                            <td className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Known Disease Relationship</td>
+                                                            <td colSpan="2" className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Scored Genetic evidence and Contradictory Evidence</td>
+                                                        </tr>
+                                                        <tr className={"header large" + (autoClassification === 'Limited' ? ' bg-emphasis' : null)}>
+                                                                <td>LIMITED</td>
+                                                                <td colSpan="2">0.1-6</td>
                                                         </tr>
                                                         <tr className={"header large" + (autoClassification === 'Moderate' ? ' bg-emphasis' : null)}>
                                                             <td>MODERATE</td>
-                                                            <td>7-11</td>
+                                                            <td colSpan="2">7-11</td>
                                                         </tr>
                                                         <tr className={"header large" + (autoClassification === 'Strong' ? ' bg-emphasis' : null)}>
                                                             <td>STRONG</td>
-                                                            <td>12-18</td>
+                                                            <td colSpan="2">12-18</td>
                                                         </tr>
                                                         <tr className={"header large" + (autoClassification === 'Definitive' ? ' bg-emphasis' : null)}>
                                                             <td>DEFINITIVE</td>
-                                                            <td>12-18 & Replicated Over Time</td>
+                                                            <td colSpan="2">12-18 & Replicated Over Time</td>
                                                         </tr>
                                                         <tr>
                                                             <td colSpan="2" className="header large">Contradictory Evidence?</td>
@@ -493,7 +498,7 @@ const ProvisionalClassification = createReactClass({
                                                         <tr className="total-row header">
                                                             <td colSpan="2">Last Saved Summary Classification</td>
                                                             <td colSpan="4">
-                                                                <div>{currentClassification}
+                                                                <div>{currentClassification}<span>&nbsp;{renderAnimalOnlyTag(provisional)}</span>
                                                                     <br />
                                                                     <span className="large">({moment(lastSavedDate).format("YYYY MMM DD, h:mm a")})</span>
                                                                 </div>

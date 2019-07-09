@@ -5,6 +5,7 @@ import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
+import { renderAnimalOnlyTag } from '../../libs/render_classification_animal_only_tag';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
 import { sopVersionByScoring } from '../../libs/sop';
 
@@ -47,6 +48,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             <dt>Modified classification:</dt>
                             <dd className="classificationModified">
                                 {provisional && provisional.alteredClassification ? (provisional.alteredClassification === 'No Selection' ? 'None' : provisional.alteredClassification) : null}
+                                &nbsp;{renderAnimalOnlyTag(provisional)}
                             </dd>
                             <dt>Reason for modified classification:</dt>
                             <dd className="classificationModifiedReason">
