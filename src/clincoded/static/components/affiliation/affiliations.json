@@ -653,5 +653,16 @@
                 "fullname": "ACADVL VCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10049",
+        "affiliation_fullname": "Peroxisomal Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40049",
+                "fullname": "Peroxisomal Disorders GCEP"
+            }
+        }
     }
 ]
