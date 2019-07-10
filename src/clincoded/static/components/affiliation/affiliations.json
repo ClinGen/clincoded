@@ -248,6 +248,10 @@
         "affiliation_fullname": "Monogenic Diabetes",
         "publish_approval": true,
         "subgroups": {
+            "gcep": {
+                "id": "40016",
+                "fullname": "Monogenic Diabetes GCEP"
+            },
             "vcep": {
                 "id": "50016",
                 "fullname": "Monogenic Diabetes VCEP"
