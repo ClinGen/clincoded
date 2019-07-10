@@ -560,12 +560,12 @@
     },
     {
         "affiliation_id": "10041",
-        "affiliation_fullname": "Coagulation Factor Deficiencies",
+        "affiliation_fullname": "Coagulation Factor Deficiency",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50041",
-                "fullname": "Coagulation Factor Deficiencies VCEP"
+                "fullname": "Coagulation Factor Deficiency VCEP"
             }
         }
     },
