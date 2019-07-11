@@ -1455,7 +1455,9 @@
             "10013",
             "10014",
             "10023",
-            "10028"
+            "10028",
+            "10040",
+            "10041"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -2816,7 +2818,7 @@
         "timezone": "US/Pacific"
     },
     {
-        "email": "Rupa.Udani@slh.wisc.edu",
+        "email": "rupaudani17@gmail.com",
         "first_name": "Rupa",
         "last_name": "Udani",
         "uuid": "6d1a4fb9-3873-43b8-aa67-0ea861b1b10f",
@@ -4556,6 +4558,7 @@
             "curator"
         ],
         "affiliation": [
+            "10005",
             "10006",
             "10019",
             "10022",
@@ -7573,6 +7576,10 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10034",
+            "10040"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -8362,7 +8369,8 @@
             "10007",
             "10017",
             "10019",
-            "10021"
+            "10021",
+            "10026"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
@@ -10725,24 +10733,6 @@
         "timezone": "US/Pacific"
     },
     {
-        "email": "benjamin.edward.kang@emory.edu",
-        "first_name": "Benjamin",
-        "last_name": "Kang",
-        "uuid": "21fe376d-b312-421f-abba-dc61c88190d0",
-        "groups": [
-            "curator"
-        ],
-        "affiliation": [
-            "10005"
-        ],
-        "job_title": "ClinGen Curator",
-        "lab": "/labs/curator/",
-        "submits_for": [
-            "/labs/curator/"
-        ],
-        "timezone": "US/Pacific"
-    },
-    {
         "email": "mg3560@cumc.columbia.edu",
         "first_name": "Mythily",
         "last_name": "Ganapathi",
@@ -12553,8 +12543,8 @@
     },
     {
         "email": "rodrigomendezh@gmail.com",
-        "first_name": "Hector",
-        "last_name": "Rodrigo Mendez",
+        "first_name": "Rodrigo",
+        "last_name": "Mendez",
         "uuid": "2e420670-a366-43bb-877a-7ed1a4dfffcf",
         "groups": [
             "curator"
@@ -13993,6 +13983,21 @@
         ],
         "affiliation": [
             "10031"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "polonalequesne@gmail.com",
+        "first_name": "Polona",
+        "last_name": "Le Quesne",
+        "uuid": "8e19e774-9bf6-41ee-8760-aac0b67a4c2c",
+        "groups": [
+            "curator"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
