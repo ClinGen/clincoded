@@ -14,6 +14,7 @@
         "primarily or exclusively homoplasmic",
         "primarily or exclusively heteroplasmic"
     ],
+    "Semidominant inheritance (HP:0032113)": [],
     "X-linked inheritance (HP:0001417)": [
         "dominant (HP:0001423)",
         "recessive (HP:0001419)",
@@ -23,8 +24,7 @@
         "Y-linked inheritance (HP:0001450)",
         "Somatic mutation (HP:0001428)",
         "Multifactorial inheritance (HP:0001426)",
-        "Codominant inheritance",
-        "Semidominant inheritance"
+        "Codominant inheritance"
     ],
     "Undetermined mode of inheritance (HP:0000005)": []
 }

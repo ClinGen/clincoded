@@ -133,7 +133,7 @@
         vertical-align: bottom;
         width: 20%;
 
-        input[type="button"] {
+        input[type="button"] :not(.clinvar-submission) {
             margin: 8px 0;
         }
 
@@ -152,10 +152,19 @@
         }
 
         .btn.approve-provisional-link-item,
+        .btn.clinvar-submission-link-item,
         .btn.publish-link-item {
             font-size: 91%;
             margin-bottom: 5px;
             padding: 6px 8px;
+        }
+
+        .btn.clinvar-submission-link-item {
+            background-color: #d4af37;
+
+            &:hover {
+                background-color: #a98c2c;
+            }
         }
 
         .btn.btn-default.publish-link-item {
