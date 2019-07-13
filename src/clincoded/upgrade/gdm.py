@@ -177,3 +177,9 @@ def gdm_6_7(value, system):
     # https://github.com/ClinGen/clincoded/issues/1847
      if value['modeInheritance'] == 'Unknown':
         value['modeInheritance'] = 'Undetermined mode of inheritance (HP:0000005)'
+
+@upgrade_step('gdm', '7', '8')
+def gdm_7_8(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1848
+    # add Semidominant inheritance (HP:0032113) to modeInheritance property
+    return

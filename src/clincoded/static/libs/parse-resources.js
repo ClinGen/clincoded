@@ -23,6 +23,16 @@ export function parseClinvar(xml, extended) {
                 if ($variationType) {
                     variant.variationType = $variationType.textContent;
                 }
+                // Parse <Name> node under <OtherNameList>
+                let $OtherNameListNode = $Allele.getElementsByTagName('OtherNameList')[0];
+                let $OtherNameNodes = [];
+                if ($OtherNameListNode) {
+                    variant.otherNameList = [];
+                    $OtherNameNodes = $OtherNameListNode.getElementsByTagName('Name');
+                    for (var k = 0; k < $OtherNameNodes.length; k++) {
+                        variant.otherNameList.push($OtherNameNodes[k].textContent)
+                    }
+                }
                 // Parse <MolecularConsequence> node under <MolecularConsequenceList>
                 let $MolecularConsequenceListNode = $Allele.getElementsByTagName('MolecularConsequenceList')[0];
                 let $MolecularConsequenceNodes = [];
