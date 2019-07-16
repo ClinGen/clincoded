@@ -37,8 +37,7 @@ const computationStatic = {
             'phastconsp7way': 'http://compgen.cshl.edu/phast/index.php',
             'phastconsp20way': 'http://compgen.cshl.edu/phast/index.php',
             'gerp': 'http://mendel.stanford.edu/SidowLab/downloads/gerp/',
-            'siphy': 'http://portals.broadinstitute.org/genome_bio/siphy/index.html',
-            'ucsc': 'http://genome.ucsc.edu/cgi-bin/hgTracks?clade=mammal&org=Human&db=hg19&position='
+            'siphy': 'http://portals.broadinstitute.org/genome_bio/siphy/index.html'
         }
     },
     other_predictors: {
@@ -532,7 +531,6 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var singleNucleotide = this.state.ext_singleNucleotide;
 
         var variant = this.state.data;
-        const variantId = (this.props.ext_myVariantInfo && this.props.ext_myVariantInfo._id) ? this.props.ext_myVariantInfo._id : null;
         var gRCh38 = null;
         var gRCh37 = null;
         var links_38 = null;
@@ -774,8 +772,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                     <h3 className="panel-title">
                                         Conservation Analysis
                                         <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
-                                        <a href={conservationStatic._url['ucsc'] + variantId} target="_blank" rel="noopener noreferrer">UCSC Genome Browser</a>
-                                    </h3>
+                                        {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + gRCh37 + ' in a new window'}>UCSC Genome Browser</a> : null}                                    </h3>
                                 </div>
                                 <div className="panel-content-wrapper">
                                     {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
