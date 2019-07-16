@@ -37,7 +37,8 @@ const computationStatic = {
             'phastconsp7way': 'http://compgen.cshl.edu/phast/index.php',
             'phastconsp20way': 'http://compgen.cshl.edu/phast/index.php',
             'gerp': 'http://mendel.stanford.edu/SidowLab/downloads/gerp/',
-            'siphy': 'http://portals.broadinstitute.org/genome_bio/siphy/index.html'
+            'siphy': 'http://portals.broadinstitute.org/genome_bio/siphy/index.html',
+            'ucsc': 'http://genome.ucsc.edu/cgi-bin/hgTracks?clade=mammal&org=Human&db=hg19&position='
         }
     },
     other_predictors: {
@@ -531,6 +532,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         var singleNucleotide = this.state.ext_singleNucleotide;
 
         var variant = this.state.data;
+        const variantId = (this.props.ext_myVariantInfo && this.props.ext_myVariantInfo._id) ? this.props.ext_myVariantInfo._id : null;
         var gRCh38 = null;
         var gRCh37 = null;
         var links_38 = null;
@@ -769,8 +771,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                             <div className="panel panel-info datasource-conservation">
                                 <div className="panel-heading">
-                                    <h3 className="panel-title">Conservation Analysis
+                                    <h3 className="panel-title">
+                                        Conservation Analysis
                                         <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                                        <a href={conservationStatic._url['ucsc'] + variantId} target="_blank" rel="noopener noreferrer">UCSC Genome Browser</a>
                                     </h3>
                                 </div>
                                 <div className="panel-content-wrapper">
