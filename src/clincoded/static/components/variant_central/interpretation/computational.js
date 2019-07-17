@@ -803,7 +803,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="panel panel-info datasource-splice">
                                 <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                                 <div className="panel-body">
-                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank" rel="noopener noreferrer">Analyze using MaxEntScan</a>
+                                    <a href="http://hollywood.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank" rel="noopener noreferrer">Analyze using MaxEntScan</a>
                                     <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank" rel="noopener noreferrer">Analyze using NNSPLICE</a>
                                     <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
@@ -901,7 +901,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             <div className="panel panel-info datasource-splice">
                                 <div className="panel-heading"><h3 className="panel-title">Splice Site Predictors</h3></div>
                                 <div className="panel-body">
-                                    <a href="http://genes.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank" rel="noopener noreferrer">Analyze using MaxEntScan</a>
+                                    <a href="http://hollywood.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank" rel="noopener noreferrer">Analyze using MaxEntScan</a>
                                     <a href="http://www.fruitfly.org/seq_tools/splice.html" target="_blank" rel="noopener noreferrer">Analyze using NNSPLICE</a>
                                     <a href="http://www.umd.be/HSF3/HSF.shtml" target="_blank" rel="noopener noreferrer">Analyze using HumanSplicingFinder</a>
                                 </div>
