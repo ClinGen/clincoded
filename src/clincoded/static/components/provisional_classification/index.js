@@ -429,7 +429,7 @@ const ProvisionalClassification = createReactClass({
                                                         <tr className="header large">
                                                             <td colSpan="2" rowSpan="5">Calculated Classification</td>
                                                             <td className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Known Disease Relationship</td>
-                                                            <td colSpan="2" className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Scored Genetic evidence and Contradictory Evidence</td>
+                                                            <td colSpan="2" className={autoClassification === 'No Known Disease Relationship' ? ' bg-emphasis' : null}>No Scored Genetic Evidence & No Contradictory Evidence</td>
                                                         </tr>
                                                         <tr className={"header large" + (autoClassification === 'Limited' ? ' bg-emphasis' : null)}>
                                                             <td>LIMITED</td>
