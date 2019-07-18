@@ -4,7 +4,7 @@
     margin-right: 30px;
 
     .evidence-panel-wrapper {
-        position: relative;
+        position: static;
 
         &.preview-only-overlay {
             background-image: url(/static/img/preview-bg.svg);
@@ -62,7 +62,6 @@
 
         &:last-child {
             border-right: none;
-            word-break: break-all;
         }
 
         .Contradicts {
