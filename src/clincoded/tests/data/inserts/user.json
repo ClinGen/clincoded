@@ -14221,5 +14221,455 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger0@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger0",
+        "uuid": "aae35663-c25f-497c-a182-dda1be095dd8",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger1@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger1",
+        "uuid": "14601b31-019c-49fc-9c3d-88ce21af44fd",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger2@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger2",
+        "uuid": "2b80dd56-30f5-4e32-ad04-d4d9537d8dfd",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger3@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger3",
+        "uuid": "7abcca90-60e2-42fe-b431-d6325111969e",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger4@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger4",
+        "uuid": "353167ec-0d0b-4d01-8afe-bb4f40b02919",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger5@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger5",
+        "uuid": "79e08e51-4bc1-4168-a38c-4e6cb5944f3c",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger6@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger6",
+        "uuid": "b7b45f32-d5f9-4be9-a434-3a7ecd243fc3",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger7@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger7",
+        "uuid": "cf43a077-45d1-47c2-8333-a853b18884ba",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger8@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger8",
+        "uuid": "1678f8b3-b6d5-443c-9268-1d1e17e4d563",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger9@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger9",
+        "uuid": "7b0a6294-01b1-4389-a9d2-49d4d318a28a",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger10@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger10",
+        "uuid": "4c781146-ca5f-4a93-ad86-936f2ac7074a",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger11@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger11",
+        "uuid": "33ec3e22-e0c6-44f4-98c8-ac854571c3f1",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger12@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger12",
+        "uuid": "fa6a057a-852b-4e45-953f-155f93cf9295",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger13@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger13",
+        "uuid": "aa0bc184-866f-458e-9316-c82838aca7e0",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger14@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger14",
+        "uuid": "80de9c32-3538-41ef-bcc7-7669f92a61b2",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger15@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger15",
+        "uuid": "08908bac-bbbc-4d70-815a-7eaa68e85a13",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger16@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger16",
+        "uuid": "dbac8872-1ce8-4a84-a128-efe45f0981dc",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger17@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger17",
+        "uuid": "a2460412-dc51-4ee3-80e9-20d195e280bd",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger18@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger18",
+        "uuid": "ec47b3b7-d2f4-4e3b-9207-0c926b35f991",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger19@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger19",
+        "uuid": "a34a3bbf-4592-4447-9633-6e198dd0df27",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger20@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger20",
+        "uuid": "e7901fbf-42a0-409e-bea5-1dfe2c37cf43",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger21@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger21",
+        "uuid": "55ae888e-a61b-4301-8e41-e0f581bb4595",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger22@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger22",
+        "uuid": "62c4eea7-dd73-4669-bc1e-bd38acb994ff",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger23@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger23",
+        "uuid": "abda2b87-dc8b-4901-be7f-d574830d3433",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger24@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger24",
+        "uuid": "45b6d2d8-8c92-4bd4-a909-e7e8e18a76b8",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger25@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger25",
+        "uuid": "0ddc31ff-9cd0-4b81-a07d-13891a12248f",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger26@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger26",
+        "uuid": "fdbb2fb1-1d78-4df8-9bb3-826e2670f4c4",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger27@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger27",
+        "uuid": "7337289c-c811-4ce5-922f-b71a85528a93",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger28@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger28",
+        "uuid": "f6f83a8e-fa71-4a69-b7bb-831b5eaf3508",
+        "submits_for": [
+            "/labs/curator/"
+        ]
+    },
+    {
+        "last_name": "testing",
+        "job_title": "ClinGen Curator",
+        "timezone": "US/Pacific",
+        "groups": [
+            "curator"
+        ],
+        "email": "badger29@example.com",
+        "lab": "/labs/curator/",
+        "first_name": "Badger29",
+        "uuid": "af72e707-0e39-42d5-8f11-e7b09c38bf43",
+        "submits_for": [
+            "/labs/curator/"
+        ]
     }
 ]
