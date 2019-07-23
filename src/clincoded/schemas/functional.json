@@ -1,0 +1,42 @@
+{
+    "title": "Functional",
+    "id": "/profiles/functional.json",
+    "description": "Schema for storing functional data for Variant Curation",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/standard_status" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+          "default": "1"
+        },
+        "functionalData": {
+            "title": "Functional",
+            "description": "Property to save blob functional data.",
+            "type": "object",
+            "comment": "No property defined. Flexible for saving different key:value formats."
+        },
+        "variant": {
+            "title": "Variant",
+            "type": "string",
+            "linkTo": "variant"
+        }
+    },
+    "columns": {
+        "variant.variant_identifier": {
+            "title": "Variant",
+            "type": "string"
+        },
+        "submitted_by.title": {
+            "title": "Capturer",
+            "type": "string"
+        }
+    }
+}

@@ -23,5 +23,16 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-05-11T22:47:10.000000+00:00",
         "last_modified": "2016-05-11T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "d513c0bb-f26b-41fe-93fb-1119bd1369cb",
+        "variant": "e518427c-c288-4d5c-bd17-dcd13848b682",
+        "functional": "adf43b86-1452-4620-aad7-0625c6db8f0f",
+        "criteria": "BS3",
+        "criteriaStatus": "met",
+        "explanation": "explanation here",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2019-06-26T18:29:32.820618+00:00",
+        "last_modified": "2019-06-26T18:29:32.917492+00:00"
     }
 ]

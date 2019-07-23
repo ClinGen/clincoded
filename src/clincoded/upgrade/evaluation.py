@@ -15,3 +15,8 @@ def evaluation_2_3(value, system):
     # Add affiliation property and update schema version
     return
 
+@upgrade_step('evaluation', '3', '4')
+def evaluation_2_3(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1794
+    # Adds functional property and update schema version
+    return

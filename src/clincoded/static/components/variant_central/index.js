@@ -7,6 +7,7 @@ import { RestMixin } from '../rest';
 import { VariantCurationHeader } from './header';
 import { VariantCurationActions } from './actions';
 import { VariantCurationInterpretation } from './interpretation';
+import { parsePubmed } from '../../libs/parse-pubmed';
 import { parseClinvar } from '../../libs/parse-resources';
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
@@ -56,6 +57,7 @@ var VariantCurationHub = createReactClass({
             ext_myGeneInfo_ClinVar: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
+            ext_genboreeFuncData: null,
             ext_singleNucleotide: true,
             ext_gnomadExac: false,
             loading_clinvarEutils: true,
@@ -66,6 +68,7 @@ var VariantCurationHub = createReactClass({
             loading_pageData: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
+            loading_genboreeFuncData: true,
             calculated_pathogenicity: null,
             autoClassification: null,
             provisionalPathogenicity: null,
@@ -172,18 +175,20 @@ var VariantCurationHub = createReactClass({
     getClinVarData: function(uuid) {
         return this.getRestData('/variants/' + uuid, null, true).then(response => {
             // The variant object successfully retrieved
-            this.setState({variantObj: response});
-            // ping out external resources (all async)
-            this.fetchClinVarEutils(this.state.variantObj);
-            this.fetchMyVariantInfo(this.state.variantObj);
-            this.fetchEnsemblVariation(this.state.variantObj);
-            this.fetchEnsemblHGVSVEP(this.state.variantObj);
-            this.parseVariantType(this.state.variantObj);
-            const session = this.props.session;
-            if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
-                this.fetchPageData(this.state.variantObj);
-            }
-            this.fetchMyVariantInfoMetadata();
+            this.setState({variantObj: response}, () => {
+                // ping out external resources (all async)
+                this.fetchClinVarEutils(this.state.variantObj);
+                this.fetchMyVariantInfo(this.state.variantObj);
+                this.fetchEnsemblVariation(this.state.variantObj);
+                this.fetchEnsemblHGVSVEP(this.state.variantObj);
+                this.fetchFunctionalData(this.state.variantObj);
+                this.parseVariantType(this.state.variantObj);
+                const session = this.props.session;
+                if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
+                    this.fetchPageData(this.state.variantObj);
+                }
+                this.fetchMyVariantInfoMetadata();
+            });
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -315,6 +320,79 @@ var VariantCurationHub = createReactClass({
             } else {
                 this.setState({loading_ensemblHgvsVEP: false});
             }
+        }
+    },
+
+    fetchFunctionalData: function(variant) {
+
+        // Returns an the AFIS records as an object with the pubmedId as the key
+        const getAfisObject = (afisRecords) => {
+            const afisObject = {};
+            afisRecords.forEach(record => {
+                const pubmedId = _.property(['fdr', 'ld', 'Source', 0, 'entId'])(record);
+                if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
+                    afisObject[pubmedId].statements.push(record);
+                } else {
+                    afisObject[pubmedId] = {
+                        statements: [record],
+                    };
+                }
+            });
+            return afisObject;
+        };
+
+        // Fetches pubmed data for each source article and replaces the AFIS with newly constructed AFIS object
+        const getAndSetPubmedArticles = (functionalData, afisObject) => {
+            const pubmedUrls = [];
+            const pubmedIdKeys = Object.keys(afisObject);
+            if (pubmedIdKeys && pubmedIdKeys.length > 0) {
+                pubmedIdKeys.forEach(id => {
+                    pubmedUrls.push(external_url_map['PubMedSearch'] + id);
+                });
+                this.getRestDatasXml(pubmedUrls).then(xmls => {
+                    xmls.forEach((xml, xmlIndex) => {
+                        const lastRecord = (xmlIndex === pubmedIdKeys.length - 1);
+                        const data = parsePubmed(xml);
+                        if (data.pmid) {
+                            afisObject[data.pmid].pubmedSource = data;
+                        }
+                        if (lastRecord) {
+                            functionalData.ld.AlleleFunctionalImpactStatement = afisObject;
+                            this.setState({ext_genboreeFuncData: functionalData}, () => {
+                                this.setState({loading_genboreeFuncData: false});
+                            });
+                        }
+                    });
+                }).catch(err => {
+                    this.setState({loading_genboreeFuncData: false});
+                    console.log('Pubmed Fetch Error', err);
+                });
+            } else {
+                this.setState({loading_genboreeFuncData: false});
+            }
+        };
+
+        if (variant) {
+            const { carId, clinvarVariantId } = variant;
+            const variantId = carId ? carId : clinvarVariantId;
+            if (variantId) {
+                this.getRestData('/functional_data/ldh/' + variantId).then(functionalData => {
+                    const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(functionalData) || [];
+                    if (afisRecords && afisRecords.length > 0) {
+                        const afisObject = getAfisObject(afisRecords);
+                        getAndSetPubmedArticles(functionalData, afisObject);
+                    } else {
+                        this.setState({loading_genboreeFuncData: false});
+                    }
+                }).catch(err => {
+                    this.setState({loading_genboreeFuncData: false});
+                    console.log('Genboree Functional Data LDH Fetch Error: ', err);
+                });
+            } else {
+                this.setState({loading_genboreeFuncData: false});
+            }
+        } else {
+            this.setState({loading_genboreeFuncData: false});
         }
     },
 
@@ -601,6 +679,7 @@ var VariantCurationHub = createReactClass({
                             ext_clinVarSCV={this.state.ext_clinVarSCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                            ext_genboreeFuncData={this.state.ext_genboreeFuncData}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             ext_gnomadExac={this.state.ext_gnomadExac}
@@ -609,6 +688,7 @@ var VariantCurationHub = createReactClass({
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_genboreeFuncData={this.state.loading_genboreeFuncData}
                             loading_pageData={this.state.loading_pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}

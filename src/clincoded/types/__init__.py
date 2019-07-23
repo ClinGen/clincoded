@@ -1446,6 +1446,9 @@ class Interpretation(Item):
         'evaluations.computational',
         'evaluations.computational.submitted_by',
         'evaluations.computational.modified_by',
+        'evaluations.functional',
+        'evaluations.functional.submitted_by',
+        'evaluations.functional.modified_by',
         'provisional_variant',
         'provisional_variant.submitted_by',
         'provisional_variant.modified_by',
@@ -1542,6 +1545,7 @@ class Evaluation(Item):
         'disease',
         'population',
         'computational',
+        'functional',
         'interpretation_associated'
     ]
     rev = {
@@ -1678,6 +1682,43 @@ class Computational(Item):
             diseaseObj = request.embed(disease, '@@object')
             return diseaseObj['term']
         return ''
+
+@collection(
+    name='functional',
+    unique_key='functional:uuid',
+    properties={
+        'title': 'Functional',
+        'description': 'Listing of Functional Evidence',
+    })
+class Functional(Item):
+    item_type = 'functional'
+    schema = load_schema('clincoded:schemas/functional.json')
+    name_key = 'uuid'
+    embedded = [
+        'submitted_by',
+        'modified_by',
+        'variant',
+        'variant.associatedInterpretations',
+        'variant.associatedInterpretations.submitted_by',
+        'variant.associatedInterpretations.modified_by',
+        'evaluation_associated',
+        'evaluation_associated.interpretation_associated',
+        'evaluation_associated.interpretation_associated.disease'
+    ]
+    rev = {
+        'evaluation_associated': ('evaluation', 'functional')
+    }
+
+    @calculated_property(schema={
+        "title": "Evaluation Associated",
+        "type": "array",
+        "items": {
+            "title": ["string", "object"],
+            "linkFrom": "evaluation.functional"
+        }
+    })
+    def evaluation_associated(self, request, evaluation_associated):
+        return paths_filtered_by_status(request, evaluation_associated)
 
 
 @collection(
