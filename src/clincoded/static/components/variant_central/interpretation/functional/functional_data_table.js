@@ -33,7 +33,7 @@ const propTypes = {
 
 const defaultProps = {
     selectedTab: 0,
-    ext_genboreeFuncData: [],
+    ext_genboreeFuncData: {},
 };
 
 const FunctionalDataTable = ({
