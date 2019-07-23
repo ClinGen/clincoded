@@ -475,7 +475,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50034",
-                "fullname": "Myeloid Malignancy VCEP"
+                "fullname": "Myeloid Malignancy VCEP",
+                "guidelines_name": "ClinGen Myeloid Malignancy Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50034/docs/assertion-criteria"
             }
         },
         "approver": [
