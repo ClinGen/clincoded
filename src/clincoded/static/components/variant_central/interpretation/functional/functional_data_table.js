@@ -6,6 +6,24 @@ import { property } from 'underscore';
 import { showActivityIndicator } from '../../../activity_indicator';
 import { PmidSummary } from '../../../curator';
 
+/**
+ * This component displays functional data in the experimental tab of the VCI
+ * 
+ * Because of the deep nesting of the LDH and FDR data is retrieved,
+ * the property() function from underscore.js is employed quite extensively to
+ * check the validity of data in order to prevent data access errors
+ * 
+ * _.property(path)
+ * Returns a function that will return the specified property of any passed-in object.
+ * @path may be specified as a simple key, or as an array of object keys or array indexes, for deep property fetching.
+ * 
+ * Ex:
+ * property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material)
+ * if every key in the path is defined, this will return the value of "label"
+ * if an undefined key is encountered, this will return undefined
+ * 
+ */
+
 const propTypes = {
     selectedTab: PropTypes.number,
     ext_genboreeFuncData: PropTypes.object,
@@ -98,7 +116,7 @@ const FunctionalDataTable = ({
                                                                                         <span>
                                                                                             <span> (</span>
                                                                                             <i>source: </i>patient; <i>genotype: </i>
-                                                                                            { property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material) }
+                                                                                            { property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material) || 'none' }
                                                                                             <span>)</span>
                                                                                         </span>
                                                                                     )
