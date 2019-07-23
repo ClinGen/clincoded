@@ -24,18 +24,14 @@ def functional_data(request):
         ldh_data = requests.get(ldh_url).json()
     except Exception as e:
         return http_error(HTTPBadRequest(), request)
-    data = ldh_data.get('data')
-    if data is not None:
+    try:
         afis_records = ldh_data['data']['ld']['AlleleFunctionalImpactStatement']
-        try:
-            for index, statement in enumerate(afis_records):
-                try:
-                    fdr_data = requests.get(statement['entIri']).json()
-                    ldh_data['data']['ld']['AlleleFunctionalImpactStatement'][index]['fdr'] = fdr_data['data']
-                except Exception as e:
-                    return http_error(HTTPServiceUnavailable(), request)
-        except TypeError:
-            return http_error(HTTPServiceUnavailable(), request)
-    else:
+        for index, statement in enumerate(afis_records):
+            try:
+                fdr_data = requests.get(statement['entIri']).json()
+                ldh_data['data']['ld']['AlleleFunctionalImpactStatement'][index]['fdr'] = fdr_data['data']
+            except Exception as e:
+                return http_error(HTTPServiceUnavailable(), request)
+    except Exception as e:
         return http_error(HTTPServiceUnavailable(), request)
     return ldh_data['data']
