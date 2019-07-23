@@ -49,7 +49,6 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
             scoreAffiliation: null, // Affiliation associated with the score
             scoreError: this.props.scoreError, // TRUE if no explanation is given for a different score or no change is made
             scoreErrorMsg: this.props.scoreErrorMsg, // Text string in response to the type of score error
-            scoreAffiliation: null, // Affiliation associated with the score
             origStatus: null, // User originally selected status
             origScore: null, // User originally selected score
             origScoreExplanation: null // User originally entered explanation for selected score
