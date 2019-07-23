@@ -248,6 +248,10 @@
         "affiliation_fullname": "Monogenic Diabetes",
         "publish_approval": true,
         "subgroups": {
+            "gcep": {
+                "id": "40016",
+                "fullname": "Monogenic Diabetes GCEP"
+            },
             "vcep": {
                 "id": "50016",
                 "fullname": "Monogenic Diabetes VCEP"
@@ -420,7 +424,14 @@
                 "id": "40028",
                 "fullname": "Hemostasis Thrombosis GCEP"
             }
-        }
+        },
+        "approver": [
+            "Kristy Lee",
+            "Justyne Ross",
+            "Shruthi Mohan",
+            "Kathleen Freson",
+            "Michele Lambert"
+        ]
     },
     {
         "affiliation_id": "10029",
@@ -444,7 +455,8 @@
             }
         },
         "approver": [
-            "Ozge Birsoy"
+            "Chandler Douglas",
+            "Carsten Bonnemann"
         ]
     },
     {
@@ -488,11 +500,8 @@
             }
         },
         "approver": [
-            "Ray Hershberger",
-            "Peter van Tintelen",
-            "Jan Jongbloed",
-            "Cindy James",
-            "Lisa Kurtz"
+            "Lisa Kurtz",
+            "Courtney Thaxton"
         ]
     },
     {
@@ -530,7 +539,10 @@
                 "id": "50038",
                 "fullname": "Malignant Hyperthermia Susceptibility VCEP"
             }
-        }
+        },
+        "approver": [
+            "Jennifer Johnston"
+        ]
     },
     {
         "affiliation_id": "10039",
@@ -556,12 +568,12 @@
     },
     {
         "affiliation_id": "10041",
-        "affiliation_fullname": "Coagulation Factor Deficiencies",
+        "affiliation_fullname": "Coagulation Factor Deficiency",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50041",
-                "fullname": "Coagulation Factor Deficiencies VCEP"
+                "fullname": "Coagulation Factor Deficiency VCEP"
             }
         }
     },
@@ -647,6 +659,17 @@
             "vcep": {
                 "id": "50048",
                 "fullname": "ACADVL VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10049",
+        "affiliation_fullname": "Peroxisomal Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40049",
+                "fullname": "Peroxisomal Disorders GCEP"
             }
         }
     }

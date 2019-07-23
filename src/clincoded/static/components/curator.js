@@ -2039,8 +2039,10 @@ function flattenFamily(family) {
 var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
     "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
-    "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
-    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "sequencingMethod", "reasonExplanation"];
+    "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "moiDisplayedForFamily",
+    "probandIs", "pedigreeLocation", "lodRequirements", "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation",
+    "sequencingMethod", "reasonExplanation"
+];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
@@ -2061,8 +2063,8 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
-    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed",
-    "recessiveZygosity", "affiliation"
+    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "probandIs", "denovo",
+    "maternityPaternityConfirmed", "recessiveZygosity", "affiliation"
 ];
 
 function flattenIndividual(individual) {
