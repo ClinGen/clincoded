@@ -674,5 +674,32 @@
                 "fullname": "Peroxisomal Disorders GCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10050",
+        "affiliation_fullname": "DICER1 and miRNA-Processing Gene",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50050",
+                "fullname": "DICER1 and miRNA-Processing Gene VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10051",
+        "affiliation_fullname": "Von Willebrand"
+    },
+    {
+        "affiliation_id": "10052",
+        "affiliation_fullname": "Hemoglobinopathies"
+    },
+    {
+        "affiliation_id": "10053",
+        "affiliation_fullname": "Glaucoma"
+    },
+    {
+        "affiliation_id": "10054",
+        "affiliation_fullname": "Myopathies"
     }
 ]
