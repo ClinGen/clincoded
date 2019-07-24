@@ -330,12 +330,14 @@ var VariantCurationHub = createReactClass({
             const afisObject = {};
             afisRecords.forEach(record => {
                 const pubmedId = _.property(['fdr', 'ld', 'Source', 0, 'entId'])(record);
-                if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
-                    afisObject[pubmedId].statements.push(record);
-                } else {
-                    afisObject[pubmedId] = {
-                        statements: [record],
-                    };
+                if (pubmedId) {
+                    if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
+                        afisObject[pubmedId].statements.push(record);
+                    } else {
+                        afisObject[pubmedId] = {
+                            statements: [record],
+                        };
+                    }
                 }
             });
             return afisObject;
