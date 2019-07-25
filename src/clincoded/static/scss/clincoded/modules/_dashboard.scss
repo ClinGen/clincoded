@@ -2,6 +2,27 @@
     margin-top: 25px;
     margin-bottom: 25px;
 
+    .filter-by {
+        background-color: #c0c0c0;
+        padding: 5px;
+
+        .filter-term-input {
+            width: 40%;
+        }
+        .filter-status {
+            width: 40%;
+
+            .filter-status-select {
+                margin-top: -35px;
+            }
+        }
+    }
+
+    .download-button button {
+        border-radius: 4px;
+        margin-top: -6px;
+    }
+
     .panel {
         border-radius: 4px;
 

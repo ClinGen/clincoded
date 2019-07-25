@@ -10,8 +10,9 @@ import { sortListByDate } from './helpers/sort';
  * @param {object} gdm - The GDM object
  * @param {object} context - The global context object
  * @param {boolean} showLink - Whether to render link to view/approve provisional (gdm) or view provisional summary (interpretation)
+ * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
  */
-export function renderProvisionalStatus(snapshots, resourceType, gdm, context, showLink) {
+export function renderProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false) {
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been provisioned
     const provisionedSnapshots = sortedSnapshots.filter(snapshot => {
@@ -28,15 +29,19 @@ export function renderProvisionalStatus(snapshots, resourceType, gdm, context, s
         showProvisionalLink = true;
     }
     if (provisionedSnapshots && provisionedSnapshots.length && (!approvedSnapshots || (approvedSnapshots && !approvedSnapshots.length))) {
-        return (
-            <span className="status-wrapper provisional">
-                <span className="label label-info status-item" data-toggle="tooltip" data-placement="top"
-                    data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
-                    PROVISIONAL
+        if (stringOnly) {
+            return 'Provisional';
+        } else {
+            return (
+                <span className="status-wrapper provisional">
+                    <span className="label label-info status-item" data-toggle="tooltip" data-placement="top"
+                        data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
+                        PROVISIONAL
+                    </span>
+                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm) : null}
                 </span>
-                {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm) : null}
-            </span>
-        );
+            );
+        }
     } else {
         return null;
     }

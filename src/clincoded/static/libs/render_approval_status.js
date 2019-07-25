@@ -10,8 +10,9 @@ import { sortListByDate } from './helpers/sort';
  * @param {object} context - The global context object
  * @param {string} affiliationId - The affiliation ID
  * @param {string} userId - The user's UUID
+ * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
  */
-export function renderApprovalStatus(snapshots, resourceType, context, affiliationId, userId) {
+export function renderApprovalStatus(snapshots, resourceType, context, affiliationId, userId, stringOnly=false) {
     let showApprovalLink = false;
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been approved
@@ -25,15 +26,19 @@ export function renderApprovalStatus(snapshots, resourceType, context, affiliati
         showApprovalLink = true;
     }
     if (approvedSnapshots && approvedSnapshots.length) {
-        return (
-            <span className="status-wrapper approval">
-                <span className="label label-success status-item" data-toggle="tooltip" data-placement="top"
-                    data-tooltip={'Approved on ' + moment(approvedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
-                    APPROVED
+        if (stringOnly) {
+            return 'Approved';
+        } else {
+            return (
+                <span className="status-wrapper approval">
+                    <span className="label label-success status-item" data-toggle="tooltip" data-placement="top"
+                        data-tooltip={'Approved on ' + moment(approvedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
+                        APPROVED
+                    </span>
+                    {showApprovalLink ? renderApprovalLink(approvedSnapshots[0], resourceType, affiliationId, userId) : null}
                 </span>
-                {showApprovalLink ? renderApprovalLink(approvedSnapshots[0], resourceType, affiliationId, userId) : null}
-            </span>
-        );
+            );
+        }
     } else {
         return null;
     }

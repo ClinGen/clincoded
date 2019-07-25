@@ -6,8 +6,9 @@ import { sortListByDate } from './helpers/sort';
 /**
  * Method to render the publication status of a given GDM's classification
  * @param {array} snapshots - List of snapshots associated with classification
+ * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
  */
-export function renderPublishStatus(snapshots) {
+export function renderPublishStatus(snapshots, stringOnly=false) {
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been published
     const publishedSnapshots = sortedSnapshots.filter(snapshot => {
@@ -35,19 +36,23 @@ export function renderPublishStatus(snapshots) {
 
     if (publishedSnapshots && publishedSnapshots.length) {
         let publishDate = publishedSnapshots[0].resource && publishedSnapshots[0].resource.publishDate ? publishedSnapshots[0].resource.publishDate : null;
-        return (
-            <span className="status-wrapper publication">
-                {publishDate ?
-                    <span className="label publish-background status-item" data-toggle="tooltip" data-placement="top"
-                        data-tooltip={'Published on ' + moment(publishDate).format("YYYY MMM DD, h:mm a")}>
-                        PUBLISHED
-                    </span>
-                    :
-                    <span className="label publish-background status-item">PUBLISHED</span>
-                }
-                {publishedWarningMessage ? renderPublishedWarningMessage() : null}
-            </span>
-        );
+        if (stringOnly) {
+            return 'Published';
+        } else {
+            return (
+                <span className="status-wrapper publication">
+                    {publishDate ?
+                        <span className="label publish-background status-item" data-toggle="tooltip" data-placement="top"
+                            data-tooltip={'Published on ' + moment(publishDate).format("YYYY MMM DD, h:mm a")}>
+                            PUBLISHED
+                        </span>
+                        :
+                        <span className="label publish-background status-item">PUBLISHED</span>
+                    }
+                    {publishedWarningMessage ? renderPublishedWarningMessage() : null}
+                </span>
+            );
+        }
     } else {
         return null;
     }
