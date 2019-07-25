@@ -178,13 +178,15 @@ const FunctionalDataTable = ({
                                                                     && <span>{ `, ${property(['entContent', 'QC', 'StatisticalAnalysis', 'statement'])(experiment)}` }</span>
                                                             }
                                                         </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Additional Notes: </strong>
-                                                            { property(['entContent', 'Notes'])(experiment) || 'none' }
-                                                        </span>
                                                     </div>
                                                 ))
                                         }
+                                        <div className="row notes">
+                                            <span className="col-md-12">
+                                                <strong>Additional Notes: </strong>
+                                                { property(['statements', 0, 'entContent', 'Notes'])(sourceArticles[currentKey]) || 'none' }
+                                            </span>
+                                        </div>
                                         <div className="row">
                                             <span className="col-md-12">
                                                 <strong>Contributor: </strong>
