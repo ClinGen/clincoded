@@ -56,6 +56,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_myVariantInfo: PropTypes.bool,
         loading_myGeneInfo: PropTypes.bool,
         loading_genboreeFuncData: PropTypes.bool,
+        error_genboreeFuncData: PropTypes.object,
         setCalculatedPathogenicity: PropTypes.func,
         selectedTab: PropTypes.string,
         selectedSubtab: PropTypes.string,
@@ -91,6 +92,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_myGeneInfo: this.props.loading_myGeneInfo,
             loading_genboreeFuncData: this.props.loading_genboreeFuncData,
+            error_genboreeFuncData: this.props.error_genboreeFuncData,
             //remember current tab/subtab so user will land on that tab when interpretation starts
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
             selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validSubtabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
@@ -160,6 +162,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_clinvarEsearch: nextProps.loading_clinvarEsearch,
             loading_clinvarSCV: nextProps.loading_clinvarSCV,
             loading_genboreeFuncData: nextProps.loading_genboreeFuncData,
+            error_genboreeFuncData: nextProps.error_genboreeFuncData,
         });
     },
 
@@ -254,6 +257,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                             ext_genboreeFuncData={this.state.ext_genboreeFuncData}
                             loading_genboreeFuncData={this.state.loading_genboreeFuncData}
+                            error_genboreeFuncData={this.state.error_genboreeFuncData}
                             affiliation={this.props.affiliation}
                             selectedCriteria={this.state.selectedCriteria} />
                     </div>

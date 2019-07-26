@@ -3,6 +3,7 @@ from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
     HTTPError,
+    HTTPNotFound,
     HTTPBadRequest,
     HTTPServiceUnavailable,
 )
@@ -22,6 +23,8 @@ def functional_data(request):
         ldh_url = "https://genboree.org/ldh/Variant/entId/{id}" \
             .format(id=variant_id)
         ldh_data = requests.get(ldh_url).json()
+        if (ldh_data.get('data') is None and ldh_data.get('status').get('code') == 404):
+            return http_error(HTTPNotFound(), request)
     except Exception as e:
         return http_error(HTTPBadRequest(), request)
     try:

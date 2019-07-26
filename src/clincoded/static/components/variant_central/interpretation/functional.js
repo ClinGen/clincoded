@@ -27,6 +27,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         updateInterpretationObj: PropTypes.func,
         ext_genboreeFuncData: PropTypes.object,
         loading_genboreeFuncData: PropTypes.bool,
+        error_genboreeFuncData: PropTypes.object,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
         session: PropTypes.object,
@@ -129,6 +130,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         selectedTab={this.state.selectedFunctionalTab}
                         ext_genboreeFuncData={this.props.ext_genboreeFuncData}
                         loading_genboreeFuncData={this.props.loading_genboreeFuncData}
+                        error_genboreeFuncData={this.props.error_genboreeFuncData}
                         handleTabSelect={this.handleTabSelect}
                     />
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}

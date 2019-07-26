@@ -28,18 +28,21 @@ const propTypes = {
     selectedTab: PropTypes.number,
     ext_genboreeFuncData: PropTypes.object,
     loading_genboreeFuncData: PropTypes.bool.isRequired,
+    error_genboreeFuncData: PropTypes.object,
     handleTabSelect: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
     selectedTab: 0,
     ext_genboreeFuncData: {},
+    error_genboreeFuncData: null,
 };
 
 const FunctionalDataTable = ({
     selectedTab,
     ext_genboreeFuncData,
     loading_genboreeFuncData,
+    error_genboreeFuncData,
     handleTabSelect,
 }) => {
     const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_genboreeFuncData);
@@ -201,7 +204,14 @@ const FunctionalDataTable = ({
                                 <tbody>
                                     <tr>
                                         <td colSpan="4">
-                                            <span>&nbsp;&nbsp;No evidence added.</span>
+                                            <span>
+                                                &nbsp;&nbsp;
+                                                {
+                                                    error_genboreeFuncData && error_genboreeFuncData.status === 404
+                                                        ? 'No evidence added.'
+                                                        : 'Data is unavailable at this time.'
+                                                }
+                                            </span>
                                         </td>
                                     </tr>
                                 </tbody>

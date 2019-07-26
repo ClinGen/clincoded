@@ -1846,11 +1846,6 @@
                             height: 100%;
                         }
                     }
-                    
-                    .max-height {
-                        max-height: 770px;
-                        overflow-y: scroll;
-                    }
 
                     .functional-tabs-wrapper {
                         padding: 10px;
@@ -1858,7 +1853,7 @@
 
                     .experiment-table {
                         background-color: #e3e3e3;
-                        max-height: 770px;
+                        max-height: 730px;
                         overflow-y: scroll;
 
                         .experiment {

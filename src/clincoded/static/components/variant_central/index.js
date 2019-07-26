@@ -69,6 +69,7 @@ var VariantCurationHub = createReactClass({
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
             loading_genboreeFuncData: true,
+            error_genboreeFuncData: null,
             calculated_pathogenicity: null,
             autoClassification: null,
             provisionalPathogenicity: null,
@@ -366,7 +367,7 @@ var VariantCurationHub = createReactClass({
                         }
                     });
                 }).catch(err => {
-                    this.setState({loading_genboreeFuncData: false});
+                    this.setState({loading_genboreeFuncData: false, error_genboreeFuncData: err});
                     console.log('Pubmed Fetch Error', err);
                 });
             } else {
@@ -387,7 +388,7 @@ var VariantCurationHub = createReactClass({
                         this.setState({loading_genboreeFuncData: false});
                     }
                 }).catch(err => {
-                    this.setState({loading_genboreeFuncData: false});
+                    this.setState({loading_genboreeFuncData: false, error_genboreeFuncData: err});
                     console.log('Genboree Functional Data LDH Fetch Error: ', err);
                 });
             } else {
@@ -694,6 +695,7 @@ var VariantCurationHub = createReactClass({
                             loading_pageData={this.state.loading_pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
+                            error_genboreeFuncData={this.state.error_genboreeFuncData}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
                             selectedTab={selectedTab} selectedSubtab={selectedSubtab}
                             selectedCriteria={selectedCriteria} affiliation={affiliation} />
