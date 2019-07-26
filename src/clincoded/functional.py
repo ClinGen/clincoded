@@ -24,7 +24,7 @@ def functional_data(request):
             .format(id=variant_id)
         ldh_data = requests.get(ldh_url).json()
         if (ldh_data.get('data') is None and ldh_data.get('status').get('code') == 404):
-            return http_error(HTTPNotFound(), request)
+            return {}
     except Exception as e:
         return http_error(HTTPBadRequest(), request)
     try:

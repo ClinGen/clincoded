@@ -207,9 +207,9 @@ const FunctionalDataTable = ({
                                             <span>
                                                 &nbsp;&nbsp;
                                                 {
-                                                    error_genboreeFuncData && error_genboreeFuncData.status === 404
-                                                        ? 'No evidence added.'
-                                                        : 'Data is unavailable at this time.'
+                                                    error_genboreeFuncData
+                                                        ? 'Data is unavailable at this time.'
+                                                        : 'No evidence added.'
                                                 }
                                             </span>
                                         </td>
