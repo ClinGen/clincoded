@@ -187,7 +187,7 @@ def main(global_config, **local_config):
     config.include('.batch_download')
     config.include('.visualization')
     config.include('.functional')
-    # config.include('.messaging')
+    config.include('.messaging')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('contentbase.elasticsearch')
