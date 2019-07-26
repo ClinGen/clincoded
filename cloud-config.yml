@@ -116,7 +116,7 @@ runcmd:
 - sudo -u clincoded git clone --no-checkout https://github.com/ClinGen/clincoded.git .
 - sudo -u clincoded git checkout %(COMMIT)s
 # Enable messaging/publication code (committed as comment in order to pass Trusty-based Travis build testing)
-- sudo -u clincoded git checkout acb95eb480e608545cfd6dbe0dac6f86f6a04659 src/clincoded/__init__.py
+- sudo -u clincoded git checkout cd5649a82fe58dfbf4f589b366c08ad12a493923 src/clincoded/__init__.py
 - mkdir /opt/cloudwatchmon
 - chown build:build /opt/cloudwatchmon
 - sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
