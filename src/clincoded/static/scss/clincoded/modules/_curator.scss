@@ -255,6 +255,7 @@
     border: 1px solid darken(#dddddd, 10%);
     cursor: pointer;
     background-color: #ffffff;
+    overflow: hidden;
     @include border-radius(3px);
 
     div {
@@ -271,7 +272,6 @@
 
     &:hover div,
     &.curr-pmid div {
-        overflow: hidden;
         opacity: 1;
     }
 }
