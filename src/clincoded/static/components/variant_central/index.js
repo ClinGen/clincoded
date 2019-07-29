@@ -325,7 +325,6 @@ var VariantCurationHub = createReactClass({
     },
 
     fetchFunctionalData: function(variant) {
-
         // Returns an the AFIS records as an object with the pubmedId as the key
         const getAfisObject = (afisRecords) => {
             const afisObject = {};
@@ -334,6 +333,7 @@ var VariantCurationHub = createReactClass({
                 if (pubmedId) {
                     if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
                         afisObject[pubmedId].statements.push(record);
+                        afisObject[pubmedId].statements.sort((a, b) => a.ExperimentNumber - b.ExperimentNumber);
                     } else {
                         afisObject[pubmedId] = {
                             statements: [record],

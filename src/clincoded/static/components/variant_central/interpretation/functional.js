@@ -52,7 +52,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
             setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
         if (this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareExternalDatas(this.props.ext_genboreeFuncData, this.state.interpretation.evaluations);
+            this.compareFunctionalData(this.props.ext_genboreeFuncData, this.state.interpretation.evaluations);
         }
     },
 
@@ -64,15 +64,37 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
             });
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
-            this.compareExternalDatas(this.props.ext_genboreeFuncData, nextProps.interpretation.evaluations);
+            this.compareFunctionalData(this.props.ext_genboreeFuncData, nextProps.interpretation.evaluations);
         }
     },
 
-    compareExternalDatas: function(newData, savedEvals) {
+    compareFunctionalData: function(newFuncData, savedEvals) {
+        // Returns true if @newData is different from @oldData, otherwise returns false
+        const isDiffAfisVersion = (newData, oldData) => {
+            const oldAfis = _.property(['ld', 'AlleleFunctionalImpactStatement'])(oldData);
+            const newAfis = _.property(['ld', 'AlleleFunctionalImpactStatement'])(newData);
+            if (!oldAfis || !newAfis || oldAfis.length !== newAfis.length) {
+                return true;
+            }
+            const afisKeys = newAfis && Object.keys(newAfis);
+            return afisKeys.some(key => {
+                const oldStatements = oldAfis[key] && oldAfis[key].statements;
+                const newStatements = newAfis[key] && newAfis[key].statements;
+                if (!oldStatements || !newStatements || oldStatements.length !== newStatements.length) {
+                    return true;
+                }
+                return newStatements.some((statement, index) => {
+                    if (statement.rev !== oldStatements[index].rev) {
+                        return true;
+                    }
+                });
+            });
+        };
+
         savedEvals.some(evaluation => {
             if (['BS3', 'PS3'].indexOf(evaluation.criteria) > -1) {
-                const tempCompare = this.findDiffKeyValues(newData, evaluation.functional.functionalData);
-                this.setState({funcDataObjDiffFlag: tempCompare[1]});
+                const funcDataObjDiffFlag = isDiffAfisVersion(newFuncData, evaluation.functional.functionalData);
+                this.setState({funcDataObjDiffFlag});
                 return true;
             }
         });
@@ -84,8 +106,12 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
 
     render() {
         const affiliation = this.props.affiliation, session = this.props.session;
-        const { ext_genboreeFuncData } = this.props;
-        const { funcDataObjDiffFlag } = this.state;
+        const {
+            ext_genboreeFuncData,
+            loading_genboreeFuncData,
+            error_genboreeFuncData,
+        } = this.props;
+        const { funcDataObjDiffFlag, selectedFunctionalTab } = this.state;
         return (
             <div className="variant-interpretation functional">
                 <PanelGroup accordion><Panel title="Hotspot or functional domain" panelBodyClassName="panel-wide-content"
@@ -119,7 +145,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                             </div>
                         </div>
                         : null}
-                    {funcDataObjDiffFlag ?
+                    {!loading_genboreeFuncData && funcDataObjDiffFlag ?
                         <div className="row">
                             <p className="alert alert-warning">
                                 <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
@@ -127,10 +153,10 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         </div>
                         : null}
                     <FunctionalDataTable
-                        selectedTab={this.state.selectedFunctionalTab}
-                        ext_genboreeFuncData={this.props.ext_genboreeFuncData}
-                        loading_genboreeFuncData={this.props.loading_genboreeFuncData}
-                        error_genboreeFuncData={this.props.error_genboreeFuncData}
+                        selectedTab={selectedFunctionalTab}
+                        ext_genboreeFuncData={ext_genboreeFuncData}
+                        loading_genboreeFuncData={loading_genboreeFuncData}
+                        error_genboreeFuncData={error_genboreeFuncData}
                         handleTabSelect={this.handleTabSelect}
                     />
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}
