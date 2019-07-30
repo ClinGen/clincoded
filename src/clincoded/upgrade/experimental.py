@@ -140,3 +140,15 @@ def experimental_4_5(value, system):
                 value['rescue']['nonHumanModel'] = 'Round worm (Caenorhabditis elegans) 6239'
             if value['rescue']['nonHumanModel'] == 'Zebrafish (Daanio rerio) 7955':
                 value['rescue']['nonHumanModel'] = 'Zebrafish (Danio rerio) 7955'
+
+@upgrade_step('experimental', '5', '6')
+def experimental_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1476
+    # Add Mammalian Phenotype Ontology (MP) IDs as additional option in Model Systems
+    return
+
+@upgrade_step('experimental', '6', '7')
+def experimental_6_7(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1909
+    # Add Zebra finch (Taeniopygia guttata) 59729 to Rescue and Model Systems
+    return

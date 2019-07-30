@@ -60,6 +60,7 @@ const IndividualCuration = createReactClass({
             individualName: '', // Currently entered individual name
             genotyping2Disabled: true, // True if genotyping method 2 dropdown disabled
             proband: null, // If we have an associated family that has a proband, this points at it
+            biallelicHetOrHom: null, // Conditional rendering of denovo questions depending on proband answer for semidom
             submitBusy: false, // True while form is submitting
             recessiveZygosity: null, // Indicates which zygosity checkbox should be checked, if any
             userScoreObj: {}, // Logged-in user's score object
@@ -107,6 +108,12 @@ const IndividualCuration = createReactClass({
             this.setState({proband_selected: true});
         } else if (ref === 'proband') {
             this.setState({proband_selected: false});
+        } else if (ref === 'probandIs') {
+            if (this.refs[ref].getValue() === 'Biallelic homozygous' || this.refs[ref].getValue() === 'Biallelic compound heterozygous') {
+                this.setState({biallelicHetOrHom: true});
+            } else {
+                this.setState({biallelicHetOrHom: false});
+            }
         }
     },
 
@@ -114,6 +121,7 @@ const IndividualCuration = createReactClass({
     handleClick: function(obj, item, e) {
         e.preventDefault(); e.stopPropagation();
         var hpoIds = '';
+        var hpoElimIds = '';
 
         if (item === 'phenotype') {
             if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
@@ -136,6 +144,16 @@ const IndividualCuration = createReactClass({
 
             if (obj.race) {
                 this.refs['race'].setValue(obj.race);
+            }
+        } else if (item === 'notphenotype') {
+            if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
+                hpoElimIds = obj.hpoIdInElimination.map(function(elimhpo, i) {
+                    return (elimhpo);
+                }).join(', ');
+                this.refs['nothpoid'].setValue(hpoElimIds);
+            }
+            if (obj.termsInElimination) {
+                this.refs['notphenoterms'].setValue(obj.termsInElimination);
             }
         }
     },
@@ -210,6 +228,10 @@ const IndividualCuration = createReactClass({
                 }
                 else {
                     this.setState({proband_selected: false});
+                }
+
+                if (stateObj.individual.probandIs === 'Biallelic homozygous' || stateObj.individual.probandIs === 'Biallelic compound heterozygous') {
+                    this.setState({biallelicHetOrHom: true});
                 }
             }
 
@@ -333,11 +355,14 @@ const IndividualCuration = createReactClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var family = this.state.family;
+            let gdm = this.state.gdm;
             var currIndividual = this.state.individual;
             var newIndividual = {}; // Holds the new group object;
             var individualDiseases = [], individualArticles, individualVariants = [];
             var evidenceScores = []; // Holds new array of scores
             let individualScores = currIndividual && currIndividual.scores ? currIndividual.scores : [];
+            const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+            const maxVariants = semiDom ? 3 : MAX_VARIANTS;
             // Find any pre-existing score(s) and put their '@id' values into an array
             if (individualScores.length) {
                 individualScores.forEach(score => {
@@ -383,7 +408,7 @@ const IndividualCuration = createReactClass({
             }
 
             // Get variant uuid's if they were added via the modals
-            for (var i = 0; i < MAX_VARIANTS; i++) {
+            for (var i = 0; i < maxVariants; i++) {
                 // Grab the values from the variant form panel
                 var variantId = this.getFormValue('variantUuid' + i);
 
@@ -647,6 +672,7 @@ const IndividualCuration = createReactClass({
         var value;
         var currIndividual = this.state.individual;
         var family = this.state.family;
+        const semiDom = this.state.gdm && this.state.gdm.modeInheritance ? this.state.gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
 
         // Make a new family. If we're editing the form, first copy the old family
         // to make sure we have everything not from the form.
@@ -726,6 +752,12 @@ const IndividualCuration = createReactClass({
 
         value = this.getFormValue('ageunit');
         newIndividual.ageUnit = value !== 'none' ? value : '';
+
+        // Field only available on GDMs with Semidominant MOI (and individual is not a family-based proband)
+        if (semiDom && !(currIndividual && currIndividual.proband && family)) {
+            value = this.getFormValue('probandIs');
+            newIndividual.probandIs = value !== 'none' ? value : '';
+        }
 
         // Fill in the individual fields from the Additional panel
         value = this.getFormValue('additionalinfoindividual');
@@ -1232,12 +1264,34 @@ function IndividualCommonDiseases() {
                     clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'phenotype')} />
                 : null}
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Individual</em> if they are specifically noted in the paper.</p>
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Individual', 'nothpo', 'Group') 
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'nothpo', 'Family') : null
+                ) 
+            }  
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
+                :
+                (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                    curator.renderPhenotype(associatedFamilies, 'Individual', 'notft', 'Family') : null
+                )
+            }       
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2"
                 value={individual && individual.termsInElimination ? individual.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
+                <Input type="button" ref="notphenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy NOT Phenotype from Associated Group"
+                    clickHandler={this.handleClick.bind(this, associatedGroups[0], 'notphenotype')} />
+                : null}
+            {associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
+                <Input type="button" ref="notphenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy NOT Phenotype from Associated Family"
+                    clickHandler={this.handleClick.bind(this, associatedFamilies[0], 'notphenotype')} />
+                : null}    
         </div>
     );
 }
@@ -1400,12 +1454,15 @@ function IndividualVariantInfo() {
     let gdmUuid = gdm && gdm.uuid ? gdm.uuid : null;
     let pmidUuid = annotation && annotation.article.pmid ? annotation.article.pmid : null;
     let userUuid = gdm && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : null;
+    const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+    const maxVariants = semiDom ? 3 : MAX_VARIANTS;
 
     return (
         <div className="row form-row-helper">
             {individual && individual.proband && family ?
                 <div>
                     <p>Variant(s) for a proband associated with a Family can only be edited through the Family page: <a href={"/family-curation/?editsc&gdm=" + gdm.uuid + "&evidence=" + annotation.uuid + "&family=" + family.uuid}>Edit {family.label}</a></p>
+                    {individual.probandIs ? <p><strong>Proband is: </strong>{individual.probandIs}</p> : null}
                     {variants.map(function(variant, i) {
                         return (
                             <div key={i} className="variant-view-panel variant-view-panel-edit">
@@ -1480,17 +1537,32 @@ function IndividualVariantInfo() {
                 </div>
                 :
                 <div>
-                    <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
-                        error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
-                        handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    </Input>
-                    <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
-                        error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
-                        handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
-                        labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
-                    </Input>
-                    {_.range(MAX_VARIANTS).map(i => {
+                    { semiDom ?  
+                        <Input type="select" label="The proband is:" ref="probandIs" handleChange={this.handleChange}
+                            defaultValue="none" value={individual && individual.probandIs ? individual.probandIs : 'none'}
+                            error={this.getFormError('probandIs')} clearError={this.clrFormErrors.bind(null, 'probandIs')}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.proband_selected}>
+                            <option value="none">No Selection</option>
+                            <option disabled="disabled"></option>
+                            <option value="Monoallelic heterozygous">Monoallelic heterozygous (e.g. autosomal)</option>
+                            <option value="Hemizygous">Hemizygous (e.g. X-linked)</option>
+                            <option value="Biallelic homozygous">Biallelic homozygous (e.g. the same variant is present on both alleles, autosomal or X-linked)</option>
+                            <option value="Biallelic compound heterozygous">Biallelic compound heterozygous (e.g. two different variants are present on the alleles, autosomal or X-linked)</option>
+                        </Input>    
+                    : 
+                    <div>
+                        <Input type="checkbox" ref="zygosityHomozygous" label={<span>Check here if homozygous:<br /><i className="non-bold-font">(Note: if homozygous, enter only 1 variant below)</i></span>}
+                            error={this.getFormError('zygosityHomozygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHomozygous')}
+                            handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Homozygous'}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        </Input>
+                        <Input type="checkbox" ref="zygosityHemizygous" label="Check here if hemizygous:"
+                            error={this.getFormError('zygosityHemizygous')} clearError={this.clrFormErrors.bind(null, 'zygosityHemizygous')}
+                            handleChange={this.handleChange} defaultChecked="false" checked={this.state.recessiveZygosity == 'Hemizygous'}
+                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group">
+                        </Input>
+                    </div>}
+                    {_.range(maxVariants).map(i => {
                         var variant;
 
                         if (variants && variants.length) {
@@ -1548,7 +1620,7 @@ function IndividualVariantInfo() {
                             </div>
                         );
                     })}
-                    {Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected ?
+                    {this.state.biallelicHetOrHom || (Object.keys(this.state.variantInfo).length > 0 && this.state.proband_selected) ?
                         <div  className="variant-panel">
                             <Input type="select" ref="individualBothVariantsInTrans" label={<span>If there are 2 variants described, are they both located in <i>trans</i> with respect to one another?</span>}
                                 defaultValue="none" value={individual && individual.bothVariantsInTrans ? individual.bothVariantsInTrans : 'none'}
@@ -1852,6 +1924,9 @@ const IndividualViewer = createReactClass({
         var tempPmid = tempGdmPmid[1];
         let associatedFamily = individual.associatedFamilies && individual.associatedFamilies.length ? individual.associatedFamilies[0] : null;
         let segregation = associatedFamily && associatedFamily.segregation ? associatedFamily.segregation : null;
+        var probandIs = individual && individual.probandIs;
+        const semiDom = tempGdm && tempGdm.modeInheritance ? tempGdm.modeInheritance.indexOf('Semidominant') > -1 : false;
+        const biallelicHetOrHom = semiDom && (probandIs === 'Biallelic homozygous' || probandIs === 'Biallelic compound heterozygous');
 
         return (
             <div>
@@ -1994,14 +2069,22 @@ const IndividualViewer = createReactClass({
                                 </div>
                             </dl>
                         </Panel>
-
                         <Panel title={LabelPanelTitleView(individual, '', true)} panelClassName="panel-data">
-                            <div>
-                                <dl className="dl-horizontal">
-                                    <dt>Zygosity</dt>
-                                    <dd>{individual && individual.recessiveZygosity ? individual.recessiveZygosity : "None selected"}</dd>
-                                </dl>
-                            </div>
+                            {semiDom ?
+                                <div>
+                                    <dl className="dl-horizontal">
+                                        <dt>The proband is</dt>
+                                        <dd>{probandIs}</dd>
+                                    </dl>
+                                </div>
+                                :
+                                <div>
+                                    <dl className="dl-horizontal">
+                                        <dt>Zygosity</dt>
+                                        <dd>{individual && individual.recessiveZygosity ? individual.recessiveZygosity : "None selected"}</dd>
+                                    </dl>
+                                </div>
+                            }
                             {variants.map(function(variant, i) {
                                 return (
                                     <div key={i} className="variant-view-panel">
@@ -2034,7 +2117,7 @@ const IndividualViewer = createReactClass({
                                     </div>
                                 );
                             })}
-                            {variants && variants.length && individual.proband ?
+                            {(variants && variants.length && individual.proband) || biallelicHetOrHom ?
                                 <div className="variant-view-panel family-associated">
                                     <div>
                                         <dl className="dl-horizontal">
@@ -2133,9 +2216,10 @@ const LabelPanelTitleView = (individual, labelText, hasVariant) => {
  * @param {object} diseases 
  * @param {object} variants 
  * @param {object} zygosity 
+ * @param {string} probandIs - Value of "The proband is" form field (expected to be null for none/"No Selection")
  * @param {object} context 
  */
-export function makeStarterIndividual(label, diseases, variants, zygosity, affiliation, context) {
+export function makeStarterIndividual(label, diseases, variants, zygosity, probandIs, affiliation, context) {
     let newIndividual = {};
     newIndividual.label = label;
     newIndividual.diagnosis = diseases;
@@ -2145,6 +2229,7 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
         newIndividual.variants = variants;
     }
     if (zygosity) newIndividual.recessiveZygosity = zygosity;
+    if (probandIs) newIndividual.probandIs = probandIs;
     if (affiliation) newIndividual.affiliation = affiliation.affiliation_id;
     const newMethod = {dateTime: moment().format()};
     newIndividual.method = newMethod;
@@ -2160,10 +2245,12 @@ export function makeStarterIndividual(label, diseases, variants, zygosity, affil
  * @param {object} individual 
  * @param {object} variants 
  * @param {object} zygosity 
+ * @param {string} probandIs - Value of "The proband is" form field (expected to be null for none/"No Selection")
  * @param {object} context 
  */
-export function updateProbandVariants(individual, variants, zygosity, context) {
+export function updateProbandVariants(individual, variants, zygosity, probandIs, context) {
     let updateNeeded = true;
+    const probandIsExisting = individual && individual.probandIs ? individual.probandIs : null;
 
     // Check whether the variants from the family are different from the variants in the individual
     if (individual.variants && (individual.variants.length === variants.length)) {
@@ -2184,6 +2271,11 @@ export function updateProbandVariants(individual, variants, zygosity, context) {
     let tempZygosity = zygosity ? zygosity : null;
     let tempIndivZygosity = individual.recessiveZygosity ? individual.recessiveZygosity : null;
     if (tempZygosity !== tempIndivZygosity) {
+        updateNeeded = true;
+    }
+
+    // Check if value of "The proband is" form field changed
+    if (probandIs !== probandIsExisting) {
         updateNeeded = true;
     }
 
@@ -2212,6 +2304,13 @@ export function updateProbandVariants(individual, variants, zygosity, context) {
             writerIndividual.recessiveZygosity = zygosity;
         } else {
             delete writerIndividual['recessiveZygosity'];
+        }
+
+        // Set probandIs attribute in individual object (based on form field value)
+        if (probandIs) {
+            writerIndividual.probandIs = probandIs;
+        } else {
+            delete writerIndividual['probandIs'];
         }
 
         return context.putRestData('/individuals/' + individual.uuid, writerIndividual).then(data => {

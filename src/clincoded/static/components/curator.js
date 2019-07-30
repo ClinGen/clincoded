@@ -1745,9 +1745,14 @@ module.exports.capture = {
         return captureBase(s, /^\s*([1-9]{1}\d*)\s*$/);
     },
 
-    // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
-    hpoids: function(s) {
+     // Find all the comma-separated HPO ID occurrences. Return all valid HPO ID in an array.
+     hpoids: function(s) {
         return captureBase(s, /^\s*(HP:\d{7})\s*$/i, true);
+    },
+
+    // Find all the comma-separated HPO/MP ID occurrences. Return all valid HPO/MP ID in an array.
+    hpoMpids: function(s) {
+        return captureBase(s, /^\s*((HP:|MP:)\d{7})\s*$/i, true);
     },
 
     // Find all the comma-separated GO_Slim ID occurrences. Return all valid GO_Slim ID in an array.
@@ -2034,8 +2039,10 @@ function flattenFamily(family) {
 var segregationSimpleProps = ["pedigreeDescription", "pedigreeSize", "numberOfGenerationInPedigree", "consanguineousFamily", "numberOfCases", "deNovoType",
     "numberOfParentsUnaffectedCarriers", "numberOfAffectedAlleles", "numberOfAffectedWithOneVariant", "numberOfAffectedWithTwoVariants", "numberOfUnaffectedCarriers",
     "numberOfUnaffectedIndividuals", "probandAssociatedWithBoth", "additionalInformation", "numberOfAffectedWithGenotype", "numberOfUnaffectedWithoutBiallelicGenotype",
-    "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "pedigreeLocation",
-    "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation", "sequencingMethod", "reasonExplanation"];
+    "numberOfSegregationsForThisFamily", "inconsistentSegregationAmongstTestedIndividuals", "explanationForInconsistent", "familyConsanguineous", "moiDisplayedForFamily",
+    "probandIs", "pedigreeLocation", "lodRequirements", "lodPublished", "publishedLodScore", "estimatedLodScore", "includeLodScoreInAggregateCalculation",
+    "sequencingMethod", "reasonExplanation"
+];
 
 var flattenSegregation = module.exports.flattenSegregation = function(segregation) {
     var flat = cloneSimpleProps(segregation, segregationSimpleProps);
@@ -2056,8 +2063,8 @@ var flattenSegregation = module.exports.flattenSegregation = function(segregatio
 
 
 var individualSimpleProps = ["label", "sex", "hpoIdInDiagnosis", "termsInDiagnosis", "hpoIdInElimination", "termsInElimination", "countryOfOrigin", "ethnicity",
-    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "denovo", "maternityPaternityConfirmed",
-    "recessiveZygosity", "affiliation"
+    "race", "ageType", "ageValue", "ageUnit", "method", "additionalInformation", "proband", "date_created", "bothVariantsInTrans", "probandIs", "denovo",
+    "maternityPaternityConfirmed", "recessiveZygosity", "affiliation"
 ];
 
 function flattenIndividual(individual) {
@@ -2449,10 +2456,14 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                         return (
                             <div key={obj.uuid} className="form-group">
                                 <div className="col-sm-5">
-                                    <strong className="pull-right">Phenotype(s) Associated with {parentObjName ? parentObjName : title}
-                                    {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
-                                    {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
-                                    :</strong>
+                                    { (type === 'hpo' || type === 'ft') ? <strong className="pull-right">Phenotype(s) Associated with {parentObjName ? parentObjName : title}
+                                        {type === 'hpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
+                                        {type === 'ft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
+                                    :</strong> : null}
+                                    { (type === 'nothpo' || type === 'notft') ? <strong className="pull-right">NOT Phenotype(s) Associated with {parentObjName ? parentObjName : title}
+                                        {type === 'nothpo' ? <span style={{fontWeight: 'normal'}}> (<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span> : null}
+                                        {type === 'notft' ? <span style={{fontWeight: 'normal'}}> (free text)</span> : null}
+                                    :</strong> : null}
                                 </div>
                                 <div className="col-sm-7">
                                     { (type === 'hpo' || type === '') && (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length > 0) ?
@@ -2467,8 +2478,25 @@ var renderPhenotype = module.exports.renderPhenotype = function(objList, title, 
                                         })
                                         : null
                                     }
+                                    { (type === 'nothpo' || type === '') && (obj.hpoIdInElimination && obj.hpoIdInElimination.length > 0) ?
+                                        obj.hpoIdInElimination.map(function(nothpoid, i) {
+                                            return (
+                                                <span key={nothpoid}>
+                                                    {nothpoid}
+                                                    {i < obj.hpoIdInElimination.length-1 ? ', ' : ''}
+                                                    {i === obj.hpoIdInElimination.length-1 && obj.termsInElimination && type === '' ? '; ' : null}
+                                                </span>
+                                            );
+                                        })
+                                        : null
+                                    }
                                     { type === 'ft' && obj.termsInDiagnosis ?
                                         <span>{obj.termsInDiagnosis}</span>
+                                        :
+                                        null
+                                    }
+                                    { type === 'notft' && obj.termsInElimination ?
+                                        <span>{obj.termsInElimination}</span>
                                         :
                                         null
                                     }

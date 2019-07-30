@@ -1,0 +1,43 @@
+.clinvar-submission-modal {
+    .modal-clinvar {
+        background-color: #d4af37;
+    }
+
+    .modal-body {
+        overflow-x: scroll;
+        overflow-wrap: break-word;
+
+        .activity-indicator.overlay-wrapper {
+            text-align: center;
+            position: relative;
+        }
+
+        table {
+            margin: 20px 0px;
+
+            td {
+                padding: 3px;
+                white-space: pre;
+
+                &.error-column {
+                    color: #f00;
+
+                    span[data-tooltip] {
+                        padding-left: 5px;
+                    }
+
+                    [data-tooltip]:before {
+                        margin-left: -200px;
+                        padding: 3px;
+                        width: 400px;
+                    }
+                }
+            }
+        }
+
+        .clinvar-submission-failure {
+            color: #f00;
+            padding-top: 10px;
+        }
+    }
+}

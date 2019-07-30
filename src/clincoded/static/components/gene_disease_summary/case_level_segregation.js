@@ -74,6 +74,9 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
+                <td className="evidence-moi">
+                    {evidence.moiDisplayedForFamily}
+                </td>
                 <td className="evidence-segregation-num-affected">
                     {evidence.segregationNumAffected}
                 </td>
@@ -136,6 +139,9 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                         return (referenceX.toLowerCase().localeCompare(referenceY.toLowerCase()) * dir);
                     });
                     break;
+                case 'moiDisplayedForFamily':
+                    sortedList = evidenceList.sort((x, y) => x[colName].toLowerCase().localeCompare(y[colName].toLowerCase()) * dir);
+                    break;    
                 case 'lodScore':
                     sortedList = evidenceList.sort((x, y) => 
                         (x['segregationPublishedLodScore'] ? x['segregationPublishedLodScore'] : x['segregationEstimatedLodScore'] - y['segregationPublishedLodScore'] ? y['segregationPublishedLodScore'] : y['segregationEstimatedLodScore']) * dir
@@ -153,7 +159,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
         const segregationEvidenceList = this.props.segregationEvidenceList;
         let sortedEvidenceList = this.state.mounted ? this.sortListbyColName(segregationEvidenceList, this.state.sortCol) : segregationEvidenceList;
         let self = this;
-        let sortIconClass = {reference: 'tcell-sort'};
+        let sortIconClass = {reference: 'tcell-sort', moiDisplayedForFamily: 'tcell-sort'};
         sortIconClass[this.state.sortCol] = this.state.reversed ? 'tcell-desc' : 'tcell-asc';
 
         return (
@@ -170,6 +176,7 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                                     <th onClick={(e) => self.handleClickHeader(e, 'reference')}>Reference<span className={sortIconClass.reference}></span></th>
                                     <th>Family ethnicity</th>
                                     <th>Family phenotypes</th>
+                                    <th onClick={(e) => self.handleClickHeader(e, 'moiDisplayedForFamily')}>Family MOI<span className={sortIconClass.moiDisplayedForFamily}></span></th>
                                     <th>Number of affected individuals</th>
                                     <th>Number of unaffected individuals</th>
                                     <th>LOD score</th>
