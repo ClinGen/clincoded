@@ -1,6 +1,5 @@
 'use strict';
 import React from 'react';
-import _ from 'underscore';
 
 // Recursive function to compare oldObj against newObj and its key:values. Creates diffObj that shares the keys (full-depth) with newObj,
 // but with values of true or false depending on whether or not oldObj's values for that key matches newValue's. A value of true means that
@@ -15,7 +14,7 @@ var findDiffKeyValuesMixin = module.exports.findDiffKeyValuesMixin = {
             // use for loop to support both arrays and objects
             if (['boolean', 'number', 'string'].indexOf(typeof newObj[key]) > -1) {
                 // if value stored in key is a boolean, number, or string, do a comparison
-                if (_.isEqual(newObj[key], oldObj[key])) {
+                if (newObj[key] === oldObj[key]) {
                     // no difference
                     diffObj[key] = false;
                 } else {

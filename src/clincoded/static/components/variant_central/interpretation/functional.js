@@ -5,7 +5,6 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import { RestMixin } from '../../rest';
-import { findDiffKeyValuesMixin } from './shared/find_diff';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { CompleteSection } from './shared/complete_section';
@@ -19,7 +18,7 @@ const extraEvidence = require('./shared/extra_evidence');
 
 // Display the curator data of the curation data
 var CurationInterpretationFunctional = module.exports.CurationInterpretationFunctional = createReactClass({
-    mixins: [RestMixin, findDiffKeyValuesMixin],
+    mixins: [RestMixin],
 
     propTypes: {
         data: PropTypes.object,

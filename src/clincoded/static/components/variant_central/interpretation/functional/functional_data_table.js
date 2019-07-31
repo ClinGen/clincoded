@@ -9,7 +9,7 @@ import { PmidSummary } from '../../../curator';
 /**
  * This component displays functional data in the experimental tab of the VCI
  * 
- * Because of the deep nesting of the LDH and FDR data is retrieved,
+ * Because of the deep nesting of the LDH and FDR data that is retrieved,
  * the property() function from underscore.js is employed quite extensively to
  * check the validity of data in order to prevent data access errors
  * 
