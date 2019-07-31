@@ -112,17 +112,6 @@ const ClinVarSubmissionData = module.exports.ClinVarSubmissionData = createReact
     },
 
     /**
-     * Method to check if (prop) affiliation is allowed to generate ClinVar submission data
-     * The allowedAffiliationIDs constant contains the IDs of affiliations that have ClinGen-approved guidelines
-     */
-    isAffiliationAllowedtoGenerate: function() {
-        const affiliationID = this.props.affiliationID;
-        const allowedAffiliationIDs = {'10002': true, '10007': true, '10012': true, '10014': true, '10015': true, '10021': true};
-
-        return (affiliationID in allowedAffiliationIDs);
-    },
-
-    /**
      * Method to render ClinVar submission data
      */
     renderClinVarSubmissionData: function() {
@@ -190,11 +179,14 @@ const ClinVarSubmissionData = module.exports.ClinVarSubmissionData = createReact
         const generatedClinVarSubmissionData = this.state.generatedClinVarSubmissionData;
         const failureMessage = this.state.failureMessage;
         const disableCopyButton = this.state.elementIDToCopy ? false : true;
+        const affiliationID = this.props.affiliationID;
         const isPublishEventActive = this.props.isPublishEventActive;
         const isApprovalActive = this.props.isApprovalActive;
         const resourceUUID = this.props.resourceUUID;
 
-        if (this.isAffiliationAllowedtoGenerate() && !isPublishEventActive && !isApprovalActive) {
+        // Criteria to render ClinVar submission button/modal: affiliation has been provided (affiliationID) and neither a publish
+        //  event (!isPublishEventActive) nor the approval process (!isApprovalActive) is currently in progress
+        if (affiliationID && !isPublishEventActive && !isApprovalActive) {
             return (
                 <ModalComponent modalTitle="ClinVar Submission Data" modalClass="modal-clinvar" modalWrapperClass="clinvar-submission-modal"
                     bootstrapBtnClass="btn btn-default clinvar-submission-link-item" actuatorClass="" actuatorTitle="ClinVar Submission Data"
