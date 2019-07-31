@@ -344,31 +344,55 @@ var VariantCurationHub = createReactClass({
             return afisObject;
         };
 
-        // Fetches pubmed data for each source article and replaces the AFIS with newly constructed AFIS object
-        const getAndSetPubmedArticles = (functionalData, afisObject) => {
+        // Sets pubmed articles in the @afisObject and replaces the AFIS with the completed @afisObject
+        const setPubmedArticles = (functionalData, afisObject, articles) => {
+            if (!Array.isArray(articles)) {
+                return;
+            }
+            articles.forEach((article, articleIdx) => {
+                afisObject[article.pmid].pubmedSource = article;
+                const lastRecord = (articleIdx === articles.length - 1);
+                if (lastRecord) {
+                    functionalData.ld.AlleleFunctionalImpactStatement = afisObject;
+                    this.setState({ext_genboreeFuncData: functionalData}, () => {
+                        this.setState({loading_genboreeFuncData: false});
+                    });
+                }
+            });
+        };
+
+        // Fetches pubmed data for each source article
+        const getPubmedArticles = (functionalData, afisObject) => {
             const pubmedUrls = [];
+            const pubmedIds = [];
             const pubmedIdKeys = Object.keys(afisObject);
             if (pubmedIdKeys && pubmedIdKeys.length > 0) {
                 pubmedIdKeys.forEach(id => {
-                    pubmedUrls.push(external_url_map['PubMedSearch'] + id);
+                    pubmedIds.push(id);
                 });
-                this.getRestDatasXml(pubmedUrls).then(xmls => {
-                    xmls.forEach((xml, xmlIndex) => {
-                        const lastRecord = (xmlIndex === pubmedIdKeys.length - 1);
-                        const data = parsePubmed(xml);
-                        if (data.pmid) {
-                            afisObject[data.pmid].pubmedSource = data;
-                        }
-                        if (lastRecord) {
-                            functionalData.ld.AlleleFunctionalImpactStatement = afisObject;
-                            this.setState({ext_genboreeFuncData: functionalData}, () => {
-                                this.setState({loading_genboreeFuncData: false});
-                            });
-                        }
+                const searchStr = '/search/?type=article&' + pubmedIds.map(pmid => 'pmid=' + pmid).join('&');
+                return this.getRestData(searchStr).then(articles => {
+                    if (articles['@graph'].length === pubmedIds.length) {
+                        return articles['@graph'];
+                    }
+                    const foundArticles = _.property(['@graph'])(articles) ? articles['@graph'] : [];
+                    const missingPmids = _.difference(pubmedIds, articles['@graph'].map(article => article.pmid));
+                    missingPmids.forEach(id => {
+                        pubmedUrls.push(external_url_map['PubMedSearch'] + id);
                     });
-                }).catch(err => {
-                    this.setState({loading_genboreeFuncData: false, error_genboreeFuncData: err});
-                    console.log('Pubmed Fetch Error', err);
+                    return this.getRestDatasXml(pubmedUrls).then(xmls => {
+                        xmls.forEach((xml, xmlIndex) => {
+                            const data = parsePubmed(xml);
+                            if (data.pmid) {
+                                foundArticles.push(data);
+                            } else {
+                                throw {statusText: 'Missing PMID articles'};
+                            }
+                        });
+                        return foundArticles;
+                    }).catch(err => {
+                        throw err;
+                    });
                 });
             } else {
                 this.setState({loading_genboreeFuncData: false});
@@ -383,7 +407,12 @@ var VariantCurationHub = createReactClass({
                     const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(functionalData) || [];
                     if (afisRecords && afisRecords.length > 0) {
                         const afisObject = getAfisObject(afisRecords);
-                        getAndSetPubmedArticles(functionalData, afisObject);
+                        getPubmedArticles(functionalData, afisObject).then(articles => {
+                            setPubmedArticles(functionalData, afisObject, articles);
+                        }).catch(err => {
+                            this.setState({loading_genboreeFuncData: false, error_genboreeFuncData: err});
+                            console.log('Pubmed Fetch Error', err);
+                        });
                     } else {
                         this.setState({loading_genboreeFuncData: false});
                     }

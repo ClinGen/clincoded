@@ -51,7 +51,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         if (this.state.selectedCriteria) {
             setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
-        if (this.state.interpretation && this.state.interpretation.evaluations) {
+        if (this.props.ext_genboreeFuncData && this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareFunctionalData(this.props.ext_genboreeFuncData, this.state.interpretation.evaluations);
         }
     },
@@ -63,7 +63,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
             });
         }
-        if (nextProps.interpretation && nextProps.interpretation.evaluations) {
+        if (this.props.ext_genboreeFuncData && nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareFunctionalData(this.props.ext_genboreeFuncData, nextProps.interpretation.evaluations);
         }
     },
