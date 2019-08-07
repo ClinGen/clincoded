@@ -48,6 +48,11 @@ const FunctionalDataTable = ({
     const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_genboreeFuncData);
     const articleKeys = sourceArticles && Object.keys(sourceArticles);
     const currentKey = articleKeys && articleKeys[selectedTab];
+    const pmid = property(['pubmedSource', 'pmid'])(sourceArticles[currentKey]);
+    const pubmedSource = property(['pubmedSource'])(sourceArticles[currentKey]);
+    const afisStatements = property(['statements'])(sourceArticles[currentKey]);
+    const additionalNotes = property(['statements', 0, 'entContent', 'Notes'])(sourceArticles[currentKey]) || 'none';
+    const contributor = property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(sourceArticles[currentKey]);
     return (
         <div className="panel panel-info functional-impact-panel">
             <div className="panel-heading">
@@ -64,15 +69,15 @@ const FunctionalDataTable = ({
                             <div className="functional-tabs-wrapper">
                                 <ul className="vci-tabs-header tab-label-list vci-subtabs dynamic-tabs" role="tablist">
                                     {
-                                        articleKeys.map((key, index) => (
+                                        articleKeys.map((key, articleIndex) => (
                                             <li
                                                 key={key}
                                                 className="tab-label"
                                                 role="tab"
-                                                onClick={() => handleTabSelect(index)}
-                                                aria-selected={selectedTab === index}
+                                                onClick={() => handleTabSelect(articleIndex)}
+                                                aria-selected={selectedTab === articleIndex}
                                             >
-                                                { `Source ${index + 1}` }
+                                                { `Source ${articleIndex + 1}` }
                                             </li>
                                         ))
                                     }
@@ -81,119 +86,147 @@ const FunctionalDataTable = ({
                                     <div role="tabpanel" className="panel-body experiment-table tab-panel">
                                         <div className="row">
                                             <span className="col-md-12">
-                                                <strong>{ `Source: PMID:${property(['pubmedSource', 'pmid'])(sourceArticles[currentKey]) || ''}` }</strong>
+                                                <strong>{ `Source: PMID:${pmid || ''}` }</strong>
                                             </span>
                                             <span className="col-md-12">
                                                 <PmidSummary
-                                                    article={property(['pubmedSource'])(sourceArticles[currentKey])}
+                                                    article={pubmedSource}
                                                     displayJournal
                                                 />
                                             </span>
                                         </div>
                                         {
-                                            property(['statements'])(sourceArticles[currentKey]) && Array.isArray(sourceArticles[currentKey].statements)
-                                                && sourceArticles[currentKey].statements.map((experiment, index) => (
-                                                    <div className="row experiment" key={experiment.id}>
-                                                        <span className="col-md-12">
-                                                            <strong className="experiment-label">{ `Experiment ${index + 1}` }</strong>
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Method: </strong>
-                                                            <a href={property(['fdr', 'ld', 'Method', 0, 'entIri'])(experiment)} target="_blank" rel="noopener noreferrer">
-                                                                { property(['fdr', 'ld', 'Method', 0, 'entId'])(experiment) }
-                                                            </a>
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Material(s): </strong>
-                                                            {
-                                                                property(['fdr', 'ld', 'Material'])(experiment) && Array.isArray(experiment.fdr.ld.Material)
-                                                                    && experiment.fdr.ld.Material.map((material, materialIndex) => (
-                                                                        <span key={material.id}>
-                                                                            { materialIndex > 0 ? ', ' : '' }
-                                                                            <a href={property(['entIri'])(material)} target="_blank" rel="noopener noreferrer">
-                                                                                { property(['entId'])(material) }
-                                                                            </a>
-                                                                            {
-                                                                                property(['entContent', 'PatientSourced'])(material)
-                                                                                    && (
-                                                                                        <span>
-                                                                                            <span> (</span>
-                                                                                            <i>source: </i>patient; <i>genotype: </i>
-                                                                                            { property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material) || 'none' }
-                                                                                            <span>)</span>
-                                                                                        </span>
-                                                                                    )
-                                                                            }
-                                                                        </span>
-                                                                    ))
-                                                            }
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Functional Impact(s): </strong>
-                                                            {
-                                                                property(['entContent', 'Effect'])(experiment) && Array.isArray(experiment.entContent.Effect)
-                                                                    && experiment.entContent.Effect.map((elem, effectIndex) => (
-                                                                        <span key={`${property(['value'])(elem)}-${property(['code'])(elem)}`}>
-                                                                            { `${effectIndex > 0 ? '; ' : ''} ${property(['value'])(elem)} ` }
-                                                                            <a href={property(['iri'])(elem)} target="_blank" rel="noopener noreferrer">
-                                                                                { property(['entId'])(elem) }
-                                                                            </a>
-                                                                        </span>
-                                                                    ))
-                                                            }
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Functional Impact Comments: </strong>
-                                                            { property(['entContent', 'comments'])(experiment) || 'none' }
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Experimental Repeats: </strong>
-                                                            { property(['entContent', 'QC', 'ExperimentalRepeats'])(experiment) }
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Experimental Controls: </strong>
-                                                            {
-                                                                property(['entContent', 'QC', 'ExperimentalControl', 'normal'])(experiment)
-                                                                    && <span><i>Normal: </i>{ experiment.entContent.QC.ExperimentalControl.normal }</span>
-                                                            }
-                                                            {
-                                                                property(['entContent', 'QC', 'ExperimentalControl', 'normal'])(experiment) && property(['entContent', 'QC', 'ExperimentalControl', 'negative'])(experiment)
-                                                                    && <span>; </span>
-                                                            }
-                                                            {
-                                                                property(['entContent', 'QC', 'ExperimentalControl', 'negative'])(experiment)
-                                                                    && <span><i>Negative: </i>{ experiment.entContent.QC.ExperimentalControl.negative }</span>
-                                                            }
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Validation Control: </strong>
-                                                            { property(['entContent', 'QC', 'ValidationControl', 'value'])(experiment) }
-                                                            {
-                                                                property(['entContent', 'QC', 'ValidationControl', 'statement'])(experiment)
-                                                                    && <span>{ `, ${property(['entContent', 'QC', 'ValidationControl', 'statement'])(experiment)}` }</span> 
-                                                            }
-                                                        </span>
-                                                        <span className="col-md-12">
-                                                            <strong>Statistical Analysis: </strong>
-                                                            { property(['entContent', 'QC', 'StatisticalAnalysis', 'value'])(experiment) }
-                                                            {
-                                                                property(['entContent', 'QC', 'StatisticalAnalysis', 'statement'])(experiment)
-                                                                    && <span>{ `, ${property(['entContent', 'QC', 'StatisticalAnalysis', 'statement'])(experiment)}` }</span>
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                ))
+                                            afisStatements && Array.isArray(afisStatements)
+                                                && afisStatements.map((experiment, experimentIndex) => {
+                                                    const experimentId = property(['id'])(experiment);
+                                                    const experimentEntIri = property(['fdr', 'ld', 'Method', 0, 'entIri'])(experiment);
+                                                    const experimentEntId = property(['fdr', 'ld', 'Method', 0, 'entId'])(experiment);
+                                                    const materials = property(['fdr', 'ld', 'Material'])(experiment);
+                                                    const effects = property(['entContent', 'Effect'])(experiment);
+                                                    const comments = property(['entContent', 'comments'])(experiment) || 'none';
+                                                    const experimentalRepeats = property(['entContent', 'QC', 'ExperimentalRepeats'])(experiment);
+                                                    const experimentalControlNormal = property(['entContent', 'QC', 'ExperimentalControl', 'normal'])(experiment);
+                                                    const experimentalControlNegative = property(['entContent', 'QC', 'ExperimentalControl', 'negative'])(experiment);
+                                                    const validationControlValue = property(['entContent', 'QC', 'ValidationControl', 'value'])(experiment);
+                                                    const validationControlStatement = property(['entContent', 'QC', 'ValidationControl', 'statement'])(experiment);
+                                                    const statisticalAnalysisValue = property(['entContent', 'QC', 'StatisticalAnalysis', 'value'])(experiment);
+                                                    const statisticalAnalysisStatement = property(['entContent', 'QC', 'StatisticalAnalysis', 'statement'])(experiment);
+                                                    return (
+                                                        <div className="row experiment" key={experimentId}>
+                                                            <span className="col-md-12">
+                                                                <strong className="experiment-label">{ `Experiment ${experimentIndex + 1}` }</strong>
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Method: </strong>
+                                                                <a href={experimentEntIri} target="_blank" rel="noopener noreferrer">
+                                                                    { experimentEntId }
+                                                                </a>
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Material(s): </strong>
+                                                                {
+                                                                    materials && Array.isArray(materials)
+                                                                        && materials.map((material, materialIndex) => {
+                                                                            const materialId = property(['id'])(material);
+                                                                            const materialEntIri = property(['entIri'])(material);
+                                                                            const materialEntId = property(['entId'])(material);
+                                                                            const patientSourced = property(['entContent', 'PatientSourced'])(material);
+                                                                            const genoTypeLabel = property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material) || 'none';
+                                                                            return (
+                                                                                <span key={materialId}>
+                                                                                    { materialIndex > 0 ? ', ' : '' }
+                                                                                    <a href={materialEntIri} target="_blank" rel="noopener noreferrer">
+                                                                                        { materialEntId }
+                                                                                    </a>
+                                                                                    {
+                                                                                        patientSourced
+                                                                                            && (
+                                                                                                <span>
+                                                                                                    <span> (</span>
+                                                                                                    <i>source: </i>patient; <i>genotype: </i>
+                                                                                                    { genoTypeLabel }
+                                                                                                    <span>)</span>
+                                                                                                </span>
+                                                                                            )
+                                                                                    }
+                                                                                </span>
+                                                                            );
+                                                                        })
+                                                                }
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Functional Impact(s): </strong>
+                                                                {
+                                                                    effects && Array.isArray(effects)
+                                                                        && effects.map((effect, effectIndex) => {
+                                                                            const effectValue = property(['value'])(effect);
+                                                                            const effectCode = property(['code'])(effect);
+                                                                            const effectIri = property(['iri'])(effect);
+                                                                            const effectEntId = property(['entId'])(effect);
+                                                                            return (
+                                                                                <span key={`${effectValue}-${effectCode}`}>
+                                                                                    { `${effectIndex > 0 ? '; ' : ''} ${effectValue} ` }
+                                                                                    <a href={effectIri} target="_blank" rel="noopener noreferrer">
+                                                                                        { effectEntId }
+                                                                                    </a>
+                                                                                </span>
+                                                                            );
+                                                                        })
+                                                                }
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Functional Impact Comments: </strong>
+                                                                { comments }
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Experimental Repeats: </strong>
+                                                                { experimentalRepeats }
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Experimental Controls: </strong>
+                                                                {
+                                                                    experimentalControlNormal
+                                                                        && <span><i>Normal: </i>{ experimentalControlNormal }</span>
+                                                                }
+                                                                {
+                                                                    experimentalControlNormal && experimentalControlNegative
+                                                                        && <span>; </span>
+                                                                }
+                                                                {
+                                                                    experimentalControlNegative
+                                                                        && <span><i>Negative: </i>{ experimentalControlNegative }</span>
+                                                                }
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Validation Control: </strong>
+                                                                { validationControlValue }
+                                                                {
+                                                                    validationControlStatement
+                                                                        && <span>{ `, ${validationControlStatement}` }</span> 
+                                                                }
+                                                            </span>
+                                                            <span className="col-md-12">
+                                                                <strong>Statistical Analysis: </strong>
+                                                                { statisticalAnalysisValue }
+                                                                {
+                                                                    statisticalAnalysisStatement
+                                                                        && <span>{ `, ${statisticalAnalysisStatement}` }</span>
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })
                                         }
                                         <div className="row notes">
                                             <span className="col-md-12">
                                                 <strong>Additional Notes: </strong>
-                                                { property(['statements', 0, 'entContent', 'Notes'])(sourceArticles[currentKey]) || 'none' }
+                                                { additionalNotes }
                                             </span>
                                         </div>
                                         <div className="row">
                                             <span className="col-md-12">
                                                 <strong>Contributor: </strong>
-                                                { property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(sourceArticles[currentKey]) }
+                                                { contributor }
                                             </span>
                                         </div>
                                     </div>
