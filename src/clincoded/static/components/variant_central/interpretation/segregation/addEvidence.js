@@ -29,13 +29,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         affiliation: PropTypes.object, // user's affiliation data object
         criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
-        deleteEvidenceFunc: PropTypes.func, // Function to call to delete an evidence
-        evidenceCollectionDone: PropTypes.func,  // Fucntion to call to add or edit an existing one
+        deleteEvidenceFunc: PropTypes.func, // function to call to delete an evidence
+        evidenceCollectionDone: PropTypes.func,  // function to call to add or edit an existing one
         canCurrUserModifyEvidence: PropTypes.func // funcition to check if current logged in user can modify given evidence
-    },
-
-    contextTypes: {
-        fetch: PropTypes.func // Function to perform a search
     },
 
     getInitialState: function() {
@@ -153,8 +149,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                     <Input type="select" defaultValue="PMID" handleChange={this.setEvidenceType}>
                                                         <option value="PMID">PMID</option>
                                                     </Input>
-                                                </div>
-                                                <div className="col-md-12">
                                                     <EvidenceModalManager
                                                         data = {null}
                                                         allData = {relevantEvidenceList}

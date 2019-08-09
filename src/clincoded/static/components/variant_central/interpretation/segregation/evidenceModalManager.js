@@ -286,7 +286,7 @@ let EvidenceModalManager = createReactClass({
     },
 
     render() {
-        let jsx = <div>
+        let jsx = <span>
             <NewEvidenceModalMetadata
                 evidenceType = {this.props.evidenceType}
                 metadataDone = {this.metadataDone}
@@ -296,7 +296,7 @@ let EvidenceModalManager = createReactClass({
                 disableActuator = {this.props.disableActuator}
             />
             {this.evidenceSheet()}
-        </div>;
+        </span>;
         return jsx;
     }
 });
