@@ -64,7 +64,6 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
      * Delete the given evidence from its interpretation.
      * 
      * @param {object} evidence     // Evidence to be deleted
-     * @param {string} subcategory  // Subcategory this evidence belongs to
      */
     deleteEvidenceFunc: function(evidence) {
         //TODO: Update evidence object or re-create it so that it passes the update validation.  See the open screenshot for details.
@@ -114,10 +113,13 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     /**
+     * If data has been completed for the evidence, save the data.  If not, just returns.
      * 
      * @param {bool} finished      If we have finished with data collection
      * @param {object} evidence    The new/modified evidence source data
      * @param {object} id          The evidence id if editing evidence. null if new evidence.
+     * @param {string} subcategory Subcategory this evidence belongs to
+     * @param {date} dateCreated   This evidence created date
      */
     evidenceCollectionDone: function(finished, evidence, id, subcategory, dateCreated) {
         if (!finished) {
@@ -267,13 +269,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     render() {
-        let that = this;
-        function getVariantUUID() {
-            if (that.state && that.state.data) {
-                return that.state.data['@id'];
-            }
-            return null;
-        }
+        const variantUUID = this.state && this.state.data ? this.state.data['@id'] : null;
         const affiliation = this.props.affiliation, session = this.props.session;
         let panel_data = [
             {
@@ -397,7 +393,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         // Common configurations
                         evidenceData={null}
                         evidenceDataUpdated={true}
-                        variantUuid={getVariantUUID()}
+                        variantUuid={variantUUID}
                         interpretation={this.state.interpretation}
                         updateInterpretationObj={this.props.updateInterpretationObj}
                         affiliation={this.props.affiliation}
@@ -457,7 +453,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <p className="alert alert-warning">ClinGen has determined that the following rules should not be applied in any context.</p>
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup8} criteria={['BP6', 'PP5']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
-                                    formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']}
+                                    formDataUpdater={criteriaGroup8Update} variantUuid={variantUUID}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                     disableEvalForm={true} affiliation={affiliation} session={session} />
                             </div>
