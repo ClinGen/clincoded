@@ -467,7 +467,7 @@ const sheetToTableMapping = [
         'subcategory': 'observed-in-healthy',
         'cols': [{
             key: 'num_unaffected_family_with_variant',
-            title: '# Unaffected Variant Carriers'
+            title: '# unaffected cariant carriers'
         },
         {
             key: 'num_control_with_variant',
@@ -479,7 +479,7 @@ const sheetToTableMapping = [
         'subcategory': 'case-control',
         'cols': [{
                 key: 'num_probands_relevant_phenotype',
-                title: '# Probands with relevant phenotypes'
+                title: '# probands with relevant phenotypes'
             }]
     },
     {
