@@ -370,8 +370,8 @@ let NewEvidenceModalMetadata = createReactClass({
 
     render() {
         const additionalEvidenceFields = this.additionalEvidenceInputFields();
-        const modalWrapperClass = "input-inline";
-        const bootstrapBtnClass = this.props.useIcon ? "btn " : "btn btn-default ";
+        const modalWrapperClass = this.props.useIcon ? "input-inline" : "inline-button-wrapper";
+        const bootstrapBtnClass = this.props.useIcon ? "btn master-icon " : "btn btn-default ";
         const actuatorClass = this.props.useIcon ? "" : "btn-primary";
         return (
             <ModalComponent 

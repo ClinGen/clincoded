@@ -38,8 +38,8 @@ let DeleteEvidenceModal = createReactClass({
     
     render() {
         const title = this.props.useIcon ? <i className="icon icon-trash-o"></i> : "Delete";
-        const modalWrapperClass = this.props.useIcon ? "input-inline pull-right" : "";
-	    const bootstrapBtnClass = this.props.useIcon ? "btn pull-right" : "btn btn-danger ";
+        const modalWrapperClass = this.props.useIcon ? "input-inline" : "inline-button-wrapper";
+	    const bootstrapBtnClass = this.props.useIcon ? "btn master-icon " : "btn btn-danger ";
         return (
             <ModalComponent
                     modalTitle="Confirm evidence deletion"
