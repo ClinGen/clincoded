@@ -123,22 +123,20 @@ let MasterEvidenceTable = createReactClass({
         let third_row = []; // Submitted by row
         let tableOrder = this.getTableEvidenceSourceOrder();
 
-        first_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="3"></td>);
+        first_row.push(<th key="header.codes_1" style={{borderTop: 'none', borderRight: 'none'}}></th>);
+        first_row.push(<th key="header.number_1" style={{borderTop: 'none', borderLeft: 'none', borderRight: 'none'}} colSpan="2">Evidence Type</th>);
         tableOrder.forEach(evidence_type => {
             if (evidence_types[evidence_type]) {
                 let num_items = evidence_types[evidence_type].length;
                 first_row.push(<th colSpan={num_items} key={`header_category_${evidence_type}`} style={{textAlign: 'center'}}>
                     {`${extraEvidence.typeMapping[evidence_type].name} (${num_items})`}
-
                 </th>);
             }
         });
-        second_row.push(<th key="header.codes" style={{borderBottom: 'none', borderTop: 'none', borderRight: 'none'}}></th>);
-        second_row.push(<th key="header.number" style={{border: 'none'}}>Evidence Type</th>);
-        second_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}></th>);
-        third_row.push(<th key="header.codes" style={{borderBottom: 'none', borderTop: 'none', borderRight: 'none'}}></th>);
-        third_row.push(<th key="header.user" style={{border: 'none'}}>Submitted by</th>);
-        third_row.push(<th key="header.sums" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}>
+        second_row.push(<td key="header_blank_row_1" style={{border: 'none'}} colSpan="3"></td>);
+        third_row.push(<th key="header.codes_3" style={{borderBottom: 'none', borderTop: 'none', borderRight: 'none'}}></th>);
+        third_row.push(<th key="header.user_3" style={{border: 'none'}}>Submitted by</th>);
+        third_row.push(<th key="header.sums_3" style={{borderBottom: 'none', borderTop: 'none', borderLeft: 'none'}}>
             <div><span>Sum</span></div>
         </th>);
         tableOrder.forEach(evidence_type => {
@@ -156,6 +154,7 @@ let MasterEvidenceTable = createReactClass({
                         if (row.source.metadata['_kind_key'] === 'PMID') {
                             let pmid = row.source.metadata.pmid;
                             let authorYear = '';
+                            let evidence_detail = '';
                             if (row.articles.length > 0) {
                                 let article = row.articles[0];
                                 let date = article && article.date ? (/^([\d]{4})/).exec(article.date) : [];
@@ -164,24 +163,28 @@ let MasterEvidenceTable = createReactClass({
                                     authorYear = article.authors[0] + ', ' + authorYear;
                                 }
                             }
-                            let element = <a
-                                href = {external_url_map['PubMed'] + pmid}
-                                target = '_blank'
-                                title = {`PubMed Article ID: ${pmid}`}
-                            >
-                                PMID {pmid}
-                            </a>
+                            if (pmid) {
+                                evidence_detail = <a
+                                    href = {external_url_map['PubMed'] + pmid}
+                                    target = '_blank'
+                                    title = {`PubMed Article ID: ${pmid}`}
+                                >
+                                    PMID {pmid}
+                                </a>
+                            }
                             second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
-                                    <div style={{textAlign: 'center'}}>
-                                        <span>{authorYear} {element}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
+                                    <div>
+                                        <div className='evidence-detail'>{authorYear}{evidence_detail}</div>
+                                        <div className='evidence-links'>{deleteButton}{editButton}</div>
                                     </div>
                             </th>)
                         } else {
                             let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
                             let evidence_detail = `${row.source.metadata[identifier.name]}`;
                             second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
-                                <div style={{textAlign: 'center'}}>
-                                    <span>{evidence_detail}<div>{deleteButton}<div style={{display:'inline', float:'right'}}>{editButton}</div></div></span>
+                                <div>
+                                    <div className='evidence-detail'>{evidence_detail}</div>
+                                    <div className='evidence-detail'>{deleteButton}{editButton}</div>
                                 </div>
                             </th>);
                         }
@@ -218,7 +221,7 @@ let MasterEvidenceTable = createReactClass({
         // Initialize the left-hand columns
         masterTable().forEach(row => {
             let contents = `${row.label}`;
-            let code_td = <td></td>;
+            let code_td = <td key={`cell_${cell_num++}`}></td>;
 
             if ('criteria_codes' in row && 'row_span' in row && row['row_span'] !== 0) {
                 let codes = `${row['criteria_codes'].join(', ')}`;
@@ -230,7 +233,7 @@ let MasterEvidenceTable = createReactClass({
             }
             // No table cell border if same source type
             if ('row_span' in row && row['row_span'] === 0) {
-                code_td = <td style={{border: 'none'}}></td>;
+                code_td = <td key={`cell_${cell_num++}`} style={{border: 'none'}}></td>;
             }
             let label_td = <td key={`cell_${cell_num++}`}>
                 <div>
@@ -262,11 +265,16 @@ let MasterEvidenceTable = createReactClass({
                             let val = row.source.data[masterRow.key];
                             let entry = '';
                             let key = masterRow.key;
-                            // For text column, limit to column width and show full text when mouseover. 
+                            // For text column, limit to 25 characters and show full text when mouseover 'more' text.
                             if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
-                                entry = <td key={`cell_${cell_num++}`}>
-                                    <div className='title-ellipsis' title={val}>{val}</div>
-                                </td>
+                                const comment = val && val.length > 25
+                                                ? <div>{val.substr(0,25) + ' ...'}
+                                                    <div data-toggle='tooltip' data-placement='top' data-tooltip={val}>
+                                                        <span className='more-text'>more</span>
+                                                    </div>
+                                                  </div>
+                                                : <div>{val}</div>
+                                entry = <td key={`cell_${cell_num++}`}>{comment}</td>
                             } else if (key === 'is_disease_associated_with_probands') {
                                 // Set checkmark for  "Disease associated with proband(s) (HPO) (Check here if unaffected)" if checked
                                 let iconClass = val === true ? 'icon icon-check' : '';
