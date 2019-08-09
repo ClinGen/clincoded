@@ -246,6 +246,27 @@ $status-types:
     width: 100%;
     display: block;
     overflow-x: scroll;
+
+    .evidence-detail {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .evidence-links {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn.master-icon {
+        padding: 2px 6px;
+    }
+
+    .more-text {
+        color: #337ab7;
+        font-weight: bold;
+        text-align: center;
+    }
 }
 .masterTable tbody tr td:nth-child(2) > div {
     width: 230px;
@@ -254,6 +275,7 @@ $status-types:
 }
 .masterTable thead tr th:nth-child(n+2),
 .masterTable tbody tr td:nth-child(n+2) {
+    min-width: 100px;
     max-width: 250px;
 }
 .masterTable thead tr:nth-child(n+1) th:nth-child(n+3),
@@ -281,11 +303,13 @@ $status-types:
     margin-left: -33px;
     padding-top: 4px;
 }
-.masterTable {
-    .btn {
-        padding: 2px 6px;
-    }
+
+// For variant interpretation Case/Segregation tab evidence tables
+.evidenceTable thead tr th,
+.evidenceTable tbody tr td {
+    min-width: 100px;
 }
+
 //style for the text displaying the number of entries for each gdm search and for each interpretation search
 .number-of-entries {
     color: grey;
