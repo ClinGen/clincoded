@@ -65,20 +65,20 @@ let EvidenceTable = createReactClass({
     /**
      * Return the number of criteria that has value in this evidence
      * 
-     * @param {object} obj  The evidence source
+     * @param {object} source  The evidence source
      */
-    getSubRowCount(obj) {
+    getSubRowCount(source) {
         let count = 0;
         // The criteria under Specificity of phenotype panel has only one corresponding comment so display them on same row.
         // SubRowCount is 1.
         if (this.props.subcategory === 'specificity-of-phenotype') {
             count = 1;
         } else {
-            if (obj['relevant_criteria']) {
+            if (source['relevant_criteria']) {
                 let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
                 let cols = relevantData.cols.map(o => o.key);
                 cols.forEach(col => {
-                    if (obj[col] && obj[col] != '') {
+                    if (source[col] && source[col] != '') {
                         count++;
                     }
                 });
@@ -208,8 +208,7 @@ let EvidenceTable = createReactClass({
             </td>
             inner.push(buttons);
         } else {
-            let emptyColumn = <td></td>
-            inner.push(emptyColumn);
+            inner.push(<td key={`noEditDelete_${id}`}></td>);
         }
     },
 
@@ -218,11 +217,11 @@ let EvidenceTable = createReactClass({
      *
      * @param {string} criteria  The criteria name to be added
      * @param {object} colNames  The table columns 
-     * @param {object} obj       The evidence source
+     * @param {object} source       The evidence source
      * @param {number} key       Table column unique key
      */
-    addAnotherCriteriaRow(criteria, colNames, obj, key) {
-        const emptyColumnNoTopBorder = <td style={{borderTop: 'none'}}></td>
+    addAnotherCriteriaRow(criteria, colNames, source, key) {
+        let i = 0; // Hack for table key
         let inner = [];
         let outer = [];
         let criteriaName = '';
@@ -231,8 +230,8 @@ let EvidenceTable = createReactClass({
             let node = null;
             let nodeContent = null;
             let criteriaCodes = this.getCriteriaCodes(col);
-            if (col in obj) {
-                nodeContent = obj[col];
+            if (col in source) {
+                nodeContent = source[col];
             }
             if (criteriaCodes.length > 0) {
                 // If this column is for given criteria, display its value
@@ -244,14 +243,14 @@ let EvidenceTable = createReactClass({
                 }
                 else {
                     // Other criteria, output blank column
-                    inner.push(emptyColumnNoTopBorder);
+                    inner.push(<td key={`empty_cell_${key++}_${i++}`} style={{borderTop: 'none'}}></td>);
                 }
             } else if (col === 'comments') {
                 // Display the comment for given criteria
                 let commentCol = criteriaName + '_comment';
                 nodeContent = null;
-                if (commentCol in obj) {
-                    nodeContent = obj[commentCol];
+                if (commentCol in source) {
+                    nodeContent = source[commentCol];
                 }
                 node = <td className='word-break-all' key={`cell_${key++}`} style={{borderTop: 'none'}}>
                     {nodeContent}
@@ -281,20 +280,19 @@ let EvidenceTable = createReactClass({
 
         tableData.forEach(row => {
             if (this.showRow(row)) {
-                let obj = row.source.data;
+                let sourceData = row.source.data;
                 let metadata = row.source.metadata;
-                obj['last_modified'] = row['last_modified'];
-                obj['_kind_title'] = metadata['_kind_title']
-                obj['relevant_criteria'] = this.props.criteriaList.join(', ');
-                obj['last_modified'] = moment(obj['last_modified']).format('YYYY MMM DD, h:mm a');
-                obj['_submitted_by'] = row.source['_submitted_by'];
+                sourceData['last_modified'] = row['last_modified'];
+                sourceData['_kind_title'] = metadata['_kind_title']
+                sourceData['relevant_criteria'] = this.props.criteriaList.join(', ');
+                sourceData['last_modified'] = moment(sourceData['last_modified']).format('YYYY MMM DD, h:mm a');
+                sourceData['_submitted_by'] = row.source['_submitted_by'];
 
                 // Get number of criteria that has value which determines the number of rows for this evidence
-                let subRows = this.getSubRowCount(obj);
+                let subRows = this.getSubRowCount(sourceData);
                 let inner = [];
                 let otherCriteria = [];
                 let criteriaName = '';
-                const emptyColumn = <td></td>
 
                 // Add source column for this evidence
                 inner.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(row)}</td>);
@@ -302,17 +300,17 @@ let EvidenceTable = createReactClass({
                 // The criteria under Specificity of phenotype panel has only one corresponding comment so display them on same row.
                 if (this.props.subcategory === 'specificity-of-phenotype') {
                     colNames.forEach(col => {
-                        let node = emptyColumn;
-                        if (col in obj) {
+                        let node = <td key={`empty_cell_${i++}`}></td>;
+                        if (col in sourceData) {
                             node = <td key={`cell_${i++}`}>
-                                {obj[col]}
+                                {sourceData[col]}
                             </td>
                         }
                         if (col === 'comments') {
                             // Display the HPO comment
                             let nodeContent = null;
-                            if ('proband_hpo_comment' in obj) {
-                                nodeContent = obj['proband_hpo_comment'];
+                            if ('proband_hpo_comment' in sourceData) {
+                                nodeContent = sourceData['proband_hpo_comment'];
                             }
                             node = <td className='word-break-all' key={`cell_${i++}`}>
                                 {nodeContent}
@@ -326,8 +324,8 @@ let EvidenceTable = createReactClass({
                     colNames.forEach(col => {
                         let node = null;
                         let nodeContent = null;
-                        if (col in obj) {
-                            nodeContent = obj[col];
+                        if (col in sourceData) {
+                            nodeContent = sourceData[col];
                             node = <td key={`cell_${i++}`}>
                                 {nodeContent}
                             </td>
@@ -347,21 +345,21 @@ let EvidenceTable = createReactClass({
                                 else {
                                     // If first row criteria has been set, display empty column
                                     // And add this criteria to the list that will be added later
-                                    node = emptyColumn;
+                                    node = <td key={`empty_cell_${i++}`}></td>;
                                     otherCriteria.push(col);
                                 }
                             }
                             else {
                                 // If criteria has no value, display empty column
-                                node = emptyColumn;
+                                node = <td key={`empty_cell_${i++}`}></td>;
                             }
                         }
                         else if (col === 'comments') {
                             // Display the comment for current criteria in this column
                             let commentCol = criteriaName + '_comment';
                             nodeContent = null;
-                            if (commentCol in obj) {
-                                nodeContent = obj[commentCol];
+                            if (commentCol in sourceData) {
+                                nodeContent = sourceData[commentCol];
                             }
                             node = <td className='word-break-all' key={`cell_${i++}`}>
                                 {nodeContent}
@@ -382,7 +380,7 @@ let EvidenceTable = createReactClass({
 
                 // Add other criteria rows if more is available for this evidence row.
                 otherCriteria.forEach(criteria => {
-                    outer = this.addAnotherCriteriaRow(criteria, colNames, obj, i);
+                    outer = this.addAnotherCriteriaRow(criteria, colNames, sourceData, i);
                     rows.push(outer);
                     // Hack for unique key
                     i = i + 10;
@@ -417,16 +415,16 @@ let EvidenceTable = createReactClass({
         let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
         let cols = relevantData.cols.map(o => o.key);
         let foundData = false;
-        this.props.tableData.forEach(row => {
+        this.props.tableData.some(row => {
+            if (foundData) {
+                return true;
+            }
             if (row.source && row.source.data) {
-                let obj = row.source.data;
-                if (foundData) {
-                    return;
-                }
-                cols.forEach(col => {
-                    if (obj[col] && obj[col] != '') {
+                let sourceData = row.source.data;
+                cols.some(col => {
+                    if (sourceData[col] && sourceData[col] != '') {
                         foundData = true;
-                        return;
+                        return true;
                     }
                 });
             }
@@ -444,11 +442,9 @@ let EvidenceTable = createReactClass({
         // relevant columns empty -> return False
         let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
         let cols = relevantData.cols.map(o => o.key);
-        let show = false;
-        cols.forEach(col => {
+        const show = cols.some(col => {
             if (row.source && row.source.data && row.source.data[col] && row.source.data[col] != '') {
-                show = true;
-                return;
+                return true;
             }
         });
         return show;
@@ -456,19 +452,25 @@ let EvidenceTable = createReactClass({
 
     render() {
         if (this.props.tableData.length == 0 || !this.hasTableData()) {
-            return <div style={{paddingBottom: '5px'}}><span>&nbsp;&nbsp;No evidence added.</span></div>
+            return (
+                <table className="evidenceTable table">
+                    <tbody>
+                        <tr><td>No evidence added.</td></tr>
+                    </tbody>
+                </table>
+            )
         }
         return (
-            <table className="table">
-            <thead>
-                <tr>
-                    {this.tableHeader()}
-                </tr>
-            </thead>
-            <tbody>
-                {this.additionalEvidenceRows()}
-            </tbody>
-        </table>
+            <table className="evidenceTable table">
+                <thead>
+                    <tr>
+                        {this.tableHeader()}
+                    </tr>
+                </thead>
+                <tbody>
+                    {this.additionalEvidenceRows()}
+                </tbody>
+            </table>
         )
     }
 });
