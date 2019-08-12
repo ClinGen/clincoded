@@ -150,7 +150,7 @@ let EvidenceSheet = createReactClass({
     inputs() {
         let jsx = [];
         let i = 0;
-        let outerStyle = {
+        let trStyle = {
             'display': 'flex',
             'alignItems': 'flex-end'
         };
@@ -159,7 +159,7 @@ let EvidenceSheet = createReactClass({
         let fields = this.allowedFields();
 
         extraEvidence.evidenceInputs.forEach(row => {
-            let inner = [];
+            let rowTDs = [];
             let done = false;
             row.cols.forEach(col => {
                 let value = '';
@@ -202,23 +202,23 @@ let EvidenceSheet = createReactClass({
                 //         {this.renderLookupResult()}
                 //     </div>);
                 // }
-                inner.push(node);
+                rowTDs.push(node);
                 // if field needs to be put in its own row, add it here.
                 if (col.width === 12) {
-                    let outer = <div className="row" style={outerStyle} key={i++}>
-                        {inner}
+                    let rowTR = <div className="row" style={trStyle} key={i++}>
+                        {rowTDs}
                     </div>
-                    jsx.push(outer);
-                    inner = [];
+                    jsx.push(rowTR);
+                    rowTDs = [];
                     done = true;
                 }
             });
             // if row has not been added, add it here.
             if (!done) {
-                let outer = <div className="row" style={outerStyle} key={i++}>
-                    {inner}
+                let rowTR = <div className="row" style={trStyle} key={i++}>
+                    {rowTDs}
                 </div>
-                jsx.push(outer);
+                jsx.push(rowTR);
             }
         });
         return jsx;
@@ -275,7 +275,7 @@ let EvidenceSheet = createReactClass({
             modalWidthPct={90}
         >
         <div className="form-std">
-            <div className="modal-body" style={{textAlign: 'left'}}>
+            <div className="case-seg-modal modal-body" style={{textAlign: 'left'}}>
                 <h4 className={errMsgClass} style={{color: 'red'}}>
                     {this.state.errorMsg}
                 </h4>

@@ -196,19 +196,19 @@ let EvidenceTable = createReactClass({
      * 
      * @param {string} key       Table Column unique key
      * @param {object} row       Evidence in this row
-     * @param {array}  inner     The table row columns content
+     * @param {array}  rowTDs    The table row columns content
      * @param {number} rowspan   Number of rows to span in this button column
      */
-    addButtons(id, row, inner, rowspan=1) {
+    addButtons(id, row, rowTDs, rowspan=1) {
         if (this.canModify(row)) {
             let editButton = this.getEditButton(row);
             let deleteButton = this.getDeleteButton(row);
             let buttons = <td key={`editDelete_${id}`} rowSpan={rowspan}>
                 {editButton} {deleteButton}
             </td>
-            inner.push(buttons);
+            rowTDs.push(buttons);
         } else {
-            inner.push(<td key={`noEditDelete_${id}`}></td>);
+            rowTDs.push(<td key={`noEditDelete_${id}`}></td>);
         }
     },
 
@@ -222,8 +222,8 @@ let EvidenceTable = createReactClass({
      */
     addAnotherCriteriaRow(criteria, colNames, source, key) {
         let i = 0; // Hack for table key
-        let inner = [];
-        let outer = [];
+        let rowTDs = [];
+        let rowTR = [];
         let criteriaName = '';
 
         colNames.forEach(col => {
@@ -243,7 +243,7 @@ let EvidenceTable = createReactClass({
                 }
                 else {
                     // Other criteria, output blank column
-                    inner.push(<td key={`empty_cell_${key++}_${i++}`} style={{borderTop: 'none'}}></td>);
+                    rowTDs.push(<td key={`empty_cell_${key++}_${i++}`} style={{borderTop: 'none'}}></td>);
                 }
             } else if (col === 'comments') {
                 // Display the comment for given criteria
@@ -258,12 +258,12 @@ let EvidenceTable = createReactClass({
             }
             // Add column
             if (node) {
-                inner.push(node);
+                rowTDs.push(node);
             }
         });
-        outer = <tr key={`row_${key++}`}>{inner}</tr>
+        rowTR = <tr key={`row_${key++}`}>{rowTDs}</tr>
 
-        return outer;
+        return rowTR;
     },
 
     /**
@@ -290,12 +290,12 @@ let EvidenceTable = createReactClass({
 
                 // Get number of criteria that has value which determines the number of rows for this evidence
                 let subRows = this.getSubRowCount(sourceData);
-                let inner = [];
+                let rowTDs = [];
                 let otherCriteria = [];
                 let criteriaName = '';
 
                 // Add source column for this evidence
-                inner.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(row)}</td>);
+                rowTDs.push(<td key={`cell_${i++}`} rowSpan={subRows}>{this.getSourceColumnContent(row)}</td>);
 
                 // The criteria under Specificity of phenotype panel has only one corresponding comment so display them on same row.
                 if (this.props.subcategory === 'specificity-of-phenotype') {
@@ -316,7 +316,7 @@ let EvidenceTable = createReactClass({
                                 {nodeContent}
                             </td>
                         }
-                        inner.push(node);
+                        rowTDs.push(node);
                     });
                 } else {
                     // For other panels, put each criteria on separate row.
@@ -370,18 +370,18 @@ let EvidenceTable = createReactClass({
                                 {nodeContent}
                             </td>
                         }
-                        inner.push(node);
+                        rowTDs.push(node);
                     });
                 }
                 // Add the edit/delete buttons if user can modify this evidence
-                this.addButtons(i++, row, inner, subRows);
-                let outer = <tr key={`row_${i++}`}>{inner}</tr>
-                rows.push(outer);
+                this.addButtons(i++, row, rowTDs, subRows);
+                let rowTR = <tr key={`row_${i++}`}>{rowTDs}</tr>
+                rows.push(rowTR);
 
                 // Add other criteria rows if more is available for this evidence row.
                 otherCriteria.forEach(criteria => {
-                    outer = this.addAnotherCriteriaRow(criteria, colNames, sourceData, i);
-                    rows.push(outer);
+                    rowTR = this.addAnotherCriteriaRow(criteria, colNames, sourceData, i);
+                    rows.push(rowTR);
                     // Hack for unique key
                     i = i + 10;
                 });

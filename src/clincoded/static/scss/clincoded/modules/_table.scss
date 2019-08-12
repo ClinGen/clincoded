@@ -310,6 +310,11 @@ $status-types:
     min-width: 100px;
 }
 
+// For variant interpretation Case/Segregation tab modal dialogs
+.case-seg-modal {
+    font-weight: normal;
+}
+
 //style for the text displaying the number of entries for each gdm search and for each interpretation search
 .number-of-entries {
     color: grey;

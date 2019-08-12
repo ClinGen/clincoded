@@ -385,7 +385,7 @@ let NewEvidenceModalMetadata = createReactClass({
                     actuatorClass={actuatorClass}
                 >
                 <div className="form-std">
-                    <div className="modal-body">
+                    <div className="case-seg-modal modal-body">
                         <Form submitHandler={this.submitAdditionalEvidenceHandler} formClassName="form-horizontal form-std">
                             {additionalEvidenceFields}
                             {this.renderPMIDResult()}

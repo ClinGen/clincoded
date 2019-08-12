@@ -50,7 +50,7 @@ let DeleteEvidenceModal = createReactClass({
                     onRef={ref => (this.child = ref)}
                 >
                 <div>
-                    <div className="modal-body">
+                    <div className="case-seg-modal modal-body">
                         <p>
                             Are you sure you want to delete this evidence?
                         </p>
