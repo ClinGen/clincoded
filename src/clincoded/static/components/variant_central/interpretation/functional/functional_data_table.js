@@ -48,11 +48,12 @@ const FunctionalDataTable = ({
     const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_genboreeFuncData);
     const articleKeys = sourceArticles && Object.keys(sourceArticles);
     const currentKey = articleKeys && articleKeys[selectedTab];
-    const pmid = property(['pubmedSource', 'pmid'])(sourceArticles[currentKey]);
-    const pubmedSource = property(['pubmedSource'])(sourceArticles[currentKey]);
-    const afisStatements = property(['statements'])(sourceArticles[currentKey]);
-    const additionalNotes = property(['statements', 0, 'entContent', 'Notes'])(sourceArticles[currentKey]) || 'none';
-    const contributor = property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(sourceArticles[currentKey]);
+    const currentSource = sourceArticles && sourceArticles[currentKey];
+    const pmid = property(['pubmedSource', 'pmid'])(currentSource);
+    const pubmedSource = property(['pubmedSource'])(currentSource);
+    const afisStatements = property(['statements'])(currentSource);
+    const additionalNotes = property(['statements', 0, 'entContent', 'Notes'])(currentSource) || 'none';
+    const contributor = property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(currentSource);
     return (
         <div className="panel panel-info functional-impact-panel">
             <div className="panel-heading">
