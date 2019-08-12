@@ -169,13 +169,13 @@ let MasterEvidenceTable = createReactClass({
                                     target = '_blank'
                                     title = {`PubMed Article ID: ${pmid}`}
                                 >
-                                    PMID {pmid}
+                                    &nbsp;PMID {pmid}
                                 </a>
                             }
                             second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
                                     <div>
                                         <div className='evidence-detail'>{authorYear}{evidence_detail}</div>
-                                        <div className='evidence-links'>{deleteButton}{editButton}</div>
+                                        <div className='evidence-links'>{editButton}{deleteButton}</div>
                                     </div>
                             </th>)
                         } else {
@@ -184,7 +184,7 @@ let MasterEvidenceTable = createReactClass({
                             second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
                                 <div>
                                     <div className='evidence-detail'>{evidence_detail}</div>
-                                    <div className='evidence-detail'>{deleteButton}{editButton}</div>
+                                    <div className='evidence-detail'>{editButton}{deleteButton}</div>
                                 </div>
                             </th>);
                         }
