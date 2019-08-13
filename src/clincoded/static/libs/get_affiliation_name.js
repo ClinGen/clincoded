@@ -39,3 +39,32 @@ export function getAffiliationNameBySubgroupID(subgroup, subgroup_id) {
     }
     return name;
 }
+
+/**
+ * Method to return all affiliations by fullname
+ */
+export function getAllAffliations() {
+    let affiliations = [];
+    AffiliationsList.forEach(affiliation => {
+        affiliations.push({
+            id: affiliation.affiliation_id,
+            fullName: affiliation.affiliation_fullname
+        });
+    });
+   return affiliations;
+}
+
+/**
+ * Method to return affiliation subgroups from all affiliations
+ */
+
+ export function getAffiliationSubgroups() {
+    let subgroupList = [];
+    AffiliationsList.forEach(affiliation => {
+        if (affiliation.subgroups) {
+            subgroupList.push(affiliation.subgroups);
+        }
+    });
+    return subgroupList;
+}
+        
