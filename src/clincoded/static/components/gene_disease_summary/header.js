@@ -22,6 +22,8 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const modeInheritanceAdjective = gdm && gdm.modeInheritanceAdjective ? gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         const publishStatus = provisional.publishClassification || snapshotPublishDate ? true : false;
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
+        const curationApprovers = provisional.curationApprovers ? provisional.curationApprovers.sort() : null;
+        const curationContributors = provisional.curationContributors ? provisional.curationContributors.sort() : null;
 
         return (
             <div className="evidence-summary panel-header">
@@ -42,6 +44,18 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                                     (provisional && provisional.submitted_by ? provisional.submitted_by.title : null)
                                 }
                             </dd>
+                            {curationApprovers ? 
+                                <div>
+                                    <dt>Curation approvers:</dt>
+                                    <dd>{curationApprovers.join(', ')}</dd>
+                                </div>
+                            : null}
+                            {curationContributors ? 
+                                <div>
+                                    <dt>Curation contributors:</dt>
+                                    <dd>{curationContributors.join(', ')}</dd>
+                                </div>
+                            : null}
                             <dt>Calculated classification:</dt>
                             <dd className="classificationSaved">{provisional ? provisional.autoClassification : null}</dd>
                             <dt>Modified classification:</dt>

@@ -5,8 +5,9 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
+import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
@@ -31,6 +32,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
     getInitialState() {
         return {
+            affiliationsList: [],
+            approversList: [],
+            curationContributors: [],
+            curationApprovers: [],
+            contributorDate: null,
+            contributorComment: null,
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalDate: this.props.provisional && this.props.provisional.approvalDate ? this.props.provisional.approvalDate : undefined,
             approvalComment: this.props.provisional && this.props.provisional.approvalComment ? this.props.provisional.approvalComment : undefined,
@@ -45,6 +52,41 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
     componentDidMount() {
         this.getAffiliationApprovers();
+        this.parseAffiliationsList();
+        const approverList = getAffiliationSubgroups();
+        this.parseApproversList(approverList);
+    },
+
+    // Method to get full affiliations list and reformat obj so it's compatible w/ react-select
+    parseAffiliationsList() {
+        const affiliationsList = getAllAffliations();
+        const parsedAffiliations = affiliationsList.map(affiliation => {
+            return {
+                value: affiliation.fullName,
+                label: `${affiliation.fullName} (${affiliation.id})`
+            }
+        });
+        this.setState({ affiliationsList: parsedAffiliations });
+    },
+
+    // Method to get affiliation subgroups and pass to react-select
+    parseApproversList(approverList) {
+        const parsedApprovers = [];
+        approverList.forEach(approver => {
+           if (approver.gcep) {
+            parsedApprovers.push({
+                   value: approver.gcep.fullname,
+                   label: approver.gcep.fullname
+               });
+           } 
+           if (approver.vcep) {
+            parsedApprovers.push({
+                   value: approver.vcep.fullname,
+                   label: approver.vcep.fullname
+               });
+           }
+        });
+        this.setState({ approversList: parsedApprovers });
     },
 
     componentWillReceiveProps(nextProps) {
@@ -55,7 +97,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     approvalReviewDate: nextProps.provisional.approvalReviewDate,
                     approvalComment: nextProps.provisional.approvalComment,
                     approvalSubmitter: nextProps.provisional.approvalSubmitter,
-                    classificationApprover: nextProps.provisional.classificationApprover
+                    classificationApprover: nextProps.provisional.classificationApprover,
+                    curationContributors: nextProps.provisional.curationContributors,
+                    curationApprovers: nextProps.provisional.curationApprovers,
+                    contributorComment: nextProps.provisional.contributorComment,
+                    contributorDate: nextProps.provisional.contributorDate
                 });
             }
         }
@@ -90,8 +136,28 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         this.setState({approvalReviewDate});
     },
 
+    handleContributorDate(contributorDate) {
+        this.setState({contributorDate});
+    },
+
+    handleContributorSelect(selectedContributor) {
+        const contributors = [];
+        selectedContributor.forEach(contributor => {
+            contributors.push(contributor.value);
+        });
+        this.setState({ curationContributors: contributors });
+    },
+
+    handleApproverSelect(selectedApprover) {
+        const approvers = [];
+        selectedApprover.forEach(approver => {
+            approvers.push(approver.value);
+        });
+        this.setState({ curationApprovers: approvers });
+    },
+
     /**
-     * Method to handle previewing classificaiton approval form
+     * Method to handle previewing classification approval form
      */
     handlePreviewApproval() {
         const affiliation = this.props.affiliation;
@@ -99,10 +165,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         let formErr = false;
 
         if (approver && approver !== 'none') {
+            const contributorComment = this.contributorCommentInput.getValue();
             const approvalComment = this.approvalCommentInput.getValue();
             this.setState({
                 approvalSubmitter: this.props.session.user_properties.title,
                 approvalComment: approvalComment.length ? approvalComment : undefined,
+                contributorComment: contributorComment.length ? contributorComment : null,
                 classificationApprover: approver
             }, () => {
                 this.setState({isApprovalPreview: true});
@@ -124,19 +192,23 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalComment: this.props.provisional && this.props.provisional.approvalComment ? this.props.provisional.approvalComment : undefined,
             classificationApprover: this.props.provisional && this.props.provisional.classificationApprover ? this.props.provisional.classificationApprover : undefined,
+            curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.provisional.curationContributors : null,
+            curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.provisional.curationApprovers : null,
+            contributorDate: this.props.provisional && this.props.provisional.contributorDate ? this.props.provisional.contributorDate : null,
+            contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : null,
             isApprovalPreview: false
         });
     },
 
     /**
-     * Method to handle editing classificaiton approval form
+     * Method to handle editing classification approval form
      */
     handleEditApproval() {
         this.setState({isApprovalPreview: false});
     },
 
     /**
-     * Method to handle submitting classificaiton approval form
+     * Method to handle submitting classification approval form
      */
     submitForm(e) {
         e.preventDefault();
@@ -146,8 +218,18 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.approvedClassification = true;
         newProvisional.approvalSubmitter = this.state.approvalSubmitter;
         newProvisional.classificationApprover = this.state.classificationApprover;
+        newProvisional.curationApprovers = this.state.curationApprovers;
+        newProvisional.curationContributors = this.state.curationContributors;
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
+        newProvisional.contributorDate = this.state.contributorDate;
+        if (this.state.contributorComment && this.state.contributorComment.length) {
+            newProvisional.contributorComment = this.state.contributorComment;
+        } else {
+            if (newProvisional.contributorComment) {
+                delete newProvisional['contributorComment']
+            }
+        }
         if (this.state.approvalComment && this.state.approvalComment.length) {
             newProvisional.approvalComment = this.state.approvalComment;
         } else {
@@ -265,9 +347,15 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     render() {
         const approvalSubmitter = this.state.approvalSubmitter;
         const classificationApprover = this.state.classificationApprover;
+        const contributorDate = this.state.contributorDate ? moment(this.state.contributorDate).format('MM/DD/YYYY') : '';
+        const contributorComment = this.state.contributorComment && this.state.contributorComment.length ? this.state.contributorComment : '';
         const approvalReviewDate = this.state.approvalReviewDate ? moment(this.state.approvalReviewDate).format('MM/DD/YYYY') : '';
         const approvalDate = this.state.approvalDate ? moment(this.state.approvalDate).format('YYYY MM DD, h:mm a') : moment().format('YYYY MM DD, h:mm a');
         const approvalComment = this.state.approvalComment && this.state.approvalComment.length ? this.state.approvalComment : '';
+        const curationContributorsList = this.state.affiliationsList ? this.state.affiliationsList : null;
+        const approversList = this.state.approversList ? this.state.approversList : null;
+        const curationContributors = this.state.curationContributors ? this.state.curationContributors.join(', ') : null;
+        const curationApprovers = this.state.curationApprovers ? this.state.curationApprovers.join(', ') : null;
         const session = this.props.session;
         const provisional = this.props.provisional;
         const classification = this.props.classification;
@@ -303,6 +391,24 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             </dl>
                                         </div>
                                         : null}
+                                    <div>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Curation Contributor(s):</span></dt>
+                                            <dd>{curationContributors ? curationContributors : null}</dd>
+                                        </dl>
+                                    </div>
+                                    <div>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Primary Contributor Date:</span></dt>
+                                            <dd>{contributorDate}</dd>
+                                        </dl>
+                                    </div>
+                                    <div>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Contributor Comments:</span></dt>
+                                            <dd><span>{contributorComment}</span></dd>
+                                        </dl>
+                                    </div>    
                                 </div>
                                 <div className="col-xs-12 col-sm-3">
                                     <div className="approval-date">
@@ -317,11 +423,15 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
                                         </dl>
                                     </div>
-                                </div>
-                                <div className="col-xs-12 col-sm-5">
+                                    <div className="curation-approvers">
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Curation Approver(s):</span></dt>
+                                            <dd>{curationApprovers ? curationApprovers : null}</dd>
+                                        </dl>
+                                    </div>
                                     <div className="approval-comments">
                                         <dl className="inline-dl clearfix preview-approval-comment">
-                                            <dt><span>Additional comments:</span></dt>
+                                            <dt><span>Approver Comments:</span></dt>
                                             <dd><span>{approvalComment ? approvalComment : null}</span></dd>
                                         </dl>
                                     </div>
@@ -336,7 +446,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         :
                         <div className="approval-edit">
                             <div className="col-md-12 approval-form-content-wrapper">
-                                <div className="col-xs-12 col-sm-4">
+                                <div className="col-xs-12 col-sm-6">
                                     <div className="approval-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
@@ -376,31 +486,55 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             }
                                         </div>
                                         : null}
-                                </div>
-                                <div className="col-xs-12 col-sm-3">
-                                    <div className="approval-review-date">
-                                        <div className="form-group">
-                                            <label className="col-sm-5 control-label">Date approved:</label>
-                                            <div className="col-sm-7">
-                                                <DayPickerInput
-                                                    value={approvalReviewDate}
-                                                    onDayChange={this.handleReviewDateChange}
-                                                    formatDate={formatDate}
-                                                    parseDate={parseDate}
-                                                    placeholder={`${formatDate(new Date())}`}
-                                                    dayPickerProps={{
-                                                        selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
-                                                    }}
-                                                />
-                                            </div>
+                                    {curationContributorsList && curationContributorsList.length ? 
+                                        <div className="contributor-form">
+                                            <label className="control-label">Curation Contributor(s):</label>
+                                            <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
+                                        </div>
+                                    : null}
+                                    <div className="contributor-form">
+                                        <label className="control-label">Primary Contributor Date:</label>
+                                        <div className="contributor-date">
+                                            <DayPickerInput
+                                                value={contributorDate}
+                                                onDayChange={this.handleContributorDate}
+                                                formatDate={formatDate}
+                                                parseDate={parseDate}
+                                                placeholder={`${formatDate(new Date())}`}
+                                                dayPickerProps={{
+                                                    selectedDays: contributorDate ? parseDate(contributorDate) : undefined
+                                                }}
+                                            />
                                         </div>
                                     </div>
+                                    <div className="contributor-form">
+                                        <Input type="textarea" className="form-group" ref={(input) => { this.contributorCommentInput = input; }}
+                                            label="Contributor Comments:" rows="5" labelClassName="control-label" />
+                                    </div>
                                 </div>
-                                <div className="col-xs-12 col-sm-5">
-                                    <div className="approval-comments">
+                                <div className="col-xs-12 col-sm-6">
+                                    <div className="curation-approvers approval-form">
+                                        <label className="control-label">Curation Approver(s):</label>
+                                        <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" onChange={this.handleApproverSelect} />
+                                    </div>
+                                    <div className="approval-form">
+                                        <label className="control-label">Approval Date:</label>
+                                        <div className="approval-date">
+                                            <DayPickerInput
+                                                value={approvalReviewDate}
+                                                onDayChange={this.handleReviewDateChange}
+                                                formatDate={formatDate}
+                                                parseDate={parseDate}
+                                                placeholder={`${formatDate(new Date())}`}
+                                                dayPickerProps={{
+                                                    selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="approval-form">
                                         <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
-                                            label="Additional comments:" value={approvalComment} rows="5"
-                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                            label="Approver Comments:" value={approvalComment} rows="5" labelClassName="control-label" />
                                     </div>
                                 </div>
                             </div>

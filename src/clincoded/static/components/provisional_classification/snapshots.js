@@ -369,6 +369,18 @@ class CurationSnapshots extends Component {
                                             <dd>{snapshot.resource.classificationApprover}</dd>
                                         </dl>
                                         : null}
+                                    {snapshot.resource && snapshot.resource.curationApprovers ?
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Curation approvers:</span></dt>
+                                            <dd><span>{snapshot.resource.curationApprovers.sort().join(', ')}</span></dd>
+                                        </dl>
+                                        : null}
+                                    {snapshot.resource && snapshot.resource.curationContributors ?
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Curation contributors:</span></dt>
+                                            <dd><span>{snapshot.resource.curationContributors.sort().join(', ')}</span></dd>
+                                        </dl>
+                                        : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
                                         <dt><span>Date saved as Approved:</span></dt>
                                         <dd><span>{snapshot.resource.approvalDate ? formatDate(snapshot.resource.approvalDate, "YYYY MMM DD, h:mm a") : null}</span></dd>
@@ -394,8 +406,12 @@ class CurationSnapshots extends Component {
                                         <dd className="modeInheritance">{renderSelectedModeInheritance(resourceParent)}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-comment">
-                                        <dt><span>Additional comments:</span></dt>
+                                        <dt><span>Approver comments:</span></dt>
                                         <dd><span>{snapshot.resource.approvalComment ? snapshot.resource.approvalComment : null}</span></dd>
+                                    </dl>
+                                    <dl className="inline-dl clearfix">
+                                        <dt><span>Contributor comments:</span></dt>
+                                        <dd><span>{snapshot.resource.contributorComment ? snapshot.resource.contributorComment : null}</span></dd>
                                     </dl>
                                 </td>
                                 <td className="approval-snapshot-buttons">

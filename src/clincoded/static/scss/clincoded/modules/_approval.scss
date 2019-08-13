@@ -315,6 +315,17 @@
             }
         }
 
+        .contributor-form {
+            padding: 8px 8px 8px 0;
+        }
+
+        .approval-form {
+            &:first-child {
+                padding-top: 9.6rem;
+            }
+            padding: 8px 8px 8px 0;
+        }
+
         .classification-approver {
             .form-group {
                 margin: 0;
@@ -434,6 +445,21 @@
 
             .panel-title {
                 font-weight: 500;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 845px) {
+    .final-approval,
+    .publish-approval {
+        .approval-form-content-wrapper,
+        .publish-form-content-wrapper {
+            .approval-form {
+                &:first-child {
+                    padding-top: 1rem;
+                }
+                padding: 8px 8px 8px 0;
             }
         }
     }
