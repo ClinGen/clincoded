@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "8"
+            "default": "9"
         },
         "classificationPoints": {
             "title": "Calculated scores and points from the scored evidence",
@@ -595,9 +595,32 @@
             "description": "Curator who approved the classification",
             "type": "string"
         },
+        "curationContributors": {
+            "title": "Curation Contributor(s)",
+            "description": "Curator(s) who contributed to the classification",
+            "type": "array",
+            "items": {
+                "title": "Contributor(s)",
+                "type": "string"
+            }
+        },
+        "curationApprovers": {
+            "title": "Curation Approver(s)",
+            "description": "Curator(s) who approved the classification",
+            "type": "array",
+            "items": {
+                "title": "Approver(s)",
+                "type": "string"
+            }
+        },
         "approvalDate": {
             "title": "Approval Date",
             "description": "Date when the classification was saved as approved",
+            "type": "string"
+        },
+        "contributorDate": {
+            "title": "Primary Contributor Date",
+            "description": "Date when the primary contributor saved the classification",
             "type": "string"
         },
         "approvalReviewDate": {
@@ -608,6 +631,11 @@
         "approvalComment": {
             "title": "Review Comments",
             "description": "Review comments for the classification",
+            "type": "string"
+        },
+        "contributorComment": {
+            "title": "Review Comments for the contributor(s)",
+            "description": "Review comments for the classification contributor(s)",
             "type": "string"
         },
         "provisionalSubmitter": {
@@ -733,8 +761,31 @@
             "title": "Approved By",
             "type": "string"
         },
+        "curationContributors": {
+            "title": "Curation Contributor(s)",
+            "description": "Curator(s) who contributed to the classification",
+            "type": "array",
+            "items": {
+                "title": "Contributor(s)",
+                "type": "string"
+            }
+        },
+        "curationApprovers": {
+            "title": "Curation Approver(s)",
+            "description": "Curator(s) who approved the classification",
+            "type": "array",
+            "items": {
+                "title": "Approver(s)",
+                "type": "string"
+            }
+        },
         "approvalDate": {
             "title": "Approval Date",
+            "type": "string"
+        },
+        "contributorDate": {
+            "title": "Primary Contributor Date",
+            "description": "Date when the primary contributor saved the classification",
             "type": "string"
         },
         "approvalReviewDate": {
@@ -743,6 +794,11 @@
         },
         "approvalComment": {
             "title": "Review Comments",
+            "type": "string"
+        },
+        "contributorComment": {
+            "title": "Review Comments for the contributor(s)",
+            "description": "Review comments for the classification contributor(s)",
             "type": "string"
         },
         "provisionalSubmitter": {
