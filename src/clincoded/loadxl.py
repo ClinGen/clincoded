@@ -39,6 +39,7 @@ ORDER = [
     'computational', # VCI
     'evaluation', # VCI
     'provisional_variant', # VCI
+    'extra_evidence', # VCI
     'interpretation', # VCI
     'curatorHistory',
     'resourceHistory',
