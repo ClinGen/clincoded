@@ -30,6 +30,8 @@ const propTypes = {
     loading_genboreeFuncData: PropTypes.bool.isRequired,
     error_genboreeFuncData: PropTypes.object,
     handleTabSelect: PropTypes.func.isRequired,
+    isPatientSourced: PropTypes.func.isRequired,
+    getGenotypeLabel: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
@@ -44,6 +46,8 @@ const FunctionalDataTable = ({
     loading_genboreeFuncData,
     error_genboreeFuncData,
     handleTabSelect,
+    isPatientSourced,
+    getGenotypeLabel,
 }) => {
     const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_genboreeFuncData);
     const articleKeys = sourceArticles && Object.keys(sourceArticles);
@@ -52,8 +56,8 @@ const FunctionalDataTable = ({
     const pmid = property(['pubmedSource', 'pmid'])(currentSource);
     const pubmedSource = property(['pubmedSource'])(currentSource);
     const afisStatements = property(['statements'])(currentSource);
-    const additionalNotes = property(['statements', 0, 'entContent', 'Notes'])(currentSource) || 'none';
-    const contributor = property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(currentSource);
+    const additionalNotes = property(['statements', 0, 'entContent', 'Notes'])(currentSource) || 'None';
+    const contributor = property(['statements', 0, 'fdr', 0, 'ld', 'Affiliation', 0, 'entId'])(currentSource);
     return (
         <div className="panel panel-info functional-impact-panel">
             <div className="panel-heading">
@@ -99,12 +103,14 @@ const FunctionalDataTable = ({
                                         {
                                             afisStatements && Array.isArray(afisStatements)
                                                 && afisStatements.map((experiment, experimentIndex) => {
-                                                    const experimentId = property(['id'])(experiment);
-                                                    const experimentEntIri = property(['fdr', 'ld', 'Method', 0, 'entIri'])(experiment);
-                                                    const experimentEntId = property(['fdr', 'ld', 'Method', 0, 'entId'])(experiment);
-                                                    const materials = property(['fdr', 'ld', 'Material'])(experiment);
+                                                    const experimentId = property(['ldhId'])(experiment);
+                                                    const experimentEntIri = property(['fdr', 0, 'ld', 'Method', 0, 'entIri'])(experiment);
+                                                    const experimentEntId = property(['fdr', 0, 'ld', 'Method', 0, 'entId'])(experiment);
+                                                    const materials = property(['fdr', 0, 'ld', 'Material'])(experiment);
+                                                    const genotypes = property(['fdr', 0, 'ld', 'Genotype'])(experiment);
+                                                    const ldSet = property(['fdr', 0, 'ld', 'LdSet'])(experiment);
                                                     const effects = property(['entContent', 'Effect'])(experiment);
-                                                    const comments = property(['entContent', 'comments'])(experiment) || 'none';
+                                                    const comments = property(['entContent', 'comments'])(experiment) || 'None';
                                                     const experimentalRepeats = property(['entContent', 'QC', 'ExperimentalRepeats'])(experiment);
                                                     const experimentalControlNormal = property(['entContent', 'QC', 'ExperimentalControl', 'normal'])(experiment);
                                                     const experimentalControlNegative = property(['entContent', 'QC', 'ExperimentalControl', 'negative'])(experiment);
@@ -128,11 +134,11 @@ const FunctionalDataTable = ({
                                                                 {
                                                                     materials && Array.isArray(materials)
                                                                         && materials.map((material, materialIndex) => {
-                                                                            const materialId = property(['id'])(material);
+                                                                            const materialId = property(['ldhId'])(material);
                                                                             const materialEntIri = property(['entIri'])(material);
                                                                             const materialEntId = property(['entId'])(material);
-                                                                            const patientSourced = property(['entContent', 'PatientSourced'])(material);
-                                                                            const genoTypeLabel = property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material) || 'none';
+                                                                            const patientSourced = isPatientSourced(materialId, ldSet);
+                                                                            const genotypeLabel = getGenotypeLabel(materialId, ldSet, genotypes);
                                                                             return (
                                                                                 <span key={materialId}>
                                                                                     { materialIndex > 0 ? ', ' : '' }
@@ -145,7 +151,7 @@ const FunctionalDataTable = ({
                                                                                                 <span>
                                                                                                     <span> (</span>
                                                                                                     <i>source: </i>patient; <i>genotype: </i>
-                                                                                                    { genoTypeLabel }
+                                                                                                    { genotypeLabel }
                                                                                                     <span>)</span>
                                                                                                 </span>
                                                                                             )
@@ -163,12 +169,12 @@ const FunctionalDataTable = ({
                                                                             const effectValue = property(['value'])(effect);
                                                                             const effectCode = property(['code'])(effect);
                                                                             const effectIri = property(['iri'])(effect);
-                                                                            const effectEntId = property(['entId'])(effect);
+                                                                            const effectLabel = property(['label'])(effect);
                                                                             return (
                                                                                 <span key={`${effectValue}-${effectCode}`}>
                                                                                     { `${effectIndex > 0 ? '; ' : ''} ${effectValue} ` }
                                                                                     <a href={effectIri} target="_blank" rel="noopener noreferrer">
-                                                                                        { effectEntId }
+                                                                                        { effectLabel }
                                                                                     </a>
                                                                                 </span>
                                                                             );

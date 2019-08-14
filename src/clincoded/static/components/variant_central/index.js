@@ -329,15 +329,17 @@ var VariantCurationHub = createReactClass({
         const getAfisObject = (afisRecords) => {
             const afisObject = {};
             afisRecords.forEach(record => {
-                const pubmedId = _.property(['fdr', 'ld', 'Source', 0, 'entId'])(record);
+                const pubmedId = _.property(['entContent', 'Experiment', 'Source', 'entId'])(record);
                 if (pubmedId) {
                     if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
                         afisObject[pubmedId].statements.push(record);
                         afisObject[pubmedId].statements.sort((a, b) => {
-                            if (a.ExperimentNumber < b.ExperimentNumber) {
+                            const experimentA = _.property(['entContent', 'Experiment', 'Number'])(a);
+                            const experimentB = _.property(['entContent', 'Experiment', 'Number'])(b);
+                            if (experimentA < experimentB) {
                                 return -1;
                             }
-                            if (b.ExperimentNumber > a.ExperimentNumber) {
+                            if (experimentA > experimentB) {
                                 return 1;
                             }
                             return 0;
@@ -411,7 +413,7 @@ var VariantCurationHub = createReactClass({
             const { carId, clinvarVariantId } = variant;
             const variantId = carId ? carId : clinvarVariantId;
             if (variantId) {
-                this.getRestData('/functional_data/ldh/' + variantId).then(functionalData => {
+                this.getRestData('/functional_data/' + variantId).then(functionalData => {
                     const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(functionalData) || [];
                     if (afisRecords && afisRecords.length > 0) {
                         const afisObject = getAfisObject(afisRecords);

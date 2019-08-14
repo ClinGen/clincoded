@@ -89,7 +89,6 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 });
             });
         };
-
         savedEvals.some(evaluation => {
             if (['BS3', 'PS3'].indexOf(evaluation.criteria) > -1) {
                 const funcDataObjDiffFlag = isDiffAfisVersion(newFuncData, evaluation.functional.functionalData);
@@ -97,6 +96,35 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 return true;
             }
         });
+    },
+
+    isPatientSourced: function(materialId, ldSet = []) {
+        return ldSet.some(set => {
+            const ldSetMaterialId = _.property(['entContent', 'entities', 'Material', 0, 'ldhId'])(set);
+            if (ldSetMaterialId === materialId) {
+                const isPatientSourced = _.property(['entContent', 'relation', 'value'])(set);
+                if (isPatientSourced === 'Yes') {
+                    return true;
+                }
+            }
+        });
+    },
+
+    getGenotypeLabel: function(materialId, ldSet = [], genotypes = []) {
+        let genotypeLabel = 'none';
+        ldSet.some(set => {
+            const ldSetMaterialId = _.property(['entContent', 'entities', 'Material', 0, 'ldhId'])(set);
+            if (ldSetMaterialId === materialId) {
+                const ldSetGenotypeId = _.property(['entContent', 'entities', 'Genotype', 0, 'ldhId'])(set);
+                return genotypes.some(genotype => {
+                    if (genotype.ldhId === ldSetGenotypeId) {
+                        genotypeLabel = genotype.entId;
+                        return true;
+                    }
+                });
+            }
+        });
+        return genotypeLabel;
     },
 
     handleTabSelect: function(selectedFunctionalTab) {
@@ -157,6 +185,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         loading_genboreeFuncData={loading_genboreeFuncData}
                         error_genboreeFuncData={error_genboreeFuncData}
                         handleTabSelect={this.handleTabSelect}
+                        isPatientSourced={this.isPatientSourced}
+                        getGenotypeLabel={this.getGenotypeLabel}
                     />
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}
