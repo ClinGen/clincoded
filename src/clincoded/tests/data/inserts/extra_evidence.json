@@ -1,0 +1,32 @@
+[
+    {
+        "uuid": "95db0843-1a5c-4ab1-a5ce-b62b269e42d3",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "category": "case-segregation",
+        "subcategory": "observed-in-healthy",
+        "articles": [
+            "031d5b7a-1784-11e5-b51f-60f81dc5b05a"
+        ],
+        "evidenceCriteria": "BS2",
+        "evidenceDescription": "test case/seg for BS2",
+        "submitted_by": "812b6327-b35b-4759-b08e-687be57460fe",
+        "modified_by": "812b6327-b35b-4759-b08e-687be57460fe",
+        "date_created": "2019-08-13T15:27:40.185267+00:00",
+        "last_modified": "2019-08-13T15:27:40.184958+00:00"
+    },
+    {
+        "uuid": "28bcc5ab-317f-49a1-9447-e32299e21a10", 
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
+        "category": "case-segregation",
+        "subcategory": "case-control",
+        "articles": [
+            "a081c96e-1784-11e5-a644-60f81dc5b05a"
+        ],
+        "evidenceCriteria": "PP1",
+        "evidenceDescription": "some explanation - PP1",
+        "submitted_by": "add95449-476e-443f-9d01-4bbd7766eeed",
+        "modified_by": "add95449-476e-443f-9d01-4bbd7766eeed",
+        "date_created": "2019-08-14T16:10:11.998019+00:00",
+        "last_modified": "2019-08-14T16:10:11.998019+00:00"
+    }
+]
