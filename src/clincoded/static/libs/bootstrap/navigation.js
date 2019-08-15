@@ -138,9 +138,12 @@ var NavItem = module.exports.NavItem = createReactClass({
         } else if (e.target === this.refs.menu_item_contact_helpdesk) {
             this.setState({dropdownActive: false});
             location.href = 'mailto:clingen-helpdesk@lists.stanford.edu';
-        } else if (e.target === this.refs.menu_item_sop) {
+        } else if (e.target === this.refs.menu_item_sop_gci) {
             this.setState({dropdownActive: false});
             window.open('https://www.clinicalgenome.org/curation-activities/gene-disease-validity/educational-and-training-materials/standard-operating-procedures/');
+        } else if (e.target === this.refs.menu_item_sop_vci) {
+            this.setState({dropdownActive: false});
+            window.open('https://clinicalgenome.org/curation-activities/variant-pathogenicity/training-materials/');
         } else if (e.target === this.refs.menu_item_gene_tracking_system) {
             this.setState({dropdownActive: false});
             window.open('http://clingen.sirs.unc.edu');
@@ -167,7 +170,8 @@ var NavItem = module.exports.NavItem = createReactClass({
                             <li><a href="#" ref="menu_item_gene_curation">Gene Curation</a></li>
                             <li><a href="#" ref="menu_item_variant_curation">Variant Curation</a></li>
                             <li><a href="#" ref="menu_item_contact_helpdesk">Contact Helpdesk</a></li>
-                            <li><a href="#" ref="menu_item_sop">Standard Operating Procedures</a></li>
+                            <li><a href="#" ref="menu_item_sop_gci">SOP - GCI</a></li>
+                            <li><a href="#" ref="menu_item_sop_vci">SOP - VCI</a></li>
                             <li><a href="#" ref="menu_item_gene_tracking_system">Gene Tracking System</a></li>
                         </ul>
                         : null}

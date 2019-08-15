@@ -146,3 +146,9 @@ def experimental_5_6(value, system):
     # https://github.com/ClinGen/clincoded/issues/1476
     # Add Mammalian Phenotype Ontology (MP) IDs as additional option in Model Systems
     return
+
+@upgrade_step('experimental', '6', '7')
+def experimental_6_7(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1909
+    # Add Zebra finch (Taeniopygia guttata) 59729 to Rescue and Model Systems
+    return
