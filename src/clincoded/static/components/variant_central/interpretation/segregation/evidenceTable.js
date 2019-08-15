@@ -16,6 +16,7 @@ import { DeleteEvidenceModal} from './deleteEvidenceModal';
 import { extraEvidence } from './segregationData';
 import { external_url_map } from '../../../globals';
 import { PmidSummary } from '../../../curator';
+import { getAffiliationName } from '../../../../libs/get_affiliation_name';
 
 let EvidenceTable = createReactClass({
     propTypes: {
@@ -95,20 +96,24 @@ let EvidenceTable = createReactClass({
     getSourceColumnContent(row) {
         let nodeContent = null;
         let metadata = row.source.metadata;
+
         if (metadata['_kind_key'] === 'PMID') {
+            let pmid = metadata.pmid ? metadata.pmid : (row.articles.length > 0 ? row.articles[0].pmid : null);
             if (row.articles.length > 0) {
                 nodeContent = <PmidSummary
                     article = {row.articles[0]}
                     pmidLinkout
                 />
-            } else {
-                nodeContent = <a
-                    href = {external_url_map['PubMed'] + metadata.pmid}
-                    target = "_blank"
-                    title = {`PubMed Article ID: ${metadata.pmid}`}
-                >
-                    PMID {metadata.pmid}
-                </a>
+            } else { 
+                if (pmid) {
+                    nodeContent = <a
+                        href = {external_url_map['PubMed'] + metadata.pmid}
+                        target = "_blank"
+                        title = {`PubMed Article ID: ${metadata.pmid}`}
+                    >
+                        PMID {pmid}
+                    </a>
+                }
             }
         } else {
             let content = null;
@@ -282,11 +287,11 @@ let EvidenceTable = createReactClass({
             if (this.showRow(row)) {
                 let sourceData = row.source.data;
                 let metadata = row.source.metadata;
-                sourceData['last_modified'] = row['last_modified'];
                 sourceData['_kind_title'] = metadata['_kind_title']
                 sourceData['relevant_criteria'] = this.props.criteriaList.join(', ');
-                sourceData['last_modified'] = moment(sourceData['last_modified']).format('YYYY MMM DD, h:mm a');
-                sourceData['_submitted_by'] = row.source['_submitted_by'];
+                sourceData['_last_modified'] = moment(row['last_modified']).format('YYYY MMM DD, h:mm a');
+                let affiliation = row.affiliation ? getAffiliationName(row.affiliation) : null;
+                sourceData['_submitted_by'] = affiliation ? `${affiliation} (${row.submitted_by.title})` : `${row.submitted_by.title}`;
 
                 // Get number of criteria that has value which determines the number of rows for this evidence
                 let subRows = this.getSubRowCount(sourceData);

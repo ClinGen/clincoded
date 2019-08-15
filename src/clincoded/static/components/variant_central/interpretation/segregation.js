@@ -127,13 +127,6 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         } else {
             this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
 
-            if (id === null) {
-                // set the submitter data as 'affiliation full name (user name)' or 'user name' if no affiliation
-                let affiliationName = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
-                let userName = this.props.session.user_properties ? `${this.props.session.user_properties['first_name']} ${this.props.session.user_properties['last_name']}` : '';
-                evidence['_submitted_by'] = affiliationName ? `${affiliationName} (${userName})` : `${userName}`;
-            }
-
             let flatInterpretation = null;
             let freshInterpretation = null;
             // TODO - not sure if need to find criteria that has value from source.data

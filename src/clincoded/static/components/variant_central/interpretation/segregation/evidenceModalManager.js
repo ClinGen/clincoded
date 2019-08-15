@@ -43,16 +43,16 @@ let EvidenceModalManager = createReactClass({
     },
 
     getInitData(){
-        let data = {};
+        let source = {};
         // If current evidence has source data, set as default
         if (this.props.data && this.props.data.source) {
-            data = this.props.data.source;
+            source = this.props.data.source;
         }
         else {
-            data = {'metadata': {}, 'data': {}}
+            source = {'metadata': {}, 'data': {}}
         }
 
-        return data;
+        return source;
     },
 
     getInitialState() {
@@ -228,9 +228,9 @@ let EvidenceModalManager = createReactClass({
             this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory, null);
         }
         else {
-            // Remove empty fields from data
+            // Remove empty fields and unnecessary fields - submitted_by, last_modified, _kind_title from source data
             let hasData = Object.keys(data).reduce((object, key) => { 
-                if (data[key] !== '') {
+                if (data[key] !== '' && !key.startsWith('_') ) {
                     object[key] = data[key]
                 }
                 return object

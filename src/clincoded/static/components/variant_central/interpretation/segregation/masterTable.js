@@ -10,6 +10,7 @@ import { masterTable, extraEvidence } from './segregationData';
 import { external_url_map } from '../../../globals';
 import { EvidenceModalManager } from './evidenceModalManager';
 import { DeleteEvidenceModal} from './deleteEvidenceModal';
+import { getAffiliationName } from '../../../../libs/get_affiliation_name';
 
 let MasterEvidenceTable = createReactClass({
     propTypes: {
@@ -40,7 +41,7 @@ let MasterEvidenceTable = createReactClass({
     getEvidenceTypes() {
         let evidence_types = {};
         for(let row of this.props.evidence_arr) {
-            let evidence_type = row.source && row.source.metadata ? row.source.metadata['_kind_key'] : '';
+            let evidence_type = row.source && row.source.metadata && row.source.metadata['_kind_key'] ? row.source.metadata['_kind_key'] : '';
             if (!(evidence_type in evidence_types)) {
                 evidence_types[evidence_type] = this.props.evidence_arr.filter(row => row.source.metadata['_kind_key'] === evidence_type);
             }
@@ -169,12 +170,12 @@ let MasterEvidenceTable = createReactClass({
                                     target = '_blank'
                                     title = {`PubMed Article ID: ${pmid}`}
                                 >
-                                    &nbsp;PMID {pmid}
+                                    PMID {pmid}
                                 </a>
                             }
                             second_row.push(<th key={`header_${row.uuid}.${pmid}`} style={{borderBottom: 'none'}}>
                                     <div>
-                                        <div className='evidence-detail'>{authorYear}{evidence_detail}</div>
+                                        <div className='evidence-detail'>{authorYear}&nbsp;{evidence_detail}</div>
                                         <div className='evidence-links'>{editButton}{deleteButton}</div>
                                     </div>
                             </th>)
@@ -188,8 +189,9 @@ let MasterEvidenceTable = createReactClass({
                                 </div>
                             </th>);
                         }
-                        if (row.source['_submitted_by']) {
-                            let submittedBy = row.source['_submitted_by'];
+                        if (row.submitted_by) {
+                            let affiliation = row.affiliation ? getAffiliationName(row.affiliation) : null;
+                            let submittedBy = affiliation ? `${affiliation} (${row.submitted_by.title})` : `${row.submitted_by.title}`;
                             third_row.push(<th key={`header_${evidence_type}_${rowNum}.${row.uuid}`}>
                                 <div style={{textAlign: 'center'}}>
                                     <span>{submittedBy}</span>

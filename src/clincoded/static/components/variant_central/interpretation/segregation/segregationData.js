@@ -611,7 +611,7 @@ function tableCols() {
                 title: 'Submitted By'
             },
             {
-                key: 'last_modified',
+                key: '_last_modified',
                 title: 'Last Edited'
             }]
         );
