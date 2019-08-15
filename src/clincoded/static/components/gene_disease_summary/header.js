@@ -44,13 +44,13 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                                     (provisional && provisional.submitted_by ? provisional.submitted_by.title : null)
                                 }
                             </dd>
-                            {curationApprovers ? 
+                            {curationApprovers && curationApprovers.length ? 
                                 <div>
                                     <dt>Curation approvers:</dt>
                                     <dd>{curationApprovers.join(', ')}</dd>
                                 </div>
                             : null}
-                            {curationContributors ? 
+                            {curationContributors && curationContributors.length ? 
                                 <div>
                                     <dt>Curation contributors:</dt>
                                     <dd>{curationContributors.join(', ')}</dd>

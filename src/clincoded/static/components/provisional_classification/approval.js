@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
+import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
 import Select from 'react-select';
@@ -46,6 +47,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             affiliationApprovers: undefined,
             isApprovalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Approved' ? true : false,
             isApprovalEdit: false,
+            showContributorForm: false,
             submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
@@ -140,6 +142,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         this.setState({contributorDate});
     },
 
+    toggleContributorForm(e) {
+        e.preventDefault();
+        this.setState({ showContributorForm:!this.state.showContributorForm });
+    },
+
     handleContributorSelect(selectedContributor) {
         const contributors = [];
         selectedContributor.forEach(contributor => {
@@ -165,8 +172,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         let formErr = false;
 
         if (approver && approver !== 'none') {
-            const contributorComment = this.contributorCommentInput.getValue();
-            const approvalComment = this.approvalCommentInput.getValue();
+            const contributorComment = this.contributorCommentInput ? this.contributorCommentInput.getValue() : '';
+            const approvalComment = this.approvalCommentInput ? this.approvalCommentInput.getValue() : '';
             this.setState({
                 approvalSubmitter: this.props.session.user_properties.title,
                 approvalComment: approvalComment.length ? approvalComment : undefined,
@@ -218,13 +225,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.approvedClassification = true;
         newProvisional.approvalSubmitter = this.state.approvalSubmitter;
         newProvisional.classificationApprover = this.state.classificationApprover;
-        newProvisional.curationApprovers = this.state.curationApprovers;
-        newProvisional.curationContributors = this.state.curationContributors;
+        newProvisional.curationApprovers = this.state.curationApprovers ? this.state.curationApprovers : [];
+        newProvisional.curationContributors = this.state.curationContributors ? this.state.curationContributors : [];
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
-        newProvisional.contributorDate = this.state.contributorDate;
+        newProvisional.contributorDate = this.state.contributorDate ? this.state.contributorDate : '';
         if (this.state.contributorComment && this.state.contributorComment.length) {
-            newProvisional.contributorComment = this.state.contributorComment;
+            newProvisional.contributorComment = this.state.contributorComment ? this.state.contributorComment : '';
         } else {
             if (newProvisional.contributorComment) {
                 delete newProvisional['contributorComment']
@@ -363,6 +370,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
+        const contributorButtonText = this.state.showContributorForm ? 'Hide Contributor(s) Form' : 'Show Contributor(s) Form';
 
         return (
             <div className="final-approval-panel-content">
@@ -486,32 +494,38 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             }
                                         </div>
                                         : null}
-                                    {curationContributorsList && curationContributorsList.length ? 
-                                        <div className="contributor-form">
-                                            <label className="control-label">Curation Contributor(s):</label>
-                                            <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
+                                    {(curationContributorsList && curationContributorsList.length) && this.state.showContributorForm ? 
+                                        <div>
+                                            <div className="contributor-form">
+                                                <label className="control-label">Curation Contributor(s):</label>
+                                                <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
+                                            </div>
+                                            <div className="contributor-form">
+                                                <label className="control-label">Primary Contributor Date:</label>
+                                                <div className="contributor-date">
+                                                    <DayPickerInput
+                                                        value={contributorDate}
+                                                        onDayChange={this.handleContributorDate}
+                                                        formatDate={formatDate}
+                                                        parseDate={parseDate}
+                                                        placeholder={`${formatDate(new Date())}`}
+                                                        dayPickerProps={{
+                                                            selectedDays: contributorDate ? parseDate(contributorDate) : undefined
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="contributor-form">
+                                                <Input type="textarea" className="form-group" ref={(input) => { this.contributorCommentInput = input; }}
+                                                    label="Contributor Comments:" rows="5" labelClassName="control-label" />
+                                            </div>
                                         </div>
                                     : null}
-                                    <div className="contributor-form">
-                                        <label className="control-label">Primary Contributor Date:</label>
-                                        <div className="contributor-date">
-                                            <DayPickerInput
-                                                value={contributorDate}
-                                                onDayChange={this.handleContributorDate}
-                                                formatDate={formatDate}
-                                                parseDate={parseDate}
-                                                placeholder={`${formatDate(new Date())}`}
-                                                dayPickerProps={{
-                                                    selectedDays: contributorDate ? parseDate(contributorDate) : undefined
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="contributor-form">
-                                        <Input type="textarea" className="form-group" ref={(input) => { this.contributorCommentInput = input; }}
-                                            label="Contributor Comments:" rows="5" labelClassName="control-label" />
+                                    <div className="col-xs-12 col-sm-6">
+                                        <button className="btn btn-primary btn-inline-spacer contributor-toggle-button form-group" onClick={this.toggleContributorForm}>{contributorButtonText}</button>
                                     </div>
                                 </div>
+                                {this.state.showContributorForm ? 
                                 <div className="col-xs-12 col-sm-6">
                                     <div className="curation-approvers approval-form">
                                         <label className="control-label">Curation Approver(s):</label>
@@ -537,6 +551,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             label="Approver Comments:" value={approvalComment} rows="5" labelClassName="control-label" />
                                     </div>
                                 </div>
+                                : null}
                             </div>
                         </div>
                     }
