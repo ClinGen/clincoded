@@ -16,7 +16,7 @@ def evaluation_2_3(value, system):
     return
 
 @upgrade_step('evaluation', '3', '4')
-def evaluation_2_3(value, system):
+def evaluation_3_4(value, system):
     # https://github.com/ClinGen/clincoded/issues/1794
     # Adds functional property and update schema version
     return
