@@ -9,6 +9,7 @@ import GeneDiseaseEvidenceSummaryCaseLevel from './case_level';
 import GeneDiseaseEvidenceSummarySegregation from './case_level_segregation';
 import GeneDiseaseEvidenceSummaryCaseControl from './case_control';
 import GeneDiseaseEvidenceSummaryExperimental from './experimental';
+import GeneDiseaseEvidenceSummaryNonscorableEvidence from './nonscorable_evidence';
 import GeneDiseaseEvidenceSummaryClassificationMatrix from './classification_matrix';
 import CASE_INFO_TYPES from '../score/constants/case_info_types';
 
@@ -35,6 +36,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             segregationEvidenceList: [],
             caseControlEvidenceList: [],
             experimentalEvidenceList: [],
+            nonscorableEvidenceList: [],
             preview: queryKeyValue('preview', this.props.href),
             hpoTermsCollection: {
                 caseLevel: {},
@@ -126,6 +128,8 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             this.parseCaseControlEvidence(annotations, user, curatorAffiliation);
             // Parse experimental evidence and its associated annotation data
             this.parseExperimentalEvidence(annotations, user, curatorAffiliation);
+            // Parse non-scorable evidence and its notes
+            this.parseNonscorableEvidence(annotations);
             // Calculate the values for the score table
             // this.calculateScoreTable();
         }).catch(err => {
@@ -535,6 +539,25 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
+     * Method to find the non-scorable evidence and corresponding notes
+     * @param {array} annotations - a list of annotations in a given gdm
+     */
+    parseNonscorableEvidence(annotations) {
+        const nonscorableEvidenceList = [];
+        if (annotations.length) {
+            annotations.forEach(annotation => {
+                if (annotation.articleNotes && annotation.articleNotes.noteType === 'non-scorable') {
+                    nonscorableEvidenceList.push({
+                        article: annotation.article,
+                        articleNotes: annotation.articleNotes,
+                    });
+                }
+            });
+        }
+        this.setState({ nonscorableEvidenceList });
+    },
+
+    /**
      * Method to map the experimental subtype to their corresponding parent type
      * @param {object} evidence - scored experimental evidence
      */
@@ -688,6 +711,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTerms={hpoTermsCollection.segregation} />
                     <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTerms={hpoTermsCollection.caseControl} />
                     <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
+                    <GeneDiseaseEvidenceSummaryNonscorableEvidence nonscorableEvidenceList={this.state.nonscorableEvidenceList} />
                 </div>
                 <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".

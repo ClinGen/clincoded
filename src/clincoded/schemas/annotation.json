@@ -91,6 +91,23 @@
             "title": "Affiliation",
             "description": "The affiliation this annotation is associated with.",
             "type": "string"
+        },
+        "articleNotes": {
+            "title": "Article Notes",
+            "description": "Notes for PubMed",
+            "type": "object",
+            "properties": {
+                "noteType": {
+                    "title": "Article Note Type",
+                    "description": "Type of note can be non-scorable or other",
+                    "type": "string"
+                },
+                "noteText": {
+                    "title": "Article Note Text",
+                    "description": "Free text for notes",
+                    "type": "string"
+                }
+            }
         }
     },
     "columns": {

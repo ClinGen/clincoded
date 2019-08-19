@@ -22,7 +22,7 @@ const PmidSummary = curator.PmidSummary;
 
 // Curator page content
 var CurationCentral = createReactClass({
-    mixins: [RestMixin, CurationMixin, CuratorHistory],
+    mixins: [RestMixin, CurationMixin, CuratorHistory, FormMixin],
 
     propTypes: {
         href_url: PropTypes.object,
@@ -35,7 +35,14 @@ var CurationCentral = createReactClass({
     getInitialState: function() {
         return {
             currPmid: queryKeyValue('pmid', this.props.href),
+            currPmidCheckboxes: {
+                'non-scorable': false,
+                other: false,
+            },
+            pubmedFreeText: '',
             currGdm: null,
+            updateMsg: null,
+            submitBusy: false,
             classificationSnapshots: []
         };
     },
@@ -57,14 +64,28 @@ var CurationCentral = createReactClass({
     // Called when currently selected PMID changes
     currPmidChange: function(pmid) {
         if (pmid !== undefined) {
+            if (this.state.currPmid !== pmid) {
+                this.setState({ updateMsg: null });
+            }
             var gdm = this.state.currGdm;
-
             if (gdm) {
                 // Find the annotation in the GDM matching the given pmid
                 var currAnnotation = curator.pmidToAnnotation(gdm,pmid);
-
                 if (currAnnotation) {
-                    this.setState({currPmid: currAnnotation.article.pmid});
+                    const currPmidCheckboxes = {
+                        'non-scorable': false,
+                        other: false,
+                    };
+                    let pubmedFreeText = '';
+                    if (currAnnotation.articleNotes) {
+                        const noteType = currAnnotation.articleNotes.noteType;
+                        currPmidCheckboxes[noteType] = true;
+                        pubmedFreeText = currAnnotation.articleNotes.noteText;   
+                    }
+                    if (this.refs['pubmedFreeText']) {
+                        this.refs['pubmedFreeText'].setValue(pubmedFreeText);
+                    }
+                    this.setState({pubmedFreeText, currPmidCheckboxes, currPmid: currAnnotation.article.pmid});
                 }
             }
             if (this.state.currGdm) {
@@ -175,6 +196,56 @@ var CurationCentral = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
+    // Submit handler for the PubMed notes form. Saves article notes and refetches gdm
+    handleSaveNotes: function(annotation) {
+        this.setState({ submitBusy: true, updateMsg: null });
+        const currGdm = this.state.currGdm;
+        let newAnnotationObj = curator.flatten(annotation);
+        if (!this.state.currPmidCheckboxes['non-scorable'] && !this.state.currPmidCheckboxes['other'] && !this.state.pubmedFreeText) {
+            newAnnotationObj = _.omit(curator.flatten(annotation), 'articleNotes');
+        } else {
+            const articleNotes = {
+                noteType: this.state.currPmidCheckboxes['non-scorable'] ? 'non-scorable' : 'other',
+                noteText: this.state.pubmedFreeText,
+            };
+            newAnnotationObj.articleNotes = articleNotes;
+        }
+
+        this.putRestData('/evidence/' + annotation.uuid, newAnnotationObj).then(data => {
+            this.setState({ submitBusy: false, updateMsg: <span className="text-success">Notes saved successfully!</span> });
+            // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
+            return this.getGdm(currGdm.uuid, annotation.article.pmid);
+        }).catch(err => {
+            this.setState({ submitBusy: false, updateMsg: <span className="text-danger">Notes could not be saved successfully!</span> });
+            parseAndLogError.bind(undefined, 'putRequest');
+        });
+    },
+
+    handleCheckboxChange: function(ref, e) {
+        const checkboxes = JSON.parse(JSON.stringify(this.state.currPmidCheckboxes));
+        let text = this.state.pubmedFreeText;
+        if (ref === 'non-scorable') {
+            if (checkboxes['non-scorable']) {
+                checkboxes['non-scorable'] = false;
+                if (this.refs['pubmedFreeText']) {
+                    this.refs['pubmedFreeText'].resetValue();
+                    text = '';
+                }
+            } else {
+                checkboxes['non-scorable'] = true;
+                checkboxes['other'] = false;
+            }
+        } else if (ref === 'other') {
+            checkboxes['other'] = checkboxes['other'] ? false : true;
+            checkboxes['non-scorable'] = false;
+        }
+        this.setState({ currPmidCheckboxes: checkboxes, pubmedFreeText: text });
+    },
+
+    handleFreeTextChange: function(ref, e) {
+        this.setState({ pubmedFreeText: this.refs[ref].getValue() });
+    },
+
     render: function() {
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
@@ -206,6 +277,51 @@ var CurationCentral = createReactClass({
                                     <PmidSummary article={currArticle} displayJournal />
                                     <PmidDoiButtons pmid={currArticle.pmid} />
                                     <BetaNote annotation={annotation} session={session} />
+                                    <Form submitHandler={() => this.handleSaveNotes(annotation)} formClassName="form-horizontal pubmed-notes-box">
+                                        <Input
+                                            ref="non-scorable"
+                                            type="checkbox"
+                                            label="Non-scorable evidence"
+                                            labelClassName="col-sm-5"
+                                            wrapperClassName="col-sm-7"
+                                            groupClassName="form-group"
+                                            checked={this.state.currPmidCheckboxes['non-scorable']}
+                                            defaultChecked="false"
+                                            handleChange={this.handleCheckboxChange}
+                                        />
+                                        <Input
+                                            ref="other"
+                                            type="checkbox"
+                                            label="Other comments on PMID"
+                                            labelClassName="col-sm-5"
+                                            wrapperClassName="col-sm-7"
+                                            groupClassName="form-group"
+                                            checked={this.state.currPmidCheckboxes['other']}
+                                            defaultChecked="false"
+                                            handleChange={this.handleCheckboxChange}
+                                        />
+                                        <Input
+                                            ref="pubmedFreeText"
+                                            type="textarea"
+                                            value={this.state.pubmedFreeText}
+                                            labelClassName="col-sm-12"
+                                            wrapperClassName="col-sm-12"
+                                            groupClassName="form-group"
+                                            handleChange={this.handleFreeTextChange}
+                                        />
+                                        <div className="flex-right">
+                                            {this.state.updateMsg ?
+                                                <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                                : null}
+                                            <Input
+                                                type="submit"
+                                                id="submit"
+                                                inputClassName="btn-primary pull-right"
+                                                title="Save"
+                                                submitBusy={this.state.submitBusy}
+                                            />
+                                        </div>
+                                    </Form>
                                     {currArticle.abstract ?
                                         <div className="pmid-overview-abstract">
                                             <h4>Abstract</h4>
