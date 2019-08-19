@@ -365,7 +365,7 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     {snapshot.resource && snapshot.resource.classificationApprover ?
                                         <dl className="inline-dl clearfix snapshot-final-approval-classification-approver">
-                                            <dt><span>Approver:</span></dt>
+                                            <dt><span>Affiliation Approver:</span></dt>
                                             <dd>{snapshot.resource.classificationApprover}</dd>
                                         </dl>
                                         : null}

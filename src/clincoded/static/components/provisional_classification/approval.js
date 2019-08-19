@@ -370,7 +370,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
-        const contributorButtonText = this.state.showContributorForm ? 'Hide Contributor(s) Form' : 'Show Contributor(s) Form';
+        const contributorButtonText = this.state.showContributorForm ? 'Close Attributions Form' : 'Open Attributions Form';
 
         return (
             <div className="final-approval-panel-content">
@@ -394,7 +394,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     {affiliation && affiliation.length ?
                                         <div className="classification-approver">
                                             <dl className="inline-dl clearfix">
-                                                <dt><span>Approver:</span></dt>
+                                                <dt><span>Affiliation Approver:</span></dt>
                                                 <dd>{classificationApprover}</dd>
                                             </dl>
                                         </div>
@@ -476,7 +476,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     {affiliation && affiliation.length ?
                                         <div className="classification-approver">
                                             {affiliationApprovers && affiliationApprovers.length ?
-                                                <Input type="select" ref={(input) => { this.approverInput = input; }} label="Approver:"
+                                                <Input type="select" ref={(input) => { this.approverInput = input; }} label="Affiliation Approver:"
                                                     error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
                                                     labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
                                                     defaultValue={classificationApprover}>
@@ -488,7 +488,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 </Input>
                                                 :
                                                 <dl className="inline-dl clearfix">
-                                                    <dt><span>Approver:</span></dt>
+                                                    <dt><span>Affiliation Approver:</span></dt>
                                                     <dd>{getAffiliationName(affiliation)}</dd>
                                                 </dl>
                                             }
