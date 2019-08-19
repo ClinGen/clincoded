@@ -5,7 +5,6 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
 import Select from 'react-select';
@@ -47,7 +46,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             affiliationApprovers: undefined,
             isApprovalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Approved' ? true : false,
             isApprovalEdit: false,
-            showContributorForm: false,
+            showAttributionForm: false,
             submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
@@ -144,7 +143,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
     toggleContributorForm(e) {
         e.preventDefault();
-        this.setState({ showContributorForm:!this.state.showContributorForm });
+        this.setState({ showAttributionForm:!this.state.showAttributionForm });
     },
 
     handleContributorSelect(selectedContributor) {
@@ -231,7 +230,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
         newProvisional.contributorDate = this.state.contributorDate ? this.state.contributorDate : '';
         if (this.state.contributorComment && this.state.contributorComment.length) {
-            newProvisional.contributorComment = this.state.contributorComment ? this.state.contributorComment : '';
+            newProvisional.contributorComment = this.state.contributorComment;
         } else {
             if (newProvisional.contributorComment) {
                 delete newProvisional['contributorComment']
@@ -370,7 +369,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
-        const contributorButtonText = this.state.showContributorForm ? 'Close Attributions Form' : 'Open Attributions Form';
+        const contributorButtonText = this.state.showAttributionForm ? 'Close Attributions Form' : 'Open Attributions Form';
 
         return (
             <div className="final-approval-panel-content">
@@ -494,7 +493,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             }
                                         </div>
                                         : null}
-                                    {(curationContributorsList && curationContributorsList.length) && this.state.showContributorForm ? 
+                                    {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ? 
                                         <div>
                                             <div className="contributor-form">
                                                 <label className="control-label">Curation Contributor(s):</label>
@@ -525,7 +524,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         <button className="btn btn-primary btn-inline-spacer contributor-toggle-button form-group" onClick={this.toggleContributorForm}>{contributorButtonText}</button>
                                     </div>
                                 </div>
-                                {this.state.showContributorForm ? 
+                                {this.state.showAttributionForm ? 
                                 <div className="col-xs-12 col-sm-6">
                                     <div className="curation-approvers approval-form">
                                         <label className="control-label">Curation Approver(s):</label>
