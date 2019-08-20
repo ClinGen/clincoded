@@ -36,7 +36,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approversList: [],
             curationContributors: [],
             curationApprovers: [],
-            contributorDate: null,
+            contributorDate: '',
             contributorComment: null,
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalDate: this.props.provisional && this.props.provisional.approvalDate ? this.props.provisional.approvalDate : undefined,
@@ -224,16 +224,16 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.approvedClassification = true;
         newProvisional.approvalSubmitter = this.state.approvalSubmitter;
         newProvisional.classificationApprover = this.state.classificationApprover;
-        newProvisional.curationApprovers = this.state.curationApprovers ? this.state.curationApprovers : [];
-        newProvisional.curationContributors = this.state.curationContributors ? this.state.curationContributors : [];
+        newProvisional.curationApprovers = this.state.curationApprovers;
+        newProvisional.curationContributors = this.state.curationContributors;
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
-        newProvisional.contributorDate = this.state.contributorDate ? this.state.contributorDate : '';
+        newProvisional.contributorDate = this.state.contributorDate;
         if (this.state.contributorComment && this.state.contributorComment.length) {
             newProvisional.contributorComment = this.state.contributorComment;
         } else {
             if (newProvisional.contributorComment) {
-                delete newProvisional['contributorComment']
+                delete newProvisional['contributorComment'];
             }
         }
         if (this.state.approvalComment && this.state.approvalComment.length) {
