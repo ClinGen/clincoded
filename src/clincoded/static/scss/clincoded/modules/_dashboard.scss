@@ -6,15 +6,12 @@
         background-color: #c0c0c0;
         padding: 5px;
 
-        .filter-term-input {
-            width: 40%;
+        .filter-term {
+            padding-bottom: 4px;
         }
-        .filter-status {
-            width: 40%;
 
-            .filter-status-select {
-                margin-top: -35px;
-            }
+        .multi-select {
+            z-index: 3;
         }
     }
 
