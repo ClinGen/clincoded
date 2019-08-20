@@ -2155,6 +2155,7 @@ function TypeModelSystems() {
                         <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
                         <option value="Round worm (Caenorhabditis elegans) 6239">Round worm (Caenorhabditis elegans) 6239</option>
                         <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
+                        <option value="Zebra finch (Taeniopygia guttata) 59729">Zebra finch (Taeniopygia guttata) 59729</option>
                         <option value="Zebrafish (Danio rerio) 7955">Zebrafish (Danio rerio) 7955</option>
                     </Input>
                 </div>
@@ -2188,7 +2189,7 @@ function TypeModelSystems() {
             <Input type="textarea" ref="model.phenotypeHPOObserved" label={<LabelPhenotypeObserved />} rows="1"
                 error={this.getFormError('model.phenotypeHPOObserved')} clearError={this.clrFormErrors.bind(null, 'model.phenotypeHPOObserved')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input"
-                value={MS_phenotypeHPOObserved} placeholder="e.g. HP:0010704" handleChange={this.handleChange}
+                value={MS_phenotypeHPOObserved} placeholder="e.g. HP:0010704, MP:0010805" handleChange={this.handleChange}
                 inputDisabled={this.cv.othersAssessed} required={!this.state.modelSystemsPOMSFT}
                 customErrorMsg="Enter HPO ID(s) and/or free text" />
             <Input type="textarea" ref="phenotypeFreetextObserved" label={<span>Phenotype(s) observed in model system <span className="normal">(free text)</span>:</span>}
@@ -2310,6 +2311,7 @@ function TypeRescue() {
                         <option value="Rat (Rattus norvegicus) 10116">Rat (Rattus norvegicus) 10116</option>
                         <option value="Round worm (Caenorhabditis elegans) 6239">Round worm (Caenorhabditis elegans) 6239</option>
                         <option value="Sheep (Ovis aries) 9940">Sheep (Ovis aries) 9940</option>
+                        <option value="Zebra finch (Taeniopygia guttata) 59729">Zebra finch (Taeniopygia guttata) 59729</option>
                         <option value="Zebrafish (Danio rerio) 7955">Zebrafish (Danio rerio) 7955</option>
                     </Input>
                 </div>
