@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
+import Select from 'react-select';
 import { curator_page } from './globals';
 import { RestMixin } from './rest';
 import { parseAndLogError } from './mixins';
@@ -17,7 +18,6 @@ import { renderApprovalStatus } from '../libs/render_approval_status';
 import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
 import { renderPublishStatus } from '../libs/render_publish_status';
 import { exportCSV } from '../libs/export_csv';
-import { FormMixin, Input } from '../libs/bootstrap/form';
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
@@ -45,10 +45,10 @@ var Dashboard = createReactClass({
             affiliatedInterpretations: [],
             affiliatedInterpretationsLoading: true,
             gdmSearchTerm: '', // User input to filter GDMs
-            gdmSearchStatus: '', // User selected status to filter GDMs
+            gdmSearchStatus: [], // User selected status to filter GDMs
             filteredGdms: [],  // List of parsed and filtered/unfiltered GDMs
             interpretationSearchTerm: '', // User input to filter interpretations
-            interpretationSearchStatus: '', // User selected status to filter interpretations
+            interpretationSearchStatus: [], // User selected status to filter interpretations
             filteredInterpretations: [] // List of parsed and filtered/unfiltered interpretations
         };
     },
@@ -82,14 +82,27 @@ var Dashboard = createReactClass({
             gdms = this.state.gdmList; // Get the complete list of GDMs
         }
         const searchTerm = this.state.gdmSearchTerm;
-        const searchStatus = this.state.gdmSearchStatus === 'All' ? '' : this.state.gdmSearchStatus;
-        if ((searchTerm && searchTerm.length) || (searchStatus && searchStatus.length)) {
-            const filteredGdms = gdms.filter(function(item) {
-                return (
-                    ((item.gdmGeneDisease && item.gdmGeneDisease.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
-                     (item.gdmModel && item.gdmModel.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
-                    (item.status && item.status.toLowerCase().indexOf(searchStatus.toLowerCase()) > -1)
-                );
+        // if no status is selected, set to search for 'All'
+        const searchStatus = this.state.gdmSearchStatus.length === 0 ? ['All'] : this.state.gdmSearchStatus;
+        let filteredGdms = [];
+        if ((searchTerm && searchTerm.length > 0) || (searchStatus && searchStatus.length > 0)) {
+            searchStatus.map(status => {
+                // if status is 'All', empty the status filter
+                if (status === 'All') {
+                    status = '';
+                }
+                // Get items for each status
+                const filteredList = gdms.filter(function(item) {
+                    return (
+                        ((item.gdmGeneDisease && item.gdmGeneDisease.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (item.gdmModel && item.gdmModel.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
+                        (item.status && item.status.toLowerCase().indexOf(status.toLowerCase()) > -1)
+                    );
+                });
+                // Remove item that's already included in selected list
+                const newList = filteredList.filter(item=> !filteredGdms.includes(item));
+                // Add new items to selected list
+                filteredGdms.push(...newList);
             });
             this.setState({filteredGdms: filteredGdms});
         } else {
@@ -105,9 +118,12 @@ var Dashboard = createReactClass({
     },
 
     // Method to handle user status change to filter/unfilter GDMs
-    gdmHandleStatusChange(e, data) {
-        //const value = e.target.selectedOptions;
-        this.setState({gdmSearchStatus: e.target.value}, () => {
+    gdmHandleStatusChange(selectedStatus) {
+        const statusList = [];
+        selectedStatus.forEach(status => {
+            statusList.push(status.value);
+        })
+        this.setState({gdmSearchStatus: statusList}, () => {
             this.gdmSetSearchResults();
         });
     },
@@ -123,15 +139,28 @@ var Dashboard = createReactClass({
             interpretations = this.state.vciInterpList; // Get the complete list of GDMs
         }
         const searchTerm = this.state.interpretationSearchTerm;
-        const searchStatus = this.state.interpretationSearchStatus === 'All' ? '' : this.state.interpretationSearchStatus;
-        if ((searchTerm && searchTerm.length) || (searchStatus && searchStatus.length)) {
-            const filteredInterpretations = interpretations.filter(function(item) {
-                return (
-                    ((item.variantTitle && item.variantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
-                     (item.diseaseTerm && item.diseaseTerm.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
-                     (item.modeInheritance && item.modeInheritance.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
-                    (item.status && item.status.toLowerCase().indexOf(searchStatus.toLowerCase()) > -1)
-                );
+        // if no status is selected, set to search for 'All'
+        const searchStatus = this.state.interpretationSearchStatus.length === 0 ? ['All'] : this.state.interpretationSearchStatus;
+        let filteredInterpretations = [];
+        if ((searchTerm && searchTerm.length > 0) || (searchStatus && searchStatus.length > 0)) {
+            searchStatus.map(status => {
+                // if status is 'All', empty the status filter
+                if (status === 'All') {
+                    status = '';
+                }
+                // Get items for each status
+                const filteredList = interpretations.filter(function(item) {
+                    return (
+                        ((item.variantTitle && item.variantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                         (item.diseaseTerm && item.diseaseTerm.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                         (item.modeInheritance && item.modeInheritance.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
+                        (item.status && item.status.toLowerCase().indexOf(status.toLowerCase()) > -1)
+                    );
+                });
+                // Remove item that's already included in selected list
+                const newList = filteredList.filter(item=> !filteredInterpretations.includes(item));
+                // Add new items to selected list
+                filteredInterpretations.push(...newList);
             });
             this.setState({filteredInterpretations: filteredInterpretations});
         } else {
@@ -147,8 +176,12 @@ var Dashboard = createReactClass({
     },
 
     // Method to handle user status change to filter/unfilter interpretations
-    interpretationHandleStatusChange(e, data) {
-        this.setState({interpretationSearchStatus: e.target.value}, () => {
+    interpretationHandleStatusChange(selectedStatus) {
+        const statusList = [];
+        selectedStatus.forEach(status => {
+            statusList.push(status.value);
+        })
+        this.setState({interpretationSearchStatus: statusList}, () => {
             this.interpretationSetSearchResults();
         });
     },
@@ -438,22 +471,24 @@ var Dashboard = createReactClass({
      * @param {integer} listLength - number of available GDMs
      */
     renderGdmsStatusFilter(listLength) {
+        const statusList = [
+                            {value: "None", label: "None"},
+                            {value: "In Progress", label: "In Progress"},
+                            {value: "Approved", label: "Approved"},
+                            {value: "Provisional", label: "Provisional"},
+                            {value: "New Provisional", label: "New Provisional"},
+                            {value: "Published", label: "Published"},
+                           ];
         if (listLength > 0) {
             return (
                 <div className="filter-by">
-                    <input type="text" name="gdmFilterTerm" id="gdmFilterTerm" placeholder="Filter by Gene, Disease or Mode of Inheritance"
-                        value={this.state.gdmSearchTerm} onChange={this.gdmHandleSearchTermChange} className="form-control filter-term-input"/>
-                    <span className="filter-status pull-right">
-                        <select className="form-control filter-status-select" value={this.state.gdmSearchStatus} onChange={this.gdmHandleStatusChange}>
-                            <option value="All">Filter by Status</option>
-                            <option value="None">None</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Provisional">Provisional</option>
-                            <option value="New Provisional">New Provisional</option>
-                            <option value="Published">Published</option>
-                        </select>
-                    </span>
+                    <div className="filter-term">
+                        <input type="text" name="gdmFilterTerm" id="gdmFilterTerm" placeholder="Filter by Gene, Disease or Mode of Inheritance"
+                            value={this.state.gdmSearchTerm} onChange={this.gdmHandleSearchTermChange} className="form-control filter-term-input"/>
+                    </div>
+                    <div className="filter-status">
+                        <Select isMulti className="multi-select" placeholder="Filter by Status" options={statusList} onChange={this.gdmHandleStatusChange} />
+                    </div>
                 </div>
             );
         } else {
@@ -467,8 +502,8 @@ var Dashboard = createReactClass({
      */
     renderIndividualRecords(records) {
         const self = this;
-        const buttonTitle = (this.state.gdmSearchTerm || this.state.gdmSearchStatus !== 'All') ? 'Download filtered table as .csv' : 'Download .csv';
-        const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus !== 'All') ? 'No matching Gene-Disease record found.' : 'You have not created any Gene-Disease-Mode of Inheritance entries.';
+        const buttonTitle = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
+        const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'No matching Gene-Disease record found.' : 'You have not created any Gene-Disease-Mode of Inheritance entries.';
         const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
@@ -523,8 +558,8 @@ var Dashboard = createReactClass({
      */
     renderAffiliatedGdms(records) {
         const self = this;
-        const buttonTitle = this.state.gdmSearchTerm ? 'Download filtered table as .csv' : 'Download .csv';
-        const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus !== 'All') ? 'No matching Gene-Disease record found.' : 'Your affiliation has not created any Gene-Disease-Mode of Inheritance entries.';
+        const buttonTitle = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
+        const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'No matching Gene-Disease record found.' : 'Your affiliation has not created any Gene-Disease-Mode of Inheritance entries.';
         const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
@@ -578,22 +613,25 @@ var Dashboard = createReactClass({
      * @param {integer} listLength - number of available variant interpretations
      */
     renderInterpretationsStatusFilter(listLength) {
+        const statusList = [
+            {value: "None", label: "None"},
+            {value: "In Progress", label: "In Progress"},
+            {value: "Approved", label: "Approved"},
+            {value: "Provisional", label: "Provisional"},
+            {value: "New Provisional", label: "New Provisional"},
+            {value: "Published", label: "Published"},
+           ];
+
         if (listLength > 0) {
             return (
                 <div className="filter-by">
-                    <input type="text" name="interpretationFilterTerm" id="interpretationFilterTerm" placeholder="Filter by Variant, Disease or Mode of Inheritance"
-                        value={this.state.interpretationSearchTerm} onChange={this.interpretationHandleSearchTermChange} className="form-control filter-term-input"/>
-                    <span className="filter-status pull-right">
-                        <select className="form-control filter-status-select" value={this.state.interpretationSearchStatus} onChange={this.interpretationHandleStatusChange}>
-                            <option value="All">Filter by Status</option>
-                            <option value="None">None</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Provisional">Provisional</option>
-                            <option value="New Provisional">New Provisional</option>
-                            <option value="Published">Published</option>
-                        </select>
-                    </span>
+                    <div className="filter-term">
+                        <input type="text" name="interpretationFilterTerm" id="interpretationFilterTerm" placeholder="Filter by Variant, Disease or Mode of Inheritance"
+                            value={this.state.interpretationSearchTerm} onChange={this.interpretationHandleSearchTermChange} className="form-control filter-term-input"/>
+                    </div>
+                    <div className="filter-status">
+                        <Select isMulti className="multi-select" placeholder="Filter by Status" options={statusList} onChange={this.interpretationHandleStatusChange} />
+                    </div>
                 </div>
             );
         } else {
@@ -607,8 +645,8 @@ var Dashboard = createReactClass({
      */
     renderIndividualInterpretations(records) {
         const self = this;
-        const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus !== 'All') ? 'Download filtered table as .csv' : 'Download .csv';
-        const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus !== 'All') ? 'No matching variant interpretation found.' : 'You have not created any You have not created any variant interpretations..';
+        const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
+        const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'No matching variant interpretation found.' : 'You have not created any You have not created any variant interpretations.';
         const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
@@ -667,8 +705,8 @@ var Dashboard = createReactClass({
      */
     renderAffiliatedInterpretations(records) {
         const self = this;
-        const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus !== 'All') ? 'Download filtered table as .csv' : 'Download .csv';
-        const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus !== 'All') ? 'No matching variant interpretation found.' : 'Your affiliation has not created any You have not created any variant interpretations..';
+        const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
+        const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'No matching variant interpretation found.' : 'Your affiliation has not created any You have not created any variant interpretations.';
         const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
