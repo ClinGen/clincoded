@@ -196,7 +196,7 @@ var Dashboard = createReactClass({
                         Variant: item.variantTitle,
                         'Disease/Mode of Inheritance': '"' + (item.diseaseTerm ? item.diseaseTerm : "--") + "/" + (item.modeInheritance ? item.modeInheritance : "--") + '"',
                         Status: item.status,
-                        'Creation Date': moment(item.date_created).format("YYYY MMM DD, h:mm a")
+                        'Creation Date': moment(item.date_created).format("YYYY MMM DD")
                     });
                 });
 
@@ -209,7 +209,7 @@ var Dashboard = createReactClass({
                     gdms.push({
                         'Gene-Disease Record': '"' + gdm.gdmGeneDisease + '-' + gdm.gdmModel + '"',
                         Status: gdm.status,
-                        'Creation Date': moment(gdm.date_created).format("YYYY MMM DD, h:mm a")
+                        'Creation Date': moment(gdm.date_created).format("YYYY MMM DD")
                     });
                 });
 
@@ -509,6 +509,7 @@ var Dashboard = createReactClass({
             <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">My Gene-Disease Records
+                        <span className="number-of-entries"> number of entries: {records.length}</span>
                         <span className="download-button pull-right">
                             <button onClick={this.handleExport.bind(null, 'gdm', 'gdms-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
                                 {buttonTitle} <i className="icon icon-download"></i>
@@ -565,6 +566,7 @@ var Dashboard = createReactClass({
             <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">My Affiliation's Gene-Disease Records *
+                        <span className="number-of-entries"> number of entries: {records.length}</span>
                         <span className="download-button pull-right">
                             <button onClick={this.handleExport.bind(null, 'gdm', 'gdms-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
                                 {buttonTitle} <i className="icon icon-download"></i>
@@ -652,6 +654,7 @@ var Dashboard = createReactClass({
             <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">My Variant Interpretations
+                        <span className="number-of-entries"> number of entries: {records.length}</span>
                         <span className="download-button pull-right">
                             <button onClick={this.handleExport.bind(null, 'interpretation', 'interpretations-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
                                 {buttonTitle} <i className="icon icon-download"></i>
@@ -712,6 +715,7 @@ var Dashboard = createReactClass({
             <div className="panel panel-primary">
                 <div className="panel-heading">
                     <h3 className="panel-title">My Affiliation's Variant Interpretations * 
+                        <span className="number-of-entries"> number of entries: {records.length}</span>
                         <span className="download-button pull-right">
                             <button onClick={this.handleExport.bind(null, 'interpretation', 'interpretations-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
                                 {buttonTitle} <i className="icon icon-download"></i>
