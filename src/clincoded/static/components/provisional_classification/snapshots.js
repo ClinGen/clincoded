@@ -11,6 +11,7 @@ import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 import AlertMessage from '../../libs/bootstrap/alert';
+import { ClinVarSubmissionData } from '../variant_central/clinvar_submission';
 
 class CurationSnapshots extends Component {
     constructor(props) {
@@ -265,8 +266,10 @@ class CurationSnapshots extends Component {
     renderSnapshot(snapshot, isApprovalActive, classificationStatus, currentApprovedSnapshotID, index) {
         const type = snapshot.resourceType;
         const snapshotUUID = snapshot.uuid ? snapshot.uuid : snapshot['@id'].split('/', 3)[2];
+        const affiliationID = snapshot.resource && snapshot.resource.affiliation ? snapshot.resource.affiliation : '';
         const isPublishEventActive = this.props.isPublishEventActive;
         let resourceParent, isSnapshotOnCurrentSOP;
+        let allowClinVarSubmission = false;
         if (snapshot.resourceType === 'classification' && snapshot.resourceParent.gdm) {
             resourceParent = snapshot.resourceParent.gdm;
 
@@ -274,8 +277,8 @@ class CurationSnapshots extends Component {
             isSnapshotOnCurrentSOP = snapshot.resource ? isScoringForCurrentSOP(snapshot.resource.classificationPoints) : false;
         } else if (snapshot.resourceType === 'interpretation' && snapshot.resourceParent.interpretation) {
             resourceParent = snapshot.resourceParent.interpretation;
-
             isSnapshotOnCurrentSOP = true;
+            allowClinVarSubmission = snapshot['@id'] === currentApprovedSnapshotID;
         }
 
         // Special criteria to render a publish link (above a "View Approved Summary" button):
@@ -290,10 +293,10 @@ class CurationSnapshots extends Component {
                         <tbody>
                             <tr>
                                 <td className="snapshot-content">
-                                    {snapshot.resource && snapshot.resource.affiliation ?
+                                    {affiliationID ?
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
+                                            <dd>{getAffiliationName(affiliationID)}</dd>
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-provisional-approval-submitter">
@@ -350,10 +353,10 @@ class CurationSnapshots extends Component {
                         <tbody>
                             <tr>
                                 <td className="snapshot-content">
-                                    {snapshot.resource && snapshot.resource.affiliation ?
+                                    {affiliationID ?
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{getAffiliationName(snapshot.resource.affiliation)}</dd>
+                                            <dd>{getAffiliationName(affiliationID)}</dd>
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-submitter">
@@ -397,6 +400,10 @@ class CurationSnapshots extends Component {
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Approved')}
+                                    {allowClinVarSubmission ?
+                                        <ClinVarSubmissionData affiliationID={affiliationID} isApprovalActive={isApprovalActive}
+                                            isPublishEventActive={isPublishEventActive} resourceUUID={snapshotUUID} />
+                                        : null}
                                     {allowSnapshotPublish ? this.renderPublishLink(resourceParent, snapshot.resourceType, snapshotUUID, false) : null}
                                     <Input type="button" inputClassName={this.renderSnapshotViewSummaryBtn(snapshot, 'Approved')} title="View Approved Summary"
                                         clickHandler={this.viewSnapshotSummary.bind(this, snapshot['@id'], type)} />
