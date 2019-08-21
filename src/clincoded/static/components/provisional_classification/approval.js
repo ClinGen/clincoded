@@ -407,7 +407,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div>
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Primary Contributor Date:</span></dt>
-                                            <dd>{contributorDate}</dd>
+                                            <dd>{contributorDate ? formatDate(parseDate(contributorDate, "YYYY MMM DD")) : null}</dd>
                                         </dl>
                                     </div>
                                     <div>
