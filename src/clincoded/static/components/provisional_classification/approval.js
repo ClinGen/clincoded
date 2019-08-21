@@ -36,7 +36,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approversList: [],
             curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.curationContributors : [],
             curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.curationApprovers : [],
-            contributorDate: this.props.provisional && this.props.provisional.contributorDate ? this.props.contributorDate : '',
+            contributorDate: this.props.provisional && this.props.provisional.contributorDate ? this.props.contributorDate : undefined,
             contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.contributorComment : '',
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalDate: this.props.provisional && this.props.provisional.approvalDate ? this.props.provisional.approvalDate : undefined,
