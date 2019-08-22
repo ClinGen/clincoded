@@ -77,17 +77,18 @@ var Dashboard = createReactClass({
         // Filter GDMs
         let gdms = [];
         if (affiliation && Object.keys(affiliation).length) {
-            gdms = this.state.affiliatedGdms;
+            gdms = this.state.affiliatedGdms; // Get the complete list of affiliated GDMs
         } else {
             gdms = this.state.gdmList; // Get the complete list of GDMs
         }
         const searchTerm = this.state.gdmSearchTerm;
-        // if no status is selected, set to search for 'All'
-        const searchStatus = this.state.gdmSearchStatus.length === 0 ? ['All'] : this.state.gdmSearchStatus;
+        let searchStatus = this.state.gdmSearchStatus;
         let filteredGdms = [];
         if ((searchTerm && searchTerm.length > 0) || (searchStatus && searchStatus.length > 0)) {
+            // If no status is selected, set to search for 'All'
+            searchStatus = searchStatus.length === 0 ? ['All'] : searchStatus;
             searchStatus.map(status => {
-                // if status is 'All', empty the status filter
+                // If status is 'All', empty the status filter
                 if (status === 'All') {
                     status = '';
                 }
@@ -101,11 +102,16 @@ var Dashboard = createReactClass({
                 });
                 // Remove item that's already included in selected list
                 const newList = filteredList.filter(item=> !filteredGdms.includes(item));
+                // Sort list by gene disease & model
+                const sortedList = _(newList).sortBy(item => {
+                    return (item.gdmGeneDisease + '-' + item.gdmModel);
+                });
                 // Add new items to selected list
-                filteredGdms.push(...newList);
+                filteredGdms.push(...sortedList);
             });
             this.setState({filteredGdms: filteredGdms});
         } else {
+            // No filter is selected so just return complete list
             this.setState({filteredGdms: gdms});
         }
     },
@@ -134,17 +140,18 @@ var Dashboard = createReactClass({
         // Filter Interpretations
         let interpretations = [];
         if (affiliation && Object.keys(affiliation).length) {
-            interpretations = this.state.affiliatedInterpretations;
+            interpretations = this.state.affiliatedInterpretations; // Get the complete list of affiliated interpretations
         } else {
-            interpretations = this.state.vciInterpList; // Get the complete list of GDMs
+            interpretations = this.state.vciInterpList; // Get the complete list of interpretations
         }
         const searchTerm = this.state.interpretationSearchTerm;
-        // if no status is selected, set to search for 'All'
-        const searchStatus = this.state.interpretationSearchStatus.length === 0 ? ['All'] : this.state.interpretationSearchStatus;
+        let searchStatus = this.state.interpretationSearchStatus;
         let filteredInterpretations = [];
         if ((searchTerm && searchTerm.length > 0) || (searchStatus && searchStatus.length > 0)) {
+            // If no status is selected, set to search for 'All'
+            searchStatus = searchStatus.length === 0 ? ['All'] : searchStatus;
             searchStatus.map(status => {
-                // if status is 'All', empty the status filter
+                // If status is 'All', empty the status filter
                 if (status === 'All') {
                     status = '';
                 }
@@ -159,11 +166,16 @@ var Dashboard = createReactClass({
                 });
                 // Remove item that's already included in selected list
                 const newList = filteredList.filter(item=> !filteredInterpretations.includes(item));
+                // Sort list by variant
+                const sortedList = _(newList).sortBy(item => {
+                    return item.variantTitle;
+                });
                 // Add new items to selected list
-                filteredInterpretations.push(...newList);
+                filteredInterpretations.push(...sortedList);
             });
             this.setState({filteredInterpretations: filteredInterpretations});
         } else {
+            // No filter is selected so just return complete list
             this.setState({filteredInterpretations: interpretations});
         }
     },
@@ -258,7 +270,7 @@ var Dashboard = createReactClass({
                 approvalStatus = renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly);
                 newProvStatus = renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly);
                 publishStatus = renderPublishStatus(snapshots, stringOnly);
-                return (provStatus + ' ' + approvalStatus + ' ' + newProvStatus+ ' ' + publishStatus);
+                return (provStatus + ',' + approvalStatus + ',' + newProvStatus+ ',' + publishStatus + ',');
             } else {
                 return (
                     <span className="classification-status-wrapper">
@@ -468,15 +480,15 @@ var Dashboard = createReactClass({
      * @param {integer} listLength - number of available GDMs
      */
     renderGdmsStatusFilter(listLength) {
-        const statusList = [
-                            {value: "None", label: "None"},
-                            {value: "In Progress", label: "In Progress"},
-                            {value: "Approved", label: "Approved"},
-                            {value: "Provisional", label: "Provisional"},
-                            {value: "New Provisional", label: "New Provisional"},
-                            {value: "Published", label: "Published"},
-                           ];
         if (listLength > 0) {
+            const statusList = [
+                {value: "None", label: "None"},
+                {value: "In Progress", label: "In Progress"},
+                {value: "Approved", label: "Approved"},
+                {value: "Provisional", label: "Provisional"},
+                {value: "New Provisional", label: "New Provisional"},
+                {value: "Published", label: "Published"},
+               ];
             return (
                 <div className="filter-by">
                     <div className="filter-term">
@@ -612,16 +624,15 @@ var Dashboard = createReactClass({
      * @param {integer} listLength - number of available variant interpretations
      */
     renderInterpretationsStatusFilter(listLength) {
-        const statusList = [
-            {value: "None", label: "None"},
-            {value: "In Progress", label: "In Progress"},
-            {value: "Approved", label: "Approved"},
-            {value: "Provisional", label: "Provisional"},
-            {value: "New Provisional", label: "New Provisional"},
-            {value: "Published", label: "Published"},
-           ];
-
         if (listLength > 0) {
+            const statusList = [
+                {value: "None", label: "None"},
+                {value: "In Progress", label: "In Progress"},
+                {value: "Approved", label: "Approved"},
+                {value: "Provisional", label: "Provisional"},
+                {value: "New Provisional", label: "New Provisional"},
+                {value: "Published", label: "Published"},
+               ];
             return (
                 <div className="filter-by">
                     <div className="filter-term">
