@@ -141,7 +141,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         this.setState({contributorDate});
     },
 
-    toggleContributorForm(e) {
+    toggleAttributionForm(e) {
         e.preventDefault();
         this.setState({ showAttributionForm:!this.state.showAttributionForm });
     },
@@ -369,7 +369,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
-        const contributorButtonText = this.state.showAttributionForm ? 'Close Attributions Form' : 'Open Attributions Form';
+        const attributionButtonText = this.state.showAttributionForm ? 'Close Attributions Form' : 'Open Attributions Form';
 
         return (
             <div className="final-approval-panel-content">
@@ -452,105 +452,103 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         </div>
                         :
                         <div className="approval-edit">
-                            <div className="col-md-12 approval-form-content-wrapper">
-                                <div className="col-xs-12 col-sm-6">
-                                    <div className="approval-affiliation">
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>ClinGen Affiliation:</span></dt>
-                                            <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
-                                        </dl>
-                                    </div>
-                                    <div className="approval-submitter">
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>Entered by:</span></dt>
-                                            <dd>
-                                                {approvalSubmitter ?
-                                                    approvalSubmitter
-                                                    :
-                                                    <span className="approval-submitter-placeholder-text">Current curator's name will be entered upon submission</span>
-                                                }
-                                            </dd>
-                                        </dl>
-                                    </div>
-                                    {affiliation && affiliation.length ?
-                                        <div className="classification-approver">
-                                            {affiliationApprovers && affiliationApprovers.length ?
-                                                <Input type="select" ref={(input) => { this.approverInput = input; }} label="Affiliation Approver:"
-                                                    error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
-                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
-                                                    defaultValue={classificationApprover}>
-                                                    <option value="none">Select Approver</option>
-                                                    <option value="" disabled className="divider"></option>
-                                                    {affiliationApprovers.map((member, i) => {
-                                                        return <option key={i} value={member}>{member}</option>;
-                                                    })}
-                                                </Input>
+                            <div className="approval-form-content-wrapper">
+                                <div className="approval-affiliation">
+                                    <dl className="inline-dl clearfix">
+                                        <dt><span>ClinGen Affiliation:</span></dt>
+                                        <dd>{affiliation ? getAffiliationName(affiliation) : null}</dd>
+                                    </dl>
+                                </div>
+                                <div className="approval-submitter">
+                                    <dl className="inline-dl clearfix">
+                                        <dt><span>Entered by:</span></dt>
+                                        <dd>
+                                            {approvalSubmitter ?
+                                                approvalSubmitter
                                                 :
-                                                <dl className="inline-dl clearfix">
-                                                    <dt><span>Affiliation Approver:</span></dt>
-                                                    <dd>{getAffiliationName(affiliation)}</dd>
-                                                </dl>
+                                                <span className="approval-submitter-placeholder-text">Current curator's name will be entered upon submission</span>
                                             }
-                                        </div>
-                                        : null}
-                                    {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ? 
-                                        <div>
-                                            <div className="contributor-form">
-                                                <label className="control-label">Curation Contributor(s):</label>
-                                                <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
-                                            </div>
-                                            <div className="contributor-form">
-                                                <label className="control-label">Primary Contributor Date:</label>
-                                                <div className="contributor-date">
-                                                    <DayPickerInput
-                                                        value={contributorDate}
-                                                        onDayChange={this.handleContributorDate}
-                                                        formatDate={formatDate}
-                                                        parseDate={parseDate}
-                                                        placeholder={`${formatDate(new Date())}`}
-                                                        dayPickerProps={{
-                                                            selectedDays: contributorDate ? parseDate(contributorDate) : undefined
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="contributor-form">
-                                                <Input type="textarea" className="form-group" ref={(input) => { this.contributorCommentInput = input; }}
-                                                    label="Contributor Comments:" rows="5" labelClassName="control-label" />
-                                            </div>
-                                        </div>
-                                    : null}
-                                    <div className="col-xs-12 col-sm-6">
-                                        <button className="btn btn-primary btn-inline-spacer contributor-toggle-button form-group" onClick={this.toggleContributorForm}>{contributorButtonText}</button>
-                                    </div>
+                                        </dd>
+                                    </dl>
                                 </div>
-                                {this.state.showAttributionForm ? 
-                                <div className="col-xs-12 col-sm-6">
-                                    <div className="curation-approvers approval-form">
-                                        <label className="control-label">Curation Approver(s):</label>
-                                        <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" onChange={this.handleApproverSelect} />
+                                {affiliation && affiliation.length ?
+                                    <div className="classification-approver">
+                                        {affiliationApprovers && affiliationApprovers.length ?
+                                            <Input type="select" ref={(input) => { this.approverInput = input; }} label="Affiliation Approver:"
+                                                error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
+                                                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-5" groupClassName="form-group"
+                                                defaultValue={classificationApprover}>
+                                                <option value="none">Select Approver</option>
+                                                <option value="" disabled className="divider"></option>
+                                                {affiliationApprovers.map((member, i) => {
+                                                    return <option key={i} value={member}>{member}</option>;
+                                                })}
+                                            </Input>
+                                            :
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Affiliation Approver:</span></dt>
+                                                <dd>{getAffiliationName(affiliation)}</dd>
+                                            </dl>
+                                        }
                                     </div>
-                                    <div className="approval-form">
-                                        <label className="control-label">Approval Date:</label>
-                                        <div className="approval-date">
-                                            <DayPickerInput
-                                                value={approvalReviewDate}
-                                                onDayChange={this.handleReviewDateChange}
-                                                formatDate={formatDate}
-                                                parseDate={parseDate}
-                                                placeholder={`${formatDate(new Date())}`}
-                                                dayPickerProps={{
-                                                    selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="approval-form">
-                                        <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
-                                            label="Approver Comments:" value={approvalComment} rows="5" labelClassName="control-label" />
-                                    </div>
-                                </div>
                                 : null}
+                                {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ? 
+                                    <div className="col-md-6">
+                                        <div className="contributor-form">
+                                            <label className="control-label">Curation Contributor(s):</label>
+                                            <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
+                                        </div>
+                                        <div className="contributor-form">
+                                            <label className="control-label">Primary Contributor Date:</label>
+                                            <div className="contributor-date">
+                                                <DayPickerInput
+                                                    value={contributorDate}
+                                                    onDayChange={this.handleContributorDate}
+                                                    formatDate={formatDate}
+                                                    parseDate={parseDate}
+                                                    placeholder={`${formatDate(new Date())}`}
+                                                    dayPickerProps={{
+                                                        selectedDays: contributorDate ? parseDate(contributorDate) : undefined
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="contributor-form">
+                                            <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
+                                                label="Contributor Comments:" rows="5" labelClassName="control-label" />
+                                        </div>
+                                    </div>
+                                : null}
+                                {this.state.showAttributionForm ? 
+                                    <div className="col-md-6">
+                                        <div className="curation-approvers approval-form">
+                                            <label className="control-label">Curation Approver(s):</label>
+                                            <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" onChange={this.handleApproverSelect} />
+                                        </div>
+                                        <div className="approval-form">
+                                            <label className="control-label">Approval Date:</label>
+                                            <div className="approval-date">
+                                                <DayPickerInput
+                                                    value={approvalReviewDate}
+                                                    onDayChange={this.handleReviewDateChange}
+                                                    formatDate={formatDate}
+                                                    parseDate={parseDate}
+                                                    placeholder={`${formatDate(new Date())}`}
+                                                    dayPickerProps={{
+                                                        selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="approval-form">
+                                            <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
+                                                label="Approver Comments:" value={approvalComment} rows="5" labelClassName="control-label" />
+                                        </div>
+                                    </div>
+                                : null}
+                            </div>
+                            <div className="">
+                                <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
                             </div>
                         </div>
                     }
