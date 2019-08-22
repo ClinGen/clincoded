@@ -258,10 +258,7 @@ var Dashboard = createReactClass({
                 approvalStatus = renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly);
                 newProvStatus = renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly);
                 publishStatus = renderPublishStatus(snapshots, stringOnly);
-                return (provStatus != null ? provStatus : '' +
-                        approvalStatus != null ? approvalStatus : '' +
-                        newProvStatus != null ? newProvStatus : '' +
-                        publishStatus != null ? publishStatus : '');
+                return (provStatus + ' ' + approvalStatus + ' ' + newProvStatus+ ' ' + publishStatus);
             } else {
                 return (
                     <span className="classification-status-wrapper">
