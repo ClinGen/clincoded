@@ -127,6 +127,14 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         return genotypeLabel;
     },
 
+    getOntologiesUrl: function(code = '', iri = '') {
+        if (iri.includes('geneontology.org')) {
+            return iri;
+        }
+        const ontologyId = code.split(':')[0];
+        return `https://www.ebi.ac.uk/ols/ontologies/${ontologyId}/terms?iri=${encodeURIComponent(iri)}`;
+    },
+
     handleTabSelect: function(selectedFunctionalTab) {
         this.setState({selectedFunctionalTab});
     },
@@ -187,6 +195,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         handleTabSelect={this.handleTabSelect}
                         isPatientSourced={this.isPatientSourced}
                         getGenotypeLabel={this.getGenotypeLabel}
+                        getOntologiesUrl={this.getOntologiesUrl}
                     />
                     <extraEvidence.ExtraEvidenceTable category="experimental" subcategory="experimental-studies" session={this.props.session}
                         href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Experimental Studies)</span>}

@@ -5,6 +5,7 @@ import { property } from 'underscore';
 
 import { showActivityIndicator } from '../../../activity_indicator';
 import { PmidSummary } from '../../../curator';
+import { external_url_map } from '../../../globals';
 
 /**
  * This component displays functional data in the experimental tab of the VCI
@@ -32,6 +33,7 @@ const propTypes = {
     handleTabSelect: PropTypes.func.isRequired,
     isPatientSourced: PropTypes.func.isRequired,
     getGenotypeLabel: PropTypes.func.isRequired,
+    getOntologiesUrl: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
@@ -48,6 +50,7 @@ const FunctionalDataTable = ({
     handleTabSelect,
     isPatientSourced,
     getGenotypeLabel,
+    getOntologiesUrl,
 }) => {
     const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_genboreeFuncData);
     const articleKeys = sourceArticles && Object.keys(sourceArticles);
@@ -104,8 +107,10 @@ const FunctionalDataTable = ({
                                             afisStatements && Array.isArray(afisStatements)
                                                 && afisStatements.map((experiment, experimentIndex) => {
                                                     const experimentId = property(['ldhId'])(experiment);
-                                                    const experimentEntIri = property(['fdr', 0, 'ld', 'Method', 0, 'entIri'])(experiment);
-                                                    const experimentEntId = property(['fdr', 0, 'ld', 'Method', 0, 'entId'])(experiment);
+                                                    const methodIri = property(['fdr', 0, 'ld', 'Method', 0, 'entIri'])(experiment);
+                                                    const methodCode = property(['fdr', 0, 'ld', 'Method', 0, 'entContent', 'code'])(experiment);
+                                                    const methodUrl = getOntologiesUrl(methodCode, methodIri);
+                                                    const methodEntId = property(['fdr', 0, 'ld', 'Method', 0, 'entId'])(experiment);
                                                     const materials = property(['fdr', 0, 'ld', 'Material'])(experiment);
                                                     const genotypes = property(['fdr', 0, 'ld', 'Genotype'])(experiment);
                                                     const ldSet = property(['fdr', 0, 'ld', 'LdSet'])(experiment);
@@ -125,8 +130,8 @@ const FunctionalDataTable = ({
                                                             </span>
                                                             <span className="col-md-12">
                                                                 <strong>Method: </strong>
-                                                                <a href={experimentEntIri} target="_blank" rel="noopener noreferrer">
-                                                                    { experimentEntId }
+                                                                <a href={methodUrl} target="_blank" rel="noopener noreferrer">
+                                                                    { methodEntId }
                                                                 </a>
                                                             </span>
                                                             <span className="col-md-12">
@@ -135,14 +140,16 @@ const FunctionalDataTable = ({
                                                                     materials && Array.isArray(materials)
                                                                         && materials.map((material, materialIndex) => {
                                                                             const materialId = property(['ldhId'])(material);
-                                                                            const materialEntIri = property(['entIri'])(material);
+                                                                            const materialIri = property(['entIri'])(material);
+                                                                            const materialCode = property(['entContent', 'code'])(material);
+                                                                            const materialUrl = getOntologiesUrl(materialCode, materialIri);
                                                                             const materialEntId = property(['entId'])(material);
                                                                             const patientSourced = isPatientSourced(materialId, ldSet);
                                                                             const genotypeLabel = getGenotypeLabel(materialId, ldSet, genotypes);
                                                                             return (
                                                                                 <span key={materialId}>
                                                                                     { materialIndex > 0 ? ', ' : '' }
-                                                                                    <a href={materialEntIri} target="_blank" rel="noopener noreferrer">
+                                                                                    <a href={materialUrl} target="_blank" rel="noopener noreferrer">
                                                                                         { materialEntId }
                                                                                     </a>
                                                                                     {
@@ -167,13 +174,14 @@ const FunctionalDataTable = ({
                                                                     effects && Array.isArray(effects)
                                                                         && effects.map((effect, effectIndex) => {
                                                                             const effectValue = property(['value'])(effect);
+                                                                            const effectIri = property(['iri',])(effect);
                                                                             const effectCode = property(['code'])(effect);
-                                                                            const effectIri = property(['iri'])(effect);
+                                                                            const effectUrl = getOntologiesUrl(effectCode, effectIri);
                                                                             const effectLabel = property(['label'])(effect);
                                                                             return (
                                                                                 <span key={`${effectValue}-${effectCode}`}>
                                                                                     { `${effectIndex > 0 ? '; ' : ''} ${effectValue} ` }
-                                                                                    <a href={effectIri} target="_blank" rel="noopener noreferrer">
+                                                                                    <a href={effectUrl} target="_blank" rel="noopener noreferrer">
                                                                                         { effectLabel }
                                                                                     </a>
                                                                                 </span>

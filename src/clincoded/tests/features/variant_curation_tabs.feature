@@ -192,7 +192,7 @@ Feature: Variant Curation Tabs
         When I fill in the css element field "input.form-control" with "CA058940"
         And I press "Retrieve from ClinGen Allele Registry"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NC_000002"
+        Then I should see "ClinVar Variant ID"
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "criteria provided, single submitter"
