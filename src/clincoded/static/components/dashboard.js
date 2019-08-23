@@ -104,7 +104,7 @@ var Dashboard = createReactClass({
                 const newList = filteredList.filter(item=> !filteredGdms.includes(item));
                 // Sort list by gene disease & model
                 const sortedList = _(newList).sortBy(item => {
-                    return (item.gdmGeneDisease + '-' + item.gdmModel);
+                    return (this.cleanGdmGeneDiseaseName(item.gdmGeneDisease, item.gdmModel));
                 });
                 // Add new items to selected list
                 filteredGdms.push(...sortedList);
@@ -219,7 +219,7 @@ var Dashboard = createReactClass({
             if (this.state.filteredGdms.length > 0) {
                 this.state.filteredGdms.map(gdm => {
                     gdms.push({
-                        'Gene-Disease Record': '"' + gdm.gdmGeneDisease + '-' + gdm.gdmModel + '"',
+                        'Gene-Disease Record': '"' + this.cleanGdmGeneDiseaseName(gdm.gdmGeneDisease, gdm.gdmModel) + '"',
                         Status: gdm.status,
                         'Creation Date': moment(gdm.date_created).format("YYYY MMM DD")
                     });
@@ -265,12 +265,13 @@ var Dashboard = createReactClass({
         }
         if (snapshots && snapshots.length) {
             if (stringOnly) {
-                let provStatus, approvalStatus, newProvStatus, publishStatus = null;
-                provStatus = renderProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly);
-                approvalStatus = renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly);
-                newProvStatus = renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly);
-                publishStatus = renderPublishStatus(snapshots, stringOnly);
-                return (provStatus + ',' + approvalStatus + ',' + newProvStatus+ ',' + publishStatus + ',');
+                let statusList = [], status = [];
+                statusList.push(renderProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly));
+                statusList.push(renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly));
+                statusList.push(renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly));
+                statusList.push(renderPublishStatus(snapshots, stringOnly));
+                status = statusList.filter(item => (item != null));
+                return (status.join(' '));
             } else {
                 return (
                     <span className="classification-status-wrapper">
