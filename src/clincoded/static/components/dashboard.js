@@ -507,75 +507,21 @@ var Dashboard = createReactClass({
     },
 
     /**
-     * Method to render individual evidence table
-     * @param {array} records - Individual curation evidence
+     * Method to render gene-disease records (GDMs) table
+     * @param {array} records - gene-disease records (GDMs)
+     * @param {boolean} affiliated - GDMs are affiliated with an affiliation
      */
-    renderIndividualRecords(records) {
-        const self = this;
-        const buttonTitle = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
-        const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'No matching Gene-Disease record found.' : 'You have not created any Gene-Disease-Mode of Inheritance entries.';
-        const disableButton = records.length > 0 ? false : true;
-        return (
-            <div className="panel panel-primary">
-                <div className="panel-heading">
-                    <h3 className="panel-title">My Gene-Disease Records
-                        <span className="number-of-entries"> number of entries: {records.length}</span>
-                        <span className="download-button pull-right">
-                            <button onClick={this.handleExport.bind(null, 'gdm', 'gdms-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
-                                {buttonTitle} <i className="icon icon-download"></i>
-                            </button>
-                        </span>
-                    </h3>
-                </div>
-                {this.renderGdmsStatusFilter(this.state.gdmList.length)}
-                <div className="panel-content-wrapper">
-                    {this.state.gdmListLoading ? showActivityIndicator('Loading... ') : null}
-                    {records.length > 0 ?
-                        <table className="table individual-record-list">
-                            <thead>
-                                <tr>
-                                    <th className="item-name">Gene-Disease Record</th>
-                                    <th className="item-status">Status</th>
-                                    <th className="item-timestamp">Creation Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.map(item => {
-                                    return (
-                                        <tr key={item.uuid}>
-                                            <td className="item-name">
-                                                <a key={item.uuid} className="individual-record-link" href={"/curation-central/?gdm=" + item.uuid}>
-                                                    <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
-                                                </a>
-                                            </td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
-                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        :
-                        <div className="panel-body"><p>{emptyListMsg}</p></div>
-                    }
-                </div>
-            </div>
-        );
-    },
-
-    /**
-     * Method to render affiliated evidence table
-     * @param {array} records - Affiliated curation evidence
-     */
-    renderAffiliatedGdms(records) {
-        const self = this;
+    renderGdms(records, affiliated) {
+        const tableTitle = affiliated ? "My Affiliation's Gene-Disease Records *" : "My Gene-Disease Records";
+        const isLoading = affiliated ? this.state.affiliatedGdmsLoading : this.state.gdmListLoading;
+        const gdmsCount = affiliated ? this.state.affiliatedGdms.length : this.state.gdmList.length;
         const buttonTitle = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
         const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'No matching Gene-Disease record found.' : 'Your affiliation has not created any Gene-Disease-Mode of Inheritance entries.';
         const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">My Affiliation's Gene-Disease Records *
+                    <h3 className="panel-title">{tableTitle}
                         <span className="number-of-entries"> number of entries: {records.length}</span>
                         <span className="download-button pull-right">
                             <button onClick={this.handleExport.bind(null, 'gdm', 'gdms-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
@@ -584,9 +530,9 @@ var Dashboard = createReactClass({
                         </span>
                     </h3>
                 </div>
-                {this.renderGdmsStatusFilter(this.state.affiliatedGdms.length)}
+                {this.renderGdmsStatusFilter(gdmsCount)}
                 <div className="panel-content-wrapper">
-                    {this.state.affiliatedGdmsLoading ? showActivityIndicator('Loading... ') : null}
+                    {isLoading ? showActivityIndicator('Loading... ') : null}
                     {records.length > 0 ?
                         <table className="table affiliated-evidence-list">
                             <thead>
@@ -605,7 +551,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
+                                            <td className="item-status">{this.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -651,79 +597,21 @@ var Dashboard = createReactClass({
     },
 
     /**
-     * Method to render individual variant interpretations table
-     * @param {array} records - Individual variant interpretations
+     * Method to render variant interpretations table
+     * @param {array} records - variant interpretations
+     * @param {boolean} affiliated - interpretaions are affiliated with an affiliation
      */
-    renderIndividualInterpretations(records) {
-        const self = this;
-        const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
-        const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'No matching variant interpretation found.' : 'You have not created any You have not created any variant interpretations.';
-        const disableButton = records.length > 0 ? false : true;
-        return (
-            <div className="panel panel-primary">
-                <div className="panel-heading">
-                    <h3 className="panel-title">My Variant Interpretations
-                        <span className="number-of-entries"> number of entries: {records.length}</span>
-                        <span className="download-button pull-right">
-                            <button onClick={this.handleExport.bind(null, 'interpretation', 'interpretations-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
-                                {buttonTitle} <i className="icon icon-download"></i>
-                            </button>
-                        </span>
-                    </h3>
-                </div>
-                {this.renderInterpretationsStatusFilter(this.state.vciInterpList.length)}
-                <div className="panel-content-wrapper">
-                    {this.state.vciInterpListLoading ? showActivityIndicator('Loading... ') : null}
-                    {records.length > 0 ?
-                        <table className="table individual-interpretation-list">
-                            <thead>
-                                <tr>
-                                    <th className="item-variant">Variant</th>
-                                    <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-status">Status</th>
-                                    <th className="item-timestamp">Creation Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.map(item => {
-                                    return (
-                                        <tr key={item.uuid}>
-                                            <td className="item-variant">
-                                                <a key={item.uuid}
-                                                    className="individual-record-link"
-                                                    href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>{item.variantTitle}</strong></span>
-                                                </a>
-                                            </td>
-                                            <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
-                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        :
-                        <div className="panel-body"><p>{emptyListMsg}</p></div>
-                    }
-                </div>
-            </div>
-        );
-    },
-
-    /**
-     * Method to render affiliated variant interpretations table
-     * @param {array} records - Affiliated variant interpretations
-     */
-    renderAffiliatedInterpretations(records) {
-        const self = this;
+    renderInterpretations(records, affiliated) {
+        const tableTitle = affiliated ? "My Affiliation's Variant Interpretations *" : "My Variant Interpretations";
+        const isLoading = affiliated ? this.state.affiliatedInterpretationsLoading : this.state.vciInterpListLoading;
+        const interpretationsCount = affiliated ? this.state.affiliatedInterpretations.length : this.state.vciInterpList.length;
         const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
         const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'No matching variant interpretation found.' : 'Your affiliation has not created any You have not created any variant interpretations.';
         const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">My Affiliation's Variant Interpretations * 
+                    <h3 className="panel-title">{tableTitle}
                         <span className="number-of-entries"> number of entries: {records.length}</span>
                         <span className="download-button pull-right">
                             <button onClick={this.handleExport.bind(null, 'interpretation', 'interpretations-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
@@ -732,9 +620,9 @@ var Dashboard = createReactClass({
                         </span>
                     </h3>
                 </div>
-                {this.renderInterpretationsStatusFilter(this.state.affiliatedInterpretations.length)}
+                {this.renderInterpretationsStatusFilter(interpretationsCount)}
                 <div className="panel-content-wrapper">
-                    {this.state.affiliatedInterpretationsLoading ? showActivityIndicator('Loading... ') : null}
+                    {isLoading ? showActivityIndicator('Loading... ') : null}
                     {records.length > 0 ?
                         <table className="table affiliated-interpretation-list">
                             <thead>
@@ -757,7 +645,7 @@ var Dashboard = createReactClass({
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
+                                            <td className="item-status">{this.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -771,6 +659,8 @@ var Dashboard = createReactClass({
             </div>
         );
     },
+
+
 
     render() {
         let affiliation = this.props.affiliation;
@@ -835,11 +725,11 @@ var Dashboard = createReactClass({
                     {/*/ Right pane /*/}
                     <div className="col-md-8">
                         {affiliation && Object.keys(affiliation).length ?
-                            this.renderAffiliatedInterpretations(this.state.filteredInterpretations)
-                            : this.renderIndividualInterpretations(this.state.filteredInterpretations)}
+                            this.renderInterpretations(this.state.filteredInterpretations, true)
+                            : this.renderInterpretations(this.state.filteredInterpretations, false)}
                         {affiliation && Object.keys(affiliation).length ?
-                            this.renderAffiliatedGdms(this.state.filteredGdms)
-                            : this.renderIndividualRecords(this.state.filteredGdms)}
+                            this.renderGdms(this.state.filteredGdms, true)
+                            : this.renderGdms(this.state.filteredGdms, false)}
                         {affiliation && Object.keys(affiliation).length ?
                             <div className="alert alert-info">
                                 <strong>* Variant interpretations and Gene-Disease records created by this Affiliation.</strong> To create a new
