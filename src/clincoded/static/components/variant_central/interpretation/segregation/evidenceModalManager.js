@@ -47,6 +47,12 @@ let EvidenceModalManager = createReactClass({
         // If current evidence has source data, set as default
         if (this.props.data && this.props.data.source) {
             source = this.props.data.source;
+            // If pmid is not set in source metadata, check current evidence articles array
+            if (source.metadata['_kind_key'] === 'PMID') {
+                if (source.metadata.pmid == undefined) {
+                    source.metadata.pmid = this.props.data.articles.length > 0 ? this.props.data.articles[0].pmid : '';
+                }
+            }
         }
         else {
             source = {'metadata': {}, 'data': {}}

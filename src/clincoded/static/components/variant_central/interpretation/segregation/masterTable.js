@@ -153,7 +153,8 @@ let MasterEvidenceTable = createReactClass({
                             deleteButton = this.getDeleteButton(row);
                         }
                         if (row.source.metadata['_kind_key'] === 'PMID') {
-                            let pmid = row.source.metadata.pmid;
+                            // If pmid is not set at source metadata, check extra evidence's artilces array
+                            const pmid = row.source.metadata.pmid ? row.source.metadata.pmid : (row.articles.length > 0 ? row.articles[0].pmid : '');
                             let authorYear = '';
                             let evidence_detail = '';
                             if (row.articles.length > 0) {
