@@ -250,7 +250,7 @@ var Dashboard = createReactClass({
         if (gdm && Object.keys(gdm).length) {
             // The rendering is for a GDM
             resourceType = 'classification';
-            let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
+            const provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
             if (provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional) {
                 classification = provisionalClassification.provisional;
                 snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
@@ -275,10 +275,10 @@ var Dashboard = createReactClass({
             } else {
                 return (
                     <span className="classification-status-wrapper">
-                        {renderProvisionalStatus(snapshots, resourceType, gdm, context)}
-                        {renderApprovalStatus(snapshots, resourceType, context)}
-                        {renderNewProvisionalStatus(snapshots, resourceType, gdm, context)}
-                        {renderPublishStatus(snapshots)}
+                        {renderProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly)}
+                        {renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly)}
+                        {renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly)}
+                        {renderPublishStatus(snapshots, stringOnly)}
                     </span>
                 );
             }
@@ -288,7 +288,7 @@ var Dashboard = createReactClass({
             } else {
                 return (
                     <span className="classification-status-wrapper">
-                        {renderInProgressStatus(classification)}
+                        {renderInProgressStatus(classification, stringOnly)}
                     </span>
                 );
             }
@@ -409,14 +409,14 @@ var Dashboard = createReactClass({
     },
 
     componentDidMount() {
-        let user = this.props.session.user_properties;
-        let affiliation = this.props.affiliation;
+        const user = this.props.session.user_properties;
+        const affiliation = this.props.affiliation;
         if (!affiliation && user) {
             this.setUserData(user);
             this.getData(user);
             this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    const filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
                 }
             });
@@ -433,8 +433,8 @@ var Dashboard = createReactClass({
     },
 
     componentWillReceiveProps(nextProps) {
-        let user = nextProps && nextProps.session.user_properties;
-        let affiliation = nextProps && nextProps.affiliation;
+        const user = nextProps && nextProps.session.user_properties;
+        const affiliation = nextProps && nextProps.affiliation;
         // This 'if' condition is true immediately upon user signing-in
         // Fetch data associated with the curator only, especially when the curator is not associated with any affiliations
         if (!affiliation && user && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(user, this.props.session.user_properties)) {
@@ -442,7 +442,7 @@ var Dashboard = createReactClass({
             this.getData(user);
             this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    const filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
                 } else {
                     this.setState({histories: [], historiesLoading: false});
@@ -467,7 +467,7 @@ var Dashboard = createReactClass({
             this.getData(user);
             this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    const filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
                 } else {
                     this.setState({histories: [], historiesLoading: false});
@@ -663,9 +663,9 @@ var Dashboard = createReactClass({
 
 
     render() {
-        let affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation;
         // FIXME: Temporarily suppress history items for adding PMIDs or variants as they are affiliation-agnostic
-        let filteredHistories = this.state.histories.filter(history => !history.primary['@id'].match(/articles|variants/ig));
+        const filteredHistories = this.state.histories.filter(history => !history.primary['@id'].match(/articles|variants/ig));
 
         return (
             <div className="container">
