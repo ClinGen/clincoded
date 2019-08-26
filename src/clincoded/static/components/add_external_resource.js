@@ -238,10 +238,8 @@ var AddResourceIdModal = createReactClass({
                 renderResult = pubmedRenderResourceResult.call(this);
                 break;
             case 'clinvar':
-                renderResult = clinvarRenderResourceResult.call(this);
-                break;
             case 'car':
-                renderResult = carRenderResourceResult.call(this);
+                renderResult = clinvarAndCarRenderResourceResult.call(this);
                 break;
         }
         return renderResult;
@@ -620,29 +618,6 @@ function clinvarQueryResource() {
         this.setState({queryResourceBusy: false});
     }
 }
-function clinvarRenderResourceResult() {
-    return(
-        <div className="resource-metadata">
-            <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
-            {this.state.tempResource && this.state.tempResource.hgvsNames ?
-                <div className="row">
-                    <div className="row">
-                        <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={external_url_map['ClinVarSearch'] + this.state.tempResource.clinvarVariantId} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
-                    </div>
-                    {this.state.tempResource.hgvsNames ?
-                        <div className="row">
-                            <span className="col-xs-4 col-md-4 control-label"><label>HGVS terms</label></span>
-                            <span className="col-xs-8 col-md-8 text-no-input">
-                                {variantHgvsRender(this.state.tempResource.hgvsNames)}
-                            </span>
-                        </div>
-                    : null}
-                </div>
-            : null}
-        </div>
-    );
-}
 function clinvarSubmitResource(func) {
     // for dealing with the main form
     this.setState({submitResourceBusy: true});
@@ -655,6 +630,7 @@ function clinvarSubmitResource(func) {
                     // Existing variants in production db will be identified if any of data property below (except clinvarVariantTitle) has value at set retrieved from ClinVar API but not have value in db
                     // In this case, save ClinVar data into the variant.
                     if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
+                        || (this.state.tempResource['carId'] !== result['carId'])
                         || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
                         || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length && (!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length)))
                         || (this.state.tempResource['variationType'] && !result['variationType'])
@@ -843,22 +819,24 @@ function carQueryResource() {
         this.setState({queryResourceBusy: false});
     }
 }
-function carRenderResourceResult() {
+function clinvarAndCarRenderResourceResult() {
     return(
         <div className="resource-metadata">
             <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
             {this.state.tempResource && this.state.tempResource.hgvsNames ?
                 <div className="row">
-                    <div className="row">
-                        <span className="col-xs-4 col-md-4 control-label"><label>CA ID</label></span>
-                        <span className="col-xs-8 col-md-8 text-no-input"><a href={`${this.props.protocol}${external_url_map['CARallele']}${this.state.tempResource.carId}.html`} target="_blank"><strong>{this.state.tempResource.carId}</strong></a></span>
-                    </div>
+                    {this.state.tempResource.carId ?
+                        <div className="row">
+                            <span className="col-xs-4 col-md-4 control-label"><label>CA ID</label></span>
+                            <span className="col-xs-8 col-md-8 text-no-input"><a href={`${this.props.protocol}${external_url_map['CARallele']}${this.state.tempResource.carId}.html`} target="_blank"><strong>{this.state.tempResource.carId}</strong></a></span>
+                        </div>
+                        : null}
                     {this.state.tempResource.clinvarVariantId ?
                         <div className="row">
                             <span className="col-xs-4 col-md-4 control-label"><label>ClinVar Variant ID</label></span>
                             <span className="col-xs-8 col-md-8 text-no-input"><a href={`${external_url_map['ClinVarSearch']}${this.state.tempResource.clinvarVariantId}`} target="_blank"><strong>{this.state.tempResource.clinvarVariantId}</strong></a></span>
                         </div>
-                    : null}
+                        : null}
                     {this.state.tempResource.hgvsNames ?
                         <div className="row">
                             <span className="col-xs-4 col-md-4 control-label"><label>HGVS terms</label></span>
@@ -866,9 +844,9 @@ function carRenderResourceResult() {
                                 {variantHgvsRender(this.state.tempResource.hgvsNames)}
                             </span>
                         </div>
-                    : null}
+                        : null}
                 </div>
-            : null}
+                : null}
         </div>
     );
 }
