@@ -547,9 +547,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                 : null}
                             </div>
-                            <div className="">
-                                <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
-                            </div>
+                            <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
                         </div>
                     }
                     <div className="col-md-12 approval-form-buttons-wrapper">
