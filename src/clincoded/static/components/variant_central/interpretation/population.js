@@ -70,8 +70,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
         session: PropTypes.object,
-        selectedCriteria: PropTypes.string
-    
+        selectedCriteria: PropTypes.string,
+        unusedCriteria: PropTypes.array
     },
 
     getInitialState: function() {
@@ -1158,7 +1158,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                                     formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
                                     criteria={['BA1', 'PM2', 'BS1']} criteriaCrossCheck={[['BA1', 'PM2', 'BS1']]}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
+                                    unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
@@ -1437,7 +1437,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
 
 // code for rendering of this group of interpretation forms
-var criteriaGroup1 = function() {
+var criteriaGroup1 = function(unusedCriteria) {
     let criteriaList1 = ['BA1', 'BS1', 'PM2']; // array of criteria code handled subgroup of this section
     let mafCutoffInput = (
         <span>
@@ -1451,7 +1451,7 @@ var criteriaGroup1 = function() {
     );
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
             {mafCutoffInput}
         </div>
     );

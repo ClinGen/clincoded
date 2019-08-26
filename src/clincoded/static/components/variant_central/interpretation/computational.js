@@ -127,7 +127,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
         affiliation: PropTypes.object,
         selectedSubtab: PropTypes.string,
         selectedCriteria: PropTypes.string,
-        getSelectedSubTab: PropTypes.func
+        getSelectedSubTab: PropTypes.func,
+        unusedCriteria: PropTypes.array
     },
 
     getInitialState: function() {
@@ -567,7 +568,8 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             formDataUpdater={criteriaMissense1Update} variantUuid={variant['@id']}
                                             criteria={['BP1', 'PP2', 'PP3', 'BP4']} criteriaCrossCheck={[['BP1', 'PP2'], ['PP3', 'BP4']]}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalNote} />
+                                            affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalNote}
+                                            unusedCriteria={this.props.unusedCriteria} />
                                     </div>
                                 </div>
                                 : null}
@@ -823,7 +825,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaMissense2Update} variantUuid={variant['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -854,7 +856,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaLof1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
+                                            unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
                                     </div>
                                 </div>
                                 : null}
@@ -894,7 +896,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true}
                                             formDataUpdater={criteriaSilentIntron1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -924,7 +926,7 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                                             evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP3', 'PM4']]}
                                             formDataUpdater={criteriaIndel1Update} variantUuid={this.state.data['@id']}
                                             interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                            affiliation={affiliation} session={session} />
+                                            unusedCriteria={this.props.unusedCriteria} affiliation={affiliation} session={session} />
                                     </div>
                                 </div>
                                 : null}
@@ -987,14 +989,14 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
 /**
  * Code for rendering of this group of interpretation forms
  */
-function criteriaMissense1() {
+function criteriaMissense1(unusedCriteria) {
     let criteriaList1 = ['BP1', 'PP2'], // array of criteria code handled subgroup of this section
         criteriaList2 = ['PP3', 'BP4']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
             <div className="clear criteria-evaluation-divider"></div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, unusedCriteria)}
         </div>
     );
 }
@@ -1011,14 +1013,14 @@ function criteriaMissense1Update(nextProps) {
 /**
  * Code for rendering of this group of interpretation forms
  */
-function criteriaMissense2() {
+function criteriaMissense2(unusedCriteria) {
     let criteriaList1 = ['PM5'], // array of criteria code handled subgroup of this section
         criteriaList2 = ['PS1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
             <div className="clear criteria-evaluation-divider"></div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList2, unusedCriteria)}
         </div>
     );
 }
@@ -1035,11 +1037,11 @@ function criteriaMissense2Update(nextProps) {
 /**
  * Code for rendering of this group of interpretation forms
  */
-function criteriaLof1() {
+function criteriaLof1(unusedCriteria) {
     let criteriaList1 = ['PVS1']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 }
@@ -1056,11 +1058,11 @@ function criteriaLof1Update(nextProps) {
 /**
  * Code for rendering of this group of interpretation forms
  */
-function criteriaSilentIntron1() {
+function criteriaSilentIntron1(unusedCriteria) {
     let criteriaList1 = ['BP7']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 }
@@ -1077,11 +1079,11 @@ function criteriaSilentIntron1Update(nextProps) {
 /**
  * Code for rendering of this group of interpretation forms
  */
-function criteriaIndel1() {
+function criteriaIndel1(unusedCriteria) {
     let criteriaList1 = ['BP3', 'PM4']; // array of criteria code handled subgroup of this section
     return (
         <div>
-            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, false)}
+            {vciFormHelper.renderEvalFormSection.call(this, criteriaList1, unusedCriteria)}
         </div>
     );
 }
