@@ -11,6 +11,12 @@
         display: flex;
         justify-content: flex-end;
     }
+    .no-padding {
+        padding: 0px;
+    }
+    .empty-text-placeholder {
+        color: grey;
+    }
 }
 
 .pmid-doi-btns {

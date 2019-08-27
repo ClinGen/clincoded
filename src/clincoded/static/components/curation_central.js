@@ -6,11 +6,12 @@ import _ from 'underscore';
 import moment from 'moment';
 import { curator_page, history_views, userMatch, queryKeyValue, external_url_map } from './globals';
 import { RestMixin } from './rest';
-import { Form, FormMixin, Input } from '../libs/bootstrap/form';
+import { FormMixin } from '../libs/bootstrap/form';
 import { parseAndLogError } from './mixins';
 import { parsePubmed } from '../libs/parse-pubmed';
 import { sortListByDate } from '../libs/helpers/sort';
 import { AddResourceId } from './add_external_resource';
+import PubMedNotesBox from './pubmed_notes_box';
 import * as CuratorHistory from './curator_history';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
@@ -35,14 +36,20 @@ var CurationCentral = createReactClass({
     getInitialState: function() {
         return {
             currPmid: queryKeyValue('pmid', this.props.href),
-            currPmidCheckboxes: {
-                'non-scorable': false,
-                other: false,
+            currPmidNotes: {
+                nonscorable: {
+                    checked: false,
+                    text: '',
+                },
+                other: {
+                    checked: false,
+                    text: '',
+                },
             },
-            pubmedFreeText: '',
             currGdm: null,
             updateMsg: null,
             submitBusy: false,
+            isEditingNotes: false,
             classificationSnapshots: []
         };
     },
@@ -72,20 +79,23 @@ var CurationCentral = createReactClass({
                 // Find the annotation in the GDM matching the given pmid
                 var currAnnotation = curator.pmidToAnnotation(gdm,pmid);
                 if (currAnnotation) {
-                    const currPmidCheckboxes = {
-                        'non-scorable': false,
-                        other: false,
+                    let currPmidNotes = {
+                        nonscorable: {
+                            checked: false,
+                            text: '',
+                        },
+                        other: {
+                            checked: false,
+                            text: '',
+                        },
                     };
-                    let pubmedFreeText = '';
                     if (currAnnotation.articleNotes) {
-                        const noteType = currAnnotation.articleNotes.noteType;
-                        currPmidCheckboxes[noteType] = true;
-                        pubmedFreeText = currAnnotation.articleNotes.noteText;   
+                        this.setEditMode(false);
+                        currPmidNotes = currAnnotation.articleNotes;
+                    } else {
+                        this.setEditMode(true);
                     }
-                    if (this.refs['pubmedFreeText']) {
-                        this.refs['pubmedFreeText'].setValue(pubmedFreeText);
-                    }
-                    this.setState({pubmedFreeText, currPmidCheckboxes, currPmid: currAnnotation.article.pmid});
+                    this.setState({currPmidNotes, currPmid: currAnnotation.article.pmid});
                 }
             }
             if (this.state.currGdm) {
@@ -197,23 +207,37 @@ var CurationCentral = createReactClass({
     },
 
     // Submit handler for the PubMed notes form. Saves article notes and refetches gdm
-    handleSaveNotes: function(annotation) {
+    handleSaveNotes: function(e, annotation) {
+        e.preventDefault(); e.stopPropagation();
         this.setState({ submitBusy: true, updateMsg: null });
-        const currGdm = this.state.currGdm;
+        const { currGdm, currPmidNotes } = this.state;
         let newAnnotationObj = curator.flatten(annotation);
-        if (!this.state.currPmidCheckboxes['non-scorable'] && !this.state.currPmidCheckboxes['other'] && !this.state.pubmedFreeText) {
-            newAnnotationObj = _.omit(curator.flatten(annotation), 'articleNotes');
-        } else {
-            const articleNotes = {
-                noteType: this.state.currPmidCheckboxes['non-scorable'] ? 'non-scorable' : 'other',
-                noteText: this.state.pubmedFreeText,
-            };
-            newAnnotationObj.articleNotes = articleNotes;
+        newAnnotationObj.articleNotes = currPmidNotes;
+
+        // Add affiliation if the user is associated with an affiliation
+        // and if the data object has no affiliation
+        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+            if (!newAnnotationObj.affiliation) {
+                newAnnotationObj.affiliation = this.props.affiliation.affiliation_id;
+            }
         }
 
-        this.putRestData('/evidence/' + annotation.uuid, newAnnotationObj).then(data => {
+        this.putRestData('/evidence/' + annotation.uuid, newAnnotationObj).then(() => {
+            return this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
+                const gdmObj = curator.flatten(freshGdm);
+                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                    return data['@graph'][0];
+                });
+            });
+        }).then(gdm => {
+            const meta = {
+                annotation: {
+                    gdm: gdm['@id'],
+                    article: annotation.article['@id'],
+                }
+            };
+            this.recordHistory('modify', annotation, meta);
             this.setState({ submitBusy: false, updateMsg: <span className="text-success">Notes saved successfully!</span> });
-            // Retrieve the updated GDM and set it as the new state GDM to force a rerendering.
             return this.getGdm(currGdm.uuid, annotation.article.pmid);
         }).catch(err => {
             this.setState({ submitBusy: false, updateMsg: <span className="text-danger">Notes could not be saved successfully!</span> });
@@ -221,32 +245,64 @@ var CurationCentral = createReactClass({
         });
     },
 
-    handleCheckboxChange: function(ref, e) {
-        const checkboxes = JSON.parse(JSON.stringify(this.state.currPmidCheckboxes));
-        let text = this.state.pubmedFreeText;
-        if (ref === 'non-scorable') {
-            if (checkboxes['non-scorable']) {
-                checkboxes['non-scorable'] = false;
-                if (this.refs['pubmedFreeText']) {
-                    this.refs['pubmedFreeText'].resetValue();
-                    text = '';
-                }
-            } else {
-                checkboxes['non-scorable'] = true;
-                checkboxes['other'] = false;
-            }
-        } else if (ref === 'other') {
-            checkboxes['other'] = checkboxes['other'] ? false : true;
-            checkboxes['non-scorable'] = false;
+    /**
+     * Toggles the checkboxes based on checkboxName. Makes a deep copy of @currPmidNotes to avoid state mutation.
+     * Note: Does not use ref because PubMedNotesBox is stateless
+     * 
+     * @param {object} e 
+     * @param {string} checkboxName 
+     */
+    handleCheckboxChange: function(e, checkboxName) {
+        const currPmidNotes = JSON.parse(JSON.stringify(this.state.currPmidNotes));
+        if (checkboxName === 'nonscorableCheckbox') {
+            const nonscorable = JSON.parse(JSON.stringify(currPmidNotes.nonscorable));
+            nonscorable.checked = !nonscorable.checked;
+            currPmidNotes.nonscorable = nonscorable;
+        } else if (checkboxName === 'otherCheckbox') {
+            const other = JSON.parse(JSON.stringify(currPmidNotes.other));
+            other.checked = !other.checked;
+            currPmidNotes.other = other;
         }
-        this.setState({ currPmidCheckboxes: checkboxes, pubmedFreeText: text });
+        this.setState({ currPmidNotes });
     },
 
-    handleFreeTextChange: function(ref, e) {
-        this.setState({ pubmedFreeText: this.refs[ref].getValue() });
+    /**
+     * Changes textarea text based on textAreaName. Makes deep copy of @currPmidNotes to avoid state mutation.
+     * Note: Does not use ref because PubMedNotesBox is stateless
+     * 
+     * @param {object} e 
+     * @param {string} textAreaName 
+     */
+    handleTextChange: function(e, textAreaName) {
+        const currPmidNotes = JSON.parse(JSON.stringify(this.state.currPmidNotes));
+        if (textAreaName === 'nonscorableText') {
+            const nonscorable = JSON.parse(JSON.stringify(currPmidNotes.nonscorable));
+            nonscorable.text = e.target.value;
+            currPmidNotes.nonscorable = nonscorable;
+        } else if (textAreaName === 'otherText') {
+            const other = JSON.parse(JSON.stringify(currPmidNotes.other));
+            other.text = e.target.value;
+            currPmidNotes.other = other;
+        }
+        this.setState({ currPmidNotes });
+    },
+
+    // Change edit mode for notes and resets @updateMsg
+    setEditMode: function(isEditingNotes) {
+        let updateMsg = this.state.updateMsg;
+        if (isEditingNotes) {
+            updateMsg = null;
+        }
+        this.setState({ updateMsg, isEditingNotes });
     },
 
     render: function() {
+        const {
+            submitBusy,
+            updateMsg,
+            isEditingNotes,
+            currPmidNotes,
+        } = this.state;
         var gdm = this.state.currGdm;
         var pmid = this.state.currPmid;
         var session = (this.props.session && Object.keys(this.props.session).length) ? this.props.session : null;
@@ -277,51 +333,17 @@ var CurationCentral = createReactClass({
                                     <PmidSummary article={currArticle} displayJournal />
                                     <PmidDoiButtons pmid={currArticle.pmid} />
                                     <BetaNote annotation={annotation} session={session} />
-                                    <Form submitHandler={() => this.handleSaveNotes(annotation)} formClassName="form-horizontal pubmed-notes-box">
-                                        <Input
-                                            ref="non-scorable"
-                                            type="checkbox"
-                                            label="Non-scorable evidence"
-                                            labelClassName="col-sm-5"
-                                            wrapperClassName="col-sm-7"
-                                            groupClassName="form-group"
-                                            checked={this.state.currPmidCheckboxes['non-scorable']}
-                                            defaultChecked="false"
-                                            handleChange={this.handleCheckboxChange}
-                                        />
-                                        <Input
-                                            ref="other"
-                                            type="checkbox"
-                                            label="Other comments on PMID"
-                                            labelClassName="col-sm-5"
-                                            wrapperClassName="col-sm-7"
-                                            groupClassName="form-group"
-                                            checked={this.state.currPmidCheckboxes['other']}
-                                            defaultChecked="false"
-                                            handleChange={this.handleCheckboxChange}
-                                        />
-                                        <Input
-                                            ref="pubmedFreeText"
-                                            type="textarea"
-                                            value={this.state.pubmedFreeText}
-                                            labelClassName="col-sm-12"
-                                            wrapperClassName="col-sm-12"
-                                            groupClassName="form-group"
-                                            handleChange={this.handleFreeTextChange}
-                                        />
-                                        <div className="flex-right">
-                                            {this.state.updateMsg ?
-                                                <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                : null}
-                                            <Input
-                                                type="submit"
-                                                id="submit"
-                                                inputClassName="btn-primary pull-right"
-                                                title="Save"
-                                                submitBusy={this.state.submitBusy}
-                                            />
-                                        </div>
-                                    </Form>
+                                    <PubMedNotesBox
+                                        updateMsg={updateMsg}
+                                        submitBusy={submitBusy}
+                                        isEditingNotes={isEditingNotes}
+                                        annotation={annotation}
+                                        currPmidNotes={currPmidNotes}
+                                        setEditMode={this.setEditMode}
+                                        handleSaveNotes={this.handleSaveNotes}
+                                        handleTextChange={this.handleTextChange}
+                                        handleCheckboxChange={this.handleCheckboxChange}
+                                    />
                                     {currArticle.abstract ?
                                         <div className="pmid-overview-abstract">
                                             <h4>Abstract</h4>
@@ -435,7 +457,6 @@ class PmidGdmAddHistory extends Component {
 
 history_views.register(PmidGdmAddHistory, 'article', 'add');
 
-
 // Display a history item for deleting a PMID from a GDM
 class PmidGdmDeleteHistory extends Component {
     render() {
@@ -444,3 +465,20 @@ class PmidGdmDeleteHistory extends Component {
 }
 
 history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
+
+const AnnotationModifyHistory = ({ history }) => {
+    const annotation = history.primary;
+    const { gdm, article } = history.meta.annotation;
+    
+    return (
+        <div>
+            Annotation in <strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong>
+            <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+            <span> modified</span>
+            <span> for <a href={'/curation-central/?gdm=' + gdm.uuid + '&pmid=' + article.pmid}>PMID:{article.pmid}</a></span>
+            <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+        </div>
+    );
+}
+
+history_views.register(AnnotationModifyHistory, 'annotation', 'modify');

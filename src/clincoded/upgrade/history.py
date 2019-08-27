@@ -298,3 +298,8 @@ def history_1_2(value, system):
 def history_2_3(value, system):
     # https://github.com/ClinGen/clincoded/issues/1419
     return
+
+@upgrade_step('history', '3', '4')
+def history_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1419
+    return

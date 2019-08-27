@@ -97,15 +97,39 @@
             "description": "Notes for PubMed",
             "type": "object",
             "properties": {
-                "noteType": {
-                    "title": "Article Note Type",
-                    "description": "Type of note can be non-scorable or other",
-                    "type": "string"
+                "nonscorable": {
+                    "title": "Non-scorable",
+                    "description": "Non-scorable notes",
+                    "type": "object",
+                    "properties": {
+                        "checked": {
+                            "title": "Checked",
+                            "description": "Boolean for whether or not nonscorable is checked",
+                            "type": "boolean"
+                        },
+                        "text": {
+                            "title": "Non-scorable Text",
+                            "description": "Explanation for nonscorable evidence",
+                            "type": "string"
+                        }
+                    }
                 },
-                "noteText": {
-                    "title": "Article Note Text",
-                    "description": "Free text for notes",
-                    "type": "string"
+                "other": {
+                    "title": "Other",
+                    "description": "Other notes",
+                    "type": "object",
+                    "properties": {
+                        "checked": {
+                            "title": "Checked",
+                            "description": "Boolean for whether or not other is checked",
+                            "type": "boolean"
+                        },
+                        "text": {
+                            "title": "Other Text",
+                            "description": "Other comments on PubMed article",
+                            "type": "string"
+                        }
+                    }
                 }
             }
         }

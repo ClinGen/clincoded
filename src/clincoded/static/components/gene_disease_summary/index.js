@@ -546,7 +546,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         const nonscorableEvidenceList = [];
         if (annotations.length) {
             annotations.forEach(annotation => {
-                if (annotation.articleNotes && annotation.articleNotes.noteType === 'non-scorable') {
+                if (annotation.articleNotes && annotation.articleNotes.nonscorable.checked) {
                     nonscorableEvidenceList.push({
                         article: annotation.article,
                         articleNotes: annotation.articleNotes,
