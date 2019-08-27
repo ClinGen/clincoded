@@ -74,10 +74,10 @@ var CurationCentral = createReactClass({
             if (this.state.currPmid !== pmid) {
                 this.setState({ updateMsg: null });
             }
-            var gdm = this.state.currGdm;
+            const gdm = this.state.currGdm;
             if (gdm) {
                 // Find the annotation in the GDM matching the given pmid
-                var currAnnotation = curator.pmidToAnnotation(gdm,pmid);
+                const currAnnotation = curator.pmidToAnnotation(gdm, pmid);
                 if (currAnnotation) {
                     let currPmidNotes = {
                         nonscorable: {
@@ -95,7 +95,7 @@ var CurationCentral = createReactClass({
                     } else {
                         this.setEditMode(true);
                     }
-                    this.setState({currPmidNotes, currPmid: currAnnotation.article.pmid});
+                    this.setState({ currPmidNotes, currPmid: currAnnotation.article.pmid });
                 }
             }
             if (this.state.currGdm) {

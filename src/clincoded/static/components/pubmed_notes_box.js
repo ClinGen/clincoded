@@ -47,7 +47,7 @@ const PubMedNotesBox = ({
                             />
                             <Input
                                 type="textarea"
-                                value={currPmidNotes.nonscorable.text}
+                                controlledValue={currPmidNotes.nonscorable.text}
                                 wrapperClassName="col-sm-8"
                                 handleChange={(ref, e) => handleTextChange(e, 'nonscorableText')}
                             />
@@ -64,7 +64,7 @@ const PubMedNotesBox = ({
                             />
                             <Input
                                 type="textarea"
-                                value={currPmidNotes.other.text}
+                                controlledValue={currPmidNotes.other.text}
                                 wrapperClassName="col-sm-8"
                                 handleChange={(ref, e) => handleTextChange(e, 'otherText')}
                             />
