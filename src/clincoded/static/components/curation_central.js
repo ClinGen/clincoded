@@ -255,13 +255,9 @@ var CurationCentral = createReactClass({
     handleCheckboxChange: function(e, checkboxName) {
         const currPmidNotes = JSON.parse(JSON.stringify(this.state.currPmidNotes));
         if (checkboxName === 'nonscorableCheckbox') {
-            const nonscorable = JSON.parse(JSON.stringify(currPmidNotes.nonscorable));
-            nonscorable.checked = !nonscorable.checked;
-            currPmidNotes.nonscorable = nonscorable;
+            currPmidNotes.nonscorable.checked = !currPmidNotes.nonscorable.checked;
         } else if (checkboxName === 'otherCheckbox') {
-            const other = JSON.parse(JSON.stringify(currPmidNotes.other));
-            other.checked = !other.checked;
-            currPmidNotes.other = other;
+            currPmidNotes.other.checked = !currPmidNotes.other.checked;
         }
         this.setState({ currPmidNotes });
     },
@@ -276,13 +272,9 @@ var CurationCentral = createReactClass({
     handleTextChange: function(e, textAreaName) {
         const currPmidNotes = JSON.parse(JSON.stringify(this.state.currPmidNotes));
         if (textAreaName === 'nonscorableText') {
-            const nonscorable = JSON.parse(JSON.stringify(currPmidNotes.nonscorable));
-            nonscorable.text = e.target.value;
-            currPmidNotes.nonscorable = nonscorable;
+            currPmidNotes.nonscorable.text = e.target.value;
         } else if (textAreaName === 'otherText') {
-            const other = JSON.parse(JSON.stringify(currPmidNotes.other));
-            other.text = e.target.value;
-            currPmidNotes.other = other;
+            currPmidNotes.other.text = e.target.value;
         }
         this.setState({ currPmidNotes });
     },
