@@ -72,7 +72,7 @@ const PubMedNotesBox = ({
                         <div className="flex-right">
                             {
                                 updateMsg
-                                    && <div className="submit-info pull-right">{updateMsg}</div>
+                                    && <div className="submit-info pull-right">{ updateMsg }</div>
                             }
                             <Input
                                 type="submit"

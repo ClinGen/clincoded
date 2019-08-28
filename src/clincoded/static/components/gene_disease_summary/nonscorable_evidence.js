@@ -30,13 +30,14 @@ const GeneDiseaseEvidenceSummaryNonscorableEvidence = ({
                                     nonscorableEvidenceList.map(evidence => (
                                         <tr key={evidence.article.pmid}>
                                             <td>
-                                                <span><strong>{`PMID: ${evidence.article.pmid}`}</strong></span>
+                                                <span><strong>{ `PMID: ${evidence.article.pmid}` }</strong></span>
                                                 <PmidSummary article={evidence.article} displayJournal />
                                                 <span>
                                                     <strong>Explanation: </strong>
-                                                    { evidence.articleNotes && evidence.articleNotes.nonscorable && evidence.articleNotes.nonscorable.text
-                                                        ? <span>{ evidence.articleNotes.nonscorable.text }</span>
-                                                        : <span>None</span>
+                                                    {
+                                                        evidence.articleNotes && evidence.articleNotes.nonscorable && evidence.articleNotes.nonscorable.text
+                                                            ? <span>{ evidence.articleNotes.nonscorable.text }</span>
+                                                            : <span>None</span>
                                                     }
                                                 </span>
                                             </td>
