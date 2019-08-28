@@ -247,7 +247,6 @@ var CurationCentral = createReactClass({
 
     /**
      * Toggles the checkboxes based on checkboxName. Makes a deep copy of @currPmidNotes to avoid state mutation.
-     * Note: Does not use ref because PubMedNotesBox is stateless
      * 
      * @param {object} e 
      * @param {string} checkboxName 
@@ -264,7 +263,6 @@ var CurationCentral = createReactClass({
 
     /**
      * Changes textarea text based on textAreaName. Makes deep copy of @currPmidNotes to avoid state mutation.
-     * Note: Does not use ref because PubMedNotesBox is stateless
      * 
      * @param {object} e 
      * @param {string} textAreaName 
