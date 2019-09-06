@@ -9,7 +9,6 @@ from contentbase.validation import http_error
 
 def includeme(config):
     config.add_route('functional_data', '/functional_data/{variant_id}')
-    config.add_route('population_data', '/population_data/{variant_id}')
     config.scan(__name__)
 
 def get_ldh_data(path):
