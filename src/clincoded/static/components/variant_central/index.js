@@ -57,7 +57,7 @@ var VariantCurationHub = createReactClass({
             ext_myGeneInfo_ClinVar: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
-            ext_genboreeFuncData: null,
+            ext_ldhFuncData: null,
             ext_singleNucleotide: true,
             ext_gnomadExac: false,
             loading_clinvarEutils: true,
@@ -68,8 +68,8 @@ var VariantCurationHub = createReactClass({
             loading_pageData: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
-            loading_genboreeFuncData: true,
-            error_genboreeFuncData: null,
+            loading_ldhFuncData: true,
+            error_ldhFuncData: null,
             calculated_pathogenicity: null,
             autoClassification: null,
             provisionalPathogenicity: null,
@@ -364,8 +364,8 @@ var VariantCurationHub = createReactClass({
                 const lastRecord = (articleIdx === articles.length - 1);
                 if (lastRecord) {
                     functionalData.ld.AlleleFunctionalImpactStatement = afisObject;
-                    this.setState({ext_genboreeFuncData: functionalData}, () => {
-                        this.setState({loading_genboreeFuncData: false});
+                    this.setState({ext_ldhFuncData: functionalData}, () => {
+                        this.setState({loading_ldhFuncData: false});
                     });
                 }
             });
@@ -405,7 +405,7 @@ var VariantCurationHub = createReactClass({
                     });
                 });
             } else {
-                this.setState({loading_genboreeFuncData: false});
+                this.setState({loading_ldhFuncData: false});
             }
         };
 
@@ -420,21 +420,21 @@ var VariantCurationHub = createReactClass({
                         getPubmedArticles(functionalData, afisObject).then(articles => {
                             setPubmedArticles(functionalData, afisObject, articles);
                         }).catch(err => {
-                            this.setState({loading_genboreeFuncData: false, error_genboreeFuncData: err});
+                            this.setState({loading_ldhFuncData: false, error_ldhFuncData: err});
                             console.log('Pubmed Fetch Error', err);
                         });
                     } else {
-                        this.setState({loading_genboreeFuncData: false});
+                        this.setState({loading_ldhFuncData: false});
                     }
                 }).catch(err => {
-                    this.setState({loading_genboreeFuncData: false, error_genboreeFuncData: err});
+                    this.setState({loading_ldhFuncData: false, error_ldhFuncData: err});
                     console.log('Genboree Functional Data LDH Fetch Error: ', err);
                 });
             } else {
-                this.setState({loading_genboreeFuncData: false});
+                this.setState({loading_ldhFuncData: false});
             }
         } else {
-            this.setState({loading_genboreeFuncData: false});
+            this.setState({loading_ldhFuncData: false});
         }
     },
 
@@ -721,7 +721,7 @@ var VariantCurationHub = createReactClass({
                             ext_clinVarSCV={this.state.ext_clinVarSCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                            ext_genboreeFuncData={this.state.ext_genboreeFuncData}
+                            ext_ldhFuncData={this.state.ext_ldhFuncData}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             ext_gnomadExac={this.state.ext_gnomadExac}
@@ -730,11 +730,11 @@ var VariantCurationHub = createReactClass({
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
-                            loading_genboreeFuncData={this.state.loading_genboreeFuncData}
+                            loading_ldhFuncData={this.state.loading_ldhFuncData}
                             loading_pageData={this.state.loading_pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
-                            error_genboreeFuncData={this.state.error_genboreeFuncData}
+                            error_ldhFuncData={this.state.error_ldhFuncData}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
                             selectedTab={selectedTab} selectedSubtab={selectedSubtab}
                             selectedCriteria={selectedCriteria} affiliation={affiliation} />

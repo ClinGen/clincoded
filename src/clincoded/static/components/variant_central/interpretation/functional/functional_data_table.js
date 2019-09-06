@@ -27,9 +27,9 @@ import { external_url_map } from '../../../globals';
 
 const propTypes = {
     selectedTab: PropTypes.number,
-    ext_genboreeFuncData: PropTypes.object,
-    loading_genboreeFuncData: PropTypes.bool.isRequired,
-    error_genboreeFuncData: PropTypes.object,
+    ext_ldhFuncData: PropTypes.object,
+    loading_ldhFuncData: PropTypes.bool.isRequired,
+    error_ldhFuncData: PropTypes.object,
     handleTabSelect: PropTypes.func.isRequired,
     isPatientSourced: PropTypes.func.isRequired,
     getGenotypeLabel: PropTypes.func.isRequired,
@@ -38,21 +38,21 @@ const propTypes = {
 
 const defaultProps = {
     selectedTab: 0,
-    ext_genboreeFuncData: {},
-    error_genboreeFuncData: null,
+    ext_ldhFuncData: {},
+    error_ldhFuncData: null,
 };
 
 const FunctionalDataTable = ({
     selectedTab,
-    ext_genboreeFuncData,
-    loading_genboreeFuncData,
-    error_genboreeFuncData,
+    ext_ldhFuncData,
+    loading_ldhFuncData,
+    error_ldhFuncData,
     handleTabSelect,
     isPatientSourced,
     getGenotypeLabel,
     getOntologiesUrl,
 }) => {
-    const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_genboreeFuncData);
+    const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_ldhFuncData);
     const articleKeys = sourceArticles && Object.keys(sourceArticles);
     const currentKey = articleKeys && articleKeys[selectedTab];
     const currentSource = sourceArticles && sourceArticles[currentKey];
@@ -68,11 +68,11 @@ const FunctionalDataTable = ({
             </div>
             <div className="panel-content-wrapper">
                 {
-                    loading_genboreeFuncData
+                    loading_ldhFuncData
                         && showActivityIndicator('Retrieving data... ')
                 }
                 {
-                    currentKey && articleKeys && articleKeys.length > 0 && !loading_genboreeFuncData
+                    currentKey && articleKeys && articleKeys.length > 0 && !loading_ldhFuncData
                         ? (
                             <div className="functional-tabs-wrapper">
                                 <ul className="vci-tabs-header tab-label-list vci-subtabs dynamic-tabs" role="tablist">
@@ -255,7 +255,7 @@ const FunctionalDataTable = ({
                                             <span>
                                                 &nbsp;&nbsp;
                                                 {
-                                                    error_genboreeFuncData
+                                                    error_ldhFuncData
                                                         ? 'Data is unavailable at this time.'
                                                         : 'No evidence added.'
                                                 }

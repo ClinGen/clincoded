@@ -24,9 +24,9 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         data: PropTypes.object,
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
-        ext_genboreeFuncData: PropTypes.object,
-        loading_genboreeFuncData: PropTypes.bool,
-        error_genboreeFuncData: PropTypes.object,
+        ext_ldhFuncData: PropTypes.object,
+        loading_ldhFuncData: PropTypes.bool,
+        error_ldhFuncData: PropTypes.object,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
         session: PropTypes.object,
@@ -50,8 +50,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         if (this.state.selectedCriteria) {
             setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
-        if (this.props.ext_genboreeFuncData && this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareFunctionalData(this.props.ext_genboreeFuncData, this.state.interpretation.evaluations);
+        if (this.props.ext_ldhFuncData && this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareFunctionalData(this.props.ext_ldhFuncData, this.state.interpretation.evaluations);
         }
     },
 
@@ -62,8 +62,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
             });
         }
-        if (this.props.ext_genboreeFuncData && nextProps.interpretation && nextProps.interpretation.evaluations) {
-            this.compareFunctionalData(this.props.ext_genboreeFuncData, nextProps.interpretation.evaluations);
+        if (this.props.ext_ldhFuncData && nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareFunctionalData(this.props.ext_ldhFuncData, nextProps.interpretation.evaluations);
         }
     },
 
@@ -142,9 +142,9 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     render() {
         const affiliation = this.props.affiliation, session = this.props.session;
         const {
-            ext_genboreeFuncData,
-            loading_genboreeFuncData,
-            error_genboreeFuncData,
+            ext_ldhFuncData,
+            loading_ldhFuncData,
+            error_ldhFuncData,
         } = this.props;
         const { funcDataObjDiffFlag, selectedFunctionalTab } = this.state;
         return (
@@ -173,14 +173,14 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['BS3', 'PS3']}
-                                    evidenceData={ext_genboreeFuncData} evidenceDataUpdated={funcDataObjDiffFlag} criteriaCrossCheck={[['BS3', 'PS3']]}
+                                    evidenceData={ext_ldhFuncData} evidenceDataUpdated={funcDataObjDiffFlag} criteriaCrossCheck={[['BS3', 'PS3']]}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                     affiliation={affiliation} session={session} />
                             </div>
                         </div>
                         : null}
-                    {!loading_genboreeFuncData && funcDataObjDiffFlag ?
+                    {!loading_ldhFuncData && funcDataObjDiffFlag ?
                         <div className="row">
                             <p className="alert alert-warning">
                                 <strong>Notice:</strong> Some of the data retrieved below has changed since the last time you evaluated these criteria. Please update your evaluation as needed.
@@ -189,9 +189,9 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         : null}
                     <FunctionalDataTable
                         selectedTab={selectedFunctionalTab}
-                        ext_genboreeFuncData={ext_genboreeFuncData}
-                        loading_genboreeFuncData={loading_genboreeFuncData}
-                        error_genboreeFuncData={error_genboreeFuncData}
+                        ext_ldhFuncData={ext_ldhFuncData}
+                        loading_ldhFuncData={loading_ldhFuncData}
+                        error_ldhFuncData={error_ldhFuncData}
                         handleTabSelect={this.handleTabSelect}
                         isPatientSourced={this.isPatientSourced}
                         getGenotypeLabel={this.getGenotypeLabel}
