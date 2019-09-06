@@ -428,7 +428,7 @@ var VariantCurationHub = createReactClass({
                     }
                 }).catch(err => {
                     this.setState({loading_ldhFuncData: false, error_ldhFuncData: err});
-                    console.log('Genboree Functional Data LDH Fetch Error: ', err);
+                    console.log('LDH Functional Data Fetch Error: ', err);
                 });
             } else {
                 this.setState({loading_ldhFuncData: false});
