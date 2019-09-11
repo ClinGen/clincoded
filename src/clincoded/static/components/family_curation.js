@@ -1484,7 +1484,7 @@ var FamilyCuration = createReactClass({
             const groups = (family && family.associatedGroups) ? family.associatedGroups :
             (this.state.group ? [this.state.group] : null);
             if (groups && groups.length) {                
-                groups.forEach((group) => {
+                groups.forEach(group => {
                     if (group.hpoIdInDiagnosis && group.hpoIdInDiagnosis.length) {
                         let hpoIds = group.hpoIdInDiagnosis;
                         this.fetchHpoName(hpoIds);
