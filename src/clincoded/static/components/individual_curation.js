@@ -68,7 +68,9 @@ const IndividualCuration = createReactClass({
             diseaseUuid: null,
             diseaseError: null,
             scoreError: false,
-            scoreErrorMsg: ''
+            scoreErrorMsg: '',
+            hpoWithTerms: [],
+            hpoInElimWithTerms: []
         };
     },
 
@@ -122,9 +124,14 @@ const IndividualCuration = createReactClass({
         e.preventDefault(); e.stopPropagation();
         var hpoIds = '';
         var hpoElimIds = '';
-
         if (item === 'phenotype') {
-            if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
+            const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+            if (hpoWithTerms && hpoWithTerms.length) {
+                hpoIds = this.state.hpoWithTerms.map((hpoid, i) => {
+                    return (hpoid);
+                }).join(', ');
+                this.refs['hpoid'].setValue(hpoIds);
+            } else if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
                 hpoIds = obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                     return (hpoid);
                 }).join(', ');
@@ -146,7 +153,13 @@ const IndividualCuration = createReactClass({
                 this.refs['race'].setValue(obj.race);
             }
         } else if (item === 'notphenotype') {
-            if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
+            const hpoInElimWithTerms = this.state.hpoInElimWithTerms ? this.state.hpoInElimWithTerms : [];
+            if (hpoInElimWithTerms && hpoInElimWithTerms.length) {
+                hpoElimIds = this.state.hpoInElimWithTerms.map((elimhpo, i) => {
+                    return (elimhpo);
+                }).join(', ');
+                this.refs['nothpoid'].setValue(hpoElimIds);
+            } else if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
                 hpoElimIds = obj.hpoIdInElimination.map(function(elimhpo, i) {
                     return (elimhpo);
                 }).join(', ');
@@ -372,8 +385,8 @@ const IndividualCuration = createReactClass({
             var formError = false;
 
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            var hpoids = this.getFormValue('hpoid');
+            var nothpoids = this.getFormValue('nothpoid');
             let recessiveZygosity = this.state.recessiveZygosity;
             let variantUuid0 = this.getFormValue('variantUuid0'),
                 variantUuid1 = this.getFormValue('variantUuid1');
@@ -391,20 +404,6 @@ const IndividualCuration = createReactClass({
                 // PMID list is bad
                 formError = true;
                 this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
-                // NOT HPOID list is bad
-                formError = true;
-                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
 
             // Get variant uuid's if they were added via the modals
@@ -689,7 +688,7 @@ const IndividualCuration = createReactClass({
 
         // Fill in the individual fields from the Diseases & Phenotypes panel
         if (hpoids && hpoids.length) {
-            newIndividual.hpoIdInDiagnosis = hpoids;
+            newIndividual.hpoIdInDiagnosis = hpoids.split(', ');
         } else if (newIndividual.hpoIdInDiagnosis && newIndividual.hpoIdInDiagnosis.length) {
             delete newIndividual.hpoIdInDiagnosis;
         }
@@ -700,7 +699,9 @@ const IndividualCuration = createReactClass({
             delete newIndividual.termsInDiagnosis;
         }
         if (nothpoids && nothpoids.length) {
-            newIndividual.hpoIdInElimination = nothpoids;
+            newIndividual.hpoIdInElimination = nothpoids.split(', ');
+        } else if (newIndividual.hpoIdInElimination && newIndividual.hpoIdInElimination.length) {
+            delete newIndividual.hpoIdInElimination;
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
@@ -904,6 +905,83 @@ const IndividualCuration = createReactClass({
     componentDidMount: function() {
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.loadData();
+    },
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.family !== prevState.family) {
+            const family = this.state.family;
+            // Check if HPO ids with terms are already passed down from associated groups, if not then fetch
+            const termCheck = / *\([^)]*\) */g;
+            let hpoChecked = [];
+            if (family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length) {
+                let hpoIds = family.hpoIdInDiagnosis;
+                hpoIds.forEach((hpoid) => {
+                   return hpoChecked = hpoid.match(termCheck);
+                });
+                if (!hpoChecked) {
+                    this.fetchHpoName(hpoIds);
+                }
+            }
+            if (family.hpoIdInElimination && family.hpoIdInElimination.length) {
+                let hpoIds = family.hpoIdInElimination;
+                hpoIds.forEach((hpoid) => {
+                    return hpoChecked = hpoid.match(termCheck);
+                });
+                if (!hpoChecked) {
+                    this.fetchHpoInElimName(hpoIds);
+                }
+            }
+        }
+    },
+
+    /**
+     * Method to fetch HPO term names and append them to HPO ids
+     * 
+     * @param {array} hpoIds 
+     */
+    fetchHpoName(hpoIds) {
+        const hpoWithTerms = [];
+        hpoIds.forEach(id => {
+            let url = external_url_map['HPOApi'] + id.replace(':', '_');
+            // Make the OLS REST API call
+            this.getRestData(url).then(response => {
+                let termLabel = response['_embedded']['terms'][0]['label'];
+                let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
+                hpoWithTerms.push(hpoWithTerm);
+                this.setState({ hpoWithTerms: hpoWithTerms });
+            }).catch(err => {
+                // Unsuccessful retrieval
+                console.warn('Error in fetching HPO data =: %o', err);
+                let hpoWithTerm = id + ' (note: term not found)';
+                hpoWithTerms.push(hpoWithTerm);
+                this.setState({ hpoWithTerms: hpoWithTerms });
+            });
+        });
+    },
+
+    /**
+     * Method to fetch HPO term names and append them to HPO In Elimination ids
+     * 
+     * @param {array} hpoIds 
+     */
+    fetchHpoInElimName(hpoIds) {
+        const hpoInElimWithTerms = [];
+        hpoIds.forEach(id => {
+            let url = external_url_map['HPOApi'] + id.replace(':', '_');
+            // Make the OLS REST API call
+            this.getRestData(url).then(response => {
+                let termLabel = response['_embedded']['terms'][0]['label'];
+                let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
+                hpoInElimWithTerms.push(hpoWithTerm);
+                this.setState({ hpoInElimWithTerms: hpoInElimWithTerms });
+            }).catch(err => {
+                // Unsuccessful retrieval
+                console.warn('Error in fetching HPO data =: %o', err);
+                let hpoWithTerm = id + ' (note: term not found)';
+                hpoInElimWithTerms.push(hpoWithTerm);
+                this.setState({ hpoInElimWithTerms: hpoInElimWithTerms });
+            });
+        });
     },
 
     /**
@@ -1244,7 +1322,7 @@ function IndividualCommonDiseases() {
             }
             <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
                 :
@@ -1256,7 +1334,7 @@ function IndividualCommonDiseases() {
                 value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
-                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Group"
+                <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Group"
                     clickHandler={this.handleClick.bind(this, associatedGroups[0], 'phenotype')} />
                 : null}
             {associatedFamilies && ((associatedFamilies[0].hpoIdInDiagnosis && associatedFamilies[0].hpoIdInDiagnosis.length) || associatedFamilies[0].termsInDiagnosis) ?
@@ -1273,7 +1351,7 @@ function IndividualCommonDiseases() {
             }  
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
                 :
@@ -1958,6 +2036,7 @@ const IndividualViewer = createReactClass({
                                 <div>
                                     <dt>HPO IDs</dt>
                                     <dd>{individual.hpoIdInDiagnosis && individual.hpoIdInDiagnosis.map(function(hpo, i) {
+                                        hpo = hpo.replace(/ *\([^)]*\) */g, "");
                                         return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
@@ -1970,6 +2049,7 @@ const IndividualViewer = createReactClass({
                                 <div>
                                     <dt>NOT HPO IDs</dt>
                                     <dd>{individual.hpoIdInElimination && individual.hpoIdInElimination.map(function(hpo, i) {
+                                        hpo = hpo.replace(/ *\([^)]*\) */g, "");
                                         return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
