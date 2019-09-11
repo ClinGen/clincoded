@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { curator_page, userMatch, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
-import omit from 'lodash/omit';
+import _ from 'underscore';
 import ViewJson from '../view_json';
 import VariantInterpretationSummaryHeader from './header';
 import VariantInterpretationSummaryEvaluation from './evaluations';
@@ -88,7 +88,7 @@ const VariantInterpretationSummary = createReactClass({
     render() {
         const interpretation = this.state.interpretation;
         const classification = this.state.classification;
-        const parsedJson = omit(interpretation, ['@id', '@type', 'actions', 'active']);
+        const parsedJson = _.omit(interpretation, ['@type', 'actions', 'active']);
         const json = JSON.stringify(parsedJson, null, 4);
         let jsonButtonText = this.state.displayJson ? 'Hide JSON' : 'View JSON';
 
