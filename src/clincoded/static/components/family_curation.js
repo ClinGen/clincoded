@@ -298,7 +298,6 @@ var FamilyCuration = createReactClass({
      * @param {array} hpoIds 
      */
     fetchHpoName(hpoIds) {
-        debugger;
         const hpoWithTerms = [];
         hpoIds.forEach(id => {
             let url = external_url_map['HPOApi'] + id.replace(':', '_');
@@ -324,7 +323,6 @@ var FamilyCuration = createReactClass({
      * @param {array} hpoIds 
      */
     fetchHpoInElimName(hpoIds) {
-        debugger;
         const hpoInElimWithTerms = [];
         hpoIds.forEach(id => {
             let url = external_url_map['HPOApi'] + id.replace(':', '_');
