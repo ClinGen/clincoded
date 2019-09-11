@@ -372,7 +372,7 @@ var VariantCurationHub = createReactClass({
         };
 
         // Fetches pubmed data for each source article
-        const getPubmedArticles = (functionalData, afisObject) => {
+        const getPubmedArticles = (afisObject) => {
             const pubmedUrls = [];
             const pubmedIds = [];
             const pubmedIdKeys = Object.keys(afisObject);
@@ -417,7 +417,7 @@ var VariantCurationHub = createReactClass({
                     const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(functionalData) || [];
                     if (afisRecords && afisRecords.length > 0) {
                         const afisObject = getAfisObject(afisRecords);
-                        getPubmedArticles(functionalData, afisObject).then(articles => {
+                        getPubmedArticles(afisObject).then(articles => {
                             setPubmedArticles(functionalData, afisObject, articles);
                         }).catch(err => {
                             this.setState({loading_ldhFuncData: false, error_ldhFuncData: err});
