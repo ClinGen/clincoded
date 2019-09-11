@@ -60,7 +60,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             affiliationUtilityBar.setAttribute('style', 'display:none');
         }
         if (this.jsonView) {
-            this.jsonView.scrollIntoView({ behavior: "smooth" });
+            this.jsonView.scrollIntoView({ behavior: 'smooth' });
         }
     },
 
