@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "6"
+            "default": "7"
         },
         "label": {
             "title": "Label",
@@ -360,9 +360,21 @@
                     "title": "Is this Family Consanguineous",
                     "type": "string"
                 },
+                "moiDisplayedForFamily": {
+                    "title": "What mode of inheritance does this family display",
+                    "type": "string"
+                },
+                "probandIs": {
+                    "title": "Proband is:",
+                    "type": "string"
+                },
                 "pedigreeLocation": {
                     "title": "Location of Pedigree in Publication",
                     "description": "If pedigree provided in publication, indicate location",
+                    "type": "string"
+                },
+                "lodRequirements": {
+                    "title": "Does the family meet requirements for estimating LOD score for EITHER autosomal dominant/X-linked or autosomal recessive?",
                     "type": "string"
                 },
                 "lodPublished": {

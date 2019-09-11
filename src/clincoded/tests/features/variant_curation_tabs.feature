@@ -18,7 +18,7 @@ Feature: Variant Curation Tabs
         When I fill in the css element field "input.form-control" with "17677"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NM_007294.3(BRCA1):c.5266dupC (p.Gln1756Profs)"
+        Then I should see "ClinVar Variant ID"
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "reviewed by expert panel"
@@ -61,7 +61,7 @@ Feature: Variant Curation Tabs
         When I fill in the css element field "input.form-control" with "53237"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NC_000007"
+        Then I should see "ClinVar Variant ID"
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "criteria provided, single submitter"
@@ -105,7 +105,7 @@ Feature: Variant Curation Tabs
         When I fill in the css element field "input.form-control" with "224885"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "LRG_121t1"
+        Then I should see "ClinVar Variant ID"
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "no assertion criteria provided"
@@ -149,7 +149,7 @@ Feature: Variant Curation Tabs
         When I fill in the css element field "input.form-control" with "213703"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NC_000001"
+        Then I should see "ClinVar Variant ID"
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "criteria provided, single submitter"

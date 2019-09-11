@@ -4,7 +4,8 @@
         "with paternal imprinting (HP:0012274)",
         "sex-limited (HP:0001470)",
         "with genetic anticipation",
-        "primarily or exclusively de novo"
+        "primarily or exclusively de novo",
+        "mosaic"
     ],
     "Autosomal recessive inheritance (HP:0000007)": [
         "with genetic anticipation",
@@ -14,6 +15,7 @@
         "primarily or exclusively homoplasmic",
         "primarily or exclusively heteroplasmic"
     ],
+    "Semidominant inheritance (HP:0032113)": [],
     "X-linked inheritance (HP:0001417)": [
         "dominant (HP:0001423)",
         "recessive (HP:0001419)",
@@ -24,7 +26,7 @@
         "Somatic mutation (HP:0001428)",
         "Multifactorial inheritance (HP:0001426)",
         "Codominant inheritance",
-        "Semidominant inheritance"
+        "Mosaic"
     ],
     "Undetermined mode of inheritance (HP:0000005)": []
 }

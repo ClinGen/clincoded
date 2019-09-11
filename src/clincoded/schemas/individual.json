@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "6"
+            "default": "7"
         },
         "label": {
             "title": "Label",
@@ -265,6 +265,11 @@
         "bothVariantsInTrans": {
             "title": "Is the 2nd variant located in trans with the 1st one?",
             "description": "For recessive heterozygous only",
+            "type": "string"
+        },
+        "probandIs": {
+            "title": "The proband is: ",
+            "description": "Selection for semidominant MOI only, under Individual- Associate Variant",
             "type": "string"
         },
         "denovo": {
