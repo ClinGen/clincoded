@@ -370,6 +370,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
         const attributionButtonText = this.state.showAttributionForm ? 'Close Attributions Form' : 'Open Attributions Form';
+        const formHelpText = 'Add a secondary approver or contributor from another affiliation or expert panel to the classification.';
 
         return (
             <div className="final-approval-panel-content">
@@ -526,7 +527,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" onChange={this.handleApproverSelect} />
                                         </div>
                                         <div className="approval-form">
-                                            <label className="control-label">Approval Date:</label>
+                                            <label className="control-label">Final Approval Date:</label>
                                             <div className="approval-date">
                                                 <DayPickerInput
                                                     value={approvalReviewDate}
@@ -548,6 +549,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 : null}
                             </div>
                             <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
+                            <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
+                                <i className="icon icon-info-circle" id="secondary-approvers-help"></i>
+                            </span>
                         </div>
                     }
                     <div className="col-md-12 approval-form-buttons-wrapper">
