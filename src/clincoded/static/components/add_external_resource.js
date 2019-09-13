@@ -597,7 +597,7 @@ function clinvarQueryResource() {
     // for pinging and parsing data from ClinVar
     this.saveFormValue('resourceId', this.state.inputValue);
     if (clinvarValidateForm.call(this)) {
-        var url = external_url_map['ClinVarEutils'];
+        var url = external_url_map['ClinVarEutilsVCV'];
         var data;
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then(xml => {
@@ -760,7 +760,7 @@ function carQueryResource() {
             data = parseCAR(json);
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
-                url = external_url_map['ClinVarEutils'];
+                url = external_url_map['ClinVarEutilsVCV'];
                 this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
                     var data_cv = parseClinvar(xml);
                     if (data_cv.clinvarVariantId) {

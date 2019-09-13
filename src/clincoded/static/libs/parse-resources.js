@@ -1,198 +1,396 @@
 'use strict';
-import _ from 'underscore';
 
-// Function for parsing ClinVar data for variant object creation
-// Derived from:
-// https://github.com/standard-analytics/pubmed-schema-org/blob/master/lib/pubmed.js
+/*
+XSD (XML Schema Definition) that likely describes the XML elements within ClinVar's EFetch response:
+ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/clinvar_variation/variation_archive.xsd (v1.3 as of Sept 2019)
+
+A quasi-XSD of the elements we're interested in (refined from the document above):
+<xs:element name="ClinVarResult-Set">
+    <xs:element name="VariationArchive" minOccurs="1" maxOccurs="unbounded">
+        <xs:attribute name="VariationID" type="xs:positiveInteger" use="required" />
+        <xs:attribute name="VariationName" type="xs:string" use="required" />
+        <xs:attribute name="VariationType" type="xs:string" use="required" />
+        <xs:choice>
+            <xs:element name="InterpretedRecord" minOccurs="1" maxOccurs="1">
+                <xs:choice>
+                    <xs:element name="SimpleAllele" />
+                    <xs:element name="Haplotype" minOccurs="1" maxOccurs="1">
+                        <xs:attribute name="VariationID" type="xs:int" use="required" />
+                        <xs:element name="SimpleAllele" minOccurs="1" maxOccurs="unbounded" />
+                    </xs:element>
+                    <xs:element name="Genotype" minOccurs="1" maxOccurs="1">
+                        <xs:attribute name="VariationID" type="xs:int" use="required" />
+                        <xs:choice minOccurs="1" maxOccurs="unbounded">
+                            <xs:element name="SimpleAllele" minOccurs="1" maxOccurs="1" />
+                            <xs:element name="Haplotype" minOccurs="1" maxOccurs="1">
+                                <xs:attribute name="VariationID" type="xs:int" use="required" />
+                                <xs:element name="SimpleAllele" minOccurs="1" maxOccurs="unbounded" />
+                            </xs:element>
+                        </xs:choice>
+                    </xs:element>
+                </xs:choice>
+            </xs:element>
+            <xs:element name="IncludedRecord" minOccurs="1" maxOccurs="1">
+                <xs:choice>
+                    <xs:element name="SimpleAllele" />
+                    <xs:element name="Haplotype" minOccurs="1" maxOccurs="1">
+                        <xs:attribute name="VariationID" type="xs:int" use="required" />
+                        <xs:element name="SimpleAllele" minOccurs="1" maxOccurs="unbounded" />
+                    </xs:element>
+                </xs:choice>
+            </xs:element>
+        </xs:choice>
+    </xs:element>
+</xs:element>
+
+<xs:element name="SimpleAllele">
+    <xs:attribute name="VariationID" type="xs:positiveInteger" use="required" />
+    <xs:element name="GeneList" minOccurs="0" maxOccurs="1">
+        <xs:element name="Gene" minOccurs="0" maxOccurs="unbounded">
+            <xs:attribute name="Symbol" use="optional" />
+            <xs:attribute name="FullName" type="xs:string" use="required" />
+            <xs:attribute name="GeneID" type="xs:positiveInteger" use="required" />
+            <xs:attribute name="HGNC_ID" type="xs:string" use="optional" />
+        </xs:element>
+    </xs:element>
+    <xs:element name="VariantType" type="xs:string" minOccurs="0" />
+    <xs:element name="Location" minOccurs="0">
+        <xs:element name="SequenceLocation" minOccurs="0" maxOccurs="unbounded">
+            <xs:attribute name="Assembly" type="xs:string" use="required" />
+            <xs:attribute name="Chr" use="required">
+                <xs:union>
+                    <xs:restriction base="xs:int">
+                        <xs:minInclusive value="1" />
+                        <xs:maxInclusive value="22" />
+                    </xs:restriction>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="X" />
+                        <xs:enumeration value="Y" />
+                        <xs:enumeration value="MT" />
+                        <xs:enumeration value="PAR" />
+                        <xs:enumeration value="Un" />
+                    </xs:restriction>
+                </xs:union>
+            </xs:attribute>
+            <xs:attribute name="Accession" type="xs:string" use="optional" />
+            <xs:attribute name="start" type="xs:nonNegativeInteger" use="optional" />
+            <xs:attribute name="stop" type="xs:positiveInteger" use="optional" />
+            <xs:attribute name="referenceAllele" type="xs:string" use="optional" />
+            <xs:attribute name="alternateAllele" type="xs:string" use="optional" />
+            <xs:attribute name="AssemblyAccessionVersion" type="xs:string" use="optional" />
+            <xs:attribute name="AssemblyStatus" use="optional">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="current" />
+                    <xs:enumeration value="previous" />
+                </xs:restriction>
+            </xs:attribute>
+        </xs:element>
+    </xs:element>
+    <xs:element name="OtherNameList" minOccurs="0">
+        <xs:element name="Name" type="xs:string" nillable="false" maxOccurs="unbounded" />
+    </xs:element>
+    <xs:element name="ProteinChange" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    <xs:element name="HGVSlist" minOccurs="0">
+        <xs:element name="HGVS" minOccurs="0" maxOccurs="unbounded">
+            <xs:attribute name="Type" use="required">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="coding" />
+                    <xs:enumeration value="genomic" />
+                    <xs:enumeration value="genomic, top-level" />
+                    <xs:enumeration value="non-coding" />
+                    <xs:enumeration value="protein" />
+                </xs:restriction>
+            </xs:attribute>
+            <xs:attribute name="Assembly" use="optional" />
+            <xs:element name="NucleotideExpression" minOccurs="0" maxOccurs="1">
+                <xs:attribute name="sequenceAccessionVersion" use="optional" />
+                <xs:attribute name="change" use="optional" />
+                <xs:element name="Expression" type="xs:string" />
+            </xs:element>
+            <xs:element name="ProteinExpression" minOccurs="0" maxOccurs="1">
+                <xs:attribute name="sequenceAccessionVersion" use="optional" />
+                <xs:attribute name="change" use="optional" />
+                <xs:element name="Expression" type="xs:string" />
+            </xs:element>
+            <xs:element name="MolecularConsequence" minOccurs="0" maxOccurs="unbounded">
+                <xs:attribute name="DB" type="xs:string" use="required" />
+                <xs:attribute name="ID" type="xs:string" use="required" />
+                <xs:attribute name="Type" type="xs:string" use="optional" />
+            </xs:element>
+        </xs:element>
+    </xs:element>
+    <xs:element name="XRefList" minOccurs="0">
+        <xs:element name="XRef" minOccurs="0" maxOccurs="unbounded">
+            <xs:attribute name="DB" type="xs:string" use="required" />
+            <xs:attribute name="ID" type="xs:string" use="required" />
+        </xs:element>
+    </xs:element>
+</xs:element>
+*/
+
+/**
+ * Function to parse XML document of ClinVar data for variant object creation
+ * @param {string} xml - XML document containing ClinVar data
+ * @param {boolean} extended - Indicator that extended parsing needs to happen
+ */
 export function parseClinvar(xml, extended) {
-    var variant = {};
-    var doc = new DOMParser().parseFromString(xml, 'text/xml');
-    var $ClinVarResult = doc.getElementsByTagName('ClinVarResult-Set')[0];
-    if ($ClinVarResult) {
-        var $VariationReport = $ClinVarResult.getElementsByTagName('VariationReport')[0];
-        if ($VariationReport) {
-            // Get the ID (just in case) and Preferred Title
-            variant.clinvarVariantId = $VariationReport.getAttribute('VariationID');
-            variant.clinvarVariantTitle = $VariationReport.getAttribute('VariationName');
-            // FIXME: Need to handle 'Haplotype' variant which has multiple alleles
-            // e.g. http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=clinvar&rettype=variation&id=7901
-            var $Allele = $VariationReport.getElementsByTagName('Allele')[0];
-            if ($Allele) {
-                // Parse <VariantType> node under <Allele>
-                let $variationType = $Allele.getElementsByTagName('VariantType')[0];
-                if ($variationType) {
-                    variant.variationType = $variationType.textContent;
-                }
-                // Parse <Name> node under <OtherNameList>
-                let $OtherNameListNode = $Allele.getElementsByTagName('OtherNameList')[0];
-                let $OtherNameNodes = [];
-                if ($OtherNameListNode) {
-                    variant.otherNameList = [];
-                    $OtherNameNodes = $OtherNameListNode.getElementsByTagName('Name');
-                    for (var k = 0; k < $OtherNameNodes.length; k++) {
-                        variant.otherNameList.push($OtherNameNodes[k].textContent)
-                    }
-                }
-                // Parse <MolecularConsequence> node under <MolecularConsequenceList>
-                let $MolecularConsequenceListNode = $Allele.getElementsByTagName('MolecularConsequenceList')[0];
-                let $MolecularConsequenceNodes = [];
-                variant.molecularConsequenceList = [];
-                if ($MolecularConsequenceListNode) {
-                    $MolecularConsequenceNodes = $MolecularConsequenceListNode.getElementsByTagName('MolecularConsequence');
-                    for (var i = 0; i < $MolecularConsequenceNodes.length; i++) {
-                        let molecularItem = {
-                            "hgvsName": $MolecularConsequenceNodes[i].getAttribute('HGVS'),
-                            "term": $MolecularConsequenceNodes[i].getAttribute('Function'),
-                            "soId": $MolecularConsequenceNodes[i].getAttribute('SOid')
-                        };
-                        variant.molecularConsequenceList.push(molecularItem);
-                    }
-                }
-                var $HGVSlist_raw = $Allele.getElementsByTagName('HGVSlist')[0];
-                if ($HGVSlist_raw) {
-                    variant.hgvsNames = {};
-                    variant.hgvsNames.others = [];
-                    // get the HGVS entries
-                    var $HGVSlist = $HGVSlist_raw.getElementsByTagName('HGVS');
-                    _.map($HGVSlist, $HGVS => {
-                        let temp_hgvs = $HGVS.textContent;
-                        let assembly = $HGVS.getAttribute('Assembly');
-                        if (assembly) {
-                            variant.hgvsNames[assembly] = temp_hgvs;
-                        } else {
-                            variant.hgvsNames.others.push(temp_hgvs);
+    let variant = {};
+    const docClinVarXML = new DOMParser().parseFromString(xml, 'text/xml');
+    const elementClinVarResultSet = docClinVarXML.getElementsByTagName('ClinVarResult-Set')[0];
+
+    if (elementClinVarResultSet) {
+        // Expecting one VariationArchive element per variant (and one variant at a time)
+        const elementVariationArchive = elementClinVarResultSet.getElementsByTagName('VariationArchive')[0];
+
+        if (elementVariationArchive) {
+            let elementRecord = elementVariationArchive.getElementsByTagName('InterpretedRecord')[0];
+            let isInterpretedRecord = false;
+            let elementSimpleAllele;
+            variant.clinvarVariantId = elementVariationArchive.getAttribute('VariationID');
+            variant.clinvarVariantTitle = elementVariationArchive.getAttribute('VariationName');
+
+            // Expecting either an InterpretedRecord or an IncludedRecord element
+            if (elementRecord) {
+                isInterpretedRecord = true;
+            } else {
+                elementRecord = elementVariationArchive.getElementsByTagName('IncludedRecord')[0];
+            }
+
+            // Keeping existing business logic of processing only one SimpleAllele element
+            if (elementRecord) {
+                const elementSimpleAlleleTemp = elementRecord.getElementsByTagName('SimpleAllele')[0];
+
+                if (elementSimpleAlleleTemp && (elementSimpleAlleleTemp.getAttribute('VariationID') === variant.clinvarVariantId)) {
+                    elementSimpleAllele = elementSimpleAlleleTemp;
+                } else {
+                    const elementHaplotype = elementRecord.getElementsByTagName('Haplotype')[0];
+
+                    if (elementHaplotype && (elementHaplotype.getAttribute('VariationID') === variant.clinvarVariantId)) {
+                        elementSimpleAllele = elementHaplotype.getElementsByTagName('SimpleAllele')[0];
+
+                    // Only InterpretedRecord element might contain a Genotype element
+                    } else if (isInterpretedRecord) {
+                        const elementGenotype = elementRecord.getElementsByTagName('Genotype')[0];
+
+                        if (elementGenotype && (elementGenotype.getAttribute('VariationID') === variant.clinvarVariantId)) {
+                            elementSimpleAllele = elementGenotype.getElementsByTagName('SimpleAllele')[0];
+
+                            if (!elementSimpleAllele) {
+                                const elementGenotypeHaplotype = elementGenotype.getElementsByTagName('Haplotype')[0];
+
+                                if (elementGenotypeHaplotype) {
+                                    elementSimpleAllele = elementGenotypeHaplotype.getElementsByTagName('SimpleAllele')[0];
+                                }
+                            }
                         }
-                    });
-                }
-                variant.dbSNPIds = [];
-                var $XRefList = $Allele.getElementsByTagName('XRefList')[0];
-                var $XRef = $XRefList.getElementsByTagName('XRef');
-                for(var j = 0; j < $XRef.length; j++) {
-                    if ($XRef[j].getAttribute('DB') === 'dbSNP') {
-                        variant.dbSNPIds.push($XRef[j].getAttribute('ID'));
                     }
                 }
-                // Call to extract more ClinVar data from XML response
+            }
+
+            if (elementSimpleAllele) {
+                let objTranscripts = {
+                    'NucleotideChangeList': [],
+                    'ProteinChangeList': []
+                };
+                const elementVariantType = elementSimpleAllele.getElementsByTagName('VariantType')[0];
+                const elementOtherNameList = elementSimpleAllele.getElementsByTagName('OtherNameList')[0];
+                const elementHGVSlist = elementSimpleAllele.getElementsByTagName('HGVSlist')[0];
+                const elementXRefList = elementSimpleAllele.getElementsByTagName('XRefList')[0];
+                variant.molecularConsequenceList = [];
+                variant.dbSNPIds = [];
+
+                // Save the variant type
+                if (elementVariantType) {
+                    variant.variationType = elementVariantType.textContent;
+                }
+
+                // Save other names for the variant
+                if (elementOtherNameList) {
+                    const elementsName = elementOtherNameList.getElementsByTagName('Name');
+                    variant.otherNameList = [];
+
+                    for (let i = 0; i < elementsName.length; i++) {
+                        variant.otherNameList.push(elementsName[i].textContent)
+                    }
+                }
+
+                // Save HGVS expressions and molecular consequences for the variant
+                if (elementHGVSlist) {
+                    const elementsHGVS = elementHGVSlist.getElementsByTagName('HGVS');
+                    variant.hgvsNames = {
+                        'others': []
+                    };
+
+                    for (let i = 0; i < elementsHGVS.length; i++) {
+                        let textNEExpression = '';
+                        const elementNucleotideExpression = elementsHGVS[i].getElementsByTagName('NucleotideExpression')[0];
+                        const elementProteinExpression = elementsHGVS[i].getElementsByTagName('ProteinExpression')[0];
+                        const elementsMolecularConsequence = elementsHGVS[i].getElementsByTagName('MolecularConsequence');
+                        const attributeHGVSType = elementsHGVS[i].getAttribute('Type');
+
+                        if (elementNucleotideExpression) {
+                            const elementNEExpression = elementNucleotideExpression.getElementsByTagName('Expression')[0];
+                            const attributeAssembly = elementsHGVS[i].getAttribute('Assembly');
+                            textNEExpression = elementNEExpression ? elementNEExpression.textContent : '';
+
+                            if (attributeAssembly) {
+                                variant.hgvsNames[attributeAssembly] = textNEExpression;
+                            } else {
+                                variant.hgvsNames.others.push(textNEExpression);
+                            }
+
+                            // Save nucleotide change transcript data (for possible extended parsing)
+                            if (attributeHGVSType === 'coding') {
+                                objTranscripts.NucleotideChangeList.push({
+                                    'HGVS': textNEExpression,
+                                    'Change': elementNucleotideExpression.getAttribute('change'),
+                                    'AccessionVersion': elementNucleotideExpression.getAttribute('sequenceAccessionVersion'),
+                                    'Type': attributeHGVSType
+                                });
+                            }
+                        }
+
+                        if (elementProteinExpression) {
+                            const elementPEExpression = elementProteinExpression.getElementsByTagName('Expression')[0];
+                            const textPEExpression = elementPEExpression ? elementPEExpression.textContent : '';
+                            variant.hgvsNames.others.push(textPEExpression);
+
+                            // Save protein change transcript data (for possible extended parsing)
+                            if (attributeHGVSType === 'protein') {
+                                objTranscripts.ProteinChangeList.push({
+                                    'HGVS': textPEExpression,
+                                    'Change': elementProteinExpression.getAttribute('change'),
+                                    'AccessionVersion': elementProteinExpression.getAttribute('sequenceAccessionVersion'),
+                                    'Type': attributeHGVSType
+                                });
+                            }
+                        }
+
+                        for (let j = 0; j < elementsMolecularConsequence.length; j++) {
+                            const attributeMCID = elementsMolecularConsequence[j].getAttribute('DB') === 'SO' ?
+                                elementsMolecularConsequence[j].getAttribute('ID') : '';
+                            variant.molecularConsequenceList.push({
+                                'hgvsName': textNEExpression,
+                                'term': elementsMolecularConsequence[j].getAttribute('Type'),
+                                'soId': attributeMCID
+                            });
+                        }
+                    }
+                }
+
+                // Save dbSNP IDs for the variant
+                if (elementXRefList) {
+                    const elementsXRef = elementXRefList.getElementsByTagName('XRef');
+
+                    for (let i = 0; i < elementsXRef.length; i++) {
+                        if (elementsXRef[i].getAttribute('DB') === 'dbSNP') {
+                            variant.dbSNPIds.push(elementsXRef[i].getAttribute('ID'));
+                        }
+                    }
+                }
+
+                // Extract additional data about the variant (if necessary)
                 if (extended) {
-                    parseClinvarExtended(variant, $Allele, $HGVSlist_raw, $VariationReport, $MolecularConsequenceNodes);
+                    parseClinvarExtended(variant, objTranscripts, elementVariationArchive, elementSimpleAllele);
                 }
             }
         }
     }
+
     return variant;
 }
 
-// Function to extract more ClinVar data than what the db stores
-function parseClinvarExtended(variant, allele, hgvs_list, dataset, molecularConsequenceNodes) {
-    variant.RefSeqTranscripts = {};
+/**
+ * Function to perform extended parsing of XML document of ClinVar data (which is not stored in the DB)
+ * @param {object} variant - Object containing data results of parsing
+ * @param {object} objTranscripts - Object containing transcript data (from HGVS elements)
+ * @param {object} elementVariationArchive - Object representing the VariationArchive element
+ * @param {object} elementSimpleAllele - Object representing the SimpleAllele element
+ */
+function parseClinvarExtended(variant, objTranscripts, elementVariationArchive, elementSimpleAllele) {
+    // Group (RefSeq?) transcripts by molecular consequence, nucleotide change and protein change
+    variant.RefSeqTranscripts = {
+        'MolecularConsequenceList': [],
+        'NucleotideChangeList': objTranscripts.NucleotideChangeList,
+        'ProteinChangeList': objTranscripts.ProteinChangeList
+    };
     variant.gene = {};
-    variant.allele = {};
-    variant.allele.SequenceLocation = [];
-    variant.allele.ProteinChange = '';
-    // Group transcripts by RefSeq nucleotide change, molecular consequence, and protein change
-    variant.RefSeqTranscripts.NucleotideChangeList = [];
-    variant.RefSeqTranscripts.MolecularConsequenceList = [];
-    variant.RefSeqTranscripts.ProteinChangeList = [];
-    // Get the 'VariationType' attribute in <VariationReport> node
-    // Not to be confused with the <VariantType> node under <Allele>
-    variant.clinvarVariationType = dataset.getAttribute('VariationType');
-    // Parse <MolecularConsequence> nodes
-    if (molecularConsequenceNodes) {
-        for (var i = 0; i < molecularConsequenceNodes.length; i++) {
-            // Used for transcript tables on "Basic Information" tab in VCI
-            // HGVS property for mapping to transcripts with matching HGVS names
-            // SOid and Function properties for UI display
-            var MolecularObj = {
-                "HGVS": molecularConsequenceNodes[i].getAttribute('HGVS'),
-                "SOid": molecularConsequenceNodes[i].getAttribute('SOid'),
-                "Function": molecularConsequenceNodes[i].getAttribute('Function')
-            };
-            variant.RefSeqTranscripts.MolecularConsequenceList.push(MolecularObj);
-        }
-    }
-    // Parse <HGVS> nodes
-    if (hgvs_list) {
-        var HGVSnodes = hgvs_list.getElementsByTagName('HGVS');
-        if (HGVSnodes) {
-            for (var j = 0; j < HGVSnodes.length; j++) {
-                // Used for transcript tables on "Basic Information" tab in VCI
-                // Type property for identifying the nucleotide change transcripts
-                // and protein change transcripts
-                var hgvsObj = {
-                    "HGVS": HGVSnodes[j].textContent,
-                    "Change": HGVSnodes[j].getAttribute('Change'),
-                    "AccessionVersion": HGVSnodes[j].getAttribute('AccessionVersion'),
-                    "Type": HGVSnodes[j].getAttribute('Type')
-                };
-                // nucleotide change
-                if (HGVSnodes[j].getAttribute('Type') === 'HGVS, coding, RefSeq') {
-                    variant.RefSeqTranscripts.NucleotideChangeList.push(hgvsObj);
-                }
-                // protein change
-                if (HGVSnodes[j].getAttribute('Type') === 'HGVS, protein, RefSeq') {
-                    variant.RefSeqTranscripts.ProteinChangeList.push(hgvsObj);
-                }
-            }
-        }
-    }
-    // Parse <gene> node
-    var geneList = dataset.getElementsByTagName('GeneList')[0];
-    if (geneList) {
-        var geneNode = geneList.getElementsByTagName('Gene')[0];
-        if (geneNode) {
-            variant.gene.id = geneNode.getAttribute('GeneID');
-            variant.gene.symbol = geneNode.getAttribute('Symbol');
-            variant.gene.full_name = geneNode.getAttribute('FullName');
-            variant.gene.hgnc_id = geneNode.getAttribute('HGNCID');
+    variant.allele = {
+        'SequenceLocation': [],
+        'ProteinChange': null
+    };
+
+    // Save the VariationType attribute of the VariationArchive element
+    variant.clinvarVariationType = elementVariationArchive.getAttribute('VariationType');
+
+    // Used for transcript tables on "Basic Information" tab in VCI
+    // HGVS property for mapping to transcripts with matching HGVS names
+    // SOid and Function properties for UI display
+    variant.molecularConsequenceList.forEach(molecularConsequence => {
+        variant.RefSeqTranscripts.MolecularConsequenceList.push({
+            'HGVS': molecularConsequence.hgvsName,
+            'SOid': molecularConsequence.soId,
+            'Function': molecularConsequence.term
+        });
+    });
+
+    // Parse Gene element (keeping existing business logic of processing only one)
+    const elementGeneList = elementSimpleAllele.getElementsByTagName('GeneList')[0];
+
+    if (elementGeneList) {
+        const elementGene = elementGeneList.getElementsByTagName('Gene')[0];
+
+        if (elementGene) {
+            variant.gene.id = elementGene.getAttribute('GeneID');
+            variant.gene.symbol = elementGene.getAttribute('Symbol');
+            variant.gene.full_name = elementGene.getAttribute('FullName');
+            variant.gene.hgnc_id = elementGene.getAttribute('HGNC_ID');
         }
     }
 
     // Evaluate whether a variant has protein change
-    // First check whether te <ProteinChange> node exists. If not,
-    // then check whether the <HGVS> node with Type="HGVS, protein, RefSeq" attribute exists
-    const protein_change = allele.getElementsByTagName('ProteinChange')[0];
-    let alt_protein_change;
-    if (variant.RefSeqTranscripts.ProteinChangeList.length > 0) {
-        const changeAttr = variant.RefSeqTranscripts.ProteinChangeList[0].Change;
-        if (changeAttr.length) {
+    // Keeping existing business logic of processing only one ProteinChange element
+    const elementProteinChange = elementSimpleAllele.getElementsByTagName('ProteinChange')[0];
+
+    // Set protein change property value
+    if (elementProteinChange) {
+        variant.allele.ProteinChange = elementProteinChange.textContent;
+    } else if (variant.RefSeqTranscripts.ProteinChangeList.length > 0) {
+        const attributeChange = variant.RefSeqTranscripts.ProteinChangeList[0].Change;
+
+        if (attributeChange) {
             // Remove 'p.' from string value
-            let posStart = changeAttr.indexOf('.') + 1;
-            let newAttrValue = changeAttr.slice(posStart);
+            let posStart = attributeChange.indexOf('.') + 1;
+            let newAttrValue = attributeChange.slice(posStart);
             // Extract the numbers into a new string
             let num = newAttrValue.match(/[0-9]+(?!.*[0-9])/);
             // Separate groups of letters into arrays
             let stringArray = newAttrValue.split(/[0-9]+(?!.*[0-9])/);
-            // Transform string into the format similar to common <ProteinChange> value
-            alt_protein_change = stringArray[0] + num + stringArray[1].substr(0, 1);
+            // Transform string into the format similar to common ProteinChange element value
+            variant.allele.ProteinChange = stringArray[0] + num + stringArray[1].substr(0, 1);
         }
     }
-    // Set protein change property value
-    if (protein_change) {
-        variant.allele.ProteinChange = protein_change.textContent;
-    } else if (alt_protein_change) {
-        variant.allele.ProteinChange = alt_protein_change;
-    } else {
-        variant.allele.ProteinChange = null;
-    }
-    // Parse <SequenceLocation> nodes
-    var SequenceLocationNodes = allele.getElementsByTagName('SequenceLocation');
-    if (SequenceLocationNodes) {
-        for(var k = 0; k < SequenceLocationNodes.length; k++) {
-            // Properties in SequenceLocationObj are used to construct LinkOut URLs
-            // Used primarily for LinkOut links on "Basic Information" tab in VCI
-            // referenceAllele and alternateAllele properties are added for Population tab
-            var SequenceLocationObj = {
-                "Assembly": SequenceLocationNodes[k].getAttribute('Assembly'),
-                "AssemblyAccessionVersion": SequenceLocationNodes[k].getAttribute('AssemblyAccessionVersion'),
-                "AssemblyStatus": SequenceLocationNodes[k].getAttribute('AssemblyStatus'),
-                "Chr": SequenceLocationNodes[k].getAttribute('Chr'),
-                "Accession": SequenceLocationNodes[k].getAttribute('Accession'),
-                "start": SequenceLocationNodes[k].getAttribute('start'),
-                "stop": SequenceLocationNodes[k].getAttribute('stop'),
-                "referenceAllele": SequenceLocationNodes[k].getAttribute('referenceAllele'),
-                "alternateAllele": SequenceLocationNodes[k].getAttribute('alternateAllele')
-            };
-            variant.allele.SequenceLocation.push(SequenceLocationObj);
+
+    // Parse SequenceLocation elements (attributes are used to construct LinkOut URLs)
+    // Used primarily for LinkOut links on "Basic Information" tab in VCI
+    // referenceAllele and alternateAllele properties are added for Population tab
+    const elementLocation = elementSimpleAllele.getElementsByTagName('Location')[0];
+
+    if (elementLocation) {
+        const elementsSequenceLocation = elementLocation.getElementsByTagName('SequenceLocation');
+
+        for (let i = 0; i < elementsSequenceLocation.length; i++) {
+            variant.allele.SequenceLocation.push({
+                'Assembly': elementsSequenceLocation[i].getAttribute('Assembly'),
+                'AssemblyAccessionVersion': elementsSequenceLocation[i].getAttribute('AssemblyAccessionVersion'),
+                'AssemblyStatus': elementsSequenceLocation[i].getAttribute('AssemblyStatus'),
+                'Chr': elementsSequenceLocation[i].getAttribute('Chr'),
+                'Accession': elementsSequenceLocation[i].getAttribute('Accession'),
+                'start': elementsSequenceLocation[i].getAttribute('start'),
+                'stop': elementsSequenceLocation[i].getAttribute('stop'),
+                'referenceAllele': elementsSequenceLocation[i].getAttribute('referenceAllele'),
+                'alternateAllele': elementsSequenceLocation[i].getAttribute('alternateAllele')
+            });
         }
     }
 }
