@@ -674,7 +674,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     // Method to render external ExAC/gnomAD linkout when no relevant population data is found
     renderExacGnomadLinkout: function(response, datasetName) {
-        let datasetCheck, datasetHomeURLKey, datasetLink, datasetRegionURLKey, linkText;
+        let datasetCheck, datasetLink, datasetRegionURLKey;
+        let linkText = 'Search ' + datasetName;
         // If no ExAC/gnomAD population data, construct external linkout for one of the following:
         // 1) clinvar/cadd data found & the variant type is substitution
         // 2) clinvar/cadd data found & the variant type is NOT substitution
@@ -682,30 +683,30 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         switch (datasetName) {
             case 'ExAC':
                 datasetCheck = this.state.hasExacData;
-                datasetHomeURLKey = 'EXACHome';
+                datasetLink = external_url_map['EXACHome'];
                 datasetRegionURLKey = 'ExACRegion';
             break;
             case 'gnomAD':
                 datasetCheck = this.state.hasGnomadData;
-                datasetHomeURLKey = 'gnomADHome';
+                datasetLink = external_url_map['gnomADHome'];
                 datasetRegionURLKey = 'gnomADRegion';
             break;
         }
         if (response) {
             let chrom = response.chrom;
-            let pos = response.hg19 ? response.hg19.start : (response.clinvar.hg19 ? response.clinvar.hg19.start : response.cadd.hg19.start);
-            let regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 : parseInt(response.cadd.hg19.start) - 30);
-            let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
+            const regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 :
+                (response.clinvar && response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 :
+                    (response.cadd && response.cadd.hg19 ? parseInt(response.cadd.hg19.start) - 30 : ''));
+            const regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 :
+                (response.clinvar && response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 :
+                    (response.cadd && response.cadd.hg19 ? parseInt(response.cadd.hg19.end) + 30 : ''));
+
             // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
             // Or there is no ExAC/gnomAD data object in the returned myvariant.info JSON response
-            if (!this.state.ext_gnomadExac || !datasetCheck) {
+            if ((!this.state.ext_gnomadExac || !datasetCheck) && chrom && regionStart && regionEnd) {
                 datasetLink = external_url_map[datasetRegionURLKey] + chrom + '-' + regionStart + '-' + regionEnd;
                 linkText = 'View the coverage of this region (+/- 30 bp) in ' + datasetName;
             }
-        } else {
-            // 404 response from myvariant.info
-            datasetLink = external_url_map[datasetHomeURLKey];
-            linkText = 'Search ' + datasetName;
         }
         return (
             <span>
