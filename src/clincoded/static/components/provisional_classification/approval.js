@@ -370,7 +370,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
         const attributionButtonText = this.state.showAttributionForm ? 'Close Attributions Form' : 'Open Attributions Form';
-        const formHelpText = 'Add a secondary approver or contributor from another affiliation or expert panel to the classification.';
+        const formHelpText = 'To acknowledge contributions and approving affiliation(s) for this gene-disease classification, please click here. Single or multiple affiliations or entities may be chosen.';
+        const contributorHelpText = 'In the event that more than one affiliation expert panel, or external curation group has contributed information, time, or help for this curation, please select each from the dropdown menu.';
+        const approverHelpText = 'In the event that more than one affiliation or expert panel has contributed to the final approved classification, please select each from the dropdown menu.';
 
         return (
             <div className="final-approval-panel-content">
@@ -497,6 +499,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div className="col-md-6">
                                         <div className="contributor-form">
                                             <label className="control-label">Curation Contributor(s):</label>
+                                            <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={contributorHelpText}>
+                                                <i className="icon icon-info-circle secondary-approvers-help"></i>
+                                            </span>
                                             <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
                                         </div>
                                         <div className="contributor-form">
@@ -524,6 +529,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div className="col-md-6">
                                         <div className="curation-approvers approval-form">
                                             <label className="control-label">Curation Approver(s):</label>
+                                            <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
+                                                <i className="icon icon-info-circle secondary-approvers-help"></i>
+                                            </span>
                                             <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" onChange={this.handleApproverSelect} />
                                         </div>
                                         <div className="approval-form">
@@ -550,7 +558,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                             </div>
                             <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
-                                <i className="icon icon-info-circle" id="secondary-approvers-help"></i>
+                                <i className="secondary-approvers-help icon icon-info-circle"></i>
                             </span>
                         </div>
                     }
