@@ -369,10 +369,10 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
-        const attributionButtonText = this.state.showAttributionForm ? 'Close Attributions Form' : 'Open Attributions Form';
-        const formHelpText = 'To acknowledge contributions and approving affiliation(s) for this gene-disease classification, please click here. Single or multiple affiliations or entities may be chosen.';
-        const contributorHelpText = 'In the event that more than one affiliation expert panel, or external curation group has contributed information, time, or help for this curation, please select each from the dropdown menu.';
-        const approverHelpText = 'In the event that more than one affiliation or expert panel has contributed to the final approved classification, please select each from the dropdown menu.';
+        const attributionButtonText = this.state.showAttributionForm ? 'Close Form' : 'Acknowledge Other Contributors';
+        const formHelpText = 'To acknowledge contributing and approving affiliation(s) for this gene-disease classification, please click here. Single or multiple affiliations or entities may be chosen.';
+        const contributorHelpText = 'In the event that more than one affiliation, or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
+        const approverHelpText = 'In the event that more than one affiliation has contributed to the final approved classification, please select each from the dropdown menu.';
 
         return (
             <div className="final-approval-panel-content">
@@ -409,7 +409,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     <div>
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Primary Contributor Date:</span></dt>
+                                            <dt><span>Contribution Date:</span></dt>
                                             <dd>{contributorDate ? formatDate(parseDate(contributorDate, "YYYY MMM DD")) : null}</dd>
                                         </dl>
                                     </div>
@@ -429,7 +429,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     <div className="approval-review-date">
                                         <dl className="inline-dl clearfix preview-approval-review-date">
-                                            <dt><span>Date approved:</span></dt>
+                                            <dt><span>Final Approval Date:</span></dt>
                                             <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
                                         </dl>
                                     </div>
@@ -505,7 +505,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
                                         </div>
                                         <div className="contributor-form">
-                                            <label className="control-label">Primary Contributor Date:</label>
+                                            <label className="control-label">Contribution Date (optional):</label>
                                             <div className="contributor-date">
                                                 <DayPickerInput
                                                     value={contributorDate}
@@ -521,7 +521,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </div>
                                         <div className="contributor-form">
                                             <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
-                                                label="Contributor Comments:" rows="5" labelClassName="control-label" />
+                                                label="Contributor Comments (optional):" rows="5" labelClassName="control-label" />
                                         </div>
                                     </div>
                                 : null}
