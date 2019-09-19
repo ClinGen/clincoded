@@ -6,7 +6,6 @@ import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
-import { sopVersionByScoring } from '../../libs/sop';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -24,6 +23,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
         const curationApprovers = provisional.curationApprovers ? provisional.curationApprovers.sort() : null;
         const curationContributors = provisional.curationContributors ? provisional.curationContributors.sort() : null;
+        const sopVersion = provisional.sopVersion;
 
         return (
             <div className="evidence-summary panel-header">
@@ -69,7 +69,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             <dt>SOP:</dt>
                             <dd className="classificationSOP">
                                 <a href="https://www.clinicalgenome.org/curation-activities/gene-disease-validity/educational-and-training-materials/standard-operating-procedures/" target="_blank"
-                                    >Gene Clinical Validity Standard Operating Procedures (SOP), Version {sopVersionByScoring(provisional.classificationPoints)}</a>
+                                    >Gene Clinical Validity Standard Operating Procedures (SOP), Version {sopVersion}</a>
                             </dd>
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">

@@ -390,6 +390,10 @@ class CurationSnapshots extends Component {
                                         <dt><span>Final Approval Date:</span></dt>
                                         <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
                                     </dl>
+                                    <dl className="inline-dl clearfix snapshot-sop-version">
+                                        <dt><span>SOP Version:</span></dt>
+                                        <dd><span>{snapshot.resource.sopVersion}</span></dd>
+                                    </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
                                         <dd><span>

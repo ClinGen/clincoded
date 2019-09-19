@@ -46,6 +46,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             isApprovalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Approved' ? true : false,
             isApprovalEdit: false,
             showAttributionForm: false,
+            sopVersion: this.props.provisional && this.props.provisional.sopVersion ? this.props.provisional.sopVersion : '',
             submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
@@ -101,6 +102,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     curationContributors: nextProps.provisional.curationContributors,
                     curationApprovers: nextProps.provisional.curationApprovers,
                     contributorComment: nextProps.provisional.contributorComment,
+                    sopVersion: nextProps.provisional.sopVersion
                 });
             }
         }
@@ -167,10 +169,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         if (approver && approver !== 'none') {
             const contributorComment = this.contributorCommentInput ? this.contributorCommentInput.getValue() : '';
             const approvalComment = this.approvalCommentInput ? this.approvalCommentInput.getValue() : '';
+            const sopVersion = this.sopVersionInput ? this.sopVersionInput.getValue() : '';
             this.setState({
                 approvalSubmitter: this.props.session.user_properties.title,
                 approvalComment: approvalComment.length ? approvalComment : undefined,
                 contributorComment: contributorComment.length ? contributorComment : null,
+                sopVersion: sopVersion ? sopVersion : '',
                 classificationApprover: approver
             }, () => {
                 this.setState({isApprovalPreview: true});
@@ -195,6 +199,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.provisional.curationContributors : null,
             curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.provisional.curationApprovers : null,
             contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : null,
+            sopVersion: this.props.provisional && this.props.provisional.sopVersion ? this.props.provisional.sopVersion : null,
             isApprovalPreview: false
         });
     },
@@ -221,6 +226,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.curationContributors = this.state.curationContributors;
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
+        newProvisional.sopVersion = this.state.sopVersion;
         if (this.state.contributorComment && this.state.contributorComment.length) {
             newProvisional.contributorComment = this.state.contributorComment;
         } else {
@@ -354,9 +360,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const curationContributors = this.state.curationContributors ? this.state.curationContributors.join(', ') : null;
         const curationApprovers = this.state.curationApprovers ? this.state.curationApprovers.join(', ') : null;
         const session = this.props.session;
+        const sopVersion = this.state.sopVersion;
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
+        const sopVersions = ['7', '6', '5', '4', '3', '2', '1'];
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
@@ -392,6 +400,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             </dl>
                                         </div>
                                         : null}
+                                    <div className="sop-version">
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>SOP Version:</span></dt>
+                                            <dd>{sopVersion}</dd>
+                                        </dl>
+                                    </div>    
                                     <div>
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation Contributor(s):</span></dt>
@@ -441,7 +455,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         :
                         <div className="approval-edit">
                             <div className="approval-form-content-wrapper">
-                                <div className="col-xs-12 col-sm-5">
+                                <div className="col-xs-12 col-sm-7">
                                     <div className="approval-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
@@ -460,14 +474,21 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             </dd>
                                         </dl>
                                     </div>
+                                    <div className="sop-version col-xs-12 col-sm-4">
+                                        <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:">
+                                            {sopVersions.map((version, i ) => {
+                                                return <option key={i} value={version}>{version}</option>;
+                                            })}
+                                        </Input>
+                                    </div>
                                 </div>
-                                <div className="col-xs-12 col-sm-7">
+                                <div className="col-xs-12 col-sm-5">
                                     {affiliation && affiliation.length ?
                                         <div className="classification-approver">
                                             {affiliationApprovers && affiliationApprovers.length ?
                                                 <Input type="select" ref={(input) => { this.approverInput = input; }} label="Affiliation Approver:"
                                                     error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
-                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-5" groupClassName="form-group"
+                                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-5" groupClassName="form-group"
                                                     defaultValue={classificationApprover}>
                                                     <option value="none">Select Approver</option>
                                                     <option value="" disabled className="divider"></option>
@@ -484,7 +505,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </div>
                                     : null}
                                     <div className="approval-review-date form-group">
-                                        <label className="col-sm-3 control-label">Final Approval Date:</label>
+                                        <label className="col-sm-4 control-label">Final Approval Date:</label>
                                         <div className="col-sm-3 approval-date">
                                             <DayPickerInput
                                                 value={approvalReviewDate}

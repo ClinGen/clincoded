@@ -239,6 +239,7 @@ var ProvisionalCuration = createReactClass({
             if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
             if (newProvisional.approvalComment) delete newProvisional.approvalComment;
             if (newProvisional.contributorComment) delete newProvisional.contributorComment;
+            if (newProvisional.sopVersion) delete newProvisional.sopVersion;
             newProvisional.publishClassification = false;
             if (newProvisional.publishSubmitter) delete newProvisional.publishSubmitter;
             if (newProvisional.publishAffiliation) delete newProvisional.publishAffiliation;

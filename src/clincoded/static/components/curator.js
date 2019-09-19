@@ -2233,7 +2233,7 @@ var provisionalSimpleProps = [
     "classificationStatus", "evidenceSummary", "reasons", "active", "affiliation", "classificationDate", "approvalSubmitter",
     "classificationApprover", "approvalDate", "approvalReviewDate", "approvalComment", "curationApprovers", "curationContributors", "contributorComment", "contributorDate", "provisionalSubmitter", "provisionalDate",
     "provisionalReviewDate", "provisionalComment", "publishSubmitter", "publishAffiliation", "publishDate", "publishComment",
-    "provisionedClassification", "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
+    "provisionedClassification", "sopVersion", "approvedClassification", "publishClassification", "associatedClassificationSnapshots"
 ];
 
 function flattenProvisional(provisional) {
