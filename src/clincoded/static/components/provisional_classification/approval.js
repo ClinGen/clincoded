@@ -455,7 +455,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         :
                         <div className="approval-edit">
                             <div className="approval-form-content-wrapper">
-                                <div className="col-xs-12 col-sm-7">
+                                <div className="col-xs-12 col-sm-4">
                                     <div className="approval-affiliation">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
@@ -473,13 +473,6 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 }
                                             </dd>
                                         </dl>
-                                    </div>
-                                    <div className="sop-version col-xs-12 col-sm-4">
-                                        <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:">
-                                            {sopVersions.map((version, i ) => {
-                                                return <option key={i} value={version}>{version}</option>;
-                                            })}
-                                        </Input>
                                     </div>
                                 </div>
                                 <div className="col-xs-12 col-sm-5">
@@ -519,6 +512,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             />
                                         </div>
                                     </div>
+                                </div>
+                                <div className="sop-version">
+                                    <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
+                                    labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
+                                        {sopVersions.map((version, i ) => {
+                                            return <option key={i} value={version}>{version}</option>;
+                                        })}
+                                    </Input>
                                 </div>
                                 {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ? 
                                     <div className="col-md-6">
