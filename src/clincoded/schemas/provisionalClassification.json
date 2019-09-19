@@ -618,11 +618,6 @@
             "description": "Date when the classification was saved as approved",
             "type": "string"
         },
-        "contributorDate": {
-            "title": "Primary Contributor Date",
-            "description": "Date when the primary contributor saved the classification",
-            "type": "string"
-        },
         "approvalReviewDate": {
             "title": "Approval Review Date",
             "description": "Date when the classification approval was reviewed",
@@ -683,6 +678,11 @@
             "description": "Boolean value for whether the classification has been saved as provisional",
             "type": "boolean",
             "default": false
+        },
+        "sopVersion": {
+            "title": "SOP Version",
+            "description": "SOP Version chosen by user in approval form",
+            "type": "string"
         },
         "approvedClassification": {
             "title": "Approved Classification",
@@ -781,11 +781,6 @@
         },
         "approvalDate": {
             "title": "Approval Date",
-            "type": "string"
-        },
-        "contributorDate": {
-            "title": "Primary Contributor Date",
-            "description": "Date when the primary contributor saved the classification",
             "type": "string"
         },
         "approvalReviewDate": {
