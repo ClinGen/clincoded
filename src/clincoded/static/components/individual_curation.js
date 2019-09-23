@@ -68,9 +68,7 @@ const IndividualCuration = createReactClass({
             diseaseUuid: null,
             diseaseError: null,
             scoreError: false,
-            scoreErrorMsg: '',
-            hpoWithTerms: [],
-            hpoInElimWithTerms: []
+            scoreErrorMsg: ''
         };
     },
 
@@ -125,13 +123,7 @@ const IndividualCuration = createReactClass({
         var hpoIds = '';
         var hpoElimIds = '';
         if (item === 'phenotype') {
-            const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
-            if (hpoWithTerms && hpoWithTerms.length) {
-                hpoIds = this.state.hpoWithTerms.map((hpoid, i) => {
-                    return (hpoid);
-                }).join(', ');
-                this.refs['hpoid'].setValue(hpoIds);
-            } else if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
+            if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
                 hpoIds = obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                     return (hpoid);
                 }).join(', ');
@@ -153,13 +145,7 @@ const IndividualCuration = createReactClass({
                 this.refs['race'].setValue(obj.race);
             }
         } else if (item === 'notphenotype') {
-            const hpoInElimWithTerms = this.state.hpoInElimWithTerms ? this.state.hpoInElimWithTerms : [];
-            if (hpoInElimWithTerms && hpoInElimWithTerms.length) {
-                hpoElimIds = this.state.hpoInElimWithTerms.map((elimhpo, i) => {
-                    return (elimhpo);
-                }).join(', ');
-                this.refs['nothpoid'].setValue(hpoElimIds);
-            } else if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
+            if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
                 hpoElimIds = obj.hpoIdInElimination.map(function(elimhpo, i) {
                     return (elimhpo);
                 }).join(', ');
@@ -907,79 +893,58 @@ const IndividualCuration = createReactClass({
         this.loadData();
     },
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this.state.family !== prevState.family) {
-            const family = this.state.family;
-            // Check if HPO ids with terms are already passed down from associated groups, if not then fetch
-            const termCheck = / *\([^)]*\) */g;
-            let hpoChecked = [];
-            if (family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.length) {
-                let hpoIds = family.hpoIdInDiagnosis;
-                hpoIds.forEach((hpoid) => {
-                   return hpoChecked = hpoid.match(termCheck);
-                });
-                if (!hpoChecked) {
-                    this.fetchHpoName(hpoIds);
-                }
-            }
-            if (family.hpoIdInElimination && family.hpoIdInElimination.length) {
-                let hpoIds = family.hpoIdInElimination;
-                hpoIds.forEach((hpoid) => {
-                    return hpoChecked = hpoid.match(termCheck);
-                });
-                if (!hpoChecked) {
-                    this.fetchHpoInElimName(hpoIds);
-                }
-            }
-        }
-    },
-
     /**
      * Method to fetch HPO term names and append them to HPO ids
-     * 
-     * @param {array} hpoIds 
      */
-    fetchHpoName(hpoIds) {
+    fetchHpoName() {
+        let hpoIds = this.refs['hpoid'].getValue();
+        if (hpoIds.match(/ *\([^)]*\) */g)) {
+            hpoIds = hpoIds.replace(/ *\([^)]*\) */g, "");
+        }
+        const hpoidList = hpoIds.split(', ');
         const hpoWithTerms = [];
-        hpoIds.forEach(id => {
+        hpoidList.forEach(id => {
             let url = external_url_map['HPOApi'] + id.replace(':', '_');
             // Make the OLS REST API call
             this.getRestData(url).then(response => {
                 let termLabel = response['_embedded']['terms'][0]['label'];
                 let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
                 hpoWithTerms.push(hpoWithTerm);
-                this.setState({ hpoWithTerms: hpoWithTerms });
+                this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
             }).catch(err => {
                 // Unsuccessful retrieval
                 console.warn('Error in fetching HPO data =: %o', err);
                 let hpoWithTerm = id + ' (note: term not found)';
                 hpoWithTerms.push(hpoWithTerm);
-                this.setState({ hpoWithTerms: hpoWithTerms });
+                this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
             });
         });
     },
 
     /**
-     * Method to fetch HPO term names and append them to HPO In Elimination ids
-     * 
-     * @param {array} hpoIds 
+     * Method to fetch HPO term names and append them to HPO In Elimination ids 
      */
-    fetchHpoInElimName(hpoIds) {
+    fetchHpoInElimName() {
+        let hpoIds = this.refs['nothpoid'].getValue();
+        if (hpoIds.match(/ *\([^)]*\) */g)) {
+            hpoIds = hpoIds.replace(/ *\([^)]*\) */g, "");
+        }
+        const hpoidList = hpoIds.split(', ');
         const hpoInElimWithTerms = [];
-        hpoIds.forEach(id => {
+        hpoidList.forEach(id => {
             let url = external_url_map['HPOApi'] + id.replace(':', '_');
             // Make the OLS REST API call
             this.getRestData(url).then(response => {
                 let termLabel = response['_embedded']['terms'][0]['label'];
                 let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
                 hpoInElimWithTerms.push(hpoWithTerm);
-                this.setState({ hpoInElimWithTerms: hpoInElimWithTerms });
+                this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
             }).catch(err => {
                 // Unsuccessful retrieval
                 console.warn('Error in fetching HPO data =: %o', err);
                 let hpoWithTerm = id + ' (note: term not found)';
                 hpoInElimWithTerms.push(hpoWithTerm);
-                this.setState({ hpoInElimWithTerms: hpoInElimWithTerms });
+                this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
             });
         });
     },
@@ -1323,6 +1288,7 @@ function IndividualCommonDiseases() {
             <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-last btn-sm" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoName} />    
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
                 :
@@ -1352,6 +1318,7 @@ function IndividualCommonDiseases() {
             <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="button" ref="getelimhpoidterm" inputClassName="btn-copy btn-last btn-sm" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoInElimName} />
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
                 :

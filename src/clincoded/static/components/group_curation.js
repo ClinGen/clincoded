@@ -133,6 +133,62 @@ var GroupCuration = createReactClass({
         this.loadData();
     },
 
+    /**
+     * Method to fetch HPO term names and append them to HPO ids
+     */
+    fetchHpoName() {
+        let hpoIds = this.refs['hpoid'].getValue();
+        if (hpoIds.match(/ *\([^)]*\) */g)) {
+            hpoIds = hpoIds.replace(/ *\([^)]*\) */g, "");
+        }
+        const hpoidList = hpoIds.split(', ');
+        const hpoWithTerms = [];
+        hpoidList.forEach(id => {
+            let url = external_url_map['HPOApi'] + id.replace(':', '_');
+            // Make the OLS REST API call
+            this.getRestData(url).then(response => {
+                let termLabel = response['_embedded']['terms'][0]['label'];
+                let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
+                hpoWithTerms.push(hpoWithTerm);
+                this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
+            }).catch(err => {
+                // Unsuccessful retrieval
+                console.warn('Error in fetching HPO data =: %o', err);
+                let hpoWithTerm = id + ' (note: term not found)';
+                hpoWithTerms.push(hpoWithTerm);
+                this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
+            });
+        });
+    },
+
+    /**
+     * Method to fetch HPO term names and append them to HPO In Elimination ids
+     */
+    fetchHpoInElimName() {
+        let hpoIds = this.refs['nothpoid'].getValue();
+        if (hpoIds.match(/ *\([^)]*\) */g)) {
+            hpoIds = hpoIds.replace(/ *\([^)]*\) */g, "");
+        }
+        const hpoidList = hpoIds.split(', ');
+        const hpoInElimWithTerms = [];
+        hpoidList.forEach(id => {
+            let url = external_url_map['HPOApi'] + id.replace(':', '_');
+            // Make the OLS REST API call
+            this.getRestData(url).then(response => {
+                let termLabel = response['_embedded']['terms'][0]['label'];
+                let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
+                hpoInElimWithTerms.push(hpoWithTerm);
+                this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
+            }).catch(err => {
+                // Unsuccessful retrieval
+                console.warn('Error in fetching HPO data =: %o', err);
+                let hpoWithTerm = id + ' (note: term not found)';
+                hpoInElimWithTerms.push(hpoWithTerm);
+                this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
+            });
+        });
+    },
+
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -148,21 +204,11 @@ var GroupCuration = createReactClass({
             // Parse comma-separated list fields
             var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
+            var hpoids = this.getFormValue('hpoid');
             var hpotext = curator.capture.hpoids(this.getFormValue('phenoterms'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            var nothpoids = this.getFormValue('nothpoid');
 
             var valid_phoId = false;
-            // Check HPO ID format
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-            else if (hpoids && hpoids.length && !_(hpoids).any(function(id) { return id === null; })) {
-                valid_phoId = true;
-            }
-
             let valid_disease = false;
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
                 valid_disease = false;
@@ -177,7 +223,6 @@ var GroupCuration = createReactClass({
                 this.setState({diseaseError: 'Required', diseaseRequired: true}, () => {
                     this.setFormErrors('diseaseError', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
                 });
-                this.setFormErrors('hpoid', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
                 this.setFormErrors('phenoterms', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
             }
 
@@ -193,13 +238,6 @@ var GroupCuration = createReactClass({
                 // PMID list is bad
                 formError = true;
                 this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
-                // NOT HPOID list is bad
-                formError = true;
-                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
 
             if (!formError) {
@@ -340,7 +378,7 @@ var GroupCuration = createReactClass({
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
                     if (hpoids && hpoids.length) {
-                        newGroup.hpoIdInDiagnosis = hpoids;
+                        newGroup.hpoIdInDiagnosis = hpoids.split(', ');
                     }
                     else if (newGroup.hpoIdInDiagnosis) {
                         delete newGroup.hpoIdInDiagnosis;
@@ -353,7 +391,7 @@ var GroupCuration = createReactClass({
                         delete newGroup.termsInDiagnosis;
                     }
                     if (nothpoids && nothpoids.length) {
-                        newGroup.hpoIdInElimination = nothpoids;
+                        newGroup.hpoIdInElimination = nothpoids.split(', ');
                     }
                     phenoterms = this.getFormValue('notphenoterms');
                     if (phenoterms) {
@@ -652,6 +690,7 @@ var GroupCommonDiseases = function() {
             <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-last btn-sm" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoName} />    
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
                 error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -659,6 +698,7 @@ var GroupCommonDiseases = function() {
             <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="button" ref="getelimhpoidterm" inputClassName="btn-copy btn-last btn-sm" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoInElimName} />        
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={group && group.termsInElimination ? group.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
