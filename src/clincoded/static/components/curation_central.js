@@ -206,6 +206,29 @@ var CurationCentral = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
+    handleDeletePmid: function(e, currAnnotation) {
+        e.preventDefault(); e.stopPropagation();
+        const { currGdm } = this.state;
+        this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
+            const gdmObj = curator.flatten(freshGdm);
+            if (gdmObj.annotations) {
+                const newAnnotations = gdmObj.annotations.filter(annotation => annotation !== currAnnotation['@id']);
+                gdmObj.annotations = newAnnotations;
+            }
+
+            return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                return data['@graph'][0];
+            }).then(updatedGdm => {
+                const pmid = _.property(['annotations', 0, 'article', 'pmid'])(updatedGdm);
+                return this.getGdm(updatedGdm.uuid, pmid);
+            }).catch(err => {
+                console.log(JSON.parse(JSON.stringify(err)));
+            });
+        }).catch(err => {
+            console.log('Fetch gdm error', err);
+        });
+    },
+
     // Submit handler for the PubMed notes form. Saves article notes and refetches gdm
     handleSaveNotes: function(e, annotation) {
         e.preventDefault(); e.stopPropagation();
@@ -321,7 +344,16 @@ var CurationCentral = createReactClass({
                             {currArticle ?
                                 <div className="curr-pmid-overview">
                                     <PmidSummary article={currArticle} displayJournal />
-                                    <PmidDoiButtons pmid={currArticle.pmid} />
+                                    <div className="pmid-button-group">
+                                        <PmidDoiButtons pmid={currArticle.pmid} />
+                                        {
+                                            _.isEmpty(annotation.groups) && _.isEmpty(annotation.families) && _.isEmpty(annotation.individuals) && _.isEmpty(annotation.experimentalData) &&
+                                            _.isEmpty(annotation.caseControlStudies) && _.isEmpty(annotation.articleNotes) &&
+                                                <a className="btn btn-danger delete-button" onClick={(e) => this.handleDeletePmid(e, annotation)}>
+                                                    <span>Delete PMID<i className="icon icon-trash-o"></i></span>
+                                                </a>
+                                        }
+                                    </div>
                                     <BetaNote annotation={annotation} session={session} />
                                     <PubMedNotesBox
                                         updateMsg={updateMsg}
