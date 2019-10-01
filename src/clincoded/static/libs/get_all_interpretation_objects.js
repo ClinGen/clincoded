@@ -37,7 +37,7 @@ export function getAllInterpretationObjects(interpretation) {
     });
 
     // Get provisional_variant objects
-    let provisional_variants = interpretation.provisional_variant && gdm.provisional_variant.length ? gdm.provisional_variant : [];
+    let provisional_variants = interpretation.provisional_variant && interpretation.provisional_variant.length ? interpretation.provisional_variant : [];
     provisional_variants.forEach(provisional_variant => {
         totalObjects.push(filteredObject(provisional_variant));
     });
