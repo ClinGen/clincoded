@@ -9,14 +9,24 @@ import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
 import * as curator from './curator';
 import { getAllGdmObjects } from '../libs/get_all_gdm_objects';
+import { getAllInterpretationObjects } from '../libs/get_all_interpretation_objects';
 
 /**
- * Return an array of '@id' from the annotations, evidence, scores, classifications
- * @param {object} gdm - The gene-disease record data object
+ * Return an array of '@id' from the annotations, evidence, scores, classifications if GDM object
+ * Return an array of '@id' from the evaluations, provisional_variants, extra_evidence if Interpretation object
+ * @param {string} type - object type - gdm or interpretation
+ * @param {object} object - The gene-disease record data object or interpretation data object
+ * @param {array} contributorUuids - contributor uuids
  */
-const findAllObjectIds = (gdm, contributorUuids) => {
-    let allObjects = getAllGdmObjects(gdm);
-    // Remove objects not created by the same user who started the GDM
+const findAllObjectIds = (type, object, contributorUuids) => {
+    let allObjects = null;
+    if (type === 'gdm') {
+        allObjects = getAllGdmObjects(object);
+    } else {
+        allObjects = getAllInterpretationObjects(object);
+    }
+
+    // Remove objects not created by the same user who started the GDM/Interpretation
     let filteredObjects = allObjects.filter(obj => {
         return contributorUuids.indexOf(obj.submitted_by.uuid) > -1;
     });
@@ -40,6 +50,7 @@ const AddAffiliation = createReactClass({
 
     getInitialState() {
         return {
+            selectedType: '', // selected object type - gdm or interpretation
             errorMsg: '', // Error message to display 
             submitBusy: false // REST operation in progress
         };
@@ -52,8 +63,11 @@ const AddAffiliation = createReactClass({
         return valid;
     },
 
-    // Handle the showing of message
-    handleChange(e) {
+    // Handle selection changes and showing of message
+    handleChange(ref, e) {
+        if (ref === 'type' && this.refs[ref].getValue()) {
+            this.setState({selectedType: this.refs[ref].getValue()});
+        }
         this.setState({errorMsg: ''});
     },
 
@@ -61,14 +75,19 @@ const AddAffiliation = createReactClass({
     putRestDatas(objs, affiliationId) {
         return Promise.all(objs.map(obj => {
             let newObj = _.clone(obj);
-            newObj.affiliation = affiliationId;
+            // If affiliationId is '0', then set to no associated affiliation 
+            if (affiliationId === '0') {
+                delete newObj.affiliation;
+            } else {
+                newObj.affiliation = affiliationId;
+            }
             delete newObj['@id'];
             return this.putRestData(obj['@id'], newObj);
         }));
     },
 
     /**
-     * Method to add affiliation to the GDM and its nested objects when form is submitted
+     * Method to add affiliation to the GDM or Interpretation and its nested objects when form is submitted
      * @param {object} e - Event object
      */
     submitForm(e) {
@@ -78,19 +97,39 @@ const AddAffiliation = createReactClass({
         this.saveAllFormValues();
         this.setState({submitBusy: true});
 
+        const getTypeObject = (type, uuid) => {
+            if (type === 'gdm') {
+                return this.getRestData('/gdm/' + uuid, null, true);
+            } else {
+                return this.getRestData('/interpretations/' + uuid);
+            }
+        };
+
+        const getObjectIds = (type, uuid, object) => {
+            let objIds = findAllObjectIds(type, object, contributorUuidList);
+            if (type === 'gdm') {
+                objIds.push('/gdm/' + uuid);
+            } else {
+                objIds.push('/interpretations/' + uuid);
+            }
+            return Promise.resolve(objIds);
+        };
+
         const affiliationId = this.getFormValue('affiliation_id');
-        const gdmUuid = this.getFormValue('gdm_uuid');
+        const type = this.getFormValue('type');
+        const uuid = this.getFormValue('uuid');
         const contributorUuids = this.getFormValue('contributor_uuid');
+        const errMsg = type === 'gdm' ? 'The Gene-Disease record has been affiliated with '
+                                : 'The Interpretation record has been affiliated with ';
+        const affiliation = affiliationId === '0' ? 'no affiliation' : affiliationId;
         // Convert contributor(s) UUIDs string into array
         const re = /\s*(?:,|$)\s*/;
         var contributorUuidList = contributorUuids.split(re);
-        if (this.validateDefault() && affiliationId && gdmUuid) {
-            // Get up-to-date gdm object
-            this.getRestData('/gdm/' + gdmUuid, null, true).then(gdmObj => {
-                // Gather all objects' '@id', including the GDM's
-                const objIds = findAllObjectIds(gdmObj, contributorUuidList);
-                objIds.push('/gdm/' + gdmUuid);
-                return Promise.resolve(objIds);
+        if (this.validateDefault() && affiliationId && uuid) {
+            // Get up-to-date object
+            getTypeObject(type, uuid).then(obj => {
+                // Gather all objects' '@id', including the GDM's or Interpretation's
+                return getObjectIds(type, uuid, obj);
             }).then(ObjectIds => {
                 if (ObjectIds.length) {
                     // Get all objects given their '@id' and flatten them
@@ -109,12 +148,8 @@ const AddAffiliation = createReactClass({
             }).then(objectList => {
                 if (objectList && objectList.length) {
                     let tempArray = [];
-                    // Return a new array with only the objects that don't already have affiliations
-                    let filteredList = objectList.filter(object => {
-                        return !object.affiliation || (object.affiliation && !object.affiliation.length);
-                    });
-                    // Batch update the objects with affiliations
-                    return this.putRestDatas(filteredList, affiliationId).then(response => {
+                    // Batch update the objects
+                    return this.putRestDatas(objectList, affiliationId).then(response => {
                         for (let item of response) {
                             tempArray.push(item['@graph'][0]);
                         }
@@ -127,7 +162,7 @@ const AddAffiliation = createReactClass({
                 if (data && data.length) {
                     this.setState({
                         submitBusy: false,
-                        errorMsg: 'The Gene-Disease record has been affiliated with ' + affiliationId
+                        errorMsg: errMsg + affiliation
                     });
                 } else {
                     console.warn('Result: ' + JSON.stringify(data));
@@ -155,7 +190,8 @@ const AddAffiliation = createReactClass({
         const submitErrClass = 'submit-err pull-right' + (this.state.errorMsg ? '' : ' hidden');
         const title = this.props.context.title;
         const user = this.props.session.user_properties;
-        let group = user && user.groups && user.groups.length ? user.groups[0] : null;
+        const uuidLabel = this.state.selectedType === 'gdm' ? 'GDM UUID' : 'Interpretation UUID';
+        const group = user && user.groups && user.groups.length ? user.groups[0] : null;
 
         return (
             <div className="container">
@@ -169,8 +205,14 @@ const AddAffiliation = createReactClass({
                                         <Input type="text" ref="affiliation_id" label="Affiliation ID" handleChange={this.handleChange}
                                             error={this.getFormError('affiliation_id')} clearError={this.clrFormErrors.bind(null, 'affiliation_id')}
                                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
-                                        <Input type="text" ref="gdm_uuid" label="GDM UUID" handleChange={this.handleChange}
-                                            error={this.getFormError('gdm_uuid')} clearError={this.clrFormErrors.bind(null, 'gdm_uuid')}
+                                        <Input type="select" ref="type" label="GDM or Interpretation" defaultValue="gdm" handleChange={this.handleChange}
+                                            error={this.getFormError('type')} clearError={this.clrFormErrors.bind(null, 'type')}
+                                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required>
+                                            <option value="gdm">GDM</option>
+                                            <option value="interpretaton">Interpretation</option>
+                                        </Input>
+                                        <Input type="text" ref="uuid" label={uuidLabel} handleChange={this.handleChange}
+                                            error={this.getFormError('uuid')} clearError={this.clrFormErrors.bind(null, 'uuid')}
                                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
                                         <Input type="text" ref="contributor_uuid" label="Contributor UUID(s)" handleChange={this.handleChange}
                                             error={this.getFormError('contributor_uuid')} clearError={this.clrFormErrors.bind(null, 'contributor_uuid')}
